@@ -1,0 +1,343 @@
+category,string,string_file_offset,string_va,xref_address,function_start,evidence
+sprite_effect,Explosion Strength,0x0043A86C,0x0083A86C,0x0040748C,0x00406C9B,CONFIRMED direct absolute reference
+sprite_effect,fExplosionStrength,0x0043AF68,0x0083AF68,0x00409683,0x00408FF5,CONFIRMED direct absolute reference
+graphics,ZBuffer,0x0043B504,0x0083B504,0x0040ADB3,0x0040AD35,CONFIRMED direct absolute reference
+model_material,assets/textures/skybgnds/%d.bmp,0x0043B6B4,0x0083B6B4,0x0040B753,0x0040B6E7,CONFIRMED direct absolute reference
+model_material,assets/textures/skybgnds/%d.bmp,0x0043B6B4,0x0083B6B4,0x0040B798,0x0040B6E7,CONFIRMED direct absolute reference
+model_material,assets/textures/skybgnds/%d.bmp,0x0043B6B4,0x0083B6B4,0x0040B86B,0x0040B6E7,CONFIRMED direct absolute reference
+model_material,assets/textures/skybgnds/%d.bmp,0x0043B6B4,0x0083B6B4,0x0040B9A4,0x0040B6E7,CONFIRMED direct absolute reference
+model_material,assets/textures/skybgnds/%d.bmp,0x0043B6B4,0x0083B6B4,0x0040BA0F,0x0040B6E7,CONFIRMED direct absolute reference
+model_material,assets/textures/skybgnds/%d.bmp,0x0043B6B4,0x0083B6B4,0x0040BA97,0x0040B6E7,CONFIRMED direct absolute reference
+model_material,assets/textures/skybgnds/%d.bmp,0x0043B6B4,0x0083B6B4,0x0040BAD5,0x0040B6E7,CONFIRMED direct absolute reference
+model_material,assets/textures/skybgnds/%d.bmp,0x0043B6B4,0x0083B6B4,0x0040BB13,0x0040B6E7,CONFIRMED direct absolute reference
+model_material,assets/textures/skybgnds/%d.bmp,0x0043B6B4,0x0083B6B4,0x004D892C,0x004D891A,CONFIRMED direct absolute reference
+model_material,assets/textures/shields.bmp,0x0043B994,0x0083B994,0x0040C414,0x0040C37A,CONFIRMED direct absolute reference
+model_material,assets/textures/shields.bmp,0x0043B994,0x0083B994,0x0040C48D,0x0040C37A,CONFIRMED direct absolute reference
+model_material,assets/textures/shields.bmp,0x0043B994,0x0083B994,0x0042612C,0x00426116,CONFIRMED direct absolute reference
+model_material,assets/models/asteroids/RockS.mod,0x0043BE74,0x0083BE74,0x0041085B,0x004107A4,CONFIRMED direct absolute reference
+model_material,assets/models/asteroids/RockM.mod,0x0043BE98,0x0083BE98,0x0041084A,0x004107A4,CONFIRMED direct absolute reference
+model_material,assets/models/asteroids/RockL.mod,0x0043BEBC,0x0083BEBC,0x00410839,0x004107A4,CONFIRMED direct absolute reference
+model_material,assets/models/asteroids/IceS.mod,0x0043BEE0,0x0083BEE0,0x00410828,0x004107A4,CONFIRMED direct absolute reference
+model_material,assets/models/asteroids/IceM.mod,0x0043BF04,0x0083BF04,0x00410817,0x004107A4,CONFIRMED direct absolute reference
+model_material,assets/models/asteroids/IceL.mod,0x0043BF28,0x0083BF28,0x00410806,0x004107A4,CONFIRMED direct absolute reference
+model_material,assets/models/xwp/xwp.mod,0x0043C004,0x0083C004,0x00410A6F,0x00410A4D,CONFIRMED direct absolute reference
+model_material,assets/models/xwp/xwp.mod,0x0043C004,0x0083C004,0x004ABB43,0x004ABA4F,CONFIRMED direct absolute reference
+model_material,assets/textures/Sun 1D.bmp,0x0043C0E0,0x0083C0E0,0x00411150,0x004110EE,CONFIRMED direct absolute reference
+model_material,assets/textures/Sun 1C.bmp,0x0043C0FC,0x0083C0FC,0x00411137,0x004110EE,CONFIRMED direct absolute reference
+model_material,assets/textures/Sun 1B.bmp,0x0043C118,0x0083C118,0x0041111E,0x004110EE,CONFIRMED direct absolute reference
+model_material,assets/textures/Sun 1A.bmp,0x0043C134,0x0083C134,0x00411105,0x004110EE,CONFIRMED direct absolute reference
+model_material,assets/models/Wormhole/Wormhole.mod,0x0043C1E0,0x0083C1E0,0x00411614,0x004115EF,CONFIRMED direct absolute reference
+model_material,assets/models/XMn/XMn.mod,0x0043C3AC,0x0083C3AC,0x0041291E,0x004128E0,CONFIRMED direct absolute reference
+model_material,HardPoint%d,0x0043D190,0x0083D190,0x00419A32,0x004199F4,CONFIRMED direct absolute reference
+model_material,assets/models/%cms/%cms.mod,0x0043D658,0x0083D658,0x0041C3B1,0x0041C271,CONFIRMED direct absolute reference
+sprite_effect,tETrait_Explosion,0x0043D714,0x0083D714,0x0041CD35,0x0041CD31,CONFIRMED direct absolute reference
+sprite_effect,tETrait_Explosion,0x0043D714,0x0083D714,0x0041E892,0x0041E79A,CONFIRMED direct absolute reference
+sprite_effect,tETrait_Explosion,0x0043D714,0x0083D714,0x0041F73D,0x0041F114,CONFIRMED direct absolute reference
+sprite_effect,fExplosionMode,0x0043D7BC,0x0083D7BC,0x0041E70D,0x0041E64F,CONFIRMED direct absolute reference
+model_material,assets/textures/skybgnd-mono.BMP,0x0043DE90,0x0083DE90,0x004F81B3,0x004F819C,CONFIRMED direct absolute reference
+model_material,assets/textures/skybgnd-mono.BMP,0x0043DE90,0x0083DE90,0x00508AA4,0x00508A52,CONFIRMED direct absolute reference
+model_material,assets\models\model.siz,0x0043E768,0x0083E768,0x0042D62C,0x0042D5FF,CONFIRMED direct absolute reference
+model_material,assets\models\model.siz,0x0043E768,0x0083E768,0x0042D69D,0x0042D67B,CONFIRMED direct absolute reference
+model_material,assets/models/model.siz,0x0043E780,0x0083E780,0x0042D7B9,0x0042D6EC,CONFIRMED direct absolute reference
+model_material,assets/textures/organic damage heavySI.bmp,0x0043E7E0,0x0083E7E0,0x0042E0D7,0x0042DEF5,CONFIRMED direct absolute reference
+model_material,assets/textures/organic damage mediumSI.bmp,0x0043E80C,0x0083E80C,0x0042E0BF,0x0042DEF5,CONFIRMED direct absolute reference
+model_material,assets/textures/organic damage lightSI.bmp,0x0043E838,0x0083E838,0x0042E0A7,0x0042DEF5,CONFIRMED direct absolute reference
+model_material,assets/textures/organic damage heavy.bmp,0x0043E864,0x0083E864,0x0042E08F,0x0042DEF5,CONFIRMED direct absolute reference
+model_material,assets/textures/organic damage medium.bmp,0x0043E890,0x0083E890,0x0042E077,0x0042DEF5,CONFIRMED direct absolute reference
+model_material,assets/textures/organic damage light.bmp,0x0043E8BC,0x0083E8BC,0x0042E05F,0x0042DEF5,CONFIRMED direct absolute reference
+model_material,assets/textures/starbase damage heavySI.bmp,0x0043E8E8,0x0083E8E8,0x0042E047,0x0042DEF5,CONFIRMED direct absolute reference
+model_material,assets/textures/starbase damage mediumSI.bmp,0x0043E914,0x0083E914,0x0042E02F,0x0042DEF5,CONFIRMED direct absolute reference
+model_material,assets/textures/starbase damage lightSI.bmp,0x0043E944,0x0083E944,0x0042E017,0x0042DEF5,CONFIRMED direct absolute reference
+model_material,assets/textures/starbase damage heavy.bmp,0x0043E970,0x0083E970,0x0042DFFF,0x0042DEF5,CONFIRMED direct absolute reference
+model_material,assets/textures/starbase damage medium.bmp,0x0043E99C,0x0083E99C,0x0042DFE7,0x0042DEF5,CONFIRMED direct absolute reference
+model_material,assets/textures/starbase damage light.bmp,0x0043E9C8,0x0083E9C8,0x0042DFCF,0x0042DEF5,CONFIRMED direct absolute reference
+model_material,assets/textures/heavy damage si.bmp,0x0043E9F4,0x0083E9F4,0x0042DFB7,0x0042DEF5,CONFIRMED direct absolute reference
+model_material,assets/textures/medium damage si.bmp,0x0043EA18,0x0083EA18,0x0042DF9F,0x0042DEF5,CONFIRMED direct absolute reference
+model_material,assets/textures/light damage si.bmp,0x0043EA40,0x0083EA40,0x0042DF87,0x0042DEF5,CONFIRMED direct absolute reference
+model_material,assets/textures/heavy damage.bmp,0x0043EA64,0x0083EA64,0x0042DF6F,0x0042DEF5,CONFIRMED direct absolute reference
+model_material,assets/textures/medium damage.bmp,0x0043EA88,0x0083EA88,0x0042DF57,0x0042DEF5,CONFIRMED direct absolute reference
+model_material,assets/textures/light damage.bmp,0x0043EAAC,0x0083EAAC,0x0042DF3F,0x0042DEF5,CONFIRMED direct absolute reference
+model_material,assets/textures/yellowsun.bmp,0x0043EB24,0x0083EB24,0x0042F2B1,0x0042F230,CONFIRMED direct absolute reference
+model_material,hardpoint,0x0043EB8C,0x0083EB8C,0x0042F81C,0x0042F806,CONFIRMED direct absolute reference
+model_material,Model has a format less than version 2.,0x0043EBEC,0x0083EBEC,0x00430002,0x0042FEF9,CONFIRMED direct absolute reference
+model_material,HardPoint,0x00441238,0x00841238,0x0044C1B2,0x0044C185,CONFIRMED direct absolute reference
+model_material,HardPoint,0x00441238,0x00841238,0x0044C313,0x0044C308,CONFIRMED direct absolute reference
+model_material,kDamageControlGroupHardPoint,0x004414DC,0x008414DC,0x0044D134,0x0044CFC2,CONFIRMED direct absolute reference
+model_material,kOfficerGroupHardPoint,0x004414FC,0x008414FC,0x0044D12A,0x0044CFC2,CONFIRMED direct absolute reference
+model_material,kProbeHardPoint,0x00441514,0x00841514,0x0044D120,0x0044CFC2,CONFIRMED direct absolute reference
+model_material,kCloakHardPoint,0x00441540,0x00841540,0x0044D0F4,0x0044CFC2,CONFIRMED direct absolute reference
+model_material,kBarracksHardPoint,0x00441550,0x00841550,0x0044D0EA,0x0044CFC2,CONFIRMED direct absolute reference
+model_material,kCargoHardPoint,0x00441564,0x00841564,0x0044D0E0,0x0044CFC2,CONFIRMED direct absolute reference
+model_material,kShieldGroupHardPoint,0x00441574,0x00841574,0x0044D0D6,0x0044CFC2,CONFIRMED direct absolute reference
+model_material,kArmorHardPoint,0x0044158C,0x0084158C,0x0044D0CC,0x0044CFC2,CONFIRMED direct absolute reference
+model_material,kLabHardPoint,0x0044159C,0x0084159C,0x0044D0A7,0x0044CFC2,CONFIRMED direct absolute reference
+model_material,kShuttleBayHardPoint,0x004415AC,0x008415AC,0x0044D09D,0x0044CFC2,CONFIRMED direct absolute reference
+model_material,kFighterBayHardPoint,0x004415C4,0x008415C4,0x0044D093,0x0044CFC2,CONFIRMED direct absolute reference
+model_material,kEngineGroupHardPoint,0x004415DC,0x008415DC,0x0044D089,0x0044CFC2,CONFIRMED direct absolute reference
+model_material,kBatteryHardPoint,0x004415F4,0x008415F4,0x0044D07F,0x0044CFC2,CONFIRMED direct absolute reference
+model_material,kTractorHardPoint,0x00441608,0x00841608,0x0044D061,0x0044CFC2,CONFIRMED direct absolute reference
+model_material,kBridgeGroupHardPoint,0x0044161C,0x0084161C,0x0044D057,0x0044CFC2,CONFIRMED direct absolute reference
+model_material,kSensorGroupHardPoint,0x00441634,0x00841634,0x0044D04D,0x0044CFC2,CONFIRMED direct absolute reference
+model_material,kHullGroupHardPoint,0x0044164C,0x0084164C,0x0044D043,0x0044CFC2,CONFIRMED direct absolute reference
+model_material,kExcessDamageHardPoint,0x00441660,0x00841660,0x0044D039,0x0044CFC2,CONFIRMED direct absolute reference
+model_material,kTransporterHardPoint,0x00441678,0x00841678,0x0044D02F,0x0044CFC2,CONFIRMED direct absolute reference
+model_material,Final phaser hardpoint chosen: #%i,0x00441718,0x00841718,0x0044D867,0x0044D50B,CONFIRMED direct absolute reference
+model_material,Chose hardpoint: #%i,0x00441850,0x00841850,0x0044DC80,0x0044D8FE,CONFIRMED direct absolute reference
+model_material,Chose hardpoint: #%i,0x00441850,0x00841850,0x0044E108,0x0044DD86,CONFIRMED direct absolute reference
+model_material,Number of equal priority hardpoints (randomfactor): %i,0x00441898,0x00841898,0x0044DBC5,0x0044D8FE,CONFIRMED direct absolute reference
+model_material,Number of equal priority hardpoints (randomfactor): %i,0x00441898,0x00841898,0x0044E04D,0x0044DD86,CONFIRMED direct absolute reference
+model_material,Hardpoint #: %i,0x004419A8,0x008419A8,0x0044DA1D,0x0044D8FE,CONFIRMED direct absolute reference
+model_material,Hardpoint #: %i,0x004419A8,0x008419A8,0x0044DEA5,0x0044DD86,CONFIRMED direct absolute reference
+scene_camera,BriefingTextScene,0x00449C94,0x00849C94,0x00479CEB,0x00479C66,CONFIRMED direct absolute reference
+scene_camera,BriefingTextScene,0x00449C94,0x00849C94,0x00479D87,0x00479D45,CONFIRMED direct absolute reference
+scene_camera,CameraRadio,0x0044CCE4,0x0084CCE4,0x0048C9F5,0x0048C969,CONFIRMED direct absolute reference
+scene_camera,CameraRadio,0x0044CCE4,0x0084CCE4,0x0048CBD1,0x0048CA35,CONFIRMED direct absolute reference
+scene_camera,CameraRadio,0x0044CCE4,0x0084CCE4,0x004AC53E,0x004ABA4F,CONFIRMED direct absolute reference
+scene_camera,CameraRadio,0x0044CCE4,0x0084CCE4,0x004B3A8D,0x004B37CE,CONFIRMED direct absolute reference
+scene_camera,Camera lock on target disabled,0x0044CD28,0x0084CD28,0x0048CBB2,0x0048CA35,CONFIRMED direct absolute reference
+scene_camera,Camera lock on target enabled,0x0044CD5C,0x0084CD5C,0x0048CB9D,0x0048CA35,CONFIRMED direct absolute reference
+model_material,assets/textures/TargetingRedicles-noise2.bmp,0x0044ECB8,0x0084ECB8,0x0049689C,0x00496853,CONFIRMED direct absolute reference
+model_material,assets/textures/TargetingRedicles-noise2.bmp,0x0044ECB8,0x0084ECB8,0x00497949,0x00497900,CONFIRMED direct absolute reference
+model_material,assets/textures/TargetingRedicles-noise2.bmp,0x0044ECB8,0x0084ECB8,0x00498555,0x00498502,CONFIRMED direct absolute reference
+model_material,assets/textures/TargetingRedicles-noise2.bmp,0x0044ECB8,0x0084ECB8,0x0049957C,0x00499529,CONFIRMED direct absolute reference
+model_material,assets/textures/TargetingRedicles-noise2.bmp,0x0044ECB8,0x0084ECB8,0x0049B5B3,0x0049B56A,CONFIRMED direct absolute reference
+model_material,assets/textures/TargetingRedicles-noise2.bmp,0x0044ECB8,0x0084ECB8,0x0049BF6E,0x0049BF25,CONFIRMED direct absolute reference
+model_material,assets/textures/TargetingRedicles-noise2.bmp,0x0044ECB8,0x0084ECB8,0x004A4873,0x004A482A,CONFIRMED direct absolute reference
+model_material,assets/textures/TargetingRedicles-noise1.bmp,0x0044ECE8,0x0084ECE8,0x00496883,0x00496853,CONFIRMED direct absolute reference
+model_material,assets/textures/TargetingRedicles-noise1.bmp,0x0044ECE8,0x0084ECE8,0x00497930,0x00497900,CONFIRMED direct absolute reference
+model_material,assets/textures/TargetingRedicles-noise1.bmp,0x0044ECE8,0x0084ECE8,0x0049853C,0x00498502,CONFIRMED direct absolute reference
+model_material,assets/textures/TargetingRedicles-noise1.bmp,0x0044ECE8,0x0084ECE8,0x00499564,0x00499529,CONFIRMED direct absolute reference
+model_material,assets/textures/TargetingRedicles-noise1.bmp,0x0044ECE8,0x0084ECE8,0x0049B59A,0x0049B56A,CONFIRMED direct absolute reference
+model_material,assets/textures/TargetingRedicles-noise1.bmp,0x0044ECE8,0x0084ECE8,0x0049BF55,0x0049BF25,CONFIRMED direct absolute reference
+model_material,assets/textures/TargetingRedicles-noise1.bmp,0x0044ECE8,0x0084ECE8,0x004A485A,0x004A482A,CONFIRMED direct absolute reference
+model_material,assets/textures/TargetingRedicles.bmp,0x0044ED18,0x0084ED18,0x0049686A,0x00496853,CONFIRMED direct absolute reference
+model_material,assets/textures/TargetingRedicles.bmp,0x0044ED18,0x0084ED18,0x00497917,0x00497900,CONFIRMED direct absolute reference
+model_material,assets/textures/TargetingRedicles.bmp,0x0044ED18,0x0084ED18,0x00498523,0x00498502,CONFIRMED direct absolute reference
+model_material,assets/textures/TargetingRedicles.bmp,0x0044ED18,0x0084ED18,0x0049954C,0x00499529,CONFIRMED direct absolute reference
+model_material,assets/textures/TargetingRedicles.bmp,0x0044ED18,0x0084ED18,0x0049B581,0x0049B56A,CONFIRMED direct absolute reference
+model_material,assets/textures/TargetingRedicles.bmp,0x0044ED18,0x0084ED18,0x0049BF3C,0x0049BF25,CONFIRMED direct absolute reference
+model_material,assets/textures/TargetingRedicles.bmp,0x0044ED18,0x0084ED18,0x004A4841,0x004A482A,CONFIRMED direct absolute reference
+model_material,assets/textures/TargetingRedicles.bmp,0x0044ED18,0x0084ED18,0x004A5511,0x004A54FA,CONFIRMED direct absolute reference
+model_material,assets/textures/HydranRedicleCircle-noise2.bmp,0x0044EE80,0x0084EE80,0x004995C4,0x00499529,CONFIRMED direct absolute reference
+model_material,assets/textures/HydranRedicleCircle-noise1.bmp,0x0044EEB0,0x0084EEB0,0x004995AC,0x00499529,CONFIRMED direct absolute reference
+model_material,assets/textures/HydranRedicleCircle.bmp,0x0044EEE0,0x0084EEE0,0x00499594,0x00499529,CONFIRMED direct absolute reference
+model_material,assets/textures/ISCRedicle.bmp,0x0044EFA4,0x0084EFA4,0x0049A8AD,0x0049A897,CONFIRMED direct absolute reference
+model_material,assets/textures/ISCRedicle.bmp,0x0044EFA4,0x0084EFA4,0x0049AEA5,0x0049AE8F,CONFIRMED direct absolute reference
+model_material,assets/textures/L-crosshair-bar-noise2.bmp,0x0044F06C,0x0084F06C,0x0049CAC1,0x0049CA78,CONFIRMED direct absolute reference
+model_material,assets/textures/L-crosshair-bar-noise1.bmp,0x0044F098,0x0084F098,0x0049CAA8,0x0049CA78,CONFIRMED direct absolute reference
+model_material,assets/textures/L-crosshair-bar.bmp,0x0044F0C4,0x0084F0C4,0x0049CA8F,0x0049CA78,CONFIRMED direct absolute reference
+model_material,assets/textures/MirakReticles.bmp,0x0044F17C,0x0084F17C,0x0049D783,0x0049D76D,CONFIRMED direct absolute reference
+model_material,assets/textures/MirakReticles.bmp,0x0044F17C,0x0084F17C,0x0049E178,0x0049E162,CONFIRMED direct absolute reference
+model_material,assets/textures/Orion_reticle.bmp,0x0044F1F4,0x0084F1F4,0x0049EA4A,0x0049EA34,CONFIRMED direct absolute reference
+model_material,assets/textures/Orion_Reticle.bmp,0x0044F23C,0x0084F23C,0x0049EFB7,0x0049EFA1,CONFIRMED direct absolute reference
+model_material,assets/textures/TargetingRedicles-noise2.bmp,0x0044FBC0,0x0084FBC0,0x004A5543,0x004A54FA,CONFIRMED direct absolute reference
+model_material,assets/textures/TargetingRedicles-noise1.bmp,0x0044FBF0,0x0084FBF0,0x004A552A,0x004A54FA,CONFIRMED direct absolute reference
+scene_camera,G_ViewportScene_XXXXXXXXXXXXXXXXX,0x00450B70,0x00850B70,0x004AB417,0x004AB015,CONFIRMED direct absolute reference
+scene_camera,G_ViewportScene_XXXXXXXXXXXXXXXXX,0x00450B70,0x00850B70,0x004AB456,0x004AB015,CONFIRMED direct absolute reference
+scene_camera,G_ViewportScene_XXXXXXXXXXXXXXXXX,0x00450B70,0x00850B70,0x004ABC44,0x004ABA4F,CONFIRMED direct absolute reference
+scene_camera,G_ViewportScene_XXXXXXXXXXXXXXXXX,0x00450B70,0x00850B70,0x004ABCF1,0x004ABA4F,CONFIRMED direct absolute reference
+scene_camera,ViewportScene_XXXXXXXXXXXXXXXXX,0x00450B94,0x00850B94,0x004AB400,0x004AB015,CONFIRMED direct absolute reference
+scene_camera,ViewportScene_XXXXXXXXXXXXXXXXX,0x00450B94,0x00850B94,0x004ABC4B,0x004ABA4F,CONFIRMED direct absolute reference
+scene_camera,ViewportScene_XXXXXXXXXXXXXXXXX,0x00450B94,0x00850B94,0x004ABCF8,0x004ABA4F,CONFIRMED direct absolute reference
+scene_camera,t%%viewport%d,0x00450C5C,0x00850C5C,0x004AB2E1,0x004AB015,CONFIRMED direct absolute reference
+scene_camera,CameraLock,0x00450C9C,0x00850C9C,0x004AC4EA,0x004ABA4F,CONFIRMED direct absolute reference
+model_material,assets/models/zft/zft.mod,0x00450CC4,0x00850CC4,0x004ABC1B,0x004ABA4F,CONFIRMED direct absolute reference
+model_material,assets/models/ift/ift.mod,0x00450CE0,0x00850CE0,0x004ABC03,0x004ABA4F,CONFIRMED direct absolute reference
+model_material,assets/models/lft/lft.mod,0x00450CFC,0x00850CFC,0x004ABBEB,0x004ABA4F,CONFIRMED direct absolute reference
+model_material,assets/models/gft/gft.mod,0x00450D18,0x00850D18,0x004ABBD3,0x004ABA4F,CONFIRMED direct absolute reference
+model_material,assets/models/rft/rft.mod,0x00450D34,0x00850D34,0x004ABBBB,0x004ABA4F,CONFIRMED direct absolute reference
+model_material,assets/models/kft/kft.mod,0x00450D50,0x00850D50,0x004ABBA3,0x004ABA4F,CONFIRMED direct absolute reference
+model_material,assets/models/fft/fft.mod,0x00450D6C,0x00850D6C,0x004ABB8B,0x004ABA4F,CONFIRMED direct absolute reference
+model_material,assets/models/hft/hft.mod,0x00450D88,0x00850D88,0x004ABB73,0x004ABA4F,CONFIRMED direct absolute reference
+model_material,assets/models/xsh/xsh.mod,0x00450DA4,0x00850DA4,0x004ABB5B,0x004ABA4F,CONFIRMED direct absolute reference
+model_material,assets/models/xmn/xmn.mod,0x00450DC0,0x00850DC0,0x004ABB2B,0x004ABA4F,CONFIRMED direct absolute reference
+model_material,assets/textures/ui/offScrIconGrid.bmp,0x00453450,0x00853450,0x004B64F7,0x004B64B4,CONFIRMED direct absolute reference
+model_material,assets/textures/ui/unkInterface.bmp,0x004534A4,0x008534A4,0x004B676A,0x004B666E,CONFIRMED direct absolute reference
+sprite_effect,./Assets/Sprites/sprites.q3,0x004557A0,0x008557A0,0x004D3DD3,0x004D3DD3,CONFIRMED direct absolute reference
+scene_camera,Can not find template scene,0x004557E4,0x008557E4,0x004D4045,0x004D3FD6,CONFIRMED direct absolute reference
+scene_camera,tUIStage::mLoadAndCenterScene-- Can not center scene,0x00455818,0x00855818,0x004D4A7C,0x004D4A02,CONFIRMED direct absolute reference
+model_material,assets/textures/anti-drone.bmp,0x004576B8,0x008576B8,0x004EC32E,0x004EC2A9,CONFIRMED direct absolute reference
+model_material,assets/textures/fireplasma.bmp,0x004576D8,0x008576D8,0x004EC301,0x004EC2A9,CONFIRMED direct absolute reference
+model_material,assets/textures/fireplasma.bmp,0x004576D8,0x008576D8,0x004FE249,0x004FE1F1,CONFIRMED direct absolute reference
+model_material,assets/textures/%s.%s,0x00457774,0x00857774,0x004ECEA9,0x004ECE80,CONFIRMED direct absolute reference
+model_material,assets/textures/Klingon-Splat.bmp,0x004577BC,0x008577BC,0x004ED8A2,0x004ED88C,CONFIRMED direct absolute reference
+model_material,assets/textures/disruptor-burst.bmp,0x0045781C,0x0085781C,0x004EE087,0x004EE046,CONFIRMED direct absolute reference
+model_material,assets/textures/disruptor-burst.bmp,0x0045781C,0x0085781C,0x004EE9DC,0x004EE98C,CONFIRMED direct absolute reference
+model_material,assets/models/missile/missile.mod,0x004578C0,0x008578C0,0x004EF0D7,0x004EF0BD,CONFIRMED direct absolute reference
+model_material,assets/textures/esg-impact-long-2.bmp,0x0045791C,0x0085791C,0x004F1CD0,0x004F1C94,CONFIRMED direct absolute reference
+model_material,assets/textures/esg-impact-long-1.bmp,0x00457944,0x00857944,0x004F1CB7,0x004F1C94,CONFIRMED direct absolute reference
+model_material,assets/textures/lance3.bmp,0x004579BC,0x008579BC,0x004F2467,0x004F242A,CONFIRMED direct absolute reference
+model_material,assets/textures/debris1.bmp,0x00457A24,0x00857A24,0x004F321A,0x004F316A,CONFIRMED direct absolute reference
+model_material,assets/textures/space-rift.bmp,0x00457A48,0x00857A48,0x004F3BF8,0x004F3BE2,CONFIRMED direct absolute reference
+model_material,assets/textures/fx_Mauler_beam.bmp,0x00457AE4,0x00857AE4,0x004F4D94,0x004F4D5A,CONFIRMED direct absolute reference
+model_material,assets/textures/heavy-photon.bmp,0x00457B68,0x00857B68,0x004F60FA,0x004F60E4,CONFIRMED direct absolute reference
+model_material,assets/textures/SkyBgnd.bmp,0x00457C1C,0x00857C1C,0x004F81CC,0x004F819C,CONFIRMED direct absolute reference
+model_material,assets/textures/ion_storm.bmp,0x00457DA4,0x00857DA4,0x004FC7E1,0x004FC73C,CONFIRMED direct absolute reference
+model_material,assets/textures/fx_mauler_beam.bmp,0x00457DE4,0x00857DE4,0x004FCC6D,0x004FCC33,CONFIRMED direct absolute reference
+model_material,assets/textures/mauler-flash_2.bmp,0x00457E44,0x00857E44,0x004FD8BE,0x004FD86E,CONFIRMED direct absolute reference
+model_material,assets/textures/mine-boom2.bmp,0x00457E88,0x00857E88,0x004FE276,0x004FE1F1,CONFIRMED direct absolute reference
+model_material,assets/textures/natesplosion2.bmp,0x00457EC8,0x00857EC8,0x004FED3A,0x004FED0A,CONFIRMED direct absolute reference
+model_material,assets/textures/natesplosion1.bmp,0x00457EEC,0x00857EEC,0x004FED21,0x004FED0A,CONFIRMED direct absolute reference
+model_material,assets/textures/Organian.bmp,0x00457F44,0x00857F44,0x004FFADE,0x004FFAC8,CONFIRMED direct absolute reference
+model_material,assets/textures/photons-2.bmp,0x00457FC8,0x00857FC8,0x0050085D,0x00500847,CONFIRMED direct absolute reference
+model_material,assets/textures/PlasmaSnare.bmp,0x00458008,0x00858008,0x00501BBC,0x00501B0E,CONFIRMED direct absolute reference
+model_material,assets/textures/FastPlasma.bmp,0x00458028,0x00858028,0x00501BA4,0x00501B0E,CONFIRMED direct absolute reference
+model_material,assets/textures/violet-plasma.bmp,0x00458048,0x00858048,0x00501B8C,0x00501B0E,CONFIRMED direct absolute reference
+model_material,assets/textures/green-plasma.bmp,0x0045806C,0x0085806C,0x00501B74,0x00501B0E,CONFIRMED direct absolute reference
+model_material,assets/textures/yellow-plasma.bmp,0x00458090,0x00858090,0x00501B5C,0x00501B0E,CONFIRMED direct absolute reference
+model_material,assets/textures/orange-plasma.bmp,0x004580B4,0x008580B4,0x00501B44,0x00501B0E,CONFIRMED direct absolute reference
+model_material,assets/textures/red-plasma.bmp,0x004580D8,0x008580D8,0x00501B2C,0x00501B0E,CONFIRMED direct absolute reference
+model_material,assets/textures/ppd-beam.bmp,0x0045811C,0x0085811C,0x00502B20,0x00502B0A,CONFIRMED direct absolute reference
+model_material,assets/textures/ppd-wave-hit.bmp,0x0045816C,0x0085816C,0x00503390,0x00503354,CONFIRMED direct absolute reference
+model_material,assets/textures/ppd-wave.bmp,0x00458190,0x00858190,0x00503377,0x00503354,CONFIRMED direct absolute reference
+model_material,assets/textures/pulsar_2.bmp,0x004582A4,0x008582A4,0x0050511D,0x005050ED,CONFIRMED direct absolute reference
+model_material,assets/textures/pulsar_1.bmp,0x004582C4,0x008582C4,0x00505104,0x005050ED,CONFIRMED direct absolute reference
+model_material,assets/textures/expl_ring16f.bmp,0x00458328,0x00858328,0x005067D8,0x0050678F,CONFIRMED direct absolute reference
+model_material,assets/textures/expl_16-31.bmp,0x0045834C,0x0085834C,0x005067BF,0x0050678F,CONFIRMED direct absolute reference
+model_material,assets/textures/expl_00-15.bmp,0x0045836C,0x0085836C,0x005067A6,0x0050678F,CONFIRMED direct absolute reference
+model_material,assets/models/space/,0x004584BC,0x008584BC,0x005099C4,0x00509970,CONFIRMED direct absolute reference
+model_material,assets/models/space/,0x004584BC,0x008584BC,0x00509A0B,0x00509970,CONFIRMED direct absolute reference
+model_material,assets/textures/spacedustheavy.BMP,0x004584DC,0x008584DC,0x00509B94,0x00509B30,CONFIRMED direct absolute reference
+model_material,assets/textures/spacedustlight.BMP,0x00458500,0x00858500,0x00509B7D,0x00509B30,CONFIRMED direct absolute reference
+model_material,assets/models/hff/hff.mod,0x00459AD0,0x00859AD0,0x0052E9F0,0x0052E6A0,CONFIRMED direct absolute reference
+model_material,assets/models/hcl/hcl.mod,0x00459AEC,0x00859AEC,0x0052E9D8,0x0052E6A0,CONFIRMED direct absolute reference
+model_material,assets/models/fca/hca.mod,0x00459B08,0x00859B08,0x0052E9C0,0x0052E6A0,CONFIRMED direct absolute reference
+model_material,assets/models/gff/gff.mod,0x00459B24,0x00859B24,0x0052E9A6,0x0052E6A0,CONFIRMED direct absolute reference
+model_material,assets/models/gcl/gcl.mod,0x00459B40,0x00859B40,0x0052E98E,0x0052E6A0,CONFIRMED direct absolute reference
+model_material,assets/models/gca/gca.mod,0x00459B5C,0x00859B5C,0x0052E976,0x0052E6A0,CONFIRMED direct absolute reference
+model_material,assets/models/pndn/pndn.mod,0x00459B78,0x00859B78,0x0052E95C,0x0052E6A0,CONFIRMED direct absolute reference
+model_material,assets/models/pdn/pdn.mod,0x00459B94,0x00859B94,0x0052E940,0x0052E6A0,CONFIRMED direct absolute reference
+model_material,assets/models/pca/pca.mod,0x00459BB0,0x00859BB0,0x0052E928,0x0052E6A0,CONFIRMED direct absolute reference
+model_material,assets/models/pff/pff.mod,0x00459BCC,0x00859BCC,0x0052E910,0x0052E6A0,CONFIRMED direct absolute reference
+model_material,assets/models/lff/lff.mod,0x00459BE8,0x00859BE8,0x0052E8D6,0x0052E6A0,CONFIRMED direct absolute reference
+model_material,assets/models/lcl/lcl.mod,0x00459C04,0x00859C04,0x0052E8BA,0x0052E6A0,CONFIRMED direct absolute reference
+model_material,assets/models/lca/lca.mod,0x00459C20,0x00859C20,0x0052E8A2,0x0052E6A0,CONFIRMED direct absolute reference
+model_material,assets/models/fff/fff.mod,0x00459C3C,0x00859C3C,0x0052E888,0x0052E6A0,CONFIRMED direct absolute reference
+model_material,assets/models/fdd/fdd.mod,0x00459C58,0x00859C58,0x0052E86C,0x0052E6A0,CONFIRMED direct absolute reference
+model_material,assets/models/fcl/fcl.mod,0x00459C74,0x00859C74,0x0052E854,0x0052E6A0,CONFIRMED direct absolute reference
+model_material,assets/models/fca/fca.mod,0x00459C90,0x00859C90,0x0052E83C,0x0052E6A0,CONFIRMED direct absolute reference
+model_material,assets/models/fbch/fbch.mod,0x00459CAC,0x00859CAC,0x0052E824,0x0052E6A0,CONFIRMED direct absolute reference
+model_material,assets/models/kff/kff.mod,0x00459CC8,0x00859CC8,0x0052E80A,0x0052E6A0,CONFIRMED direct absolute reference
+model_material,assets/models/kdd/kdd.mod,0x00459CE4,0x00859CE4,0x0052E7EE,0x0052E6A0,CONFIRMED direct absolute reference
+model_material,assets/models/kcl/kcl.mod,0x00459D00,0x00859D00,0x0052E7D6,0x0052E6A0,CONFIRMED direct absolute reference
+model_material,assets/models/kca/kca.mod,0x00459D1C,0x00859D1C,0x0052E7BE,0x0052E6A0,CONFIRMED direct absolute reference
+model_material,assets/models/rfr/rfr.mod,0x00459D38,0x00859D38,0x0052E7A4,0x0052E6A0,CONFIRMED direct absolute reference
+model_material,assets/models/rln/rln.mod,0x00459D54,0x00859D54,0x0052E788,0x0052E6A0,CONFIRMED direct absolute reference
+model_material,assets/models/rfa/rfa.mod,0x00459D70,0x00859D70,0x0052E770,0x0052E6A0,CONFIRMED direct absolute reference
+model_material,assets/models/rff/rff.mod,0x00459D8C,0x00859D8C,0x0052E758,0x0052E6A0,CONFIRMED direct absolute reference
+model_material,assets/models/rdk/rdk.mod,0x00459DA8,0x00859DA8,0x0052E740,0x0052E6A0,CONFIRMED direct absolute reference
+model_material,assets/models/rde/rde.mod,0x00459DC4,0x00859DC4,0x0052E728,0x0052E6A0,CONFIRMED direct absolute reference
+model_material,assets/models/rdd/rdd.mod,0x00459DE0,0x00859DE0,0x0052E710,0x0052E6A0,CONFIRMED direct absolute reference
+model_material,assets/models/rcl/rcl.mod,0x00459DFC,0x00859DFC,0x0052E6F8,0x0052E6A0,CONFIRMED direct absolute reference
+model_material,assets/models/rca/rca.mod,0x00459E18,0x00859E18,0x0052E6E0,0x0052E6A0,CONFIRMED direct absolute reference
+model_material,assets/textures/pk-maw.bmp,0x0045AD44,0x0085AD44,0x005364FD,0x005364E7,CONFIRMED direct absolute reference
+scene_camera,MetaViewPortHandlerNameC,0x0046EC44,0x0086EC44,0x005ADF0A,0x005ADEF0,CONFIRMED direct absolute reference
+scene_camera,MetaViewPortHandlerNameC,0x0046EC44,0x0086EC44,0x005B0420,0x005B0406,CONFIRMED direct absolute reference
+scene_camera,MetaViewPortHandlerNameC,0x0046EC44,0x0086EC44,0x005DF6FC,0x005DF6E2,CONFIRMED direct absolute reference
+scene_camera,MetaViewPortHandlerNameC,0x0046EC44,0x0086EC44,0x005DF9FF,0x005DF9E5,CONFIRMED direct absolute reference
+scene_camera,MetaViewPortHandlerNameC,0x0046EC44,0x0086EC44,0x005DFFE1,0x005DFFC7,CONFIRMED direct absolute reference
+scene_camera,MetaViewPortHandlerNameC,0x0046EC44,0x0086EC44,0x005E025C,0x005E0242,CONFIRMED direct absolute reference
+scene_camera,MetaViewPortHandlerNameC,0x0046EC44,0x0086EC44,0x005E041D,0x005E0403,CONFIRMED direct absolute reference
+scene_camera,MetaViewPortHandlerNameC,0x0046EC44,0x0086EC44,0x005E0630,0x005E0616,CONFIRMED direct absolute reference
+scene_camera,MetaViewPortHandlerNameC,0x0046EC44,0x0086EC44,0x005E0EC4,0x005E0EAA,CONFIRMED direct absolute reference
+scene_camera,MetaViewPortHandlerNameC,0x0046EC44,0x0086EC44,0x005E179C,0x005E1782,CONFIRMED direct absolute reference
+scene_camera,MetaViewPortHandlerNameC,0x0046EC44,0x0086EC44,0x005E4C91,0x005E4C77,CONFIRMED direct absolute reference
+scene_camera,MetaViewPortHandlerNameC,0x0046EC44,0x0086EC44,0x005EB748,0x005EB72E,CONFIRMED direct absolute reference
+scene_camera,F:\Projects\Taldren\Projects\SFC2_5\Source\MetaClient\MetaClientMap\MetaViewPortHandler.cpp,0x0047644C,0x0087644C,0x005E5893,0x005E506F,CONFIRMED direct absolute reference
+scene_camera,F:\Projects\Taldren\Projects\SFC2_5\Source\MetaClient\MetaClientMap\MetaViewPortHandler.cpp,0x0047644C,0x0087644C,0x005E7EE4,0x005E7D80,CONFIRMED direct absolute reference
+sprite_effect,tQ3Error_Q3CAST_ReadSprite,0x00483074,0x00883074,0x00677300,0x006770A0,CONFIRMED direct absolute reference
+graphics,Direct3D Error %s,0x004841B8,0x008841B8,0x0069CF98,0x0069CDA0,CONFIRMED direct absolute reference
+scene_camera,D3DERR_SCENE_END_FAILED,0x004841E0,0x008841E0,0x0069CF62,0x0069CDA0,CONFIRMED direct absolute reference
+scene_camera,D3DERR_SCENE_BEGIN_FAILED,0x004841F8,0x008841F8,0x0069CF56,0x0069CDA0,CONFIRMED direct absolute reference
+scene_camera,D3DERR_SCENE_NOT_IN_SCENE,0x00484214,0x00884214,0x0069CF4B,0x0069CDA0,CONFIRMED direct absolute reference
+scene_camera,D3DERR_SCENE_IN_SCENE,0x00484230,0x00884230,0x0069CF43,0x0069CDA0,CONFIRMED direct absolute reference
+model_material,D3DERR_MATERIAL_GETDATA_FAILED,0x00484260,0x00884260,0x0069CF2C,0x0069CDA0,CONFIRMED direct absolute reference
+model_material,D3DERR_MATERIAL_SETDATA_FAILED,0x00484280,0x00884280,0x0069CF24,0x0069CDA0,CONFIRMED direct absolute reference
+model_material,D3DERR_MATERIAL_DESTROY_FAILED,0x004842A0,0x008842A0,0x0069CF18,0x0069CDA0,CONFIRMED direct absolute reference
+model_material,D3DERR_MATERIAL_CREATE_FAILED,0x004842C0,0x008842C0,0x0069CF0D,0x0069CDA0,CONFIRMED direct absolute reference
+scene_camera,D3DERR_SETVIEWPORTDATA_FAILED,0x004842E0,0x008842E0,0x0069CF05,0x0069CDA0,CONFIRMED direct absolute reference
+graphics,Direct3D,0x004845B8,0x008845B8,0x0069D3A0,0x0069D2B0,CONFIRMED direct absolute reference
+graphics,DirectDrawCreate,0x00484DF4,0x00884DF4,0x006AD554,0x006AD410,CONFIRMED direct absolute reference
+graphics,tDDSurfMgr::mEnumDispModes(): IDirectDraw2::EnumDisplayModes() failed,0x00484F04,0x00884F04,0x006B3684,0x006B3360,CONFIRMED direct absolute reference
+graphics,tDDSurfMgr::mEnumDispModes(): Could not obtain DirectDraw2 interface,0x00484F4C,0x00884F4C,0x006B3634,0x006B3360,CONFIRMED direct absolute reference
+graphics,D:\work\QSI\Projects\CORE\dmp3d\glsurface\tDDSurfMgr.cpp,0x00484F94,0x00884F94,0x006B3604,0x006B3360,CONFIRMED direct absolute reference
+graphics,D:\work\QSI\Projects\CORE\dmp3d\glsurface\tDDSurfMgr.cpp,0x00484F94,0x00884F94,0x006B363E,0x006B3360,CONFIRMED direct absolute reference
+graphics,D:\work\QSI\Projects\CORE\dmp3d\glsurface\tDDSurfMgr.cpp,0x00484F94,0x00884F94,0x006B3690,0x006B3360,CONFIRMED direct absolute reference
+graphics,D:\work\QSI\Projects\CORE\dmp3d\glsurface\tDDSurfMgr.cpp,0x00484F94,0x00884F94,0x006B3981,0x006B3360,CONFIRMED direct absolute reference
+graphics,D:\work\QSI\Projects\CORE\dmp3d\glsurface\tDDSurfMgr.cpp,0x00484F94,0x00884F94,0x006B3B72,0x006B3360,CONFIRMED direct absolute reference
+graphics,D:\work\QSI\Projects\CORE\dmp3d\glsurface\tDDSurfMgr.cpp,0x00484F94,0x00884F94,0x006B3D13,0x006B3360,CONFIRMED direct absolute reference
+graphics,D:\work\QSI\Projects\CORE\dmp3d\glsurface\tDDSurfMgr.cpp,0x00484F94,0x00884F94,0x006B3D82,0x006B3360,CONFIRMED direct absolute reference
+graphics,D:\work\QSI\Projects\CORE\dmp3d\glsurface\tDDSurfMgr.cpp,0x00484F94,0x00884F94,0x006B3E87,0x006B3E10,CONFIRMED direct absolute reference
+graphics,D:\work\QSI\Projects\CORE\dmp3d\glsurface\tDDSurfMgr.cpp,0x00484F94,0x00884F94,0x006B3EBE,0x006B3E10,CONFIRMED direct absolute reference
+graphics,D:\work\QSI\Projects\CORE\dmp3d\glsurface\tDDSurfMgr.cpp,0x00484F94,0x00884F94,0x006B3EF9,0x006B3E10,CONFIRMED direct absolute reference
+graphics,D:\work\QSI\Projects\CORE\dmp3d\glsurface\tDDSurfMgr.cpp,0x00484F94,0x00884F94,0x006B439D,0x006B4360,CONFIRMED direct absolute reference
+graphics,D:\work\QSI\Projects\CORE\dmp3d\glsurface\tDDSurfMgr.cpp,0x00484F94,0x00884F94,0x006B43F0,0x006B4360,CONFIRMED direct absolute reference
+graphics,D:\work\QSI\Projects\CORE\dmp3d\glsurface\tDDSurfMgr.cpp,0x00484F94,0x00884F94,0x006B443E,0x006B4360,CONFIRMED direct absolute reference
+graphics,D:\work\QSI\Projects\CORE\dmp3d\glsurface\tDDSurfMgr.cpp,0x00484F94,0x00884F94,0x006B44B0,0x006B4460,CONFIRMED direct absolute reference
+graphics,D:\work\QSI\Projects\CORE\dmp3d\glsurface\tDDSurfMgr.cpp,0x00484F94,0x00884F94,0x006B44E8,0x006B4460,CONFIRMED direct absolute reference
+graphics,D:\work\QSI\Projects\CORE\dmp3d\glsurface\tDDSurfMgr.cpp,0x00484F94,0x00884F94,0x006B4525,0x006B4460,CONFIRMED direct absolute reference
+graphics,D:\work\QSI\Projects\CORE\dmp3d\glsurface\tDDSurfMgr.cpp,0x00484F94,0x00884F94,0x006B4624,0x006B4540,CONFIRMED direct absolute reference
+graphics,D:\work\QSI\Projects\CORE\dmp3d\glsurface\tDDSurfMgr.cpp,0x00484F94,0x00884F94,0x006B46BE,0x006B4540,CONFIRMED direct absolute reference
+graphics,D:\work\QSI\Projects\CORE\dmp3d\glsurface\tDDSurfMgr.cpp,0x00484F94,0x00884F94,0x006B46DA,0x006B4540,CONFIRMED direct absolute reference
+graphics,D:\work\QSI\Projects\CORE\dmp3d\glsurface\tDDSurfMgr.cpp,0x00484F94,0x00884F94,0x006B470F,0x006B4540,CONFIRMED direct absolute reference
+graphics,D:\work\QSI\Projects\CORE\dmp3d\glsurface\tDDSurfMgr.cpp,0x00484F94,0x00884F94,0x006B4734,0x006B4540,CONFIRMED direct absolute reference
+graphics,D:\work\QSI\Projects\CORE\dmp3d\glsurface\tDDSurfMgr.cpp,0x00484F94,0x00884F94,0x006B47BB,0x006B4540,CONFIRMED direct absolute reference
+graphics,D:\work\QSI\Projects\CORE\dmp3d\glsurface\tDDSurfMgr.cpp,0x00484F94,0x00884F94,0x006B47F1,0x006B4540,CONFIRMED direct absolute reference
+graphics,D:\work\QSI\Projects\CORE\dmp3d\glsurface\tDDSurfMgr.cpp,0x00484F94,0x00884F94,0x006B482E,0x006B4540,CONFIRMED direct absolute reference
+graphics,D:\work\QSI\Projects\CORE\dmp3d\glsurface\tDDSurfMgr.cpp,0x00484F94,0x00884F94,0x006B4867,0x006B4540,CONFIRMED direct absolute reference
+graphics,D:\work\QSI\Projects\CORE\dmp3d\glsurface\tDDSurfMgr.cpp,0x00484F94,0x00884F94,0x006B4895,0x006B4540,CONFIRMED direct absolute reference
+graphics,D:\work\QSI\Projects\CORE\dmp3d\glsurface\tDDSurfMgr.cpp,0x00484F94,0x00884F94,0x006B48C1,0x006B4540,CONFIRMED direct absolute reference
+graphics,D:\work\QSI\Projects\CORE\dmp3d\glsurface\tDDSurfMgr.cpp,0x00484F94,0x00884F94,0x006B48E9,0x006B4540,CONFIRMED direct absolute reference
+graphics,tDDSurfMgr::mEnumDispModes(): DirectDrawCreate() failed,0x00484FD0,0x00884FD0,0x006B35FA,0x006B3360,CONFIRMED direct absolute reference
+graphics,tDDSurfMgr::mSwapBuffers(): DirectDraw flip failure,0x00485008,0x00885008,0x006B3977,0x006B3360,CONFIRMED direct absolute reference
+graphics,tDDSurfMgr::mCopyToFront(): DirectDraw BitBlt() failure,0x0048503C,0x0088503C,0x006B3B68,0x006B3360,CONFIRMED direct absolute reference
+graphics,tDDSurfMgr::mCreateSurface(): Could not obtain surface description,0x00485074,0x00885074,0x006B3D78,0x006B3360,CONFIRMED direct absolute reference
+graphics,tDDSurfMgr::mCreateSurface(): Could not create surface,0x004850B8,0x008850B8,0x006B3D09,0x006B3360,CONFIRMED direct absolute reference
+graphics,tDDSurfMgr::mInitInterfaces(): Could not set coop level,0x004850F0,0x008850F0,0x006B3EEF,0x006B3E10,CONFIRMED direct absolute reference
+graphics,tDDSurfMgr::mInitInterfaces(): Could not obtain DirectDraw2 interface,0x00485128,0x00885128,0x006B3EB4,0x006B3E10,CONFIRMED direct absolute reference
+graphics,tDDSurfMgr::mInitInterfaces(): DirectDrawCreate() failed,0x00485170,0x00885170,0x006B3E7D,0x006B3E10,CONFIRMED direct absolute reference
+graphics,tDDSurfMgr::mSetDisplayMode(): Could not restore coop level,0x004851C4,0x008851C4,0x006B4434,0x006B4360,CONFIRMED direct absolute reference
+graphics,tDDSurfMgr::mSetDisplayMode(): Could not restore coop level,0x004851C4,0x008851C4,0x006B451B,0x006B4460,CONFIRMED direct absolute reference
+graphics,tDDSurfMgr::mSetDisplayMode(): Unable to set display mode to %dx%dx%dx,0x00485200,0x00885200,0x006B43E6,0x006B4360,CONFIRMED direct absolute reference
+graphics,tDDSurfMgr::mSetDisplayMode(): Could not set coop level,0x00485248,0x00885248,0x006B4393,0x006B4360,CONFIRMED direct absolute reference
+graphics,tDDSurfMgr::mRestoreDisplayMode(): Could not restore display mode,0x00485280,0x00885280,0x006B44DE,0x006B4460,CONFIRMED direct absolute reference
+graphics,tDDSurfMgr::mRestoreDisplayMode(): Could not set coop level,0x004852C4,0x008852C4,0x006B44A6,0x006B4460,CONFIRMED direct absolute reference
+graphics,tDDSurfMgr::mInitBuffers(): SetPalette() failed,0x00485300,0x00885300,0x006B48B7,0x006B4540,CONFIRMED direct absolute reference
+graphics,tDDSurfMgr::mInitBuffers(): SetPalette() failed,0x00485300,0x00885300,0x006B48DF,0x006B4540,CONFIRMED direct absolute reference
+graphics,tDDSurfMgr::mInitBuffers(): Can't make palette,0x00485330,0x00885330,0x006B488B,0x006B4540,CONFIRMED direct absolute reference
+graphics,tDDSurfMgr::mInitBuffers(): Could not obtain back surface description,0x00485360,0x00885360,0x006B485D,0x006B4540,CONFIRMED direct absolute reference
+graphics,tDDSurfMgr::mInitBuffers(): Could not obtain front surface description,0x004853A8,0x008853A8,0x006B4824,0x006B4540,CONFIRMED direct absolute reference
+graphics,tD3DMgr::mInitD3DDevice(): Could not create back buffer,0x004853F0,0x008853F0,0x006B47E7,0x006B4540,CONFIRMED direct absolute reference
+graphics,tD3DMgr::mInitD3DDevice(): Could not create back buffer,0x0048543C,0x0088543C,0x006B47B1,0x006B4540,CONFIRMED direct absolute reference
+graphics,tDDSurfMgr::mInitBuffers(): fDDFront->SetClipper() failed,0x00485484,0x00885484,0x006B472A,0x006B4540,CONFIRMED direct absolute reference
+graphics,tDDSurfMgr::mInitBuffers(): Clipper->SetHWnd() failed,0x004854C0,0x008854C0,0x006B4705,0x006B4540,CONFIRMED direct absolute reference
+graphics,tDDSurfMgr::mInitBuffers(): Failed to create clipper,0x004854F8,0x008854F8,0x006B46D0,0x006B4540,CONFIRMED direct absolute reference
+graphics,tDDSurfMgr::mInitBuffers(): Failed to create front surface,0x00485530,0x00885530,0x006B46B4,0x006B4540,CONFIRMED direct absolute reference
+graphics,tDDSurfMgr::mInitBuffers(): Could not obtain back buffer surface,0x0048556C,0x0088556C,0x006B465F,0x006B4540,CONFIRMED direct absolute reference
+graphics,tDDSurfMgr::mInitBuffers(): Failed to create primary surface,0x004855B0,0x008855B0,0x006B461A,0x006B4540,CONFIRMED direct absolute reference
+graphics,DirectDrawEnumerateExA,0x0048562C,0x0088562C,0x006B79A8,0x006B7980,CONFIRMED direct absolute reference
+model_material,D3DERR_MATERIAL_SETDATA_FAILED,0x004856E4,0x008856E4,0x006B96A8,0x006B9290,CONFIRMED direct absolute reference
+model_material,D3DERR_MATERIAL_DESTROY_FAILED,0x00485704,0x00885704,0x006B96A2,0x006B9290,CONFIRMED direct absolute reference
+model_material,D3DERR_MATERIAL_CREATE_FAILED,0x00485724,0x00885724,0x006B969C,0x006B9290,CONFIRMED direct absolute reference
+scene_camera,D3DERR_SETVIEWPORTDATA_FAILED,0x00485744,0x00885744,0x006B9696,0x006B9290,CONFIRMED direct absolute reference
+graphics,Informs DirectDraw that the previous Blt which is transfering information to or from this Surface is incomplete.,0x00485AE4,0x00885AE4,0x006B95B0,0x006B9290,CONFIRMED direct absolute reference
+graphics,A hardware-only DirectDraw object creation was attempted but the driver did not support any hardware.,0x00485E8C,0x00885E8C,0x006B9568,0x006B9290,CONFIRMED direct absolute reference
+graphics,No DirectDraw ROP hardware.,0x00485EF4,0x00885EF4,0x006B9562,0x006B9290,CONFIRMED direct absolute reference
+graphics,The GUID passed to DirectDrawCreate is not a valid DirectDraw driver identifier.,0x00485FF8,0x00885FF8,0x006B9544,0x006B9290,CONFIRMED direct absolute reference
+graphics,"HWND used by DirectDraw CooperativeLevel has been subclassed, this prevents DirectDraw from restoring state.",0x0048604C,0x0088604C,0x006B953E,0x006B9290,CONFIRMED direct absolute reference
+graphics,A DirectDraw object representing this driver has already been created for this process.,0x00486190,0x00886190,0x006B952C,0x006B9290,CONFIRMED direct absolute reference
+graphics,Bitmask in the pixel format requested is unsupported by DirectDraw.,0x00486344,0x00886344,0x006B94DA,0x006B9290,CONFIRMED direct absolute reference
+graphics,FOURCC format requested is unsupported by DirectDraw.,0x0048638C,0x0088638C,0x006B94D4,0x006B9290,CONFIRMED direct absolute reference
+graphics,Width requested by DirectDraw is too large.,0x004863C4,0x008863C4,0x006B94CE,0x006B9290,CONFIRMED direct absolute reference
+graphics,"Size requested by DirectDraw is too large, but the individual height and width are OK.",0x004863F4,0x008863F4,0x006B94C8,0x006B9290,CONFIRMED direct absolute reference
+graphics,Height requested by DirectDraw is too large.,0x0048644C,0x0088644C,0x006B94C2,0x006B9290,CONFIRMED direct absolute reference
+graphics,Access to this surface is being refused because the surface memory is gone. The DirectDrawSurface object representing this surface should have Restore called on it.,0x004864A4,0x008864A4,0x006B94B6,0x006B9290,CONFIRMED direct absolute reference
+graphics,Operation could not be carried out because there is no hardware support for zbuffer blitting.,0x00486868,0x00886868,0x006B9455,0x006B9290,CONFIRMED direct absolute reference
+graphics,DirectDrawSurface is not in 8 bit color mode and the requested operation requires 8 bit color.,0x004869A8,0x008869A8,0x006B9443,0x006B9290,CONFIRMED direct absolute reference
+graphics,DirectDrawSurface is not in 4 bit color index palette and the requested operation requires 4 bit color index palette.,0x00486A08,0x00886A08,0x006B943D,0x006B9290,CONFIRMED direct absolute reference
+graphics,DirectDrawSurface is not in 4 bit color palette and the requested operation requires 4 bit color palette.,0x00486A80,0x00886A80,0x006B9437,0x006B9290,CONFIRMED direct absolute reference
+graphics,Create function called without DirectDraw object method SetCooperativeLevel being called.,0x00486DAC,0x00886DAC,0x006B93D5,0x006B9290,CONFIRMED direct absolute reference
+graphics,DirectDraw received a pointer that was an invalid DIRECTDRAW object.,0x00487044,0x00887044,0x006B937C,0x006B9290,CONFIRMED direct absolute reference
+graphics,DirectDraw does not support the requested mode.,0x0048708C,0x0088708C,0x006B9376,0x006B9290,CONFIRMED direct absolute reference
+graphics,DirectDraw does not support the provided cliplist.,0x004870C0,0x008870C0,0x006B9370,0x006B9290,CONFIRMED direct absolute reference
+graphics,DirectDraw does not have enough memory to perform the operation.,0x00487358,0x00887358,0x006B92F2,0x006B9290,CONFIRMED direct absolute reference

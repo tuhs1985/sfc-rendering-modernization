@@ -1,0 +1,10 @@
+{
+  "instructions": 1262760,
+  "function_start_candidates": 14636,
+  "text_landmarks": 92,
+  "functions_with_landmarks": 40,
+  "string_anchor_xrefs": 342,
+  "functions_with_anchor_xrefs": 113,
+  "graphics_import_xrefs": 15,
+  "selected_functions": 159
+}
