@@ -1,0 +1,119 @@
+# M1 Increment A Development Test Manifest
+
+## Manifest identity
+
+- Manifest ID: `M1-A-MANIFEST-001`
+- Frozen: 2026-09-04
+- Planning baseline: commit `51ab372`
+- Active work: neutral semantic observation/pass-through
+- Status: active development manifest; runtime fixture details are completed in
+  each probe run record
+
+## Supported client
+
+- Product: Starfleet Command: Orion Pirates Community Edition
+- Executable: `StarFleetOP.exe`
+- File version: `2.5.6.4`
+- Product version: `1.0z`
+- Size: 4,812,800 bytes
+- Installed path used for development:
+  `C:\Games\Taldren Software Inc\Starfleet Command Orion Pirates\StarFleetOP.exe`
+- MD5: `2BE8F713F81B1C68D50EAD6088C32886`
+- SHA-256:
+  `4D65761D7DD69EF1504070261B81E9C200C0AF18105033E1C4D2222C62320C29`
+- Last-write time observed: 2019-06-29 20:09:05 UTC
+
+The controller and component refuse any process whose on-disk image does not
+match the MD5. Runtime records repeat both hashes before and after testing.
+
+## Launch and configuration
+
+- Required launcher:
+  `C:\Project\SFC-Modernize Engine\Game Assets\SFCLauncher 2.1.0.22.exe`.
+- Launcher size: 219,136 bytes; MD5 `5974EA36E3C4E3DFE4F8E243607FC3CF`;
+  SHA-256 `84D3A5F89A922C4BEE6815CF0614538C3565C4BDB7DB3AA187C552CB727EF890`.
+- Authenticode status: unsigned original restored from the sponsor's source ZIP.
+  A briefly re-signed copy was rejected before evidence capture and replaced.
+- Game configuration: launcher-created native `StarFleetOP.exe`; no renderer
+  replacement is selected by M1.
+- M1 component state must be recorded as `disabled`, `enabled`, or `removed`.
+- Module inventory is attempted where access permits. Its denial in the first
+  disabled attempt does not block semantic gating, client attribution, process
+  telemetry, or the later elevated controller; it is deferred unless integration
+  evidence shows it is needed.
+
+## Host environment
+
+- OS: Microsoft Windows 11 Home, version `10.0.26200`, build `26200`, x64.
+- Physical GPU: NVIDIA GeForce RTX 4070 Ti.
+- NVIDIA driver: `32.0.15.9636`, dated 2026-04-22 UTC.
+- Other enumerated display adapters:
+  - SudoMaker Virtual Display Adapter `1.10.9.289`;
+  - Sunshine Virtual Display Driver `1.4.4.0`.
+- PowerShell: `7.6.5`.
+- Python: `3.14.6`.
+- C/C++ toolchain: Microsoft Visual C/C++ `19.51.36248`, x86 target, Visual
+  Studio 2026 Community developer environment `18.7.3`.
+
+The active display adapter/output and resolution are recorded per runtime run
+because adapter enumeration alone does not establish which output SFC uses.
+
+## Component and dependency baseline
+
+- Component source: `tools/m1_component/m1_component.cpp`.
+- Controller source: `tools/m1_component/m1_controller.cpp`.
+- Preferred loader: three-export local WINMM forwarder built from the same
+  component source and removed after game exit.
+- Disabled-baseline scene gate: standalone `m1_gate.dll`, injected by the scoped
+  elevated workflow, with one semantic hook restored and the DLL unloaded before
+  baseline telemetry begins. It writes nothing to the game directory.
+- Shared contract logic: `tools/m1_component/m1_contract.h`.
+- Build/runner/analyzer revisions are the working-tree versions associated with
+  the runtime run record; implementation changes are not committed without later
+  sponsor authority.
+- Runtime dependencies: Windows x86 APIs and the static MSVC runtime only.
+- No external renderer, helper model, or third-party detour library is used.
+- The loader temporarily adds `winmm.dll` and `m1-component.ini` beside the game
+  executable only for an enabled run. It refuses to replace existing files and
+  verifies/removes exactly those two additions after normal exit.
+
+## Fixtures
+
+- `M1-A-FIXTURE-01`: smallest valid tactical setup, a two-ship skirmish. The
+  sponsor confirmed that SFC skirmish cannot be configured with fewer ships.
+- `M1-A-FIXTURE-02`: two distinguishable visible ship/model classes with camera
+  and object motion plus an enter/leave condition.
+- `M1-A-FIXTURE-03`: representative mission for the later 30-minute neutral
+  stability run.
+
+Fixtures 02 and 03 are not executed until Fixture 01 is stable. These are
+development fixtures, not a new CDD verification-fixture definition.
+
+## Default capture envelope
+
+- automatic tactical gate: first confirmed ship-owner event;
+- detailed frames: at most 120;
+- detailed events: at most 10,000;
+- detailed owners: at most eight;
+- event-log warning: 16 MiB;
+- event-log hard stop: 32 MiB;
+- formal runtime: at most 35 minutes;
+- downstream validation: bounded counters and detailed events only inside the
+  active burst;
+- after saturation: counters continue; detailed records stop;
+- raw output: ignored `artifacts/m1/runs/<timestamp>/`.
+
+Unrestricted tracing can grow to multiple gigabytes rapidly and is prohibited.
+
+## Disabled baseline
+
+`M1-A-BASELINE-002` run `20260905-094407-disabled-auto-gate` is the accepted
+Fixture-01 disabled baseline. The automatic semantic gate opened on a validated
+`tEntityShip::render` owner/visual event, restored and unloaded before telemetry,
+and required no sponsor timestamp. The run retained 119 telemetry samples over
+119.289 seconds, recorded normal process disappearance, added no game-directory
+files, and preserved both client hashes. The sponsor reported normal rendering,
+HUD, cursor, targeting, camera movement, and controls with no noted issues.
+
+The paired enabled result remains required before semantic integration can be
+adjudicated. This disabled result does not itself exercise the neutral component.

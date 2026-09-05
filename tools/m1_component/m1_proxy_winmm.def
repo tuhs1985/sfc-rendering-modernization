@@ -1,0 +1,7 @@
+LIBRARY winmm
+EXPORTS
+    M1StartW=_M1StartW@4
+    M1Stop=_M1Stop@4
+    timeGetTime=_timeGetTime@0
+    timeKillEvent=_timeKillEvent@4
+    timeSetEvent=_timeSetEvent@20

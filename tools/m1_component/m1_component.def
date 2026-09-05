@@ -1,0 +1,4 @@
+LIBRARY m1_component
+EXPORTS
+    M1StartW=_M1StartW@4
+    M1Stop=_M1Stop@4
