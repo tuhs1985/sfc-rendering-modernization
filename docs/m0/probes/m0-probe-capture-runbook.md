@@ -61,6 +61,20 @@ Each point disarms independently at its maximum. Approved duration is 300
 seconds by default and never more than 900 seconds. No broad API trace, memory
 dump, instruction trace, or unrelated function sampling is enabled.
 
+## Privilege and UAC policy
+
+Routine probe execution uses a narrowly scoped, already-elevated PowerShell
+parent session. The analyst or test preparer opens that session before sponsor
+gameplay begins; the runner and native probe then inherit its privilege and do
+not issue a per-run `runas` request. Keep the elevated session limited to this
+workspace and close it when testing ends.
+
+The runner verifies that its parent is elevated and stops before launch when it
+is not. `-ElevateProbe` is retained only as an explicit fallback for recovery
+or historical reproduction and may display UAC. Do not use it for routine
+sponsor-assisted runs. Do not disable UAC, alter global consent policy, create a
+broad auto-elevation rule, or grant persistent administrative rights.
+
 ## Build and launch
 
 1. Build and smoke-test:
@@ -70,19 +84,20 @@ dump, instruction trace, or unrelated function sampling is enabled.
    .\artifacts\pre-m0\bin\m0_probe.exe --help
    ```
 
-2. Start the watcher before launching the game:
+2. Before sponsor involvement, the analyst opens PowerShell as Administrator,
+   changes to the workspace, builds/smoke-tests the probe, and starts the
+   watcher without `-ElevateProbe`:
 
    ```powershell
-   .\tools\m0_probe\run_probe.ps1 -ProbeProfile m0-rt-001 -MaxSeconds 300 -WaitForClientSeconds 600 -ElevateProbe
+   Set-Location -LiteralPath 'C:\Project\SFC-Modernize Engine'
+   .\tools\m0_probe\run_probe.ps1 -ProbeProfile m0-rt-001 -MaxSeconds 300 -WaitForClientSeconds 600
    ```
 
 3. Open SFCLauncher 2.1.0.22 manually and use the same configuration already
    demonstrated to reach gameplay. The runner does not choose or alter the
    renderer configuration.
-4. Approve the UAC prompt for `m0_probe.exe`. Elevation is required because
-   the launcher-created game process runs at higher integrity.
-5. Enter one tactical battle and exercise one camera or ship control.
-6. Exit the game normally once the geometry points saturate or the requested
+4. Enter one tactical battle and exercise one camera or ship control.
+5. Exit the game normally once the geometry points saturate or the requested
    event is complete.
 
 The runner may also target one unambiguous existing process with

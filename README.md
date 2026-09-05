@@ -4,9 +4,10 @@ This repository is the controlled engineering workspace for technical discovery
 and, after requirements review, possible rendering modernization of *Starfleet
 Command II: Orion Pirates Community Edition*.
 
-The capability requirements are not baselined. Existing wrappers, patching
-techniques, and community tools are evidence and candidate approaches—not
-requirements or architecture decisions.
+The governing capability requirements are the approved *Starfleet Command
+Rendering Modernization Capability Requirements* v1.0 (approved 2026-09-03).
+Existing wrappers, patching techniques, and community tools remain evidence and
+candidate approaches—not requirements or architecture decisions.
 
 ## Preservation boundary
 

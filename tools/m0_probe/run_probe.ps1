@@ -16,6 +16,19 @@ param(
 $ErrorActionPreference = "Stop"
 
 $toolRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
+Import-Module (Join-Path $toolRoot "ProbeRunnerPolicy.psm1") -Force
+
+$identity = [Security.Principal.WindowsIdentity]::GetCurrent()
+$principal = [Security.Principal.WindowsPrincipal]::new($identity)
+$isElevated = $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+$selfElevateProbe = Test-ProbeElevation `
+    -IsElevated $isElevated `
+    -ElevateProbeRequested ([bool]$ElevateProbe)
+
+if ($isElevated -and $ElevateProbe) {
+    Write-Warning "The parent shell is already elevated; inheriting its privilege without a second runas request."
+}
+
 $workspaceRoot = Resolve-Path (Join-Path $toolRoot "..\..")
 $probe = Join-Path $workspaceRoot "artifacts\pre-m0\bin\m0_probe.exe"
 
@@ -77,8 +90,8 @@ try {
 $startInfo = [System.Diagnostics.ProcessStartInfo]::new()
 $startInfo.FileName = $probe
 $startInfo.WorkingDirectory = $workspaceRoot
-$startInfo.UseShellExecute = [bool]$ElevateProbe
-if ($ElevateProbe) {
+$startInfo.UseShellExecute = $selfElevateProbe
+if ($selfElevateProbe) {
     $startInfo.Verb = "runas"
     $startInfo.WindowStyle = [System.Diagnostics.ProcessWindowStyle]::Hidden
 } else {
@@ -94,7 +107,7 @@ Write-Output "Enter a tactical scene, exercise one camera or ship control, then 
 Write-Output "Evidence log: $logPath"
 Write-Output "Module inventory: $modulePath"
 
-if ($ElevateProbe) {
+if ($selfElevateProbe) {
     while (Get-Process -Id $probeProcess.Id -ErrorAction SilentlyContinue) {
         Start-Sleep -Milliseconds 500
     }
