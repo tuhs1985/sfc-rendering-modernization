@@ -86,6 +86,15 @@ Direct injection remains a fallback only from a narrowly scoped already-elevated
 parent using `run_m1_increment_a.ps1 -Mode enabled`; do not generate an extra UAC
 prompt merely to use it.
 
+Where ordinary access cannot create the temporary proxy in the game directory,
+use `start_m1_enabled_session.ps1`. It verifies the frozen launcher, creates one
+scoped elevated parent, launches SFC, and waits inertly for the workspace-local
+`artifacts/m1/enabled-tactical-arm.signal`. Create that signal only when the
+sponsor reports tactical entry. The runner then injects directly into the exact
+PID and retains the component's automatic first-valid-ship gate. The signal is
+bounded by `ArmTimeoutSeconds` (600 seconds by default) and is removed on success
+or failure. This path adds no game-directory files.
+
 The runner waits for exactly one launcher-created `StarFleetOP.exe`. If more than
 one exists, stop and pass `-TargetPid` only after identifying the correct client.
 
@@ -158,6 +167,12 @@ modules, and once-per-second process telemetry for the bounded duration.
 Unbounded breakpoint or draw-call capture can generate multiple gigabytes rapidly.
 Never remove address filters or numeric bounds to obtain more frames. Any increase
 requires a revised probe definition and sponsor-visible rationale.
+
+The sponsor authorized a 10 GB absolute temporary-output ceiling on 2026-09-05,
+provided raw output is compressed or removed after analysis. This ceiling does
+not replace the probe-specific limits above and is not a capture target. Prefer
+sampling, counters, and early saturation; any probe needing more than its current
+limit must document the smaller bound it will actually enforce and its cleanup.
 
 ## Expected output and volume
 
