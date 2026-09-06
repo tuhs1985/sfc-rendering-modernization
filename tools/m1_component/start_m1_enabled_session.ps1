@@ -2,7 +2,12 @@ param(
     [ValidateRange(5, 2100)][int]$MaxSeconds = 300,
     [ValidateRange(30, 900)][int]$WaitForClientSeconds = 600,
     [ValidateRange(30, 900)][int]$WaitForExitSeconds = 600,
-    [ValidateRange(30, 900)][int]$ArmTimeoutSeconds = 600
+    [ValidateRange(30, 900)][int]$ArmTimeoutSeconds = 600,
+    [ValidateRange(1, 6000)][int]$MaxFrames = 120,
+    [ValidateRange(1, 100000)][int]$MaxEvents = 10000,
+    [ValidateRange(0, 8)][int]$GeometrySamplesPerOwnerFrame = 1,
+    [ValidateRange(0, 8)][int]$UncorrelatedGeometrySamplesPerFrame = 1,
+    [switch]$DisableGeometryHook
 )
 
 $ErrorActionPreference = 'Stop'
@@ -25,8 +30,13 @@ if (-not $isAdmin) {
         '-MaxSeconds', $MaxSeconds,
         '-WaitForClientSeconds', $WaitForClientSeconds,
         '-WaitForExitSeconds', $WaitForExitSeconds,
-        '-ArmTimeoutSeconds', $ArmTimeoutSeconds
+        '-ArmTimeoutSeconds', $ArmTimeoutSeconds,
+        '-MaxFrames', $MaxFrames,
+        '-MaxEvents', $MaxEvents,
+        '-GeometrySamplesPerOwnerFrame', $GeometrySamplesPerOwnerFrame,
+        '-UncorrelatedGeometrySamplesPerFrame', $UncorrelatedGeometrySamplesPerFrame
     ) -join ' '
+    if ($DisableGeometryHook) { $arguments += ' -DisableGeometryHook' }
     [void](Start-Process -FilePath $pwsh -ArgumentList $arguments -Verb RunAs `
         -WindowStyle Hidden)
     Write-Output "Elevated enabled workflow requested; tactical arm signal: $armSignal"
@@ -75,7 +85,11 @@ try {
 
     & $runner -Mode enabled -MaxSeconds $MaxSeconds -TargetPid $game.Id `
         -WaitForClientSeconds $WaitForClientSeconds `
-        -WaitForExitSeconds $WaitForExitSeconds
+        -WaitForExitSeconds $WaitForExitSeconds -MaxFrames $MaxFrames `
+        -MaxEvents $MaxEvents `
+        -GeometrySamplesPerOwnerFrame $GeometrySamplesPerOwnerFrame `
+        -UncorrelatedGeometrySamplesPerFrame $UncorrelatedGeometrySamplesPerFrame `
+        -DisableGeometryHook:$DisableGeometryHook
 } finally {
     Remove-Item -LiteralPath $armSignal -Force -ErrorAction SilentlyContinue
     Stop-Transcript | Out-Null

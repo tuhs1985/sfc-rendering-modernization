@@ -55,6 +55,9 @@ def analyze_run(run_dir: Path) -> dict:
                 "models": sorted(models),
                 "sources": sorted(sources),
                 "events": len(rows),
+                "first_frame": min(int(row["frame"]) for row in rows),
+                "last_frame": max(int(row["frame"]) for row in rows),
+                "retired": any(row["event"] == "owner_retired" for row in rows),
                 "correlated_geometry": sum(
                     row["event"] == "geometry_submit" and row["correlated"] == "1"
                     for row in rows
@@ -75,9 +78,9 @@ def analyze_run(run_dir: Path) -> dict:
 
     bounds = summary["limits"]
     bounded = (
-        summary["detailed_events"] <= bounds["max_events"] <= 10000
+        summary["detailed_events"] <= bounds["max_events"] <= 100000
         and summary["event_log_bytes"] <= bounds["hard_bytes"] <= 32 * 1024 * 1024
-        and bounds["max_frames"] <= 120
+        and bounds["max_frames"] <= 6000
         and bounds["max_owners"] <= 8
         and not summary["log_truncated"]
     )
@@ -98,11 +101,32 @@ def analyze_run(run_dir: Path) -> dict:
         and bounded
     )
 
+    ship_epochs: dict[str, set[int]] = defaultdict(set)
+    for chain in owner_chains:
+        for ship in chain["ships"]:
+            ship_epochs[ship].add(chain["owner_id"])
+    reappeared_ships = sorted(
+        ship for ship, epochs in ship_epochs.items() if len(epochs) > 1
+    )
+    coherent_chains = all(
+        len(chain["ships"]) <= 1 and len(chain["visuals"]) <= 1
+        and len(chain["models"]) <= 1 and len(chain["sources"]) <= 1
+        for chain in owner_chains
+    )
+    lifetime_confirmed = (
+        one_owner_confirmed
+        and summary["frames_observed"] > 2
+        and event_counts["owner_retired"] > 0
+        and bool(reappeared_ships)
+        and coherent_chains
+    )
+
     return {
         "schema": summary["schema"],
         "component_version": summary["component_version"],
         "result": (
-            "ONE_OWNER_INTEGRATION_CONFIRMED"
+            "MULTI_FRAME_LIFETIME_CONFIRMED"
+            if lifetime_confirmed else "ONE_OWNER_INTEGRATION_CONFIRMED"
             if one_owner_confirmed
             else "PARTIAL_OR_REVIEW_REQUIRED"
         ),
@@ -110,8 +134,16 @@ def analyze_run(run_dir: Path) -> dict:
         "owner_chains": owner_chains,
         "distinct_owner_epochs": len(owner_chains),
         "retirement_events": event_counts["owner_retired"],
+        "reappeared_ship_pointers": reappeared_ships,
+        "coherent_owner_chains": coherent_chains,
         "correlated_geometry": summary["correlated_geometry"],
         "uncorrelated_geometry": summary["uncorrelated_geometry"],
+        "sampled_correlated_geometry": summary.get(
+            "sampled_correlated_geometry", event_counts["geometry_submit"]
+        ),
+        "sampled_uncorrelated_geometry": summary.get(
+            "sampled_uncorrelated_geometry", 0
+        ),
         "known_exception_00509843": summary["known_exception_00509843"],
         "rejected_semantics": summary["rejected_semantics"],
         "vtable_mismatch_sequences": sorted(set(vtable_mismatches)),
@@ -135,6 +167,9 @@ def write_outputs(run_dir: Path, result: dict) -> tuple[Path, Path]:
         f"- Distinct owner epochs: {result['distinct_owner_epochs']}",
         f"- Correlated geometry events: {result['correlated_geometry']}",
         f"- Uncorrelated geometry events: {result['uncorrelated_geometry']}",
+        f"- Retained correlated/uncorrelated geometry samples: "
+        f"{result['sampled_correlated_geometry']} / "
+        f"{result['sampled_uncorrelated_geometry']}",
         f"- Known `0x00509843` exceptions: {result['known_exception_00509843']}",
         f"- Bounded output: {result['bounded']}",
         f"- Component/controller restoration: {result['hooks_restored_by_component']} / "
@@ -149,13 +184,18 @@ def write_outputs(run_dir: Path, result: dict) -> tuple[Path, Path]:
             f"visual {', '.join(chain['visuals']) or 'none'}; "
             f"Model0 {', '.join(chain['models']) or 'none'}; "
             f"source {', '.join(chain['sources']) or 'none'}; "
-            f"correlated geometry {chain['correlated_geometry']}"
+            f"frames {chain['first_frame']}-{chain['last_frame']}; "
+            f"retired {chain['retired']}; "
+            f"correlated geometry samples {chain['correlated_geometry']}"
         )
     lines += [
         "",
         "## Review notes",
         "",
         f"- Retirement events: {result['retirement_events']}",
+        f"- Reappeared ship pointers: "
+        f"{result['reappeared_ship_pointers'] or 'none'}",
+        f"- Coherent owner chains: {result['coherent_owner_chains']}",
         f"- Rejected semantic samples: {result['rejected_semantics']}",
         f"- Vtable mismatch sequences: {result['vtable_mismatch_sequences'] or 'none'}",
         "",

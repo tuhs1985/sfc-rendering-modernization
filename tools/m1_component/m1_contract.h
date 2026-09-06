@@ -6,6 +6,19 @@
 
 namespace sfc_m1 {
 
+template <typename UInt>
+inline bool should_sample_geometry(UInt frame, UInt& sample_frame,
+                                   UInt& samples_in_frame, UInt limit) {
+    if (!limit) return false;
+    if (sample_frame != frame) {
+        sample_frame = frame;
+        samples_in_frame = 0;
+    }
+    if (samples_in_frame >= limit) return false;
+    ++samples_in_frame;
+    return true;
+}
+
 struct OwnerObservation {
     std::uint32_t id = 0;
     bool first_seen = false;

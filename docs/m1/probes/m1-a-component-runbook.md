@@ -164,6 +164,19 @@ modules, and once-per-second process telemetry for the bounded duration.
 - Queues: fixed memory; no hook performs output I/O.
 - After detailed saturation: summary counters only.
 
+For `M1-A-RT-002`, component 0.2 counts every downstream geometry call but
+retains only the configured per-owner/per-frame and uncorrelated-per-frame
+samples. Its reviewed envelope is 6,000 scene epochs, 100,000 total retained
+events, one geometry sample per owner per epoch, one uncorrelated sample per
+epoch, 90 seconds, and the unchanged 32 MiB hard event-log stop. Semantic and
+lifetime events remain detailed.
+
+For stutter attribution, `-DisableGeometryHook` leaves `0x006AB410` unpatched
+while retaining the five semantic/lifetime hooks. The controller still checks
+the geometry address during final byte verification. This mode intentionally
+does not generate new downstream-correlation evidence; it must be interpreted
+with the already-confirmed `M1-A-RT-001/002` correlation.
+
 Unbounded breakpoint or draw-call capture can generate multiple gigabytes rapidly.
 Never remove address filters or numeric bounds to obtain more frames. Any increase
 requires a revised probe definition and sponsor-visible rationale.

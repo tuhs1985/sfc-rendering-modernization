@@ -11,6 +11,20 @@ param(
     [ValidateRange(30, 900)]
     [int]$WaitForExitSeconds = 600,
 
+    [ValidateRange(1, 6000)]
+    [int]$MaxFrames = 120,
+
+    [ValidateRange(1, 100000)]
+    [int]$MaxEvents = 10000,
+
+    [ValidateRange(0, 8)]
+    [int]$GeometrySamplesPerOwnerFrame = 1,
+
+    [ValidateRange(0, 8)]
+    [int]$UncorrelatedGeometrySamplesPerFrame = 1,
+
+    [switch]$DisableGeometryHook,
+
     [int]$TargetPid = 0,
 
     [switch]$ContinueAfterBurst
@@ -80,11 +94,14 @@ $metadata = [ordered]@{
     target_md5 = $observedMd5
     target_sha256 = $observedSha256
     max_seconds = $MaxSeconds
-    max_frames = 120
-    max_events = 10000
+    max_frames = $MaxFrames
+    max_events = $MaxEvents
     max_owners = 8
     warning_bytes = 16777216
     hard_bytes = 33554432
+    geometry_samples_per_owner_frame = $GeometrySamplesPerOwnerFrame
+    uncorrelated_geometry_samples_per_frame = $UncorrelatedGeometrySamplesPerFrame
+    geometry_hook_enabled = -not [bool]$DisableGeometryHook
     stop_on_burst = -not [bool]$ContinueAfterBurst
     component = if ($Mode -eq "enabled") { $component } else { $null }
     controller = if ($Mode -eq "enabled") { $controller } else { $null }
@@ -108,9 +125,12 @@ if ($Mode -eq "enabled") {
     @(
         "[m1]",
         "OutputDirectory=$runDir",
-        "MaxFrames=120",
-        "MaxEvents=10000",
+        "MaxFrames=$MaxFrames",
+        "MaxEvents=$MaxEvents",
         "MaxOwners=8",
+        "GeometrySamplesPerOwnerFrame=$GeometrySamplesPerOwnerFrame",
+        "UncorrelatedGeometrySamplesPerFrame=$UncorrelatedGeometrySamplesPerFrame",
+        "EnableGeometryHook=$(if ($DisableGeometryHook) { 0 } else { 1 })",
         "WarningBytes=16777216",
         "HardBytes=33554432"
     ) | Set-Content -LiteralPath $configPath -Encoding ascii

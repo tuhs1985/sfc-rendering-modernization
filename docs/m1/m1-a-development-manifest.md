@@ -115,5 +115,11 @@ and required no sponsor timestamp. The run retained 119 telemetry samples over
 files, and preserved both client hashes. The sponsor reported normal rendering,
 HUD, cursor, targeting, camera movement, and controls with no noted issues.
 
-The paired enabled result remains required before semantic integration can be
-adjudicated. This disabled result does not itself exercise the neutral component.
+Paired enabled runs `M1-A-RT-001/002/003` subsequently confirmed neutral semantic
+operation, two-owner differentiation, retirement/fresh reappearance, and prior
+downstream correlation. The `0x006AB410` diagnostic hook caused a reported
+3–5-second initial stutter while processing 32.4 million calls; the same semantic
+component without that optional hot hook produced no reported stutter across
+3,000 scene epochs. The semantic integration sub-gate is therefore PASS while M1
+remains CONTINUES. The geometry hook is diagnostic-only and disabled for routine
+semantic operation.

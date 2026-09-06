@@ -16,6 +16,17 @@ void require(bool condition, const char* message) {
 }  // namespace
 
 int main() {
+    std::uint32_t sample_frame = 0xFFFFFFFFu;
+    std::uint32_t samples = 0;
+    require(sfc_m1::should_sample_geometry(7u, sample_frame, samples, 1u),
+            "first geometry event in frame is sampled");
+    require(!sfc_m1::should_sample_geometry(7u, sample_frame, samples, 1u),
+            "geometry sample limit suppresses repeated events");
+    require(sfc_m1::should_sample_geometry(8u, sample_frame, samples, 1u),
+            "new frame resets geometry sample allowance");
+    require(!sfc_m1::should_sample_geometry(9u, sample_frame, samples, 0u),
+            "zero sample limit retains counters only");
+
     sfc_m1::OwnerTable<2> owners;
     auto first = owners.observe(0x1000, 0x2000, 1);
     require(first.id == 1 && first.first_seen && !first.overflow,

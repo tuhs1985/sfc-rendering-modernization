@@ -20,7 +20,7 @@ constexpr const char* kSchema = "m1.scene-gate.v1";
 constexpr const char* kComponentVersion = "0.1-gate";
 #else
 constexpr const char* kSchema = "m1.semantic.v1";
-constexpr const char* kComponentVersion = "0.1";
+constexpr const char* kComponentVersion = "0.2";
 #endif
 constexpr DWORD kImageBase = 0x00400000;
 constexpr DWORD kShipVtable = 0x00796F0C;
@@ -28,7 +28,7 @@ constexpr DWORD kVisualVtable = 0x007985A4;
 constexpr DWORD kModel0Vtable = 0x007983E8;
 constexpr DWORD kVisualMainlineReturn = 0x0042FDD5;
 constexpr DWORD kKnownExceptionReturn = 0x00509843;
-constexpr std::size_t kEventCapacity = 10000;
+constexpr std::size_t kEventCapacity = 100000;
 constexpr std::size_t kOwnerCapacity = 8;
 constexpr std::size_t kThreadCapacity = 8;
 
@@ -89,6 +89,8 @@ struct ThreadState {
     DWORD visual = 0;
     DWORD model0 = 0;
     DWORD source = 0;
+    DWORD geometry_sample_frame = 0xFFFFFFFFu;
+    DWORD geometry_samples_in_frame = 0;
     bool model_scope = false;
 };
 
@@ -110,6 +112,9 @@ struct Config {
     DWORD max_owners = 8;
     DWORD warning_bytes = 16u * 1024u * 1024u;
     DWORD hard_bytes = 32u * 1024u * 1024u;
+    DWORD geometry_samples_per_owner_frame = 1;
+    DWORD uncorrelated_geometry_samples_per_frame = 1;
+    bool enable_geometry_hook = true;
 };
 
 CRITICAL_SECTION g_lock;
@@ -127,6 +132,8 @@ volatile LONG g_frame = 0;
 volatile LONG g_counts[kEventKindCount]{};
 volatile LONG g_correlated_geometry = 0;
 volatile LONG g_uncorrelated_geometry = 0;
+volatile LONG g_sampled_correlated_geometry = 0;
+volatile LONG g_sampled_uncorrelated_geometry = 0;
 volatile LONG g_exception_509843 = 0;
 volatile LONG g_rejected_semantics = 0;
 volatile LONG g_owner_overflow = 0;
@@ -136,6 +143,8 @@ ULONGLONG g_start_tick = 0;
 ULONGLONG g_gate_tick = 0;
 HANDLE g_burst_event = nullptr;
 HMODULE g_self = nullptr;
+DWORD g_uncorrelated_sample_frame = 0xFFFFFFFFu;
+DWORD g_uncorrelated_samples_in_frame = 0;
 
 #ifdef M1_WINMM_PROXY
 volatile LONG g_proxy_started = 0;
@@ -455,6 +464,7 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
                     retired.owner_id = slot.id;
                     retired.ship = static_cast<DWORD>(slot.ship);
                     retired.visual = static_cast<DWORD>(slot.visual);
+                    InterlockedIncrement(&g_counts[kRetire]);
                     append_event_locked(retired);
                 });
             }
@@ -575,10 +585,23 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
             event.model0 = state->model0;
             event.source = state->source;
             InterlockedIncrement(&g_correlated_geometry);
+            if (sfc_m1::should_sample_geometry(static_cast<DWORD>(g_frame),
+                    state->geometry_sample_frame,
+                    state->geometry_samples_in_frame,
+                    g_config.geometry_samples_per_owner_frame)) {
+                InterlockedIncrement(&g_sampled_correlated_geometry);
+                append_event_locked(event);
+            }
         } else {
             InterlockedIncrement(&g_uncorrelated_geometry);
+            if (sfc_m1::should_sample_geometry(static_cast<DWORD>(g_frame),
+                    g_uncorrelated_sample_frame,
+                    g_uncorrelated_samples_in_frame,
+                    g_config.uncorrelated_geometry_samples_per_frame)) {
+                InterlockedIncrement(&g_sampled_uncorrelated_geometry);
+                append_event_locked(event);
+            }
         }
-        append_event_locked(event);
     } else if (kind == kVisualExit) {
         event.origin = 0x0042FDD5;
         if (state) {
@@ -778,9 +801,17 @@ bool load_config(const wchar_t* path) {
         16u * 1024u * 1024u, path);
     g_config.hard_bytes = GetPrivateProfileIntW(L"m1", L"HardBytes",
         32u * 1024u * 1024u, path);
-    return g_config.max_frames >= 1 && g_config.max_frames <= 120 &&
+    g_config.geometry_samples_per_owner_frame = GetPrivateProfileIntW(
+        L"m1", L"GeometrySamplesPerOwnerFrame", 1, path);
+    g_config.uncorrelated_geometry_samples_per_frame = GetPrivateProfileIntW(
+        L"m1", L"UncorrelatedGeometrySamplesPerFrame", 1, path);
+    g_config.enable_geometry_hook = GetPrivateProfileIntW(
+        L"m1", L"EnableGeometryHook", 1, path) != 0;
+    return g_config.max_frames >= 1 && g_config.max_frames <= 6000 &&
         g_config.max_events >= 1 && g_config.max_events <= kEventCapacity &&
         g_config.max_owners >= 1 && g_config.max_owners <= kOwnerCapacity &&
+        g_config.geometry_samples_per_owner_frame <= 8 &&
+        g_config.uncorrelated_geometry_samples_per_frame <= 8 &&
         g_config.warning_bytes <= g_config.hard_bytes &&
         g_config.hard_bytes <= 32u * 1024u * 1024u;
 }
@@ -844,6 +875,10 @@ bool write_outputs(bool hooks_restored) {
     summary << "  },\n"
             << "  \"correlated_geometry\": " << g_correlated_geometry << ",\n"
             << "  \"uncorrelated_geometry\": " << g_uncorrelated_geometry << ",\n"
+            << "  \"sampled_correlated_geometry\": " << g_sampled_correlated_geometry << ",\n"
+            << "  \"sampled_uncorrelated_geometry\": " << g_sampled_uncorrelated_geometry << ",\n"
+            << "  \"geometry_hook_enabled\": "
+            << (g_config.enable_geometry_hook ? "true" : "false") << ",\n"
             << "  \"known_exception_00509843\": " << g_exception_509843 << ",\n"
             << "  \"rejected_semantics\": " << g_rejected_semantics << ",\n"
             << "  \"owner_overflow\": " << g_owner_overflow << ",\n"
@@ -853,7 +888,11 @@ bool write_outputs(bool hooks_restored) {
             << "    \"max_events\": " << g_config.max_events << ",\n"
             << "    \"max_owners\": " << g_config.max_owners << ",\n"
             << "    \"warning_bytes\": " << g_config.warning_bytes << ",\n"
-            << "    \"hard_bytes\": " << g_config.hard_bytes << "\n"
+            << "    \"hard_bytes\": " << g_config.hard_bytes << ",\n"
+            << "    \"geometry_samples_per_owner_frame\": "
+            << g_config.geometry_samples_per_owner_frame << ",\n"
+            << "    \"uncorrelated_geometry_samples_per_frame\": "
+            << g_config.uncorrelated_geometry_samples_per_frame << "\n"
             << "  }\n"
             << "}\n";
     summary.close();
@@ -907,6 +946,8 @@ extern "C" DWORD WINAPI M1StartW(void* parameter) {
     if (!g_burst_event) return 3;
 
     for (Hook& hook : g_hooks) {
+        if (!g_config.enable_geometry_hook &&
+            std::strcmp(hook.name, "geometry_submit") == 0) continue;
         if (!prepare_hook(hook, module_base)) return 4;
     }
     assign_trampolines();
@@ -916,6 +957,8 @@ extern "C" DWORD WINAPI M1StartW(void* parameter) {
     if (!suspend_ok) return 5;
     bool installed = true;
     for (Hook& hook : g_hooks) {
+        if (!g_config.enable_geometry_hook &&
+            std::strcmp(hook.name, "geometry_submit") == 0) continue;
         if (!install_hook(hook, module_base)) {
             installed = false;
             break;
