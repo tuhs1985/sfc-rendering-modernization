@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "m1_contract.h"
+#include "m1_visual_tint.h"
 
 namespace {
 
@@ -20,7 +21,7 @@ constexpr const char* kSchema = "m1.scene-gate.v1";
 constexpr const char* kComponentVersion = "0.1-gate";
 #else
 constexpr const char* kSchema = "m1.semantic.v1";
-constexpr const char* kComponentVersion = "0.2";
+constexpr const char* kComponentVersion = "0.3";
 #endif
 constexpr DWORD kImageBase = 0x00400000;
 constexpr DWORD kShipVtable = 0x00796F0C;
@@ -80,6 +81,12 @@ struct EventRecord {
     DWORD lod_selected = 0;
     DWORD selected_child = 0;
     DWORD correlated = 0;
+    DWORD effective_source = 0;
+    DWORD tint_entries = 0;
+    DWORD tint_original_rgb = 0;
+    DWORD tint_applied = 0;
+    DWORD tint_restore = 0;
+    DWORD tint_elapsed_ms = 0;
 };
 
 struct ThreadState {
@@ -92,6 +99,8 @@ struct ThreadState {
     DWORD geometry_sample_frame = 0xFFFFFFFFu;
     DWORD geometry_samples_in_frame = 0;
     bool model_scope = false;
+    sfc_m1::TintSnapshot tint_snapshot;
+    sfc_m1::TintLease tint_lease;
 };
 
 struct Hook {
@@ -115,6 +124,9 @@ struct Config {
     DWORD geometry_samples_per_owner_frame = 1;
     DWORD uncorrelated_geometry_samples_per_frame = 1;
     bool enable_geometry_hook = true;
+    bool enable_visual_tint = false;
+    DWORD tint_delay_ms = 5000;
+    DWORD tint_duration_ms = 10000;
 };
 
 CRITICAL_SECTION g_lock;
@@ -139,9 +151,19 @@ volatile LONG g_rejected_semantics = 0;
 volatile LONG g_owner_overflow = 0;
 volatile LONG g_thread_overflow = 0;
 volatile LONG g_log_truncated = 0;
+volatile LONG g_tint_live = 0;
+volatile LONG g_tint_applied = 0;
+volatile LONG g_tint_restored = 0;
+volatile LONG g_tint_renderer_replaced = 0;
+volatile LONG g_tint_rejected = 0;
+volatile LONG g_tint_restore_failed = 0;
+volatile LONG g_tint_thread_mismatch = 0;
+DWORD g_tint_target_owner = 0;
+DWORD g_tint_target_thread = 0;
 ULONGLONG g_start_tick = 0;
 ULONGLONG g_gate_tick = 0;
 HANDLE g_burst_event = nullptr;
+HANDLE g_tactical_event = nullptr;
 HMODULE g_self = nullptr;
 DWORD g_uncorrelated_sample_frame = 0xFFFFFFFFu;
 DWORD g_uncorrelated_samples_in_frame = 0;
@@ -354,6 +376,27 @@ bool safe_read32(DWORD address, DWORD& value) {
     }
 }
 
+bool read_tint32(std::uint32_t address, std::uint32_t& value) {
+    DWORD word = 0;
+    const bool ok = safe_read32(address, word);
+    value = word;
+    return ok;
+}
+
+bool safe_copy(DWORD address, void* target, DWORD length) {
+    __try {
+        std::memcpy(target, reinterpret_cast<const void*>(address), length);
+        return true;
+    } __except (EXCEPTION_EXECUTE_HANDLER) { return false; }
+}
+
+bool safe_write32(DWORD address, DWORD value) {
+    __try {
+        *reinterpret_cast<DWORD*>(address) = value;
+        return true;
+    } __except (EXCEPTION_EXECUTE_HANDLER) { return false; }
+}
+
 DWORD snapshot_entry_esp(const DWORD* saved) {
     return saved[3] + sizeof(DWORD);
 }
@@ -427,9 +470,76 @@ DWORD observe_owner(DWORD ship, DWORD visual, bool& first_seen) {
     return observation.id;
 }
 
+DWORD restore_active_tint(ThreadState* state) {
+    if (!state || !state->tint_lease.active) return 0;
+    const auto result = sfc_m1::restore_tint_source(
+        state->tint_lease, read_tint32, safe_write32);
+    if (result == sfc_m1::TintRestore::Failed) {
+        InterlockedIncrement(&g_tint_restore_failed);
+        signal_saturation();
+    } else {
+        InterlockedDecrement(&g_tint_live);
+        if (result == sfc_m1::TintRestore::Restored)
+            InterlockedIncrement(&g_tint_restored);
+        else InterlockedIncrement(&g_tint_renderer_replaced);
+    }
+    return static_cast<DWORD>(result);
+}
+
+void maybe_apply_tint(ThreadState* state, EventRecord& event, const DWORD* saved) {
+    if (!g_running || !g_config.enable_visual_tint || !state || !event.owner_id) return;
+    if (!g_tint_target_owner) {
+        g_tint_target_owner = event.owner_id;
+        g_tint_target_thread = event.thread_id;
+    }
+    if (event.thread_id != g_tint_target_thread) {
+        InterlockedIncrement(&g_tint_thread_mismatch);
+        return;
+    }
+    if (event.owner_id != g_tint_target_owner || g_tint_restore_failed ||
+        g_tint_thread_mismatch ||
+        !detail_available() || !sfc_m1::tint_window(
+            GetTickCount64() - g_gate_tick, g_config.tint_delay_ms,
+            g_config.tint_duration_ms)) return;
+    DWORD manager_vtable = 0, count = 0, list = 0;
+    if (state->tint_lease.active ||
+        !safe_read32(event.manager, manager_vtable) || manager_vtable != 0x007B8D4C ||
+        !safe_read32(event.model0 + 0x10, count) ||
+        !safe_read32(event.model0 + 0x14, list) ||
+        !sfc_m1::prepare_tint_snapshot(event.source, count, list,
+            read_tint32, safe_copy, state->tint_snapshot)) {
+        InterlockedIncrement(&g_tint_rejected);
+        return;
+    }
+    const DWORD effective = reinterpret_cast<DWORD>(state->tint_snapshot.bytes.data());
+    const ULONGLONG tint_elapsed = GetTickCount64() - g_gate_tick;
+    if (!g_running || !sfc_m1::tint_window(tint_elapsed,
+            g_config.tint_delay_ms, g_config.tint_duration_ms)) return;
+    const DWORD source_argument = snapshot_entry_esp(saved) + 2 * sizeof(DWORD);
+    if (!safe_write32(source_argument, effective)) {
+        InterlockedIncrement(&g_tint_rejected);
+        return;
+    }
+    state->tint_lease = {event.manager, event.source, effective, true};
+    InterlockedIncrement(&g_tint_live);
+    InterlockedIncrement(&g_tint_applied);
+    event.effective_source = effective;
+    event.tint_entries = state->tint_snapshot.entries;
+    event.tint_original_rgb = state->tint_snapshot.original_rgb;
+    event.tint_applied = 1;
+    event.tint_elapsed_ms = static_cast<DWORD>(tint_elapsed);
+}
+
 extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
     InterlockedIncrement(&g_in_recorders);
     if (!g_running || kind >= kEventKindCount) {
+        // Stop blocks new substitutions but must leave the exit hook able to
+        // drain an original Model0 invocation already using our source copy.
+        if (kind == kVisualExit && g_tint_live) {
+            EnterCriticalSection(&g_lock);
+            restore_active_tint(thread_state(GetCurrentThreadId()));
+            LeaveCriticalSection(&g_lock);
+        }
         InterlockedDecrement(&g_in_recorders);
         return;
     }
@@ -485,6 +595,7 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
             if (InterlockedCompareExchange(&g_gate, 1, 0) == 0) {
                 g_gate_tick = GetTickCount64();
                 g_start_tick = g_gate_tick;
+                if (g_tactical_event) SetEvent(g_tactical_event);
             }
             bool first_seen = false;
             event.owner_id = observe_owner(event.ship, event.visual, first_seen);
@@ -565,6 +676,7 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
                     event.ship = static_cast<DWORD>(slot->ship);
                     state->ship = event.ship;
                 }
+                maybe_apply_tint(state, event, saved);
             } else {
                 state->model_scope = false;
                 state->model0 = 0;
@@ -605,6 +717,11 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
     } else if (kind == kVisualExit) {
         event.origin = 0x0042FDD5;
         if (state) {
+            if (state->tint_lease.active) {
+                event.manager = state->tint_lease.manager;
+                event.effective_source = state->tint_lease.effective;
+                event.tint_restore = restore_active_tint(state);
+            }
             event.owner_id = state->owner_id;
             event.ship = state->ship;
             event.visual = state->visual;
@@ -807,12 +924,23 @@ bool load_config(const wchar_t* path) {
         L"m1", L"UncorrelatedGeometrySamplesPerFrame", 1, path);
     g_config.enable_geometry_hook = GetPrivateProfileIntW(
         L"m1", L"EnableGeometryHook", 1, path) != 0;
+    g_config.enable_visual_tint = GetPrivateProfileIntW(
+        L"m1", L"EnableVisualTint", 0, path) != 0;
+    g_config.tint_delay_ms = GetPrivateProfileIntW(L"m1", L"TintDelayMs", 5000, path);
+    g_config.tint_duration_ms = GetPrivateProfileIntW(L"m1", L"TintDurationMs", 10000, path);
+#ifdef M1_GATE_ONLY
+    if (g_config.enable_visual_tint) return false;
+#endif
     return g_config.max_frames >= 1 && g_config.max_frames <= 6000 &&
         g_config.max_events >= 1 && g_config.max_events <= kEventCapacity &&
         g_config.max_owners >= 1 && g_config.max_owners <= kOwnerCapacity &&
         g_config.geometry_samples_per_owner_frame <= 8 &&
         g_config.uncorrelated_geometry_samples_per_frame <= 8 &&
+        (!g_config.enable_visual_tint || !g_config.enable_geometry_hook) &&
+        g_config.tint_delay_ms <= 10000 &&
+        g_config.tint_duration_ms >= 1 && g_config.tint_duration_ms <= 10000 &&
         g_config.warning_bytes <= g_config.hard_bytes &&
+        g_config.hard_bytes >= 1024 &&
         g_config.hard_bytes <= 32u * 1024u * 1024u;
 }
 
@@ -826,13 +954,15 @@ bool write_outputs(bool hooks_restored) {
     csv << "schema,component_version,elapsed_ms,sequence,frame,event,thread,origin,"
            "return_address,ecx,ebx,esi,arg1,arg2,arg3,arg4,owner_id,ship,visual,"
            "model0,manager,source,ship_vtable,visual_vtable,model0_vtable,"
-           "lod_count,lod_override,lod_selected,selected_child,correlated\n";
+           "lod_count,lod_override,lod_selected,selected_child,correlated,"
+           "effective_source,tint_entries,tint_original_rgb,tint_applied,tint_restore,tint_elapsed_ms\n";
     const LONG count = (g_event_count < 0) ? 0 :
         ((g_event_count > static_cast<LONG>(kEventCapacity)) ?
             static_cast<LONG>(kEventCapacity) : g_event_count);
     for (LONG i = 0; i < count; ++i) {
         const EventRecord& e = g_events[static_cast<std::size_t>(i)];
-        csv << kSchema << ',' << kComponentVersion << ',' << e.elapsed_ms << ','
+        std::ostringstream row;
+        row << kSchema << ',' << kComponentVersion << ',' << e.elapsed_ms << ','
             << e.sequence << ',' << e.frame << ',' << event_name(e.kind) << ','
             << e.thread_id << ',' << hex32(e.origin) << ','
             << hex32(e.return_address) << ',' << hex32(e.ecx) << ','
@@ -844,11 +974,16 @@ bool write_outputs(bool hooks_restored) {
             << hex32(e.visual_vtable) << ',' << hex32(e.model0_vtable) << ','
             << e.lod_count << ',' << static_cast<LONG>(e.lod_override) << ','
             << e.lod_selected << ',' << hex32(e.selected_child) << ','
-            << e.correlated << '\n';
-        if (csv.tellp() >= static_cast<std::streamoff>(g_config.hard_bytes)) {
+            << e.correlated << ',' << hex32(e.effective_source) << ','
+            << e.tint_entries << ',' << hex32(e.tint_original_rgb) << ','
+            << e.tint_applied << ',' << e.tint_restore << ',' << e.tint_elapsed_ms << '\n';
+        const std::string encoded = row.str();
+        if (csv.tellp() + static_cast<std::streamoff>(encoded.size()) >
+                static_cast<std::streamoff>(g_config.hard_bytes)) {
             InterlockedExchange(&g_log_truncated, 1);
             break;
         }
+        csv << encoded;
     }
     csv.flush();
     const auto csv_size = csv.tellp();
@@ -867,6 +1002,8 @@ bool write_outputs(bool hooks_restored) {
             << "  \"frames_observed\": " << g_frame << ",\n"
             << "  \"event_log_bytes\": " << static_cast<long long>(csv_size) << ",\n"
             << "  \"log_truncated\": " << (g_log_truncated ? "true" : "false") << ",\n"
+            << "  \"warning_threshold_exceeded\": "
+            << (csv_size >= static_cast<std::streamoff>(g_config.warning_bytes) ? "true" : "false") << ",\n"
             << "  \"counts\": {\n";
     for (DWORD kind = 0; kind < kEventKindCount; ++kind) {
         summary << "    \"" << event_name(kind) << "\": " << g_counts[kind]
@@ -879,6 +1016,19 @@ bool write_outputs(bool hooks_restored) {
             << "  \"sampled_uncorrelated_geometry\": " << g_sampled_uncorrelated_geometry << ",\n"
             << "  \"geometry_hook_enabled\": "
             << (g_config.enable_geometry_hook ? "true" : "false") << ",\n"
+            << "  \"visual_tint\": {\n"
+            << "    \"enabled\": " << (g_config.enable_visual_tint ? "true" : "false") << ",\n"
+            << "    \"target_owner_id\": " << g_tint_target_owner << ",\n"
+            << "    \"target_thread_id\": " << g_tint_target_thread << ",\n"
+            << "    \"thread_mismatch\": " << g_tint_thread_mismatch << ",\n"
+            << "    \"delay_ms\": " << g_config.tint_delay_ms << ",\n"
+            << "    \"duration_ms\": " << g_config.tint_duration_ms << ",\n"
+            << "    \"applied\": " << g_tint_applied << ",\n"
+            << "    \"restored\": " << g_tint_restored << ",\n"
+            << "    \"renderer_replaced\": " << g_tint_renderer_replaced << ",\n"
+            << "    \"rejected\": " << g_tint_rejected << ",\n"
+            << "    \"restore_failed\": " << g_tint_restore_failed << ",\n"
+            << "    \"active_scopes\": " << g_tint_live << "\n  },\n"
             << "  \"known_exception_00509843\": " << g_exception_509843 << ",\n"
             << "  \"rejected_semantics\": " << g_rejected_semantics << ",\n"
             << "  \"owner_overflow\": " << g_owner_overflow << ",\n"
@@ -944,6 +1094,10 @@ extern "C" DWORD WINAPI M1StartW(void* parameter) {
     event_name_stream << L"Local\\SFCM1BurstComplete_" << GetCurrentProcessId();
     g_burst_event = CreateEventW(nullptr, TRUE, FALSE, event_name_stream.str().c_str());
     if (!g_burst_event) return 3;
+    std::wostringstream tactical_name;
+    tactical_name << L"Local\\SFCM1TacticalGate_" << GetCurrentProcessId();
+    g_tactical_event = CreateEventW(nullptr, TRUE, FALSE, tactical_name.str().c_str());
+    if (!g_tactical_event) return 3;
 
     for (Hook& hook : g_hooks) {
         if (!g_config.enable_geometry_hook &&
@@ -974,8 +1128,8 @@ extern "C" DWORD WINAPI M1StartW(void* parameter) {
 extern "C" DWORD WINAPI M1Stop(void*) {
     if (!InterlockedExchange(&g_running, 0)) return 11;
     const ULONGLONG deadline = GetTickCount64() + 5000;
-    while (g_in_recorders && GetTickCount64() < deadline) Sleep(1);
-    if (g_in_recorders) return 12;
+    while ((g_in_recorders || g_tint_live) && GetTickCount64() < deadline) Sleep(1);
+    if (g_in_recorders || g_tint_live) return 12;
 
     const DWORD module_base = reinterpret_cast<DWORD>(GetModuleHandleW(nullptr));
     bool suspend_ok = false;
@@ -995,6 +1149,7 @@ BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, LPVOID) {
         InitializeCriticalSection(&g_lock);
     } else if (reason == DLL_PROCESS_DETACH) {
         if (g_burst_event) CloseHandle(g_burst_event);
+        if (g_tactical_event) CloseHandle(g_tactical_event);
         DeleteCriticalSection(&g_lock);
     }
     return TRUE;

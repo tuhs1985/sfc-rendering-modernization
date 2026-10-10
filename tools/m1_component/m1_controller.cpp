@@ -171,7 +171,8 @@ bool restored_bytes(HANDLE process) {
 void usage() {
     std::wcerr << L"Usage: m1_controller.exe --pid <pid> --dll <path> "
                   L"--config <path> [--max-seconds 300] [--stop-on-burst 0|1] "
-                  L"[--already-loaded 0|1] [--unload-after-stop 0|1]\n";
+                  L"[--already-loaded 0|1] [--unload-after-stop 0|1] "
+                  L"[--gate-timeout-seconds 0..900]\n";
 }
 
 }  // namespace
@@ -182,6 +183,7 @@ int wmain(int argc, wchar_t** argv) {
     bool stop_on_burst = true;
     bool already_loaded = false;
     bool unload_after_stop = false;
+    DWORD gate_timeout_seconds = 0;
     std::wstring dll_path;
     std::wstring config_path;
     for (int i = 1; i < argc; ++i) {
@@ -197,9 +199,11 @@ int wmain(int argc, wchar_t** argv) {
             already_loaded = _wtoi(argv[++i]) != 0;
         else if (arg == L"--unload-after-stop" && i + 1 < argc)
             unload_after_stop = _wtoi(argv[++i]) != 0;
+        else if (arg == L"--gate-timeout-seconds" && i + 1 < argc)
+            gate_timeout_seconds = _wtoi(argv[++i]);
         else { usage(); return 2; }
     }
-    if (!pid || dll_path.empty() || config_path.empty() || max_seconds < 1 ||
+    if (!pid || dll_path.empty() || config_path.empty() || gate_timeout_seconds > 900 || max_seconds < 1 ||
         max_seconds > 2100) {
         usage();
         return 2;
@@ -287,10 +291,23 @@ int wmain(int argc, wchar_t** argv) {
     }
 
     DWORD wait_result = WAIT_TIMEOUT;
-    if (stop_on_burst && burst) {
+    bool gate_ready = gate_timeout_seconds == 0;
+    if (gate_timeout_seconds && gate_timeout_seconds <= 900) {
+        std::wostringstream tactical_name;
+        tactical_name << L"Local\\SFCM1TacticalGate_" << pid;
+        HANDLE tactical = OpenEventW(SYNCHRONIZE, FALSE, tactical_name.str().c_str());
+        if (tactical) {
+            HANDLE gates[] = {process, tactical};
+            wait_result = WaitForMultipleObjects(2, gates, FALSE, gate_timeout_seconds * 1000);
+            gate_ready = wait_result == WAIT_OBJECT_0 + 1;
+            CloseHandle(tactical);
+        }
+        std::cout << "tactical_gate=" << (gate_ready ? "detected" : "not_detected") << "\n";
+    }
+    if (gate_ready && stop_on_burst && burst) {
         HANDLE waits[] = {process, burst};
         wait_result = WaitForMultipleObjects(2, waits, FALSE, max_seconds * 1000);
-    } else {
+    } else if (gate_ready) {
         wait_result = WaitForSingleObject(process, max_seconds * 1000);
     }
     if (wait_result == WAIT_OBJECT_0) {
@@ -301,7 +318,8 @@ int wmain(int argc, wchar_t** argv) {
         return 8;
     }
     std::cout << "stop_trigger="
-              << ((stop_on_burst && wait_result == WAIT_OBJECT_0 + 1) ?
+              << (!gate_ready ? "gate_timeout" :
+                  (stop_on_burst && wait_result == WAIT_OBJECT_0 + 1) ?
                     "detail_bound" : "duration") << "\n";
 
     DWORD stop_result = 0;
@@ -328,5 +346,5 @@ int wmain(int argc, wchar_t** argv) {
     if (burst) CloseHandle(burst);
     FreeLibrary(local_image);
     CloseHandle(process);
-    return restored && unloaded ? 0 : 10;
+    return !gate_ready ? 15 : restored && unloaded ? 0 : 10;
 }

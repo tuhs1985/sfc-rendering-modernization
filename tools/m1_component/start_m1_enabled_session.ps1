@@ -7,7 +7,10 @@ param(
     [ValidateRange(1, 100000)][int]$MaxEvents = 10000,
     [ValidateRange(0, 8)][int]$GeometrySamplesPerOwnerFrame = 1,
     [ValidateRange(0, 8)][int]$UncorrelatedGeometrySamplesPerFrame = 1,
-    [switch]$DisableGeometryHook
+    [switch]$DisableGeometryHook,
+    [switch]$EnableVisualTint,
+    [switch]$AutomaticArm,
+    [string]$PythonExecutable = 'C:\Users\rober\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -22,6 +25,12 @@ $pwsh = (Get-Process -Id $PID).Path
 $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
 $principal = [Security.Principal.WindowsPrincipal]::new($identity)
 $isAdmin = $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+if ($EnableVisualTint -and (-not $isAdmin -or -not $DisableGeometryHook)) {
+    throw 'Visual tint must inherit an elevated parent and keep the geometry hook disabled.'
+}
+if (-not (Test-Path -LiteralPath $PythonExecutable)) {
+    throw "Configured Python runtime was not found: $PythonExecutable"
+}
 
 if (-not $isAdmin) {
     $arguments = @(
@@ -37,6 +46,9 @@ if (-not $isAdmin) {
         '-UncorrelatedGeometrySamplesPerFrame', $UncorrelatedGeometrySamplesPerFrame
     ) -join ' '
     if ($DisableGeometryHook) { $arguments += ' -DisableGeometryHook' }
+    if ($EnableVisualTint) { $arguments += ' -EnableVisualTint' }
+    if ($AutomaticArm) { $arguments += ' -AutomaticArm' }
+    $arguments += (' -PythonExecutable "{0}"' -f $PythonExecutable)
     [void](Start-Process -FilePath $pwsh -ArgumentList $arguments -Verb RunAs `
         -WindowStyle Hidden)
     Write-Output "Elevated enabled workflow requested; tactical arm signal: $armSignal"
@@ -70,6 +82,7 @@ try {
     } while ((Get-Date) -lt $discoveryDeadline)
     if (-not $game) { throw 'Timed out waiting for SFC Launcher.' }
 
+    if (-not $AutomaticArm) {
     Write-Output "Client PID $($game.Id) found; waiting for tactical arm signal: $armSignal"
     $armDeadline = (Get-Date).AddSeconds($ArmTimeoutSeconds)
     do {
@@ -82,6 +95,7 @@ try {
     if (-not (Test-Path -LiteralPath $armSignal)) {
         throw 'Timed out waiting for the tactical arm signal.'
     }
+    }
 
     & $runner -Mode enabled -MaxSeconds $MaxSeconds -TargetPid $game.Id `
         -WaitForClientSeconds $WaitForClientSeconds `
@@ -89,7 +103,8 @@ try {
         -MaxEvents $MaxEvents `
         -GeometrySamplesPerOwnerFrame $GeometrySamplesPerOwnerFrame `
         -UncorrelatedGeometrySamplesPerFrame $UncorrelatedGeometrySamplesPerFrame `
-        -DisableGeometryHook:$DisableGeometryHook
+        -DisableGeometryHook:$DisableGeometryHook -EnableVisualTint:$EnableVisualTint `
+        -PythonExecutable $PythonExecutable
 } finally {
     Remove-Item -LiteralPath $armSignal -Force -ErrorAction SilentlyContinue
     Stop-Transcript | Out-Null

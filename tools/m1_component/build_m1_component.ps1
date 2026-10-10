@@ -30,6 +30,12 @@ $gateObject = Join-Path $outputDir "m1_gate.obj"
 $controllerObject = Join-Path $outputDir "m1_controller.obj"
 $testObject = Join-Path $outputDir "m1_contract_tests.obj"
 $proxyTestObject = Join-Path $outputDir "m1_proxy_forwarding_tests.obj"
+$tintTestSource = Join-Path $workspaceRoot "tests\m1_visual_tint_tests.cpp"
+$tintTestOutput = Join-Path $outputDir "m1_visual_tint_tests.exe"
+$tintTestObject = Join-Path $outputDir "m1_visual_tint_tests.obj"
+$tintComponentTestSource = Join-Path $workspaceRoot "tests\m1_visual_tint_component_tests.cpp"
+$tintComponentTestOutput = Join-Path $outputDir "m1_visual_tint_component_tests.exe"
+$tintComponentTestObject = Join-Path $outputDir "m1_visual_tint_component_tests.obj"
 
 $commands = @(
     ('cl /nologo /std:c++17 /EHsc /W4 /WX /O2 /MT /arch:SSE2 /LD /Fo:"{0}" /Fe:"{1}" "{2}" /link /DEF:"{3}"' -f $dllObject, $dllOutput, $dllSource, $definition),
@@ -37,7 +43,9 @@ $commands = @(
     ('cl /nologo /std:c++17 /EHsc /W4 /WX /O2 /MT /arch:SSE2 /DM1_GATE_ONLY /LD /Fo:"{0}" /Fe:"{1}" "{2}" /link /DEF:"{3}"' -f $gateObject, $gateOutput, $dllSource, $gateDefinition),
     ('cl /nologo /std:c++17 /EHsc /W4 /WX /O2 /MT /Fo:"{0}" /Fe:"{1}" "{2}" /link advapi32.lib' -f $controllerObject, $controllerOutput, $controllerSource),
     ('cl /nologo /std:c++17 /EHsc /W4 /WX /O2 /MT /Fo:"{0}" /Fe:"{1}" "{2}"' -f $testObject, $testOutput, $testSource),
-    ('cl /nologo /std:c++17 /EHsc /W4 /WX /O2 /MT /Fo:"{0}" /Fe:"{1}" "{2}"' -f $proxyTestObject, $proxyTestOutput, $proxyTestSource)
+    ('cl /nologo /std:c++17 /EHsc /W4 /WX /O2 /MT /Fo:"{0}" /Fe:"{1}" "{2}"' -f $proxyTestObject, $proxyTestOutput, $proxyTestSource),
+    ('cl /nologo /std:c++17 /EHsc /W4 /WX /O2 /MT /Fo:"{0}" /Fe:"{1}" "{2}"' -f $tintTestObject, $tintTestOutput, $tintTestSource),
+    ('cl /nologo /std:c++17 /EHsc /W4 /WX /O2 /MT /arch:SSE2 /Fo:"{0}" /Fe:"{1}" "{2}"' -f $tintComponentTestObject, $tintComponentTestOutput, $tintComponentTestSource)
 )
 
 foreach ($compile in $commands) {
@@ -52,6 +60,11 @@ foreach ($compile in $commands) {
 if ($LASTEXITCODE -ne 0) {
     throw "M1 contract regression test failed with exit code $LASTEXITCODE."
 }
+
+& $tintTestOutput
+if ($LASTEXITCODE -ne 0) { throw "M1 visual tint regression test failed." }
+& $tintComponentTestOutput
+if ($LASTEXITCODE -ne 0) { throw "M1 production tint lifecycle test failed." }
 
 & $proxyTestOutput $proxyOutput
 if ($LASTEXITCODE -ne 0) {
