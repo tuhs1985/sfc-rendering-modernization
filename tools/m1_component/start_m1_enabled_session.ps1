@@ -9,6 +9,8 @@ param(
     [ValidateRange(0, 8)][int]$UncorrelatedGeometrySamplesPerFrame = 1,
     [switch]$DisableGeometryHook,
     [switch]$EnableVisualTint,
+    [switch]$EnableShadingOff,
+    [switch]$ContinueAfterBurst,
     [switch]$AutomaticArm,
     [string]$PythonExecutable = 'C:\Users\rober\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe'
 )
@@ -25,8 +27,11 @@ $pwsh = (Get-Process -Id $PID).Path
 $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
 $principal = [Security.Principal.WindowsPrincipal]::new($identity)
 $isAdmin = $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-if ($EnableVisualTint -and (-not $isAdmin -or -not $DisableGeometryHook)) {
+if (($EnableVisualTint -or $EnableShadingOff) -and (-not $isAdmin -or -not $DisableGeometryHook)) {
     throw 'Visual tint must inherit an elevated parent and keep the geometry hook disabled.'
+}
+if ($EnableShadingOff -and ($EnableVisualTint -or -not $ContinueAfterBurst -or $MaxSeconds -lt 75 -or $MaxSeconds -gt 90)) {
+    throw 'Shading diagnostic requires no tint mode, ContinueAfterBurst and 75-90 seconds.'
 }
 if (-not (Test-Path -LiteralPath $PythonExecutable)) {
     throw "Configured Python runtime was not found: $PythonExecutable"
@@ -48,6 +53,7 @@ if (-not $isAdmin) {
     if ($DisableGeometryHook) { $arguments += ' -DisableGeometryHook' }
     if ($EnableVisualTint) { $arguments += ' -EnableVisualTint' }
     if ($AutomaticArm) { $arguments += ' -AutomaticArm' }
+    if ($ContinueAfterBurst) { $arguments += ' -ContinueAfterBurst' }
     $arguments += (' -PythonExecutable "{0}"' -f $PythonExecutable)
     [void](Start-Process -FilePath $pwsh -ArgumentList $arguments -Verb RunAs `
         -WindowStyle Hidden)
@@ -104,6 +110,7 @@ try {
         -GeometrySamplesPerOwnerFrame $GeometrySamplesPerOwnerFrame `
         -UncorrelatedGeometrySamplesPerFrame $UncorrelatedGeometrySamplesPerFrame `
         -DisableGeometryHook:$DisableGeometryHook -EnableVisualTint:$EnableVisualTint `
+        -EnableShadingOff:$EnableShadingOff -ContinueAfterBurst:$ContinueAfterBurst `
         -PythonExecutable $PythonExecutable
 } finally {
     Remove-Item -LiteralPath $armSignal -Force -ErrorAction SilentlyContinue

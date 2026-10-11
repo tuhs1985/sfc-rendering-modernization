@@ -45,7 +45,8 @@ $commands = @(
     ('cl /nologo /std:c++17 /EHsc /W4 /WX /O2 /MT /Fo:"{0}" /Fe:"{1}" "{2}"' -f $testObject, $testOutput, $testSource),
     ('cl /nologo /std:c++17 /EHsc /W4 /WX /O2 /MT /Fo:"{0}" /Fe:"{1}" "{2}"' -f $proxyTestObject, $proxyTestOutput, $proxyTestSource),
     ('cl /nologo /std:c++17 /EHsc /W4 /WX /O2 /MT /Fo:"{0}" /Fe:"{1}" "{2}"' -f $tintTestObject, $tintTestOutput, $tintTestSource),
-    ('cl /nologo /std:c++17 /EHsc /W4 /WX /O2 /MT /arch:SSE2 /Fo:"{0}" /Fe:"{1}" "{2}"' -f $tintComponentTestObject, $tintComponentTestOutput, $tintComponentTestSource)
+    ('cl /nologo /std:c++17 /EHsc /W4 /WX /O2 /MT /arch:SSE2 /Fo:"{0}" /Fe:"{1}" "{2}"' -f $tintComponentTestObject, $tintComponentTestOutput, $tintComponentTestSource),
+    ('cl /nologo /std:c++17 /EHsc /W4 /WX /O2 /MT /arch:SSE2 /Fo:"{0}\m1_shading_off_component_tests.obj" /Fe:"{0}\m1_shading_off_component_tests.exe" "{1}\tests\m1_shading_off_component_tests.cpp"' -f $outputDir, $workspaceRoot)
 )
 
 foreach ($compile in $commands) {
@@ -65,6 +66,8 @@ if ($LASTEXITCODE -ne 0) {
 if ($LASTEXITCODE -ne 0) { throw "M1 visual tint regression test failed." }
 & $tintComponentTestOutput
 if ($LASTEXITCODE -ne 0) { throw "M1 production tint lifecycle test failed." }
+& (Join-Path $outputDir 'm1_shading_off_component_tests.exe')
+if ($LASTEXITCODE -ne 0) { throw 'M1 production shading-off test failed.' }
 
 & $proxyTestOutput $proxyOutput
 if ($LASTEXITCODE -ne 0) {

@@ -1,6 +1,144 @@
 # SFC Modernize — model handoff
 
-## NEWEST / AUTHORITATIVE CHECKPOINT — 2026-10-10 visual tint runtime
+## NEWEST / AUTHORITATIVE CHECKPOINT — 2026-10-11 shading-off diagnostic prepared
+
+- **M1 CONTINUES**; semantic integration sub-gate PASS remains accepted. Formal
+  TRL4/CTE2/CTE3 are not complete. Sponsor approved diagnostic build preparation
+  and commit; **no game launch, injection or gameplay test in this run**.
+- Prepared component0.4 and [M1-C-RT-001](m1/probes/M1-C-RT-001.md): first validated
+  mainline owner epoch/thread, copied-source flags & ~0x06, never shared mode or
+  originals. Fixed gate schedule: 0–5s normal, 5–8s magenta identification cue,
+  8–13s normal, 13–58s inspected lighting off, 58–75s normal. May target enemy.
+  Entry `tools/m1_component/start_m1_shading_off_session.ps1` rebuilds/tests,
+  inherits elevated parent, refuses UAC, automatically gates; normal exit prompt.
+- Original flags, read-only manager mode+1ECC, referenced-lit entry counts and
+  owner/model/source/release samples survive semantic-log saturation in a fixed
+  96-slot array. Geometry hook **disabled**: previous high-call-count stutter
+  attribution remains STRONG HYPOTHESIS; semantic-only no-stutter evidence stands.
+  Source bits already clear or mode3 => no-op. Baked textures/secondary effects
+  remain; all-shading removal and benefit are not promised.
+- Existing five hook sites/ABI and source-lease restoration unchanged. Model0
+  `0042E4B2`, return `0042FDD5`, source argument2, manager+558; shader selector
+  branches `006AC18C`, `006AC2F8`; `00509843` untouched. No force-unload; storage
+  remains mapped until process exit. Retired owner never silently retargeted.
+- Offline **CONFIRMED**: x86 `/W4 /WX` build, five native test groups, sixteen
+  Python tests, 15 PowerShell parses, both PS5→PS7 shim fixtures, elevation and
+  process-discovery/exit tests. Production synthetic JSON→analyzer has no issues,
+  eight samples/3,847-byte summary; explicitly not runtime/visual evidence.
+  Runtime flag participation/appearance remain STRONG HYPOTHESIS; numeric normals/
+  transform space still unqualified. No useful raw evidence deleted.
+- Exact changed files, reproduction, hashes and validation caveat in
+  [run record](runs/2026-10-11-codex-m1-shading-off-preparation.md). All reviewed
+  pending CDD/C01 documents/harness and diagnostic code/tests are included in
+  authorized commit `Prepare bounded owner-specific shading-off diagnostic`,
+  parent `1dca452`; use Git log for the commit containing this checkpoint.
+  Generated binaries/captures stay ignored; final tracked/untracked tree clean.
+- Reference/installed client SHA256 and restored launcher unchanged; approved
+  CDD unchanged. No game/controller/launcher or persistent admin/server session
+  assumed. No helper invoked. Earlier "not implemented" checkpoints are history.
+- Do not redo seam discovery, enable the hot geometry hook, mutate global mode,
+  call an ineligible target success, or infer a modernization/TRL4 PASS from this
+  diagnostic. Approved C-02 enhancement remains separately gated.
+- **Exact next action:** obtain sponsor runtime readiness/authorization, then use
+  the prepared M1-C-RT-001 workflow for one two-ship normal/cue/off/normal test.
+
+## SUPERSEDED HISTORICAL CHECKPOINT — 2026-10-11 existing shading mapped
+
+- **M1 CONTINUES**. Sponsor resumed C-01 digging and suggested shading-off.
+  Offline packet/tests executed; no game launch/injection/visual intervention.
+- [Analysis](m1/m1-c01-existing-shading-analysis.md) identifies source-entry DWORD
+  flags bit0x04/0x02 selecting polygon/vertex lighting response in 006ABFC0;
+  clearing both in the proven owner-local copy bypasses inspected contributions
+  without RGB/global manager mutation. Static branches CONFIRMED; live participation
+  and flatter visible hull STRONG HYPOTHESIS. Not all shading/texture detail removed.
+- Five harness tests passed; 49,473-byte packet generated with pending qualification
+  status. New verify_m1_c01_shading_bytes.py matched 15 PE byte anchors. No guessed
+  float layout, full normal/transform qualification or enhancement quality claim.
+- Next diagnostic proposal: identify target before effect, 45-second normal/off/
+  normal comparison, original/masked lighting-bit counts, source release evidence.
+  Existing live flags may already be clear; no-op must not be called success.
+  No implementation/test build or runner prepared for this intervention yet.
+- [Run record](runs/2026-10-11-codex-m1-c01-existing-shading.md) preserves exact
+  commands, ranges, files/hashes and bounds; offline runbook updated. Packet ZIP
+  8,860 bytes verified; small raw retained, both ignored. Client/reference unchanged.
+- HEAD `1dca452`, HANDOFF modified plus ten untracked curated files; no staging/
+  commit. No persistent runtime/server/admin session assumed; geometry hook off.
+- Do not redo seam discovery, mutate shared mode, claim a color tweak as modernization,
+  or equate shading-off with CTE2/TRL4 PASS. Other passes/numeric spaces remain unknown.
+- **Exact next action:** obtain approval for bounded owner-specific shading-off
+  diagnostic contract/build preparation; no runtime execution from this checkpoint.
+
+## SUPERSEDED HISTORICAL CHECKPOINT — 2026-10-11 C-01 harness parked
+
+- **M1 CONTINUES**. Sponsor approved C-01 but explicitly ordered harness
+  development without execution. No SFC launch, injection, harness/test run,
+  enhancement implementation or new runtime evidence tonight.
+- Prepared `tools/m1_component/prepare_m1_c01_packet.py` and
+  `tests/test_prepare_m1_c01_packet.py`; [runbook](m1/probes/M1-C01-OFFLINE-001.md)
+  contains exact CLI/tool/limits/expected output/cleanup. Offline-only: exact-build
+  static windows and historical owner CSV; no game memory access or guessed
+  normal/transform fields. Output must stay INPUT_QUALIFICATION_PENDING.
+- [Run record](runs/2026-10-11-codex-m1-c01-harness-preparation.md) records files,
+  baseline/commands and limitations. Increment C now records limited approval;
+  C-02 still requires qualified contract and separate sponsor approval.
+- Validation only syntax AST, doc links/whitespace and Git status; functional
+  regression suite authored but intentionally unexecuted. Do not report runtime-
+  ready or infer normals/space/lighting from the existence of a packet harness.
+- No persistent tool/server/session. No client/reference modification; diagnostic
+  geometry hook remains off. Previous visual proof and CDD source/hash unchanged.
+- Tree: HANDOFF modified plus seven untracked planning/harness/test/runbook/records,
+  unstaged/uncommitted, HEAD `1dca452`. Earlier work/history preserved.
+- **Exact next action:** after sponsor allows execution, run the prepared offline
+  tests/harness and adjudicate the selected instructions; no gameplay needed yet.
+
+## SUPERSEDED HISTORICAL CHECKPOINT — 2026-10-10 CDD reconciliation
+
+- **M1 CONTINUES**; proofs at `1dca452` unchanged. Planning only; no code/runtime.
+- Approved CDD v1.0 accessible at sponsor's OneDrive/Obsidian path; exact path and
+  hash in [revised draft](m1/m1-c-cte23-increment-plan.md) and
+  [run record](runs/2026-10-10-codex-m1-cdd-reconciliation.md). Source untouched.
+- RGB-only enhancement candidate rejected by CDD cosmetic-uplift exclusion;
+  magenta still valid control proof. Next proposal C-01: qualify geometry-aware
+  hull shading inputs in known Model0/prep/transform path. Normals/space,
+  transform numeric layout, source sharing/legacy lighting unknown; benefit
+  **SPECULATIVE**. No final renderer or broad material investigation selected.
+- Draft for sponsor review; C-01 analysis approval first, implementation only
+  after qualified contract and separate C-02 approval. Three actual proposed
+  CDD classes: close ship, multiple ships, camera movement. Do not confuse TRL4
+  gates with full KPP thresholds/KSA1 missions or complete KPP4 coverage.
+- Files changed: draft and HANDOFF, new reconciliation record; prior planning
+  record and superseded draft reasoning preserved. Doc links/whitespace/status,
+  original CDD hash checked; no tool/server/runtime session to preserve.
+- HEAD `1dca452`, HANDOFF modified and three planning/run docs untracked,
+  unstaged/uncommitted. Governing approved M1 plan and requirements unchanged.
+- **Exact next action:** sponsor adjudicates C-01 bounded input qualification;
+  do not begin visual implementation from the draft.
+
+## SUPERSEDED HISTORICAL CHECKPOINT — 2026-10-10 next-increment planning
+
+- **M1 CONTINUES**; committed semantic/visual-control evidence at `1dca452`
+  unchanged. This run authorized planning only; no new rendering code/runtime.
+- Created [conditional CTE-2/CTE-3 draft](m1/m1-c-cte23-increment-plan.md) and
+  [run record](runs/2026-10-10-codex-m1-cte23-planning.md). Approved M1 plan
+  remains unchanged. Files changed: those two new docs and this HANDOFF only.
+- **CONFIRMED availability gap:** exact approved CDD v1.0 is not present in
+  repository; external source path unavailable, as already noted historically.
+  Requested sponsor copy/path. Do not infer VMES classes or visual thresholds.
+- Provisional cheapest candidate: owner-local copied-source RGB response mapping;
+  beneficial enhancement is **SPECULATIVE**, not another magenta success claim.
+  Existing white source sample may make tonal remapping useless. CDD eligibility
+  and visible benefit must qualify it; otherwise reject without broadening scope.
+- Remaining formal evidence: actual CTE-2/CTE-3 outcome, three prescribed VMES
+  classes, continuous/repeated mission, actual frame-time and memory telemetry.
+  No measurement tool adopted; no hidden administrative/runtime session needed.
+- Validation: local doc links/whitespace and Git status/diff; no code test/run
+  needed. Three documentation changes only, unstaged/uncommitted, HEAD `1dca452`.
+- Do not blindly redo seam/tint discovery, start candidate implementation,
+  name arbitrary VMES classes, or reinterpret current proof as formal TRL4.
+- **Exact next action:** read sponsor-supplied approved CDD v1.0 and resolve
+  draft gate C-00; finalize for sponsor approval before implementation.
+
+## SUPERSEDED HISTORICAL CHECKPOINT — 2026-10-10 visual tint runtime
 
 - **M1 CONTINUES**; semantic sub-gate remains PASS, not formal TRL 4 completion.
   Bounded reversible visual-control proof demonstrated: sponsor saw Klingon

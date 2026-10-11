@@ -21,7 +21,7 @@ constexpr const char* kSchema = "m1.scene-gate.v1";
 constexpr const char* kComponentVersion = "0.1-gate";
 #else
 constexpr const char* kSchema = "m1.semantic.v1";
-constexpr const char* kComponentVersion = "0.3";
+constexpr const char* kComponentVersion = "0.4";
 #endif
 constexpr DWORD kImageBase = 0x00400000;
 constexpr DWORD kShipVtable = 0x00796F0C;
@@ -101,6 +101,8 @@ struct ThreadState {
     bool model_scope = false;
     sfc_m1::TintSnapshot tint_snapshot;
     sfc_m1::TintLease tint_lease;
+    int shading_sample = -1;
+    DWORD shading_lease_phase = 0;
 };
 
 struct Hook {
@@ -125,6 +127,7 @@ struct Config {
     DWORD uncorrelated_geometry_samples_per_frame = 1;
     bool enable_geometry_hook = true;
     bool enable_visual_tint = false;
+    bool enable_shading_off = false;
     DWORD tint_delay_ms = 5000;
     DWORD tint_duration_ms = 10000;
 };
@@ -160,6 +163,22 @@ volatile LONG g_tint_restore_failed = 0;
 volatile LONG g_tint_thread_mismatch = 0;
 DWORD g_tint_target_owner = 0;
 DWORD g_tint_target_thread = 0;
+struct ShadingPhaseStats {
+    ULONGLONG observed = 0;
+    ULONGLONG eligible = 0;
+    ULONGLONG applied = 0;
+    ULONGLONG released = 0;
+};
+struct ShadingSample {
+    DWORD elapsed_ms = 0, phase = 0, owner = 0, ship = 0, visual = 0;
+    DWORD model0 = 0, source = 0, effective = 0, flags = 0, effective_flags = 0;
+    DWORD lit_entries = 0, manager_mode = 0, applied = 0, restore = 0;
+};
+std::array<ShadingPhaseStats, 5> g_shading_phases{};
+std::array<ShadingSample, 96> g_shading_samples{};
+DWORD g_shading_sample_count = 0;
+ULONGLONG g_shading_sample_second = ~ULONGLONG(0);
+DWORD g_shading_last_phase = 5;
 ULONGLONG g_start_tick = 0;
 ULONGLONG g_gate_tick = 0;
 HANDLE g_burst_event = nullptr;
@@ -482,12 +501,21 @@ DWORD restore_active_tint(ThreadState* state) {
         if (result == sfc_m1::TintRestore::Restored)
             InterlockedIncrement(&g_tint_restored);
         else InterlockedIncrement(&g_tint_renderer_replaced);
+        if (g_config.enable_shading_off) {
+            ++g_shading_phases[state->shading_lease_phase].released;
+        }
+    }
+    if (state->shading_sample >= 0) {
+        g_shading_samples[static_cast<std::size_t>(state->shading_sample)].restore =
+            static_cast<DWORD>(result);
+        state->shading_sample = -1;
     }
     return static_cast<DWORD>(result);
 }
 
 void maybe_apply_tint(ThreadState* state, EventRecord& event, const DWORD* saved) {
-    if (!g_running || !g_config.enable_visual_tint || !state || !event.owner_id) return;
+    if (!g_running || (!g_config.enable_visual_tint && !g_config.enable_shading_off) ||
+        !state || !event.owner_id) return;
     if (!g_tint_target_owner) {
         g_tint_target_owner = event.owner_id;
         g_tint_target_thread = event.thread_id;
@@ -497,30 +525,77 @@ void maybe_apply_tint(ThreadState* state, EventRecord& event, const DWORD* saved
         return;
     }
     if (event.owner_id != g_tint_target_owner || g_tint_restore_failed ||
-        g_tint_thread_mismatch ||
-        !detail_available() || !sfc_m1::tint_window(
-            GetTickCount64() - g_gate_tick, g_config.tint_delay_ms,
-            g_config.tint_duration_ms)) return;
-    DWORD manager_vtable = 0, count = 0, list = 0;
+        g_tint_thread_mismatch) return;
+    const ULONGLONG elapsed = GetTickCount64() - g_gate_tick;
+    const DWORD phase = sfc_m1::shading_phase(elapsed);
+    const bool shading = g_config.enable_shading_off;
+    if (!shading && (!detail_available() || !sfc_m1::tint_window(
+            elapsed, g_config.tint_delay_ms, g_config.tint_duration_ms))) return;
+    // Shading diagnostic duration is independent of semantic detail saturation.
+    // Its evidence is a fixed 96-slot, one-per-second/phase-change sample array.
+    bool sample = shading && g_shading_sample_count < g_shading_samples.size() &&
+        (elapsed / 1000 != g_shading_sample_second || phase != g_shading_last_phase);
+    if (shading) ++g_shading_phases[phase].observed;
+    const bool intervention = !shading || phase == 1 || phase == 3;
+    if (!intervention && !sample) return;
+    const auto modification = !shading || phase == 1 ?
+        sfc_m1::SourceModification::Magenta : phase == 3 ?
+        sfc_m1::SourceModification::ShadingOff : sfc_m1::SourceModification::Observe;
+    DWORD manager_vtable = 0, count = 0, list = 0, manager_mode = 0;
     if (state->tint_lease.active ||
         !safe_read32(event.manager, manager_vtable) || manager_vtable != 0x007B8D4C ||
+        (shading && !safe_read32(event.manager + 0x1ECC, manager_mode)) ||
         !safe_read32(event.model0 + 0x10, count) ||
         !safe_read32(event.model0 + 0x14, list) ||
         !sfc_m1::prepare_tint_snapshot(event.source, count, list,
-            read_tint32, safe_copy, state->tint_snapshot)) {
+            read_tint32, safe_copy, state->tint_snapshot, modification)) {
         InterlockedIncrement(&g_tint_rejected);
         return;
     }
     const DWORD effective = reinterpret_cast<DWORD>(state->tint_snapshot.bytes.data());
     const ULONGLONG tint_elapsed = GetTickCount64() - g_gate_tick;
-    if (!g_running || !sfc_m1::tint_window(tint_elapsed,
-            g_config.tint_delay_ms, g_config.tint_duration_ms)) return;
+    if (!g_running || (shading ? sfc_m1::shading_phase(tint_elapsed) != phase :
+        !sfc_m1::tint_window(tint_elapsed,
+            g_config.tint_delay_ms, g_config.tint_duration_ms))) return;
+    // Preserve the first actually lighting-eligible source, even when the
+    // first mesh sampled in this second happened to be already unlit.
+    const bool eligible = state->tint_snapshot.lit_entries && manager_mode != 3;
+    if (shading && phase == 3 && eligible &&
+        !g_shading_phases[phase].eligible && g_shading_sample_count < g_shading_samples.size())
+        sample = true;
+    int sample_index = -1;
+    if (sample) {
+        sample_index = static_cast<int>(g_shading_sample_count++);
+        auto& entry = g_shading_samples[static_cast<std::size_t>(sample_index)];
+        entry.elapsed_ms = static_cast<DWORD>(tint_elapsed);
+        entry.phase = phase; entry.owner = event.owner_id; entry.ship = event.ship;
+        entry.visual = event.visual; entry.model0 = event.model0; entry.source = event.source;
+        entry.flags = state->tint_snapshot.original_flags;
+        entry.effective_flags = entry.flags;
+        entry.lit_entries = state->tint_snapshot.lit_entries;
+        entry.manager_mode = manager_mode;
+        g_shading_sample_second = elapsed / 1000;
+        g_shading_last_phase = phase;
+    }
+    if (shading && phase == 3 && eligible)
+        ++g_shading_phases[phase].eligible;
+    // Already-unlit data is a documented no-op, not a successful intervention.
+    if (!intervention || (shading && phase == 3 && !eligible)) return;
     const DWORD source_argument = snapshot_entry_esp(saved) + 2 * sizeof(DWORD);
     if (!safe_write32(source_argument, effective)) {
         InterlockedIncrement(&g_tint_rejected);
         return;
     }
     state->tint_lease = {event.manager, event.source, effective, true};
+    state->shading_lease_phase = phase;
+    state->shading_sample = sample_index;
+    if (shading) ++g_shading_phases[phase].applied;
+    if (sample_index >= 0) {
+        auto& entry = g_shading_samples[static_cast<std::size_t>(sample_index)];
+        entry.applied = 1; entry.effective = effective;
+        std::memcpy(&entry.effective_flags, state->tint_snapshot.bytes.data() +
+            state->tint_snapshot.sample_index * sfc_m1::kTintSourceStride, 4);
+    }
     InterlockedIncrement(&g_tint_live);
     InterlockedIncrement(&g_tint_applied);
     event.effective_source = effective;
@@ -926,10 +1001,12 @@ bool load_config(const wchar_t* path) {
         L"m1", L"EnableGeometryHook", 1, path) != 0;
     g_config.enable_visual_tint = GetPrivateProfileIntW(
         L"m1", L"EnableVisualTint", 0, path) != 0;
+    g_config.enable_shading_off = GetPrivateProfileIntW(
+        L"m1", L"EnableShadingOff", 0, path) != 0;
     g_config.tint_delay_ms = GetPrivateProfileIntW(L"m1", L"TintDelayMs", 5000, path);
     g_config.tint_duration_ms = GetPrivateProfileIntW(L"m1", L"TintDurationMs", 10000, path);
 #ifdef M1_GATE_ONLY
-    if (g_config.enable_visual_tint) return false;
+    if (g_config.enable_visual_tint || g_config.enable_shading_off) return false;
 #endif
     return g_config.max_frames >= 1 && g_config.max_frames <= 6000 &&
         g_config.max_events >= 1 && g_config.max_events <= kEventCapacity &&
@@ -937,6 +1014,8 @@ bool load_config(const wchar_t* path) {
         g_config.geometry_samples_per_owner_frame <= 8 &&
         g_config.uncorrelated_geometry_samples_per_frame <= 8 &&
         (!g_config.enable_visual_tint || !g_config.enable_geometry_hook) &&
+        (!g_config.enable_shading_off ||
+            (!g_config.enable_geometry_hook && !g_config.enable_visual_tint)) &&
         g_config.tint_delay_ms <= 10000 &&
         g_config.tint_duration_ms >= 1 && g_config.tint_duration_ms <= 10000 &&
         g_config.warning_bytes <= g_config.hard_bytes &&
@@ -1029,6 +1108,33 @@ bool write_outputs(bool hooks_restored) {
             << "    \"rejected\": " << g_tint_rejected << ",\n"
             << "    \"restore_failed\": " << g_tint_restore_failed << ",\n"
             << "    \"active_scopes\": " << g_tint_live << "\n  },\n"
+            << "  \"shading_off\": {\n"
+            << "    \"enabled\": " << (g_config.enable_shading_off ? "true" : "false") << ",\n"
+            << "    \"sample_capacity\": 96,\n"
+            << "    \"phases\": [\n";
+    for (std::size_t i = 0; i < g_shading_phases.size(); ++i) {
+        const auto& phase = g_shading_phases[i];
+        summary << "      {\"phase\":" << i << ",\"observed\":" << phase.observed
+            << ",\"eligible\":" << phase.eligible << ",\"applied\":" << phase.applied
+            << ",\"released\":" << phase.released << "}"
+            << (i + 1 == g_shading_phases.size() ? "\n" : ",\n");
+    }
+    summary << "    ],\n    \"samples\": [\n";
+    for (DWORD i = 0; i < g_shading_sample_count; ++i) {
+        const auto& sample = g_shading_samples[i];
+        summary << "      {\"elapsed_ms\":" << sample.elapsed_ms
+            << ",\"phase\":" << sample.phase << ",\"owner\":" << sample.owner
+            << ",\"ship\":\"" << hex32(sample.ship) << "\",\"visual\":\""
+            << hex32(sample.visual) << "\",\"model0\":\"" << hex32(sample.model0)
+            << "\",\"source\":\"" << hex32(sample.source) << "\",\"effective\":\""
+            << hex32(sample.effective) << "\",\"flags\":" << sample.flags
+            << ",\"effective_flags\":" << sample.effective_flags
+            << ",\"lit_entries\":" << sample.lit_entries
+            << ",\"manager_mode\":" << sample.manager_mode
+            << ",\"applied\":" << sample.applied << ",\"restore\":" << sample.restore << "}"
+            << (i + 1 == g_shading_sample_count ? "\n" : ",\n");
+    }
+    summary << "    ]\n  },\n"
             << "  \"known_exception_00509843\": " << g_exception_509843 << ",\n"
             << "  \"rejected_semantics\": " << g_rejected_semantics << ",\n"
             << "  \"owner_overflow\": " << g_owner_overflow << ",\n"

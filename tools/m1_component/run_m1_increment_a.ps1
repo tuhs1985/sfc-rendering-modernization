@@ -26,6 +26,7 @@ param(
     [switch]$DisableGeometryHook,
 
     [switch]$EnableVisualTint,
+    [switch]$EnableShadingOff,
 
     [ValidateRange(30, 900)][int]$GateTimeoutSeconds = 600,
 
@@ -37,6 +38,10 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+if ($EnableShadingOff -and ($EnableVisualTint -or $Mode -ne 'enabled' -or
+    -not $DisableGeometryHook -or -not $ContinueAfterBurst -or $MaxSeconds -lt 75 -or $MaxSeconds -gt 90)) {
+    throw 'Shading diagnostic requires enabled mode, geometry off, no tint mode, ContinueAfterBurst and 75-90 seconds.'
+}
 if ($EnableVisualTint -and ($Mode -ne 'enabled' -or -not $DisableGeometryHook)) {
     throw 'Visual tint requires enabled mode with the geometry hook disabled.'
 }
@@ -97,7 +102,7 @@ $runDir = Join-Path $workspaceRoot "artifacts\m1\runs\$stamp-$Mode"
 New-Item -ItemType Directory -Force -Path $runDir | Out-Null
 
 $metadata = [ordered]@{
-    probe_id = if ($EnableVisualTint) { 'M1-B-RT-001' } elseif ($Mode -eq "enabled") { "M1-A-RT-001" } else { "M1-A-BASELINE-001" }
+    probe_id = if ($EnableShadingOff) { 'M1-C-RT-001' } elseif ($EnableVisualTint) { 'M1-B-RT-001' } elseif ($Mode -eq "enabled") { "M1-A-RT-001" } else { "M1-A-BASELINE-001" }
     mode = $Mode
     started = (Get-Date).ToString("o")
     target_pid = $game.Id
@@ -115,11 +120,14 @@ $metadata = [ordered]@{
     uncorrelated_geometry_samples_per_frame = $UncorrelatedGeometrySamplesPerFrame
     geometry_hook_enabled = -not [bool]$DisableGeometryHook
     visual_tint_enabled = [bool]$EnableVisualTint
+    shading_off_enabled = [bool]$EnableShadingOff
+    shading_phase_boundaries_ms = @(0, 5000, 8000, 13000, 58000)
     tint_delay_ms = 5000
     tint_duration_ms = 10000
-    gate_timeout_seconds = if ($EnableVisualTint) { $GateTimeoutSeconds } else { 0 }
+    gate_timeout_seconds = if ($EnableVisualTint -or $EnableShadingOff) { $GateTimeoutSeconds } else { 0 }
     python_executable = $PythonExecutable
     component_sha256 = if ($Mode -eq 'enabled') { (Get-FileHash -LiteralPath $component -Algorithm SHA256).Hash } else { $null }
+    controller_sha256 = if ($Mode -eq 'enabled') { (Get-FileHash -LiteralPath $controller -Algorithm SHA256).Hash } else { $null }
     stop_on_burst = -not [bool]$ContinueAfterBurst
     component = if ($Mode -eq "enabled") { $component } else { $null }
     controller = if ($Mode -eq "enabled") { $controller } else { $null }
@@ -150,6 +158,7 @@ if ($Mode -eq "enabled") {
         "UncorrelatedGeometrySamplesPerFrame=$UncorrelatedGeometrySamplesPerFrame",
         "EnableGeometryHook=$(if ($DisableGeometryHook) { 0 } else { 1 })",
         "EnableVisualTint=$(if ($EnableVisualTint) { 1 } else { 0 })",
+        "EnableShadingOff=$(if ($EnableShadingOff) { 1 } else { 0 })",
         "TintDelayMs=5000",
         "TintDurationMs=10000",
         "WarningBytes=16777216",
@@ -163,7 +172,7 @@ if ($Mode -eq "enabled") {
         "--max-seconds", $MaxSeconds,
         "--stop-on-burst", $(if ($ContinueAfterBurst) { 0 } else { 1 })
     )
-    if ($EnableVisualTint) { $controllerArgs += @('--gate-timeout-seconds', $GateTimeoutSeconds) }
+    if ($EnableVisualTint -or $EnableShadingOff) { $controllerArgs += @('--gate-timeout-seconds', $GateTimeoutSeconds) }
     $startInfo = [System.Diagnostics.ProcessStartInfo]::new()
     $startInfo.FileName = $controller
     $startInfo.WorkingDirectory = $workspaceRoot
@@ -178,7 +187,7 @@ if ($Mode -eq "enabled") {
 }
 
 $sampleStart = Get-Date
-$totalEnvelopeSeconds = $MaxSeconds + $(if ($EnableVisualTint) { $GateTimeoutSeconds } else { 0 })
+$totalEnvelopeSeconds = $MaxSeconds + $(if ($EnableVisualTint -or $EnableShadingOff) { $GateTimeoutSeconds } else { 0 })
 Write-Output "Client verified (PID $($game.Id)). Recording up to $MaxSeconds seconds: $runDir"
 while (-not $game.HasExited) {
     $elapsed = ((Get-Date) - $sampleStart).TotalSeconds
@@ -207,6 +216,10 @@ if ($Mode -eq "enabled") {
     if ($EnableVisualTint) {
         & $PythonExecutable (Join-Path $toolRoot 'analyze_m1_visual_tint.py') $runDir
         if ($LASTEXITCODE -ne 0) { throw 'Visual tint evidence analyzer failed.' }
+    }
+    if ($EnableShadingOff) {
+        & $PythonExecutable (Join-Path $toolRoot 'analyze_m1_shading_off.py') $runDir
+        if ($LASTEXITCODE -ne 0) { throw 'Shading-off evidence analyzer failed.' }
     }
 }
 

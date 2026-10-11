@@ -57,6 +57,24 @@ int main() {
             snapshot.entries == 256 && snapshot.bytes[255 * 36 + 6] == 255,
             "highest supported source index remains bounded and tintable");
     memory[0x2004] = 2;
+    require(sfc_m1::prepare_tint_snapshot(0x3000, 2, 0x1000, read, copy, snapshot,
+            sfc_m1::SourceModification::ShadingOff), "shading copy is available");
+    for (std::size_t i = 0; i < original.size(); ++i) {
+        const auto entry = i / 36;
+        const auto expected = (entry == 0 || entry == 2) && i % 36 == 0 ?
+            original[i] & ~6 : original[i];
+        require(snapshot.bytes[i] == expected,
+                "only referenced source flags lose lighting bits; all other bytes preserved");
+    }
+    require(sfc_m1::prepare_tint_snapshot(0x3000, 2, 0x1000, read, copy, snapshot,
+            sfc_m1::SourceModification::Observe) &&
+            std::memcmp(original.data(), snapshot.bytes.data(), original.size()) == 0,
+            "observation never changes the copied data");
+    require(sfc_m1::shading_phase(4999) == 0 && sfc_m1::shading_phase(5000) == 1 &&
+            sfc_m1::shading_phase(7999) == 1 && sfc_m1::shading_phase(8000) == 2 &&
+            sfc_m1::shading_phase(12999) == 2 && sfc_m1::shading_phase(13000) == 3 &&
+            sfc_m1::shading_phase(57999) == 3 && sfc_m1::shading_phase(58000) == 4,
+            "identification and 45-second shading window have exact fixed boundaries");
     require(!sfc_m1::prepare_tint_snapshot(0x3000, 4097, 0x1000, read, copy, snapshot),
             "polygon flood is refused");
     require(!sfc_m1::prepare_tint_snapshot(0x3000, 2, 0xFFFFFFFC, read, copy, snapshot),

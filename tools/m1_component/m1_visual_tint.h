@@ -3,6 +3,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <limits>
 
 namespace sfc_m1 {
@@ -24,15 +25,29 @@ struct TintSnapshot {
     std::uint32_t entries = 0;
     std::uint32_t sample_index = 0;
     std::uint32_t original_rgb = 0;
+    std::uint32_t original_flags = 0;
+    std::uint32_t lit_entries = 0;
 };
+
+enum class SourceModification { Magenta, Observe, ShadingOff };
+
+// Fixed diagnostic schedule, milliseconds from the automatic tactical gate.
+// 5s baseline, 3s identification cue, 5s baseline, 45s lighting-off, restore.
+inline std::uint32_t shading_phase(std::uint64_t elapsed_ms) {
+    return elapsed_ms < 5000 ? 0 : elapsed_ms < 8000 ? 1 :
+        elapsed_ms < 13000 ? 2 : elapsed_ms < 58000 ? 3 : 4;
+}
 
 // Read/copy callbacks are guarded by SEH in the live component. They are
 // injectable here so bounds and non-mutation can be verified without SFC.
 template <typename Read32, typename Copy>
 bool prepare_tint_snapshot(std::uint32_t source, std::uint32_t polygon_count,
                            std::uint32_t polygon_list, Read32 read, Copy copy,
-                           TintSnapshot& snapshot) {
+                           TintSnapshot& snapshot,
+                           SourceModification modification = SourceModification::Magenta) {
     snapshot.entries = 0;
+    snapshot.lit_entries = 0;
+    std::array<bool, kTintSourceCapacity> referenced{};
     if (!source || !polygon_list || !polygon_count ||
         polygon_count > kTintPolygonLimit) return false;
     std::uint32_t maximum = 0;
@@ -42,6 +57,7 @@ bool prepare_tint_snapshot(std::uint32_t source, std::uint32_t polygon_count,
             !read(address, polygon) || !tint_address(polygon, 4, address) ||
             !read(address, index) || index >= kTintSourceCapacity) return false;
         if (!i) snapshot.sample_index = index;
+        referenced[index] = true;
         if (index > maximum) maximum = index;
     }
     const std::uint32_t length = (maximum + 1) * kTintSourceStride;
@@ -52,7 +68,17 @@ bool prepare_tint_snapshot(std::uint32_t source, std::uint32_t polygon_count,
     snapshot.original_rgb = snapshot.bytes[sample] |
         (std::uint32_t(snapshot.bytes[sample + 1]) << 8) |
         (std::uint32_t(snapshot.bytes[sample + 2]) << 16);
+    std::memcpy(&snapshot.original_flags,
+        snapshot.bytes.data() + snapshot.sample_index * kTintSourceStride, 4);
     for (std::uint32_t i = 0; i <= maximum; ++i) {
+        std::uint32_t flags = 0;
+        std::memcpy(&flags, snapshot.bytes.data() + i * kTintSourceStride, 4);
+        if (referenced[i] && (flags & 0x06)) ++snapshot.lit_entries;
+        if (modification == SourceModification::ShadingOff && referenced[i]) {
+            flags &= ~std::uint32_t(0x06);
+            std::memcpy(snapshot.bytes.data() + i * kTintSourceStride, &flags, 4);
+        }
+        if (modification != SourceModification::Magenta) continue;
         const std::size_t offset = i * kTintSourceStride + 4;
         snapshot.bytes[offset] = 255;
         snapshot.bytes[offset + 1] = 0;
