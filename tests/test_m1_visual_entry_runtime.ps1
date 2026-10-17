@@ -1,6 +1,6 @@
 # Execute from Windows PowerShell 5.1. Exercise the production runtime shim
 # against this harmless fixture, not the real gameplay/injection workflow.
-param([string]$EntryName = 'start_m1_visual_tint_session.ps1')
+param([string]$EntryName = 'start_m1_visual_tint_session.ps1', [switch]$EnableTextureReferences)
 $ErrorActionPreference = 'Stop'
 if ($PSVersionTable.PSVersion.Major -ge 7) {
     Write-Output 'M1_RUNTIME_SHIM_OK'

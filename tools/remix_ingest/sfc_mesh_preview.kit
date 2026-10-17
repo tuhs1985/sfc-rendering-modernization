@@ -1,0 +1,28 @@
+[package]
+version = "0.1.0"
+title = "SFC captured mesh - offline Remix preview"
+
+[dependencies]
+"omni.kit.uiapp" = {}
+"omni.kit.widget.viewport" = {}
+"omni.kit.viewport.utility" = {}
+"omni.kit.renderer.capture" = {}
+"lightspeed.hydra.remix.core" = {}
+"lightspeed.trex.app.resources" = {}
+
+[settings]
+app.name = "SFC Mesh Preview"
+app.window.title = "SFC captured mesh - OFFLINE PREVIEW (not the game)"
+app.window.width = 1280
+app.window.height = 820
+app.fastShutdown = true
+app.useFabricSceneDelegate = false
+app.settings.persistent = false
+app.settings.loadUserConfig = false
+app.extensions.registryEnabled = false
+app.audio.enabled = false
+app.renderer.skipWhileMinimized = false
+app.runLoops.main.rateLimitFrequency = 60
+app.runLoops.main.rateLimitEnabled = true
+renderer.mdl.searchPaths.templates = "${lightspeed.trex.app.resources}/deps/omni_core_materials/Base;${kit}/mdl/core/Base;${kit}/mdl/core/Volume;${kit}/mdl/core/mdl"
+usd.enableOmniUsdMdlDiscoverOnStartup = true

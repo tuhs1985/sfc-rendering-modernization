@@ -4,13 +4,27 @@ param(
     [ValidateRange(30, 900)][int]$GateTimeoutSeconds = 600,
     [ValidateRange(30, 900)][int]$WaitForExitSeconds = 600,
     [ValidateSet('Auto', 'Manual')][string]$GateMode = 'Auto',
-    [switch]$LaunchSfc
+    [switch]$LaunchSfc,
+    [switch]$CaptureMetrics,
+    [string]$PythonExecutable = 'C:\Users\rober\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe'
 )
 
 $ErrorActionPreference = 'Stop'
 $toolRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $workspaceRoot = Resolve-Path (Join-Path $toolRoot '..\..')
 Import-Module (Join-Path $toolRoot 'ProcessImagePath.psm1') -Force
+if ($CaptureMetrics) {
+    if ($CaptureSeconds -gt 30) { throw 'Measurement qualification is limited to 30 seconds; formal endurance orchestration is not yet qualified' }
+    if ($GateMode -ne 'Auto') { throw 'Measurement qualification requires automatic tactical gating' }
+    Import-Module (Join-Path $toolRoot 'M1MeasurementJobs.psm1') -Force
+    $presentMon = Join-Path $workspaceRoot 'artifacts/m1/tools/PresentMon-2.3.1-x64.exe'
+    if (-not (Test-Path -LiteralPath $PythonExecutable) -or
+        -not (Test-Path -LiteralPath $presentMon)) { throw 'Measurement dependencies missing' }
+    if ((Get-FileHash -LiteralPath $presentMon -Algorithm SHA256).Hash -ne
+        '364E5D98D4D134BD54DD25C22ED2CA2F4883F8BC3ED6502BEE0C151E3436D30C') {
+        throw 'Pinned PresentMon hash mismatch'
+    }
+}
 
 $gameDir = 'C:\Games\Taldren Software Inc\Starfleet Command Orion Pirates'
 $client = Join-Path $gameDir 'StarFleetOP.exe'
@@ -58,7 +72,8 @@ $controllerOut = Join-Path $runDir 'controller.stdout.txt'
 $controllerErr = Join-Path $runDir 'controller.stderr.txt'
 
 $metadata = [ordered]@{
-    probe_id = 'M1-A-BASELINE-002'
+    probe_id = if ($CaptureMetrics) { 'M1-CLOSE-MEASURE-001' } else { 'M1-A-BASELINE-002' }
+    measurement_enabled = [bool]$CaptureMetrics
     mode = 'disabled-semantic-gate'
     prepared = (Get-Date).ToString('o')
     gate_mode = $GateMode.ToLower()
@@ -213,6 +228,11 @@ try {
     'timestamp,elapsed_seconds,cpu_seconds,working_set_bytes,private_bytes,handle_count,thread_count' |
         Set-Content -LiteralPath $telemetryPath -Encoding utf8
     $captureStart = Get-Date
+    $measurementJobs = @()
+    if ($CaptureMetrics) {
+        $measurementJobs = @(Start-M1MeasurementJobs -TargetProcessId $game.Id `
+            -Seconds $CaptureSeconds -OutputDirectory $runDir -PythonExecutable $PythonExecutable)
+    }
     while ((Get-Date) -lt $captureStart.AddSeconds($CaptureSeconds)) {
         $current = Get-Process -Id $game.Id -ErrorAction SilentlyContinue
         if (-not $current) { break }
@@ -224,6 +244,14 @@ try {
         Start-Sleep -Seconds 1
     }
 
+    if ($CaptureMetrics) {
+        $measurementOkay = Complete-M1MeasurementJobs -Jobs $measurementJobs -OutputDirectory $runDir
+        $metadata.measurement_collectors_passed = $measurementOkay
+        $metadata | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $metadataPath -Encoding utf8
+        if (-not $measurementOkay) {
+            Write-Warning 'Measurement qualification incomplete; normal gameplay is not a telemetry PASS. Exit normally when requested.'
+        }
+    }
     Write-Output 'Baseline capture complete. Exit SFC normally now.'
     $exit = Wait-M1ProcessExit -ProcessId $game.Id -TimeoutSeconds $WaitForExitSeconds
     $exitOutcome = $exit.Outcome

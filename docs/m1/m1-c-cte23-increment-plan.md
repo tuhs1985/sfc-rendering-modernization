@@ -1,12 +1,92 @@
 ---
 title: "M1 next increment — CTE-2/CTE-3 evidence-gap and candidate plan"
 milestone: M1
-status: approved-c01-shading-diagnostic-preparation
+status: c01-diagnostic-complete-enhancement-allocation-superseded
 date: 2026-10-10
 baseline: 1dca452
 ---
 
 # M1 Increment C — draft for sponsor review
+
+## CURRENT GOVERNANCE — 2026-10-14
+
+The approved [M1/M2 amendment](../decisions/2026-10-14-m1-m2-gate-allocation-amendment.md)
+supersedes this document's assignment of beneficial enhancement and three VMES
+classes to M1. C-01 diagnostic results remain valid; C-02 and later enhancement
+stages below are historical candidate planning, **not active M1 work or approved
+M2 implementation**. No more cosmetic experiments are needed to satisfy M1.
+Close M1 reliability/telemetry/reproducibility evidence first. Enhancement
+integration belongs to separately approved M2 planning; aggregate TRL 4 still
+requires combined CTE-1/2/3 evidence before any TRL 5 claim.
+
+## CURRENT C-01 STATE — 2026-10-13 sustained lighting control demonstrated
+
+[RT-010 evidence](evidence/M1-C01-RT-010-20261013-surface-lighting.md):20s marked
+enemy,299 neutral/899 altered full-mesh handoffs, matching prep receipts/parents,
+restored originals and sponsor-observed lighting change/return with no other
+issues. Diagnostic PASS; M1 CONTINUES, not quality/TRL4 completion. Same selected
+owner18/18 corner windows; spare owner's12/18 coverage retained as auxiliary
+limitation, not erased. Review checkpoint before any beneficial-shading proposal;
+C-02 implementation remains unauthorized, no final renderer chosen.
+
+## HISTORICAL C-01 STATE — 2026-10-13 sustained diagnostic approved/prepared
+
+Sponsor approved the larger diagnostic and required20seconds magenta for locating
+the right ship. [Contract](m1-c01-sustained-lighting-test-contract.md) /
+[RT-010](probes/M1-C01-RT-010.md) prepare20s marker,5s neutral,15s reversed corner
+lighting vectors,then original rendering on the same owner. Full small primary
+mesh, immutable neutral/altered pairs, per-call original comparison, no retarget
+or earlyfree. Offline validation passes; runtime not executed. No C-02 beneficial
+enhancement/final renderer/TRL4 authority implied; M1 CONTINUES.
+
+## HISTORICAL C-01 STATE — 2026-10-13 RT-009 and sponsor larger-step assessment
+
+[RT-009](evidence/M1-C01-RT-009-20261013-copy-epoch.md) confirms32 neutral fresh
+handoffs; selected epoch stayed active, other owner reset, so new-epoch recovery
+remains unexercised. Sponsor requests considering a larger next leap. Recommendation
+is a separately approved sustained object-specific surface-lighting diagnostic;
+not another identical reset fixture and not authority to begin C-02. Need bounded
+fresh-copy memory/coverage contract before implementation. M1 CONTINUES; no code
+or final-renderer decision in this runtime adjudication/assessment.
+
+## HISTORICAL C-01 STATE — 2026-10-13 fresh-epoch test prepared
+
+Sponsor authorized continuation. [Contract](m1-c01-fresh-epoch-copy-contract.md)
+records the independent-qualification policy before implementation;
+[RT-009](probes/M1-C01-RT-009.md) is prepared/offline-validated, not executed.
+New epochs remain separate IDs, old private data stays immutable/pinned, max2
+qualifications/32total slots, no new hooks or visual change. Original RT-008
+criterion/result is unchanged. C-01/M1 CONTINUES; C-02 remains separately gated.
+
+## HISTORICAL C-01 STATE — 2026-10-13 repeated-copy runtime
+
+[RT-008 evidence](evidence/M1-C01-RT-008-20261013-repeated-copy.md) confirms 30
+fresh private handoffs across 29.016 seconds / 1,740 rendered-frame intervals,
+all received/intact/parent-closed and normal sponsor-reported gameplay. Selected
+epoch retired at 51.000 seconds and fresh epoch4 appeared at 51.110 seconds;
+no automatic identity transfer, so the planned 32-record target was not met.
+M1/C-01 CONTINUES; no acceptance-rule relaxation, C-02 or TRL 4 completion.
+Review bounded fresh-epoch requalification before extending substitution; do not
+blindly rerun merely to fill two slots or infer physical disappearance from an
+observation-based retirement. Existing used slots remain pinned until exit.
+
+## HISTORICAL C-01 STATE — 2026-10-13 repeated-copy preparation
+
+RT-007 confirmed the one-use private input handoff with normal sponsor-reported
+gameplay. Sponsor authorized continuation. [RT-008](probes/M1-C01-RT-008.md)
+prepares 32 fresh immutable inputs for the same owner at >=1-second spacing,
+without reuse/free assumptions. Runtime remains unexecuted; C-01/M1 CONTINUES.
+No shading enhancement, C-02 approval or formal TRL 4 completion follows.
+Older dated dispositions below are history, not instructions to rerun old tests.
+
+## HISTORICAL C-01 STATE — 2026-10-11 runtime followed by input qualification
+
+Shading-off/return corroborated in M1-C-RT-001; sponsor parked baseline loading
+noise as suspected monitor/display behavior to troubleshoot separately. No
+requirements waiver or diagnosed hardware cause. [Corner/transform analysis](m1-c01-corner-transform-qualification.md)
+now narrows the remaining numeric inputs. C-01 CONTINUES: prepare read-only live
+snapshot qualification, not a new visual effect. The prior build-only disposition
+below describes its earlier stage; C-02 beneficial enhancement remains gated.
 
 ## NEWEST DISPOSITION — 2026-10-11 shading-off diagnostic build approved
 

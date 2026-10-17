@@ -1,0 +1,262 @@
+{
+  "schema": "sfc.camera.recovery.v1",
+  "input_sha256": "10164685ad9e424be0846845205a77cd74bd96eae810c0cf7a108eef454a83d0",
+  "records": 1854,
+  "excluded": [],
+  "first": {
+    "sequence": 1,
+    "owner_epoch": 1,
+    "frame": 1,
+    "elapsed_ms": 63,
+    "combined_world_to_screen_homogeneous": [
+      [
+        1043.896240234375,
+        -1903.345947265625,
+        -184.06712341308594,
+        778233.1298828125
+      ],
+      [
+        201.28353881835938,
+        0.0,
+        -1968.1998291015625,
+        127862.61022949219
+      ],
+      [
+        0.984873354434967,
+        0.0,
+        -0.1736598014831543,
+        373.0852348804474
+      ],
+      [
+        0.9848077297210693,
+        0.0,
+        -0.17364822328090668,
+        375.06030559539795
+      ]
+    ],
+    "recomposition_max_error": 0.0,
+    "camera_center_native": [
+      -376.1746738449518,
+      199.99999933877706,
+      26.493671980421343
+    ],
+    "view_candidate": [
+      [
+        1.3517004646302037e-10,
+        -1.0,
+        7.665868840651601e-10,
+        199.9999993693149
+      ],
+      [
+        0.1736482258884968,
+        -0.0,
+        0.9848077445094436,
+        39.23089139054801
+      ],
+      [
+        -0.9848077445094436,
+        -0.0,
+        0.17364822588849682,
+        -375.0603112274946
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "pixel_projection_candidate": [
+      [
+        1903.3459758472368,
+        0.0,
+        -1060.0000471896847,
+        0.0
+      ],
+      [
+        0.0,
+        -1903.3459336066269,
+        -540.0000044970313,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        -1.0000666382617576,
+        -2.0000641118037024
+      ],
+      [
+        0.0,
+        0.0,
+        -1.0,
+        0.0
+      ]
+    ],
+    "principal_point_pixels": [
+      1060.0000471896847,
+      540.0000044970313
+    ],
+    "focal_magnitudes_pixels": [
+      1903.3459758472368,
+      1903.3459336066269
+    ],
+    "homogeneous_scale": 0.9999999849834911,
+    "normalized_skew": -7.784127390283018e-10,
+    "depth_alpha": 1.0000666382617576,
+    "depth_beta": -2.0000640817697217,
+    "depth_row_residual": 6.586490880478024e-09,
+    "factorization_max_error": 6.586490991500327e-09,
+    "qualification": "Pinhole, no skew; pixel-Y flip/forward convention from static viewport and perspective builder; not directly captured view/projection"
+  },
+  "last": {
+    "sequence": 1854,
+    "owner_epoch": 1,
+    "frame": 5378,
+    "elapsed_ms": 90000,
+    "combined_world_to_screen_homogeneous": [
+      [
+        1825.9538497896995,
+        -1174.0263359815367,
+        -184.0675048828125,
+        347846.3631245565
+      ],
+      [
+        176.86164400652734,
+        96.09904079928828,
+        -1968.199951171875,
+        70717.16693439918
+      ],
+      [
+        0.8653787157511592,
+        0.47020761347632495,
+        -0.1736598014831543,
+        93.47476707764082
+      ],
+      [
+        0.8653211028268661,
+        0.47017627471472245,
+        -0.17364822328090668,
+        95.46847357515064
+      ]
+    ],
+    "recomposition_max_error": 2.2737367544323206e-13,
+    "camera_center_native": [
+      -142.94347771173818,
+      69.81235651383938,
+      26.49367455382844
+    ],
+    "view_candidate": [
+      [
+        0.477429462895912,
+        -0.8786700791303185,
+        -2.0244177511099595e-07,
+        129.58746197410468
+      ],
+      [
+        0.1525795881869106,
+        0.08290460383967803,
+        0.98480774566963,
+        -10.068684708493004
+      ],
+      [
+        -0.8653210830323292,
+        -0.4701762639592681,
+        0.17364821930864002,
+        -95.46847139127436
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "pixel_projection_candidate": [
+      [
+        1903.3459730390093,
+        0.0,
+        -1060.0000166330822,
+        0.0
+      ],
+      [
+        0.0,
+        -1903.3459836854993,
+        -540.0000017233353,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        -1.000066598952573,
+        -2.0000645521014557
+      ],
+      [
+        0.0,
+        0.0,
+        -1.0,
+        0.0
+      ]
+    ],
+    "principal_point_pixels": [
+      1060.0000166330822,
+      540.0000017233353
+    ],
+    "focal_magnitudes_pixels": [
+      1903.3459730390093,
+      1903.3459836854993
+    ],
+    "homogeneous_scale": 1.0000000228753665,
+    "normalized_skew": 3.345349602256858e-09,
+    "depth_alpha": 1.000066598952573,
+    "depth_beta": -2.0000645978536653,
+    "depth_row_residual": 2.5514181822838822e-08,
+    "factorization_max_error": 2.551418126772731e-08,
+    "qualification": "Pinhole, no skew; pixel-Y flip/forward convention from static viewport and perspective builder; not directly captured view/projection"
+  },
+  "camera_center_ranges_native": [
+    [
+      -376.17471065583237,
+      374.4317890438286
+    ],
+    [
+      69.81235651383938,
+      201.75006777426455
+    ],
+    [
+      26.493662005702248,
+      28.24533146473251
+    ]
+  ],
+  "principal_point_ranges_pixels": [
+    [
+      1059.999865690684,
+      1060.0001479275852
+    ],
+    [
+      539.9999366911927,
+      540.0000615062723
+    ]
+  ],
+  "focal_magnitude_ranges_pixels": [
+    [
+      1903.3455912103539,
+      1903.3462749565538
+    ],
+    [
+      1903.345700918187,
+      1903.3461785194233
+    ]
+  ],
+  "max_recomposition_error": 2.3283064365386963e-10,
+  "max_factorization_error": 3.055292552289757e-08,
+  "max_depth_row_residual": 3.055292702169865e-08,
+  "confidence": "CONFIRMED algebra on recorded inputs; STRONG HYPOTHESIS active pinhole camera interpretation",
+  "not_proven": [
+    "independent native projected-vertex match",
+    "direct +628 view/+55C projection capture",
+    "viewport rectangle",
+    "clip/depth interval and pixel-center convention",
+    "all camera modes"
+  ],
+  "native_game_or_preview_changes": false
+}

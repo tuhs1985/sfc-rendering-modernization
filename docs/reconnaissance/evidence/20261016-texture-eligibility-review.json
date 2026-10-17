@@ -1,0 +1,70 @@
+{
+  "schema": "sfc.texture.path-analysis.v1",
+  "packet_sha256": "79726bc09b979209c0f1c944f0a2447b5c7da803dc79f8b264a0edd2b86d2eb5",
+  "references_sha256": "6219e014eedae33ce43cf303d5c33d2e65ee24b42cd8f36047e9a54642accd53",
+  "owner_epoch": 1,
+  "frame": 3,
+  "model": 315671832,
+  "source": 76887644,
+  "model_filename": "assets/models/kff/kff.mod",
+  "groups": [
+    {
+      "group": 0,
+      "flags": 35,
+      "primary": 170,
+      "secondary": 171,
+      "primary_name_offset": 215,
+      "secondary_name_offset": 223
+    },
+    {
+      "group": 1,
+      "flags": 35,
+      "primary": 172,
+      "secondary": 173,
+      "primary_name_offset": 232,
+      "secondary_name_offset": 240
+    },
+    {
+      "group": 2,
+      "flags": 35,
+      "primary": 174,
+      "secondary": 175,
+      "primary_name_offset": 249,
+      "secondary_name_offset": 257
+    },
+    {
+      "group": 3,
+      "flags": 35,
+      "primary": 176,
+      "secondary": 177,
+      "primary_name_offset": 266,
+      "secondary_name_offset": 274
+    },
+    {
+      "group": 4,
+      "flags": 35,
+      "primary": 178,
+      "secondary": 179,
+      "primary_name_offset": 283,
+      "secondary_name_offset": 291
+    }
+  ],
+  "textures_enabled": 1,
+  "manager_secondary_path_word": 511,
+  "manager_multitexture_flag": 0,
+  "manager_fallback_validation_mask": 3,
+  "manager_previous_alpha_test_flag": 0,
+  "static_fallback_request_prediction": "MODES_2_THEN_1_REQUESTED",
+  "branch_family": "FALLBACK_FAMILY_EXACT_MODE_UNOBSERVED",
+  "confidence": "CONFIRMED",
+  "confidence_scope": "Recorded inputs plus exact-build static branch; not direct executed-pass or GPU-state observation",
+  "exact_fallback_passes": "UNOBSERVED",
+  "missing_for_fallback_eligibility": [],
+  "not_proven": [
+    "executed pass count",
+    "GPU texture-stage/blend values",
+    "physical emission strength",
+    "legacy color space"
+  ],
+  "provisional_preview_disposition": "Keep labelled hypothesis; no automatic promotion or asset changes"
+}

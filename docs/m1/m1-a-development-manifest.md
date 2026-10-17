@@ -1,5 +1,53 @@
 # M1 Increment A Development Test Manifest
 
+## Authoritative baseline disposition — 2026-10-14
+
+Sponsor: "the baseline is what 'ships' in the community edition. I dont' want to
+mess with it atm until needed". Accepted baseline is the existing supported
+Community Edition installation/launcher configuration, including its bundled
+graphics add-ons. Do not strip, disable, upgrade, replace or tune dgVoodoo/ReShade
+merely to obtain a wrapper-free baseline. A future necessary change needs an
+explicitly scoped proposal and before/after baseline record.
+
+This resolves the scope/documentation discrepancy below: native-launch means the
+existing launcher workflow, **not absence of wrappers**. Retain exact client
+2.5.6.4/hash and recorded dependency versions; no expansion to other Community
+Edition builds. Sponsor attestation establishes accepted baseline scope; source
+archive provenance of each installed file was not independently verified.
+Missing historical disabled-run dependency hashes remain a comparison limitation,
+not a new blocker or reason for a repeat endurance run. No capability waiver or
+final rendering-architecture selection follows from accepting existing packaging.
+Actual loaded inventory, current hashes and postexit snapshots below are retained.
+
+## Current scope correction — 2026-10-14 endurance
+
+[M1-CLOSE-ENDURE-001 evidence](evidence/M1-CLOSE-ENDURE-001-20261014.md) records
+actual game-local dgVoodoo/ReShade DLLs loaded in the tested configuration.
+Original dependency statements below are historical and **must not be used to
+claim wrapper-free rendering**. Project's semantic component uses no third-party
+detour library; that does not imply the installed game has no graphics wrappers.
+No wrapper installed/changed/removed by this execution; no architecture adopted.
+
+Loaded paths in run005117 `loaded-modules.csv`; current on-disk product/hash
+verification at adjudication (not an in-memory hash or prior baseline hash):
+
+| Game-local file | Product/version | Bytes | SHA256 |
+| --- | --- | --- | --- |
+|DDRAW.dll|dgVoodoo2.8.6.5 / file4.7.1.3000|257,024|62F1E1B2AC5196F4A74B35B898BA8644322F976026324E2F767A4096BFB58748|
+|D3DImm.dll|dgVoodoo2.8.6.5 / file4.7.1.3000|209,920|F51507ACBB1C5510AB72881EEFDE5E4DFE6376667546E86DDCF62E6A9EE4923F|
+|DXGI.DLL|ReShade6.7.1 / file6.7.1.2133|4,014,360|E35E4E2E47F4765F0799CB54C88E5ADE49B50CD7895C137B9D557F263344CAB7|
+
+All under `C:\Games\Taldren Software Inc\Starfleet Command Orion Pirates`.
+Their timestamps predate testing, but timestamps alone do not prove prior loaded
+configuration. Configuration files have current runtime modification timestamps;
+the writer is not established by timestamps, and no prior config hashes were
+frozen. Accepted disabled10s capture lacks equivalent module inventory.
+Reconcile baseline before final M1 closure; preserve successful endurance result
+for actual stack, do not remove dependencies or automatically repeat endurance.
+Actual analyst runtime verified Python3.12.14/PowerShell7.6.5; historical Python
+version below does not identify current analyzer. Sandbox OS CIM query denied;
+do not infer current OS build from historical manifest alone.
+
 ## Manifest identity
 
 - Manifest ID: `M1-A-MANIFEST-001`

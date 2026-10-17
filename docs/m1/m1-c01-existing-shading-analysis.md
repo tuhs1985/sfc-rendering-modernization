@@ -2,6 +2,12 @@
 
 ## Result
 
+**Current qualification update:** [runtime](evidence/M1-C-RT-001-20261011-shading-off.md)
+corroborates vertex-light suppression and visible return. Subsequent
+[corner/transform analysis](m1-c01-corner-transform-qualification.md) identifies
+the narrower read-only proof needed before an enhancement. Earlier unexecuted/
+unconfirmed statements below are pre-runtime history, not current status.
+
 **Update 2026-10-11:** sponsor approved diagnostic contract/build preparation
 and commit. [M1-C-RT-001](probes/M1-C-RT-001.md) implements a fixed magenta
 identification cue followed by a 45-second owner-local lighting-bit mask.

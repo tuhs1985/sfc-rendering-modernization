@@ -150,6 +150,8 @@ bool restored_bytes(HANDLE process) {
     static const BYTE model[] = {0x55, 0x8B, 0xEC, 0x83, 0xEC, 0x38};
     static const BYTE visual_exit[] = {0x5F, 0x5E, 0xC9, 0xC2, 0x0C, 0x00};
     static const BYTE geometry[] = {0x83, 0xEC, 0x14, 0x53, 0x8B, 0xD9};
+    static const BYTE wrapper[] = {0x83,0xEC,0x08,0x53,0x56};
+    static const BYTE prepare[] = {0x81,0xEC,0x84,0,0,0};
     const Check checks[] = {
         {0x0069E300, scene, sizeof(scene)},
         {0x004162B9, ship, sizeof(ship)},
@@ -157,6 +159,8 @@ bool restored_bytes(HANDLE process) {
         {0x0042E4B2, model, sizeof(model)},
         {0x0042FDD5, visual_exit, sizeof(visual_exit)},
         {0x006AB410, geometry, sizeof(geometry)},
+        {0x006AC5A0,wrapper,sizeof(wrapper)},
+        {0x006ABFC0,prepare,sizeof(prepare)},
     };
     for (const Check& check : checks) {
         BYTE observed[8]{};
@@ -209,6 +213,10 @@ int wmain(int argc, wchar_t** argv) {
         return 2;
     }
 
+    if(unload_after_stop && GetPrivateProfileIntW(L"m1",L"EnablePrivateCopy",0,config_path.c_str())) {
+        std::wcerr << L"Private-copy mode retains its buffer until process exit; forced unload refused.\n";
+        return 2;
+    }
     HANDLE process = OpenProcess(PROCESS_CREATE_THREAD | PROCESS_QUERY_INFORMATION |
         PROCESS_VM_OPERATION | PROCESS_VM_WRITE | PROCESS_VM_READ | SYNCHRONIZE,
         FALSE, pid);

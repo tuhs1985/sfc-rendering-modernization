@@ -5,17 +5,41 @@ param(
     [ValidateRange(30, 900)][int]$ArmTimeoutSeconds = 600,
     [ValidateRange(1, 6000)][int]$MaxFrames = 120,
     [ValidateRange(1, 100000)][int]$MaxEvents = 10000,
+    [ValidateRange(1, 32)][int]$MaxOwners = 8,
     [ValidateRange(0, 8)][int]$GeometrySamplesPerOwnerFrame = 1,
     [ValidateRange(0, 8)][int]$UncorrelatedGeometrySamplesPerFrame = 1,
     [switch]$DisableGeometryHook,
     [switch]$EnableVisualTint,
     [switch]$EnableShadingOff,
+    [switch]$EnableCornerSnapshot,
+    [switch]$EnableWrapperObservation,
+    [switch]$EnablePrivateCopy,
+    [switch]$EnableRepeatedPrivateCopy,
+    [switch]$EnableCopyEpochRequalification,
+    [switch]$EnableSurfaceLighting,
+    [switch]$EnableMeshExport,
+    [switch]$EnableTextureReferences,
+    [string]$LiveChannel = '',
+    [switch]$FreshScene,
     [switch]$ContinueAfterBurst,
     [switch]$AutomaticArm,
+    [switch]$Endurance,
     [string]$PythonExecutable = 'C:\Users\rober\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe'
 )
 
 $ErrorActionPreference = 'Stop'
+if($EnableTextureReferences -and -not $EnableMeshExport){throw 'Texture references require same-run mesh export.'}
+if($EnableMeshExport -and (-not $EnableWrapperObservation -or -not $DisableGeometryHook -or
+    -not $ContinueAfterBurst -or $MaxSeconds -ne 90 -or $EnableCornerSnapshot -or
+    $EnablePrivateCopy -or $EnableRepeatedPrivateCopy -or $EnableCopyEpochRequalification -or
+    $EnableSurfaceLighting -or $EnableShadingOff -or $EnableVisualTint -or $Endurance)) {
+    throw 'Mesh export requires exclusive read-only wrapper mode, geometry off, ContinueAfterBurst and 90 seconds.'
+}
+if($EnableWrapperObservation -and -not ($EnableCornerSnapshot -or $EnableMeshExport)){throw 'Wrapper observation requires corner or mesh mode.'}
+if($EnablePrivateCopy -and -not $EnableWrapperObservation){throw 'Private copy requires wrapper mode.'}
+if($EnableRepeatedPrivateCopy -and -not $EnablePrivateCopy){throw 'Repeated private copy requires private copy mode.'}
+if($EnableCopyEpochRequalification -and -not $EnableRepeatedPrivateCopy){throw 'Epoch qualification requires repeated copy mode.'}
+if($EnableSurfaceLighting -and (-not $EnablePrivateCopy -or $EnableRepeatedPrivateCopy -or $EnableCopyEpochRequalification)){throw 'Surface lighting requires exclusive private-copy mode.'}
 $toolRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $workspaceRoot = Resolve-Path (Join-Path $toolRoot '..\..')
 $runner = Join-Path $toolRoot 'run_m1_increment_a.ps1'
@@ -27,8 +51,12 @@ $pwsh = (Get-Process -Id $PID).Path
 $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
 $principal = [Security.Principal.WindowsPrincipal]::new($identity)
 $isAdmin = $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-if (($EnableVisualTint -or $EnableShadingOff) -and (-not $isAdmin -or -not $DisableGeometryHook)) {
+if (($EnableVisualTint -or $EnableShadingOff -or $EnableCornerSnapshot -or $EnableMeshExport) -and (-not $isAdmin -or -not $DisableGeometryHook)) {
     throw 'Visual tint must inherit an elevated parent and keep the geometry hook disabled.'
+}
+if ($EnableCornerSnapshot -and ($EnableVisualTint -or $EnableShadingOff -or
+    -not $ContinueAfterBurst -or $MaxSeconds -ne 90)) {
+    throw 'Corner snapshot requires exclusive read-only mode, ContinueAfterBurst and 90 seconds.'
 }
 if ($EnableShadingOff -and ($EnableVisualTint -or -not $ContinueAfterBurst -or $MaxSeconds -lt 75 -or $MaxSeconds -gt 90)) {
     throw 'Shading diagnostic requires no tint mode, ContinueAfterBurst and 75-90 seconds.'
@@ -38,6 +66,7 @@ if (-not (Test-Path -LiteralPath $PythonExecutable)) {
 }
 
 if (-not $isAdmin) {
+    if ($Endurance) { throw 'Endurance requires the existing elevated parent; automatic UAC is disabled for this workflow.' }
     $arguments = @(
         '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File',
         ('"{0}"' -f $MyInvocation.MyCommand.Path),
@@ -111,6 +140,17 @@ try {
         -UncorrelatedGeometrySamplesPerFrame $UncorrelatedGeometrySamplesPerFrame `
         -DisableGeometryHook:$DisableGeometryHook -EnableVisualTint:$EnableVisualTint `
         -EnableShadingOff:$EnableShadingOff -ContinueAfterBurst:$ContinueAfterBurst `
+        -EnableCornerSnapshot:$EnableCornerSnapshot `
+        -EnableWrapperObservation:$EnableWrapperObservation `
+        -EnablePrivateCopy:$EnablePrivateCopy `
+        -EnableRepeatedPrivateCopy:$EnableRepeatedPrivateCopy `
+        -EnableCopyEpochRequalification:$EnableCopyEpochRequalification `
+        -EnableSurfaceLighting:$EnableSurfaceLighting `
+        -EnableMeshExport:$EnableMeshExport `
+        -EnableTextureReferences:$EnableTextureReferences `
+        -LiveChannel $LiveChannel -MaxOwners $MaxOwners -FreshScene:$FreshScene `
+        -GateTimeoutSeconds $ArmTimeoutSeconds `
+        -Endurance:$Endurance `
         -PythonExecutable $PythonExecutable
 } finally {
     Remove-Item -LiteralPath $armSignal -Force -ErrorAction SilentlyContinue

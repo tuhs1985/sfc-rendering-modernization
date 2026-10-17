@@ -5,6 +5,11 @@ Five prepared tests passed; packet 49,473 bytes, still INPUT_QUALIFICATION_PENDI
 Earlier preparation was deliberately unexecuted; preserved in its run record.
 No live probe/gameplay. See [shading analysis](../m1-c01-existing-shading-analysis.md).
 
+Supplement2026-10-11: immediate corner/transform windows and exact PE anchors
+adjudicated in [qualification note](../m1-c01-corner-transform-qualification.md).
+Reusable verifier now checks29 anchors (earlier15-anchor execution remains history).
+No new bulk output or runtime probe from that follow-on static analysis.
+
 ## Question and scope
 
 What exact instructions must be adjudicated to recover normals/positions,

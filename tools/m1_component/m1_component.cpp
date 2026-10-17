@@ -13,6 +13,15 @@
 
 #include "m1_contract.h"
 #include "m1_visual_tint.h"
+#include "m1_corner_snapshot.h"
+#include "m1_thread_suspend.h"
+#include "m1_rejection_diagnostics.h"
+#include "m1_private_copy.h"
+#include "m1_surface_graph.h"
+#include "m1_mesh_export.h"
+#include "m1_texture_references.h"
+#include "m1_live_bridge.h"
+#include "m1_live_scene.h"
 
 namespace {
 
@@ -21,7 +30,7 @@ constexpr const char* kSchema = "m1.scene-gate.v1";
 constexpr const char* kComponentVersion = "0.1-gate";
 #else
 constexpr const char* kSchema = "m1.semantic.v1";
-constexpr const char* kComponentVersion = "0.4";
+constexpr const char* kComponentVersion = "0.20";
 #endif
 constexpr DWORD kImageBase = 0x00400000;
 constexpr DWORD kShipVtable = 0x00796F0C;
@@ -30,7 +39,7 @@ constexpr DWORD kModel0Vtable = 0x007983E8;
 constexpr DWORD kVisualMainlineReturn = 0x0042FDD5;
 constexpr DWORD kKnownExceptionReturn = 0x00509843;
 constexpr std::size_t kEventCapacity = 100000;
-constexpr std::size_t kOwnerCapacity = 8;
+constexpr std::size_t kOwnerCapacity = 32;
 constexpr std::size_t kThreadCapacity = 8;
 
 enum EventKind : DWORD {
@@ -41,13 +50,15 @@ enum EventKind : DWORD {
     kVisualExit = 4,
     kGeometry = 5,
     kRetire = 6,
-    kEventKindCount = 7,
+    kWrapper = 7,
+    kPrepare = 8,
+    kEventKindCount = 9,
 };
 
 const char* event_name(DWORD kind) {
     static const char* names[] = {
         "scene_begin", "ship_owner", "visual_model", "model0",
-        "visual_exit", "geometry_submit", "owner_retired"
+        "visual_exit", "geometry_submit", "owner_retired", "polygon_wrapper", "polygon_prepare"
     };
     return kind < kEventKindCount ? names[kind] : "unknown";
 }
@@ -99,6 +110,10 @@ struct ThreadState {
     DWORD geometry_sample_frame = 0xFFFFFFFFu;
     DWORD geometry_samples_in_frame = 0;
     bool model_scope = false;
+    DWORD model_manager = 0, wrapper_pending = 0;
+    DWORD copy_depth=0;
+    DWORD copy_slot_pending=0;
+    DWORD surface_pending=0;
     sfc_m1::TintSnapshot tint_snapshot;
     sfc_m1::TintLease tint_lease;
     int shading_sample = -1;
@@ -128,12 +143,30 @@ struct Config {
     bool enable_geometry_hook = true;
     bool enable_visual_tint = false;
     bool enable_shading_off = false;
+    bool enable_corner_snapshot = false;
+    bool enable_wrapper_observation = false;
+    bool enable_private_copy = false;
+    bool enable_repeated_private_copy = false;
+    bool enable_copy_epoch_requalification = false;
+    bool enable_surface_lighting = false;
+    bool enable_mesh_export = false;
+    bool enable_texture_references = false;
+    std::wstring live_channel;
     DWORD tint_delay_ms = 5000;
     DWORD tint_duration_ms = 10000;
 };
 
 CRITICAL_SECTION g_lock;
 Config g_config;
+sfc_m1::MeshPacket g_mesh_packet;
+sfc_m1::TextureReferences g_texture_references;
+sfc_m1::MeshCaptureBudget g_mesh_budget;
+sfc_m1::LiveBridge g_live_bridge;
+sfc_m1::LiveScene g_live_scene;
+bool g_live_scene_mode=false;
+bool stop_live(){const bool scene=g_live_scene.stop();const bool legacy=g_live_bridge.stop();return scene && legacy;}
+std::array<LONGLONG,2> g_mesh_capture_ticks{};
+LARGE_INTEGER g_mesh_capture_frequency{};
 sfc_m1::OwnerTable<kOwnerCapacity> g_owners;
 std::array<EventRecord, kEventCapacity> g_events{};
 std::array<ThreadState, kThreadCapacity> g_threads{};
@@ -151,6 +184,55 @@ volatile LONG g_sampled_correlated_geometry = 0;
 volatile LONG g_sampled_uncorrelated_geometry = 0;
 volatile LONG g_exception_509843 = 0;
 volatile LONG g_rejected_semantics = 0;
+sfc_m1::RejectionDiagnostics g_rejection_diagnostics;
+struct WrapperSample {
+    std::array<DWORD,15> data{};
+};
+std::array<WrapperSample,64> g_wrapper_samples{};
+std::array<ULONGLONG,8> g_wrapper_outcomes{};
+ULONGLONG g_wrapper_total = 0, g_wrapper_parent_closed = 0;
+sfc_m1::PinnedPolygonCopy g_private_copy;
+DWORD g_copy_owner=0,g_copy_thread=0,g_copy_ship=0,g_copy_visual=0,g_copy_model=0;
+DWORD g_copy_manager=0,g_copy_original_list=0,g_copy_elapsed=0,g_copy_failure=0;
+DWORD g_copy_source=0;
+DWORD g_copy_applied=0,g_copy_consumed=0,g_copy_parent=0;
+DWORD g_copy_frame=0;
+bool g_copy_module_pinned=false;
+// Fresh process-lifetime slots, never overwritten or returned to a free list.
+struct AdditionalCopy {
+    sfc_m1::PinnedPolygonCopy data;
+    DWORD elapsed=0, frame=0, consumed=0, parent=0, failure=0;
+    DWORD owner=0, requalified_from=0, retired_ms=0, retired_frame=0;
+    DWORD qualification_ms=0, qualification_frame=0, qualification_frames=0;
+};
+std::array<AdditionalCopy,31> g_additional_copies;
+static_assert(sizeof(g_private_copy)+sizeof(g_additional_copies)<=700u*1024u,
+              "Pinned fresh-copy bank exceeds its fixed budget");
+DWORD g_copy_attempts=0,g_copy_last_elapsed=0,g_copy_receipt_mismatch=0;
+ULONGLONG g_copy_identity_skips=0;
+bool g_copy_halted=false;
+DWORD g_copy_current_owner=0,g_copy_requalifications=0;
+DWORD g_copy_retired_ms=0,g_copy_retired_frame=0;
+struct CopyEpochCandidate {
+    DWORD owner=0, first_ms=0, first_frame=0, last_frame=0, frames=0;
+    bool observe(DWORD id,DWORD frame,DWORD elapsed) {
+        if(owner!=id) {owner=id;first_ms=elapsed;first_frame=last_frame=frame;frames=1;}
+        else if(frame>last_frame) {last_frame=frame;++frames;}
+        return frames>=3 && elapsed-first_ms>=250;
+    }
+};
+CopyEpochCandidate g_copy_candidate;
+struct SurfacePhaseStats {
+    DWORD observed=0,applied=0,received=0,parent=0,first_ms=0,last_ms=0;
+};
+sfc_m1::SurfaceGraphPair g_surface_graphs;
+std::array<SurfacePhaseStats,4> g_surface_phases{};
+DWORD g_surface_owner=0,g_surface_thread=0,g_surface_ship=0,g_surface_visual=0;
+DWORD g_surface_model=0,g_surface_source=0,g_surface_manager=0,g_surface_vertices=0;
+DWORD g_surface_count=0,g_surface_list=0,g_surface_failure=0;
+ULONGLONG g_surface_tick=0;
+bool g_surface_attempted=false;
+HANDLE g_surface_lighting_event=nullptr,g_surface_restored_event=nullptr;
 volatile LONG g_owner_overflow = 0;
 volatile LONG g_thread_overflow = 0;
 volatile LONG g_log_truncated = 0;
@@ -179,10 +261,30 @@ std::array<ShadingSample, 96> g_shading_samples{};
 DWORD g_shading_sample_count = 0;
 ULONGLONG g_shading_sample_second = ~ULONGLONG(0);
 DWORD g_shading_last_phase = 5;
+struct CornerOwnerWindow {
+    DWORD owner = 0, thread = 0, next_window = 0;
+    DWORD ship = 0, visual = 0, seen_mask = 0, success_mask = 0;
+    DWORD thread_rejections = 0;
+    DWORD visual_mismatches = 0;
+    bool retired = false;
+    ULONGLONG last_elapsed = 0;
+};
+std::array<CornerOwnerWindow, 2> g_corner_owners{};
+std::array<sfc_m1::CornerSnapshot, 2 * sfc_m1::kCornerWindows> g_corner_snapshots{};
+DWORD g_corner_count = 0;
+struct CornerTransition {
+    DWORD elapsed = 0, reason = 0, filter = 0, from = 0, to = 0, thread = 0;
+    DWORD observed_visual = 0;
+};
+std::array<CornerTransition, 64> g_corner_transitions{};
+DWORD g_corner_transition_count = 0, g_corner_transition_dropped = 0;
+DWORD g_corner_outside_filter = 0;
+sfc_m1::ThreadSuspendDiagnostic g_thread_suspend_diagnostic;
 ULONGLONG g_start_tick = 0;
 ULONGLONG g_gate_tick = 0;
 HANDLE g_burst_event = nullptr;
 HANDLE g_tactical_event = nullptr;
+HANDLE g_copy_ready_event=nullptr;
 HMODULE g_self = nullptr;
 DWORD g_uncorrelated_sample_frame = 0xFFFFFFFFu;
 DWORD g_uncorrelated_samples_in_frame = 0;
@@ -206,6 +308,8 @@ void* g_tramp_visual = nullptr;
 void* g_tramp_model0 = nullptr;
 void* g_tramp_visual_exit = nullptr;
 void* g_tramp_geometry = nullptr;
+void* g_tramp_wrapper = nullptr;
+void* g_tramp_prepare = nullptr;
 
 const BYTE kSceneBytes[] = {0x53, 0x56, 0x8B, 0xF1, 0x57};
 const BYTE kShipBytes[] = {0x55, 0x8B, 0xEC, 0x83, 0xEC, 0x50};
@@ -213,6 +317,8 @@ const BYTE kVisualBytes[] = {0x55, 0x8B, 0xEC, 0x83, 0xEC, 0x0C};
 const BYTE kModel0Bytes[] = {0x55, 0x8B, 0xEC, 0x83, 0xEC, 0x38};
 const BYTE kVisualExitBytes[] = {0x5F, 0x5E, 0xC9, 0xC2, 0x0C, 0x00};
 const BYTE kGeometryBytes[] = {0x83, 0xEC, 0x14, 0x53, 0x8B, 0xD9};
+const BYTE kWrapperBytes[] = {0x83,0xEC,0x08,0x53,0x56};
+const BYTE kPrepareBytes[] = {0x81,0xEC,0x84,0,0,0};
 
 extern "C" void HookScene();
 extern "C" void HookShip();
@@ -220,6 +326,8 @@ extern "C" void HookVisual();
 extern "C" void HookModel0();
 extern "C" void HookVisualExit();
 extern "C" void HookGeometry();
+extern "C" void HookWrapper();
+extern "C" void HookPrepare();
 
 #ifdef M1_GATE_ONLY
 std::array<Hook, 1> g_hooks = {{
@@ -227,7 +335,7 @@ std::array<Hook, 1> g_hooks = {{
         reinterpret_cast<void*>(&HookShip)},
 }};
 #else
-std::array<Hook, 6> g_hooks = {{
+std::array<Hook, 8> g_hooks = {{
     {"scene_begin", 0x0029E300, kSceneBytes, sizeof(kSceneBytes),
         reinterpret_cast<void*>(&HookScene)},
     {"ship_owner", 0x000162B9, kShipBytes, sizeof(kShipBytes),
@@ -240,6 +348,10 @@ std::array<Hook, 6> g_hooks = {{
         reinterpret_cast<void*>(&HookVisualExit)},
     {"geometry_submit", 0x002AB410, kGeometryBytes, sizeof(kGeometryBytes),
         reinterpret_cast<void*>(&HookGeometry)},
+    {"polygon_wrapper",0x002AC5A0,kWrapperBytes,sizeof(kWrapperBytes),
+        reinterpret_cast<void*>(&HookWrapper)},
+    {"polygon_prepare",0x002ABFC0,kPrepareBytes,sizeof(kPrepareBytes),
+        reinterpret_cast<void*>(&HookPrepare)},
 }};
 #endif
 
@@ -605,6 +717,212 @@ void maybe_apply_tint(ThreadState* state, EventRecord& event, const DWORD* saved
     event.tint_elapsed_ms = static_cast<DWORD>(tint_elapsed);
 }
 
+void corner_transition(DWORD reason, DWORD filter, DWORD from, DWORD to, DWORD thread,
+    DWORD observed_visual = 0) {
+    if (g_corner_transition_count == g_corner_transitions.size()) {
+        ++g_corner_transition_dropped; return;
+    }
+    g_corner_transitions[g_corner_transition_count++] = {
+        static_cast<DWORD>(GetTickCount64() - g_gate_tick), reason, filter, from, to, thread,
+        observed_visual ? observed_visual : g_corner_owners[filter].visual};
+}
+
+void maybe_capture_corner_inputs(const EventRecord& event) {
+    if (!g_config.enable_corner_snapshot || !g_running || !g_gate || !event.owner_id) return;
+    const ULONGLONG elapsed = GetTickCount64() - g_gate_tick;
+    if (elapsed >= sfc_m1::kCornerWindows * sfc_m1::kCornerWindowMs) return;
+    const DWORD window = static_cast<DWORD>(elapsed / sfc_m1::kCornerWindowMs);
+    CornerOwnerWindow* target = nullptr;
+    DWORD filter = 0;
+    for (auto& slot : g_corner_owners) {
+        if (slot.ship == event.ship && slot.visual != event.visual) {
+            if (!slot.visual_mismatches) corner_transition(5, filter, slot.owner,
+                event.owner_id, event.thread_id, event.visual);
+            ++slot.visual_mismatches; ++g_corner_outside_filter; return;
+        }
+        if (slot.ship == event.ship && slot.visual == event.visual) { target = &slot; break; }
+        if (!slot.ship) {
+            slot.ship = event.ship; slot.visual = event.visual;
+            slot.owner = event.owner_id; slot.thread = event.thread_id; target = &slot;
+            corner_transition(1, filter, 0, event.owner_id, event.thread_id); break;
+        }
+        ++filter;
+    }
+    if (!target) { ++g_corner_outside_filter; return; }
+    // Address pair is a read-only interest filter, NOT persistent object identity.
+    // Fresh validated epochs retain their literal IDs and get a transition record.
+    if (target->owner != event.owner_id) {
+        corner_transition(3, filter, target->owner, event.owner_id, event.thread_id);
+        target->owner = event.owner_id; target->thread = event.thread_id; target->retired = false;
+    }
+    if (target->thread != event.thread_id) {
+        if (!target->thread_rejections) corner_transition(4, filter, target->owner, target->owner, event.thread_id);
+        ++target->thread_rejections; return;
+    }
+    target->seen_mask |= DWORD(1) << window;
+    if (window < target->next_window) return;
+    if (g_corner_count >= g_corner_snapshots.size()) return;
+    if (target->next_window && elapsed - target->last_elapsed < 1000) return;
+    target->last_elapsed = elapsed;
+    target->next_window = window + 1; // bounded attempts, including failed snapshots
+    auto& snapshot = g_corner_snapshots[g_corner_count++];
+    snapshot.elapsed_ms = static_cast<DWORD>(elapsed); snapshot.window = window;
+    snapshot.owner = event.owner_id; snapshot.thread = event.thread_id;
+    snapshot.filter = filter;
+    snapshot.ship = event.ship; snapshot.visual = event.visual; snapshot.model = event.model0;
+    snapshot.manager = event.manager; snapshot.source = event.source;
+    if (sfc_m1::capture_corner_inputs(snapshot, read_tint32, safe_copy))
+        target->success_mask |= DWORD(1) << window;
+}
+
+void record_rejection(const EventRecord& e, DWORD reason) {
+    InterlockedIncrement(&g_rejected_semantics);
+    sfc_m1::RejectionSample sample{};
+    sample.phase = !g_gate ? 0 : (GetTickCount64()-g_gate_tick < 15000 ? 1 :
+                                 (GetTickCount64()-g_gate_tick < 30000 ? 2 : 3));
+    sample.elapsed = static_cast<DWORD>(GetTickCount64()-(g_gate ? g_gate_tick : g_start_tick));
+    sample.kind=e.kind; sample.reason=reason; sample.caller=e.return_address;
+    sample.thread=e.thread_id; sample.ship=e.ship; sample.visual=e.visual;
+    sample.model=e.model0; sample.source=e.source; sample.owner=e.owner_id;
+    sample.ship_vtable=e.ship_vtable; sample.visual_vtable=e.visual_vtable;
+    sample.model_vtable=e.model0_vtable;
+    for(DWORD i=0;i<g_corner_owners.size();++i) {
+        const auto& filter=g_corner_owners[i];
+        if(filter.ship && e.ship==filter.ship) sample.ship_match |= 1u<<i;
+        if(filter.visual && e.visual==filter.visual) sample.visual_match |= 1u<<i;
+    }
+    g_rejection_diagnostics.record(sample);
+}
+
+// Only validates already-established fields; raw filter equality never merges IDs.
+bool validated_copy_owner(const ThreadState& state) {
+    const auto* owner=g_owners.find_by_id(state.owner_id);
+    DWORD ship_vtable=0,visual_vtable=0,model_vtable=0,linked_visual=0;
+    return owner && owner->ship==state.ship && owner->visual==state.visual &&
+        safe_read32(state.ship,ship_vtable) && ship_vtable==kShipVtable &&
+        safe_read32(state.ship+0x88,linked_visual) && linked_visual==state.visual &&
+        safe_read32(state.visual,visual_vtable) && visual_vtable==kVisualVtable &&
+        safe_read32(state.model0,model_vtable) && model_vtable==kModel0Vtable;
+}
+
+template<class Read>
+void observe_mesh_export(ThreadState* state,const EventRecord& event,DWORD outcome,Read read) {
+    if(!g_config.enable_mesh_export || !g_gate || outcome!=1 || !state ||
+       state->copy_depth!=1 || state->wrapper_pending!=1 || !validated_copy_owner(*state))return;
+    sfc_m1::MeshIdentity id;
+    id.owner=state->owner_id;id.thread=event.thread_id;id.frame=static_cast<DWORD>(g_frame);
+    id.elapsed=static_cast<DWORD>(GetTickCount64()-g_gate_tick);id.ship=state->ship;id.visual=state->visual;
+    id.model=state->model0;id.manager=event.ecx;id.source=state->source;id.caller=event.return_address;
+    id.list=event.arg2;id.count=event.arg1;
+    auto live_valid=[&](){
+        return g_running && state->model_scope && state->owner_id==id.owner &&
+            state->model0==id.model && state->source==id.source && validated_copy_owner(*state);
+    };
+    if(!g_config.live_channel.empty()){
+        if(g_live_scene_mode)g_live_scene.observe(id,read,live_valid);
+        else g_live_bridge.observe(id,read,live_valid);
+    }
+    if(g_live_scene_mode || !g_mesh_budget.admit(id))return;
+    LARGE_INTEGER before{},after{};
+    QueryPerformanceFrequency(&g_mesh_capture_frequency);
+    const bool timed=QueryPerformanceCounter(&before)!=FALSE;
+    g_mesh_budget.status=sfc_m1::capture_mesh(g_mesh_packet,id,read,[&](){
+        return g_running && state->model_scope && state->owner_id==id.owner &&
+            state->model0==id.model && state->source==id.source && validated_copy_owner(*state);
+    });
+    if(g_config.enable_texture_references && g_mesh_packet.complete && !g_texture_references.status)
+        sfc_m1::capture_texture_references(g_texture_references,g_mesh_packet,read,[&](){
+            return g_running && state->model_scope && state->owner_id==id.owner &&
+                state->model0==id.model && state->source==id.source && validated_copy_owner(*state);
+        });
+    if(timed && QueryPerformanceCounter(&after))g_mesh_capture_ticks[g_mesh_budget.attempts-1]=after.QuadPart-before.QuadPart;
+}
+
+bool admissible_copy_identity(const ThreadState& state,const EventRecord& event,DWORD elapsed) {
+    if(g_config.enable_copy_epoch_requalification && !validated_copy_owner(state))return false;
+    if(!g_copy_attempts)return true;
+    if(state.ship!=g_copy_ship || state.visual!=g_copy_visual || state.model0!=g_copy_model ||
+       state.source!=g_copy_source || event.ecx!=g_copy_manager || event.thread_id!=g_copy_thread ||
+       event.arg2!=g_copy_original_list || event.arg1!=g_private_copy.count)return false;
+    if(state.owner_id==g_copy_current_owner)return true;
+    if(!g_config.enable_copy_epoch_requalification || g_copy_requalifications>=2 ||
+       !g_copy_retired_ms || g_owners.find_by_id(g_copy_current_owner))return false;
+    return g_copy_candidate.observe(state.owner_id,static_cast<DWORD>(g_frame),elapsed);
+}
+
+bool surface_tuple(const ThreadState& state) {
+    return state.owner_id==g_surface_owner && GetCurrentThreadId()==g_surface_thread &&
+        state.ship==g_surface_ship && state.visual==g_surface_visual &&
+        state.model0==g_surface_model && state.source==g_surface_source &&
+        state.model_manager==g_surface_manager && validated_copy_owner(state);
+}
+
+void begin_surface_model(ThreadState* state,EventRecord& event,const DWORD* saved) {
+    if(!g_config.enable_surface_lighting || !state || !g_copy_ready_event ||
+       WaitForSingleObject(g_copy_ready_event,0)!=WAIT_OBJECT_0 || g_surface_failure || state->copy_depth!=1)return;
+    if(!g_surface_attempted) {
+        DWORD count=0,list=0,vertices=0,manager_vtable=0,mode=0;
+        if(!safe_read32(event.model0+0x10,count) || !count || count>512)return;
+        g_surface_attempted=true;
+        if(!validated_copy_owner(*state) || !safe_read32(event.manager,manager_vtable) || manager_vtable!=0x007B8D4C ||
+           !safe_read32(event.manager+0x1ECC,mode) || mode==3 || !safe_read32(event.model0+0x14,list) ||
+           !safe_read32(event.model0+8,vertices) || !sfc_m1::prepare_tint_snapshot(event.source,count,list,
+               read_tint32,safe_copy,state->tint_snapshot,sfc_m1::SourceModification::Observe)) {
+            g_surface_failure=1;return;
+        }
+        bool vertex_lit=false;
+        for(DWORD i=0;i<count;++i) {
+            DWORD polygon=0,index=0,flags=0;
+            if(!safe_read32(list+i*4,polygon) || !safe_read32(polygon+4,index) || index>=256) {g_surface_failure=1;return;}
+            std::memcpy(&flags,state->tint_snapshot.bytes.data()+index*36,4);
+            vertex_lit|=(flags&2)!=0;
+        }
+        if(!vertex_lit || !g_surface_graphs.build(list,count,vertices,safe_copy)){g_surface_failure=2;return;}
+        g_surface_owner=state->owner_id;g_surface_thread=event.thread_id;
+        g_surface_ship=state->ship;g_surface_visual=state->visual;g_surface_model=state->model0;
+        g_surface_source=state->source;g_surface_manager=state->model_manager;
+        g_surface_count=count;g_surface_list=list;g_surface_vertices=vertices;
+    }
+    if(state->owner_id!=g_surface_owner)return; // Other ship; never select it.
+    DWORD current_count=0,current_list=0,current_vertices=0;
+    if(!surface_tuple(*state) || g_tint_restore_failed || state->tint_lease.active ||
+       !safe_read32(state->model0+0x10,current_count) || current_count!=g_surface_count ||
+       !safe_read32(state->model0+0x14,current_list) || current_list!=g_surface_list ||
+       !safe_read32(state->model0+8,current_vertices) || current_vertices!=g_surface_vertices){g_surface_failure=3;return;}
+    const DWORD elapsed=g_surface_tick?static_cast<DWORD>(GetTickCount64()-g_surface_tick):0;
+    const auto phase=sfc_m1::surface_test_phase(elapsed);
+    auto& stats=g_surface_phases[phase];
+    if(!stats.observed)stats.first_ms=elapsed;
+    stats.last_ms=elapsed;++stats.observed;
+    if(phase==2 && g_surface_lighting_event)SetEvent(g_surface_lighting_event);
+    if(phase==3 && g_surface_restored_event)SetEvent(g_surface_restored_event);
+    if(phase!=0)return;
+    if(!sfc_m1::prepare_tint_snapshot(state->source,g_surface_count,g_surface_list,
+          read_tint32,safe_copy,state->tint_snapshot,sfc_m1::SourceModification::Magenta)) {g_surface_failure=4;return;}
+    const DWORD effective=reinterpret_cast<DWORD>(state->tint_snapshot.bytes.data());
+    if(!safe_write32(snapshot_entry_esp(saved)+8,effective)){g_surface_failure=5;return;}
+    if(!g_surface_tick)g_surface_tick=GetTickCount64(); // Full20s from actual marker activation.
+    state->tint_lease={state->model_manager,state->source,effective,true};
+    ++stats.applied;state->surface_pending=1;
+    InterlockedIncrement(&g_tint_live);InterlockedIncrement(&g_tint_applied);
+    event.effective_source=effective;event.tint_applied=1;
+}
+
+void apply_surface_graph(ThreadState* state,const EventRecord& event,const DWORD* saved,DWORD outcome) {
+    if(!g_config.enable_surface_lighting || !g_surface_tick || g_surface_failure || outcome!=1 ||
+       !state || state->owner_id!=g_surface_owner || state->copy_depth!=1 || state->wrapper_pending!=1)return;
+    const auto phase=sfc_m1::surface_test_phase(GetTickCount64()-g_surface_tick);
+    if(phase!=1 && phase!=2)return;
+    DWORD vertices=0;
+    if(!surface_tuple(*state) || event.arg1!=g_surface_count || event.arg2!=g_surface_list ||
+       !safe_read32(state->model0+8,vertices) ||
+       !g_surface_graphs.neutral.matches_original(event.arg2,event.arg1,vertices,safe_copy) ||
+       !g_surface_graphs.intact()){g_surface_failure=6;return;}
+    const auto& graph=phase==1?g_surface_graphs.neutral:g_surface_graphs.altered;
+    if(!safe_write32(snapshot_entry_esp(saved)+8,reinterpret_cast<DWORD>(graph.list.data()))) {g_surface_failure=7;return;}
+    state->surface_pending=phase+1;++g_surface_phases[phase].applied;
+}
+
 extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
     InterlockedIncrement(&g_in_recorders);
     if (!g_running || kind >= kEventKindCount) {
@@ -636,12 +954,135 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
     EnterCriticalSection(&g_lock);
     ThreadState* state = thread_state(thread_id);
 
-    if (kind == kScene) {
+    if(kind==kPrepare) {
+        if(g_config.enable_surface_lighting && g_surface_graphs.built) {
+            const DWORD pointer=event.arg3;
+            DWORD phase=0;
+            if(pointer==reinterpret_cast<DWORD>(g_surface_graphs.neutral.list.data()))phase=1;
+            else if(pointer==reinterpret_cast<DWORD>(g_surface_graphs.altered.list.data()))phase=2;
+            if(phase) {
+                if(state && surface_tuple(*state) && state->surface_pending==phase+1 &&
+                   event.arg2==g_surface_count && event.ecx==g_surface_manager)++g_surface_phases[phase].received;
+                else g_surface_failure=8;
+            }
+        }
+        for(DWORD i=0;i<g_copy_attempts;++i) {
+            const auto& copy=i?g_additional_copies[i-1].data:g_private_copy;
+            const DWORD owner=i?g_additional_copies[i-1].owner:g_copy_owner;
+            if(!copy.published || event.arg3!=reinterpret_cast<DWORD>(copy.list.data()))continue;
+            if(event.arg2==copy.count && event.ecx==g_copy_manager && thread_id==g_copy_thread &&
+               state && state->model_scope && state->owner_id==owner &&
+               state->model0==g_copy_model && state->source==g_copy_source && state->copy_depth==1 &&
+               state->copy_slot_pending==i+1) {
+                if(i)++g_additional_copies[i-1].consumed;else ++g_copy_consumed;
+            } else {++g_copy_receipt_mismatch;g_copy_halted=true;}
+        }
+    } else if (kind == kWrapper) {
+        DWORD outcome=0, expected_count=0, expected_list=0, manager_vtable=0;
+        if(!state || !state->model_scope || !state->owner_id) outcome=3;
+        else if(event.ecx!=state->model_manager || !safe_read32(event.ecx,manager_vtable) ||
+                manager_vtable!=0x007B8D4C) outcome=4;
+        else if(event.return_address!=0x0042E55D && event.return_address!=0x0042E626) outcome=5;
+        else if(!safe_read32(state->model0+0x10,expected_count) ||
+                !safe_read32(state->model0+(event.return_address==0x0042E55D?0x14:0x18),expected_list)) outcome=6;
+        else if(!expected_count || expected_count>65536 || !expected_list ||
+                event.arg1!=expected_count || event.arg2!=expected_list || event.arg3!=1) outcome=7;
+        else outcome=event.return_address==0x0042E55D?1:2;
+        ++g_wrapper_total;++g_wrapper_outcomes[outcome];
+        if(outcome==1 || outcome==2) ++state->wrapper_pending;
+        observe_mesh_export(state,event,outcome,safe_copy);
+        const auto index=g_wrapper_total<=32?g_wrapper_total-1:32+(g_wrapper_total-33)%32;
+        auto& s=g_wrapper_samples[static_cast<std::size_t>(index)];
+        s.data={static_cast<DWORD>(g_gate?GetTickCount64()-g_gate_tick:0),
+            static_cast<DWORD>(g_gate),outcome,event.thread_id,event.return_address,
+            state?state->owner_id:0,state?state->ship:0,state?state->visual:0,
+            state?state->model0:0,event.ecx,event.arg1,event.arg2,event.arg3,expected_count,expected_list};
+        // RT-007 uses one slot. RT-008 uses fresh immutable slots <=1/second.
+        if(g_config.enable_private_copy && !g_config.enable_surface_lighting && outcome==1 && g_gate &&
+           g_copy_ready_event && WaitForSingleObject(g_copy_ready_event,0)==WAIT_OBJECT_0 &&
+           !g_copy_halted && g_copy_attempts<(g_config.enable_repeated_private_copy?32u:1u) &&
+           expected_count<=1024 &&
+           state->copy_depth==1 && state->wrapper_pending==1) {
+          const DWORD elapsed=static_cast<DWORD>(GetTickCount64()-g_gate_tick);
+          const bool same=admissible_copy_identity(*state,event,elapsed);
+          if(!same) ++g_copy_identity_skips;
+          else if(!g_copy_attempts || elapsed-g_copy_last_elapsed>=1000) {
+            const DWORD previous=g_copy_attempts?g_copy_attempts-1:0;
+            const bool previous_closed=!g_copy_attempts || (previous?
+                (g_additional_copies[previous-1].parent && g_additional_copies[previous-1].consumed):
+                (g_copy_parent && g_copy_consumed));
+            if(previous_closed) {
+            if(!g_copy_attempts) {
+            g_copy_owner=state->owner_id;g_copy_thread=thread_id;g_copy_ship=state->ship;
+            g_copy_visual=state->visual;g_copy_model=state->model0;g_copy_manager=event.ecx;
+            g_copy_source=state->source;
+            g_copy_current_owner=state->owner_id;
+            g_copy_original_list=event.arg2;g_copy_elapsed=elapsed;g_copy_frame=static_cast<DWORD>(g_frame);
+            }
+            const DWORD copy_index=g_copy_attempts++;
+            auto& copy=copy_index?g_additional_copies[copy_index-1].data:g_private_copy;
+            auto& failure=copy_index?g_additional_copies[copy_index-1].failure:g_copy_failure;
+            if(copy_index) {
+                g_additional_copies[copy_index-1].elapsed=elapsed;
+                g_additional_copies[copy_index-1].frame=static_cast<DWORD>(g_frame);
+                g_additional_copies[copy_index-1].owner=state->owner_id;
+                if(state->owner_id!=g_copy_current_owner) {
+                    auto& record=g_additional_copies[copy_index-1];
+                    record.requalified_from=g_copy_current_owner;
+                    record.retired_ms=g_copy_retired_ms;record.retired_frame=g_copy_retired_frame;
+                    record.qualification_ms=g_copy_candidate.first_ms;
+                    record.qualification_frame=g_copy_candidate.first_frame;
+                    record.qualification_frames=g_copy_candidate.frames;
+                }
+            }
+            g_copy_last_elapsed=elapsed;
+            DWORD vertices=0;
+            if(!safe_read32(state->model0+8,vertices)) {copy.attempted=true;failure=1;}
+            else if(!copy.build(event.arg2,expected_count,vertices,safe_copy)) {
+                copy.attempted=true;failure=2;
+            } else {
+                const DWORD argument=snapshot_entry_esp(saved)+8;
+                const DWORD relocated=reinterpret_cast<DWORD>(copy.list.data());
+                if(safe_write32(argument,relocated)) {
+                    copy.published=true;state->copy_slot_pending=copy_index+1;if(!copy_index)g_copy_applied=1;
+                    if(state->owner_id!=g_copy_current_owner) {
+                        g_copy_current_owner=state->owner_id;++g_copy_requalifications;
+                        g_copy_retired_ms=g_copy_retired_frame=0;g_copy_candidate={};
+                    }
+                }
+                else failure=3;
+            }
+            if(failure)g_copy_halted=true;
+            }
+          }
+        }
+        apply_surface_graph(state,event,saved,outcome);
+    } else if (kind == kScene) {
         event.origin = 0x0069E300;
         if (g_gate) {
             DWORD frame = static_cast<DWORD>(InterlockedIncrement(&g_frame));
             if (frame > 2) {
                 g_owners.retire_before(frame - 2, [&](const auto& slot) {
+                    if(!g_config.live_channel.empty()){
+                        const auto elapsed=static_cast<DWORD>(GetTickCount64()-g_gate_tick);
+                        if(g_live_scene_mode)g_live_scene.retire(slot.id,frame,elapsed);
+                        else g_live_bridge.retire(slot.id,frame,elapsed);
+                    }
+                    if(g_config.enable_mesh_export && slot.id==g_mesh_budget.target.owner)g_mesh_budget.retired=true;
+                    if(g_config.enable_surface_lighting && slot.id==g_surface_owner)g_surface_failure=9;
+                    if(g_config.enable_copy_epoch_requalification && slot.id==g_copy_current_owner) {
+                        g_copy_retired_ms=static_cast<DWORD>(GetTickCount64()-g_gate_tick);
+                        g_copy_retired_frame=frame;g_copy_candidate={};
+                    }
+                    if (g_config.enable_corner_snapshot) {
+                        for (DWORD i = 0; i < g_corner_owners.size(); ++i) {
+                            auto& interest = g_corner_owners[i];
+                            if (interest.owner == slot.id && !interest.retired) {
+                                corner_transition(2, i, slot.id, 0, thread_id);
+                                interest.retired = true;
+                            }
+                        }
+                    }
                     EventRecord retired{};
                     retired.kind = kRetire;
                     retired.thread_id = thread_id;
@@ -660,12 +1101,16 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
         event.origin = 0x004162B9;
         event.ship = event.ecx;
         DWORD visual = 0;
-        bool valid = safe_read32(event.ship, event.ship_vtable) &&
-            event.ship_vtable == kShipVtable &&
-            safe_read32(event.ship + 0x88, visual);
+        DWORD reason=0;
+        if(!safe_read32(event.ship,event.ship_vtable)) reason=1;
+        else if(event.ship_vtable!=kShipVtable) reason=2;
+        else if(!safe_read32(event.ship+0x88,visual)) reason=3;
         event.visual = visual;
-        valid = valid && safe_read32(visual, event.visual_vtable) &&
-            event.visual_vtable == kVisualVtable;
+        if(!reason) {
+            if(!safe_read32(visual,event.visual_vtable)) reason=4;
+            else if(event.visual_vtable!=kVisualVtable) reason=5;
+        }
+        const bool valid = reason==0;
         if (valid) {
             if (InterlockedCompareExchange(&g_gate, 1, 0) == 0) {
                 g_gate_tick = GetTickCount64();
@@ -689,19 +1134,21 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
             signal_saturation();
 #endif
         } else {
-            InterlockedIncrement(&g_rejected_semantics);
+            record_rejection(event,reason);
         }
     } else if (kind == kVisual) {
         event.origin = 0x0042FD3F;
         event.visual = event.ecx;
         event.ship = event.ebx;
         DWORD ship_visual = 0;
-        bool valid = safe_read32(event.ship, event.ship_vtable) &&
-            event.ship_vtable == kShipVtable &&
-            safe_read32(event.visual, event.visual_vtable) &&
-            event.visual_vtable == kVisualVtable &&
-            safe_read32(event.ship + 0x88, ship_visual) &&
-            ship_visual == event.visual;
+        DWORD reason=0;
+        if(!safe_read32(event.ship,event.ship_vtable)) reason=1;
+        else if(event.ship_vtable!=kShipVtable) reason=2;
+        else if(!safe_read32(event.visual,event.visual_vtable)) reason=4;
+        else if(event.visual_vtable!=kVisualVtable) reason=5;
+        else if(!safe_read32(event.ship+0x88,ship_visual)) reason=3;
+        else if(ship_visual!=event.visual) reason=6;
+        const bool valid = reason==0;
         if (valid) {
             safe_read32(event.visual + 0x158, event.source);
             safe_read32(event.visual + 0x11C, event.lod_count);
@@ -723,7 +1170,7 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
             }
             append_event_locked(event);
         } else {
-            InterlockedIncrement(&g_rejected_semantics);
+            record_rejection(event,reason);
         }
     } else if (kind == kModel0) {
         event.origin = 0x0042E4B2;
@@ -731,8 +1178,8 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
         event.visual = event.esi;
         event.manager = event.arg1;
         event.source = event.arg2;
-        safe_read32(event.model0, event.model0_vtable);
-        safe_read32(event.visual, event.visual_vtable);
+        const bool model_read=safe_read32(event.model0, event.model0_vtable);
+        const bool visual_read=safe_read32(event.visual, event.visual_vtable);
         event.owner_id = g_owners.find_by_visual(event.visual);
         const bool mainline = event.return_address == kVisualMainlineReturn &&
             event.model0_vtable == kModel0Vtable &&
@@ -742,23 +1189,30 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
         }
         if (state) {
             if (mainline) {
+                if(g_config.enable_private_copy || g_config.enable_mesh_export) ++state->copy_depth;
                 state->owner_id = event.owner_id;
                 state->visual = event.visual;
                 state->model0 = event.model0;
                 state->source = event.source;
                 state->model_scope = true;
+                state->model_manager = event.manager;
                 if (auto* slot = g_owners.find_by_id(event.owner_id)) {
                     event.ship = static_cast<DWORD>(slot->ship);
                     state->ship = event.ship;
                 }
+                begin_surface_model(state,event,saved);
                 maybe_apply_tint(state, event, saved);
+                maybe_capture_corner_inputs(event);
             } else {
                 state->model_scope = false;
                 state->model0 = 0;
             }
         }
         if (!mainline && event.return_address != kKnownExceptionReturn) {
-            InterlockedIncrement(&g_rejected_semantics);
+            const DWORD reason=event.return_address!=kVisualMainlineReturn ? 7 :
+                (!model_read ? 8 : (event.model0_vtable!=kModel0Vtable ? 9 :
+                (!visual_read ? 10 : (event.visual_vtable!=kVisualVtable ? 11 : 12))));
+            record_rejection(event,reason);
         }
         append_event_locked(event);
     } else if (kind == kGeometry) {
@@ -792,6 +1246,21 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
     } else if (kind == kVisualExit) {
         event.origin = 0x0042FDD5;
         if (state) {
+            if(state->surface_pending && surface_tuple(*state)) {
+                ++g_surface_phases[state->surface_pending-1].parent;
+                state->surface_pending=0;
+            }
+            const DWORD pending_owner=state->copy_slot_pending>1?
+                g_additional_copies[state->copy_slot_pending-2].owner:g_copy_owner;
+            if(state->copy_slot_pending && state->owner_id==pending_owner && thread_id==g_copy_thread &&
+               state->copy_depth==1 && state->model0==g_copy_model && state->source==g_copy_source) {
+                if(state->copy_slot_pending==1)g_copy_parent=1;
+                else g_additional_copies[state->copy_slot_pending-2].parent=1;
+                state->copy_slot_pending=0;
+            }
+            if(state->copy_depth) --state->copy_depth;
+            g_wrapper_parent_closed+=state->wrapper_pending;
+            state->wrapper_pending=0;
             if (state->tint_lease.active) {
                 event.manager = state->tint_lease.manager;
                 event.effective_source = state->tint_lease.effective;
@@ -862,47 +1331,27 @@ extern "C" void __declspec(naked) HookVisualExit() {
 extern "C" void __declspec(naked) HookGeometry() {
     M1_HOOK_BODY(5, g_tramp_geometry)
 }
+extern "C" void __declspec(naked) HookWrapper() {
+    M1_HOOK_BODY(7, g_tramp_wrapper)
+}
+extern "C" void __declspec(naked) HookPrepare() {
+    M1_HOOK_BODY(8, g_tramp_prepare)
+}
 
 #undef M1_HOOK_BODY
 
 std::vector<HANDLE> suspend_other_threads(bool& ok) {
-    std::vector<HANDLE> suspended;
-    ok = false;
-    HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
-    if (snapshot == INVALID_HANDLE_VALUE) return suspended;
-    THREADENTRY32 entry{};
-    entry.dwSize = sizeof(entry);
-    const DWORD process_id = GetCurrentProcessId();
-    const DWORD current_thread = GetCurrentThreadId();
-    bool enumeration_ok = Thread32First(snapshot, &entry) != FALSE;
-    while (enumeration_ok) {
-        if (entry.th32OwnerProcessID == process_id &&
-            entry.th32ThreadID != current_thread) {
-            HANDLE thread = OpenThread(THREAD_SUSPEND_RESUME, FALSE,
-                entry.th32ThreadID);
-            if (thread) {
-                if (SuspendThread(thread) == static_cast<DWORD>(-1)) {
-                    CloseHandle(thread);
-                    enumeration_ok = false;
-                    break;
-                }
-                suspended.push_back(thread);
-            }
-        }
-        enumeration_ok = Thread32Next(snapshot, &entry) != FALSE;
-    }
-    DWORD enumeration_error = GetLastError();
-    CloseHandle(snapshot);
-    if (!enumeration_ok && enumeration_error != ERROR_NO_MORE_FILES) {
-        for (HANDLE thread : suspended) {
-            ResumeThread(thread);
-            CloseHandle(thread);
-        }
-        suspended.clear();
-        return suspended;
-    }
-    ok = true;
-    return suspended;
+    return sfc_m1::suspend_thread_transaction(ok, g_thread_suspend_diagnostic);
+}
+
+void write_thread_failure(const char* stage) {
+    // One overwritten bounded record per stage, after suspension rollback.
+    std::ofstream out(narrow(g_config.output_dir + L"\\M1-thread-transaction-failure.log"),
+        std::ios::out | std::ios::trunc);
+    out << "stage=" << stage << "\napi=" << g_thread_suspend_diagnostic.api
+        << "\nthread_id=" << g_thread_suspend_diagnostic.thread
+        << "\nwin32_error=" << g_thread_suspend_diagnostic.error
+        << "\nrollback_resume_failures=" << g_thread_suspend_diagnostic.rollback_failures << '\n';
 }
 
 void resume_threads(std::vector<HANDLE>& threads) {
@@ -976,6 +1425,8 @@ void assign_trampolines() {
     g_tramp_model0 = g_hooks[3].trampoline;
     g_tramp_visual_exit = g_hooks[4].trampoline;
     g_tramp_geometry = g_hooks[5].trampoline;
+    g_tramp_wrapper = g_hooks[6].trampoline;
+    g_tramp_prepare = g_hooks[7].trampoline;
 #endif
 }
 
@@ -1003,10 +1454,23 @@ bool load_config(const wchar_t* path) {
         L"m1", L"EnableVisualTint", 0, path) != 0;
     g_config.enable_shading_off = GetPrivateProfileIntW(
         L"m1", L"EnableShadingOff", 0, path) != 0;
+    g_config.enable_corner_snapshot = GetPrivateProfileIntW(
+        L"m1", L"EnableCornerSnapshot", 0, path) != 0;
+    g_config.enable_wrapper_observation = GetPrivateProfileIntW(
+        L"m1",L"EnableWrapperObservation",0,path)!=0;
+    g_config.enable_private_copy=GetPrivateProfileIntW(L"m1",L"EnablePrivateCopy",0,path)!=0;
+    g_config.enable_repeated_private_copy=GetPrivateProfileIntW(L"m1",L"EnableRepeatedPrivateCopy",0,path)!=0;
+    g_config.enable_copy_epoch_requalification=GetPrivateProfileIntW(L"m1",L"EnableCopyEpochRequalification",0,path)!=0;
+    g_config.enable_surface_lighting=GetPrivateProfileIntW(L"m1",L"EnableSurfaceLighting",0,path)!=0;
+    g_config.enable_mesh_export=GetPrivateProfileIntW(L"m1",L"EnableMeshExport",0,path)!=0;
+    g_config.enable_texture_references=GetPrivateProfileIntW(L"m1",L"EnableTextureReferences",0,path)!=0;
+    std::array<wchar_t,128> channel{};
+    GetPrivateProfileStringW(L"m1",L"LiveChannel",L"",channel.data(),static_cast<DWORD>(channel.size()),path);
+    g_config.live_channel=channel.data();
     g_config.tint_delay_ms = GetPrivateProfileIntW(L"m1", L"TintDelayMs", 5000, path);
     g_config.tint_duration_ms = GetPrivateProfileIntW(L"m1", L"TintDurationMs", 10000, path);
 #ifdef M1_GATE_ONLY
-    if (g_config.enable_visual_tint || g_config.enable_shading_off) return false;
+    if (g_config.enable_visual_tint || g_config.enable_shading_off || g_config.enable_corner_snapshot || g_config.enable_wrapper_observation || g_config.enable_private_copy || g_config.enable_mesh_export) return false;
 #endif
     return g_config.max_frames >= 1 && g_config.max_frames <= 6000 &&
         g_config.max_events >= 1 && g_config.max_events <= kEventCapacity &&
@@ -1016,11 +1480,110 @@ bool load_config(const wchar_t* path) {
         (!g_config.enable_visual_tint || !g_config.enable_geometry_hook) &&
         (!g_config.enable_shading_off ||
             (!g_config.enable_geometry_hook && !g_config.enable_visual_tint)) &&
+        (!g_config.enable_corner_snapshot || (!g_config.enable_geometry_hook &&
+            !g_config.enable_visual_tint && !g_config.enable_shading_off)) &&
+        (!g_config.enable_wrapper_observation || g_config.enable_corner_snapshot || g_config.enable_mesh_export) &&
+        (!g_config.enable_texture_references || g_config.enable_mesh_export) &&
+        (g_config.live_channel.empty() || (sfc_m1::LiveBridge::name_ok(g_config.live_channel) &&
+            g_config.enable_mesh_export && g_config.enable_texture_references)) &&
+        (!g_config.enable_mesh_export || (g_config.enable_wrapper_observation && !g_config.enable_geometry_hook &&
+            !g_config.enable_corner_snapshot && !g_config.enable_private_copy && !g_config.enable_visual_tint &&
+            !g_config.enable_shading_off && !g_config.enable_surface_lighting)) &&
+        (!g_config.enable_private_copy || g_config.enable_wrapper_observation) &&
+        (!g_config.enable_repeated_private_copy || g_config.enable_private_copy) &&
+        (!g_config.enable_copy_epoch_requalification || g_config.enable_repeated_private_copy) &&
+        (!g_config.enable_surface_lighting || (g_config.enable_private_copy &&
+            !g_config.enable_repeated_private_copy && !g_config.enable_copy_epoch_requalification &&
+            !g_config.enable_visual_tint && !g_config.enable_shading_off)) &&
         g_config.tint_delay_ms <= 10000 &&
         g_config.tint_duration_ms >= 1 && g_config.tint_duration_ms <= 10000 &&
         g_config.warning_bytes <= g_config.hard_bytes &&
         g_config.hard_bytes >= 1024 &&
         g_config.hard_bytes <= 32u * 1024u * 1024u;
+}
+
+bool write_corner_outputs() {
+    if (!g_config.enable_corner_snapshot) return true;
+    std::ofstream out(narrow(g_config.output_dir + L"\\M1-C01-corners.json"),
+        std::ios::out | std::ios::trunc);
+    if (!out) return false;
+    out << "{\"schema\":\"m1.c01.corners.v3\",\"captured\":" << g_corner_count << ",\"records\":[\n";
+    DWORD written = 0;
+    for (DWORD i = 0; i < g_corner_count; ++i) {
+        const auto& s = g_corner_snapshots[i];
+        std::ostringstream row;
+        row << (i ? ",\n" : "") << "{\"elapsed_ms\":" << s.elapsed_ms
+            << ",\"window\":" << s.window << ",\"owner\":" << s.owner
+            << ",\"filter\":" << s.filter
+            << ",\"thread\":" << s.thread << ",\"ship\":" << s.ship
+            << ",\"visual\":" << s.visual << ",\"model\":" << s.model
+            << ",\"manager\":" << s.manager << ",\"source\":" << s.source
+            << ",\"vertex_count\":" << s.vertex_count << ",\"vertex_base\":" << s.vertex_base
+            << ",\"polygon_count\":" << s.polygon_count << ",\"status\":" << s.status
+            << ",\"sample_truncated\":" << (s.truncated ? "true" : "false");
+        auto array = [&](const char* name, const auto& values) {
+            row << ",\"" << name << "\":[";
+            for (std::size_t j = 0; j < values.size(); ++j) row << (j ? "," : "") << values[j];
+            row << ']';
+        };
+        array("object_transform", s.object_transform);
+        array("position_transform", s.position_transform);
+        array("dispatch", s.dispatch);
+        row << ",\"polygons\":[";
+        for (DWORD p = 0; p < s.polygons; ++p) {
+            const auto& polygon = s.polygon_data[p];
+            row << (p ? "," : "") << '[' << polygon.address << ',' << polygon.source_index
+                << ',' << polygon.count << ',' << polygon.source_flags;
+            for (const auto value : polygon.vector) row << ',' << value;
+            row << ']';
+        }
+        row << "],\"corners\":[";
+        for (DWORD c = 0; c < s.corners; ++c) {
+            const auto& corner = s.corner_data[c];
+            row << (c ? "," : "") << '[' << corner.polygon << ',' << corner.index;
+            for (const auto value : corner.vector) row << ',' << value;
+            for (const auto value : corner.position) row << ',' << value;
+            row << ']';
+        }
+        row << "]}";
+        const auto encoded = row.str();
+        if (static_cast<std::streamoff>(out.tellp()) +
+            static_cast<std::streamoff>(encoded.size()) + 8192 > sfc_m1::kCornerPacketBytes) break;
+        out << encoded; ++written;
+    }
+    out << "\n],\"filters\":[";
+    for (std::size_t i = 0; i < g_corner_owners.size(); ++i) {
+        const auto& f = g_corner_owners[i];
+        out << (i ? "," : "") << "[" << f.ship << ',' << f.visual << ',' << f.owner
+            << ',' << f.seen_mask << ',' << f.success_mask << ',' << f.thread_rejections
+            << ',' << f.visual_mismatches << ']';
+    }
+    out << "],\"transitions\":[";
+    for (DWORD i = 0; i < g_corner_transition_count; ++i) {
+        const auto& t = g_corner_transitions[i];
+        out << (i ? "," : "") << '[' << t.elapsed << ',' << t.reason << ',' << t.filter
+            << ',' << t.from << ',' << t.to << ',' << t.thread << ',' << t.observed_visual << ']';
+    }
+    out << "],\"transition_dropped\":" << g_corner_transition_dropped
+        << ",\"outside_filter_calls\":" << g_corner_outside_filter
+        << ",\"written\":" << written << ",\"output_truncated\":"
+        << (written != g_corner_count ? "true" : "false") << "}\n";
+    return static_cast<bool>(out);
+}
+
+void write_wrapper_observation(std::ostream& summary) {
+    summary << "{\"schema\":\"m1.wrapper.v1\",\"enabled\":"
+            << (g_config.enable_wrapper_observation?"true":"false") << ",\"total\":" << g_wrapper_total
+            << ",\"parent_closed\":" << g_wrapper_parent_closed << ",\"outcomes\":[";
+    for(std::size_t i=0;i<g_wrapper_outcomes.size();++i) summary << (i?",":"") << g_wrapper_outcomes[i];
+    summary << "],\"example_omitted\":" << (g_wrapper_total>64?g_wrapper_total-64:0) << ",\"samples\":[";
+    const DWORD n=g_wrapper_total<64?static_cast<DWORD>(g_wrapper_total):64;
+    for(DWORD i=0;i<n;++i) {
+        summary << (i?",[":"[");
+        for(std::size_t j=0;j<15;++j) summary << (j?",":"") << g_wrapper_samples[i].data[j];
+        summary << ']';
+    }
+    summary << "]}";
 }
 
 bool write_outputs(bool hooks_restored) {
@@ -1137,6 +1700,82 @@ bool write_outputs(bool hooks_restored) {
     summary << "    ]\n  },\n"
             << "  \"known_exception_00509843\": " << g_exception_509843 << ",\n"
             << "  \"rejected_semantics\": " << g_rejected_semantics << ",\n"
+            << "  \"rejection_diagnostics\": ";
+    std::ostringstream rejection_section;
+    g_rejection_diagnostics.write(rejection_section);
+    const auto rejection_json=rejection_section.str();
+    if(rejection_json.size()<=65536) summary << rejection_json;
+    else summary << "{\"schema\":\"m1.rejections.v1\",\"output_truncated\":true}";
+    summary << ",\n  \"wrapper_observation\":";
+    write_wrapper_observation(summary);
+    summary << ",\n  \"private_copy\":{\"enabled\":" << (g_config.enable_private_copy?"true":"false")
+        << ",\"attempted\":" << (g_private_copy.attempted?"true":"false")
+        << ",\"applied\":" << g_copy_applied << ",\"consumed\":" << g_copy_consumed
+        << ",\"parent_return\":" << g_copy_parent << ",\"failure\":" << g_copy_failure
+        << ",\"owner\":" << g_copy_owner << ",\"thread\":" << g_copy_thread
+        << ",\"ship\":" << g_copy_ship << ",\"visual\":" << g_copy_visual << ",\"model\":" << g_copy_model
+        << ",\"manager\":" << g_copy_manager << ",\"original_list\":" << g_copy_original_list
+        << ",\"source\":" << g_copy_source
+        << ",\"copy_list\":" << reinterpret_cast<DWORD>(g_private_copy.list.data())
+        << ",\"elapsed_ms\":" << g_copy_elapsed << ",\"count\":" << g_private_copy.count
+        << ",\"copied_polygons\":" << g_private_copy.copied << ",\"payload_bytes\":" << g_private_copy.payload_bytes
+        << ",\"slot_bytes\":" << sizeof(g_private_copy) << ",\"before_hash\":" << g_private_copy.before_hash
+        << ",\"after_hash\":" << (g_private_copy.built?g_private_copy.payload_hash():0)
+        << ",\"intact\":" << (g_private_copy.intact()?"true":"false")
+        << ",\"pinned_until_exit\":" << (g_copy_module_pinned?"true":"false") << '}';
+    summary << ",\n  \"repeated_private_copy\":{\"enabled\":"
+        << (g_config.enable_repeated_private_copy?"true":"false")
+        << ",\"limit\":32,\"interval_ms\":1000,\"attempts\":" << g_copy_attempts
+        << ",\"storage_bytes\":" << sizeof(g_private_copy)+sizeof(g_additional_copies)
+        << ",\"halted\":" << (g_copy_halted?"true":"false")
+        << ",\"identity_skips\":" << g_copy_identity_skips
+        << ",\"receipt_mismatch\":" << g_copy_receipt_mismatch << ",\"records\":[";
+    for(DWORD i=0;i<g_copy_attempts;++i) {
+        const auto& copy=i?g_additional_copies[i-1].data:g_private_copy;
+        if(i)summary << ',';
+        summary << "{\"slot\":" << i << ",\"elapsed_ms\":" << (i?g_additional_copies[i-1].elapsed:g_copy_elapsed)
+            << ",\"frame\":" << (i?g_additional_copies[i-1].frame:g_copy_frame)
+            << ",\"owner\":" << (i?g_additional_copies[i-1].owner:g_copy_owner)
+            << ",\"requalified_from\":" << (i?g_additional_copies[i-1].requalified_from:0)
+            << ",\"retired_ms\":" << (i?g_additional_copies[i-1].retired_ms:0)
+            << ",\"retired_frame\":" << (i?g_additional_copies[i-1].retired_frame:0)
+            << ",\"qualification_ms\":" << (i?g_additional_copies[i-1].qualification_ms:0)
+            << ",\"qualification_frame\":" << (i?g_additional_copies[i-1].qualification_frame:0)
+            << ",\"qualification_frames\":" << (i?g_additional_copies[i-1].qualification_frames:0)
+            << ",\"applied\":" << (copy.published?1:0)
+            << ",\"consumed\":" << (i?g_additional_copies[i-1].consumed:g_copy_consumed)
+            << ",\"parent_return\":" << (i?g_additional_copies[i-1].parent:g_copy_parent)
+            << ",\"failure\":" << (i?g_additional_copies[i-1].failure:g_copy_failure)
+            << ",\"copy_list\":" << reinterpret_cast<DWORD>(copy.list.data())
+            << ",\"count\":" << copy.count << ",\"copied_polygons\":" << copy.copied
+            << ",\"payload_bytes\":" << copy.payload_bytes << ",\"before_hash\":" << copy.before_hash
+            << ",\"after_hash\":" << (copy.built?copy.payload_hash():0)
+            << ",\"intact\":" << (copy.intact()?"true":"false") << '}';
+    }
+    summary << "],\"epoch_requalification_enabled\":" << (g_config.enable_copy_epoch_requalification?"true":"false")
+        << ",\"epoch_requalifications\":" << g_copy_requalifications << ",\"epoch_limit\":2}";
+    summary << ",\n  \"surface_lighting\":{\"enabled\":" << (g_config.enable_surface_lighting?"true":"false")
+        << ",\"attempted\":" << (g_surface_attempted?"true":"false")
+        << ",\"started\":" << (g_surface_tick?"true":"false") << ",\"failure\":" << g_surface_failure
+        << ",\"owner\":" << g_surface_owner << ",\"thread\":" << g_surface_thread
+        << ",\"ship\":" << g_surface_ship << ",\"visual\":" << g_surface_visual << ",\"model\":" << g_surface_model
+        << ",\"source\":" << g_surface_source << ",\"manager\":" << g_surface_manager
+        << ",\"original_list\":" << g_surface_list << ",\"count\":" << g_surface_count
+        << ",\"neutral_list\":" << reinterpret_cast<DWORD>(g_surface_graphs.neutral.list.data())
+        << ",\"altered_list\":" << reinterpret_cast<DWORD>(g_surface_graphs.altered.list.data())
+        << ",\"storage_bytes\":" << sizeof(g_surface_graphs)
+        << ",\"changed_vectors\":" << g_surface_graphs.changed_vectors
+        << ",\"intact\":" << (g_surface_graphs.intact()?"true":"false")
+        << ",\"pinned_until_exit\":" << (g_copy_module_pinned?"true":"false")
+        << ",\"marker_ms\":20000,\"normal_gap_ms\":5000,\"altered_ms\":15000,\"phases\":[";
+    for(DWORD i=0;i<4;++i) {
+        if(i)summary << ',';const auto& phase=g_surface_phases[i];
+        summary << "{\"phase\":" << i << ",\"observed\":" << phase.observed << ",\"applied\":" << phase.applied
+            << ",\"received\":" << phase.received << ",\"parent\":" << phase.parent
+            << ",\"first_ms\":" << phase.first_ms << ",\"last_ms\":" << phase.last_ms << '}';
+    }
+    summary << "]}";
+    summary << ",\n"
             << "  \"owner_overflow\": " << g_owner_overflow << ",\n"
             << "  \"thread_overflow\": " << g_thread_overflow << ",\n"
             << "  \"limits\": {\n"
@@ -1165,7 +1804,33 @@ bool write_outputs(bool hooks_restored) {
                   << hex32(kImageBase + hook.rva) << ",restored="
                   << (!hook.installed ? "true" : "false") << "\n";
     }
-    return true;
+    bool mesh_wrote=true;
+    if(g_config.enable_mesh_export && !g_live_scene_mode) {
+        // Stop has drained recorders and restored hooks. No I/O on the render thread.
+        if(g_mesh_packet.complete) {
+            std::ofstream mesh(narrow(g_config.output_dir+L"\\MESH-EXPORT-001.bin"),std::ios::binary|std::ios::trunc);
+            mesh_wrote=g_mesh_packet.write(mesh);mesh.flush();mesh_wrote=mesh_wrote && mesh.good();
+        }
+        std::ofstream receipt(narrow(g_config.output_dir+L"\\MESH-EXPORT-001-receipt.json"));
+        receipt << "{\"schema\":\"sfc.mesh.receipt.v1\",\"component_version\":\"" << kComponentVersion
+            << "\",\"attempts\":" << g_mesh_budget.attempts << ",\"status\":" << static_cast<DWORD>(g_mesh_budget.status)
+            << ",\"complete\":" << (g_mesh_packet.complete?"true":"false")
+            << ",\"owner_retired_after_selection\":" << (g_mesh_budget.retired?"true":"false")
+            << ",\"hooks_restored\":" << (hooks_restored?"true":"false")
+            << ",\"file_write_ok\":" << (mesh_wrote?"true":"false")
+            << ",\"owner_epoch\":" << g_mesh_budget.target.owner
+            << ",\"packet_bytes\":" << g_mesh_packet.header[sfc_m1::MeshBytes]
+            << ",\"packet_fnv1a\":" << g_mesh_packet.header[sfc_m1::MeshHash]
+            << ",\"capture_qpc_frequency\":" << g_mesh_capture_frequency.QuadPart
+            << ",\"capture_qpc_ticks\":[" << g_mesh_capture_ticks[0] << ',' << g_mesh_capture_ticks[1] << "]}";
+        receipt.flush();mesh_wrote=mesh_wrote && receipt.good();
+        if(g_config.enable_texture_references){
+            std::ofstream refs(narrow(g_config.output_dir+L"\\TEXTURE-EXPORT-001.json"));
+            mesh_wrote=sfc_m1::write_texture_references(refs,g_texture_references,g_mesh_packet,hooks_restored) && mesh_wrote;
+            refs.flush();mesh_wrote=mesh_wrote && refs.good();
+        }
+    }
+    return write_corner_outputs() && mesh_wrote;
 }
 
 }  // namespace
@@ -1204,19 +1869,47 @@ extern "C" DWORD WINAPI M1StartW(void* parameter) {
     tactical_name << L"Local\\SFCM1TacticalGate_" << GetCurrentProcessId();
     g_tactical_event = CreateEventW(nullptr, TRUE, FALSE, tactical_name.str().c_str());
     if (!g_tactical_event) return 3;
+    if(g_config.enable_private_copy) {
+        HMODULE pinned=nullptr;
+        if(!GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_PIN|GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS,
+            reinterpret_cast<LPCWSTR>(&g_private_copy),&pinned))return 3;
+        g_copy_module_pinned=true;
+        std::wostringstream name;name << L"Local\\SFCM1PrivateCopyReady_" << GetCurrentProcessId();
+        g_copy_ready_event=CreateEventW(nullptr,TRUE,FALSE,name.str().c_str());
+        if(!g_copy_ready_event)return 3;
+        if(!ResetEvent(g_copy_ready_event))return 3;
+        if(g_config.enable_surface_lighting) {
+            std::wostringstream lighting,restored;
+            lighting << L"Local\\SFCM1SurfaceLighting_" << GetCurrentProcessId();
+            restored << L"Local\\SFCM1SurfaceRestored_" << GetCurrentProcessId();
+            g_surface_lighting_event=CreateEventW(nullptr,TRUE,FALSE,lighting.str().c_str());
+            g_surface_restored_event=CreateEventW(nullptr,TRUE,FALSE,restored.str().c_str());
+            if(!g_surface_lighting_event || !g_surface_restored_event ||
+               !ResetEvent(g_surface_lighting_event) || !ResetEvent(g_surface_restored_event))return 3;
+        }
+    }
 
     for (Hook& hook : g_hooks) {
+        if(!g_config.enable_private_copy && std::strcmp(hook.name,"polygon_prepare")==0) continue;
+        if(!g_config.enable_wrapper_observation && std::strcmp(hook.name,"polygon_wrapper")==0) continue;
         if (!g_config.enable_geometry_hook &&
             std::strcmp(hook.name, "geometry_submit") == 0) continue;
         if (!prepare_hook(hook, module_base)) return 4;
     }
     assign_trampolines();
 
+    if(!g_config.live_channel.empty()){
+        g_live_scene_mode=g_live_scene.start(g_config.live_channel,g_config.output_dir);
+        if(!g_live_scene_mode && !g_live_bridge.start(g_config.live_channel,g_config.output_dir))return 3;
+    }
+
     bool suspend_ok = false;
     auto suspended = suspend_other_threads(suspend_ok);
-    if (!suspend_ok) return 5;
+    if (!suspend_ok) { write_thread_failure("start"); stop_live(); return 5; }
     bool installed = true;
     for (Hook& hook : g_hooks) {
+        if(!g_config.enable_private_copy && std::strcmp(hook.name,"polygon_prepare")==0) continue;
+        if(!g_config.enable_wrapper_observation && std::strcmp(hook.name,"polygon_wrapper")==0) continue;
         if (!g_config.enable_geometry_hook &&
             std::strcmp(hook.name, "geometry_submit") == 0) continue;
         if (!install_hook(hook, module_base)) {
@@ -1228,6 +1921,7 @@ extern "C" DWORD WINAPI M1StartW(void* parameter) {
     g_start_tick = GetTickCount64();
     if (installed) InterlockedExchange(&g_running, 1);
     resume_threads(suspended);
+    if(!installed)stop_live();
     return installed ? 0 : 6;
 }
 
@@ -1240,9 +1934,10 @@ extern "C" DWORD WINAPI M1Stop(void*) {
     const DWORD module_base = reinterpret_cast<DWORD>(GetModuleHandleW(nullptr));
     bool suspend_ok = false;
     auto suspended = suspend_other_threads(suspend_ok);
-    if (!suspend_ok) return 13;
+    if (!suspend_ok) { write_thread_failure("stop"); return 13; }
     const bool restored = restore_hooks(module_base);
     resume_threads(suspended);
+    if(!stop_live())return 12; // Never unload storage while worker remains live.
     const bool wrote = write_outputs(restored);
     if (g_burst_event) SetEvent(g_burst_event);
     return restored && wrote ? 0 : 14;

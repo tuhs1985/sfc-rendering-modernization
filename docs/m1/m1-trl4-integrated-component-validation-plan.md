@@ -1,13 +1,36 @@
 ---
 title: "M1 — TRL 4 Integrated Component Validation Plan"
 milestone: M1
-target_maturity: TRL 4
-status: approved-active
+target_maturity: CTE-1-oriented component validation; aggregate TRL tracked separately
+status: technical-validation-complete-pending-sponsor-closure-review
 date: 2026-09-04
-governing_authority: "Starfleet Command Rendering Modernization Capability Requirements v1.0"
+governing_authority: "CDD v1.0 plus approved SFC-GATE-20261014"
 ---
 
 # M1 — TRL 4 Integrated Component Validation Plan
+
+## Current execution disposition — 2026-10-14
+
+[M1 closure report](m1-component-integration-closure-report.md) recommends technical
+PASS for the amended component gate; sponsor acceptance pending. No further
+runtime test identified as necessary for this scope. Historical title does not
+imply aggregate TRL4; approved gate amendment below still governs. No M2
+implementation or commit authorized by this disposition.
+
+## CURRENT APPROVED DISPOSITION — 2026-10-14
+
+[SFC-GATE-20261014](../decisions/2026-10-14-m1-m2-gate-allocation-amendment.md)
+is the approved authority for the revised M1/M2 allocation. The filename and
+original title remain stable for existing links; **M1 is now semantic component
+integration validation, not an aggregate TRL 4 claim**. Original allocation
+language retained below is historical wherever it conflicts with this amendment.
+
+M1 closes on semantic sub-gate plus sustained integration reliability, >=30-minute
+representative mission, repeatable frame-time/system/graphics-memory evidence,
+usable tactical UI/control, reproducible setup/disable/removal and reviewed risks.
+Beneficial enhancement and three-class modernization move to M2's combined
+CTE-1/2/3 TRL 4 checkpoint, before unchanged TRL 5 validation. No capability
+Threshold/Objective/REQ ID changed; overall maturity remains least-CTE bounded.
 
 ## 1. Milestone purpose
 
@@ -42,8 +65,8 @@ from it and does not change any Threshold, Objective, or stable requirement ID.
 | Authority | M1 relevance | Planned evidence |
 |---|---|---|
 | CTE-1 — Legacy Render Access | Primary technical subject: turn the proven seam into a repeatable integrated component boundary. | Component manifest, static hook justification, enabled/disabled runtime runs, semantic-to-downstream correlations. |
-| CTE-2 — Modern Rendering Enhancement | Not demonstrated by the initial neutral pass-through. A later M1 increment is required before formal TRL 4 can be claimed. | Sponsor-approved bounded enhancement evidence, if authorized after the pass-through gate. |
-| CTE-3 — Scene/UI Composition and Temporal Integrity | Neutral pass-through establishes non-interference but does not itself demonstrate modernized 3D/UI composition. | HUD/cursor checks during pass-through; formal CTE-3 evidence only with an authorized CTE-2/3 increment. |
+| CTE-2 — Modern Rendering Enhancement | Deferred to M2 under SFC-GATE-20261014; no M1 visual-benefit claim. | Separately approved enhancement integration and combined TRL 4 evidence in M2. |
+| CTE-3 — Scene/UI Composition and Temporal Integrity | M1 checks original rendering/UI non-interference only. | Modernized composition/temporal proof at the combined TRL 4 checkpoint in M2. |
 | REQ-BAS-001 | Keep the supported executable/build and configuration explicit. | Exact executable hash and launch/configuration manifest for every formal run. |
 | REQ-BAS-002 | Preserve a modernization-disabled comparison. | Paired disabled and enabled baseline captures for the selected fixtures. |
 | REQ-BAS-003 | Make every formal result attributable. | Game, component, dependency, driver, and fixture identifiers in each run record. |
@@ -62,8 +85,8 @@ from it and does not change any Threshold, Objective, or stable requirement ID.
 
 REQ-VIS-* and the full KPP-1 visual-quality evaluation remain governing
 requirements, but a neutral pass-through produces no honest visual-modernization
-claim. They enter formal M1 exit evidence only if the CDD-completion increment
-described in Section 13 is authorized.
+claim. Enhancement and three-class modernization evidence are allocated to M2 by
+SFC-GATE-20261014, not required to close M1's component integration gate.
 
 ## 3. Confirmed starting evidence
 
@@ -268,6 +291,10 @@ recreation record, and failure attribution.
 
 ### M1-07 — Evaluate the formal TRL 4 completion gap
 
+**Superseded allocation:** use SFC-GATE-20261014. Assess M1 reliability against
+the revised component gate; record the combined TRL 4 gap for M2. The original
+decision paths below are preserved historically, not current execution authority.
+
 After the neutral component is proven, compare the evidence with the unchanged
 CDD TRL 4 exit criteria. A neutral pass-through cannot by itself demonstrate
 CTE-2, integrated CTE-3 modernization, or three VMES scene classes showing
@@ -410,7 +437,15 @@ The pass-through sub-gate succeeds when all of the following are **CONFIRMED**:
 - output remains within documented bounds; and
 - the observed mainline and exception set are sufficiently bounded to continue.
 
-### 13.3 Formal M1 / TRL 4 exit criteria
+### 13.3 Current M1 component integration exit criteria
+
+Use the approved amendment's M1 exit checklist in addition to section 13.2:
+>=30-minute representative semantic-component mission, repeatable frame-time and
+system/graphics-memory comparison, usable UI/control, repeatable setup and
+disable/removal, unchanged client, bounded output and reviewed lifetime/exception
+risks. No beneficial enhancement required and no aggregate TRL 4 PASS implied.
+
+### 13.3-H Historical combined TRL 4 criteria — now scheduled within M2
 
 Formal **M1 PASS / TRL 4 demonstrated** requires both the semantic integration
 sub-gate and every unchanged CDD TRL 4 exit criterion:
@@ -425,6 +460,11 @@ Required formal evidence remains: integrated-build manifest, run log, VMES
 samples, telemetry, and updated risk/deficiency register.
 
 ### 13.4 Decision logic
+
+**Current:** M1 PASS = component integration/reliability criteria confirmed;
+CONTINUES = bounded evidence remains; BLOCKED/FAIL = component unsuitable or
+different approach needed. None implies aggregate TRL 4. The original combined
+gate logic below remains applicable to M2's overall TRL 4 checkpoint only.
 
 - **M1 PASS / TRL 4 demonstrated:** semantic integration and all formal CDD TRL 4
   exit criteria pass; no unresolved issue invalidates the seam.
@@ -483,6 +523,11 @@ the relevant target environment and against a broader verification set. Its plan
 will be created only after M1 evidence is reviewed.
 
 ## 17. Sponsor disposition
+
+**Current approval 2026-10-14:** SFC-GATE-20261014 explicitly reallocates beneficial
+enhancement and three-class modernization to M2. It supersedes the prior
+requirement to finish that work within M1; no final capability waiver is granted.
+The earlier approval below remains historical, not the current allocation.
 
 Approved 2026-09-04: execute the neutral pass-through as the first M1 increment.
 Successful completion satisfies the semantic integration sub-gate only and leaves

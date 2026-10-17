@@ -10,6 +10,7 @@ if (-not (Test-Path -LiteralPath $vcvars)) {
 }
 
 New-Item -ItemType Directory -Force -Path $outputDir | Out-Null
+New-Item -ItemType Directory -Force -Path (Join-Path $workspaceRoot 'artifacts\m1\test-temp') | Out-Null
 
 $dllSource = Join-Path $toolRoot "m1_component.cpp"
 $definition = Join-Path $toolRoot "m1_component.def"
@@ -46,7 +47,14 @@ $commands = @(
     ('cl /nologo /std:c++17 /EHsc /W4 /WX /O2 /MT /Fo:"{0}" /Fe:"{1}" "{2}"' -f $proxyTestObject, $proxyTestOutput, $proxyTestSource),
     ('cl /nologo /std:c++17 /EHsc /W4 /WX /O2 /MT /Fo:"{0}" /Fe:"{1}" "{2}"' -f $tintTestObject, $tintTestOutput, $tintTestSource),
     ('cl /nologo /std:c++17 /EHsc /W4 /WX /O2 /MT /arch:SSE2 /Fo:"{0}" /Fe:"{1}" "{2}"' -f $tintComponentTestObject, $tintComponentTestOutput, $tintComponentTestSource),
-    ('cl /nologo /std:c++17 /EHsc /W4 /WX /O2 /MT /arch:SSE2 /Fo:"{0}\m1_shading_off_component_tests.obj" /Fe:"{0}\m1_shading_off_component_tests.exe" "{1}\tests\m1_shading_off_component_tests.cpp"' -f $outputDir, $workspaceRoot)
+    ('cl /nologo /std:c++17 /EHsc /W4 /WX /O2 /MT /arch:SSE2 /Fo:"{0}\m1_shading_off_component_tests.obj" /Fe:"{0}\m1_shading_off_component_tests.exe" "{1}\tests\m1_shading_off_component_tests.cpp"' -f $outputDir, $workspaceRoot),
+    ('cl /nologo /std:c++17 /EHsc /W4 /WX /O2 /MT /arch:SSE2 /Fo:"{0}\m1_corner_snapshot_tests.obj" /Fe:"{0}\m1_corner_snapshot_tests.exe" "{1}\tests\m1_corner_snapshot_tests.cpp"' -f $outputDir, $workspaceRoot),
+    ('cl /nologo /std:c++17 /EHsc /W4 /WX /O2 /MT /arch:SSE2 /Fo:"{0}\m1_surface_graph_tests.obj" /Fe:"{0}\m1_surface_graph_tests.exe" "{1}\tests\m1_surface_graph_tests.cpp"' -f $outputDir, $workspaceRoot),
+    ('cl /nologo /std:c++17 /EHsc /W4 /WX /O2 /MT /arch:SSE2 /Fo:"{0}\m1_surface_component_tests.obj" /Fe:"{0}\m1_surface_component_tests.exe" "{1}\tests\m1_surface_component_tests.cpp"' -f $outputDir, $workspaceRoot),
+    ('cl /nologo /std:c++17 /EHsc /W4 /WX /O2 /MT /arch:SSE2 /Fo:"{0}\m1_mesh_export_tests.obj" /Fe:"{0}\m1_mesh_export_tests.exe" "{1}\tests\m1_mesh_export_tests.cpp"' -f $outputDir, $workspaceRoot),
+    ('cl /nologo /std:c++17 /EHsc /W4 /WX /O2 /MT /arch:SSE2 /Fo:"{0}\m1_mesh_component_tests.obj" /Fe:"{0}\m1_mesh_component_tests.exe" "{1}\tests\m1_mesh_component_tests.cpp"' -f $outputDir, $workspaceRoot),
+    ('cl /nologo /std:c++17 /EHsc /W4 /WX /O2 /MT /arch:SSE2 /Fo:"{0}\m1_live_bridge_tests.obj" /Fe:"{0}\m1_live_bridge_tests.exe" "{1}\tests\m1_live_bridge_tests.cpp"' -f $outputDir, $workspaceRoot),
+    ('cl /nologo /std:c++17 /EHsc /W4 /WX /O2 /MT /arch:SSE2 /Fo:"{0}\m1_live_scene_tests.obj" /Fe:"{0}\m1_live_scene_tests.exe" "{1}\tests\m1_live_scene_tests.cpp"' -f $outputDir, $workspaceRoot)
 )
 
 foreach ($compile in $commands) {
@@ -68,6 +76,16 @@ if ($LASTEXITCODE -ne 0) { throw "M1 visual tint regression test failed." }
 if ($LASTEXITCODE -ne 0) { throw "M1 production tint lifecycle test failed." }
 & (Join-Path $outputDir 'm1_shading_off_component_tests.exe')
 if ($LASTEXITCODE -ne 0) { throw 'M1 production shading-off test failed.' }
+& (Join-Path $outputDir 'm1_corner_snapshot_tests.exe')
+if ($LASTEXITCODE -ne 0) { throw 'M1 corner snapshot test failed.' }
+& (Join-Path $outputDir 'm1_surface_graph_tests.exe')
+if ($LASTEXITCODE -ne 0) { throw 'M1 complete surface graph/schedule test failed.' }
+& (Join-Path $outputDir 'm1_surface_component_tests.exe') (Join-Path $workspaceRoot 'artifacts\m1\test-temp\surface-component')
+if ($LASTEXITCODE -ne 0) { throw 'M1 production surface sequence test failed.' }
+& (Join-Path $outputDir 'm1_mesh_export_tests.exe') (Join-Path $workspaceRoot 'artifacts\m1\test-temp\mesh-synthetic.bin')
+if ($LASTEXITCODE -ne 0) { throw 'M1 read-only mesh export test failed.' }
+& (Join-Path $outputDir 'm1_mesh_component_tests.exe') (Join-Path $workspaceRoot 'artifacts\m1\test-temp\mesh-component')
+if ($LASTEXITCODE -ne 0) { throw 'M1 production mesh configuration/stop test failed.' }
 
 & $proxyTestOutput $proxyOutput
 if ($LASTEXITCODE -ne 0) {

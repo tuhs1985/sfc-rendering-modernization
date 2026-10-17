@@ -1,0 +1,188 @@
+{
+  "client_sha256": "4D65761D7DD69EF1504070261B81E9C200C0AF18105033E1C4D2222C62320C29",
+  "anchors": [
+    {
+      "va": "0x007B8D8C",
+      "file_offset": 3902860,
+      "bytes": "00 A0 6A 00"
+    },
+    {
+      "va": "0x007B8D90",
+      "file_offset": 3902864,
+      "bytes": "80 A0 6A 00"
+    },
+    {
+      "va": "0x007B8E24",
+      "file_offset": 3903012,
+      "bytes": "A0 A4 6A 00"
+    },
+    {
+      "va": "0x007B8E28",
+      "file_offset": 3903016,
+      "bytes": "D0 A4 6A 00"
+    },
+    {
+      "va": "0x007B8E38",
+      "file_offset": 3903032,
+      "bytes": "F0 A3 6A 00"
+    },
+    {
+      "va": "0x007B8E3C",
+      "file_offset": 3903036,
+      "bytes": "90 A4 6A 00"
+    },
+    {
+      "va": "0x007B8E4C",
+      "file_offset": 3903052,
+      "bytes": "E0 A0 6A 00"
+    },
+    {
+      "va": "0x006AA004",
+      "file_offset": 2793476,
+      "bytes": "D9 91 5C 07 00 00"
+    },
+    {
+      "va": "0x006AA018",
+      "file_offset": 2793496,
+      "bytes": "D9 91 64 07 00 00"
+    },
+    {
+      "va": "0x006AA032",
+      "file_offset": 2793522,
+      "bytes": "D9 99 6C 07 00 00"
+    },
+    {
+      "va": "0x006AA042",
+      "file_offset": 2793538,
+      "bytes": "D9 99 70 07 00 00"
+    },
+    {
+      "va": "0x006AA3F8",
+      "file_offset": 2794488,
+      "bytes": "8D 93 5C 05 00 00"
+    },
+    {
+      "va": "0x006AA406",
+      "file_offset": 2794502,
+      "bytes": "F3 A5"
+    },
+    {
+      "va": "0x006AA408",
+      "file_offset": 2794504,
+      "bytes": "8D B3 A0 05 00 00"
+    },
+    {
+      "va": "0x006AA43F",
+      "file_offset": 2794559,
+      "bytes": "D9 E0"
+    },
+    {
+      "va": "0x006AA470",
+      "file_offset": 2794608,
+      "bytes": "E8 DB 0F FF FF"
+    },
+    {
+      "va": "0x006AA475",
+      "file_offset": 2794613,
+      "bytes": "8D 93 28 06 00 00"
+    },
+    {
+      "va": "0x006AA47B",
+      "file_offset": 2794619,
+      "bytes": "81 C3 E4 05 00 00"
+    },
+    {
+      "va": "0x006AA485",
+      "file_offset": 2794629,
+      "bytes": "E8 66 16 FF FF"
+    },
+    {
+      "va": "0x006AA4A8",
+      "file_offset": 2794664,
+      "bytes": "8D 90 28 06 00 00"
+    },
+    {
+      "va": "0x006AA4B8",
+      "file_offset": 2794680,
+      "bytes": "8D 88 E4 05 00 00"
+    },
+    {
+      "va": "0x006AA4BF",
+      "file_offset": 2794687,
+      "bytes": "8D 88 A0 05 00 00"
+    },
+    {
+      "va": "0x006AA4C5",
+      "file_offset": 2794693,
+      "bytes": "E8 26 16 FF FF"
+    },
+    {
+      "va": "0x006AA570",
+      "file_offset": 2794864,
+      "bytes": "F3 A5"
+    },
+    {
+      "va": "0x006AA57C",
+      "file_offset": 2794876,
+      "bytes": "E8 6F 15 FF FF"
+    },
+    {
+      "va": "0x006AA58F",
+      "file_offset": 2794895,
+      "bytes": "E8 5C 15 FF FF"
+    },
+    {
+      "va": "0x0069BAF0",
+      "file_offset": 2734832,
+      "bytes": "A1 F4 9F C6 00"
+    },
+    {
+      "va": "0x0069CA95",
+      "file_offset": 2738837,
+      "bytes": "8A 59 41"
+    },
+    {
+      "va": "0x0069CAA7",
+      "file_offset": 2738855,
+      "bytes": "D9 41 38"
+    },
+    {
+      "va": "0x006AC2C9",
+      "file_offset": 2802377,
+      "bytes": "8D 8F B0 06 00 00"
+    },
+    {
+      "va": "0x006AB5BA",
+      "file_offset": 2799034,
+      "bytes": "D8 70 10"
+    },
+    {
+      "va": "0x006AB5C7",
+      "file_offset": 2799047,
+      "bytes": "D8 48 04"
+    },
+    {
+      "va": "0x006AB5CF",
+      "file_offset": 2799055,
+      "bytes": "D8 48 08"
+    },
+    {
+      "va": "0x006AB5D7",
+      "file_offset": 2799063,
+      "bytes": "D8 48 0C"
+    },
+    {
+      "va": "0x007959C8",
+      "file_offset": 3758536,
+      "bytes": "00 00 00 3F"
+    },
+    {
+      "va": "0x007959CC",
+      "file_offset": 3758540,
+      "bytes": "00 00 80 3F"
+    }
+  ],
+  "result": "STATIC_PREFIXES_MATCH",
+  "limitation": "Byte corroboration only; not runtime semantics or safe intervention proof.",
+  "scope": "Camera-path static byte anchors; interpretation supported separately by inspected instructions and runtime algebra"
+}
