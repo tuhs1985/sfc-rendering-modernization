@@ -1061,6 +1061,7 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
         event.origin = 0x0069E300;
         if (g_gate) {
             DWORD frame = static_cast<DWORD>(InterlockedIncrement(&g_frame));
+            if(g_live_scene_mode)sfc_calibration::begin(g_live_scene.calibration,frame);
             if (frame > 2) {
                 g_owners.retire_before(frame - 2, [&](const auto& slot) {
                     if(!g_config.live_channel.empty()){
@@ -1927,6 +1928,7 @@ extern "C" DWORD WINAPI M1StartW(void* parameter) {
 
 extern "C" DWORD WINAPI M1Stop(void*) {
     if (!InterlockedExchange(&g_running, 0)) return 11;
+    if(g_live_scene.calibration)InterlockedExchange(&g_live_scene.calibration->active,0);
     const ULONGLONG deadline = GetTickCount64() + 5000;
     while ((g_in_recorders || g_tint_live) && GetTickCount64() < deadline) Sleep(1);
     if (g_in_recorders || g_tint_live) return 12;

@@ -1,0 +1,256 @@
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <windows.h>
+#include <d3d11.h>
+#include <dxgi.h>
+#include <d3dcompiler.h>
+#include <wrl/client.h>
+#include <iostream>
+#include <fstream>
+#include <cstring>
+#include <dbghelp.h>
+#include "return_wire.h"
+#include "depth_search_wire.h"
+#include "broad_trace.h"
+using Microsoft::WRL::ComPtr;
+static void check(HRESULT h,const char* text){if(FAILED(h))throw std::runtime_error(text);}
+static LRESULT CALLBACK proc(HWND w,UINT m,WPARAM p,LPARAM l){return DefWindowProcW(w,m,p,l);}
+__declspec(naked) static void probeBegin(){__asm{push ebx} __asm{push esi} __asm{mov esi,ecx} __asm{push edi} __asm{pop edi} __asm{pop esi} __asm{pop ebx} __asm{ret}}
+__declspec(naked) static void probeEnd(){__asm{push ebx} __asm{push esi} __asm{mov esi,ecx} __asm{push edi} __asm{pop edi} __asm{pop esi} __asm{pop ebx} __asm{ret}}
+__declspec(naked) static void probePresent(){__asm{push ebx} __asm{push esi} __asm{mov esi,ecx} __asm{push edi} __asm{pop edi} __asm{pop esi} __asm{pop ebx} __asm{ret}}
+static depth_search::Data* fakeSearch=nullptr;static bool slowRequested=false,slowDone=false;static DWORD fakeStart=0;
+static void maybeSlow(){
+  __declspec(align(16)) BYTE saved[512];
+  __asm{fxsave saved}
+  if(slowRequested&&!slowDone&&fakeSearch&&GetTickCount()-fakeStart>4000){
+    slowDone=true;InterlockedExchange(&fakeSearch->reserved,1);Sleep(2000);
+    InterlockedExchange(&fakeSearch->reserved,2);
+  }
+  __asm{fxrstor saved}
+}
+__declspec(naked) static void fakeEndScene(){__asm{call maybeSlow} __asm{xor eax,eax} __asm{ret 4}}
+static void* fakeTable[11]={nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,reinterpret_cast<void*>(&fakeEndScene)};
+static void* fakeDevice=fakeTable;
+// Mirrors actual mid-function call/test bytes and COM stack consumption.
+__declspec(naked) static void probeAfterFlush(){__asm{call dword ptr [ecx+28h]} __asm{test eax,eax} __asm{ret}}
+__declspec(naked) static void invokeAfterFlush(){
+  __asm{push offset finished}
+  __asm{push offset fakeDevice}
+  __asm{mov ecx,offset fakeTable}
+  __asm{jmp probeAfterFlush}
+  __asm{finished: ret}
+}
+static bool preserved(void (*function)(),bool midCall=false){
+  __declspec(align(16)) BYTE before[512]{},after[512]{};
+  DWORD stackBefore=0,stackAfter=0,flagsBefore=0,flagsAfter=0,answer=1;
+  __asm{mov stackBefore,esp}
+  __asm{pushfd}
+  __asm{pop flagsBefore}
+  __asm{fxsave before}
+  __asm{call function}
+  __asm{mov answer,eax}
+  __asm{fxsave after}
+  __asm{pushfd}
+  __asm{pop flagsAfter}
+  __asm{mov stackAfter,esp}
+  return stackBefore==stackAfter&&!std::memcmp(before,after,512)&&
+    (midCall?(answer==0&&(flagsAfter&64)!=0):((flagsBefore^flagsAfter)&0xCD5)==0);
+}
+static LONG CALLBACK traceCrash(EXCEPTION_POINTERS* exception){
+  static LONG once=0;
+  if(exception->ExceptionRecord->ExceptionCode!=EXCEPTION_STACK_OVERFLOW&&exception->ExceptionRecord->ExceptionCode!=EXCEPTION_ACCESS_VIOLATION)return EXCEPTION_CONTINUE_SEARCH;
+  if(InterlockedExchange(&once,1))return EXCEPTION_CONTINUE_SEARCH;
+  std::cout<<"FIXTURE_EXCEPTION code=0x"<<std::hex<<exception->ExceptionRecord->ExceptionCode<<std::dec<<"\n";
+  void* frames[32]{};const auto count=CaptureStackBackTrace(0,32,frames,nullptr);
+  for(unsigned i=0;i<count;++i){HMODULE module=nullptr;char file[1024]{};
+    if(GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS|GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,reinterpret_cast<LPCSTR>(frames[i]),&module))GetModuleFileNameA(module,file,1024);
+    std::cout<<"STACK "<<i<<" "<<file<<" +0x"<<std::hex<<(reinterpret_cast<uintptr_t>(frames[i])-reinterpret_cast<uintptr_t>(module))<<std::dec<<"\n";
+  }
+  HANDLE file=CreateFileW(L"fixture-crash.dmp",GENERIC_WRITE,0,nullptr,CREATE_NEW,FILE_ATTRIBUTE_NORMAL,nullptr);
+  if(file!=INVALID_HANDLE_VALUE){MINIDUMP_EXCEPTION_INFORMATION info{GetCurrentThreadId(),exception,FALSE};MiniDumpWriteDump(GetCurrentProcess(),GetCurrentProcessId(),file,MiniDumpNormal,&info,nullptr,nullptr);CloseHandle(file);}
+  TerminateProcess(GetCurrentProcess(),exception->ExceptionRecord->ExceptionCode);
+  return EXCEPTION_CONTINUE_SEARCH;
+}
+struct Scene {
+  ComPtr<ID3D11Device> device;ComPtr<ID3D11DeviceContext> context;ComPtr<IDXGISwapChain> swap;
+  ComPtr<ID3D11RenderTargetView> target;ComPtr<ID3D11RasterizerState> raster;ComPtr<ID3D11BlendState> blend;ComPtr<ID3D11DepthStencilState> depth;
+  ComPtr<ID3D11DepthStencilView> fixtureDepth;
+  ComPtr<ID3D11Texture2D> fixtureColor;
+  ComPtr<ID3D11VertexShader> fixtureVS;ComPtr<ID3D11PixelShader> fixturePS;ComPtr<ID3D11Buffer> fixtureIndices;
+  uint32_t width=800,height=600;
+  void targetView(){
+    D3D11_TEXTURE2D_DESC color{};color.Width=color.Height=16;color.MipLevels=color.ArraySize=1;color.Format=DXGI_FORMAT_B8G8R8A8_UNORM;color.SampleDesc.Count=1;color.BindFlags=D3D11_BIND_SHADER_RESOURCE;
+    fixtureColor.Reset();check(device->CreateTexture2D(&color,nullptr,&fixtureColor),"fixture explicit color resource event");
+    ComPtr<ID3D11Texture2D> texture;check(swap->GetBuffer(0,IID_PPV_ARGS(&texture)),"fixture backbuffer");check(device->CreateRenderTargetView(texture.Get(),nullptr,&target),"fixture RTV");
+    fixtureDepth.Reset();
+    if(GetEnvironmentVariableW(L"SFC_RETURN_FIXTURE_DEPTH",nullptr,0)){
+      D3D11_TEXTURE2D_DESC desc{};desc.Width=width;desc.Height=height;desc.MipLevels=desc.ArraySize=1;
+      desc.Format=DXGI_FORMAT_D24_UNORM_S8_UINT;desc.SampleDesc.Count=1;desc.BindFlags=D3D11_BIND_DEPTH_STENCIL;
+      const bool snapshot=GetEnvironmentVariableW(L"SFC_REMIX_DEPTH_OUTPUT",nullptr,0)!=0;
+      if(snapshot){desc.Format=DXGI_FORMAT_R32_TYPELESS;desc.SampleDesc.Count=8;desc.BindFlags|=D3D11_BIND_SHADER_RESOURCE;}
+      ComPtr<ID3D11Texture2D> resource;check(device->CreateTexture2D(&desc,nullptr,&resource),"fixture known depth resource");
+      D3D11_DEPTH_STENCIL_VIEW_DESC vd{};vd.Format=DXGI_FORMAT_D32_FLOAT;vd.ViewDimension=D3D11_DSV_DIMENSION_TEXTURE2DMS;
+      check(device->CreateDepthStencilView(resource.Get(),snapshot?&vd:nullptr,&fixtureDepth),"fixture known depth view");
+      if(snapshot)context->ClearDepthStencilView(fixtureDepth.Get(),D3D11_CLEAR_DEPTH,.625f,0);
+      D3D11_TEXTURE2D_DESC actual{};resource->GetDesc(&actual);
+      D3D11_DEPTH_STENCIL_VIEW_DESC actualView{};fixtureDepth->GetDesc(&actualView);
+      std::cout<<"KNOWN_FIXTURE_DEPTH width="<<width<<" height="<<height<<" resource_format="<<actual.Format<<" view_format="<<actualView.Format<<" flags="<<actual.BindFlags<<"\n";
+      // Known bound descriptor only; depth testing stays disabled. Not scene data.
+    }
+  }
+  void init(HWND window){
+    DXGI_SWAP_CHAIN_DESC desc{};desc.BufferDesc.Width=width;desc.BufferDesc.Height=height;desc.BufferDesc.Format=DXGI_FORMAT_B8G8R8A8_UNORM;
+    desc.BufferCount=1;desc.SampleDesc.Count=1;desc.BufferUsage=DXGI_USAGE_RENDER_TARGET_OUTPUT;desc.OutputWindow=window;desc.Windowed=TRUE;desc.SwapEffect=DXGI_SWAP_EFFECT_SEQUENTIAL;
+    const D3D_FEATURE_LEVEL level=D3D_FEATURE_LEVEL_10_1;
+    const bool snapshot=GetEnvironmentVariableW(L"SFC_REMIX_DEPTH_OUTPUT",nullptr,0)!=0;
+    check(D3D11CreateDeviceAndSwapChain(nullptr,D3D_DRIVER_TYPE_HARDWARE,nullptr,0,snapshot?&level:nullptr,snapshot?1:0,D3D11_SDK_VERSION,&desc,&swap,&device,nullptr,&context),"fixture device/swapchain");
+    if(snapshot){if(device->GetFeatureLevel()!=level)throw std::runtime_error("snapshot fixture feature level mismatch");std::cout<<"DEPTH_FEATURE_LEVEL "<<static_cast<unsigned>(device->GetFeatureLevel())<<"\n";}targetView();
+    D3D11_RASTERIZER_DESC rd{};rd.FillMode=D3D11_FILL_SOLID;rd.CullMode=D3D11_CULL_FRONT;rd.DepthClipEnable=TRUE;rd.ScissorEnable=TRUE;check(device->CreateRasterizerState(&rd,&raster),"fixture raster");
+    D3D11_BLEND_DESC bd{};bd.RenderTarget[0].RenderTargetWriteMask=D3D11_COLOR_WRITE_ENABLE_ALL;check(device->CreateBlendState(&bd,&blend),"fixture blend");
+    D3D11_DEPTH_STENCIL_DESC dd{};dd.DepthEnable=FALSE;dd.DepthWriteMask=D3D11_DEPTH_WRITE_MASK_ZERO;dd.DepthFunc=D3D11_COMPARISON_ALWAYS;check(device->CreateDepthStencilState(&dd,&depth),"fixture depth");
+    if(GetEnvironmentVariableW(L"SFC_REMIX_BROAD_OUTPUT",nullptr,0)||GetEnvironmentVariableW(L"SFC_REMIX_DEPTH_OUTPUT",nullptr,0)){
+      const char* code="float4 vs(uint id:SV_VertexID):SV_Position { float2 p[3]={float2(-.5,-.5),float2(0,.5),float2(.5,-.5)};return float4(p[id],.5,1); } float4 ps():SV_Target { return float4(.02,.05,.3,1); }";
+      ComPtr<ID3DBlob> vs,ps,errors;
+      check(D3DCompile(code,std::strlen(code),nullptr,nullptr,nullptr,"vs","vs_4_0",D3DCOMPILE_ENABLE_STRICTNESS,0,&vs,&errors),"fixture VS compile");
+      check(D3DCompile(code,std::strlen(code),nullptr,nullptr,nullptr,"ps","ps_4_0",D3DCOMPILE_ENABLE_STRICTNESS,0,&ps,&errors),"fixture PS compile");
+      check(device->CreateVertexShader(vs->GetBufferPointer(),vs->GetBufferSize(),nullptr,&fixtureVS),"fixture VS");
+      check(device->CreatePixelShader(ps->GetBufferPointer(),ps->GetBufferSize(),nullptr,&fixturePS),"fixture PS");
+      const uint16_t indices[]={0,1,2};D3D11_BUFFER_DESC indexDesc{};indexDesc.ByteWidth=sizeof(indices);indexDesc.Usage=D3D11_USAGE_IMMUTABLE;indexDesc.BindFlags=D3D11_BIND_INDEX_BUFFER;
+      D3D11_SUBRESOURCE_DATA data{indices,0,0};check(device->CreateBuffer(&indexDesc,&data,&fixtureIndices),"fixture index buffer");
+    }
+  }
+  void resize(){context->ClearState();target.Reset();width=1024;height=768;check(swap->ResizeBuffers(1,width,height,DXGI_FORMAT_B8G8R8A8_UNORM,0),"fixture resize");targetView();}
+  void clear(){
+    const float blue[]={0.02f,0.05f,0.3f,1};context->ClearRenderTargetView(target.Get(),blue);
+    const float factor[]={0.1f,0.2f,0.3f,0.4f};context->OMSetBlendState(blend.Get(),factor,0xFFFFFFFA);context->OMSetDepthStencilState(depth.Get(),42);
+    context->RSSetState(raster.Get());D3D11_VIEWPORT viewport{3,4,static_cast<float>(width-10),static_cast<float>(height-20),0.2f,0.8f};context->RSSetViewports(1,&viewport);
+    const D3D11_RECT scissor{10,20,500,400};context->RSSetScissorRects(1,&scissor);
+    context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);auto* rt=target.Get();
+    if(GetEnvironmentVariableW(L"SFC_REMIX_DEPTH_OUTPUT",nullptr,0))context->OMSetRenderTargets(0,nullptr,fixtureDepth.Get());
+    else context->OMSetRenderTargets(1,&rt,fixtureDepth.Get());
+  }
+  bool statePreserved(bool depthUnbound=false){
+    ComPtr<ID3D11BlendState> bs;float factor[4]{};UINT mask=0;context->OMGetBlendState(&bs,factor,&mask);
+    ComPtr<ID3D11DepthStencilState> ds;UINT stencil=0;context->OMGetDepthStencilState(&ds,&stencil);
+    ComPtr<ID3D11RasterizerState> rs;context->RSGetState(&rs);ComPtr<ID3D11RenderTargetView> rt;ComPtr<ID3D11DepthStencilView> boundDepth;context->OMGetRenderTargets(1,&rt,&boundDepth);
+    UINT n=1;D3D11_VIEWPORT vp{};context->RSGetViewports(&n,&vp);UINT nr=1;D3D11_RECT rect{};context->RSGetScissorRects(&nr,&rect);
+    D3D11_PRIMITIVE_TOPOLOGY topology{};context->IAGetPrimitiveTopology(&topology);
+    return bs.Get()==blend.Get()&&ds.Get()==depth.Get()&&rs.Get()==raster.Get()&&rt.Get()==target.Get()&&boundDepth.Get()==(depthUnbound?nullptr:fixtureDepth.Get())&&mask==0xFFFFFFFA&&stencil==42&&factor[0]==0.1f&&factor[3]==0.4f&&n==1&&vp.TopLeftX==3&&vp.TopLeftY==4&&vp.Width==width-10&&vp.Height==height-20&&vp.MinDepth==0.2f&&vp.MaxDepth==0.8f&&nr==1&&rect.left==10&&rect.bottom==400&&topology==D3D11_PRIMITIVE_TOPOLOGY_LINELIST;
+  }
+  unsigned sample(const char* phase,bool save){
+    ComPtr<ID3D11Texture2D> back;check(swap->GetBuffer(0,IID_PPV_ARGS(&back)),"fixture sampled backbuffer");D3D11_TEXTURE2D_DESC desc{};back->GetDesc(&desc);
+    desc.Usage=D3D11_USAGE_STAGING;desc.BindFlags=0;desc.MiscFlags=0;desc.CPUAccessFlags=D3D11_CPU_ACCESS_READ;
+    ComPtr<ID3D11Texture2D> staging;check(device->CreateTexture2D(&desc,nullptr,&staging),"fixture staging");context->CopyResource(staging.Get(),back.Get());
+    D3D11_MAPPED_SUBRESOURCE pixels{};check(context->Map(staging.Get(),0,D3D11_MAP_READ,0,&pixels),"fixture verification readback");
+    unsigned green=0;bool untouched=true;
+    for(unsigned y=96;y<352;++y){const auto* row=static_cast<const unsigned char*>(pixels.pData)+y*pixels.RowPitch;for(unsigned x=width-272;x<width-16;++x){if(row[x*4+1]>row[x*4]+20&&row[x*4+1]>row[x*4+2]+20)++green;}}
+    // A blue-only region outside the image verifies original drawing remains.
+    for(unsigned y=height-80;y<height-20;++y){const auto* row=static_cast<const unsigned char*>(pixels.pData)+y*pixels.RowPitch;for(unsigned x=20;x<80;++x)if(row[x*4]<50||row[x*4+1]>30||row[x*4+2]>20)untouched=false;}
+    if(save){
+      BITMAPFILEHEADER f{};f.bfType=0x4D42;f.bfOffBits=sizeof(f)+sizeof(BITMAPINFOHEADER);f.bfSize=f.bfOffBits+width*height*4;
+      BITMAPINFOHEADER b{};b.biSize=sizeof(b);b.biWidth=static_cast<LONG>(width);b.biHeight=-static_cast<LONG>(height);b.biPlanes=1;b.biBitCount=32;
+      std::ofstream image("fixture-enabled.bmp",std::ios::binary);image.write(reinterpret_cast<const char*>(&f),sizeof(f));image.write(reinterpret_cast<const char*>(&b),sizeof(b));
+      for(unsigned y=0;y<height;++y)image.write(static_cast<const char*>(pixels.pData)+y*pixels.RowPitch,width*4);
+    }
+    context->Unmap(staging.Get(),0);
+    std::cout<<"SAMPLE "<<phase<<" green="<<green<<" outside_blue="<<untouched<<" width="<<width<<" height="<<height<<"\n";
+    if(!untouched)throw std::runtime_error("fixture original drawing changed outside tile");return green;
+  }
+  void reset(){if(context)context->ClearState();fixtureIndices.Reset();fixtureVS.Reset();fixturePS.Reset();fixtureColor.Reset();fixtureDepth.Reset();target.Reset();raster.Reset();blend.Reset();depth.Reset();swap.Reset();context.Reset();device.Reset();}
+  ~Scene(){reset();}
+};
+int wmain(){
+  std::cout.setf(std::ios::unitbuf);HWND window=nullptr;HMODULE proxy=nullptr,component=nullptr;int result=1;
+  if(GetEnvironmentVariableW(L"SFC_RETURN_CAPTURE_CRASH",nullptr,0)){ULONG bytes=65536;SetThreadStackGuarantee(&bytes);AddVectoredExceptionHandler(1,traceCrash);}
+  try{
+    wchar_t name[128]{};if(!GetEnvironmentVariableW(L"SFC_REMIX_RETURN_SESSION",name,128))throw std::runtime_error("fixture session");return_path::Mapping mapping(false,name);auto& s=*mapping.state;
+    proxy=LoadLibraryW(L".\\dxgi.dll");if(!proxy)throw std::runtime_error("fixture copied ReShade proxy");
+    // Limited ReShade deliberately omits automatic add-on loading, but supports
+    // external registration and overlay/runtime events. Use those public APIs;
+    // no proxy patch, restricted application event or ReShade binary replacement.
+    component=GetModuleHandleW(L"SFCRemixReturn.dll");if(!component)throw std::runtime_error("fixture startup component missing");
+    WNDCLASSW wc{};wc.lpfnWndProc=proc;wc.hInstance=GetModuleHandleW(nullptr);wc.lpszClassName=L"SFC_ReturnFixture";if(!RegisterClassW(&wc))throw std::runtime_error("fixture class");
+    window=CreateWindowW(wc.lpszClassName,L"Offline returned-image fixture — NOT SFC",WS_POPUP,100,100,800,600,nullptr,nullptr,wc.hInstance,nullptr);if(!window)throw std::runtime_error("fixture window");ShowWindow(window,SW_SHOWNOACTIVATE);
+    {
+      Scene scene;scene.init(window);const auto start=GetTickCount64();bool enabled=false,disabled=false,resized=false,recreated=false,afterResize=false,afterRecreate=false,disconnected=false;unsigned frames=0,stateErrors=0;
+      const bool observationOnly=GetEnvironmentVariableW(L"SFC_RETURN_OBSERVATION_ONLY",nullptr,0)!=0;
+      const bool expanded=GetEnvironmentVariableW(L"SFC_RETURN_EXPANDED_SEARCH",nullptr,0)!=0;
+      const bool broad=GetEnvironmentVariableW(L"SFC_REMIX_BROAD_OUTPUT",nullptr,0)!=0;
+      const bool snapshot=GetEnvironmentVariableW(L"SFC_REMIX_DEPTH_OUTPUT",nullptr,0)!=0;
+      auto* broadHeader=reinterpret_cast<broad_trace::Header*>(reinterpret_cast<BYTE*>(&s)+256);
+      auto* search=reinterpret_cast<depth_search::Data*>(reinterpret_cast<BYTE*>(&s)+256);
+      if(expanded){
+        fakeSearch=search;fakeStart=GetTickCount();slowRequested=GetEnvironmentVariableW(L"SFC_RETURN_SLOW_END",nullptr,0)!=0;
+        auto install=reinterpret_cast<BOOL(__cdecl*)(void* const*)>(GetProcAddress(component,"SFCSearchFixtureStart"));
+        void* points[]={reinterpret_cast<void*>(&probeBegin),reinterpret_cast<void*>(&probeEnd),reinterpret_cast<void*>(&probeAfterFlush),reinterpret_cast<void*>(&probePresent)};
+        if(!install||!install(points))throw std::runtime_error("fixture search installation");
+      }
+      while(GetTickCount64()-start<25000){
+        MSG m{};while(PeekMessageW(&m,nullptr,0,0,PM_REMOVE)){TranslateMessage(&m);DispatchMessageW(&m);}
+        scene.clear();
+        if(broad||snapshot){
+          // Valid original geometry exercises both public draw callbacks. Same
+          // blue as clear; depth testing remains explicitly disabled.
+          scene.context->VSSetShader(scene.fixtureVS.Get(),nullptr,0);scene.context->PSSetShader(scene.fixturePS.Get(),nullptr,0);
+          scene.context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+          scene.context->Draw(3,0);scene.context->IASetIndexBuffer(scene.fixtureIndices.Get(),DXGI_FORMAT_R16_UINT,0);scene.context->DrawIndexed(3,0,0);
+          scene.context->IASetIndexBuffer(nullptr,DXGI_FORMAT_UNKNOWN,0);scene.context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+          scene.context->VSSetShader(nullptr,nullptr,0);scene.context->PSSetShader(nullptr,nullptr,0);
+          auto* rt=scene.target.Get();scene.context->OMSetRenderTargets(1,&rt,nullptr);
+        }
+        if(expanded){if(!preserved(probeBegin)||!preserved(probeEnd)||!preserved(invokeAfterFlush,true)||!preserved(probePresent))throw std::runtime_error("engine observer stack/flags/FP state changed");}
+        check(scene.swap->Present(0,0),"fixture present");++frames;if(!scene.statePreserved(broad||snapshot))++stateErrors;
+        if(snapshot){if(GetTickCount64()-start>16000)break;Sleep(16);continue;}
+        if(broad){
+          if(frames==90){scene.resize();resized=true;}
+          if(frames==180){scene.reset();scene.init(window);recreated=true;}
+          if(broadHeader->status>=3)break;
+          Sleep(16);continue;
+        }
+        if(expanded){
+          if(frames==90){scene.resize();resized=true;}
+          if(frames==180){scene.reset();scene.init(window);recreated=true;}
+          if(search->status==depth_search::Removed)break;
+          Sleep(16);continue;
+        }
+        if(observationOnly){
+          if(return_path::read(s.visibilitySamples)>=3&&!resized){scene.resize();resized=true;}
+          if(return_path::read(s.visibilitySamples)>=5&&!recreated){scene.reset();scene.init(window);recreated=true;}
+          if(return_path::read(s.visibilitySamples)==8)break;
+          Sleep(16);continue;
+        }
+        if(!enabled&&return_path::read(s.drawCount)>30){if(scene.sample("enabled",true)<1000)throw std::runtime_error("returned image missing");enabled=true;}
+        if(enabled&&!disabled&&!return_path::read(s.enabled)){if(scene.sample("disabled",false)>10)throw std::runtime_error("disabled image visible");disabled=true;}
+        if(disabled&&!resized&&return_path::read(s.enabled)){scene.resize();SetWindowPos(window,nullptr,100,100,1024,768,SWP_NOACTIVATE|SWP_NOZORDER);resized=true;}
+        if(resized&&!afterResize&&return_path::read(s.ready)&&return_path::read(s.epoch)>=2&&return_path::read(s.presentedEpoch)==return_path::read(s.epoch)&&return_path::read(s.drawCount)>80){if(scene.sample("resized",false)<1000)throw std::runtime_error("image missing after resize");afterResize=true;}
+        if(afterResize&&!recreated){scene.reset();Sleep(50);scene.init(window);recreated=true;}
+        if(recreated&&!afterRecreate&&return_path::read(s.ready)&&return_path::read(s.epoch)>=3&&return_path::read(s.presentedEpoch)==return_path::read(s.epoch)&&return_path::read(s.drawCount)>100){if(scene.sample("recreated",false)<1000)throw std::runtime_error("image missing after recreation");afterRecreate=true;}
+        if(afterRecreate&&!disconnected&&!return_path::fresh(s.renderedAt,return_path::now(),s.qpcFrequency)){
+          // Allow one presented frame after expiry to remove cached draw list.
+          scene.clear();check(scene.swap->Present(0,0),"fixture disconnect present");
+          if(scene.sample("disconnected",false)>10)throw std::runtime_error("stale renderer image visible");disconnected=true;break;
+        }
+        Sleep(16);
+      }
+      if(snapshot){
+        std::cout<<"DEPTH_SNAPSHOT_END frames="<<frames<<" state_errors="<<stateErrors<<"\n";
+        if(stateErrors)throw std::runtime_error("snapshot fixture original state changed");
+      }else if(broad){
+        std::cout<<"BROAD_END frames="<<frames<<" state_errors="<<stateErrors<<" status="<<broadHeader->status<<" drops="<<broadHeader->dropped<<" resized="<<resized<<" recreated="<<recreated<<"\n";
+        if(stateErrors||broadHeader->status!=3||broadHeader->error||!resized||!recreated)throw std::runtime_error("broad fixture incomplete");
+      }else if(expanded){
+        std::cout<<"SEARCH_END frames="<<frames<<" state_errors="<<stateErrors<<" restored="<<search->restoredMask<<" seen="<<search->seenMask<<"\n";
+        if(stateErrors||search->status!=depth_search::Removed||search->restoredMask!=15||search->seenMask!=63)throw std::runtime_error("expanded search restoration/coverage failed");
+        if(slowRequested&&(!slowDone||search->reserved!=2))throw std::runtime_error("slow in-flight restoration test incomplete");
+      }else if(observationOnly){
+        std::cout<<"OBSERVATION_END frames="<<frames<<" state_errors="<<stateErrors<<" samples="<<return_path::read(s.visibilitySamples)<<" resized="<<resized<<" recreated="<<recreated<<"\n";
+        if(stateErrors||return_path::read(s.visibilitySamples)!=8||!resized||!recreated)throw std::runtime_error("observation fixture incomplete");
+      }else{
+        std::cout<<"FIXTURE_END frames="<<frames<<" state_errors="<<stateErrors<<" phases="<<enabled<<disabled<<afterResize<<afterRecreate<<disconnected<<"\n";
+        if(!enabled||!disabled||!afterResize||!afterRecreate||!disconnected||stateErrors)throw std::runtime_error("fixture phases/state incomplete");
+      }
+      result=0;
+    }
+  }catch(const std::exception& e){std::cout<<"FIXTURE_FAILED "<<e.what()<<"\n";}
+  if(window)DestroyWindow(window);if(proxy)FreeLibrary(proxy);return result;
+}

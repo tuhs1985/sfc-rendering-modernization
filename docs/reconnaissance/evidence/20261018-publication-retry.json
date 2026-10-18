@@ -1,0 +1,16 @@
+{
+  "run_id": "SFC-RETURN-20261018-25",
+  "result": "READY_FOR_PRIVATE_RUNTIME_RETEST",
+  "native_request_checks_per_architecture": 62,
+  "native_triplet_checks_per_architecture": 65,
+  "python_tests": 195,
+  "offline_gpu_gates": ["direct", "proxy callback", "slow receiver", "producer disconnect"],
+  "host_sha256": "D2DDFDEA5DFB5AC02D673C3DFCEF54EB5E60DBA682F81E432CFFA4183207CE1F",
+  "qualification_sha256": "C3F64E490808D999798A08097074FB22D94BF5E94202B9BC51A139F85820C2C8",
+  "archive_sha256": "82AA6048D5D9E59ACAB9F61B696D18FABD6A8B32DEECA10100754BD52EBD9102",
+  "archive_bytes": 3919642,
+  "sfc_launched": false,
+  "sustained_runtime_fix_confirmed": false,
+  "unchanged_client_hashes": true,
+  "staged_or_committed": false
+}

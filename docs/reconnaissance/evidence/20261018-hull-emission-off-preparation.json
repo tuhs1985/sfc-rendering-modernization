@@ -1,0 +1,43 @@
+{
+  "run_id": "SFC-RETURN-20261018-34",
+  "status": "READY_FOR_SPONSOR_RUNTIME_TEST",
+  "sfc_launched_by_codex": false,
+  "whole_hull_emission": false,
+  "emissive_texture": null,
+  "emissive_intensity": 0,
+  "emissive_constant": [0, 0, 0],
+  "original_images_uv_geometry_unchanged": true,
+  "secondary_emission_applied": false,
+  "inspection_light": {
+    "type": "distant",
+    "direction": [0, -0.70710678, -0.70710678],
+    "radiance": [1, 1, 1],
+    "angular_diameter_degrees": 0.53,
+    "native_sfc_light_claimed": false,
+    "reason": "Old tiny world-origin sphere left the non-emissive hull dark at native world distance"
+  },
+  "initial_partial": "20261018-201501-739988-live-private",
+  "final_gpu_runs": [
+    "20261018-201718-789860-live-private",
+    "20261018-201740-519481-live-private",
+    "20261018-201803-486939-live-private",
+    "20261018-201825-240643-live-private",
+    "20261018-201833-510518-live-private",
+    "20261018-201842-605191-live-private",
+    "20261018-201852-335182-live-private",
+    "20261018-201900-319670-live-private"
+  ],
+  "all_eight_gpu_gates_passed": true,
+  "python_tests_passed": 212,
+  "textured_silhouette_iou": 0.99886925795053,
+  "normal_steady_samples_displayed": [60, 60],
+  "host_sha256": "0F48A1465F5B25540D5C5A7E82711A10BA2456F54EC67B861F94DDDD1E5C1606",
+  "qualification_sha256": "00D590736F9B7E6F4D18A826DC538B7829717FDE1933408377A8A06AD501E2BF",
+  "archive": "artifacts/remix-runtime/archives/20261018-hull-emission-off-preparation.zip",
+  "archive_bytes": 36099702,
+  "archive_sha256": "9833E97A336B519963F35EA89DB8077C6887A05A4CB2ECBAACBE373A00097D3B",
+  "texture_reversal_fixed": false,
+  "continuous_observation_seconds": 90,
+  "staged": false,
+  "committed": false
+}

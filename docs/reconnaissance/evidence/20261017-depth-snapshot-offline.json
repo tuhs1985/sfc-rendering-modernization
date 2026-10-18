@@ -1,0 +1,41 @@
+{
+  "probe": "REMIX-DEPTH-001",
+  "date": "2026-10-17",
+  "result": "READY_FOR_SPONSOR_RUNTIME_TEST",
+  "confidence": "CONFIRMED offline only; SFC depth content remains unqualified",
+  "sfc_launched": false,
+  "addon_sha256": "98E7B202A035A03B1F951EF62B343B306289DC45A63DF19D4BF8F3469DB5FCC0",
+  "rebuild_identity_verified": true,
+  "native_gpu": {
+    "path": "artifacts/remix-runtime/runs/20261017-depth-snapshot-gpu-03",
+    "pairs": 3, "samples": 8, "uniform_depth": 0.625,
+    "distinct_samples_expected_sample0_min_max_mean": [0.1, 0.1, 0.8, 0.45],
+    "original_state_preserved": true
+  },
+  "callback_positive": {
+    "path": "artifacts/remix-runtime/runs/20261017-184531-014262-return-fixture",
+    "frames": 948, "pairs": 3, "state_errors": 0, "normal_exit": true,
+    "content": "Known synthetic uniform depth, NOT ship silhouettes"
+  },
+  "callback_negative": {
+    "path": "artifacts/remix-runtime/runs/20261017-184615-737131-return-fixture",
+    "frames": 946, "pairs": 0, "state_errors": 0, "normal_exit": true
+  },
+  "broad_regressions": [
+    {"path": "artifacts/remix-runtime/runs/20261017-184543-845477-return-fixture", "frames": 588, "drops": 0, "state_errors": 0, "resize_recreate": true},
+    {"path": "artifacts/remix-runtime/runs/20261017-184628-025939-return-fixture", "frames": 580, "drops": 0, "state_errors": 0, "resize_recreate": true}
+  ],
+  "validation": {
+    "python_tests_passed": 149,
+    "native_checks": {"wire": 37, "search": 13, "broad": 14, "controller": 212},
+    "powershell_parser": "PASS", "read_only_preflight": "PASS"
+  },
+  "bounds": {"pairs": 3, "tactical_seconds": 20, "image_bytes": 67108864, "ancillary_bytes": 33554432, "workflow_seconds": 300},
+  "archive": {
+    "path": "artifacts/remix-runtime/archives/20261017-depth-snapshot-offline.zip",
+    "bytes": 322642,
+    "sha256": "4456B34EDD50EF67809E53EDEDF2A4E277BDF4A480975C2261D0BBAF5E5E8813",
+    "crc_verified": true, "raw_removed": false
+  },
+  "unresolved": ["Tactical ship depth/camera correspondence", "Depth direction/coverage", "Owner suppression/UI/effect composition", "Native SFC reference-count warning67"]
+}

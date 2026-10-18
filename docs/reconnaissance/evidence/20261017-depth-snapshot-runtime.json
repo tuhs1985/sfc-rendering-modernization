@@ -1,0 +1,32 @@
+{
+  "probe": "REMIX-DEPTH-001",
+  "run": "artifacts/remix-runtime/runs/20261017-185115-506823-in-game",
+  "result": "PARTIAL_NO_IMAGES",
+  "requested_tactical_seconds": 20,
+  "prepared_seconds": 48.313,
+  "target_pid": 11952,
+  "status": {"files": 0, "io_errors": 0, "gpu_failures": 1, "ambiguous": false, "issued": 0, "pending_abandoned": false},
+  "mechanical": {
+    "normal_game_exit": true, "gate_controller_exit": 0,
+    "hook_restored_unloaded": true, "host_exit": 0,
+    "proxy_config_restored": true, "original_critical_settings_unchanged": true
+  },
+  "compatibility": {
+    "observed_feature_level": "0xA100 / D3D_FEATURE_LEVEL_10_1",
+    "log_time_last_device": "14:51:17:542",
+    "requested_probe_shader": "cs_5_0",
+    "mismatch": "CONFIRMED unsupported shader profile for observed device feature level",
+    "failure_cause": "STRONG HYPOTHESIS shader creation failed at init; exact API/HRESULT not logged",
+    "offline_test_gap": "Fixture requested highest available feature level, not explicit10_1",
+    "reference": "https://learn.microsoft.com/en-us/windows/win32/direct3d11/direct3d-11-advanced-stages-compute-create"
+  },
+  "visible_behavior": "No explicit equivalence report for this run; normal exit is not visual evidence",
+  "warning": "Reference count for ID3D11Device0 object 08AED8F0 (0D891F14) is inconsistent (67).",
+  "archive": {
+    "path": "artifacts/remix-runtime/archives/20261017-depth-snapshot-partial.zip",
+    "bytes": 18317, "entries": 13, "source_bytes": 137886,
+    "sha256": "085788F4DA178A606B2198EB6DB9AB72D279AB3378EAF761504F2FEA8A28D8BA",
+    "crc_verified": true, "raw_removed": false
+  },
+  "next": "Offline10_1-compatible depth extraction and stage/HRESULT diagnostics; do not repeat unchanged runner"
+}

@@ -39,7 +39,7 @@ $tintComponentTestOutput = Join-Path $outputDir "m1_visual_tint_component_tests.
 $tintComponentTestObject = Join-Path $outputDir "m1_visual_tint_component_tests.obj"
 
 $commands = @(
-    ('cl /nologo /std:c++17 /EHsc /W4 /WX /O2 /MT /arch:SSE2 /LD /Fo:"{0}" /Fe:"{1}" "{2}" /link /DEF:"{3}"' -f $dllObject, $dllOutput, $dllSource, $definition),
+    ('cl /nologo /std:c++17 /EHsc /W4 /WX /O2 /MT /arch:SSE2 /LD /Fo:"{0}" /Fe:"{1}" "{2}" /link /Brepro /DEF:"{3}"' -f $dllObject, $dllOutput, $dllSource, $definition),
     ('cl /nologo /std:c++17 /EHsc /W4 /WX /O2 /MT /arch:SSE2 /DM1_WINMM_PROXY /LD /Fo:"{0}" /Fe:"{1}" "{2}" /link /DEF:"{3}"' -f $proxyObject, $proxyOutput, $dllSource, $proxyDefinition),
     ('cl /nologo /std:c++17 /EHsc /W4 /WX /O2 /MT /arch:SSE2 /DM1_GATE_ONLY /LD /Fo:"{0}" /Fe:"{1}" "{2}" /link /DEF:"{3}"' -f $gateObject, $gateOutput, $dllSource, $gateDefinition),
     ('cl /nologo /std:c++17 /EHsc /W4 /WX /O2 /MT /Fo:"{0}" /Fe:"{1}" "{2}" /link advapi32.lib' -f $controllerObject, $controllerOutput, $controllerSource),

@@ -1,0 +1,41 @@
+{
+  "run_id": "SFC-RETURN-20261018-33",
+  "runtime_source": "20261018-193951-766949-in-game",
+  "audit": {
+    "vertices": 19110,
+    "groups": 58,
+    "unique_images": 81,
+    "vertex_uv_exact": true,
+    "resource_group_material_indices_exact": true,
+    "images_pixel_exact": true,
+    "saucer_group": 45,
+    "saucer_corners": 1980,
+    "saucer_primary": "assets/models/fca/top.bmp",
+    "saucer_sha256": "7edff9804f13617c96d98991906ac8f6ba2e17a3734c029742c6128545ff4a18",
+    "bmp_height": 1024,
+    "original_vs_dds_pixel_mae": 0,
+    "vertical_flip_mae": 13.695805231730143,
+    "horizontal_flip_mae": 10.606157302856445
+  },
+  "washout": {
+    "confirmed_configuration": "Every primary map used as albedo AND emissive at intensity1, plus provisional sphere radiance200",
+    "major_visual_contribution": "Confirmed substantial brightening in fixed-light synthetic emission-off/on GPU control; actual ship contribution not isolated",
+    "sole_cause_proven": false
+  },
+  "offline_gpu_control": {
+    "run": "20261018-200014-459912-texture-control",
+    "status": "PARTIAL shutdown failure after both fence-completed captures",
+    "native_exit_code": "NOT_RECORDED_BY_INITIAL_RUNNER",
+    "correct_corner_placement_observed": true,
+    "samples_rgb_order": "TL red, TR green, BL blue, BR yellow",
+    "emission_off": [[87,13,13],[13,92,13],[12,12,82],[91,90,13]],
+    "emission_on": [[240,43,41],[33,231,31],[51,52,244],[224,224,26]],
+    "complete_gpu_fixture_pass_claimed": false
+  },
+  "flip_root_cause_confirmed": false,
+  "blanket_flip_authorized_by_evidence": false,
+  "runtime_or_production_changed": false,
+  "python_tests_passed": 210,
+  "staged": false,
+  "committed": false
+}

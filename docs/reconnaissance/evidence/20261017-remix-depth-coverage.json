@@ -1,0 +1,46 @@
+{
+  "probe": "REMIX-COVERAGE-001",
+  "run": "artifacts/remix-runtime/runs/20261017-200529-953300-coverage",
+  "result": "STANDALONE_DEPTH_COVERAGE_AND_HISTORICAL_CAMERA_QUALIFIED",
+  "confidence": "CONFIRMED controlled native runtime and independent native-composed projection comparison;not live SFC replacement",
+  "sfc_launched": false,
+  "toolkit_launched": false,
+  "seconds": 3.593,
+  "rendered_frames": 96,
+  "retained_triplets": 6,
+  "native_consumer_feature_level": 41216,
+  "gpu_transfer_exact_images": 18,
+  "shader_owner_id_decode_exact_images": 6,
+  "picking_interpretation": "uint32 RAW BITS in R32F,not numeric float IDs",
+  "tested_ids": [0, 7, 11, 13, 23, 29],
+  "depth_interpretation": "D3D projected normalized0..1 for tested cameras;view/ray distance rejected",
+  "background": {"depth": -1234, "id": 0, "all_pixels_checked": true},
+  "source_asset": {
+    "path": "artifacts/m1/runs/20261016-223535-enabled/LIVE-SCENE-001-asset-2.bin",
+    "sha256": "D28CD7F0A4259B7DAB215349E63EC0D3E751514A44112741DA83DC62A03A5C04",
+    "references_sha256": "DA093CDEEAF6CD03ECADF7FDD56B7A64A3185631A84DD7716DBA16A67D5A801E",
+    "model": "assets/models/fca/fca.mod",
+    "triangles": 6370, "corner_vertices": 19110, "groups_recorded": 58,
+    "appearance_scope": "Default opaque,double-sided diagnostic material;original images not applied"
+  },
+  "historical_replay": {
+    "updates_sha256": "A4400F1ABDD13A7D101934402A42BA0E04658E7E567B00AF5B182C78FB1C19A6",
+    "source_line": 4, "asset_capture_frame": 4, "pose_camera_frame": 5, "owner_epoch": 2, "asset_revision": 2,
+    "viewport": [200, 30, 1720, 1020], "mask_intersection": 478, "mask_union": 478,
+    "mask_iou": 1.0, "depth_median_error": 0.00000018007762153660067,
+    "limitation": "Rigid same-revision replay against native composed math;not actual co-frame SFC GPU depth calibration"
+  },
+  "runtime_exit": 0,
+  "sdk_shutdown": 0,
+  "warning": "[40] common device objects were not disposed of.",
+  "scope_limits": {"four_gpu_outputs_bytes_max": 1048576, "cpu_readback_bytes_max": 2097152, "output_bytes_max": 33554432, "seconds_max": 120, "whole_run_bytes": 5416771},
+  "tests": {"python_passed": 160, "native_output_contract_checks": 30},
+  "archive": {
+    "path": "artifacts/remix-runtime/archives/20261017-200555-380640-coverage.zip",
+    "bytes": 1470629, "entries": 173, "source_bytes": 25309676,
+    "sha256": "2CC8B1F5187E8957E09715470D29D03173F094FF7FF1425175CFD9825059A490",
+    "crc_verified": true, "raw_removed": false
+  },
+  "next": "Prepare contemporaneous selected-owner/model/camera/native-depth capture before original-ship suppression",
+  "repository": {"head": "e96765a", "staged": false, "committed": false}
+}

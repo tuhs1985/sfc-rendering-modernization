@@ -1,0 +1,67 @@
+{
+  "scope": "REMIX-RETURN-001 finite diagnostic, not general renderer compatibility",
+  "remix": {
+    "release": "remix-1.5.2",
+    "release_repository_commit": "26a8fdc7a0574d8ec9d438b05be4667d18dc11aa",
+    "sdk_repository_commit": "b81a7b566b1eeb9edb4dc2b3c9d3972e0f253ad4",
+    "sdk_version": "0.6.4",
+    "archive_url": "https://github.com/NVIDIAGameWorks/rtx-remix/releases/download/remix-1.5.2/remix-1.5.2-release.zip",
+    "archive_sha256": "CC424BE4DD1A0C6FD922BC6A7F8E5F6582BAEA7043A38AFA6686D8B6FAABAD01",
+    "x64_runtime_relative_path": ".trex/d3d9.dll",
+    "x64_runtime_sha256": "F7C310821AA98BCDFDEC120330B0A89457B7C5EBA58D21464AF32639611C809F",
+    "header_sha256": "E623E4956A76894EEEF02361334C7C0458D4EC8BF49F729EC9038C36128BBF47",
+    "reported_binary_version": "remix-1.5.2+68edea01",
+    "binary_suffix_public_source_identity_verified": false
+  },
+  "reshade": {
+    "existing_x86_proxy_version": "6.7.1.2133",
+    "existing_proxy_sha256": "E35E4E2E47F4765F0799CB54C88E5ADE49B50CD7895C137B9D557F263344CAB7",
+    "sdk_commit": "8cf85bd12d56697d756d4fcb45e501f5d1b540fa",
+    "api_version": 18,
+    "imgui_commit": "3912b3d9a9c1b3f17431aebafd86d2f40ee6e59c",
+    "imgui_version": 19250,
+    "mechanism": "public external registration; allowed runtime/overlay events; automatic addon32 unsupported",
+    "optional_broad_capture_full_support": {
+      "authorization": "Sponsor Yes after SFC-RETURN-20261017-08; isolated test copy only",
+      "package_url": "https://reshade.me/downloads/ReShade_Setup_6.7.1_Addon.exe",
+      "package_sha256": "FC55C5C62D0BC43BF02C40EC9AEF69E0B74F22A6017403AF1897EC32E5CD0E8F",
+      "proxy_sha256": "A1BA732B5E31E0405CDE322CC5EC62CF972B3FBAEFBB6CBDC8A24DA00D58AE24",
+      "file_version": "6.7.1.2131",
+      "product_version": "6.7.1",
+      "installer_executed": false,
+      "qualification": "artifacts/remix-runtime/deps/reshade-full-6.7.1/qualification.json",
+      "rollback": "Per-run dxgi-original.rollback; restore only after copied game exits",
+      "baseline_proxy_unchanged_outside_opt_in_session": true
+    }
+  },
+  "detours": {
+    "version": "4.0.1",
+    "commit": "e4bfd6b03e50de46b47abfbd1e46b384f0c5f833",
+    "archive_sha256": "FEF0B17C5C3C9356FB8BA7366A3B196149DAADD131FB6A92ABEDA1CB4D3B9B85",
+    "use": "startup-only process-memory import and restore; no disk client patch"
+  },
+  "environment": {
+    "os": "Windows 11 Home build 26200",
+    "gpu": "NVIDIA RTX 4070 Ti",
+    "driver": "617.42",
+    "visual_studio": "2026 Community 18.7.3",
+    "compiler": "19.51.36248",
+    "powershell": "7.6.5",
+    "python": "3.12.14",
+    "process_local": {
+      "DXVK_LOG_LEVEL": "error",
+      "DXVK_GRAPHICS_PRESET_TYPE": "4",
+      "RTX_INTEGRATE_INDIRECT_MODE": "0",
+      "DXVK_UPSCALER_TYPE": "0",
+      "DXVK_RAY_RECONSTRUCTION": "False",
+      "RTX_DLSS_PRESET": "0",
+      "RTX_ENABLE_ASYNC_COMPILATION": "False"
+    }
+  },
+  "game_client_sha256": "4D65761D7DD69EF1504070261B81E9C200C0AF18105033E1C4D2222C62320C29",
+  "test_install": "C:/Project/SFC-Remix-Return-Test",
+  "launcher_reference_sha256": "84D3A5F89A922C4BEE6815CF0614538C3565C4BDB7DB3AA187C552CB727EF890",
+  "launcher_reference_must_not_be_run": true,
+  "full_copy_manifest": "artifacts/remix-runtime/test-install/source-copy-files.json",
+  "per_run_built_component_hashes": "artifacts/remix-runtime/runs/<UTC>-in-game/manifest.json"
+}

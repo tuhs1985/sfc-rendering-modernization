@@ -1,0 +1,20 @@
+{
+  "run_id": "SFC-RETURN-20261018-39",
+  "runtime": "20261018-214915-357379-in-game",
+  "result": "REMIX_TEXTURE_ORIGIN_CORRECTION_SPONSOR_ACCEPTED",
+  "sponsor_report": "that did it, works great. commit",
+  "normal_game_exit": true,
+  "gate_clean_unloaded": true,
+  "gate_controller_exit": 0,
+  "renderer_exit": 0,
+  "critical_hashes_and_launcher_settings_unchanged": true,
+  "private_return": {"offered": 1694, "rendered": 1694, "acquired": 1692, "drawn": 1692, "failed": 0, "late": 1, "invalid": 615},
+  "counter_scope": "Atomic asynchronous summary;invalid/rejected observations not a complete semantic error classification",
+  "prepared_image": {"width": 1920, "height": 1080, "owner_epoch": 2, "source_frame": 1517, "source_request_age_ms": 42.2458, "sha256": "2143ec8f85d3c45bec82e308963e8e91e8c95dad3726fbc7cf6283aa2e8c6add"},
+  "runtime_folder_bytes": 61449658,
+  "prior_attempt": {"runtime": "20261018-214803-276390-in-game", "result": "PARTIAL", "error": "Semantic controller exited before tactical gate", "controller_exit": 7, "detail": "M1StartW failed: 5", "hashes_unchanged": true, "root_cause": "UNRESOLVED;not attributed to UV fix"},
+  "archive": "artifacts/remix-runtime/archives/20261018-remix-uv-corrected-runtime.zip",
+  "archive_bytes": 6889688,
+  "archive_sha256": "E780F6F0D506BDE3FC56B3545D909C8EEAD686611FE4C7D394D5ED3C21AFB791",
+  "remaining_limits": ["Brightness/native lighting parity unqualified", "SDK warning40 persists despite host exit0", "Original ships remain on;not replacement or formal TRL completion", "Future renderer adapters must qualify own texture-origin convention"]
+}

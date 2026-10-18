@@ -1,0 +1,39 @@
+{
+  "run_id": "SFC-RETURN-20261017-21",
+  "local_date": "2026-10-17",
+  "probe": "REMIX-TRIPLET-001",
+  "result": "TRIPLET_GPU_RETURN_QUALIFIED_OFFLINE",
+  "sfc_launched": false,
+  "game_addon_modified_or_adopted": false,
+  "original_ship_suppressed": false,
+  "wire_version": 2,
+  "wire_bytes": 464,
+  "key_bytes": 136,
+  "native_tests_per_architecture": 56,
+  "native_test_architectures": ["x64", "x86"],
+  "python_tests": 184,
+  "producer_sha256": "B09705BB561DC2A7A5C28CEEEC77187F40169805E68330057B5946287A271289",
+  "consumer_x86_sha256": "9D57331C91F68F195ED5B310B3629A35A759F3919234B56A5D6B36D1E8CDE2D5",
+  "positive_runs": [
+    {"folder": "20261018-032340-400739-coverage", "source_engine_frame": 120, "triplets": 2, "plane_deliveries_exact": 6, "seconds": 3.6409999999959837, "bytes": 5418271, "host_exit": 0, "child_exit": 0},
+    {"folder": "20261018-032345-254877-coverage", "source_engine_frame": 720, "triplets": 2, "plane_deliveries_exact": 6, "seconds": 3.610000000000582, "bytes": 5418344, "host_exit": 0, "child_exit": 0}
+  ],
+  "fault_runs": [
+    {"folder": "20261018-032349-966322-coverage", "fault": "slow6seconds", "expected_fault_observed": true, "published": 1, "ack": 0, "accepted": 0, "lease": "READY", "host_exit": 1, "seconds": 9.421999999998661},
+    {"folder": "20261018-032400-524942-coverage", "fault": "receiver_exit", "expected_fault_observed": true, "published": 1, "ack": 0, "accepted": 0, "lease": "READY", "host_exit": 1, "seconds": 3.3430000000007567}
+  ],
+  "development_v1_runs_retained": ["20261018-032032-395505-coverage", "20261018-032052-446439-coverage", "20261018-032057-195207-coverage", "20261018-032107-650416-coverage"],
+  "shared_gpu_triplet_bytes": 786432,
+  "mapping_bytes": 4096,
+  "max_output_surfaces": 4,
+  "accepted_and_copied_critical_hashes_unchanged": true,
+  "prior_native_probe_binary_unchanged": true,
+  "archive": "artifacts/remix-runtime/archives/20261018-032516-596505-coverage.zip",
+  "archive_bytes": 2009064,
+  "archive_source_bytes": 43114179,
+  "archive_entries": 260,
+  "archive_sha256": "A00029F1C52FB3A287996D2592EF88ECF97C9BBC653D40A443C7C006DF3DD5A1",
+  "archive_crc_verified": true,
+  "raw_removed": false,
+  "remaining_gates": ["Actual SFC addon adoption and graphics-state/UI-safe composition", "Live frame-request timing/latency without waiting in SFC", "Full-size/resize/device-recreation lifecycle", "Owner-specific suppression,coverage,occlusion,effects and fallback", "SDK40-object warning persists;SFC54/67 warnings remain unresolved"]
+}

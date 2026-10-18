@@ -1,0 +1,33 @@
+{
+  "probe": "REMIX-DEPTH-001",
+  "result": "READY_FOR_SPONSOR_RUNTIME_RETRY",
+  "date": "2026-10-17",
+  "sfc_launched": false,
+  "confidence": "CONFIRMED offline at exact SFC feature mode; SFC content not yet qualified",
+  "feature_level": 41216,
+  "reader": "vs_4_1/ps_4_1 private float4 target",
+  "addon_sha256": "5B32A337865F5D92BB7D00AF8E059597C1B48B125166585D8BB60B8663596F02",
+  "rebuild_identity_verified": true,
+  "old_profile_reproduction": {"profile": "cs_5_0", "create_shader_hresult": "0x80070057", "actual_old_sfc_hresult_logged": false},
+  "native": {
+    "path": "artifacts/remix-runtime/runs/20261017-depth-snapshot-fl101-02",
+    "pairs": 3, "samples": 8, "known_uniform": 0.625,
+    "gradient": "base=.1015+.002*x+.004*y; sample0=min=base,max=base+.56,mean=base+.28",
+    "all_pixels_verified": true, "original_state_preserved": true
+  },
+  "callback_positive": {"path": "artifacts/remix-runtime/runs/20261017-185839-279602-return-fixture", "frames": 948, "pairs": 3, "state_errors": 0, "gpu_errors": 0, "io_errors": 0, "normal_exit": true},
+  "callback_negative": {"path": "artifacts/remix-runtime/runs/20261017-185928-419893-return-fixture", "frames": 947, "pairs": 0, "state_errors": 0, "gpu_errors": 0, "io_errors": 0, "normal_exit": true},
+  "broad_regressions": [
+    {"path": "artifacts/remix-runtime/runs/20261017-185851-711003-return-fixture", "frames": 588, "state_errors": 0, "drops": 0, "resize_recreate": true},
+    {"path": "artifacts/remix-runtime/runs/20261017-190000-950730-return-fixture", "frames": 583, "state_errors": 0, "drops": 0, "resize_recreate": true}
+  ],
+  "validation": {"python_tests": 152, "native_wire_checks": 37, "native_search_checks": 13, "native_broad_checks": 14, "controller_checks": 212, "read_only_preflight": "PASS"},
+  "bounds": {"pairs": 3, "tactical_seconds": 20, "images_bytes": 67108864, "ancillary_bytes": 33554432, "prepared_seconds": 300},
+  "archive": {
+    "path": "artifacts/remix-runtime/archives/20261017-depth-fl101-offline.zip",
+    "bytes": 328919, "entries": 52, "source_bytes": 15182791,
+    "sha256": "66F6079B7360B615B78D6539F6C470DD842E49A32FB52A8E29D822E497A8F24D",
+    "crc_verified": true, "raw_removed": false
+  },
+  "unresolved": ["SFC depth silhouettes/camera correspondence/coverage", "Owner-specific visibility and suppression", "Native SFC device-reference warning67"]
+}

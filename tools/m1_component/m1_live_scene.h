@@ -1,5 +1,6 @@
 #pragma once
 #include "m1_live_bridge.h"
+#include "m1_present_calibration.h"
 
 namespace sfc_m1 {
 constexpr DWORD kSceneBytes=16*1024*1024,kSceneOwners=32,kSceneRevisions=64;
@@ -30,6 +31,7 @@ struct LiveScene {
     DWORD capture_attempts=0,capture_failures=0,owner_overflow=0,dropped=0,invalid=0;
     LONGLONG max_capture_ticks=0;LARGE_INTEGER frequency{};
     volatile LONG enabled=0;
+    sfc_calibration::Mailbox* calibration=nullptr;
     bool start(const std::wstring& name,const std::wstring& directory) {
         if(!LiveBridge::name_ok(name) || worker)return false;
         mapping=OpenFileMappingW(FILE_MAP_READ|FILE_MAP_WRITE,FALSE,name.c_str());
@@ -42,15 +44,24 @@ struct LiveScene {
         for(DWORD i=0;i<4;++i)if(h[4+i]!=std::stoul(hex.substr(i*8,8),nullptr,16)){close();return false;}
         output=directory;stop_event=CreateEventW(nullptr,TRUE,FALSE,nullptr);
         if(!stop_event){close();return false;}
+        wchar_t calibration_name[128]{};
+        if(GetEnvironmentVariableW(L"SFC_REMIX_CALIBRATION_SCENE",calibration_name,128) && name==calibration_name){
+            calibration=reinterpret_cast<sfc_calibration::Mailbox*>(view+sfc_calibration::Offset);
+            calibration->snapshot={};std::memcpy(calibration->snapshot.session,h+4,16);
+            InterlockedExchange(&calibration->active,1);
+        }
         QueryPerformanceFrequency(&frequency);
         // Fault in fixed storage before hook installation, not during first asset.
         for(auto& a:assets){a.mesh.positions={};a.mesh.corners={};a.mesh.polygons={};a.refs={};}
         InterlockedExchange(&enabled,1);worker=CreateThread(nullptr,0,run,this,0,nullptr);
         if(!worker){enabled=0;close();return false;}return true;
     }
-    void close(){if(view){UnmapViewOfFile(view);view=nullptr;}if(mapping){CloseHandle(mapping);mapping=nullptr;}
+    void close(){if(calibration){InterlockedExchange(&calibration->active,0);calibration=nullptr;}
+        if(view){UnmapViewOfFile(view);view=nullptr;}if(mapping){CloseHandle(mapping);mapping=nullptr;}
         if(stop_event){CloseHandle(stop_event);stop_event=nullptr;}}
-    bool stop(){InterlockedExchange(&enabled,0);if(!worker){close();return true;}
+    bool stop(){InterlockedExchange(&enabled,0);
+        if(calibration)InterlockedExchange(&calibration->active,0);
+        if(!worker){close();return true;}
         SetEvent(stop_event);if(WaitForSingleObject(worker,5000)!=WAIT_OBJECT_0)return false;
         CloseHandle(worker);worker=nullptr;close();return true;}
     void offer(DWORD index,std::array<DWORD,96> r){
@@ -82,7 +93,7 @@ struct LiveScene {
         if(o.retired)return; // owner epoch must be newly qualified by existing owner table
         if(!o.identity.same_epoch(id) || o.lod!=lod){o.identity=id;o.lod=lod;o.revision=0;o.failed=false;o.last_ms=0;}
         if(!o.revision && !o.failed && id.frame!=last_capture_frame){
-            if(revisions==kSceneRevisions){o.failed=true;++capture_failures;}
+            if(revisions==(calibration?8:kSceneRevisions)){o.failed=true;++capture_failures;}
             else for(auto& a:assets)if(InterlockedCompareExchange(&a.ready,0,0)==0){
                 last_capture_frame=id.frame;++capture_attempts;LARGE_INTEGER before{},after{};QueryPerformanceCounter(&before);
                 const auto result=capture_mesh(a.mesh,id,read,valid);
@@ -95,7 +106,8 @@ struct LiveScene {
                 a.revision=++revisions;o.revision=a.revision;MemoryBarrier();InterlockedExchange(&a.ready,1);break;
             }
         }
-        if(o.sequence && id.elapsed-o.last_ms<34)return;
+        const bool sampled=o.sequence && id.elapsed-o.last_ms<34;
+        if(sampled && !calibration)return;
         std::array<DWORD,96> r{};r[1]=id.owner;r[2]=id.frame;r[3]=id.elapsed;
         r[4]=o.failed?3:1;r[5]=id.model;r[6]=id.source;r[7]=o.revision;
         std::array<DWORD,34> check{};std::array<DWORD,40> camera{};std::array<DWORD,3> lod_check{};
@@ -109,7 +121,10 @@ struct LiveScene {
         for(DWORD i=8;i<89;++i)if(i!=24 && i!=41 && i!=65 && i!=82 && !(i>=42 && i<=48) &&
             !MeshPacket::finite(r[i])){++invalid;return;}
         r[46]=lod[1]!=0xffffffffu?lod[1]:(lod[0]>1?lod[2]:0);
-        r[48]=1;o.last_ms=id.elapsed;offer(index,r);
+        r[48]=1;
+        if(calibration){auto exact=r;exact[47]=GetCurrentThreadId();sfc_calibration::offer(calibration,index,exact);}
+        if(sampled)return;
+        o.last_ms=id.elapsed;offer(index,r);
     }
     static DWORD WINAPI run(void* raw){
         auto& b=*static_cast<LiveScene*>(raw);

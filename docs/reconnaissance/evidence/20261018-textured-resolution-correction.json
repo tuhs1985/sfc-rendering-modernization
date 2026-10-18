@@ -1,0 +1,39 @@
+{
+  "run_id": "SFC-RETURN-20261018-31",
+  "status": "READY_FOR_SPONSOR_CORRECTED_RUNTIME_TEST",
+  "root_cause": "256-square hidden producer window caused SDK Present swapchain resize despite full-HD transport",
+  "correction": "Native-size hidden client, post-Present swapchain verification and textured internal scale1.0",
+  "prior_actual_runs": [
+    {"run": "20261018-184126-281063-in-game", "outputs": 738, "acquired": 737, "private_failures": 0, "normal_exit_unload_hashes": true, "bytes": 53839075},
+    {"run": "20261018-184419-628232-in-game", "outputs": 737, "acquired": 734, "private_failures": 0, "normal_exit_unload_hashes": true, "bytes": 54494080}
+  ],
+  "old_textured_mask_iou": 0.9209245742092458,
+  "corrected_textured_mask_iou": 0.99886925795053,
+  "corrected_centroid_error_pixels": 0.038876316915825194,
+  "corrected_beyond3px_unexpected_missing": [0, 0],
+  "corrected_quantized_colors": 244,
+  "python_tests_passed": 206,
+  "final_gpu_runs": [
+    "20261018-185001-913204-live-private",
+    "20261018-185023-502843-live-private",
+    "20261018-185046-594729-live-private",
+    "20261018-185110-494728-live-private",
+    "20261018-185118-642449-live-private",
+    "20261018-185127-696521-live-private",
+    "20261018-185137-336230-live-private",
+    "20261018-185145-204249-live-private"
+  ],
+  "final_gpu_gates_passed": 8,
+  "actual_post_present_size": [1920, 1080],
+  "host_sha256": "94B3B77A6343AB2C2F0AD5261FD127499E465706D092BCD137F364AA8B753243",
+  "qualification_sha256": "36282C11ED4700D29AB73C734DEA4392F8044355A849A6D23EBA4FB9AEBE5187",
+  "archive": "artifacts/remix-runtime/archives/20261018-textured-resolution-correction.zip",
+  "archive_bytes": 28714575,
+  "archive_sha256": "A1909870E86EA3A68CB4431319EB69E5BFE481FD419441859CD4B37120402BF5",
+  "sponsor_corrected_runtime_pending": true,
+  "capture_tool_investigated": false,
+  "original_ship_suppressed": false,
+  "lighting_changed": false,
+  "staged": false,
+  "committed": false
+}

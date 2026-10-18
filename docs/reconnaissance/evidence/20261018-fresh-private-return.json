@@ -1,0 +1,33 @@
+{
+  "run_id": "SFC-RETURN-20261018-23",
+  "date": "2026-10-18",
+  "probe": "REMIX-LIVE-RETURN-001",
+  "result": "READY_FOR_SPONSOR_PRIVATE_TIMING_TEST",
+  "confidence": "CONFIRMED_OFFLINE_ONLY",
+  "sfc_launched": false,
+  "backbuffer_ship_drawing": false,
+  "original_suppression": false,
+  "milestone_pass_claimed": false,
+  "source_fixture": "Recorded Run19 FCA geometry with synthetic current-frame publisher;production has no template fallback",
+  "wire": {"triplet_version": 3, "triplet_bytes": 496, "key_bytes": 152, "command_version": 1, "command_bytes": 592, "seed_bytes": 176, "registration_bytes": 184},
+  "validation": {"native_tests_each_x86_x64": 41, "python_tests": 195, "python_seconds": 4.416, "reproducible_rebuild": true, "read_only_preflight": "PASS"},
+  "binaries": {
+    "ship_live_host.exe": "43E5BE9DDF75D8C736EC61B586D894C3B2F95CAA3766966FA7B48815B9374FA1",
+    "ship_live_gpu_fixture.exe": "29D4B7A906248A1438C8DE35540CC99F38FC4DAE027EEC396928795D2DCC2CE0",
+    "SFCRemixReturn.dll": "D81B457D64424C0FB458373E15D8FD33C7352A58D674D9E43172051FC30959E0"
+  },
+  "qualification_sha256": "F2071F768D58EC5D2D7320183DF969A649CD24D043441131741C40E40398EB76",
+  "gates": [
+    {"kind": "direct", "folder": "20261018-042305-359524-live-private", "seconds": 7.687, "produced": 88, "private_attempts": 65, "late_mismatch": 22, "failed": 0, "mask_iou": 1.0, "bytes": 2938081},
+    {"kind": "proxy_callback", "folder": "20261018-042313-380163-live-private", "seconds": 8.531, "produced": 87, "private_attempts": 65, "late_mismatch": 22, "failed": 0, "host_exit": 0, "fixture_exit": 0, "bytes": 6726112},
+    {"kind": "slow1.5s", "folder": "20261018-042322-255925-live-private", "seconds": 9.125, "produced": 88, "private_attempts": 65, "late_mismatch": 23, "failed": 0, "no_overwrite": true, "mask_iou": 1.0, "bytes": 2954456},
+    {"kind": "renderer_terminated", "folder": "20261018-042331-720903-live-private", "seconds": 7.422, "produced": 2, "private_attempts": 2, "failed": 0, "mask_iou": 1.0, "fixture_exit": 0, "host_nonzero_expected": true, "bytes": 2929024}
+  ],
+  "corrected_defects": ["Buffered startup announcement timeout", "Uninitialized opaque alpha-test state rejected color/depth despite valid picking", "Normal host-stop classification during proxy teardown"],
+  "expected_filtering": "Retirement/inactive source counters28-30 are deliberate fixture phases;not unreported corruption",
+  "archive": {"path": "artifacts/remix-runtime/archives/20261018-live-private-preparation.zip", "bytes": 15179960, "entries": 340, "source_bytes": 56216395, "sha256": "937908E2F4501C663B3580AC66CB8F3E36EDF690050A2B661045E67A381137E0", "crc_verified": true, "attempts": 16, "raw_removed": false},
+  "critical_hashes_both_installations_unchanged": true,
+  "open": ["Real SFC exact-current-frame admission budget", "Continuous moving-pose SDK pixel correspondence", "Actual game behavior/exit and cleanup for new mode", "HUD-safe on-screen placement and retained-scene occlusion", "SDK common-object teardown warning40", "Device recreation/hot-unload not qualified"],
+  "next": "Run start_return_image_session.ps1 -PrivateShip from established elevated parent;normal game appearance expected",
+  "repository": {"head": "e96765a1a34c15212ed22f11edeb9a708b9fc18d", "staged": false, "committed": false, "prior_changes_preserved": true}
+}

@@ -1,0 +1,20 @@
+{
+  "run_id": "SFC-RETURN-20261018-27",
+  "status": "READY_FOR_SPONSOR_OFFSET_COPY_TEST",
+  "replaces": "Run26 corner inset,not executed in SFC",
+  "placement": "captured native camera viewport;SDK already applies diagnostic world translation",
+  "fixture_viewport": [200,30,1720,1020],
+  "visible_camera_mask_iou": 0.9946026986506746,
+  "native_checks_each_architecture": 69,
+  "python_tests_passed": 199,
+  "five_offline_gates_passed": true,
+  "strict_current_frame": true,
+  "original_ship_suppressed": false,
+  "actual_offset_game_test_completed": false,
+  "retained_scene_depth_ordering_proven": false,
+  "addon_sha256": "F534CC2BA47D6EB02E2A281CEA30DC1BFD54B1AFAA4DA442FB00750C963A62EE",
+  "archive_sha256": "3B477B55E2F33C60AD31B17D3839CEF3625F26D72910F83E2920619032E6E652",
+  "qualification_sha256": "3DDACA7B1C6E76203E1F001DA244B8C743B3F336C3E6C842C69924B4A7A89535",
+  "client_files_unchanged": true,
+  "staged_or_committed": false
+}

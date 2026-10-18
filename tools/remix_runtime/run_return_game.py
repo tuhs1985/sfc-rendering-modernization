@@ -1,0 +1,461 @@
+"""Explicit opt-in returned-image test. Accepted installation is read-only input."""
+from pathlib import Path
+import argparse
+import ctypes as C
+from ctypes import wintypes as W
+import datetime as dt
+import json
+import os
+import re
+import shutil
+import subprocess as sp
+import time
+import winreg
+import winsound
+from return_channel import Channel,valid_name,visibility_result
+import depth_search_channel
+import broad_capture
+from run_return_fixture import ROOT,BIN,DLL,TEST,ENV,digest
+
+SOURCE=Path(r'C:\Games\Taldren Software Inc\Starfleet Command Orion Pirates')
+CLIENT='4D65761D7DD69EF1504070261B81E9C200C0AF18105033E1C4D2222C62320C29'
+CRITICAL=('StarFleetOP.exe','DDraw.dll','D3DImm.dll','dxgi.dll','dgVoodoo.conf','ReShade.ini','sfc.ini')
+
+def observation_phase(elapsed,continuous=False):
+    """Routine textured observation stays on; diagnostic fallback cycle is retained."""
+    return 0 if continuous else (0 if elapsed<30 else 1 if elapsed<45 else 2 if elapsed<60 else 3)
+
+def image_path(pid):
+    k=C.WinDLL('kernel32',use_last_error=True)
+    k.OpenProcess.argtypes=[W.DWORD,W.BOOL,W.DWORD];k.OpenProcess.restype=W.HANDLE
+    k.QueryFullProcessImageNameW.argtypes=[W.HANDLE,W.DWORD,W.LPWSTR,C.POINTER(W.DWORD)]
+    k.CloseHandle.argtypes=[W.HANDLE]
+    handle=k.OpenProcess(0x1000,False,pid)
+    if not handle:raise C.WinError(C.get_last_error())
+    try:
+        value=C.create_unicode_buffer(32768);size=W.DWORD(len(value))
+        if not k.QueryFullProcessImageNameW(handle,0,value,C.byref(size)):raise C.WinError(C.get_last_error())
+        return value.value
+    finally:k.CloseHandle(handle)
+
+def game_running():
+    from windows_processes import game_running as native_inventory
+    return native_inventory()
+
+def critical_hashes(folder):return {n:digest(folder/n) for n in CRITICAL}
+def launcher_paths():
+    try:
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER,r'Software\VB and VBA Program Settings\SFCLauncher\Paths') as key:
+            return {n:winreg.QueryValueEx(key,n)[0] for n in ('Client2Op','Server2Op')}
+    except FileNotFoundError:return {}
+def compat_flags():
+    key=r'Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers'
+    try:
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER,key) as handle:return str(winreg.QueryValueEx(handle,str(SOURCE/'StarFleetOP.exe'))[0])
+    except FileNotFoundError:return ''
+
+def wait_component_ready(snapshot,pid,poll,enforce,timeout=60,clock=time.monotonic,pause=time.sleep):
+    until=clock()+timeout
+    while clock()<until:
+        enforce();state=snapshot()
+        if poll() is not None:raise RuntimeError('Game exited during graphics initialization')
+        if state['error']:raise RuntimeError('Component error during graphics initialization')
+        if state['gamePid']==pid and state['startupVerified'] and state['startupRestored'] and state['ready']:return state
+        pause(.05)
+    raise RuntimeError('Graphics initialization readiness timed out; no tactical gate injection attempted')
+
+def wait_live_gate(pid,controller,enforce,timeout=90):
+    k=C.WinDLL('kernel32',use_last_error=True)
+    k.OpenEventW.argtypes=[W.DWORD,W.BOOL,W.LPCWSTR];k.OpenEventW.restype=W.HANDLE
+    k.WaitForSingleObject.argtypes=[W.HANDLE,W.DWORD];k.CloseHandle.argtypes=[W.HANDLE]
+    deadline=time.monotonic()+timeout;event=None
+    try:
+        while time.monotonic()<deadline:
+            enforce()
+            if controller.poll() is not None:raise RuntimeError('Semantic controller exited before tactical gate')
+            if not event:event=k.OpenEventW(0x100000,False,f'Local\\SFCM1TacticalGate_{pid}')
+            if event and k.WaitForSingleObject(event,0)==0:return
+            time.sleep(.05)
+        raise RuntimeError('Semantic tactical gate timeout')
+    finally:
+        if event:k.CloseHandle(event)
+def preflight():
+    if digest(SOURCE/'StarFleetOP.exe')!=CLIENT or digest(TEST/'StarFleetOP.exe')!=CLIENT:raise RuntimeError('Original/copied client hash mismatch')
+    if digest(DLL)!='F7C310821AA98BCDFDEC120330B0A89457B7C5EBA58D21464AF32639611C809F':raise RuntimeError('Pinned runtime mismatch')
+    if digest(TEST/'dxgi.dll')!='E35E4E2E47F4765F0799CB54C88E5ADE49B50CD7895C137B9D557F263344CAB7':raise RuntimeError('Copied proxy mismatch')
+    for p in (BIN/'return_launcher.exe',BIN/'return_host.exe',BIN/'SFCRemixReturn.dll',ROOT/'artifacts/m1/bin/m1_gate.dll',ROOT/'artifacts/m1/bin/m1_controller.exe'):
+        if not p.is_file():raise RuntimeError('Prepared build missing: '+str(p))
+    # Critical copied configuration is unchanged from independent preparation;
+    # generated log/screenshot files are deliberately not part of this freeze.
+    manifest=json.loads((ROOT/'artifacts/remix-runtime/test-install/source-copy-files.json').read_text(encoding='utf-8-sig'))
+    expected={v['path'].lower():v['copy_sha256'] for v in manifest}
+    for name,sha in critical_hashes(TEST).items():
+        if expected.get(name.lower())!=sha:raise RuntimeError('Copied baseline changed: '+name)
+
+def main():
+    parser=argparse.ArgumentParser();parser.add_argument('--execute',action='store_true');parser.add_argument('--budget-seconds',type=int,default=285)
+    inspect=parser.add_mutually_exclusive_group()
+    inspect.add_argument('--inspect-visibility',action='store_true',help='At most eight read-only late depth-binding observations; no suppression')
+    inspect.add_argument('--inspect-early-depth',action='store_true',help='Eight read-only pre-effects Present depth-binding observations; no suppression')
+    inspect.add_argument('--search-depth',action='store_true',help='Continuous bounded six-phase engine/presentation depth search')
+    inspect.add_argument('--broad-capture',action='store_true',help='Approved full-support public event burst;10seconds/2GB')
+    inspect.add_argument('--depth-snapshots',action='store_true',help='Three paired depth/color snapshots,20seconds,no rendering changes')
+    inspect.add_argument('--private-ship',action='store_true',help='Fresh semantic SDK ship return into private game-side target;no visible change')
+    inspect.add_argument('--visible-ship',action='store_true',help='Fresh matching magenta ship at world-offset position in original camera viewport;original ships unchanged')
+    inspect.add_argument('--textured-ship',action='store_true',help='Original textures,screen-resolution output,bounded delayed additive display;no suppression')
+    parser.add_argument('--observation-only',action='store_true',help='Use control-only host; do not start Remix or display triangle')
+    parser.add_argument('--calibration',action='store_true',help='Opt-in current-frame semantic records paired with three depth snapshots')
+    parser.add_argument('--capture-ship-image',action='store_true',help='One exact prepared textured ship-layer image;external readback only')
+    args=parser.parse_args()
+    if args.capture_ship_image:args.textured_ship=True
+    if args.textured_ship:args.visible_ship=True
+    if args.visible_ship:args.private_ship=True
+    if args.private_ship and (args.calibration or args.observation_only):parser.error('--private-ship is separate from calibration/observation-only')
+    semantic_enabled=args.calibration or args.private_ship
+    live_bin=ROOT/'artifacts/remix-runtime/live-return-bin'
+    if args.calibration and not (args.depth_snapshots and args.observation_only):parser.error('--calibration requires --depth-snapshots --observation-only')
+    if args.observation_only and not (args.inspect_early_depth or args.search_depth or args.broad_capture or args.depth_snapshots):parser.error('--observation-only requires --inspect-early-depth or --search-depth or --broad-capture or --depth-snapshots')
+    if args.depth_snapshots and not args.observation_only:parser.error('--depth-snapshots requires --observation-only')
+    full_support=args.broad_capture or args.depth_snapshots
+    if args.broad_capture and not args.observation_only:parser.error('--broad-capture requires --observation-only')
+    if args.search_depth and not args.observation_only:parser.error('--search-depth requires --observation-only')
+    if args.execute:
+        if not C.windll.shell32.IsUserAnAdmin():raise RuntimeError('Use the established elevated testing parent. No automatic UAC requested.')
+        if game_running():raise RuntimeError('Exit the existing SFC game normally before starting or recovering the isolated test.')
+        if full_support:
+            from recover_broad_session import recover_pending
+            recovered=recover_pending(game_running)
+            if recovered:print('Recovered prior interrupted test: '+recovered,flush=True)
+    preflight()
+    if args.private_ship:
+        from live_return import require_qualification as require_private_qualification
+        require_private_qualification(visible=args.visible_ship,textured=args.textured_ship,capture_image=args.capture_ship_image)
+        for path in (live_bin/'ship_live_host.exe',live_bin/'SFCRemixReturn.dll'):
+            if not path.is_file():raise RuntimeError('Private return build missing: '+str(path))
+        q=json.loads((ROOT/'artifacts/remix-runtime/deps/present-calibration-qualification.json').read_text())
+        if q['component_sha256']!=digest(ROOT/'artifacts/m1/bin/m1_component.dll'):raise RuntimeError('Accepted semantic component changed; requalify ABI before private test')
+    if args.calibration and not (ROOT/'artifacts/m1/bin/m1_component.dll').is_file():raise RuntimeError('Full semantic component build required')
+    if args.calibration:
+        from present_calibration import require_qualification as require_calibration
+        require_calibration()
+    if full_support:
+        broad_capture.qualified_full()
+        broad_capture.reserve_capture_budget()
+        qualification=ROOT/'artifacts/remix-runtime/deps/reshade-full-6.7.1/qualification.json'
+        q=json.loads(qualification.read_text())
+        if q.get('proxy_sha256')!=broad_capture.FULL_SHA or q.get('result')!='OFFLINE_EVENT_AND_STATE_PASS':raise RuntimeError('Full-support offline qualification missing')
+        from prepare_full_reshade import source_hashes
+        if q.get('source_hashes')!=source_hashes():raise RuntimeError('Broad collector sources changed since offline qualification; requalify first')
+        if args.depth_snapshots:
+            from depth_snapshot_analysis import require_qualification
+            require_qualification()
+    inspect_requested=args.inspect_visibility or args.inspect_early_depth
+    if not args.execute:print('Read-only preflight PASS. No game/renderer started.');return
+    if not C.windll.shell32.IsUserAnAdmin():raise RuntimeError('Use the established elevated testing parent. No automatic UAC requested.')
+    if game_running():raise RuntimeError('Exit the existing SFC game normally before starting the isolated test.')
+    if not 120<=args.budget_seconds<=285:raise RuntimeError('Prepared workflow budget must be120..285seconds')
+    if args.textured_ship:
+        reserve=384*1024*1024 #128MiB images+32MiB evidence,plus worst-case archive coexistence
+        if broad_capture.storage_bytes()+reserve>broad_capture.OVERALL or shutil.disk_usage(ROOT).free<reserve:raise RuntimeError('Textured run/archive exceeds available10GB allowance or disk space')
+    work=ROOT/'artifacts/remix-runtime/runs'/dt.datetime.now(dt.timezone.utc).strftime('%Y%m%d-%H%M%S-%f-in-game');work.mkdir()
+    start=time.monotonic();deadline=start+args.budget_seconds
+    original=critical_hashes(SOURCE);paths=launcher_paths();compat=compat_flags()
+    host_exe=live_bin/'ship_live_host.exe' if args.private_ship else BIN/'return_host.exe'
+    addon=live_bin/'SFCRemixReturn.dll' if args.private_ship else BIN/'SFCRemixReturn.dll'
+    for src,name in [(host_exe,'renderer-host.bin'),(BIN/'return_launcher.exe','startup-launcher.bin'),(addon,'SFCRemixReturn.dll')]:shutil.copyfile(src,work/name)
+    metadata={'probe':'REMIX-RETURN-001','utc':dt.datetime.now(dt.timezone.utc).isoformat(),'accepted_critical_before':original,'copied_critical_before':critical_hashes(TEST),'launcher_settings_before':paths,'source_compatibility':compat,'scene':'SDK default-material triangle with green sphere light; no SFC draw suppression','output_resources_bytes':2*256*256*4,'capture_seconds':90,'workflow_seconds':args.budget_seconds,'limits_bytes':32*1024*1024,'build_hashes':{p.name:digest(p) for p in (BIN/'return_host.exe',BIN/'return_launcher.exe',BIN/'SFCRemixReturn.dll',DLL)}}
+    metadata['visibility_probe']={'enabled':inspect_requested,'scope':'early-present' if args.inspect_early_depth else 'late-overlay','max_samples':8,'minimum_interval_ms':1000,'read_only':True,'qualified_scene_depth':False}
+    metadata['observation_only']=args.observation_only
+    if args.private_ship:
+        metadata.update(probe='REMIX-LIVE-RETURN-001',scene='Fresh selected ship rendered by SDK to PRIVATE game-side target;no backbuffer changes',output_resources_bytes=4*256*256*4)
+        metadata['private_ship']={'strict_current_frame':True,'saved_template':False,'expected_visible_change':bool(args.visible_ship),'host_sha256':digest(host_exe),'addon_sha256':digest(addon)}
+        if args.visible_ship:metadata['scene']='Fresh SDK magenta ship at diagnostic WORLD offset in original camera viewport;transparent background,original ships ON,no scene-depth or replacement claim'
+        if args.textured_ship:metadata.update(scene='Fresh original primary textures,1920x1080 output,100ms delayed additive copy;NOT synchronized replacement',output_resources_bytes=4*1920*1080*4,image_limit_bytes=128*1024*1024,display_policy='v4 source request age<=100ms;captured pose/camera retained')
+        if args.textured_ship:metadata['private_ship'].update(strict_current_frame=False,identity_checked=True,source_provenance_retained=True,maximum_request_age_ms=100)
+        metadata['build_hashes']={p.name:digest(p) for p in (host_exe,BIN/'return_launcher.exe',addon,DLL)}
+        if args.capture_ship_image:
+            metadata['prepared_ship_image']={'probe':'REMIX-PREPARED-IMAGE-001','shots':1,'delay_after_first_display_ms':15000,'reader_sha256':digest(live_bin/'ship_image_reader.exe'),'extra_gpu_bytes':2*1920*1080*4,'max_raw_bytes':256+1920*1080*4,'render_thread_readback':False,'camera_motion_cues':False}
+    metadata['depth_snapshots']={'enabled':args.depth_snapshots,'probe':'REMIX-DEPTH-001','maximum_pairs':3,'tactical_seconds':20,'image_limit_bytes':64*1024*1024,'expected_source_samples':8}
+    if args.calibration:metadata['probe']='REMIX-CALIBRATION-001'
+    metadata['broad_capture']={'enabled':args.broad_capture,'proxy_sha256':broad_capture.FULL_SHA,'tactical_detail_seconds':10,'trace_hard_bytes':broad_capture.HARD,'trace_warning_bytes':1_000_000_000,'overall_ceiling_bytes':broad_capture.OVERALL,'prelude':'resource/view/device/command lifecycle plus target bindings/reset before tactical gate','coverage':'enumerated public events, not exhaustive GPU/geometry capture'}
+    if args.broad_capture:metadata['capture_seconds']=10.1
+    if args.depth_snapshots:metadata['capture_seconds']=20;metadata['limits_bytes']=96*1024*1024
+    if args.broad_capture:
+        metadata['limits_bytes']=broad_capture.HARD+32*1024*1024
+        metadata['ancillary_limit_bytes']=32*1024*1024
+    metadata['expanded_search']={'enabled':args.search_depth,'phases':depth_search_channel.PHASES,'resource_limit':32,'duration_seconds':90,'mapping_extension_bytes':2304}
+    if args.observation_only:metadata['scene']='No Remix runtime started; read-only early depth-binding observation'
+    if args.broad_capture:metadata['scene']='No Remix renderer; full-support read-only resource/binding/draw metadata'
+    if args.depth_snapshots:metadata['scene']='No Remix renderer; three paired read-only depth/color snapshots; no original draws suppressed'
+    (work/'manifest.json').write_text(json.dumps(metadata,indent=2))
+    host=launcher=controller=channel=None;receiver=None;streams=[];pid=None;error=None;normal=False;gate_clean=False;history=[];phase_results={};last=0;host_shutdown_expected=False;proxy_restored=None;image_reader=None;image_result=None
+    rollback=work/'dxgi-original.rollback'
+    config_backup=work/'ReShade.original.ini'
+    def out(name):f=open(work/name,'wb');streams.append(f);return f
+    def enforce():
+        if receiver:receiver.drain()
+        size=sum(p.stat().st_size for p in work.rglob('*') if p.is_file())
+        other=sum(p.stat().st_size for p in work.rglob('*') if p.is_file() and p.name!='broad.bin')
+        if args.textured_ship:
+            textures=sum(p.stat().st_size for p in (work/'textures').glob('*') if p.is_file())
+            if textures>128*1024*1024:raise RuntimeError('Original/derived image128MiB cap')
+            if textures>64*1024*1024 and not phase_results.get('texture_warned'):print('Image output64MiB warning;128MiB cap remains.',flush=True);phase_results['texture_warned']=True
+            size-=textures;other-=textures
+        if full_support and (TEST/'ReShade.log').exists():other+=(TEST/'ReShade.log').stat().st_size
+        image_bytes=sum(p.stat().st_size for p in work.glob('depth-*.bin'))
+        if args.depth_snapshots:other-=image_bytes
+        if args.broad_capture and (work/'broad.bin').exists() and (work/'broad.bin').stat().st_size>=1_000_000_000 and not phase_results.get('broad_warned'):
+            print('Broad trace warning1GB; strict2GB writer cap remains active.',flush=True);phase_results['broad_warned']=True
+        if args.depth_snapshots and image_bytes>64*1024*1024:raise RuntimeError('Depth image64MiB cap; original rendering retained')
+        if args.depth_snapshots and image_bytes>32*1024*1024 and not phase_results.get('image_warned'):print('Depth images exceed32MiB warning; three-pair64MiB cap remains.',flush=True);phase_results['image_warned']=True
+        if time.monotonic()>deadline or other>32*1024*1024 or size>(broad_capture.HARD+32*1024*1024 if args.broad_capture else (96*1024*1024 if args.depth_snapshots else 32*1024*1024)):raise RuntimeError('Prepared workflow time/output cap; original rendering retained')
+        if other>16*1024*1024 and not phase_results.get('warned'):print('Evidence warning16MiB; still bounded.',flush=True);phase_results['warned']=True
+    try:
+        if full_support:
+            # No accepted-install or translator changes. Restore only after game exit.
+            shutil.copyfile(TEST/'ReShade.ini',config_backup)
+            broad_capture.install_test_proxy(TEST/'dxgi.dll',rollback)
+        host_env={**os.environ,**ENV,'DXVK_LOG_PATH':str(work)}
+        if args.private_ship:
+            from live_return import FreshReceiver
+            receiver=FreshReceiver(work,textured=args.textured_ship);host_env['SFC_REMIX_CALIBRATION_SCENE']=receiver.name
+        host_env.pop('SFC_REMIX_TEXTURED_SHIP',None)
+        if args.textured_ship:host_env['SFC_REMIX_TEXTURED_SHIP']='1'
+        host=sp.Popen([str(host_exe),'--observe-only' if args.observation_only else str(DLL)],cwd=work,env=host_env,stdout=out('host.log'),stderr=sp.STDOUT,creationflags=sp.CREATE_NO_WINDOW)
+        session=None;until=time.monotonic()+60
+        while time.monotonic()<until:
+            enforce()
+            if host.poll() is not None:raise RuntimeError('Renderer exited before session ready')
+            session=next((s[8:] for s in (work/'host.log').read_text(errors='replace').splitlines() if s.startswith('SESSION ')),None)
+            if session:break
+            time.sleep(.1)
+        if not session or not valid_name(session):raise RuntimeError('Renderer startup/session failed')
+        channel=Channel(session)
+        metadata['return_session']=session
+        if full_support:metadata['full_support_qualification']=q
+        (work/'manifest.json').write_text(json.dumps(metadata,indent=2))
+        env={**os.environ,'SFC_REMIX_RETURN_SESSION':session,'SFC_REMIX_EXPECTED_IMAGE':str(TEST/'StarFleetOP.exe'),'SFC_REMIX_PRELOAD_REQUIRED':'1'}
+        env['SFC_REMIX_INSPECT_VISIBILITY']='3' if args.search_depth else ('2' if args.inspect_early_depth else ('1' if args.inspect_visibility else '0'))
+        env.pop('SFC_REMIX_BROAD_OUTPUT',None)
+        env.pop('SFC_REMIX_DEPTH_OUTPUT',None)
+        env.pop('SFC_REMIX_CALIBRATION_SCENE',None)
+        env.pop('SFC_REMIX_CAPTURE_SHIP_IMAGE',None);env.pop('SFC_REMIX_CAPTURE_SHIP_IMAGE_DELAY_MS',None)
+        if args.capture_ship_image:env.update(SFC_REMIX_CAPTURE_SHIP_IMAGE='1',SFC_REMIX_CAPTURE_SHIP_IMAGE_DELAY_MS='15000')
+        if semantic_enabled:
+            from present_calibration import Receiver
+            if receiver is None:receiver=Receiver()
+            env['SFC_REMIX_CALIBRATION_SCENE']=receiver.name
+            env.pop('SFC_REMIX_VISIBLE_SHIP',None)
+            env.pop('SFC_REMIX_TEXTURED_SHIP',None)
+            if args.private_ship:env['SFC_REMIX_PRIVATE_SHIP']='1'
+            if args.visible_ship:env['SFC_REMIX_VISIBLE_SHIP']='1'
+            if args.textured_ship:env['SFC_REMIX_TEXTURED_SHIP']='1'
+            metadata['semantic_calibration']={'probe':'REMIX-CALIBRATION-001','scene_session':receiver.name,'maximum_asset_revisions':8,'geometry_hook':False,'same_process_render_thread_required':True,'component_sha256':digest(ROOT/'artifacts/m1/bin/m1_component.dll')}
+            (work/'manifest.json').write_text(json.dumps(metadata,indent=2))
+        if args.depth_snapshots:env['SFC_REMIX_DEPTH_OUTPUT']=str(work)
+        if args.broad_capture:env['SFC_REMIX_BROAD_OUTPUT']=str(work/'broad.bin')
+        if compat:
+            # Preserve only the already-configured visual/OS compatibility layer
+            # in this child, without changing any registry/security policy.
+            flags=[s for s in compat.split() if s!='~']
+            if any(s.upper()=='RUNASINVOKER' for s in flags):raise RuntimeError('Existing invoker override requires explicit review; not propagated')
+            env['__COMPAT_LAYER']=' '.join(flags)
+        launcher=sp.Popen([str(BIN/'return_launcher.exe'),'--game',str(TEST/'StarFleetOP.exe'),str(work/'SFCRemixReturn.dll'),CLIENT,digest(work/'SFCRemixReturn.dll')],cwd=TEST,env=env,stdout=out('launcher.log'),stderr=sp.STDOUT,creationflags=sp.CREATE_NO_WINDOW)
+        until=time.monotonic()+20
+        while time.monotonic()<until:
+            enforce();text=(work/'launcher.log').read_text(errors='replace');match=re.search(r'VERIFIED_CHILD pid=(\d+) suspended_path_match=1 disk_sha_match=1',text)
+            if match:pid=int(match[1]);break
+            if launcher.poll() is not None:raise RuntimeError('Verified copied client did not launch')
+            time.sleep(.1)
+        if not pid or Path(image_path(pid))!=TEST/'StarFleetOP.exe':raise RuntimeError('Actual process path does not match isolated test copy; no gate activated')
+        if args.private_ship:receiver.context(session,pid)
+        # Do not enumerate/inject the gate while the translator and proxy are
+        # still populating the target's loader/module list. No fixed blind sleep.
+        ready_at=time.monotonic()
+        wait_component_ready(channel.snapshot,pid,launcher.poll,enforce)
+        metadata['graphics_ready_wait_seconds']=time.monotonic()-ready_at
+        metadata['gate_build_hashes']={p.name:digest(p) for p in (ROOT/'artifacts/m1/bin/m1_controller.exe',ROOT/'artifacts/m1/bin/m1_gate.dll')}
+        (work/'manifest.json').write_text(json.dumps(metadata,indent=2))
+        print('Enter the usual two-ship skirmish. Ships should look normal.',flush=True)
+        if args.private_ship:print('At the first beep,hold your ship and camera still. A later single beep means a small camera change;three beeps mean gently move/turn your ship. Two beeps mean exit normally.',flush=True)
+        if inspect_requested:print('Read-only visibility check: keep both ships visible briefly. No ship will be replaced.',flush=True)
+        if args.broad_capture:print('Broad recording: keep both ships in view briefly and play normally. About10seconds after tactical entry, two beeps request normal exit. No visual change expected.',flush=True)
+        if args.depth_snapshots:print('Keep both ships visible. At first beep hold camera still; at the next single beep make one small camera rotation, then hold still. Two beeps mean exit normally. No visual change expected.',flush=True)
+        if args.textured_ship:print('Look for a TEXTURED ship copy beside an original,not magenta. It stays ON throughout this observation;stop only at the two-beep exit request. Small bounded delay,not frame-exact replacement.',flush=True)
+        if args.capture_ship_image:print('One prepared-image snapshot will be saved automatically. Focus the extra ship and hold the camera briefly once it appears;no manual screenshot or timestamp needed.',flush=True)
+        else:print('Look for a MAGENTA ship copy BESIDE the selected original ship,usually to its left at the starting view;it may flash. This is NOT a corner window. Original ships stay normal.' if args.visible_ship else ('No visible change expected;fresh ship output is tested privately,originals stay normal.' if args.private_ship else ('No triangle or ship changes expected; this is a read-only check.' if args.observation_only else 'A small green animated triangle will appear in a black square at upper right. It turns off/on/off automatically.')),flush=True)
+        print('Play normally. Please exit only after the two-beep exit request.',flush=True)
+        controller_exe=ROOT/'artifacts/m1/bin/m1_controller.exe';gate=ROOT/'artifacts/m1/bin/m1_gate.dll'
+        gate_dir=work/'gate';gate_dir.mkdir();config=gate_dir/'component.ini'
+        config.write_text('[m1]\nOutputDirectory='+str(gate_dir)+'\nControllerPath='+str(controller_exe)+'\nMaxSeconds=90\nStopOnBurst=1\nMaxFrames=1\nMaxEvents=1\nMaxOwners=1\nWarningBytes=16777216\nHardBytes=33554432\n',encoding='ascii')
+        if semantic_enabled:
+            gate=ROOT/'artifacts/m1/bin/m1_component.dll'
+            config.write_text('[m1]\nOutputDirectory='+str(gate_dir)+'\nControllerPath='+str(controller_exe)+
+                '\nMaxSeconds='+('90' if args.private_ship else '24')+'\nStopOnBurst=0\nMaxFrames=120\nMaxEvents=10000\nMaxOwners=32\nWarningBytes=16777216\nHardBytes=33554432'+
+                '\nEnableGeometryHook=0\nEnableWrapperObservation=1\nEnableMeshExport=1\nEnableTextureReferences=1\nEnablePrivateCopy=0\nLiveChannel='+receiver.name+'\n',encoding='ascii')
+        controller_args=[str(controller_exe),'--pid',str(pid),'--dll',str(gate),'--config',str(config),'--max-seconds','24' if args.calibration else '90','--stop-on-burst','0' if semantic_enabled else '1','--already-loaded','0','--unload-after-stop','1']
+        if semantic_enabled:controller_args+=['--gate-timeout-seconds','90']
+        controller=sp.Popen(controller_args,cwd=ROOT,stdout=out('gate-controller.log'),stderr=sp.STDOUT,creationflags=sp.CREATE_NO_WINDOW)
+        if semantic_enabled:wait_live_gate(pid,controller,enforce)
+        else:
+            while controller.poll() is None:enforce();time.sleep(.1)
+            gate_text=(work/'gate-controller.log').read_text(errors='replace')
+            summary=json.loads((gate_dir/'M1-A-summary.json').read_text(encoding='utf-8-sig')) if (gate_dir/'M1-A-summary.json').exists() else {}
+            gate_clean=controller.returncode==0 and summary.get('gate_activated') is True and all(s in gate_text for s in ('component_state=removed','hook_bytes_restored=true','component_unloaded=true'))
+            if not gate_clean:raise RuntimeError('Tactical gate did not complete/restored/unload cleanly; image left disabled')
+        if args.search_depth:
+            search=depth_search_channel.snapshot(channel.address)
+            if search['status']!=2 or search['installedMask']!=15 or search['error']:raise RuntimeError('Expanded engine search installation not qualified')
+        state=channel.snapshot()
+        if args.broad_capture:
+            broad=broad_capture.header_at(channel.address)
+            if broad['status']!=2 or broad['error']:raise RuntimeError('Broad writer not active at tactical gate; prelude may have saturated; preserve partial evidence')
+        if state['gamePid']!=pid or not state['startupRestored'] or not state['startupVerified'] or not state['ready']:raise RuntimeError('Image component startup/device not qualified; original game remains normal')
+        channel.set('armed',1);channel.set('enabled',int(not args.observation_only));winsound.Beep(880,200);active=time.monotonic();phase=-1
+        if args.capture_ship_image:image_reader=sp.Popen([str(live_bin/'ship_image_reader.exe'),session,str(work)],cwd=work,stdout=out('ship-image-reader.log'),stderr=sp.STDOUT,creationflags=sp.CREATE_NO_WINDOW)
+        camera_cued=False;motion_cued=False
+        while time.monotonic()-active<(10.1 if args.broad_capture else (20 if args.depth_snapshots else 90)):
+            enforce();elapsed=time.monotonic()-active;state=channel.snapshot()
+            if args.depth_snapshots and elapsed>=5 and not camera_cued:
+                winsound.Beep(1000,200);print('Small camera rotation now, then hold still; keep both ships visible.',flush=True);camera_cued=True
+            if args.private_ship and not args.capture_ship_image and elapsed>=10 and not camera_cued:
+                winsound.Beep(1000,200);print('Make one small camera change now,then hold it.',flush=True);camera_cued=True
+            if args.private_ship and not args.capture_ship_image and elapsed>=20 and not motion_cued:
+                for _ in range(3):winsound.Beep(1100,150)
+                print('Gently accelerate and turn your ship;keep playing until the two-beep exit cue.',flush=True);motion_cued=True
+            next_phase=observation_phase(elapsed,continuous=args.textured_ship)
+            if phase!=next_phase:
+                phase=next_phase;phase_results[str(phase)]={'seconds':elapsed,'start':state};channel.set('enabled',int(not args.observation_only and phase in (0,2)))
+                print(('Private receiver ON','Private receiver OFF','Private receiver ON again','Private renderer disconnect;original game unchanged')[phase] if args.private_ship else ('Read-only check; keep playing normally.' if args.observation_only else ('Image ON','Image OFF; keep playing','Image ON again','Renderer disconnect; image OFF; keep playing')[phase]),flush=True)
+                if phase==3 and not args.search_depth:channel.set('stop',1);host_shutdown_expected=True
+            if state['error']:raise RuntimeError('Image component reported an error; original rendering retained')
+            if launcher.poll() is not None:raise RuntimeError('Game exited before the requested tactical observation completed')
+            if host.poll() is not None and not host_shutdown_expected:raise RuntimeError('Renderer exited unexpectedly; original rendering retained')
+            if elapsed-last>.25:
+                item={'seconds':elapsed,'phase':phase,**state}
+                if args.private_ship:
+                    from live_return import telemetry
+                    item['private_return']=telemetry(channel.address)
+                    if args.textured_ship:
+                        sampled=C.c_longlong();C.windll.kernel32.QueryPerformanceCounter(C.byref(sampled));item['sample_qpc']=sampled.value
+                        item['last_display_request_age_ms']=(sampled.value-state['renderedAt'])*1000/state['qpcFrequency'] if state['renderedAt'] else None
+                history.append(item);last=elapsed
+            time.sleep(.05)
+        if args.search_depth:
+            channel.set('stop',1);host_shutdown_expected=True
+            until=min(deadline,time.monotonic()+8)
+            while time.monotonic()<until:
+                search=depth_search_channel.snapshot(channel.address)
+                if search['status'] in (4,5):break
+                time.sleep(.05)
+            if search['status']!=4 or search['restoredMask']!=15 or search['error']:raise RuntimeError('Expanded-search hooks not confirmed restored; exit normally, do not unload DLL')
+        if args.broad_capture:
+            until=min(deadline,time.monotonic()+8)
+            while time.monotonic()<until:
+                broad=broad_capture.header_at(channel.address)
+                if broad['status'] in (3,4):break
+                time.sleep(.02)
+            if broad['status']!=3 or broad['error']:raise RuntimeError('Broad writer did not close successfully; exit normally')
+            channel.set('stop',1);host_shutdown_expected=True
+        if args.depth_snapshots or args.textured_ship:
+            channel.set('enabled',0);channel.set('stop',1);host_shutdown_expected=True
+        if semantic_enabled:
+            until=min(deadline,time.monotonic()+15)
+            while controller.poll() is None and time.monotonic()<until:enforce();time.sleep(.05)
+            gate_text=(work/'gate-controller.log').read_text(errors='replace')
+            summary=json.loads((gate_dir/'M1-A-summary.json').read_text(encoding='utf-8-sig')) if (gate_dir/'M1-A-summary.json').exists() else {}
+            gate_clean=controller.poll()==0 and summary.get('gate_activated') is True and all(s in gate_text for s in ('component_state=removed','hook_bytes_restored=true','component_unloaded=true'))
+            if not gate_clean:raise RuntimeError('Semantic component removal/unload not confirmed; exit normally')
+        print('Depth capture window finished — please exit SFC normally now; validation follows after exit.' if args.depth_snapshots else 'TEST COMPLETE — please exit SFC normally now.',flush=True);winsound.Beep(660,200);winsound.Beep(660,200)
+        until=min(deadline,time.monotonic()+30)
+        while launcher.poll() is None and time.monotonic()<until:enforce();time.sleep(.1)
+        normal=launcher.poll()==0 and 'CHILD_EXIT code=0' in (work/'launcher.log').read_text(errors='replace')
+        if not normal:raise RuntimeError('Normal game exit not yet confirmed; do not kill SFC')
+        if host.poll() is None:host.wait(timeout=8)
+        if host.returncode:raise RuntimeError('Renderer shutdown did not complete normally')
+        if not args.observation_only and not args.private_ship and (not history or max(v['drawCount'] for v in history)<30 or max(v['copyCount'] for v in history)<10):raise RuntimeError('Insufficient actual image/presentation evidence')
+        if inspect_requested and (channel.state.visibilitySamples!=8 or channel.state.visibilityScope!=(2 if args.inspect_early_depth else 1)):raise RuntimeError('Read-only visibility observations incomplete or wrong scope')
+        if args.capture_ship_image:
+            image_reader.wait(timeout=8)
+            if image_reader.returncode:raise RuntimeError('Requested prepared ship image missing/reader failed;runtime evidence retained')
+            from ship_image_snapshot import convert
+            image_result=convert(work)
+    except Exception as exc:
+        error=str(exc);print('Test stopped safely: '+error,flush=True)
+        if pid and not normal:print('Please exit the copied SFC game normally. No original drawing is suppressed.',flush=True)
+    finally:
+        if channel:channel.set('enabled',0);channel.set('stop',1)
+        if image_reader and image_reader.poll() is None:
+            try:image_reader.wait(timeout=5)
+            except sp.TimeoutExpired:image_reader.terminate();image_reader.wait(timeout=5)
+        if error and launcher and pid and launcher.poll() is None:
+            print('Waiting briefly for normal game exit before restoring the test setup.',flush=True)
+            until=min(deadline,time.monotonic()+30)
+            while launcher.poll() is None and time.monotonic()<until:time.sleep(.1)
+            normal=launcher.poll()==0 and 'CHILD_EXIT code=0' in (work/'launcher.log').read_text(errors='replace')
+        # Never terminate SFC or a controller still responsible for live gate hooks.
+        if host and host.poll() is None:
+            try:host.wait(timeout=8)
+            except sp.TimeoutExpired:host.terminate();host.wait(timeout=5)
+        if launcher and launcher.poll() is None:launcher.terminate();launcher.wait(timeout=5) # parent only, not game; no game job kill flag
+        if full_support and rollback.exists():
+            if game_running():
+                proxy_restored=False;error=(error+'; ' if error else '')+'Game still running: proxy rollback deferred; exit normally then restore verified backup'
+            else:
+                try:
+                    if (TEST/'ReShade.log').exists() and (TEST/'ReShade.log').stat().st_size<=16*1024*1024:shutil.copyfile(TEST/'ReShade.log',work/'ReShade.full-support.log')
+                    broad_capture.restore_test_proxy(TEST/'dxgi.dll',rollback);proxy_restored=True
+                    if digest(config_backup)!=metadata['copied_critical_before']['ReShade.ini']:raise ValueError('Copied configuration rollback hash mismatch')
+                    shutil.copyfile(TEST/'ReShade.ini',work/'ReShade.after-test.ini')
+                    shutil.copyfile(config_backup,TEST/'ReShade.ini')
+                except Exception as exc:proxy_restored=False;error=(error+'; ' if error else '')+str(exc)
+        final=channel.snapshot() if channel else None
+        visibility=visibility_result(channel.state) if channel else 'NO_CHANNEL'
+        search=None
+        if channel and args.search_depth:
+            try:search=depth_search_channel.snapshot(channel.address)
+            except ValueError as exc:error=(error+'; ' if error else '')+str(exc)
+        private_stats=None
+        if args.private_ship and channel:
+            from live_return import telemetry
+            private_stats=telemetry(channel.address)
+        if channel:channel.close()
+        if receiver:receiver.close()
+        for f in streams:f.close()
+        after=critical_hashes(SOURCE);paths_after=launcher_paths();copy_after=critical_hashes(TEST)
+        if after!=original or paths_after!=paths:error=(error+'; ' if error else '')+'Accepted installation or launcher settings changed'
+        if copy_after['StarFleetOP.exe']!=CLIENT:error=(error+'; ' if error else '')+'Copied client hash changed'
+        if full_support and copy_after!=metadata['copied_critical_before']:error=(error+'; ' if error else '')+'Copied critical baseline not fully restored'
+        result={'probe':'REMIX-RETURN-001','error':error,'seconds':time.monotonic()-start,'target_pid':pid,'normal_game_exit':normal,'gate_clean_unloaded':gate_clean,'gate_controller_pid':controller.pid if controller else None,'gate_controller_exit':controller.poll() if controller else None,'gate_controller_left_running':controller is not None and controller.poll() is None,'renderer_exit':host.returncode if host else None,'original_critical_unchanged':after==original,'launcher_settings_unchanged':paths_after==paths,'accepted_critical_after':after,'copied_critical_after':copy_after,'history':history,'phases':phase_results,'final':final,'sponsor_visible_behavior':'PENDING sponsor report','result':'RUNTIME_REVIEW_REQUIRED' if not error else 'PARTIAL'}
+        if args.private_ship:
+            result.update(probe='REMIX-LIVE-RETURN-001',private_return=private_stats,fresh_asset=receiver.selected if receiver else None,
+                  backbuffer_ship_drawing=bool(args.visible_ship),original_ship_suppressed=False)
+            if args.textured_ship:result.update(display_policy='v4 delayed-additive,request age<=100ms at enqueue;captured pose/camera NOT current-frame replacement',output_size=[1920,1080],original_textures=True)
+            if not error:result['result']='FRESH_PRIVATE_LEASE_ACCEPTED_REVIEW_REQUIRED' if private_stats and private_stats['drawn'] else 'NO_CURRENT_FRAME_RETURN_ADDITIONAL_BOUNDED_EVIDENCE_REQUIRED'
+            if not error and args.visible_ship:result['result']='VISIBLE_SHIP_SUBMITTED_SPONSOR_REVIEW_REQUIRED' if final and final['drawCount'] else 'NO_VISIBLE_SHIP_SUBMISSIONS_PARTIAL'
+        result['visibility_observation']=visibility
+        if args.capture_ship_image:result['prepared_ship_image']=image_result
+        result['observation_only']=args.observation_only
+        result['expanded_search']=search
+        result['broad_proxy_restored']=proxy_restored
+        if args.depth_snapshots:
+            try:
+                from depth_snapshot_analysis import analyze_run
+                result['depth_snapshots']=analyze_run(work,images=True)
+                if not result['depth_snapshots']['complete']:
+                    status=result['depth_snapshots']['status']
+                    raise ValueError(f"Depth capture PARTIAL: {status.get('files',0)}/3 images; stage={status.get('failure_stage_name','unrecorded')}; HRESULT={status.get('failure_hresult_hex','unrecorded')}; feature_level={status.get('feature_level','unrecorded')}. Evidence retained; no ship suppressed.")
+            except (ValueError,OSError) as exc:error=(error+'; ' if error else '')+str(exc);result['error']=error;result['result']='PARTIAL'
+        if args.calibration:
+            try:
+                from present_calibration import analyze
+                result['semantic_calibration']=analyze(work,metadata['semantic_calibration']['scene_session'],pid)
+            except (ValueError,OSError) as exc:error=(error+'; ' if error else '')+str(exc);result['error']=error;result['result']='PARTIAL'
+        if args.broad_capture and (work/'broad.bin').exists():
+            try:result['broad_capture']=broad_capture.save_analysis(work/'broad.bin')
+            except ValueError as exc:error=(error+'; ' if error else '')+str(exc);result['error']=error;result['result']='PARTIAL'
+        if search:result['expanded_search_verdict']=depth_search_channel.verdict(search)
+        (work/'result.json').write_text(json.dumps(result,indent=2))
+    print('Evidence: '+str(work),flush=True)
+    if error:raise RuntimeError(error)
+if __name__=='__main__':main()

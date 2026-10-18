@@ -1,0 +1,151 @@
+{
+  "run": "20261017-182017-086947-in-game",
+  "probe": "REMIX-RETURN-001-BROAD",
+  "confidence": "CONFIRMED descriptors/bindings and recorded ordering; usable tactical depth unqualified",
+  "source_sha256": "CB10781A2940EFA1288F713316856826F4A0347A7F90E3B3147A4C9FB11D71C7",
+  "records": 141285,
+  "raw_bytes": 18084608,
+  "dropped": 0,
+  "tactical_seconds": 10.0002166,
+  "draws": {
+    "without_depth": 1205,
+    "with_depth": 67290
+  },
+  "present": {
+    "depth_unbound": 600,
+    "latest_depth_draw_then_unbind_before_present": 599
+  },
+  "frame_totals": {
+    "frames_with_depth_draws": 599,
+    "unbound_draws_after_last_depth_draw": 1198,
+    "frames_with_exactly_two_unbound_tail_draws": 599
+  },
+  "depth_binding_window": {
+    "before_gate": 98,
+    "after_gate": 605
+  },
+  "depth_paths": [
+    {
+      "device": 196126028,
+      "view": 200698240,
+      "view_creation_sequence": 912,
+      "draws": 67290,
+      "indexed": 64760,
+      "nonindexed": 2530,
+      "first_sequence": 4643,
+      "last_sequence": 141272,
+      "pipeline_handles": [
+        {
+          "handle": 196444768,
+          "draws": 600
+        },
+        {
+          "handle": 197207584,
+          "draws": 2274
+        },
+        {
+          "handle": 196443744,
+          "draws": 63524
+        },
+        {
+          "handle": 196444128,
+          "draws": 892
+        }
+      ],
+      "dynamic_depth_states": [
+        {
+          "enable_write_compare": [
+            null,
+            null,
+            null
+          ],
+          "draws": 67290
+        }
+      ],
+      "view_descriptor": {
+        "device": 196126028,
+        "view": 200698240,
+        "creation_sequence": 912,
+        "resource": 200783396,
+        "resource_creation_sequence": 909,
+        "usage": 48,
+        "type": 6,
+        "format": 40,
+        "range": [
+          0,
+          1,
+          0,
+          0
+        ],
+        "end_sequence": null
+      },
+      "resource_descriptor": {
+        "device": 196126028,
+        "resource": 200783396,
+        "creation_sequence": 909,
+        "creation_qpc": 137133032279,
+        "type": 3,
+        "usage": 11504,
+        "flags": 0,
+        "width_or_size": 1920,
+        "height_or_stride": 1080,
+        "format": 39,
+        "samples": 8,
+        "end_sequence": null
+      },
+      "related_views": [
+        {
+          "device": 196126028,
+          "view": 200744972,
+          "creation_sequence": 911,
+          "resource": 200783396,
+          "resource_creation_sequence": 909,
+          "usage": 192,
+          "type": 6,
+          "format": 41,
+          "range": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "end_sequence": null
+        },
+        {
+          "device": 196126028,
+          "view": 200698240,
+          "creation_sequence": 912,
+          "resource": 200783396,
+          "resource_creation_sequence": 909,
+          "usage": 48,
+          "type": 6,
+          "format": 40,
+          "range": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "end_sequence": null
+        }
+      ]
+    }
+  ],
+  "presented_backbuffers": [
+    {
+      "device": 196126028,
+      "resource": 196844900,
+      "presents": 600
+    }
+  ],
+  "unqualified": "Depth values,static depth-pipeline descriptors,HUD/owner identity and GPU usability not captured; deferred command replay not reconstructed",
+  "mechanical_result": {
+    "normal_game_exit": true,
+    "gate_restored_unloaded": true,
+    "proxy_config_restored": true,
+    "accepted_critical_unchanged": true
+  },
+  "visible_behavior": "CONFIRMED sponsor observation for this bounded run: game, HUD, targeting and controls normal; no new stutter or visual problems. Not an instrumented equivalence claim.",
+  "warning": "Native ID3D11Device0 reference-count inconsistency (67) at shutdown; unresolved, not a quantified leak",
+  "archive": "artifacts/remix-runtime/archives/20261017-182017-broad-depth-evidence.zip"
+}

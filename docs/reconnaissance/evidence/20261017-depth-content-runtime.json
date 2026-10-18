@@ -1,0 +1,49 @@
+{
+  "probe": "REMIX-DEPTH-001",
+  "run": "artifacts/remix-runtime/runs/20261017-190353-769314-in-game",
+  "result": "TACTICAL_DEPTH_CONTENT_DEMONSTRATED_NOT_REPLACEMENT",
+  "confidence": "CONFIRMED runtime pixel content plus paired visual inspection and native depth-state observations",
+  "prepared_seconds": 50.172,
+  "requested_tactical_seconds": 20,
+  "target_pid": 20528,
+  "reader": "ps_4_1",
+  "feature_level": 41216,
+  "source": {"width": 1920, "height": 1080, "format": 39, "samples": 8, "resource_epoch": 1},
+  "color_format": 28,
+  "pairs": 3,
+  "gpu_errors": 0,
+  "io_errors": 0,
+  "invalid_depth_values": 0,
+  "snapshots": [
+    {"file": "depth-0.bin", "sha256": "E6D799954F361D25E8631A786F4DD4FFFD643910D354E5F8DD8A9275E5ABEF29", "present": 724, "qpc": 163427954808, "relative_seconds": 0, "min_depth_pixels_below_0_9999999": 42444},
+    {"file": "depth-1.bin", "sha256": "8CC50908094FB0921700D07E882476303274C019042C5357D730214E879F9BF6", "present": 1024, "qpc": 163477945905, "relative_seconds": 4.9991097, "min_depth_pixels_below_0_9999999": 36433},
+    {"file": "depth-2.bin", "sha256": "8DB03F9F94A82A45DC4A7AE17D555C9487AFB509B861BA7744D519CE85E1F472", "present": 1324, "qpc": 163527958957, "relative_seconds": 10.0004149, "min_depth_pixels_below_0_9999999": 29112}
+  ],
+  "qpc_frequency": 10000000,
+  "visual_review": {
+    "ship_silhouette_matches_color": true,
+    "tactical_grid_matches_color": true,
+    "changed_view_matches": true,
+    "clearly_adjudicated_ship_count": 1,
+    "sponsor_observation": "done,no issues on my side",
+    "pixel_exact_registration_claimed": false,
+    "color_png_sampling_caveat": "Nearest resized color derivative samples one source pixel offset from raw depth grid; original full color retained"
+  },
+  "final_native_depth_states": [
+    {"enabled": true, "write_mask": "ALL", "compare": "ALWAYS", "observations": 720},
+    {"enabled": false, "write_mask": "ALL", "compare": "LESS", "observations": 2215},
+    {"enabled": true, "write_mask": "ALL", "compare": "LESS_EQUAL", "observations": 80761},
+    {"enabled": true, "write_mask": "ZERO", "compare": "LESS_EQUAL", "observations": 856}
+  ],
+  "mechanical": {"normal_game_exit": true, "gate_restored_unloaded": true, "host_exit": 0, "proxy_config_restored": true, "client_critical_settings_unchanged": true},
+  "warning": "Reference count for ID3D11Device0 object 07FD6168 (08B69F4C) is inconsistent (67).",
+  "size": {"raw_packets_bytes": 49768704, "raw_plus_images_bytes": 50700037, "whole_run_bytes": 55682889, "images_hard_bytes": 67108864, "warning_threshold_crossing_expected": true},
+  "archive": {
+    "path": "artifacts/remix-runtime/archives/20261017-depth-content-runtime.zip",
+    "bytes": 5136753, "entries": 31, "source_bytes": 50847151,
+    "sha256": "6B0DBE067C807BF5E21ABE97C4279BFE4DEB523948741887C19BCD38439208F7",
+    "crc_verified": true, "raw_removed": false
+  },
+  "unresolved": ["Complete object/effect/UI coverage", "Pixel-exact projection and depth convention shared with Remix", "Lossless8sample visibility", "Owner-specific frame-matched suppression", "Native reference warning67"],
+  "next": "Offline-qualify selected-ship Remix coverage/depth and coordinate/frame correspondence before suppression"
+}

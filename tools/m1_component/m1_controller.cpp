@@ -12,6 +12,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include "module_snapshot_retry.h"
 
 #pragma comment(lib, "advapi32.lib")
 
@@ -77,9 +78,12 @@ bool md5_file(const std::wstring& path, std::string& result) {
 }
 
 std::uintptr_t remote_module_base(DWORD pid, const std::wstring& module_name) {
-    HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE |
-        TH32CS_SNAPMODULE32, pid);
-    if (snapshot == INVALID_HANDLE_VALUE) return 0;
+    DWORD error=0;unsigned attempts=0;
+    HANDLE snapshot=sfc_probe::module_snapshot_retry(
+        [&](){return CreateToolhelp32Snapshot(TH32CS_SNAPMODULE|TH32CS_SNAPMODULE32,pid);},
+        [](){return GetLastError();},[](DWORD ms){Sleep(ms);},error,attempts);
+    if(attempts>1)std::cout<<"module_snapshot_attempts="<<attempts<<" last_error="<<error<<"\n";
+    if(snapshot==INVALID_HANDLE_VALUE){SetLastError(error);return 0;}
     MODULEENTRY32W entry{};
     entry.dwSize = sizeof(entry);
     std::uintptr_t result = 0;

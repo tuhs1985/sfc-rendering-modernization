@@ -47,7 +47,15 @@ int wmain(int argc,wchar_t** argv){
     h[MeshPolygons]=8192;h[MeshCorners]=32768;h[MeshSources]=256;
     check_mesh(large_packet.bounds() && large_packet.byte_size()<2*1024*1024,"expanded packet byte/storage ceiling");
     h[MeshCorners]=32769;check_mesh(!large_packet.bounds(),"expanded corner bound");
+    // Exact-frame calibration observes BEFORE the independent 30Hz stream throttle.
+    static sfc_calibration::Mailbox calibration;calibration.active=1;scene.calibration=&calibration;
+    ++id.frame;++id.elapsed;sfc_calibration::begin(&calibration,id.frame);
+    scene.observe(id,read,[]{return true;});sfc_calibration::Snapshot snap;
+    check_mesh(sfc_calibration::read(&calibration,snap)&&snap.frame==id.frame&&snap.owner[0][1]==999,
+        "current-frame observation bypasses 30Hz throttle");
+    check_mesh(snap.owner[0][47]==GetCurrentThreadId(),"calibration render-thread provenance");
     Sleep(100);check_mesh(scene.stop(),"worker drains and joins before unmap");
+    check_mesh(!calibration.active,"calibration deactivated before producer storage removed");
     check_mesh(!scene.worker&&!scene.mapping&&!scene.view,"native scene handles closed");
     std::cout<<"Fresh scene native capture/multi-owner/bounds/worker tests passed\n";
 }

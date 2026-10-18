@@ -1,0 +1,37 @@
+{
+  "run_id": "SFC-RETURN-20261017-22",
+  "date_local": "2026-10-17",
+  "probe": "REMIX-OFFSET-001",
+  "result": "PARTIAL_IN_GAME_OBJECTIVE_OFFLINE_OFFSET_COMPOSITOR_CONFIRMED",
+  "confidence": "CONFIRMED",
+  "sfc_launched": false,
+  "game_addon_adopted": false,
+  "original_ship_suppressed": false,
+  "sponsor_runtime_ready": false,
+  "milestone_pass_claimed": false,
+  "source_capture": "artifacts/remix-runtime/runs/20261018-025737-262069-in-game",
+  "source_owner_epoch": 2,
+  "source_asset_revision": 2,
+  "source_packet_sha256": "6E752E8833239650548E51BF62FC128D08CC00A8241CE9174A2F9F3CCD5B24CF",
+  "wire": {"version": 3, "bytes": 496, "key_bytes": 152, "native_checks_each_x86_x64": 65},
+  "validation": {"python_tests": 188, "gpu_compositor_checks": 22, "feature_level": "10_1", "synthetic_target_sizes": [16,24]},
+  "producer_sha256": "E2114AEDF86ED02750DEC1206D3C1DD6C4685C1444622A9FA69BCD859B6EC6E5",
+  "consumer_sha256": "A3D938681AF4126286DF5426D91573FEC35B1648CAF55F676B9198C19110606C",
+  "gpu_test_sha256": "A2645F5731F3ACB727C93C098252EE1D0415CFFBB69B99783D43B1FD5E7DBCF1",
+  "control_run": "20261018-033712-466567-coverage",
+  "offset_runs": [
+    {"folder": "20261018-034342-239613-coverage", "source_frame": 120, "mask_pixels": 512, "mask_iou": 1.0, "depth_median_error": 1.823704272041482e-7, "triplets": 2, "exit_code": 0, "seconds": 3.703, "bytes_after_comparison": 5426113},
+    {"folder": "20261018-033936-688936-coverage", "source_frame": 720, "mask_pixels": 505, "mask_iou": 1.0, "depth_median_error": 4.485079322380514e-7, "triplets": 2, "exit_code": 0, "bytes": 5421113}
+  ],
+  "offset_example": {"source_frame": 120, "world_translation": [0.0,14.361175537109375,0.0], "centroid_shift_pixels": [-51.029296875,0.4831001569037596], "source_mesh_camera_unchanged": true},
+  "faults": [
+    {"folder": "20261018-033954-610616-coverage", "kind": "slow6s", "expected_fault_observed": true, "published": 1, "ack": 0, "accepted": 0, "lease": "READY"},
+    {"folder": "20261018-034320-402636-coverage", "kind": "receiver_exit", "expected_fault_observed": true, "published": 1, "ack": 0, "accepted": 0, "lease": "READY"}
+  ],
+  "initial_failed_attempt": {"folder": "20261018-033618-648042-coverage", "stage": "child_ready", "cause": "UNRESOLVED;initial sandbox run lacked child diagnostic log;external run with log passed"},
+  "limits": {"run_seconds": 120, "render_frames": 96, "evidence_hard_bytes": 33554432, "warning_bytes": 16777216, "shared_surfaces": 3, "shared_bytes": 786432},
+  "archive": {"path": "artifacts/remix-runtime/archives/20261018-034415-245677-coverage.zip", "bytes": 1700179, "entries": 226, "source_bytes": 33046024, "sha256": "5101456E8FE395779FA337916C0FE82F85244E3A85C7F148D9CE120BDD343478", "crc_verified": true, "raw_removed": false},
+  "critical_hashes_both_installations_unchanged": true,
+  "open_items": ["Fresh live request/receiver adoption in actual addon", "HUD-safe composition and retained-scene visibility", "Live frame/pose deadlines", "Default material is dark;not textured appearance proof", "SDK common-object teardown warning", "Actual device-loss/hot-unload/fullsize lifecycle"],
+  "repository": {"head": "e96765a1a34c15212ed22f11edeb9a708b9fc18d", "index_empty": true, "staged": false, "committed": false, "prior_work_preserved": true}
+}

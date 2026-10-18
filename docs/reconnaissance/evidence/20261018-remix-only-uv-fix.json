@@ -1,0 +1,32 @@
+{
+  "run_id": "SFC-RETURN-20261018-38",
+  "result": "OFFLINE_QUALIFIED_RUNTIME_VISUAL_CHECK_PENDING",
+  "conversion": "Remix textured SDK vertices only: u unchanged, v=1-captured_v",
+  "shared_capture_and_source_assets_unchanged": true,
+  "other_renderers_must_not_inherit_conversion": true,
+  "native_client_sha256": "4D65761D7DD69EF1504070261B81E9C200C0AF18105033E1C4D2222C62320C29",
+  "python_tests": 223,
+  "python_seconds": 4.356,
+  "native_request_checks_each_x86_x64": 89,
+  "native_uv_checks_each_x86_x64": 14,
+  "offline_gates": [
+    "20261018-212057-049100-live-private",
+    "20261018-212119-120124-live-private",
+    "20261018-212142-171728-live-private",
+    "20261018-212203-883357-live-private",
+    "20261018-212214-160379-live-private",
+    "20261018-212223-310394-live-private",
+    "20261018-212233-138554-live-private",
+    "20261018-212241-216917-live-private"
+  ],
+  "textured_fixture": {"produced": 130, "acquired": 128, "failed": 0, "mask_iou": 0.99886925795053, "host_exit": 0, "fixture_exit": 0, "sdk_shutdown": 0, "prepared_image_verified": true},
+  "read_only_game_preflight": "PASS",
+  "qualification_sha256": "0117BC565B1B04010BC79640B5BA7A31FA07FC532160713EFECBBDF316586A66",
+  "host_sha256": "0D53E9A40254C06A68E4ECF270E0437A9DE53961233D9A81492907E9304F2304",
+  "addon_sha256": "6C37A539A2133BEF0C539EFD2EA539EDA5E2E05F7CB160884B582FB6C51A1980",
+  "archive": "artifacts/remix-runtime/archives/20261018-remix-only-uv-fix-qualification.zip",
+  "archive_bytes": 28811569,
+  "archive_sha256": "53FAB52C9DB1784FE67FA5304B35286F7B341F02C7E81F95683D2E8AA5086AE1",
+  "staged": false,
+  "committed": false
+}
