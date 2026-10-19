@@ -1,20 +1,22 @@
 # SFC Modernize — model handoff
 
-## NEWEST / AUTHORITATIVE CHECKPOINT — 2026-10-19 local publication checkpoint; push held
+## NEWEST / AUTHORITATIVE CHECKPOINT — 2026-10-19 authorized PUBLIC publication checkpoint
 
 - Sponsor authorizes commit/push. [Run64](runs/2026-10-19-codex-appearance-controls-publication.md)
   records reviewed Run57–63 appearance controls,cache safety,tests,evidence and R2
-  baseline. Local checkpoint is commit containing Run64;resolve SHA via Git.
+  baseline. Implementation commit237686c;follow-on documentation records sponsor
+  visibility clarification without rewriting history. Publication tip is that
+  follow-on commit;resolve SHA through Git.
 - 278Python tests and current source-matched read-only tuning preflight PASS.
   Generated/proprietary binaries,captures,archives and removed chat screenshot
   excluded. README now links current R2. No runtime changes in publication task.
-- PUSH HELD:GitHub read-only check unexpectedly reports isPrivate=false for
-  tuhs1985/sfc-rendering-modernization;remote/master still357bc70. Earlier private
-  status is historical. No visibility change or remote write authorized by
-  assumption. Ask sponsor before publishing additional work publicly.
-- Exact next action:obtain decision—push to currently PUBLIC repository,or restore
-  PRIVATE first. Then use only sanitized branch→master non-force refspec. Never
-  merge/push unsanitized recovery master or all refs. No new rendering work.
+- PUBLIC visibility is INTENTIONAL:sponsor confirmed making repository public
+  this morning. Initial push hold resolved;commit-and-push authorization applies.
+  Earlier private status is historical. No visibility change requested/performed.
+- Publication uses only sanitized branch→master non-force refspec,then verify
+  remote master equals HEAD and clean status. Never merge/push unsanitized recovery
+  master or all refs. Next engineering action awaits sponsor direction;no new
+  rendering implementation in this publication task.
 
 ## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-19 temporary appearance baseline revision2
 
