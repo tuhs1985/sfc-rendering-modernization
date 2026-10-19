@@ -26,7 +26,13 @@ int main(){
  values[0]=.5f;write(55);require(!state.read());
  write();bytes[55]^=1;{std::ofstream f("material-controls.bin",std::ios::binary);f.write(reinterpret_cast<const char*>(bytes.data()),bytes.size());}require(!state.read());
  write();require(state.read());require(state.values[0]==.5f);
- values[4]=.5f;write();require(!state.read());require(state.values[4]==1.f);
- std::filesystem::remove("material-controls.bin");std::filesystem::current_path(original);std::filesystem::remove(directory);
+ values[4]=.5f;write();require(!state.read());require(state.values[4]==0.f);
+ h[1]=2;memcpy(bytes.data(),h,8);values={.2f,5,0,0,1,.5f,0,1,0,1};write();require(state.read());require(state.values[4]==1);
+ values[7]=0;write();require(!state.read());require(state.values[7]==1);
+ values[7]=1;values[8]=.5f;write();require(!state.read());
+ values[8]=0;values[9]=0;write();require(!state.read());
+ require(materialReceipt(123,123,1));require(std::filesystem::file_size("material-receipt.bin")==40);
+ require(materialReceipt(456,123,2));require(std::filesystem::file_size("material-receipt.bin")==40);
+ std::filesystem::remove("material-receipt.bin");std::filesystem::remove("material-controls.bin");std::filesystem::current_path(original);std::filesystem::remove(directory);
  std::cout<<"REMIX_MATERIAL_CONTROL_"<<(pass?"PASS":"FAIL")<<" checks="<<checks<<" bytes=56\n";return pass?0:1;
 }

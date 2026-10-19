@@ -4,7 +4,7 @@ schema_version = 1
 backend = "remix_sdk_0_6_4"
 
 # Provisional unit conversion,NOT physical calibration.
-conversion_scale = 0.15
+conversion_scale = 1.0
 # 0.5 halves mapped brightness;1.0 leaves mapped brightness unchanged.
 master_multiplier = 1.0
 
@@ -27,7 +27,7 @@ environment_rotation_degrees = 0.0
 enabled = true
 intensity_multiplier = 1.0
 color_multiplier = [1.0, 1.0, 1.0]
-angular_diameter_degrees = 17
+angular_diameter_degrees = 10
 raytracing = "renderer_default"
 
 [[lights]]
@@ -47,9 +47,9 @@ focus_exponent = 0.0
 environment_image = ""
 environment_rotation_degrees = 0.0
 enabled = true
-intensity_multiplier = 1
+intensity_multiplier = 1.0
 color_multiplier = [1.0, 1.0, 1.0]
-angular_diameter_degrees = 15
+angular_diameter_degrees = 17
 raytracing = "renderer_default"
 # No per-light shadow-only switch in pinned public SDK;unsupported modes rejected.
 
@@ -59,7 +59,7 @@ raytracing = "renderer_default"
 id = "project_fill"
 type = "dome"
 enabled = true
-intensity_multiplier = 0.005
+intensity_multiplier = 0.12
 color_multiplier = [1.0, 1.0, 1.0]
 environment_image = "" # uniform white fill;no image needed
 environment_rotation_degrees = 0.0

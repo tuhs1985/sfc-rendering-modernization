@@ -16,6 +16,9 @@ static void check(remixapi_ErrorCode e,const char* s){if(e!=REMIXAPI_ERROR_CODE_
 #include "ship_textured_asset.h"
 #include "remix_texture_coordinates.h"
 #include "remix_live_lights.h"
+#include "remix_image_controls.h"
+#include "remix_image_adjust.h"
+#include "remix_quality_controls.h"
 static LRESULT CALLBACK proc(HWND w,UINT m,WPARAM p,LPARAM l){return DefWindowProcW(w,m,p,l);}
 struct SceneReader:sfc_calibration::Reader{~SceneReader(){close();}};
 int wmain(int argc,wchar_t** argv){
@@ -56,6 +59,11 @@ int wmain(int argc,wchar_t** argv){
     check(native->CreateTexture2D(&t,nullptr,&outputs[i].native),"ship shared texture");ComPtr<IDXGIResource> resource;check(outputs[i].native.As(&resource),"ship shared resource");HANDLE h=nullptr;check(resource->GetSharedHandle(&h),"ship shared handle");wire.handles[i]=canonicalHandle(h);
     check(device->CreateTexture(outputWidth,outputHeight,1,D3DUSAGE_RENDERTARGET,i?D3DFMT_R32F:D3DFMT_A8R8G8B8,D3DPOOL_DEFAULT,&outputs[i].imported,&h),"ship SDK import");check(outputs[i].imported->GetSurfaceLevel(0,&outputs[i].surface),"ship SDK surface");}
    ComPtr<IDirect3DQuery9> fence;check(device->CreateQuery(D3DQUERYTYPE_EVENT,&fence),"ship SDK fence");
+   RemixImageAdjust imageAdjust;RemixImageControls imageSettings;ULONGLONG lastImagePoll=0;unsigned imageRevisions=0;bool imageTouched=false,postPending=false;
+   RemixQualityControls qualitySettings;ULONGLONG lastQualityPoll=0;unsigned qualityRevisions=0;bool qualityTouched=false;
+   uint64_t appliedSamplerRevision=0;
+   ComPtr<ID3D11Query> imageFence;D3D11_QUERY_DESC imageQuery{D3D11_QUERY_EVENT,0};
+   if(textured){imageAdjust.prepare(native.Get(),outputs[0].native.Get());check(native->CreateQuery(&imageQuery,&imageFence),"image GPU fence");}
    remixapi_Float4D clear{-1234,0,0,0},zero{};check(api.dxvk_SetDefaultOutput(types[1],&clear),"ship default depth");check(api.dxvk_SetDefaultOutput(types[2],&zero),"ship default picking");
    check(api.dxvk_CopyRenderingOutput(outputs[2].surface.Get(),types[2]),"ship prime picking");
    store(wire.ready,1);std::string name;for(const auto ch:mapping.name){if(ch>127)throw std::runtime_error("non ASCII session");name.push_back(static_cast<char>(ch));}std::cout<<"SESSION "<<name<<"\n";
@@ -63,6 +71,8 @@ int wmain(int argc,wchar_t** argv){
    std::vector<remixapi_HardcodedVertex> vertices;std::vector<uint32_t> indices;
    TexturedAsset texture;std::vector<remixapi_MeshInfoSurfaceTriangles> surfaces;
    RemixMaterialControls materialSettings;ULONGLONG lastMaterialPoll=0;unsigned materialRevisions=0;
+   uint64_t receiptProcessed=0,receiptActive=0;uint32_t receiptStatus=0;
+   auto sendMaterialReceipt=[&](uint64_t processed,uint64_t active,uint32_t status){receiptProcessed=processed;receiptActive=active;receiptStatus=status;return materialReceipt(processed,active,status);};
    RemixLiveLights nativeLights;
    const auto started=GetTickCount64();ULONGLONG lastRender=0;bool loaded=false,inflight=false,resolutionLogged=false;Key rendering{};uint64_t requestAt=0,busyPublications=0;unsigned detailed=0;
    const ULONGLONG hostLimit=GetEnvironmentVariableW(L"SFC_LIGHT_TUNING",nullptr,0)?1980000ull:285000ull;
@@ -93,12 +103,13 @@ int wmain(int argc,wchar_t** argv){
      remixapi_MeshInfo info{};info.sType=REMIXAPI_STRUCT_TYPE_MESH_INFO;info.hash=0x5346434c02;info.surfaces_values=&surface;info.surfaces_count=1;
      if(textured){
       materialSettings.read();texture.load(static_cast<uint32_t>(vertices.size()));texture.create(api,materialSettings);
-      std::cout<<"MATERIAL_APPLIED initial=1 revision="<<materialSettings.revision<<" roughness="<<materialSettings.values[0]<<" illumination="<<materialSettings.values[1]<<"\n";
+      std::cout<<"MATERIAL_APPLIED initial=1 revision="<<materialSettings.revision<<" roughness="<<materialSettings.values[0]<<" illumination="<<materialSettings.values[1]<<" roughness_map="<<materialSettings.values[4]<<"\n";
       for(auto g:texture.groups){auto part=surface;part.indices_values=texture.indices.data()+g.first;part.indices_count=g.count;part.material=texture.handles[g.material];surfaces.push_back(part);}
       info.hash=seed.meshHash;info.surfaces_values=surfaces.data();info.surfaces_count=static_cast<uint32_t>(surfaces.size());
       std::cout<<"TEXTURED_ASSET_READY materials="<<texture.materials.size()<<" groups="<<texture.groups.size()<<" output="<<wire.width<<"x"<<wire.height<<" policy=delayed_additive100ms\n";
      }
      check(api.CreateMesh(&info,&mesh),"live fresh mesh");
+     if(textured&&!sendMaterialReceipt(materialSettings.revision,materialSettings.revision,1))std::cout<<"MATERIAL_RECEIPT_RETRY_REQUIRED\n";
      // Texture-only hulls need illumination at arbitrary world positions. The
      // legacy tiny origin light was ineffective hundreds of units from the hull.
      remixapi_LightInfoSphereEXT sphere{};sphere.sType=REMIXAPI_STRUCT_TYPE_LIGHT_INFO_SPHERE_EXT;sphere.radius=.1f;
@@ -110,30 +121,64 @@ int wmain(int argc,wchar_t** argv){
     }
     if(inflight){const HRESULT done=fence->GetData(nullptr,0,D3DGETDATA_FLUSH);
      if(done==S_FALSE){if(return_path::now()-requestAt>wire.frequency*5)throw std::runtime_error("live GPU5s timeout");Sleep(1);continue;}check(done,"live GPU completion");
+     if(textured&&!postPending&&imageAdjust.draw(nc.Get(),outputs[0].native.Get(),imageSettings.post())){nc->End(imageFence.Get());nc->Flush();postPending=true;}
+     if(postPending){BOOL complete=FALSE;const auto hr=nc->GetData(imageFence.Get(),&complete,sizeof(complete),0);check(hr,"image completion");if(hr==S_FALSE||!complete){if(return_path::now()-requestAt>wire.frequency*5)throw std::runtime_error("image GPU5s timeout");Sleep(1);continue;}}
      uint64_t unused[3]{};const auto outcome=publishCompleted(wire,rendering,unused,textured?requestAt:return_path::now(),inflight);
      if(outcome==Publication::Busy){++busyPublications;if(return_path::now()-requestAt>wire.frequency*5)throw std::runtime_error("live publication5s timeout");Sleep(1);continue;}
      if(outcome==Publication::Invalid)throw std::runtime_error("live publication invalid lease");
      const bool sent=outcome==Publication::Published;
+     postPending=false;
      if(sent)InterlockedIncrement(&cmd.rendered);else InterlockedIncrement(&cmd.cancelled);
      if(detailed++<100)std::cout<<"FRESH_OUTPUT source_frame="<<rendering.frame<<" published="<<sent<<" elapsed_ticks="<<return_path::now()-requestAt<<"\n";
     }
     if(!return_path::read(state.armed)||!return_path::read(state.enabled)||GetTickCount64()-lastRender<34||load(wire.lease)!=Idle){Sleep(1);continue;}
+    if(textured&&GetTickCount64()-lastQualityPoll>=500&&qualityRevisions<256&&materialRevisions<256){
+     lastQualityPoll=GetTickCount64();auto next=qualitySettings;if(next.read()){
+      if(next.enabled||qualityTouched){auto set=[&](const char* k,const char* v){return api.SetConfigVariable(k,v)==REMIXAPI_ERROR_CODE_SUCCESS;};
+       if(!next.apply(set)){if(!qualitySettings.apply(set))throw std::runtime_error("quality rollback failed");throw std::runtime_error("quality native option unsupported");}qualityTouched=true;}
+      qualitySettings=next;++qualityRevisions;std::cout<<"QUALITY_APPLIED revision="<<next.revision<<" enabled="<<next.enabled<<" aniso="<<next.anisotropic<<" samples="<<next.samples<<" bias="<<next.bias<<" aa="<<next.aa<<" denoise="<<next.denoising<<" supersampling=1\n";
+     }
+    }
+    if(textured&&GetTickCount64()-lastImagePoll>=500&&imageRevisions<256){
+     lastImagePoll=GetTickCount64();auto next=imageSettings;
+     if(next.read()){
+      // Initial disabled file is a genuine no-op. Disabling after edits restores
+      // this isolated host's tested pinned defaults, not any SFC settings.
+      if(next.enabled||imageTouched){
+       auto set=[&](const char* name,const char* value){return api.SetConfigVariable(name,value)==REMIXAPI_ERROR_CODE_SUCCESS;};
+       if(!next.apply(set)){if(!imageSettings.apply(set))throw std::runtime_error("image native rollback failed");throw std::runtime_error("image native option unsupported");}
+       imageTouched=true;
+      }
+      imageSettings=next;++imageRevisions;
+      std::cout<<"IMAGE_APPLIED revision="<<next.revision<<" enabled="<<next.enabled<<" mode="<<(next.mode?"local":"global")<<" auto="<<next.automatic<<" brightness="<<next.brightness<<" ev="<<next.values[0]<<" contrast="<<next.values[1]<<" gamma="<<next.values[2]<<" saturation="<<next.values[3]<<" grade="<<(next.mode?"host_linear":"native_global")<<"\n";
+     }
+    }
     // Only after output GPU completion and receiver release;no SFC callback IO.
     if(textured&&GetTickCount64()-lastMaterialPoll>=500&&materialRevisions<256){
+     if(receiptStatus)materialReceipt(receiptProcessed,receiptActive,receiptStatus);
      lastMaterialPoll=GetTickCount64();auto next=materialSettings;
-     if(next.read()){
+     const auto samplerRevision=qualitySettings.enabled?qualitySettings.revision:0;
+     if(next.read()||samplerRevision!=appliedSamplerRevision){
       TexturedAsset candidate=texture;candidate.handles.clear();remixapi_MeshHandle replacement=nullptr;auto parts=surfaces;
       try{
-       candidate.create(api,next);for(size_t i=0;i<parts.size();++i)parts[i].material=candidate.handles[texture.groups[i].material];
-       remixapi_MeshInfo mi{};mi.sType=REMIXAPI_STRUCT_TYPE_MESH_INFO;mi.hash=seed.meshHash^next.revision;if(!mi.hash)mi.hash=1;mi.surfaces_values=parts.data();mi.surfaces_count=static_cast<uint32_t>(parts.size());
+       candidate.create(api,next,samplerRevision,qualitySettings.enabled?1:0);for(size_t i=0;i<parts.size();++i)parts[i].material=candidate.handles[texture.groups[i].material];
+       remixapi_MeshInfo mi{};mi.sType=REMIXAPI_STRUCT_TYPE_MESH_INFO;mi.hash=seed.meshHash^next.revision^samplerRevision;if(!mi.hash)mi.hash=1;mi.surfaces_values=parts.data();mi.surfaces_count=static_cast<uint32_t>(parts.size());
        check(api.CreateMesh(&mi,&replacement),"material revision mesh");
-      }catch(const std::exception& e){if(replacement)api.DestroyMesh(replacement);replacement=nullptr;for(auto h:candidate.handles)if(h)api.DestroyMaterial(h);std::cout<<"MATERIAL_REJECTED "<<e.what()<<"\n";}
+      }catch(const std::exception& e){
+       bool cleaned=true;if(replacement)cleaned=api.DestroyMesh(replacement)==REMIXAPI_ERROR_CODE_SUCCESS;replacement=nullptr;
+       for(auto h:candidate.handles)if(h&&api.DestroyMaterial(h)!=REMIXAPI_ERROR_CODE_SUCCESS)cleaned=false;
+       // Without successful candidate release, do not authorize file reclamation.
+       if(!cleaned)throw std::runtime_error("material candidate cleanup failed;cache remains protected");
+       sendMaterialReceipt(next.revision,materialSettings.revision,2);std::cout<<"MATERIAL_REJECTED "<<e.what()<<"\n";
+      }
       if(replacement){
        // A retirement failure stops this optional host;never continue with a
        // partially destroyed previous mesh. Original SFC rendering is independent.
        check(api.DestroyMesh(mesh),"retire material revision mesh");for(auto h:texture.handles)check(api.DestroyMaterial(h),"retire material revision handle");
        mesh=replacement;texture.handles=std::move(candidate.handles);surfaces=std::move(parts);materialSettings=next;++materialRevisions;
-       std::cout<<"MATERIAL_APPLIED revision="<<next.revision<<" roughness="<<next.values[0]<<" illumination="<<next.values[1]<<"\n";
+       if(!sendMaterialReceipt(next.revision,next.revision,1))std::cout<<"MATERIAL_RECEIPT_RETRY_REQUIRED\n";
+       appliedSamplerRevision=samplerRevision;std::cout<<"QUALITY_SAMPLER_APPLIED revision="<<samplerRevision<<" filter="<<(qualitySettings.enabled?1:0)<<"\n";
+       std::cout<<"MATERIAL_APPLIED revision="<<next.revision<<" roughness="<<next.values[0]<<" illumination="<<next.values[1]<<" roughness_map="<<next.values[4]<<"\n";
       }
      }
     }
@@ -158,6 +203,8 @@ int wmain(int argc,wchar_t** argv){
     for(unsigned i=0;i<3;++i)check(api.dxvk_CopyRenderingOutput(outputs[i].surface.Get(),types[i]),"live three output copy");check(fence->Issue(D3DISSUE_END),"live output fence");inflight=true;
    }
    store(wire.ready,0);store(wire.stop,1);
+   if(textured){nc->ClearState();nc->End(imageFence.Get());nc->Flush();BOOL complete=FALSE;const auto until=GetTickCount64()+5000;
+    while(nc->GetData(imageFence.Get(),&complete,sizeof(complete),0)!=S_OK||!complete){if(GetTickCount64()>until)throw std::runtime_error("image retirement5s timeout");Sleep(1);}}
    nativeLights.close(api);
    if(mesh)check(api.DestroyMesh(mesh),"live destroy mesh");if(material)check(api.DestroyMaterial(material),"live destroy material");if(light)check(api.DestroyLight(light),"live destroy light");
    for(auto handle:texture.handles)check(api.DestroyMaterial(handle),"retire textured material");

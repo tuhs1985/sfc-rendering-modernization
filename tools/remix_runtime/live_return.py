@@ -26,6 +26,9 @@ LIVE_SOURCES+=('start_light_tuning_session.ps1',)
 LIVE_SOURCES+=('return_launcher.cpp','build_tuning_launcher.ps1')
 LIVE_SOURCES+=('light_shapes.py','remix_light_shapes.h')
 LIVE_SOURCES+=('material_controls.py','remix_material_controls.h')
+LIVE_SOURCES+=('roughness_maps.py',)
+LIVE_SOURCES+=('image_controls.py','remix_image_controls.h','remix_image_adjust.h')
+LIVE_SOURCES+=('quality_controls.py','remix_quality_controls.h')
 QUALIFICATION=ROOT/'artifacts/remix-runtime/deps/live-return-qualification.json'
 def source_hashes():return {n:digest(Path(__file__).parent/n) for n in LIVE_SOURCES}
 def binary_hashes():
@@ -39,9 +42,12 @@ def require_qualification(visible=False,textured=False,capture_image=False,light
     if capture_image and not q.get('prepared_image_qualified'):raise ValueError('Prepared ship image qualification missing')
     if light_wiring and not (q.get('light_wiring_qualified') and q.get('light_types_qualified') and q.get('project_fill_qualified')):raise ValueError('Native light/config/type/project-fill qualification missing')
     if textured and not q.get('material_controls_qualified'):raise ValueError('Material/illumination qualification missing')
+    if textured and not q.get('image_controls_qualified'):raise ValueError('Image controls native/GPU/reload qualification missing')
+    if light_wiring and not q.get('quality_controls_qualified'):raise ValueError('Quality controls reload/pixel qualification missing')
     return q
-def qualify(folders):
+def qualify(folders,image_proof=None,quality_proof=None):
     hashes=source_hashes();binaries=binary_hashes();seen=set();evidence=[];image_qualified=False;light_qualified=False;types_qualified=False;fill_qualified=False;material_qualified=False
+    image_reload=False;quality_reload=False
     for folder in folders:
         folder=Path(folder).resolve()
         if folder.parent!=(ROOT/'artifacts/remix-runtime/runs').resolve():raise ValueError('Exact private fixture required')
@@ -53,6 +59,8 @@ def qualify(folders):
         if r.get('light_types_verified')==['dome','sphere','rectangle','disk','cylinder','spot','directional']:types_qualified=True
         if r.get('project_fill_verified'):fill_qualified=True
         if r.get('material_controls_verified'):material_qualified=True
+        if r.get('image_controls_verified'):image_reload=True
+        if r.get('quality_controls_verified'):quality_reload=True
         if r.get('textured_delivery_verified'):seen.add('textured_disconnect' if r.get('renderer_disconnect') else ('textured_slow' if r.get('slow_receiver') else 'textured'))
         elif r.get('visible_camera_verified') and r.get('mask_iou',0)>=.95:seen.add('visible')
         elif r.get('renderer_disconnect'):seen.add('disconnect')
@@ -63,7 +71,29 @@ def qualify(folders):
         elif r.get('mask_iou',0)>=.95:seen.add('direct')
         evidence.append(str(folder.relative_to(ROOT)))
     if not {'direct','callback','slow','disconnect'}.issubset(seen) or seen-{'direct','callback','slow','disconnect','visible','textured','textured_slow','textured_disconnect'}:raise ValueError('Four distinct private gates required')
-    QUALIFICATION.write_text(json.dumps(dict(result='OFFLINE_PRIVATE_RETURN_QUALIFIED',source_hashes=hashes,binaries=binaries,evidence=evidence,visible_camera_qualified='visible' in seen,textured_delivery_qualified={'textured','textured_slow','textured_disconnect'}.issubset(seen),prepared_image_qualified=image_qualified,light_wiring_qualified=light_qualified,light_types_qualified=types_qualified,project_fill_qualified=fill_qualified,material_controls_qualified=material_qualified),indent=2))
+    image_evidence=None
+    if image_proof:
+        path=Path(image_proof).resolve()
+        if path.parent!=(ROOT/'artifacts/remix-runtime/runs').resolve():raise ValueError('Exact image fixture required')
+        image_evidence=json.loads((path/'result.json').read_text())
+        from run_image_probe import analyze
+        if image_evidence.get('result')!='OFFLINE_IMAGE_CONTROLS_PASS' or image_evidence.get('sfc_launched') or image_evidence.get('exit_code')!=0:raise ValueError('Image probe failed')
+        for name,sha in image_evidence['source_hashes'].items():
+            if digest(Path(__file__).parent/name)!=sha:raise ValueError('Image proof sources stale')
+        if image_evidence['executable_sha256']!=digest(ROOT/'artifacts/remix-runtime/live-return-bin/image_controls_probe.exe'):raise ValueError('Image proof binary stale')
+        if analyze((path/'probe.log').read_text())!=image_evidence['cases']:raise ValueError('Image pixel proof differs')
+        evidence.append(str(path.relative_to(ROOT)))
+    quality_evidence=None
+    if quality_proof:
+        path=Path(quality_proof).resolve()
+        if path.parent!=(ROOT/'artifacts/remix-runtime/runs').resolve():raise ValueError('Exact quality fixture required')
+        quality_evidence=json.loads((path/'result.json').read_text())
+        if quality_evidence.get('result')!='OFFLINE_QUALITY_OPTIONS_EXERCISED' or quality_evidence.get('exit_code')!=0 or not quality_evidence.get('temporal_aa_measured') or not quality_evidence.get('denoising_measured') or not quality_evidence.get('linear_sampler_measured'):raise ValueError('Quality pixel proof incomplete')
+        for name,sha in quality_evidence['source_hashes'].items():
+            if digest(Path(__file__).parent/name)!=sha:raise ValueError('Quality source proof stale')
+        if quality_evidence['executable_sha256']!=digest(ROOT/'artifacts/remix-runtime/live-return-bin/image_controls_probe.exe'):raise ValueError('Quality binary proof stale')
+        evidence.append(str(path.relative_to(ROOT)))
+    QUALIFICATION.write_text(json.dumps(dict(result='OFFLINE_PRIVATE_RETURN_QUALIFIED',source_hashes=hashes,binaries=binaries,evidence=evidence,visible_camera_qualified='visible' in seen,textured_delivery_qualified={'textured','textured_slow','textured_disconnect'}.issubset(seen),prepared_image_qualified=image_qualified,light_wiring_qualified=light_qualified,light_types_qualified=types_qualified,project_fill_qualified=fill_qualified,material_controls_qualified=material_qualified,image_controls_qualified=bool(image_reload and image_evidence),quality_controls_qualified=bool(quality_reload and quality_evidence)),indent=2))
     return require_qualification()
 
 class FreshReceiver(Receiver):

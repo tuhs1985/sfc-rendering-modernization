@@ -1,0 +1,19 @@
+# Remix backend ONLY. Save while the light-tuning runner is active to reload.
+# Invalid edits retain the last valid settings. Restart after256 accepted edits.
+[material]
+# BASELINE CONTROLS
+# 0=polished/sharp reflections;1=fully rough/matte. Does not add surface detail.
+roughness = 1.0
+# 0=illumination map off;1=provisional baseline;2=twice that emission. Range0..100.
+# Uses primary colour multiplied by its associated secondary image,not raw glow.
+illumination_strength = 5.0
+
+# OPTIONAL CONTROLS,ordered by likely usefulness. Defaults preserve neutral mapping.
+# 1: 0=dielectric painted hull;1=metal. Intermediate values blend those responses.
+# Increasing can darken diffuse and colour reflections;not a recovered SFC property.
+metallic = 0.0
+# 2: 0=round/isotropic highlights;nonzero stretches highlights in a surface direction.
+# Range-1..1. No recovered tangent map:experimental,not recommended for matching SFC.
+anisotropy = 0.5
+# Texture tints are deliberately NOT exposed:the pinned SDK colour constants are
+# fallbacks for absent images,not multipliers on the images we are using.

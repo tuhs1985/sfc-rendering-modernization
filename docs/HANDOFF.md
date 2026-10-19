@@ -1,6 +1,187 @@
 # SFC Modernize — model handoff
 
-## NEWEST / AUTHORITATIVE CHECKPOINT — 2026-10-18 README/CDD publication authorized
+## NEWEST / AUTHORITATIVE CHECKPOINT — 2026-10-19 local publication checkpoint; push held
+
+- Sponsor authorizes commit/push. [Run64](runs/2026-10-19-codex-appearance-controls-publication.md)
+  records reviewed Run57–63 appearance controls,cache safety,tests,evidence and R2
+  baseline. Local checkpoint is commit containing Run64;resolve SHA via Git.
+- 278Python tests and current source-matched read-only tuning preflight PASS.
+  Generated/proprietary binaries,captures,archives and removed chat screenshot
+  excluded. README now links current R2. No runtime changes in publication task.
+- PUSH HELD:GitHub read-only check unexpectedly reports isPrivate=false for
+  tuhs1985/sfc-rendering-modernization;remote/master still357bc70. Earlier private
+  status is historical. No visibility change or remote write authorized by
+  assumption. Ask sponsor before publishing additional work publicly.
+- Exact next action:obtain decision—push to currently PUBLIC repository,or restore
+  PRIVATE first. Then use only sanitized branch→master non-force refspec. Never
+  merge/push unsanitized recovery master or all refs. No new rendering work.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-19 temporary appearance baseline revision2
+
+- Sponsor requests updated [four-file baseline R2](reconnaissance/evidence/baselines/20261019-sponsor-temporary-appearance-r2/README.md).
+  [Run63](runs/2026-10-19-codex-temporary-baseline-r2.md). Exact copies/hashes,
+  schema checks PASS;active settings not rewritten. Prior snapshots preserved.
+- Sponsor's material changes:roughness0.4,metallic0.2,anisotropy0.5,mapgamma0.4.
+  Illumination5,mapenabled/strength0.9 unchanged. Lights/image/quality byte-identical
+  to R1. Full R2 files are current restoration/comparison authority.
+- Attribution correction:observed light contribution was NOT isolated to
+  illumination maps. Metallic/material interaction may also contribute;cause
+  remains unproven. Existing mapped emissive input is known code wiring,not proof
+  that it alone caused the visual observation. Older CONFIRMED causal wording is
+  historical;not another native light or a claim metallic emits light by itself.
+- Documentation/snapshot only,no runtime/config/source changes,new test/gameplay,
+  requirements change or milestone advancement. Run61 cache qualification and
+  Run62 native-supersampling-first clarification remain applicable below.
+  HEAD357bc70unchanged;all work UNSTAGED/UNCOMMITTED,no push.
+- Exact next action:use R2 for the next authorized tuning run. Sponsor's intended
+  order remains final settings→controlled replacement→native supersampling test→
+  stage review. Do not implement those merely because baseline was recorded.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-19 tuning cache retirement OFFLINE QUALIFIED
+
+- Run62 clarification:[native supersampling assessment](runs/2026-10-19-codex-native-supersampling-assessment.md).
+  Earlier nearest-output-copy rationale was insufficient to require custom
+  downsampling. Native internal-scale/final-resolve path must be tested FIRST
+  if authorized. Current native1x/AAoff remains unchanged and supported;>1not
+  dynamically qualified. No supersampling implementation or settings change yet.
+
+- Run61: [record](runs/2026-10-19-codex-material-cache-retirement.md),
+  [evidence](reconnaissance/evidence/20261019-material-cache-retirement.json),
+  [amended probe](reconnaissance/probes/REMIX-ROUGHNESS-MAP-001.md).
+- Fixed128MiB repeated-map accumulation,NOT system RAM exhaustion. Host atomic
+  material receipt follows GPU completion and successful old-resource release;
+  worker protects active/pending maps,serializes edits and reclaims only retired
+  generated roughness DDS. Missing/stale/corrupt receipt pauses publication.
+  Failed SDK cleanup never authorizes deletion. Asset publisher arriving after
+  relay construction is adopted before cleanup. Source/emission files untouched.
+- CONFIRMED:278Python tests,native material24checks per architecture,30edits under
+  tiny synthetic budget;actual4map revisions/restore reclaim82,358,272B,6accepted
+  profiles/1invalid rejection,no pending,normal exit.14final source-matched return
+  gates and read-only tuning preflight PASS. Original128MiB/256edit safety caps
+  retained. Genuine oversized/locked working sets can still reject with clear
+  cache-budget wording. SDK40warning and missing independent specular remain.
+- Sponsor's [temporary appearance baseline](reconnaissance/evidence/baselines/20261019-sponsor-temporary-appearance/README.md)
+  remains current:all4active config hashes identical. No appearance changes,new
+  gameplay,original suppression or TRL advancement. Both clients' hashes intact.
+- Finished generated fixtures recoverably compacted after decompressed SHA checks;
+  all provenance/logs/packets and originals preserved. Evidence≈9.548GB/10GB;
+  next384MiB tuning reservation PASS. No active game/owned probe left.
+- HEAD357bc70unchanged;all prior and current work UNSTAGED/UNCOMMITTED,no push.
+- Exact next action:sponsor starts existing start_light_tuning_session.ps1 when
+  ready and tunes normally from the accepted baseline. No new manual RE/timestamp
+  test or routine UAC required;do not reset settings or blindly repeat full matrix.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-19 sponsor temporary appearance baseline
+
+- Sponsor explicitly accepts current appearance settings as the new TEMPORARY
+  baseline after reporting improved returned-ship appearance. Exact four-file,
+  SHA-verified snapshot with restore instructions:
+  [baseline](reconnaissance/evidence/baselines/20261019-sponsor-temporary-appearance/README.md).
+  [Run60](runs/2026-10-19-codex-sponsor-temporary-appearance-baseline.md).
+- Material roughness0.2,illumination5,generated roughness ON/strength0.9;
+  image manual/local,brightness50,contrast1.12,gamma0.7,saturation1.2;
+  quality16x,mip0,AAoff,denoiseron,SS1. Full snapshot controls all remaining values.
+  Active files not rewritten;older snapshots preserved as historical,not current.
+- Snapshot hashes/parser/range checks PASS. No new build/GPU/gameplay run or source
+  changes;Run59 qualification still current. Sponsor visual acceptance is not
+  native parity/physical calibration or proof of the washout mechanism. No gate
+  advancement. Diagnostic geometry remains disabled;SDK40warning remains.
+- HEAD357bc70unchanged,all previous and current work UNSTAGED/UNCOMMITTED,no push.
+  No active SFC/host at check;no new tool session or runtime state introduced.
+- Exact next action:use this saved four-file baseline for comparison/restoration
+  in the next authorized tuning task;do not reset to older tentative/default values.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-19 optional roughness maps OFFLINE QUALIFIED
+
+- Run59: [run record](runs/2026-10-19-codex-roughness-map-controls.md),
+  [probe](reconnaissance/probes/REMIX-ROUGHNESS-MAP-001.md),
+  [evidence](reconnaissance/evidence/20261019-roughness-map-controls.json).
+- Sponsor material/light tuning preserved. materials.toml adds optional generated
+  roughness map,OFF by default,with strength/levels/invert/gamma. Derived from
+  primary image in worker;ARTISTIC approximation,not recovered SFC properties.
+  Immutable DDS/provenance,atomic v2material packet,strict v1 compatibility;
+  original geometry/UV/images and SFC hooks unchanged. Existing geometry diagnostic
+  remains disabled. No independent opaque specular strength field in pinned SDK;
+  do NOT invent a knob or substitute metallic/IoR/ray-sampling probability.
+- CONFIRMED:275Python tests,native material20checks per architecture,SDK map
+  enable/invalid-edit rejection/restore,14source-matched return gates,read-only
+  tuning preflight PASS. Unchanged Run58 independent pixel proofs hash-revalidated.
+  No new gameplay or visual-improvement/washout-cause claim. SDK40warning remains.
+- Same 128MiB image/4096dimension/256material-edit limits;derivatives may consume
+  budget after several map edits. Saturation retains last good. No render callback
+  disk/decoding/generation/waits. Runtime evidence≈9.537GB/10GB after recoverable,
+  decompressed-SHA-verified compaction of exact finished private fixture textures.
+  Original assets/logs/packets remain;ZIP receipts in each fixture. Next384MiB
+  tuning-run reservation PASS. Both client hashes unchanged. No owned process live.
+- HEAD357bc70/codex/github-sanitized remains. All Run57/58/59 and user tuning
+  UNSTAGED/UNCOMMITTED,no push. No renderer replacement or gate advancement.
+- Exact next action:use existing start_light_tuning_session.ps1;hold camera steady,
+  save roughness_map_enabled=true with strength0.25 in materials.toml and compare.
+  Disable to return to uniform roughness. Do not reset user's lighting/image values,
+  blindly repeat the whole matrix,or claim missing independent reflectivity exists.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-19 quality comparison profile OFFLINE QUALIFIED
+
+- Run58: [quality controls](runs/2026-10-19-codex-quality-controls-baseline.md),
+  [probe](reconnaissance/probes/REMIX-QUALITY-CONTROLS-001.md),
+  [evidence](reconnaissance/evidence/20261019-quality-controls.json).
+- New separate config/quality.toml enabled:explicit SDK Linear material filter,
+  requested16x anisotropy,mip0,AAoff,denoiseron,native1x. Current SFC wrapper itself
+  forces16x filtering/8x MSAA;Remix TAA is NOT MSAA. This is a suggested comparison
+  starting point,NOT native parity. quality.example.toml/disabled restores previous
+  native defaults AND material filter0. Existing appearance settings preserved in
+  [newer user baseline](reconnaissance/evidence/baselines/20261019-quality-start/README.md).
+- Critical discovery:zero-initialized SDK MaterialInfo.filterMode0 differed from
+  pinned C++ default1/Linear. Global knobs alone incomplete. Enabled quality now
+  sets1 and rebinds host materials/mesh safely after output completion;disabled
+  restores0. Do not alter shared geometry,UVs,wrap or original images to compensate.
+- CONFIRMED offline:TAA/NRD pixel effects,linear/point sampler difference,14final
+  return cases+17image+10quality cases,271Python tests,native14quality checks per
+  architecture/existing native checks. Reload/invalidSS/restore and read-only tuning
+  preflight PASS. Global AF/mip visual impact still weak/unresolved;do not overclaim.
+- Supersampling>1is NOT implemented. SDK output copy uses nearest sampling;real
+  downsampling/coverage resolve remains required. SS1is enforced,not a fake knob.
+  No milestone advancement,original suppression,gameplay or CDD change this run.
+- Both client hashes unchanged. SDK40warning remains. No active owned probe.
+  Repeated generated textures from enumerated offline fixtures recoverably archived
+  after decompressed SHA verification;logs/provenance retained. Original game assets
+  untouched. Total runtime evidence≈9.345GB/10GB;exact archive hashes inRun58.
+- HEAD357bc70/codex/github-sanitized unchanged. Run57+58 and user's existing tuning
+  remain UNSTAGED/UNCOMMITTED;no commit/push. Don't reset user settings or blindly
+  repeat whole matrix;source-matched qualification already current.
+- Exact next action:sponsor uses existing start_light_tuning_session.ps1,compares
+  the added ship,then changes/saves ONE quality.toml setting at a time while holding
+  view steady. Exit normally when finished;30minute safety ceiling.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-18 live image controls OFFLINE QUALIFIED
+
+- Run57: [image controls](runs/2026-10-18-codex-remix-image-controls.md),
+  [probe/contract](reconnaissance/probes/REMIX-IMAGE-CONTROLS-001.md),
+  [exact evidence](reconnaissance/evidence/20261018-remix-image-controls.json).
+- Separate tools/remix_runtime/config/image.toml, default enabled=false; restore
+  with image.example.toml. Brightness/EV use supported native exposure; local/global
+  tone-mapper and auto-exposure switches. Native global contrast/saturation;
+  missing local grade plus gamma use bounded host-only GPU pass. Neutral bypass,
+  last-good invalid-edit behavior, explicit disabled restoration. SFC original/HUD,
+  source assets and light/material settings untouched. No geometry hook changes.
+- Actual runtime rejects nominal rtx.userBrightness key; do NOT re-add it based
+  only on associated source. Supported exposure implements its3-stop slider math.
+  Native global grading is inert in local mode; do not double-apply grading.
+- 267Python tests PASS; native image22checks per architecture, existing native
+  tests PASS.13source-matched return cases +17pixel-control cases PASS. Live relay
+  applies4profiles/rejects invalid gamma/restores baseline. Read-only tuning
+  preflight PASS after correctly refreshing dedicated native-light qualification.
+- Both clients' SHA unchanged. No gameplay this run, no probe/process left live.
+  Existing SDK40 warning remains unresolved. No new milestone/replacement claim.
+  Archive708,860B/183entries CRCverified; overall raw/evidence≈9.342GB within10GB.
+  Do not repeat whole matrix or reset sponsor lights/materials unasked.
+- Git357bc70 unchanged on codex/github-sanitized; all23 changes UNSTAGED/UNCOMMITTED;
+  nothing pushed. Qualification receipts/binaries are ignored machine-local state.
+- Exact next action: sponsor launches existing start_light_tuning_session.ps1,
+  sets image.toml enabled=true, changes/saves one image setting at a time, then
+  exits normally. No timestamps, manual RE or new routine UAC workflow required.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-18 README/CDD publication authorized
 
 - Run56: [commit/publication record](runs/2026-10-18-codex-readme-cdd-publication.md).
   Sponsor authorizes committing and pushing reviewed Run54/55 documentation.

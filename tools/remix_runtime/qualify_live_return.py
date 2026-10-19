@@ -53,20 +53,27 @@ def main():
     p.add_argument('--light-types',action='store_true')
     p.add_argument('--project-fill',action='store_true')
     p.add_argument('--material-controls',action='store_true')
+    p.add_argument('--image-controls',action='store_true')
+    p.add_argument('--quality-controls',action='store_true')
+    p.add_argument('--image-proof',type=Path)
     # Parse the added optional offline image control alongside existing modes.
     args=p.parse_args()
     if args.light_types:args.light_wiring=True
     if args.project_fill:args.light_wiring=True
     if args.material_controls:args.textured=True;args.addon=True
+    if args.image_controls:args.textured=True;args.addon=True
+    if args.quality_controls:args.textured=True;args.addon=True
     if args.light_wiring:args.textured=True;args.addon=True
     if args.capture_image and not (args.textured and args.addon):p.error('--capture-image requires --textured --addon')
     if args.textured:args.visible=True
     if args.visible and not args.addon:p.error('--visible requires --addon')
-    if args.qualify:print(json.dumps(qualify(args.qualify),indent=2));return
+    if args.qualify:print(json.dumps(qualify(args.qualify,args.image_proof),indent=2));return
     if not args.execute:print('Offline fixture only; --execute starts owned SDK/native test processes,not SFC.');return
     if digest(DLL)!='F7C310821AA98BCDFDEC120330B0A89457B7C5EBA58D21464AF32639611C809F':raise ValueError('Pinned runtime mismatch')
     from broad_capture import storage_bytes,OVERALL
-    reserve=(384 if args.textured else 64)*1024*1024
+    # Explicit disk bounds:128MiB images+32MiB other output+32MiB margin.
+    # This is reservation accounting only;capture/output caps are NOT increased.
+    reserve=(192 if args.textured else 64)*1024*1024
     if storage_bytes()+reserve>OVERALL or shutil.disk_usage(ROOT).free<reserve:raise ValueError('Evidence/archive allowance or disk space')
     work=ROOT/'artifacts/remix-runtime/runs'/dt.datetime.now(dt.timezone.utc).strftime('%Y%m%d-%H%M%S-%f-live-private');work.mkdir()
     if args.addon:
@@ -81,11 +88,22 @@ def main():
     light_relay=None;light_changed=False;types_step=0;types_next=0
     fill_step=0
     material_step=0;material_relay=None
+    image_step=0;image_relay=None
+    quality_step=0;quality_relay=None
+    if args.quality_controls:
+        from quality_controls import Relay as QualityRelay
+        quality_path=work/'quality-test.toml';quality_path.write_text('[quality]\nenabled=true\nmax_anisotropy=16\n')
+        quality_relay=QualityRelay(work,quality_path)
+    if args.image_controls:
+        from image_controls import Relay as ImageRelay
+        image_path=work/'image-test.toml';image_path.write_text('[image]\nenabled=true\ngamma=1.0\n')
+        image_relay=ImageRelay(work,image_path)
     if args.material_controls:
         from material_controls import Relay as MaterialRelay
         material_path=work/'materials-test.toml'
         material_path.write_text('[material]\nroughness=0.4\nillumination_strength=0\n')
         material_relay=MaterialRelay(work,material_path)
+        material_relay.poll() # Freeze private factory profile BEFORE asset preparation.
     type_sequence=['dome','sphere','rectangle','disk','cylinder','spot','directional']
     if args.light_wiring:
         from live_lights import Relay
@@ -95,6 +113,14 @@ def main():
             '[[lights]]\nid = "native_directional_0"\n[[lights]]\nid = "native_directional_1"\n')
         if args.project_fill:control_path.write_text(control_path.read_text()+'[[lights]]\nid = "project_fill"\ntype = "dome"\nenabled = true\nintensity_multiplier = 0.05\n')
         light_relay=Relay(work,receiver,control_path)
+        # Fixtures must NEVER follow sponsor's mutable image/material/quality edits.
+        from material_controls import Relay as MaterialRelay
+        from image_controls import Relay as ImageRelay
+        from quality_controls import Relay as QualityRelay
+        for name,section in (('material','material'),('image','image'),('quality','quality')):(work/f'{name}-factory.toml').write_text(f'[{section}]\n')
+        light_relay.materials=MaterialRelay(work,work/'material-factory.toml')
+        light_relay.images=ImageRelay(work,work/'image-factory.toml')
+        light_relay.quality=QualityRelay(work,work/'quality-factory.toml')
     def output(name):f=(work/name).open('wb');streams.append(f);return f
     warned=False
     def check():
@@ -118,6 +144,7 @@ def main():
         if args.slow:env['SFC_PRIVATE_SLOW']='1'
         if args.disconnect:env['SFC_PRIVATE_DISCONNECT']='1'
         if args.visible:env['SFC_REMIX_VISIBLE_SHIP']='1'
+        if args.material_controls:env['SFC_PRIVATE_MATERIAL_CACHE']='1'
         env.pop('SFC_REMIX_CAPTURE_SHIP_IMAGE',None);env.pop('SFC_REMIX_CAPTURE_SHIP_IMAGE_DELAY_MS',None)
         if args.capture_image:env.update(SFC_REMIX_CAPTURE_SHIP_IMAGE='1',SFC_REMIX_CAPTURE_SHIP_IMAGE_DELAY_MS='2000')
         host=sp.Popen([str(BIN/'ship_live_host.exe'),str(DLL)],cwd=work,env=env,stdout=output('host.log'),stderr=sp.STDOUT,creationflags=sp.CREATE_NO_WINDOW)
@@ -149,14 +176,35 @@ def main():
         history=[];disconnected=False;displayed_at_disconnect=None
         while fixture.poll() is None:
             check();receiver.drain();history.append(telemetry(channel.address))
+            if quality_relay:
+                quality_relay.poll();host_text=(work/'host.log').read_text(errors='replace')
+                if quality_step==0 and 'samples=16 bias=0 aa=0 denoise=1' in host_text:
+                    quality_path.write_text('[quality]\nenabled=true\ntexture_filtering="trilinear"\nanti_aliasing="temporal"\ndenoising=false\n');quality_step=1
+                elif quality_step==1 and 'aa=3 denoise=0' in host_text:
+                    quality_path.write_text('[quality]\nsupersampling=2.0\n');quality_step=2
+                elif quality_step==2 and quality_relay.rejected:
+                    quality_path.write_text('[quality]\n');quality_step=3
+            if image_relay:
+                image_relay.poll();host_text=(work/'host.log').read_text(errors='replace')
+                if image_step==0 and 'gamma=1 saturation=1 grade=host_linear' in host_text:
+                    image_path.write_text('[image]\nenabled=true\ngamma=2.0\n');image_step=1
+                elif image_step==1 and 'gamma=2 saturation=1 grade=host_linear' in host_text:
+                    image_path.write_text('[image]\ngamma=0.0\n');image_step=2
+                elif image_step==2 and image_relay.rejected:
+                    image_path.write_text('[image]\nenabled=true\ntone_mapping="global"\ncontrast=0.7\nsaturation=0.5\n');image_step=3
+                elif image_step==3 and 'saturation=0.5 grade=native_global' in host_text:
+                    image_path.write_text('[image]\n');image_step=4
             if material_relay:
                 material_relay.poll();host_text=(work/'host.log').read_text(errors='replace')
                 if material_step==0 and 'roughness=0.4 illumination=0' in host_text:
-                    material_path.write_text('[material]\nroughness=0.7\nillumination_strength=2\nmetallic=0.2\n');material_step=1
-                elif material_step==1 and 'roughness=0.7 illumination=2' in host_text:
-                    material_path.write_text('[material]\nroughness=99\n');material_step=2
-                elif material_step==2 and material_relay.rejected:
-                    material_path.write_text('[material]\nroughness=0.5\nillumination_strength=1\n');material_step=3
+                    material_path.write_text('[material]\nroughness=0.7\nillumination_strength=2\nmetallic=0.2\nroughness_map_enabled=true\nroughness_map_strength=0.1\n');material_step=1
+                elif 1<=material_step<=4 and material_relay.pending_revision is None and material_relay.accepted==material_step+1:
+                    if material_step<4:
+                        material_step+=1
+                        material_path.write_text(f'[material]\nroughness=0.7\nillumination_strength=2\nmetallic=0.2\nroughness_map_enabled=true\nroughness_map_strength={material_step/10}\n')
+                    else:material_path.write_text('[material]\nroughness=99\n');material_step=5
+                elif material_step==5 and material_relay.rejected:
+                    material_path.write_text('[material]\nroughness=0.5\nillumination_strength=1\n');material_step=6
             if light_relay:
                 light_relay.poll()
                 if not light_changed and 'NATIVE_LIGHT_APPLIED slot=1' in (work/'host.log').read_text(errors='replace'):
@@ -193,9 +241,16 @@ def main():
         host.wait(timeout=8)
         if host.returncode and not disconnected:raise RuntimeError('Fresh host shutdown failed')
         log=(work/'fixture.log').read_text()
+        if quality_relay:
+            host_text=(work/'host.log').read_text()
+            if quality_step!=3 or ' enabled=0 aniso=1 samples=8' not in host_text or ' filter=1' not in host_text or 'QUALITY_SAMPLER_APPLIED revision=0 filter=0' not in host_text or quality_relay.accepted!=3:raise RuntimeError('Quality reload/rejection/restore incomplete')
+        if image_relay:
+            host_text=(work/'host.log').read_text()
+            if image_step!=4 or ' enabled=0 mode=local' not in host_text or 'image native' in host_text or image_relay.accepted!=4:
+                raise RuntimeError('Image hot-reload/rejection/restoration proof incomplete')
         if material_relay:
             host_text=(work/'host.log').read_text()
-            if material_step!=3 or not all(s in host_text for s in ('roughness=0.4 illumination=0','roughness=0.7 illumination=2','roughness=0.5 illumination=1')) or 'MATERIAL_REJECTED' in host_text:
+            if material_step!=6 or material_relay.accepted!=6 or material_relay.pending_revision is not None or not material_relay.reclaimed_bytes or not all(s in host_text for s in ('roughness=0.4 illumination=0 roughness_map=0','roughness=0.7 illumination=2 roughness_map=1','roughness=0.5 illumination=1 roughness_map=0')) or 'MATERIAL_REJECTED' in host_text:
                 raise RuntimeError('Material SDK hot-reload/last-good proof incomplete')
             if not receiver.selected['textures']['secondary_applied']:raise RuntimeError('Fixture has no qualified product illumination')
         if light_relay:
@@ -262,7 +317,9 @@ def main():
         if light_relay:result.update(light_wiring_verified=True,light_controls=light_relay.summary(),synthetic_native_lights=True)
         if args.light_types:result['light_types_verified']=type_sequence
         if args.project_fill:result['project_fill_verified']=True
-        if material_relay:result.update(material_controls_verified=True,material_changes=material_relay.accepted,material_invalid_rejected=material_relay.rejected)
+        if material_relay:result.update(material_controls_verified=True,material_changes=material_relay.accepted,material_invalid_rejected=material_relay.rejected,material_cache_reclaimed_bytes=material_relay.reclaimed_bytes,material_pending_revision=material_relay.pending_revision)
+        if image_relay:result.update(image_controls_verified=True,image_changes=image_relay.accepted,image_invalid_rejected=image_relay.rejected)
+        if quality_relay:result.update(quality_controls_verified=True,quality_changes=quality_relay.accepted,quality_invalid_rejected=quality_relay.rejected)
         result.update(prepared_image_verified=bool(image_result),prepared_image=image_result)
     except Exception as exc:error=str(exc);result=dict(result='PARTIAL',error=error,sfc_launched=False)
     finally:

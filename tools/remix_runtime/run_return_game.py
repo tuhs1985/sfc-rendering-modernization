@@ -347,7 +347,7 @@ def main():
         channel.set('armed',1);channel.set('enabled',int(not args.observation_only));winsound.Beep(880,200);active=time.monotonic();phase=-1
         if args.capture_ship_image:image_reader=sp.Popen([str(live_bin/'ship_image_reader.exe'),session,str(work)],cwd=work,stdout=out('ship-image-reader.log'),stderr=sp.STDOUT,creationflags=sp.CREATE_NO_WINDOW)
         camera_cued=False;motion_cued=False
-        if args.light_tuning:print('TUNING:edit tools/remix_runtime/config/lights.toml and SAVE. Changes apply live. Exit SFC normally when finished;30minute safety ceiling. No timed motion instructions.',flush=True)
+        if args.light_tuning:print('TUNING:edit tools/remix_runtime/config/lights.toml, materials.toml or image.toml and SAVE. Image adjustments need enabled=true. Changes apply live. Exit SFC normally when finished;30minute safety ceiling. No timed motion instructions.',flush=True)
         tuning_exited=False
         while time.monotonic()-active<(1800 if args.light_tuning else 10.1 if args.broad_capture else (20 if args.depth_snapshots else 90)):
             enforce();elapsed=time.monotonic()-active;state=channel.snapshot()

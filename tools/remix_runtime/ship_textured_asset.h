@@ -7,7 +7,7 @@ struct DiskGroup {uint32_t identity,material,first,count;};
 static_assert(sizeof(DiskMaterial)==80&&sizeof(DiskGroup)==16);
 struct TexturedAsset {
  std::vector<DiskMaterial> materials;std::vector<DiskGroup> groups;std::vector<uint32_t> indices;
- std::vector<std::wstring> paths,emissionPaths;std::vector<remixapi_MaterialHandle> handles;
+ std::vector<std::wstring> paths,emissionPaths,roughnessPaths;std::vector<remixapi_MaterialHandle> handles;
  void load(uint32_t vertices){
   std::ifstream f("live-materials.bin",std::ios::binary|std::ios::ate);
   if(!f||f.tellg()<40||f.tellg()>2*1024*1024)throw std::runtime_error("textured material file bound");
@@ -46,13 +46,24 @@ struct TexturedAsset {
    if(!std::filesystem::is_regular_file(path)||std::filesystem::file_size(path)>128*1024*1024)throw std::runtime_error("illumination DDS missing/bound");emissionPaths[j]=path.wstring();
   }
  }
- void create(remixapi_Interface& api,const RemixMaterialControls& settings){
+ void create(remixapi_Interface& api,const RemixMaterialControls& settings,uint64_t samplerRevision=0,uint8_t filter=0){
   handles.resize(materials.size());
+  roughnessPaths.resize(materials.size());
   for(size_t i=0;i<materials.size();++i){
    remixapi_MaterialInfoOpaqueEXT opaque{};opaque.sType=REMIXAPI_STRUCT_TYPE_MATERIAL_INFO_OPAQUE_EXT;
    const auto& v=settings.values;
-   opaque.albedoConstant={v[4],v[5],v[6]};opaque.opacityConstant=1;opaque.roughnessConstant=v[0];opaque.metallicConstant=v[2];opaque.anisotropy=v[3];opaque.alphaTestType=7;
-   remixapi_MaterialInfo info{};info.sType=REMIXAPI_STRUCT_TYPE_MATERIAL_INFO;info.pNext=&opaque;info.hash=materials[i].hash^settings.revision;if(!info.hash)info.hash=1;
+   opaque.albedoConstant={1,1,1};opaque.opacityConstant=1;opaque.roughnessConstant=v[0];opaque.metallicConstant=v[2];opaque.anisotropy=v[3];opaque.alphaTestType=7;
+   if(v[4]){
+    char suffix[32]{};sprintf_s(suffix,"-%016llx.dds",static_cast<unsigned long long>(settings.revision));
+    const auto stem=std::filesystem::path(paths[i]).stem().wstring();std::wstring tail;for(const char* p=suffix;*p;++p)tail+=static_cast<wchar_t>(*p);
+    const auto path=std::filesystem::current_path()/L"textures"/(L"roughness-"+stem+tail);
+    if(!std::filesystem::is_regular_file(path)||std::filesystem::file_size(path)>128*1024*1024)throw std::runtime_error("roughness derivative missing/bound");
+    roughnessPaths[i]=path.wstring();opaque.roughnessTexture=roughnessPaths[i].c_str();
+   }
+   remixapi_MaterialInfo info{};info.sType=REMIXAPI_STRUCT_TYPE_MATERIAL_INFO;info.pNext=&opaque;info.hash=materials[i].hash^settings.revision^samplerRevision;if(!info.hash)info.hash=1;
+   // Remix SDK-specific sampler field:1=Linear (pinned remix.h C++ default).
+   // Preserve previous zero-initialized material when quality profile disabled.
+   info.filterMode=filter;
    // Ordinary hull colour is reflected surface colour, not a whole-ship lamp.
    // Product mask only;raw primary or raw secondary is NEVER whole-hull emission.
    info.albedoTexture=paths[i].c_str();info.emissiveTexture=emissionPaths[i].empty()?nullptr:emissionPaths[i].c_str();

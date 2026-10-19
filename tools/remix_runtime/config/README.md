@@ -1,6 +1,156 @@
-# Light controls
+# Remix appearance controls
+
+## Current temporary appearance baseline
+
+Sponsor approved the current four tuning files on2026-10-19. Exact copies,hashes
+and restoration instructions:
+[temporary appearance baseline revision2](../../../docs/reconnaissance/evidence/baselines/20261019-sponsor-temporary-appearance-r2/README.md).
+Use this checkpoint for future comparisons;older tentative snapshots and factory
+examples are not the current sponsor baseline. No physical/native-SFC parity claim.
+
+## Separate quality controls and suggested comparison profile
+
+Use [quality.toml](quality.toml), independently of image/lights/materials. The
+suggested starting file is enabled:anisotropic16x,mip bias0,temporal AA OFF,
+denoising ON,native1x resolution. Your existing three tuning files are preserved.
+This is a conservative comparison profile,**not a verified match to SFC**.
+The accepted Community Edition's DirectX wrapper already forcesFiltering=16 and
+Antialiasing=8x. Remix temporal AA is a different method,not an8x MSAA switch.
+We leave it OFF initially to isolate temporal softening,not because SFC lacks AA.
+
+Save while the existing light-tuning runner is active. QUALITY CONFIG_ACCEPTED
+means validated;QUALITY_APPLIED in host.log confirms native application. Changes
+apply at a safe output boundary,usually about500ms plus the next completed image.
+No compilation needed. Bad values keep the last accepted profile.
+
+| Setting | Use |
+| --- | --- |
+| enabled | true uses this profile;false restores pre-quality Remix defaults:anisotropic8x,mip0,AAoff,denoisingon,native1x. |
+| texture_filtering | "anisotropic" for angled surfaces;"trilinear" disables anisotropic filtering. No unverified nearest/bilinear selector is offered. |
+| max_anisotropy | 1,2,4,8,16. This is texture filtering,NOT the materials.toml stretched-highlight control. |
+| mip_bias | -1..1;0neutral. Negative requests sharper mip selection but may shimmer;positive requests softer mips. Native option acceptance confirmed;visible effect on our SDK meshes is still weak/unresolved. |
+| anti_aliasing | "off" or "temporal". Temporal AA can smooth jaggies but soften detail or leave motion trails. Native-resolution TAA,no DLSS/NIS/Ray Reconstruction enabled. |
+| denoising | true keeps ray-tracing noise under control. false is a diagnostic view of noisy samples,not what the old SFC renderer did. |
+| supersampling | Currently1.0ONLY. Larger values are rejected and leave settings unchanged. Correct larger-than-screen rendering/downsampling remains separate work. |
+
+Restore with [quality.example.toml](quality.example.toml) or enabled=false. The
+example restores previous Remix behavior,not the suggested16x comparison profile.
+It never resets your image exposure,gamma,lighting or material settings.
+
+The enabled profile explicitly selects each SDK material's LINEAR filter field
+(filterMode1,the pinned SDK C++ default). Our previous zero-initialized C record
+left that field0(point). Global anisotropy options alone were therefore not a
+complete filtering setup. Quality edits safely recreate the host material/mesh
+bindings after GPU completion;captured geometry/images remain unchanged. Disabling
+quality restores the previous field0 as well as global defaults. Image-only edits
+do not recreate geometry;material/quality recreation shares the existing256-change
+safety ceiling—restart a long tuning session if it is reached.
+
+Try ONE change at a time with fixed ship/camera:temporal AA on/off first,then
+denoising briefly off/on. Filtering tests can follow,without adding image sharpening.
+Actual filtering/mip changes were small relative to stochastic variation in the
+bounded synthetic probe before selecting the SDK material filter;do not assume
+that global16x alone caused the original softness. The explicit linear-vs-point
+material field,temporal AA and denoising produced stronger measured differences. Do not lower
+roughness to try to sharpen textures—it controls reflected highlights instead.
+
+Supersampling is intentionally not faked with resolutionScale>1:the pinned SDK's
+output-copy helper uses nearest sampling. A real GPU downsample/coverage resolve,
+resource-budget checks and new spatial proof are required before enabling it.
+No game-camera/transport redesign is needed merely to test the controls above.
+Bounds and evidence:[quality probe](../../../docs/reconnaissance/probes/REMIX-QUALITY-CONTROLS-001.md).
+
+## Separate image controls
+
+Use [image.toml](image.toml) for the returned Remix image, independently of
+lights.toml and materials.toml. This does **not** adjust original SFC drawing,
+HUD, menus or the whole combined screen. Current output is still an added ship.
+
+Start the existing `start_light_tuning_session.ps1` launcher. In image.toml set
+`enabled=true`, change one value and SAVE. Reload is about half a second plus the
+next completed render; initial asset/shader setup can take longer. Invalid edits
+keep the last accepted settings. IMAGE CONFIG_ACCEPTED means validation/relay;
+IMAGE_APPLIED in host.log confirms the native host applied it. No recompile needed.
+
+| Control / default | What it does |
+| --- | --- |
+| enabled=false | Leaves startup image unchanged. After tuning, false restores the tested local/automatic baseline and bypasses the extra grading pass. |
+| tone_mapping="local" | Existing default; balances different image regions. "global" uses Remix's whole-image tone curve and can look different even with neutral sliders. |
+| automatic_exposure=true | Existing default; adapts exposure to the image. Set false for steadier manual comparisons, especially with a ship on a mostly black background. |
+| brightness=50 | 0..100 slider; 50 neutral. Lower dims, higher brightens through native exposure. 0/100 correspond to -1.5/+1.5 stops relative to 50. |
+| exposure_ev=0.0 | -4..4 stops added to brightness's exposure bias. +1 doubles the input exposure factor; -1 halves it. Final displayed RGB is not necessarily doubled because tone mapping compresses it. |
+| contrast=1.0 | 0..2; below1 flattens differences, above1 strengthens them. 0 makes a grey image; not an ambient-light control. |
+| gamma=1.0 | 0.25..4; above1 brightens displayed midtones, below1 darkens. Black/white endpoints stay fixed. Not a monitor calibration or a replacement for correct colour-space conversion. |
+| saturation=1.0 | 0..2; 0 grey, 1 unchanged, above1 stronger colour. |
+
+To restore the entire image configuration, copy [image.example.toml](image.example.toml)
+over image.toml and SAVE, or simply set enabled=false. Lighting/material files are
+not reset. Turning automatic exposure off or switching tone mapper is an intentional
+appearance change; neither happens by default. Returned output is already8bit:
+gamma/grade cannot recover clipped highlights or missing texture detail.
+
+Tuning tip: turn automatic_exposure=false when comparing light strengths or
+manual exposure; otherwise adaptation can partly counteract your changes. This
+is optional, not a changed default. Brightness and exposure_ev deliberately feed
+the same native exposure factor; gamma is the separate midtone adjustment.
+
+### Which implementation actually works
+
+Pinned Remix1.5.2 accepts native `rtx.tonemappingMode`, `rtx.autoExposure.enabled`,
+`rtx.tonemap.exposureBias` (global) and `rtx.localtonemap.exposure` (local).
+Local native exposure starts at0.75; our combined EV multiplies it by2^EV.
+The nominal `rtx.userBrightness` option from associated public source is rejected
+by this DLL (SDK error1). We therefore map the slider's documented3-stop-span
+formula through the two working exposure controls. There is no pretend slider.
+
+Global contrast/saturation are native `rtx.tonemap.*` controls and require
+colorGradingEnabled=true. They are unused by the LOCAL mapper. In local mode only,
+a small host-owned GPU pass supplies contrast/saturation after decoding the
+returned sRGB-like display values to linear RGB, then re-encodes them. Its0.18
+contrast pivot/BT.709 luminance follow the native global grading convention;
+8bit quantization and different tone curves mean the two modes are not identical.
+Gamma is a narrowly scoped display-midtone GPU adjustment in either mode. Never
+apply both native and fallback contrast/saturation to the same image. Source
+assets, lights, materials, output picking/depth and alpha are unchanged.
+
+The extra pass runs only in the separate64bit host, after Remix completion and
+before output publication. The game callback does no configuration/file work.
+Default/disabled settings bypass pixel adjustment exactly. Native option failure
+stops only the optional host after attempting rollback; original SFC still draws.
+
+Bounds:16KiB config, at most256 accepted revisions per session,16 retained config
+snapshots plus latest,100 console messages, no per-frame image dumps. Restart after
+256accepted edits. One private1920x1080 scratch texture adds8,294,400bytes of GPU
+storage, no extra shared surface or CPU screenshot loop. Existing session/output
+caps and normal-exit cleanup remain in force. For proof and source references see
+[image-control probe](../../../docs/reconnaissance/probes/REMIX-IMAGE-CONTROLS-001.md).
 
 ## Separate material controls
+
+### Optional texture-derived roughness
+
+New `roughness_map_enabled=false` preserves your current uniform surface.
+Enable it in materials.toml to derive an artistic roughness map from the original
+colour image. This is NOT recovered SFC surface data and does not alter that image.
+`roughness_map_strength`0..1 blends uniform roughness with the derived result;
+start0.25. `roughness_map_black`/`white`0..1 set input levels (white>black).
+White produces rough/matte areas; `roughness_map_invert=true` reverses that.
+`roughness_map_gamma`0.25..4 changes map midtones:above1 rougher,below1 smoother.
+Save to reload; turn enabled=false to restore uniform roughness. No game restart.
+Generation happens only in the host worker and may take longer than the usual
+half-second reload. Existing128MiB image/256-edit limits apply. Old derivatives
+are reclaimed only after the host confirms safe material retirement;current and
+one pending revision stay protected. Missing/stale confirmation pauses further
+material publication rather than risking an in-use file. A cache-budget message
+is NOT machine RAM exhaustion. If current+pending images cannot fit or files stay
+locked,a genuine budget rejection still retains last good settings.
+
+**Independent opaque specular strength/reflectivity is not available in the pinned
+SDK material interface.** No fake control has been added. Metallic, thin film,
+translucent IoR and ray-sampling probability are not equivalent substitutes.
+No normal/clearcoat/specular maps are invented in this increment. Current colour,
+light and emission tuning remain independent. See
+[roughness probe](../../../docs/reconnaissance/probes/REMIX-ROUGHNESS-MAP-001.md).
 
 Use [materials.toml](materials.toml) for the extra ship's surface and illuminated
 markings. Keep lights.toml for light sources. Save while the **light-tuning** runner

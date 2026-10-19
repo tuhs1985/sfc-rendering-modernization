@@ -93,8 +93,10 @@ If setup fails, retain the generated evidence and inspect the reported condition
 
 - [`lights.toml`](tools/remix_runtime/config/lights.toml): mapped native lights and an independent project fill light.
 - [`materials.toml`](tools/remix_runtime/config/materials.toml): roughness, illuminated-marking strength and supported optional surface controls.
+- [`image.toml`](tools/remix_runtime/config/image.toml): separately enabled live brightness, exposure, contrast, midtone/gamma and saturation controls; restore defaults with image.example.toml.
+- [`quality.toml`](tools/remix_runtime/config/quality.toml): separate filtering, temporal AA and denoiser controls; supersampling remains at the qualified1× setting.
 - [Control reference](tools/remix_runtime/config/README.md): units, ranges, live reload, light types and unsupported options.
-- [Tentative appearance baseline](docs/reconnaissance/evidence/baselines/20261018-tentative-light-material/README.md): the sponsor's recorded starting settings, not physically calibrated conversion factors.
+- [Current temporary appearance baseline](docs/reconnaissance/evidence/baselines/20261019-sponsor-temporary-appearance-r2/README.md): the sponsor's recorded settings and attribution caveats, not physically calibrated conversion factors; older checkpoints remain historical.
 
 Save valid configuration changes while the tuning session is active to apply them live. Invalid edits retain the last accepted settings. These settings affect the Remix-rendered copy, not the original game assets or native lights. Per-light shadow/ray-tracing disable is not exposed by the pinned SDK.
 

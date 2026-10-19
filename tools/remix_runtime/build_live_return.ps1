@@ -15,7 +15,7 @@ try{
     $build='"{0}" && cl /nologo /std:c++20 /EHsc /W4 /WX /DSFC_LIVE_RETURN /LD /I"{1}\artifacts\remix-runtime\deps\reshade\include" /I"{3}\include" "{2}\return_addon.cpp" /Fe:SFCRemixReturn.dll /link /Brepro /DEF:"{2}\return_addon.def" "{3}\lib.X86\detours.lib" reshade_registration.lib d3d11.lib d3dcompiler.lib advapi32.lib ole32.lib user32.lib' -f $vc,$root,$PSScriptRoot,$detours
     & $env:ComSpec /d /s /c $build
     if($LASTEXITCODE -ne 0){throw 'Private live addon build failed'}
-    $build='"{0}" && cl /nologo /std:c++20 /EHsc /W4 /WX /I"{1}\artifacts\remix-runtime\deps\include" "{2}\ship_live_host.cpp" /Fe:ship_live_host.exe /link /Brepro d3d11.lib user32.lib advapi32.lib ole32.lib' -f $vc64,$root,$PSScriptRoot
+    $build='"{0}" && cl /nologo /std:c++20 /EHsc /W4 /WX /I"{1}\artifacts\remix-runtime\deps\include" "{2}\ship_live_host.cpp" /Fe:ship_live_host.exe /link /Brepro d3d11.lib d3dcompiler.lib user32.lib advapi32.lib ole32.lib' -f $vc64,$root,$PSScriptRoot
     & $env:ComSpec /d /s /c $build
     if($LASTEXITCODE -ne 0){throw 'Fresh SDK host build failed'}
     $build='"{0}" && cl /nologo /std:c++20 /EHsc /W4 /WX "{1}\ship_image_reader.cpp" /Fe:ship_image_reader.exe /link /Brepro d3d11.lib dxgi.lib user32.lib advapi32.lib ole32.lib' -f $vc64,$PSScriptRoot
@@ -25,6 +25,24 @@ try{
     & $env:ComSpec /d /s /c $build
     if($LASTEXITCODE -ne 0){throw 'Private native fixture build failed'}
     foreach($compiler in @($vc,$vc64)){
+        $materialName=if($compiler -eq $vc){'material_controls32.exe'}else{'material_controls64.exe'}
+        $build='"{0}" && cl /nologo /std:c++20 /EHsc /W4 /WX "{1}\tests\remix_material_control_tests.cpp" /Fe:{2} /link /Brepro' -f $compiler,$root,$materialName
+        & $env:ComSpec /d /s /c $build
+        if($LASTEXITCODE -ne 0){throw 'Material native build failed'}
+        & (Join-Path $bin $materialName)
+        if($LASTEXITCODE -ne 0){throw 'Material native tests failed'}
+        $qualityName=if($compiler -eq $vc){'quality_controls32.exe'}else{'quality_controls64.exe'}
+        $build='"{0}" && cl /nologo /std:c++20 /EHsc /W4 /WX "{1}\tests\remix_quality_controls_tests.cpp" /Fe:{2} /link /Brepro' -f $compiler,$root,$qualityName
+        & $env:ComSpec /d /s /c $build
+        if($LASTEXITCODE -ne 0){throw 'Quality native build failed'}
+        & (Join-Path $bin $qualityName)
+        if($LASTEXITCODE -ne 0){throw 'Quality native tests failed'}
+        $imageName=if($compiler -eq $vc){'image_controls32.exe'}else{'image_controls64.exe'}
+        $build='"{0}" && cl /nologo /std:c++20 /EHsc /W4 /WX "{1}\tests\remix_image_controls_tests.cpp" /Fe:{2} /link /Brepro' -f $compiler,$root,$imageName
+        & $env:ComSpec /d /s /c $build
+        if($LASTEXITCODE -ne 0){throw 'Image controls test build failed'}
+        & (Join-Path $bin $imageName)
+        if($LASTEXITCODE -ne 0){throw 'Image controls tests failed'}
         $name=if($compiler -eq $vc){'live_request32.exe'}else{'live_request64.exe'}
         $build='"{0}" && cl /nologo /std:c++20 /EHsc /W4 /WX "{1}\tests\ship_live_request_tests.cpp" /Fe:{2} /link /Brepro advapi32.lib ole32.lib' -f $compiler,$root,$name
         & $env:ComSpec /d /s /c $build

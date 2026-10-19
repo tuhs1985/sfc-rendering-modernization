@@ -74,6 +74,10 @@ class Relay:
         self.tuning=tuning
         from material_controls import Relay as MaterialRelay
         self.materials=MaterialRelay(folder)
+        from image_controls import Relay as ImageRelay
+        self.images=ImageRelay(folder)
+        from quality_controls import Relay as QualityRelay
+        self.quality=QualityRelay(folder)
         self.scale=self.master=1;self.revision=0;self.generation=0;self.messages=0
         self.accepted=0;self.rejected=0;self.last_native=None;self.observed=0
         self.publish_busy=0
@@ -132,7 +136,7 @@ class Relay:
         if now-self.last_poll<.1:return
         self.last_poll=now
         if now-self.last_config>=.5:
-            self.last_config=now;self.reload();self.materials.poll()
+            self.last_config=now;self.reload();self.materials.poll();self.images.poll();self.quality.poll()
         selected=self.receiver.selected
         source=self.folder/'gate/native-lights.bin'
         if self.tuning and selected:
@@ -164,6 +168,8 @@ class Relay:
     def summary(self):
         return dict(config=str(self.path),accepted=self.accepted,rejected=self.rejected,
                     material_config=dict(path=str(self.materials.path),accepted=self.materials.accepted,rejected=self.materials.rejected,sha256=self.materials.digest),
+                    image_config=dict(path=str(self.images.path),accepted=self.images.accepted,rejected=self.images.rejected,sha256=self.images.digest),
+                    quality_config=dict(path=str(self.quality.path),accepted=self.quality.accepted,rejected=self.quality.rejected,sha256=self.quality.digest),
                     revisions=self.revision,packets=self.generation,source_bytes=self.offset,
                     config_sha256=self.last_digest,publish_busy=self.publish_busy,read_busy=self.read_busy,
                     read_recoveries=self.read_recoveries,read_pending=self.read_pending,

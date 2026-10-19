@@ -1,0 +1,339 @@
+{
+  "schema": "sfc.remix-image-controls-evidence.v1",
+  "confidence": "CONFIRMED offline runtime/GPU and production-host fixtures;actual SFC tuning not run",
+  "starting_commit": "357bc703e3dc0923cd4c7801ec87e99abc01f157",
+  "qualification_sha256": "349591C96D00CBB45C9EE0A388C1FA3AD3C8B511773E9809FAC6DB46DB15E867",
+  "qualification": {
+    "result": "OFFLINE_PRIVATE_RETURN_QUALIFIED",
+    "source_hashes": {
+      "remix_texture_coordinates.h": "FD652E700E9F88BDC3ABB8BF290FA11FED4194305FE938EC72B01478AC4A5C67",
+      "ship_image_snapshot.h": "CFAA40693B45566B2C5F22D95E7C538F0B0D0F952405A91FAFAB004C9703DE1C",
+      "ship_image_reader.cpp": "7A82C2F189CFF3ACDCF3DDC88406D68C4E147C5082C6FFFC5D622546883B1FB6",
+      "ship_image_snapshot.py": "1708C45CCE1F78AFC25EDCE729F2913BDE7259F2645C67BF2EAF02A7A26DD5F9",
+      "ship_live_request.h": "3B2908D979A1B0F90468F29EA6E2DD8490E364EF65C57282068B55511E1E82A5",
+      "ship_live_camera.h": "86DFA59414C4A9120F2B1865F41A65CE3B854E52001A064E09F8E62831E6EC7E",
+      "ship_live_receiver.h": "E43D1685A57988F63B0EA505047FB3A4ED17A08A439F371C869DD2E031FF1216",
+      "ship_live_host.cpp": "7069CE2B2254714E20C635ECE7D35CA06754CC571ECA9701390B1C501C35187B",
+      "ship_live_gpu_fixture.cpp": "6250C8E545585633BF9864E1757610693CE31BC68FDA25075E1CB48605A21F1F",
+      "ship_triplet_wire.h": "99C8EA02FCCEC64693724275F97201303FEE89DFEB953266A27C81953FE74872",
+      "ship_triplet_consumer.h": "F44DBB8EE85D3D262E0302689E8B684DDF8724A6BCBDE1C57871427B51D153A9",
+      "ship_triplet_compositor.h": "45D6CD96E1FBEF1AFAAA84802C2D3E277762897F2D79813F9A3F28B5819C2E25",
+      "return_addon.cpp": "EBD20FDE69CEC59D58ABC7A4414867E258FF00A1AAE25FCC7364133FEAA0DAA3",
+      "build_live_return.ps1": "67FD762B01C09BA83930C86572237BE620FFCE01A8AB53E5BAB12DF52C5C7DFD",
+      "run_return_game.py": "9DB0A93CE748C488D75DD92340B6F5D99C8F20A15ADBF733A9BBEE435DD368D0",
+      "start_return_image_session.ps1": "283A0D04A5C1B1C779352AFDB48CA0773C88C137A39AE2486F9B8255DA083C6B",
+      "live_return.py": "12FC3366927CFFF85337D0B0B303B3602B67F2820F3FD0C2D2F2F1348835AF76",
+      "qualify_live_return.py": "D935D63F69F42095589727E9EB380E5E98E8E53580BF5A84FBCA85502529FA0C",
+      "run_coverage_probe.py": "4608D0BA8C8F11ECD6E19BAA626B96E16ADE595F550FC586916AA8458215EDF8",
+      "textured_asset.py": "9FA47896CF31BD8AA92DDD799C5847610B3AF7E4820EC3A873E5A082018DBD67",
+      "ship_textured_asset.h": "9D11B4495B1F1F1FC51F6867F6264A0A09F697913A26B0DEA465CDEEF714FC65",
+      "../m1_component/m1_present_calibration.h": "1D0DB2B54CB9EA47F48E817B9E9AB8DC2FFAB02F1D3044EBFACEF2C31F30C360",
+      "remix_light_wire.h": "5AA935307DF294EB363EC58252F5D1BDB086A928BBB8465473C6202CA1C0868F",
+      "remix_live_lights.h": "FE1BADF12017736C96A72CD481805970F39F21F5AB121C4609F17D5D2A6EAA1C",
+      "live_lights.py": "1143B6D2FBA000BA9DD9A6EF545B4007436B1A6D4C45840E16D841A492E0B2E0",
+      "light_controls.py": "CD0E337621ECCC1F28D1DF88A4095A6290BCDCF99A66294F29E25AECBB7425A2",
+      "run_report.py": "B45D9BDB46BB12CE21F5CD86A7164F669D543C5B412F2DF8BBF899DAC529B967",
+      "start_light_wiring_session.ps1": "6BADFA3ED104D72D2AC8587CA1981D461E3CE4DC959A767A69E1F8521A93E697",
+      "../m1_component/native_light_snapshot.h": "080E3D21DFF72617AB2379BE2E8836129A9AF42E739D09EC56CC61BE9C143272",
+      "start_light_tuning_session.ps1": "D3B51D7ADE338099918223803FC8BBEAE06864D0B5C5803EC6CCE0D393AC3AF6",
+      "return_launcher.cpp": "9BCA87C84A56F92C65C7913C2501EBC141AC94C6BD1E1EFD55A088D14BF4DF34",
+      "build_tuning_launcher.ps1": "3B0E7EBC454784DE9B560E6D23E8FCC3FCFF855D6C5502E7ED8E20FC4D32E4CE",
+      "light_shapes.py": "EBD73918FD5AA938B8EEEB16138039C5CEE5C4C8EAF078E941C9E2D2866B1E0B",
+      "remix_light_shapes.h": "5D62F33925045E4D3F4B06BDB3B3525B234AD7A909257835CD150C38164AE233",
+      "material_controls.py": "872740B6D3A682F4E38D711EEA0862D910B0DF1B7FE4203420A0482688DAFD15",
+      "remix_material_controls.h": "A98D68A6E3C90D8ED5D7FD3AF07A169181846E60D816F549E2DB56C02F13E2D8",
+      "image_controls.py": "AE83B96DE7EEA8641BB03452764F98B6BB1149DDC5F96F798E4CBF17964CF683",
+      "remix_image_controls.h": "DE20D2F8EF1E14C1F244CADA4EE498E35B602911D59E048B836E162EFFDD890C",
+      "remix_image_adjust.h": "E31479D2DC853071BB69511577A1611A5CFA22428F69579C9038AEDD6FDAA6B3"
+    },
+    "binaries": {
+      "ship_live_host.exe": "1569626B011525F5A73A4571851DBCC3099383A21387AF0D7CDEABE0A9A0D26B",
+      "ship_live_gpu_fixture.exe": "D523118899DB9F9A8C55A77238C53CDAEDEC3A21385D815E930958F23088F655",
+      "SFCRemixReturn.dll": "6C37A539A2133BEF0C539EFD2EA539EDA5E2E05F7CB160884B582FB6C51A1980",
+      "ship_image_reader.exe": "1784920C447F9A130AF2773E455A5BB78CAC6277C6394656A75A22D1912764ED"
+    },
+    "evidence": [
+      "artifacts\\remix-runtime\\runs\\20261019-035047-156728-live-private",
+      "artifacts\\remix-runtime\\runs\\20261019-035056-373825-live-private",
+      "artifacts\\remix-runtime\\runs\\20261019-035106-109655-live-private",
+      "artifacts\\remix-runtime\\runs\\20261019-035116-421654-live-private",
+      "artifacts\\remix-runtime\\runs\\20261019-035125-015610-live-private",
+      "artifacts\\remix-runtime\\runs\\20261019-035137-054752-live-private",
+      "artifacts\\remix-runtime\\runs\\20261019-035211-967793-live-private",
+      "artifacts\\remix-runtime\\runs\\20261019-035248-143711-live-private",
+      "artifacts\\remix-runtime\\runs\\20261019-035322-627209-live-private",
+      "artifacts\\remix-runtime\\runs\\20261019-035357-005503-live-private",
+      "artifacts\\remix-runtime\\runs\\20261019-035431-962924-live-private",
+      "artifacts\\remix-runtime\\runs\\20261019-035506-571170-live-private",
+      "artifacts\\remix-runtime\\runs\\20261019-035541-157497-live-private",
+      "artifacts\\remix-runtime\\runs\\20261019-035615-182507-image-controls"
+    ],
+    "visible_camera_qualified": true,
+    "textured_delivery_qualified": true,
+    "prepared_image_qualified": true,
+    "light_wiring_qualified": true,
+    "light_types_qualified": true,
+    "project_fill_qualified": true,
+    "material_controls_qualified": true,
+    "image_controls_qualified": true
+  },
+  "image_probe": {
+    "probe": "REMIX-IMAGE-CONTROLS-001",
+    "source_hashes": {
+      "image_controls_probe.cpp": "911D745165590BAE7CA834605A237169C463066FE669EC7106E6E5C28BA8B476",
+      "remix_image_adjust.h": "E31479D2DC853071BB69511577A1611A5CFA22428F69579C9038AEDD6FDAA6B3",
+      "remix_image_controls.h": "DE20D2F8EF1E14C1F244CADA4EE498E35B602911D59E048B836E162EFFDD890C",
+      "image_controls.py": "AE83B96DE7EEA8641BB03452764F98B6BB1149DDC5F96F798E4CBF17964CF683",
+      "run_image_probe.py": "557DE572B14E2178F62291FA3EB8FB1C451AA1EAB7F452B07E614E206EC61EFE"
+    },
+    "executable_sha256": "6382DD5828913BBF35522B1D75E54A12B82116D101CA19EC468845949CF621C3",
+    "runtime_sha256": "F7C310821AA98BCDFDEC120330B0A89457B7C5EBA58D21464AF32639611C809F",
+    "sfc_launched": false,
+    "limits": {
+      "seconds": 75,
+      "warning_bytes": 16777216,
+      "hard_bytes": 33554432
+    },
+    "environment": {
+      "DXVK_LOG_LEVEL": "error",
+      "DXVK_GRAPHICS_PRESET_TYPE": "4",
+      "RTX_INTEGRATE_INDIRECT_MODE": "0",
+      "DXVK_UPSCALER_TYPE": "0",
+      "DXVK_RAY_RECONSTRUCTION": "False",
+      "RTX_DLSS_PRESET": "0",
+      "RTX_ENABLE_ASYNC_COMPILATION": "False"
+    },
+    "exit_code": 0,
+    "cases": {
+      "startup": [
+        214.271,
+        100.684,
+        72.8542
+      ],
+      "local_auto": [
+        214.401,
+        100.859,
+        72.9841
+      ],
+      "local_manual": [
+        121.976,
+        35.5137,
+        25.4658
+      ],
+      "local_exposure": [
+        44.8137,
+        13.6296,
+        10.3743
+      ],
+      "local_brightness": [
+        59.623,
+        17.2634,
+        12.9705
+      ],
+      "local_saturation": [
+        66.0349,
+        66.0349,
+        66.0349
+      ],
+      "local_contrast": [
+        118,
+        118,
+        118
+      ],
+      "local_gamma": [
+        176.183,
+        95.0688,
+        80.4854
+      ],
+      "global_manual": [
+        126.935,
+        55.9619,
+        44.968
+      ],
+      "global_saturation": [
+        77.5398,
+        77.5398,
+        77.5398
+      ],
+      "global_contrast": [
+        116.916,
+        116.916,
+        116.916
+      ],
+      "global_exposure": [
+        94.8237,
+        41.7854,
+        33.5298
+      ],
+      "global_brightness": [
+        101.903,
+        44.9299,
+        36.061
+      ],
+      "global_auto": [
+        207.659,
+        91.5676,
+        73.5479
+      ],
+      "restored": [
+        214.377,
+        100.802,
+        72.9211
+      ],
+      "local_boost": [
+        144.87,
+        0,
+        0
+      ],
+      "global_boost": [
+        153.131,
+        0,
+        0
+      ]
+    },
+    "result": "OFFLINE_IMAGE_CONTROLS_PASS",
+    "seconds": 26.15700000000652,
+    "output_bytes": 8673
+  },
+  "gates": [
+    {
+      "path": "artifacts\\remix-runtime\\runs\\20261019-035047-156728-live-private",
+      "result": "OFFLINE_FRESH_PRIVATE_RETURN_PASS",
+      "seconds": 8.09299999999348,
+      "bytes": 2940164,
+      "image_controls_verified": null,
+      "image_changes": null,
+      "image_invalid_rejected": null,
+      "failed": 0
+    },
+    {
+      "path": "artifacts\\remix-runtime\\runs\\20261019-035056-373825-live-private",
+      "result": "OFFLINE_PROXY_PRIVATE_RETURN_PASS",
+      "seconds": 8.578000000008615,
+      "bytes": 6753036,
+      "image_controls_verified": null,
+      "image_changes": null,
+      "image_invalid_rejected": null,
+      "failed": 0
+    },
+    {
+      "path": "artifacts\\remix-runtime\\runs\\20261019-035106-109655-live-private",
+      "result": "OFFLINE_FRESH_PRIVATE_RETURN_PASS",
+      "seconds": 9.187000000005355,
+      "bytes": 2956792,
+      "image_controls_verified": null,
+      "image_changes": null,
+      "image_invalid_rejected": null,
+      "failed": 0
+    },
+    {
+      "path": "artifacts\\remix-runtime\\runs\\20261019-035116-421654-live-private",
+      "result": "OFFLINE_FRESH_PRIVATE_RETURN_PASS",
+      "seconds": 7.485000000015134,
+      "bytes": 2931329,
+      "image_controls_verified": null,
+      "image_changes": null,
+      "image_invalid_rejected": null,
+      "failed": 0
+    },
+    {
+      "path": "artifacts\\remix-runtime\\runs\\20261019-035125-015610-live-private",
+      "result": "OFFLINE_PROXY_PRIVATE_RETURN_PASS",
+      "seconds": 10.875,
+      "bytes": 8852026,
+      "image_controls_verified": null,
+      "image_changes": null,
+      "image_invalid_rejected": null,
+      "failed": 0
+    },
+    {
+      "path": "artifacts\\remix-runtime\\runs\\20261019-035137-054752-live-private",
+      "result": "OFFLINE_PROXY_PRIVATE_RETURN_PASS",
+      "seconds": 33.76600000000326,
+      "bytes": 79431769,
+      "image_controls_verified": null,
+      "image_changes": null,
+      "image_invalid_rejected": null,
+      "failed": 0
+    },
+    {
+      "path": "artifacts\\remix-runtime\\runs\\20261019-035211-967793-live-private",
+      "result": "OFFLINE_PROXY_PRIVATE_RETURN_PASS",
+      "seconds": 35.01500000001397,
+      "bytes": 71101969,
+      "image_controls_verified": null,
+      "image_changes": null,
+      "image_invalid_rejected": null,
+      "failed": 0
+    },
+    {
+      "path": "artifacts\\remix-runtime\\runs\\20261019-035248-143711-live-private",
+      "result": "OFFLINE_PROXY_PRIVATE_RETURN_PASS",
+      "seconds": 33.32799999997951,
+      "bytes": 71086103,
+      "image_controls_verified": null,
+      "image_changes": null,
+      "image_invalid_rejected": null,
+      "failed": 0
+    },
+    {
+      "path": "artifacts\\remix-runtime\\runs\\20261019-035322-627209-live-private",
+      "result": "OFFLINE_PROXY_PRIVATE_RETURN_PASS",
+      "seconds": 33.187999999994645,
+      "bytes": 71993421,
+      "image_controls_verified": null,
+      "image_changes": null,
+      "image_invalid_rejected": null,
+      "failed": 0
+    },
+    {
+      "path": "artifacts\\remix-runtime\\runs\\20261019-035357-005503-live-private",
+      "result": "OFFLINE_PROXY_PRIVATE_RETURN_PASS",
+      "seconds": 33.780999999988126,
+      "bytes": 72013289,
+      "image_controls_verified": null,
+      "image_changes": null,
+      "image_invalid_rejected": null,
+      "failed": 0
+    },
+    {
+      "path": "artifacts\\remix-runtime\\runs\\20261019-035431-962924-live-private",
+      "result": "OFFLINE_PROXY_PRIVATE_RETURN_PASS",
+      "seconds": 33.390999999974156,
+      "bytes": 71997767,
+      "image_controls_verified": null,
+      "image_changes": null,
+      "image_invalid_rejected": null,
+      "failed": 0
+    },
+    {
+      "path": "artifacts\\remix-runtime\\runs\\20261019-035506-571170-live-private",
+      "result": "OFFLINE_PROXY_PRIVATE_RETURN_PASS",
+      "seconds": 33.437000000005355,
+      "bytes": 71083773,
+      "image_controls_verified": null,
+      "image_changes": null,
+      "image_invalid_rejected": null,
+      "failed": 0
+    },
+    {
+      "path": "artifacts\\remix-runtime\\runs\\20261019-035541-157497-live-private",
+      "result": "OFFLINE_PROXY_PRIVATE_RETURN_PASS",
+      "seconds": 33.828000000008615,
+      "bytes": 71085601,
+      "image_controls_verified": true,
+      "image_changes": 4,
+      "image_invalid_rejected": 1,
+      "failed": 0
+    }
+  ],
+  "python_tests": 267,
+  "native_image_checks_per_architecture": 22,
+  "config_default_disabled": true,
+  "lights_unchanged_sha256": "FC55CE88326AC4D544D166D42882540C257B2E54671517F9F6CD2F93B3F70E2F",
+  "materials_unchanged_sha256": "5AF94EE33CA8B2A658802D4B23D4BFBCE8A7D5D7AB93ED6DCD56BF14996BAD31",
+  "client_sha256": "4D65761D7DD69EF1504070261B81E9C200C0AF18105033E1C4D2222C62320C29",
+  "no_sfc_launched": true,
+  "remaining_issue": "Known SDK40 cleanup warning persists;not claimed resolved",
+  "repository": "Unstaged/uncommitted;no push"
+}

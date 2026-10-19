@@ -15,7 +15,7 @@ class MaterialTests(unittest.TestCase):
     def test_defaults_and_wire(self):
         # Factory defaults must not depend on the sponsor's mutable tuning file.
         raw=encode(b'[material]\n');self.assertEqual(len(raw),56)
-        self.assertEqual(struct.unpack('<2I10fQ',raw)[:6],(0x3143544d,1,1.,1.,0.,0.))
+        self.assertEqual(struct.unpack('<2I10fQ',raw)[:6],(0x3143544d,2,1.,1.,0.,0.))
         self.assertEqual(struct.unpack_from('<Q',raw,48)[0],fnv(raw[:48]))
     def test_invalid_and_optional(self):
         for text in ('roughness=2','illumination_strength=-1','roughness=nan','roughness=true','wat=1','metallic=2','anisotropy=-2','base_colour=[1,1]','base_colour=[1,1,1]','illumination_colour=[1,2,1]'):
@@ -26,6 +26,8 @@ class MaterialTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             folder=Path(temp);config=folder/'settings.toml';config.write_text('[material]\nroughness=0.5\n')
             relay=Relay(folder,config);relay.poll();good=(folder/'material-controls.bin').read_bytes()
+            from test_roughness_maps import acknowledge
+            acknowledge(folder,good)
             config.write_text('[material]\nroughness=99\n');relay.poll()
             self.assertEqual((folder/'material-controls.bin').read_bytes(),good);self.assertEqual(relay.rejected,1)
             relay.accepted=256;config.write_text('[material]\nroughness=0.1\n');relay.poll()

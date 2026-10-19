@@ -99,9 +99,11 @@ int wmain(int argc,wchar_t** argv){wchar_t session[128]{};if(argc==2)wcscpy_s(se
  checked(d->CreateTexture2D(&desc,nullptr,&stageColor),"fixture color staging");desc.Format=DXGI_FORMAT_R32_FLOAT;checked(d->CreateTexture2D(&desc,nullptr,&stagePicking),"fixture picking staging");
  checked(d->CreateTexture2D(&desc,nullptr,&stageDepth),"fixture depth staging");}LONG observedDraw=0;unsigned debug=0;
  bool captured=false;const auto start=GetTickCount64();ULONGLONG qualifiedAt=0;LONG hold=0,retiredAt=0,disabledAt=0;bool retirement=false,disabled=false;
- while(!qualifiedAt||GetTickCount64()-qualifiedAt<(visibleMode?7000u:5000u)){
-  if(GetTickCount64()-start>15000)throw std::runtime_error("fixture cold-start15s cap");
-  const auto rawElapsed=qualifiedAt?GetTickCount64()-qualifiedAt:0;
+ const ULONGLONG cacheHold=GetEnvironmentVariableW(L"SFC_PRIVATE_MATERIAL_CACHE",nullptr,0)?20000u:0u;
+ while(!qualifiedAt||GetTickCount64()-qualifiedAt<cacheHold+(visibleMode?7000u:5000u)){
+  if(GetTickCount64()-start>15000+cacheHold)throw std::runtime_error("fixture bounded cold-start/hold cap");
+  const auto rawTime=qualifiedAt?GetTickCount64()-qualifiedAt:0;
+  const auto rawElapsed=rawTime>cacheHold?rawTime-cacheHold:0;
   const auto elapsed=visibleMode?(rawElapsed>2000?rawElapsed-2000:0):rawElapsed;
   if(elapsed<2000){hold=load(cmd.drawn);}
   else if(elapsed<3000){++snap.frame;row[2]=snap.frame;if(texturedMode){float x=0;memcpy(&x,&row[11],4);x+=.01f;memcpy(&row[11],&x,4);}}

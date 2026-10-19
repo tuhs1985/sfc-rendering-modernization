@@ -1,0 +1,33 @@
+# Remix backend ONLY. Save while the light-tuning runner is active to reload.
+# Invalid edits retain the last valid settings. Restart after256 accepted edits.
+[material]
+# BASELINE CONTROLS
+# 0=polished/sharp reflections;1=fully rough/matte. Does not add surface detail.
+roughness = 0.4
+# 0=illumination map off;1=provisional baseline;2=twice that emission. Range0..100.
+# Uses primary colour multiplied by its associated secondary image,not raw glow.
+illumination_strength = 5.0
+
+# OPTIONAL CONTROLS,ordered by likely usefulness. Defaults preserve neutral mapping.
+# 1: 0=dielectric painted hull;1=metal. Intermediate values blend those responses.
+# Increasing can darken diffuse and colour reflections;not a recovered SFC property.
+metallic = 0.2
+# 2: 0=round/isotropic highlights;nonzero stretches highlights in a surface direction.
+# Range-1..1. No recovered tangent map:experimental,not recommended for matching SFC.
+anisotropy = 0.5
+# OPTIONAL ARTISTIC ROUGHNESS MAP — not recovered SFC surface properties.
+# Off preserves current uniform roughness. Save to regenerate outside SFC.
+roughness_map_enabled = true
+# 0=uniform roughness above;1=derived entirely from texture brightness.
+roughness_map_strength = 0.9
+# Encoded luminance levels;white must exceed black. White=rough/matte.
+roughness_map_black = 0.0
+roughness_map_white = 1.0
+# true makes bright paint smoother instead. Does NOT flip the image.
+roughness_map_invert = false
+# >1 makes map midtones rougher;<1 smoother.
+roughness_map_gamma = 0.4
+# Independent opaque specular/reflectivity is NOT exposed by the pinned SDK.
+# Metallic and ray-sampling probabilities are NOT equivalent substitutes.
+# Texture tints are deliberately NOT exposed:the pinned SDK colour constants are
+# fallbacks for absent images,not multipliers on the images we are using.

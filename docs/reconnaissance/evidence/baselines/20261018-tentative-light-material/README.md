@@ -1,5 +1,11 @@
 # Tentative sponsor-selected Remix appearance baseline
 
+HISTORICAL / SUPERSEDED:see [current revision2 and attribution correction](../20261019-sponsor-temporary-appearance-r2/README.md).
+The quote below records the original observation;its illumination-map-specific
+causal attribution was NOT isolated. Sponsor subsequently identified possible
+metallic/material interaction. Do not carry the older CONFIRMED wording forward
+as proof that illumination maps alone caused the observed light contribution.
+
 Recorded2026-10-18 at22:56:25-04:00. **TENTATIVE**,not a physical calibration or
 claim that native SFC lighting/material response has been reproduced exactly.
 Full [lights.toml](lights.toml),[materials.toml](materials.toml) and source hashes/
