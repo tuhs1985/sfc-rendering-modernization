@@ -12,6 +12,9 @@ from pathlib import PurePosixPath
 import re
 import subprocess
 
+REMOVED_DESKTOP_PATH='docs/reconnaissance/images/20261016-live-camera-sponsor.png'
+REMOVED_DESKTOP_BLOB='cbe09de36100a48eab37d68bd1d4a3f607946585'
+
 def git(*args,stdin=None):
     return subprocess.check_output(['git',*args],input=stdin)
 
@@ -29,6 +32,7 @@ def audit(ref='refs/heads/master'):
     blocked=[];reviews=[]
     denied=re.compile(r'(?i)(?:^|/)(?:Game Assets|References|captures|dumps|extracted|scratch|node_modules|\.vs)(?:/|$)|\.(?:exe|dll|pdb|lib|obj|zip|7z|rar|iso|bin|trace|etl|rdc|mod|bmp|dds|key|pem|pfx|p12)$|(?:^|/)(?:\.env(?:\..+)?|credentials\.[^/]+|secrets\.[^/]+)$')
     for path in paths:
+        if path==REMOVED_DESKTOP_PATH:blocked.append(dict(path=path,rule='removed_private_desktop_path'))
         if denied.search(path) or path.startswith('artifacts/') and path!='artifacts/README.md':
             blocked.append(dict(path=path,rule='excluded_or_sensitive_historical_path'))
     rules={
@@ -50,6 +54,7 @@ def audit(ref='refs/heads/master'):
         raw=batch[offset:offset+size];offset+=size+1
         if len(raw)!=size:raise ValueError('Truncated Git blob')
         path=names[oid];extensions[PurePosixPath(path).suffix.lower()]+=1
+        if oid==REMOVED_DESKTOP_BLOB:blocked.append(dict(path=path,object=oid,rule='removed_private_desktop_blob'))
         maximum.append(dict(path=path,object=oid,bytes=size))
         if size>10*1024*1024:blocked.append(dict(path=path,object=oid,rule='blob_over10MiB',bytes=size))
         if raw.startswith(b'\x89PNG\r\n\x1a\n'):

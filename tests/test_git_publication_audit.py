@@ -42,5 +42,9 @@ class PublicationTests(unittest.TestCase):
     def test_explicit_branch_only(self):
         for ref in ('HEAD','--all','refs/heads/../private','refs/tags/v1'):
             with self.subTest(ref=ref),self.assertRaises(ValueError):audit.audit(ref)
+    def test_removed_desktop_path_cannot_be_reintroduced(self):
+        with patch.object(audit,'git',side_effect=fixture([(audit.REMOVED_DESKTOP_PATH,b'\x89PNG\r\n\x1a\nfixture')])):
+            result=audit.audit()
+        self.assertIn('removed_private_desktop_path',{row['rule'] for row in result['blocked']})
 
 if __name__=='__main__':unittest.main()

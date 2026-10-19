@@ -2,6 +2,14 @@
 
 ## Current disposition — sponsor approval2026-10-18
 
+Sanitization verified:12/12paired commit trees match exactly after removing only
+the approved image;authors,messages,timestamps and parent topology unchanged.
+Four commit IDs changed. Source masterf0751b5c38cadfe72bb5efbeaf87233aa2bbf901 is
+LOCAL-ONLY;sanitized counterpart74dece9f1a16e269b22b1f964ef504008c6dbd18.
+Working branch is now codex/github-sanitized. Normal origin push is explicitly
+restricted to refs/heads/codex/github-sanitized:refs/heads/master. Preserve this.
+Do not merge original master into it. See reviewed commit map/final audit inRun53.
+
 Sponsor: “ok, sanitize the history then, that image sadly has to go”. Remove
 docs/reconnaissance/images/20261016-live-camera-sponsor.png from every published
 commit. No cropping/replacement image;retain the remaining reviewed game/preview

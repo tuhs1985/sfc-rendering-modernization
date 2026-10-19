@@ -20,6 +20,7 @@
 *.tar
 *.tar.gz
 *.tgz
+*.bundle
 *.iso
 *.cab
 
@@ -63,6 +64,8 @@ scan_*.txt
 *.bak
 *.orig
 *.rej
+# Removed from publication history for unrelated desktop/chat content.
+/docs/reconnaissance/images/20261016-live-camera-sponsor.png
 *.swp
 *.swo
 *~

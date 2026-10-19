@@ -1,6 +1,21 @@
 # SFC Modernize — model handoff
 
-## NEWEST / AUTHORITATIVE CHECKPOINT — 2026-10-18 sanitized publication AUTHORIZED
+## NEWEST / AUTHORITATIVE CHECKPOINT — 2026-10-18 sanitized branch VERIFIED,publication pending
+
+- Active branch **codex/github-sanitized**,sanitized baseline74dece9;original local
+  masterf0751b5 remains unchanged/LOCAL-ONLY. DO NOT switch to or merge/push master.
+  Normal origin pushes explicitly map sanitized branch→GitHub master only.
+- Run53 records approved screenshot removal,verified bundle backup,12/12tree and
+  metadata/topology preservation,full sanitized audit:682blobs/9.01MB,no flagged
+  secrets/binaries,ten visually reviewed game/renderer images. Exact image/blob
+  absent even from sanitized clone's object store. Four commit IDs changed;map
+  retained. Original local history/Codex refs/backup bundles never published.
+- Runtime code and tentative light/material settings unchanged. Only screenshot
+  removed from current worktree;original is recoverable from local backup/history.
+- Exact next action:commit reviewed publication provenance/policy,verify PRIVATE
+  remote still empty,push only sanitized branch,independently verify remote history.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-18 sanitized publication AUTHORIZED
 
 - Run53:[sanitized publication](runs/2026-10-18-codex-sanitized-github-publication.md).
   Sponsor explicitly authorizes removing the desktop/chat screenshot from all

@@ -13,6 +13,11 @@ The publishing history is sanitized to exclude one desktop/chat screenshot;
 defines the safe branch/backup boundary. Never merge local unsanitized history
 back into the publishing branch or mirror all local refs.
 
+In the existing development workspace,the active branch is `codex/github-sanitized`
+and normal pushes publish it to GitHub `master`. The old local `master` is an
+unsanitized recovery reference,NOT a development/publishing branch. Fresh GitHub
+clones use the safe remote `master` normally. See HANDOFF before switching refs.
+
 A clone includes source/tests/docs/configuration,not a working game installation,
 downloaded SDK/runtime dependencies or bulk runtime evidence. Those stay local,
 must be obtained legitimately and qualified using the project runbooks. No grant
