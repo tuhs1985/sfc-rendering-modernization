@@ -1,6 +1,27 @@
 # SFC Modernize — model handoff
 
-## NEWEST / AUTHORITATIVE CHECKPOINT — 2026-10-18 sanitized branch VERIFIED,publication pending
+## NEWEST / AUTHORITATIVE CHECKPOINT — 2026-10-18 private publication VERIFIED
+
+- PRIVATE repository: https://github.com/tuhs1985/sfc-rendering-modernization;
+  default branch master. Independent GitHub clone verified b7371ef (13 commits);
+  final documentation receipt is pushed afterward. Resolve latest tip through Git.
+- Develop on **codex/github-sanitized**, tracking origin/master. Explicit normal
+  push maps only this branch to remote master; no tags. Original local master
+  f0751b5 and Codex refs are UNSANITIZED LOCAL recovery history. Never merge or
+  push those refs, or use --mirror/--all/force. Backups remain outside repository.
+- Approved screenshot path/blob absent throughout published history, independent
+  clone object store and GitHub blob API (HTTP404). All 12 original commit trees
+  and metadata preserved except that image; four IDs changed. Run53 contains map,
+  backup provenance and verification. Ten remaining game/renderer PNGs reviewed.
+- Published source/tests/docs/configuration and curated evidence only. No game
+  binaries/assets, SDK/runtime downloads, bulk captures, builds or credentials.
+- 262 tests PASS; read-only preflight PASS; both client hashes unchanged. Runtime
+  code/light/material settings unchanged. Existing engineering uncertainties stay
+  open; publication does not advance any technical milestone. No active runtime.
+- Exact next action: await the sponsor's next authorized engineering task on the
+  sanitized branch; there is no remaining publication hold.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-18 sanitized branch VERIFIED,publication pending
 
 - Active branch **codex/github-sanitized**,sanitized baseline74dece9;original local
   masterf0751b5 remains unchanged/LOCAL-ONLY. DO NOT switch to or merge/push master.

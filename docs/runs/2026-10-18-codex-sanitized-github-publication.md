@@ -99,3 +99,34 @@ hashes still4D65761D7DD69EF1504070261B81E9C200C0AF18105033E1C4D2222C62320C29;
 git diff --check PASS. Runtime/GPU qualifiers remain source/binary matched. No
 game/renderer launched. Next:commit only reviewed publication metadata/guards,
 audit that complete new ancestry,push explicit branch and independently verify.
+
+## Completed publication and independent verification
+
+Publication checkpoint b7371ef1e1d1489df8ea10b924e52369e14f35eb:
+13 commits, 691 unique blobs, 9,302,367 bytes; ancestry audit has no blocked or
+manual-text findings. Ten retained PNGs visually reviewed. Verified PRIVATE and
+empty before first push. Used scoped GitHub credential helper without displaying
+tokens or changing global credentials. Pushed only sanitized branch to master,
+normal fast-forward, no tags/other refs/force. GitHub default branch is master.
+
+Fresh actual GitHub clone artifacts/github-verify-20261018 independently matches
+tip, ancestry audit and 13-commit API count. Removed path absent throughout;
+removed blob absent from clone object store; GitHub blob API HTTP404. Private
+visibility confirmed again. Screenshot removed from active worktree but recoverable
+in original local master and external bundles. Do not share unsanitized backups.
+
+This final documentation-only receipt is committed and pushed afterward; final
+tip is verified through Git rather than embedding a self-referential commit hash.
+Prior 262-test PASS, preflight and client hashes remain valid: no runtime code,
+configuration or sponsor tuning changed. No game or renderer launched.
+
+Published source, tests, documentation, configuration, provenance and reviewed
+game/renderer images. Excluded proprietary game binaries/model/texture assets,
+SDK/runtime binaries, raw captures, builds, caches, temporary files, credentials
+and original local refs. Repository requires qualified local dependencies; it is
+not a self-contained game distribution. Existing technical limitations unchanged.
+
+Final expected state: clean codex/github-sanitized tracking origin/master, with
+only reviewed publication work committed. Original master f0751b5 unchanged and
+LOCAL-ONLY. Exact next action: await next sponsor-approved engineering task;
+never merge/push the original master into sanitized history.

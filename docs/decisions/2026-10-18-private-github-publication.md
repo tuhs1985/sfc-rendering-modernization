@@ -2,6 +2,12 @@
 
 ## Current disposition — sponsor approval2026-10-18
 
+**PUBLISHED / VERIFIED PRIVATE.** First remote checkpoint b7371ef (13 commits,
+default master) independently cloned and audited. Removed screenshot absent from
+all published history and GitHub blob API returns HTTP404 for its exact old blob.
+Final receipt commit follows; origin/master identifies latest documentation tip.
+No publication hold remains. Original master/backups remain local recovery only.
+
 Sanitization verified:12/12paired commit trees match exactly after removing only
 the approved image;authors,messages,timestamps and parent topology unchanged.
 Four commit IDs changed. Source masterf0751b5c38cadfe72bb5efbeaf87233aa2bbf901 is

@@ -1,6 +1,6 @@
 {
   "schema": "sfc.sanitized-publication-verification.v1",
-  "status": "SANITIZED_VERIFIED_READY_TO_PUSH",
+  "status": "PUBLISHED_AND_INDEPENDENTLY_VERIFIED",
   "repository": "https://github.com/tuhs1985/sfc-rendering-modernization",
   "visibility": "PRIVATE",
   "tree_verification": {
@@ -177,5 +177,173 @@
   "original_bundle": "C:/Project/SFC-Modernize Engine Backups/20261018-231607-before-github-sanitize.bundle",
   "complete_source_bundle": "C:/Project/SFC-Modernize Engine Backups/20261018-231607-publication-source-complete.bundle",
   "complete_source_bundle_sha256": "021DBDF16E55D2A9776039CDFF93C52ECB5CE623CB73B310013BCCFA6B615716",
-  "publication_note": "Remote verification will be recorded after actual push;this artifact is pre-push proof,not a completed upload claim"
+  "publication_note": "Only sanitized branch published. Original master, app-local refs and backups remain local. Runtime code/configs unchanged. No remaining publication privacy hold.",
+  "remote_verification": {
+    "verified_head": "b7371ef1e1d1489df8ea10b924e52369e14f35eb",
+    "verified_commits": 13,
+    "default_branch": "master",
+    "visibility": "PRIVATE",
+    "github_commits_api_count": 13,
+    "independent_clone": "artifacts/github-verify-20261018",
+    "forbidden_path_absent_from_full_history": true,
+    "forbidden_blob_absent_from_clone_object_store": true,
+    "forbidden_blob_github_api_status": 404,
+    "audit": {
+      "schema": "sfc.git-publication-audit.v1",
+      "ref": "refs/heads/master",
+      "head": "b7371ef1e1d1489df8ea10b924e52369e14f35eb",
+      "commits": 13,
+      "historical_paths": 615,
+      "unique_blobs": 691,
+      "total_blob_bytes": 9302367,
+      "largest_blobs": [
+        {
+          "path": "docs/reconnaissance/images/20261018-textured-blocky-runtime.png",
+          "object": "23e77ac129261f2484d6cbb98c86633eac14cc03",
+          "bytes": 1129706
+        },
+        {
+          "path": "docs/reconnaissance/images/20261018-emission-off-sponsor.png",
+          "object": "8433f56654864245bca320a8728b7f1162980de4",
+          "bytes": 1116773
+        },
+        {
+          "path": "docs/reconnaissance/images/20261017-calibration-frame720.png",
+          "object": "0bad7eaeea06f87f4470e3ed54e83c13d992d0f4",
+          "bytes": 284498
+        },
+        {
+          "path": "docs/reconnaissance/data/community-landmarks.json",
+          "object": "d4a50b82f97dfd3f0ce5afe3496377ed2252c3fb",
+          "bytes": 276377
+        },
+        {
+          "path": "docs/HANDOFF.md",
+          "object": "1767f0f8c067352359689d4f4a8a563cf332a3d7",
+          "bytes": 261585
+        },
+        {
+          "path": "docs/HANDOFF.md",
+          "object": "47cba60753c9cc52907ced0cf993eac05d48edc2",
+          "bytes": 260510
+        },
+        {
+          "path": "docs/HANDOFF.md",
+          "object": "c98e66f57dd660a561ddd597ed10c11990ae424f",
+          "bytes": 257903
+        },
+        {
+          "path": "docs/HANDOFF.md",
+          "object": "f231b67bf42ced0e3947c410ffeeab8795440ee8",
+          "bytes": 240114
+        },
+        {
+          "path": "docs/reconnaissance/images/20261016-preview-emissive-surface.png",
+          "object": "0da3de8446fc00e6c44f59d1ce85f96c69bfd00f",
+          "bytes": 169660
+        },
+        {
+          "path": "docs/HANDOFF.md",
+          "object": "6455d875122d63aa70b11f74c455c59595e629b3",
+          "bytes": 153339
+        }
+      ],
+      "blob_extensions": {
+        "": 2,
+        ".md": 295,
+        ".csv": 7,
+        ".json": 38,
+        ".txt": 1,
+        ".toml": 3,
+        ".png": 10,
+        ".cpp": 58,
+        ".ini": 4,
+        ".py": 145,
+        ".ps1": 71,
+        ".psm1": 4,
+        ".def": 6,
+        ".h": 42,
+        ".conf": 1,
+        ".kit": 1,
+        ".cmd": 3
+      },
+      "blocked": [],
+      "manual_text_review": [],
+      "images_to_review": [
+        {
+          "path": "docs/reconnaissance/images/20261016-fresh-scene-offline.png",
+          "object": "f5355e78ec4ab07331a51dca47968040baad470d",
+          "bytes": 82689,
+          "sha256": "e0ffed8fe4368647b229979d7098737e78068966a54d079efea9b2858a985f20"
+        },
+        {
+          "path": "docs/reconnaissance/images/20261016-preview-emissive-surface.png",
+          "object": "0da3de8446fc00e6c44f59d1ce85f96c69bfd00f",
+          "bytes": 169660,
+          "sha256": "908b84c54d1e8827448347ecd31f5302f6ef2f8008e54a1c2733e75fffcca45b"
+        },
+        {
+          "path": "docs/reconnaissance/images/20261016-preview-off.png",
+          "object": "dfd30fac5bffec6cb242a9cefc53ad0a76b759a2",
+          "bytes": 142579,
+          "sha256": "b9eb75d0f18b58be942affb5455178317adde68c4f13ff585ad5f127c7b1073c"
+        },
+        {
+          "path": "docs/reconnaissance/images/20261016-preview-provisional.png",
+          "object": "3ce9c5a598181e4d2bb4964c73a29c86697404c0",
+          "bytes": 149208,
+          "sha256": "aef7411652d3705d058ea1f02c62ec5a477bb3c94ed5f0b645f019d02159a360"
+        },
+        {
+          "path": "docs/reconnaissance/images/20261016-preview-quarter-light.png",
+          "object": "26ec0e7f0ea426ae5abc11173a90f1cca634af4a",
+          "bytes": 141201,
+          "sha256": "8d0088c97f9dc69282992f4a3d2fca27e6f4b170cc7f1b1f67ce14fcc00ee58d"
+        },
+        {
+          "path": "docs/reconnaissance/images/20261017-calibration-frame720.png",
+          "object": "0bad7eaeea06f87f4470e3ed54e83c13d992d0f4",
+          "bytes": 284498,
+          "sha256": "3413d7ff965993cc67836ede83eb3629ca5bc46ab9fcd6c72f130223078bcad1"
+        },
+        {
+          "path": "docs/reconnaissance/images/20261018-emission-off-sponsor.png",
+          "object": "8433f56654864245bca320a8728b7f1162980de4",
+          "bytes": 1116773,
+          "sha256": "8a5b5ef0550242a113a0ed3a1db5ad7e0462febcd9912443e2118872f1486d85"
+        },
+        {
+          "path": "docs/reconnaissance/images/20261018-prepared-layer-offline.png",
+          "object": "ab5d101445e39f3531daec8bed2a00b3d64e6c6c",
+          "bytes": 43405,
+          "sha256": "d53c870364ee3b85e1a5a77fba16dda4b79b5d65ea92ca603415cc25b39c4761"
+        },
+        {
+          "path": "docs/reconnaissance/images/20261018-remix-uv-corrected-runtime.png",
+          "object": "cc8c98f5e0e042c5f6c864e2e82942fb08d40bb3",
+          "bytes": 152656,
+          "sha256": "2143ec8f85d3c45bec82e308963e8e91e8c95dad3726fbc7cf6283aa2e8c6add"
+        },
+        {
+          "path": "docs/reconnaissance/images/20261018-textured-blocky-runtime.png",
+          "object": "23e77ac129261f2484d6cbb98c86633eac14cc03",
+          "bytes": 1129706,
+          "sha256": "d867102db533957aecd1de8fa0bbac91d9d1ac3db00b8967ce7c3635102a775f"
+        }
+      ],
+      "rules": [
+        "github_token",
+        "aws_access_key",
+        "private_key",
+        "slack_token",
+        "openai_or_anthropic_key",
+        "google_api_key",
+        "stripe_secret_key",
+        "credential_url"
+      ],
+      "scope": "Entire selected branch ancestry;not other refs,reflogs,ignored or unreachable data",
+      "limitations": "Heuristic detection only;visual PNG/privacy and provenance review required before publication"
+    },
+    "subsequent_documentation_commit": "Final receipt commit also pushed; resolve latest tip through origin/master."
+  }
 }
