@@ -1,0 +1,22 @@
+# HISTORICAL MINIMAL SCHEMA EXAMPLE;not the active tuning configuration.
+# Native lights are now identified and wired. Edit lights.toml with the prepared
+# light-tuning runner;there is no --lights-config option. This example is inactive.
+schema_version = 1
+backend = "remix_sdk_0_6_4"
+
+# One section per reviewed logical light ID from the discovery manifest.
+# Do not use a process pointer or assume native slot 0 is the sun.
+# Uncomment only after the ID exists and is qualified.
+# [[lights]]
+# id = "REPLACE_WITH_DISCOVERED_LOGICAL_ID"
+# enabled = true
+# intensity_multiplier = 1.0
+# color_multiplier = [1.0, 1.0, 1.0]
+# position_offset = [0.0, 0.0, 0.0]  # positional lights only
+# direction_override = [0.0, -1.0, 0.0]  # directional lights only;nonzero
+# radius = 0.1  # point/sphere only;provisional renderer units
+# angular_diameter_degrees = 0.53  # directional only
+# volumetric_multiplier = 1.0
+# raytracing = "renderer_default"
+# Current pinned public Remix API does NOT offer per-light non-raytraced lighting.
+# raytracing="off" is rejected,NOT silently ignored. enabled=false removes light.

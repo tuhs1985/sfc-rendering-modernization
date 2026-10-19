@@ -54,6 +54,10 @@ int wmain(int argc,wchar_t** argv){
     check_mesh(sfc_calibration::read(&calibration,snap)&&snap.frame==id.frame&&snap.owner[0][1]==999,
         "current-frame observation bypasses 30Hz throttle");
     check_mesh(snap.owner[0][47]==GetCurrentThreadId(),"calibration render-thread provenance");
+    if(scene.lightTuning){id.owner=2;id.elapsed=100000;++id.frame;
+        const auto old=scene.owners[1].sequence;
+        scene.observe(id,read,[]{return true;});
+        check_mesh(scene.owners[1].sequence>old,"tuning stream survives90seconds");}
     Sleep(100);check_mesh(scene.stop(),"worker drains and joins before unmap");
     check_mesh(!calibration.active,"calibration deactivated before producer storage removed");
     check_mesh(!scene.worker&&!scene.mapping&&!scene.view,"native scene handles closed");

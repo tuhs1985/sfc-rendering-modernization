@@ -49,8 +49,16 @@ def textured_footprint(predicted,actual):
 def main():
     p=argparse.ArgumentParser();p.add_argument('--execute',action='store_true');p.add_argument('--addon',action='store_true');p.add_argument('--visible',action='store_true');p.add_argument('--textured',action='store_true');p.add_argument('--slow',action='store_true');p.add_argument('--disconnect',action='store_true');p.add_argument('--qualify',nargs='+',type=Path)
     p.add_argument('--capture-image',action='store_true')
+    p.add_argument('--light-wiring',action='store_true')
+    p.add_argument('--light-types',action='store_true')
+    p.add_argument('--project-fill',action='store_true')
+    p.add_argument('--material-controls',action='store_true')
     # Parse the added optional offline image control alongside existing modes.
     args=p.parse_args()
+    if args.light_types:args.light_wiring=True
+    if args.project_fill:args.light_wiring=True
+    if args.material_controls:args.textured=True;args.addon=True
+    if args.light_wiring:args.textured=True;args.addon=True
     if args.capture_image and not (args.textured and args.addon):p.error('--capture-image requires --textured --addon')
     if args.textured:args.visible=True
     if args.visible and not args.addon:p.error('--visible requires --addon')
@@ -70,6 +78,23 @@ def main():
     association=next(a for a in original if a['owner']==2);row=association['record']
     (work/'fixture-row.bin').write_bytes(struct.pack('<96I',*row))
     receiver=FreshReceiver(work,textured=args.textured);channel=None;host=fixture=image_reader=None;error=None;streams=[];start=time.monotonic()
+    light_relay=None;light_changed=False;types_step=0;types_next=0
+    fill_step=0
+    material_step=0;material_relay=None
+    if args.material_controls:
+        from material_controls import Relay as MaterialRelay
+        material_path=work/'materials-test.toml'
+        material_path.write_text('[material]\nroughness=0.4\nillumination_strength=0\n')
+        material_relay=MaterialRelay(work,material_path)
+    type_sequence=['dome','sphere','rectangle','disk','cylinder','spot','directional']
+    if args.light_wiring:
+        from live_lights import Relay
+        (work/'gate').mkdir();control_path=work/'lights-test.toml'
+        # Private deterministic fixture, independent of sponsor's live edits.
+        control_path.write_text('schema_version = 1\nbackend = "remix_sdk_0_6_4"\nmaster_multiplier = 0.5\n'
+            '[[lights]]\nid = "native_directional_0"\n[[lights]]\nid = "native_directional_1"\n')
+        if args.project_fill:control_path.write_text(control_path.read_text()+'[[lights]]\nid = "project_fill"\ntype = "dome"\nenabled = true\nintensity_multiplier = 0.05\n')
+        light_relay=Relay(work,receiver,control_path)
     def output(name):f=(work/name).open('wb');streams.append(f);return f
     warned=False
     def check():
@@ -87,6 +112,8 @@ def main():
     try:
         env={**os.environ,**ENV,'SFC_REMIX_CALIBRATION_SCENE':receiver.name,'DXVK_LOG_PATH':str(work)}
         env.pop('SFC_REMIX_TEXTURED_SHIP',None)
+        env.pop('SFC_REMIX_LIGHT_WIRING',None)
+        if args.light_wiring:env['SFC_REMIX_LIGHT_WIRING']='1'
         if args.textured:env['SFC_REMIX_TEXTURED_SHIP']='1'
         if args.slow:env['SFC_PRIVATE_SLOW']='1'
         if args.disconnect:env['SFC_PRIVATE_DISCONNECT']='1'
@@ -122,6 +149,34 @@ def main():
         history=[];disconnected=False;displayed_at_disconnect=None
         while fixture.poll() is None:
             check();receiver.drain();history.append(telemetry(channel.address))
+            if material_relay:
+                material_relay.poll();host_text=(work/'host.log').read_text(errors='replace')
+                if material_step==0 and 'roughness=0.4 illumination=0' in host_text:
+                    material_path.write_text('[material]\nroughness=0.7\nillumination_strength=2\nmetallic=0.2\n');material_step=1
+                elif material_step==1 and 'roughness=0.7 illumination=2' in host_text:
+                    material_path.write_text('[material]\nroughness=99\n');material_step=2
+                elif material_step==2 and material_relay.rejected:
+                    material_path.write_text('[material]\nroughness=0.5\nillumination_strength=1\n');material_step=3
+            if light_relay:
+                light_relay.poll()
+                if not light_changed and 'NATIVE_LIGHT_APPLIED slot=1' in (work/'host.log').read_text(errors='replace'):
+                    control_path.write_text(control_path.read_text().replace('master_multiplier = 0.5','master_multiplier = 0.25'))
+                    light_changed=True
+                if args.project_fill and light_changed:
+                    text=(work/'host.log').read_text(errors='replace')
+                    if fill_step==0 and 'slot=1 enabled=1 radiance=0.0625' in text:
+                        control_path.write_text(control_path.read_text().replace('enabled = true','enabled = false'));fill_step=1
+                    elif fill_step==1 and 'PROJECT_LIGHT_APPLIED slot=2 enabled=0' in text:
+                        control_path.write_text(control_path.read_text().replace('enabled = false','enabled = true'));fill_step=2
+                if args.light_types and light_changed and time.monotonic()>=types_next:
+                    log_text=(work/'host.log').read_text(errors='replace')
+                    from light_shapes import TYPES
+                    previous_ok=types_step==0 or f'LIGHT_TYPE_APPLIED slot=1 type={TYPES[type_sequence[types_step-1]]}' in log_text
+                    if previous_ok and types_step<len(type_sequence):
+                        text='schema_version = 1\nbackend = "remix_sdk_0_6_4"\nmaster_multiplier = 0.25\n'
+                        text+='[[lights]]\nid = "native_directional_0"\ntype = "directional"\n'
+                        text+=f'[[lights]]\nid = "native_directional_1"\ntype = "{type_sequence[types_step]}"\nradius = 0.01\nwidth = 0.02\nheight = 0.02\nlength = 0.02\n'
+                        control_path.write_text(text);types_step+=1;types_next=time.monotonic()+.6
             marker=(work/'fixture.log').read_text(errors='replace')
             ready_to_disconnect='TEXTURED_PIXELS_PASS' in marker if args.textured else ('PRIVATE_MASK ' in marker or 'PRIVATE_CALLBACK_ACTIVE ' in marker)
             if args.disconnect and not disconnected and ready_to_disconnect:
@@ -138,6 +193,24 @@ def main():
         host.wait(timeout=8)
         if host.returncode and not disconnected:raise RuntimeError('Fresh host shutdown failed')
         log=(work/'fixture.log').read_text()
+        if material_relay:
+            host_text=(work/'host.log').read_text()
+            if material_step!=3 or not all(s in host_text for s in ('roughness=0.4 illumination=0','roughness=0.7 illumination=2','roughness=0.5 illumination=1')) or 'MATERIAL_REJECTED' in host_text:
+                raise RuntimeError('Material SDK hot-reload/last-good proof incomplete')
+            if not receiver.selected['textures']['secondary_applied']:raise RuntimeError('Fixture has no qualified product illumination')
+        if light_relay:
+            hostlog=(work/'host.log').read_text()
+            if not all(s in hostlog for s in ('slot=0 enabled=1 radiance=0.75,0.75,0.75','slot=1 enabled=1 radiance=0.125,0.125,0.125','slot=0 enabled=1 radiance=0.375,0.375,0.375','slot=1 enabled=1 radiance=0.0625,0.0625,0.0625')):
+                raise RuntimeError('Native light hot-reload SDK application missing')
+            if args.light_types:
+                from light_shapes import TYPES
+                applied=[int(m[1]) for m in re.finditer(r'LIGHT_TYPE_APPLIED slot=1 type=(\d+)',hostlog)]
+                if types_step!=len(type_sequence) or applied[-len(type_sequence):]!=[TYPES[k] for k in type_sequence]:
+                    raise RuntimeError('Not all requested Remix light types were exercised')
+            if args.project_fill:
+                states=[int(m[1]) for m in re.finditer(r'PROJECT_LIGHT_APPLIED slot=2 enabled=(\d+)',hostlog)]
+                if states!=[1,0,1] or 'PROJECT_LIGHT_APPLIED slot=2 enabled=1 radiance=0.05,0.05,0.05' not in hostlog:
+                    raise RuntimeError('Independent project dome on/off/on not confirmed')
         if args.visible and 'VISIBLE_CAMERA_PIXELS_PASS' not in log:raise RuntimeError('Visible game-camera pixel proof missing')
         if args.textured and ('TEXTURED_PIXELS_PASS' not in log or (not args.disconnect and 'STEADY_DISPLAY_PASS' not in log)):raise RuntimeError('Textured/cadence proof missing')
         if 'PRIVATE_GPU_FIXTURE_PASS' not in log or 'retired_draws_stopped=1 disabled_draws_stopped=1' not in log:raise RuntimeError('Private lifecycle proof incomplete')
@@ -186,6 +259,10 @@ def main():
             selected=asset,telemetry=final,mask_iou=iou,sfc_launched=False,game_callback_qualified=args.addon,source='synthetic current-frame publisher with recorded fixture geometry',
             host_exit=host.returncode,fixture_exit=fixture.returncode,history=history)
         result.update(slow_receiver=args.slow,renderer_disconnect=disconnected,visible_camera_verified=bool(args.visible and not args.textured),textured_delivery_verified=bool(args.textured),textured_footprint=footprint,output_size=[1920,1080] if args.textured else [256,256])
+        if light_relay:result.update(light_wiring_verified=True,light_controls=light_relay.summary(),synthetic_native_lights=True)
+        if args.light_types:result['light_types_verified']=type_sequence
+        if args.project_fill:result['project_fill_verified']=True
+        if material_relay:result.update(material_controls_verified=True,material_changes=material_relay.accepted,material_invalid_rejected=material_relay.rejected)
         result.update(prepared_image_verified=bool(image_result),prepared_image=image_result)
     except Exception as exc:error=str(exc);result=dict(result='PARTIAL',error=error,sfc_launched=False)
     finally:

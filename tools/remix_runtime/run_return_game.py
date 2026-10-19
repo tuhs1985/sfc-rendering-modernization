@@ -13,6 +13,7 @@ import time
 import winreg
 import winsound
 from return_channel import Channel,valid_name,visibility_result
+import run_report
 import depth_search_channel
 import broad_capture
 from run_return_fixture import ROOT,BIN,DLL,TEST,ENV,digest
@@ -106,7 +107,13 @@ def main():
     parser.add_argument('--observation-only',action='store_true',help='Use control-only host; do not start Remix or display triangle')
     parser.add_argument('--calibration',action='store_true',help='Opt-in current-frame semantic records paired with three depth snapshots')
     parser.add_argument('--capture-ship-image',action='store_true',help='One exact prepared textured ship-layer image;external readback only')
+    parser.add_argument('--capture-native-lights',action='store_true',help='Read-only bounded native light bank discovery;no lighting changes')
+    parser.add_argument('--light-wiring',action='store_true',help='Normal90s two-native-directional-light/config wiring check;not long tuning mode')
+    parser.add_argument('--light-tuning',action='store_true',help='Low-recording live controls until normal game exit;30minute tactical ceiling')
     args=parser.parse_args()
+    if args.light_tuning:args.light_wiring=True
+    if args.light_wiring:args.capture_native_lights=True
+    if args.capture_native_lights:args.textured_ship=True
     if args.capture_ship_image:args.textured_ship=True
     if args.textured_ship:args.visible_ship=True
     if args.visible_ship:args.private_ship=True
@@ -127,9 +134,12 @@ def main():
             recovered=recover_pending(game_running)
             if recovered:print('Recovered prior interrupted test: '+recovered,flush=True)
     preflight()
+    if args.capture_native_lights:
+        from light_discovery import require_qualification as require_light_qualification
+        light_qualification=require_light_qualification()
     if args.private_ship:
         from live_return import require_qualification as require_private_qualification
-        require_private_qualification(visible=args.visible_ship,textured=args.textured_ship,capture_image=args.capture_ship_image)
+        require_private_qualification(visible=args.visible_ship,textured=args.textured_ship,capture_image=args.capture_ship_image,light_wiring=args.light_wiring)
         for path in (live_bin/'ship_live_host.exe',live_bin/'SFCRemixReturn.dll'):
             if not path.is_file():raise RuntimeError('Private return build missing: '+str(path))
         q=json.loads((ROOT/'artifacts/remix-runtime/deps/present-calibration-qualification.json').read_text())
@@ -158,7 +168,9 @@ def main():
         reserve=384*1024*1024 #128MiB images+32MiB evidence,plus worst-case archive coexistence
         if broad_capture.storage_bytes()+reserve>broad_capture.OVERALL or shutil.disk_usage(ROOT).free<reserve:raise RuntimeError('Textured run/archive exceeds available10GB allowance or disk space')
     work=ROOT/'artifacts/remix-runtime/runs'/dt.datetime.now(dt.timezone.utc).strftime('%Y%m%d-%H%M%S-%f-in-game');work.mkdir()
-    start=time.monotonic();deadline=start+args.budget_seconds
+    run_report.save(work,dict(result='IN_PROGRESS',probe='REMIX-RETURN-001',stage='prepared',
+                              light_wiring=args.light_wiring,final_report_complete=False))
+    start=time.monotonic();deadline=start+(1980 if args.light_tuning else args.budget_seconds)
     original=critical_hashes(SOURCE);paths=launcher_paths();compat=compat_flags()
     host_exe=live_bin/'ship_live_host.exe' if args.private_ship else BIN/'return_host.exe'
     addon=live_bin/'SFCRemixReturn.dll' if args.private_ship else BIN/'SFCRemixReturn.dll'
@@ -166,6 +178,8 @@ def main():
     metadata={'probe':'REMIX-RETURN-001','utc':dt.datetime.now(dt.timezone.utc).isoformat(),'accepted_critical_before':original,'copied_critical_before':critical_hashes(TEST),'launcher_settings_before':paths,'source_compatibility':compat,'scene':'SDK default-material triangle with green sphere light; no SFC draw suppression','output_resources_bytes':2*256*256*4,'capture_seconds':90,'workflow_seconds':args.budget_seconds,'limits_bytes':32*1024*1024,'build_hashes':{p.name:digest(p) for p in (BIN/'return_host.exe',BIN/'return_launcher.exe',BIN/'SFCRemixReturn.dll',DLL)}}
     metadata['visibility_probe']={'enabled':inspect_requested,'scope':'early-present' if args.inspect_early_depth else 'late-overlay','max_samples':8,'minimum_interval_ms':1000,'read_only':True,'qualified_scene_depth':False}
     metadata['observation_only']=args.observation_only
+    metadata['light_tuning']=args.light_tuning
+    if args.light_tuning:metadata.update(capture_seconds=1800,workflow_seconds=1980,detail_policy='100 scene rows per owner;latest-only native bank;5second presentation samples')
     if args.private_ship:
         metadata.update(probe='REMIX-LIVE-RETURN-001',scene='Fresh selected ship rendered by SDK to PRIVATE game-side target;no backbuffer changes',output_resources_bytes=4*256*256*4)
         metadata['private_ship']={'strict_current_frame':True,'saved_template':False,'expected_visible_change':bool(args.visible_ship),'host_sha256':digest(host_exe),'addon_sha256':digest(addon)}
@@ -189,11 +203,13 @@ def main():
     if args.depth_snapshots:metadata['scene']='No Remix renderer; three paired read-only depth/color snapshots; no original draws suppressed'
     (work/'manifest.json').write_text(json.dumps(metadata,indent=2))
     host=launcher=controller=channel=None;receiver=None;streams=[];pid=None;error=None;normal=False;gate_clean=False;history=[];phase_results={};last=0;host_shutdown_expected=False;proxy_restored=None;image_reader=None;image_result=None
+    light_relay=None;tuning_exited=False
     rollback=work/'dxgi-original.rollback'
     config_backup=work/'ReShade.original.ini'
     def out(name):f=open(work/name,'wb');streams.append(f);return f
     def enforce():
         if receiver:receiver.drain()
+        if light_relay:light_relay.poll()
         size=sum(p.stat().st_size for p in work.rglob('*') if p.is_file())
         other=sum(p.stat().st_size for p in work.rglob('*') if p.is_file() and p.name!='broad.bin')
         if args.textured_ship:
@@ -220,6 +236,12 @@ def main():
             from live_return import FreshReceiver
             receiver=FreshReceiver(work,textured=args.textured_ship);host_env['SFC_REMIX_CALIBRATION_SCENE']=receiver.name
         host_env.pop('SFC_REMIX_TEXTURED_SHIP',None)
+        host_env.pop('SFC_REMIX_LIGHT_WIRING',None)
+        host_env.pop('SFC_LIGHT_TUNING',None)
+        if args.light_tuning:host_env['SFC_LIGHT_TUNING']='1'
+        if args.light_wiring:
+            from live_lights import Relay
+            light_relay=Relay(work,receiver,tuning=args.light_tuning);host_env['SFC_REMIX_LIGHT_WIRING']='1'
         if args.textured_ship:host_env['SFC_REMIX_TEXTURED_SHIP']='1'
         host=sp.Popen([str(host_exe),'--observe-only' if args.observation_only else str(DLL)],cwd=work,env=host_env,stdout=out('host.log'),stderr=sp.STDOUT,creationflags=sp.CREATE_NO_WINDOW)
         session=None;until=time.monotonic()+60
@@ -240,6 +262,10 @@ def main():
         env.pop('SFC_REMIX_DEPTH_OUTPUT',None)
         env.pop('SFC_REMIX_CALIBRATION_SCENE',None)
         env.pop('SFC_REMIX_CAPTURE_SHIP_IMAGE',None);env.pop('SFC_REMIX_CAPTURE_SHIP_IMAGE_DELAY_MS',None)
+        env.pop('SFC_NATIVE_LIGHT_DISCOVERY',None)
+        env.pop('SFC_LIGHT_TUNING',None)
+        if args.light_tuning:env['SFC_LIGHT_TUNING']='1'
+        if args.capture_native_lights:env['SFC_NATIVE_LIGHT_DISCOVERY']='1'
         if args.capture_ship_image:env.update(SFC_REMIX_CAPTURE_SHIP_IMAGE='1',SFC_REMIX_CAPTURE_SHIP_IMAGE_DELAY_MS='15000')
         if semantic_enabled:
             from present_calibration import Receiver
@@ -277,23 +303,30 @@ def main():
         metadata['gate_build_hashes']={p.name:digest(p) for p in (ROOT/'artifacts/m1/bin/m1_controller.exe',ROOT/'artifacts/m1/bin/m1_gate.dll')}
         (work/'manifest.json').write_text(json.dumps(metadata,indent=2))
         print('Enter the usual two-ship skirmish. Ships should look normal.',flush=True)
-        if args.private_ship:print('At the first beep,hold your ship and camera still. A later single beep means a small camera change;three beeps mean gently move/turn your ship. Two beeps mean exit normally.',flush=True)
+        if args.private_ship and not args.light_tuning:print('At the first beep,hold your ship and camera still. A later single beep means a small camera change;three beeps mean gently move/turn your ship. Two beeps mean exit normally.',flush=True)
         if inspect_requested:print('Read-only visibility check: keep both ships visible briefly. No ship will be replaced.',flush=True)
         if args.broad_capture:print('Broad recording: keep both ships in view briefly and play normally. About10seconds after tactical entry, two beeps request normal exit. No visual change expected.',flush=True)
         if args.depth_snapshots:print('Keep both ships visible. At first beep hold camera still; at the next single beep make one small camera rotation, then hold still. Two beeps mean exit normally. No visual change expected.',flush=True)
-        if args.textured_ship:print('Look for a TEXTURED ship copy beside an original,not magenta. It stays ON throughout this observation;stop only at the two-beep exit request. Small bounded delay,not frame-exact replacement.',flush=True)
+        if args.textured_ship and not args.light_tuning:print('Look for a TEXTURED ship copy beside an original,not magenta. It stays ON throughout this observation;stop only at the two-beep exit request. Small bounded delay,not frame-exact replacement.',flush=True)
+        if args.capture_native_lights and not args.light_tuning:print('Light discovery:play normally,move the camera and ship briefly,and fire when convenient. We record the game lights without changing them. Exit only at the two-beep request.',flush=True)
+        if args.light_wiring and not args.light_tuning:print('LIGHT WIRING:extra ship uses two observed native directional lights with ratio controls. Native game unchanged. Normal90s test,not extended tuning;exit at two-beep cue.',flush=True)
         if args.capture_ship_image:print('One prepared-image snapshot will be saved automatically. Focus the extra ship and hold the camera briefly once it appears;no manual screenshot or timestamp needed.',flush=True)
-        else:print('Look for a MAGENTA ship copy BESIDE the selected original ship,usually to its left at the starting view;it may flash. This is NOT a corner window. Original ships stay normal.' if args.visible_ship else ('No visible change expected;fresh ship output is tested privately,originals stay normal.' if args.private_ship else ('No triangle or ship changes expected; this is a read-only check.' if args.observation_only else 'A small green animated triangle will appear in a black square at upper right. It turns off/on/off automatically.')),flush=True)
-        print('Play normally. Please exit only after the two-beep exit request.',flush=True)
+        elif not args.textured_ship:print('Look for a MAGENTA ship copy BESIDE the selected original ship,usually to its left at the starting view;it may flash. This is NOT a corner window. Original ships stay normal.' if args.visible_ship else ('No visible change expected;fresh ship output is tested privately,originals stay normal.' if args.private_ship else ('No triangle or ship changes expected; this is a read-only check.' if args.observation_only else 'A small green animated triangle will appear in a black square at upper right. It turns off/on/off automatically.')),flush=True)
+        print('Tune the textured extra ship;exit SFC normally whenever finished.' if args.light_tuning else 'Play normally. Please exit only after the two-beep exit request.',flush=True)
         controller_exe=ROOT/'artifacts/m1/bin/m1_controller.exe';gate=ROOT/'artifacts/m1/bin/m1_gate.dll'
         gate_dir=work/'gate';gate_dir.mkdir();config=gate_dir/'component.ini'
         config.write_text('[m1]\nOutputDirectory='+str(gate_dir)+'\nControllerPath='+str(controller_exe)+'\nMaxSeconds=90\nStopOnBurst=1\nMaxFrames=1\nMaxEvents=1\nMaxOwners=1\nWarningBytes=16777216\nHardBytes=33554432\n',encoding='ascii')
         if semantic_enabled:
             gate=ROOT/'artifacts/m1/bin/m1_component.dll'
+            if args.capture_native_lights:
+                gate=ROOT/'artifacts/remix-runtime/native-light-tests/m1_light_component.dll'
+                metadata['native_lights']={'probe':'NATIVE-LIGHTS-001','qualification':light_qualification,'hypothesis':'three lights and/or global illumination;UNCONFIRMED'}
+                (work/'manifest.json').write_text(json.dumps(metadata,indent=2))
             config.write_text('[m1]\nOutputDirectory='+str(gate_dir)+'\nControllerPath='+str(controller_exe)+
-                '\nMaxSeconds='+('90' if args.private_ship else '24')+'\nStopOnBurst=0\nMaxFrames=120\nMaxEvents=10000\nMaxOwners=32\nWarningBytes=16777216\nHardBytes=33554432'+
+                '\nMaxSeconds='+('1800' if args.light_tuning else '90' if args.private_ship else '24')+'\nStopOnBurst=0\nMaxFrames=120\nMaxEvents=10000\nMaxOwners=32\nWarningBytes=16777216\nHardBytes=33554432'+
                 '\nEnableGeometryHook=0\nEnableWrapperObservation=1\nEnableMeshExport=1\nEnableTextureReferences=1\nEnablePrivateCopy=0\nLiveChannel='+receiver.name+'\n',encoding='ascii')
         controller_args=[str(controller_exe),'--pid',str(pid),'--dll',str(gate),'--config',str(config),'--max-seconds','24' if args.calibration else '90','--stop-on-burst','0' if semantic_enabled else '1','--already-loaded','0','--unload-after-stop','1']
+        if args.light_tuning:controller_args[controller_args.index('--max-seconds')+1]='1800'
         if semantic_enabled:controller_args+=['--gate-timeout-seconds','90']
         controller=sp.Popen(controller_args,cwd=ROOT,stdout=out('gate-controller.log'),stderr=sp.STDOUT,creationflags=sp.CREATE_NO_WINDOW)
         if semantic_enabled:wait_live_gate(pid,controller,enforce)
@@ -314,13 +347,17 @@ def main():
         channel.set('armed',1);channel.set('enabled',int(not args.observation_only));winsound.Beep(880,200);active=time.monotonic();phase=-1
         if args.capture_ship_image:image_reader=sp.Popen([str(live_bin/'ship_image_reader.exe'),session,str(work)],cwd=work,stdout=out('ship-image-reader.log'),stderr=sp.STDOUT,creationflags=sp.CREATE_NO_WINDOW)
         camera_cued=False;motion_cued=False
-        while time.monotonic()-active<(10.1 if args.broad_capture else (20 if args.depth_snapshots else 90)):
+        if args.light_tuning:print('TUNING:edit tools/remix_runtime/config/lights.toml and SAVE. Changes apply live. Exit SFC normally when finished;30minute safety ceiling. No timed motion instructions.',flush=True)
+        tuning_exited=False
+        while time.monotonic()-active<(1800 if args.light_tuning else 10.1 if args.broad_capture else (20 if args.depth_snapshots else 90)):
             enforce();elapsed=time.monotonic()-active;state=channel.snapshot()
+            if args.light_tuning and launcher.poll() is not None:
+                tuning_exited=True;break
             if args.depth_snapshots and elapsed>=5 and not camera_cued:
                 winsound.Beep(1000,200);print('Small camera rotation now, then hold still; keep both ships visible.',flush=True);camera_cued=True
-            if args.private_ship and not args.capture_ship_image and elapsed>=10 and not camera_cued:
+            if args.private_ship and not args.light_tuning and not args.capture_ship_image and elapsed>=10 and not camera_cued:
                 winsound.Beep(1000,200);print('Make one small camera change now,then hold it.',flush=True);camera_cued=True
-            if args.private_ship and not args.capture_ship_image and elapsed>=20 and not motion_cued:
+            if args.private_ship and not args.light_tuning and not args.capture_ship_image and elapsed>=20 and not motion_cued:
                 for _ in range(3):winsound.Beep(1100,150)
                 print('Gently accelerate and turn your ship;keep playing until the two-beep exit cue.',flush=True);motion_cued=True
             next_phase=observation_phase(elapsed,continuous=args.textured_ship)
@@ -331,7 +368,7 @@ def main():
             if state['error']:raise RuntimeError('Image component reported an error; original rendering retained')
             if launcher.poll() is not None:raise RuntimeError('Game exited before the requested tactical observation completed')
             if host.poll() is not None and not host_shutdown_expected:raise RuntimeError('Renderer exited unexpectedly; original rendering retained')
-            if elapsed-last>.25:
+            if elapsed-last>(5 if args.light_tuning else .25):
                 item={'seconds':elapsed,'phase':phase,**state}
                 if args.private_ship:
                     from live_return import telemetry
@@ -365,7 +402,9 @@ def main():
             gate_text=(work/'gate-controller.log').read_text(errors='replace')
             summary=json.loads((gate_dir/'M1-A-summary.json').read_text(encoding='utf-8-sig')) if (gate_dir/'M1-A-summary.json').exists() else {}
             gate_clean=controller.poll()==0 and summary.get('gate_activated') is True and all(s in gate_text for s in ('component_state=removed','hook_bytes_restored=true','component_unloaded=true'))
-            if not gate_clean:raise RuntimeError('Semantic component removal/unload not confirmed; exit normally')
+            # On normal process exit Windows reclaims target memory. This is NOT
+            # evidence of a controlled live-hook restoration/unload.
+            if not gate_clean and not (args.light_tuning and tuning_exited and controller.poll()==8):raise RuntimeError('Semantic component removal/unload not confirmed; exit normally')
         print('Depth capture window finished — please exit SFC normally now; validation follows after exit.' if args.depth_snapshots else 'TEST COMPLETE — please exit SFC normally now.',flush=True);winsound.Beep(660,200);winsound.Beep(660,200)
         until=min(deadline,time.monotonic()+30)
         while launcher.poll() is None and time.monotonic()<until:enforce();time.sleep(.1)
@@ -434,7 +473,20 @@ def main():
             if not error:result['result']='FRESH_PRIVATE_LEASE_ACCEPTED_REVIEW_REQUIRED' if private_stats and private_stats['drawn'] else 'NO_CURRENT_FRAME_RETURN_ADDITIONAL_BOUNDED_EVIDENCE_REQUIRED'
             if not error and args.visible_ship:result['result']='VISIBLE_SHIP_SUBMITTED_SPONSOR_REVIEW_REQUIRED' if final and final['drawCount'] else 'NO_VISIBLE_SHIP_SUBMISSIONS_PARTIAL'
         result['visibility_observation']=visibility
+        if args.light_tuning:result['cleanup_mode']='process-exit reclamation' if tuning_exited else 'controlled timed removal'
         if args.capture_ship_image:result['prepared_ship_image']=image_result
+        if args.capture_native_lights and not args.light_tuning:
+            try:
+                from light_discovery import analyze as analyze_lights
+                lights=analyze_lights(work/'gate/native-lights.bin')
+                expected=[int(receiver.name[-32:][i:i+8],16) for i in range(0,32,8)]
+                if lights['session_words']!=expected:raise ValueError('Light discovery session mismatch')
+                worker=json.loads((work/'gate/native-lights-summary.json').read_text())
+                if worker['io_failed'] or worker['queued'] or worker['written']!=lights['records']:raise ValueError('Light discovery worker incomplete')
+                result['native_lights']=lights
+            except (ValueError,OSError) as exc:
+                error=(error+'; ' if error else '')+str(exc);result['error']=error;result['result']='PARTIAL'
+        if light_relay:result['light_controls']=light_relay.summary()
         result['observation_only']=args.observation_only
         result['expanded_search']=search
         result['broad_proxy_restored']=proxy_restored
@@ -455,7 +507,12 @@ def main():
             try:result['broad_capture']=broad_capture.save_analysis(work/'broad.bin')
             except ValueError as exc:error=(error+'; ' if error else '')+str(exc);result['error']=error;result['result']='PARTIAL'
         if search:result['expanded_search_verdict']=depth_search_channel.verdict(search)
-        (work/'result.json').write_text(json.dumps(result,indent=2))
+        result['final_report_complete']=True
+        run_report.save(work,result)
     print('Evidence: '+str(work),flush=True)
     if error:raise RuntimeError(error)
-if __name__=='__main__':main()
+if __name__=='__main__':
+    try:main()
+    except BaseException as exc:
+        run_report.failure(exc)
+        raise

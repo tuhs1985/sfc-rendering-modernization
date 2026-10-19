@@ -47,7 +47,9 @@ int wmain(int argc,wchar_t** argv){
     }
     std::cout<<"VERIFIED_CHILD pid="<<child.dwProcessId<<" suspended_path_match=1 disk_sha_match=1 startup_import_only=1\n";
     if(ResumeThread(child.hThread)==static_cast<DWORD>(-1))throw std::runtime_error("resume verified client");resumed=true;CloseHandle(child.hThread);child.hThread=nullptr;
-    const auto waited=WaitForSingleObject(child.hProcess,fixture?60000:300000);
+    wchar_t tuning[4]{};
+    const bool lightTuning=GetEnvironmentVariableW(L"SFC_LIGHT_TUNING",tuning,4)==1&&tuning[0]==L'1';
+    const auto waited=WaitForSingleObject(child.hProcess,fixture?60000:lightTuning?1980000:300000);
     if(waited==WAIT_OBJECT_0){DWORD code=1;GetExitCodeProcess(child.hProcess,&code);std::cout<<"CHILD_EXIT code="<<code<<"\n";result=static_cast<int>(code);}
     else{std::cout<<"CHILD_WAIT_LIMIT original_game_left_running="<<!fixture<<"\n";result=120;}
   }catch(const std::exception& e){std::cout<<"LAUNCH_FAILED "<<e.what()<<" win32="<<GetLastError()<<"\n";if(child.hProcess&&!resumed)TerminateProcess(child.hProcess,97);}

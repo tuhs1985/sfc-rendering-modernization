@@ -21,20 +21,27 @@ LIVE_SOURCES=('remix_texture_coordinates.h','ship_image_snapshot.h','ship_image_
     'ship_live_gpu_fixture.cpp','ship_triplet_wire.h','ship_triplet_consumer.h','ship_triplet_compositor.h',
     'return_addon.cpp','build_live_return.ps1','run_return_game.py','start_return_image_session.ps1',
     'live_return.py','qualify_live_return.py','run_coverage_probe.py','textured_asset.py','ship_textured_asset.h','../m1_component/m1_present_calibration.h')
+LIVE_SOURCES+=('remix_light_wire.h','remix_live_lights.h','live_lights.py','light_controls.py','run_report.py','start_light_wiring_session.ps1','../m1_component/native_light_snapshot.h')
+LIVE_SOURCES+=('start_light_tuning_session.ps1',)
+LIVE_SOURCES+=('return_launcher.cpp','build_tuning_launcher.ps1')
+LIVE_SOURCES+=('light_shapes.py','remix_light_shapes.h')
+LIVE_SOURCES+=('material_controls.py','remix_material_controls.h')
 QUALIFICATION=ROOT/'artifacts/remix-runtime/deps/live-return-qualification.json'
 def source_hashes():return {n:digest(Path(__file__).parent/n) for n in LIVE_SOURCES}
 def binary_hashes():
     folder=ROOT/'artifacts/remix-runtime/live-return-bin'
     return {n:digest(folder/n) for n in ('ship_live_host.exe','ship_live_gpu_fixture.exe','SFCRemixReturn.dll','ship_image_reader.exe')}
-def require_qualification(visible=False,textured=False,capture_image=False):
+def require_qualification(visible=False,textured=False,capture_image=False,light_wiring=False):
     q=json.loads(QUALIFICATION.read_text())
     if q.get('result')!='OFFLINE_PRIVATE_RETURN_QUALIFIED' or q.get('source_hashes')!=source_hashes() or q.get('binaries')!=binary_hashes():raise ValueError('Private return offline qualification stale/missing')
     if visible and not q.get('visible_camera_qualified'):raise ValueError('Visible ship camera/pixel qualification missing')
     if textured and not q.get('textured_delivery_qualified'):raise ValueError('Textured full-resolution/buffered qualification missing')
     if capture_image and not q.get('prepared_image_qualified'):raise ValueError('Prepared ship image qualification missing')
+    if light_wiring and not (q.get('light_wiring_qualified') and q.get('light_types_qualified') and q.get('project_fill_qualified')):raise ValueError('Native light/config/type/project-fill qualification missing')
+    if textured and not q.get('material_controls_qualified'):raise ValueError('Material/illumination qualification missing')
     return q
 def qualify(folders):
-    hashes=source_hashes();binaries=binary_hashes();seen=set();evidence=[];image_qualified=False
+    hashes=source_hashes();binaries=binary_hashes();seen=set();evidence=[];image_qualified=False;light_qualified=False;types_qualified=False;fill_qualified=False;material_qualified=False
     for folder in folders:
         folder=Path(folder).resolve()
         if folder.parent!=(ROOT/'artifacts/remix-runtime/runs').resolve():raise ValueError('Exact private fixture required')
@@ -42,6 +49,10 @@ def qualify(folders):
         if r.get('result') not in ('OFFLINE_FRESH_PRIVATE_RETURN_PASS','OFFLINE_PROXY_PRIVATE_RETURN_PASS') or m.get('source_hashes')!=hashes or m.get('binaries')!=binaries:raise ValueError('Fixture evidence/source mismatch')
         if r.get('sfc_launched') or r.get('fixture_exit') or r['telemetry']['failed']:raise ValueError('Fixture failed/unsafe')
         if r.get('prepared_image_verified'):image_qualified=True
+        if r.get('light_wiring_verified'):light_qualified=True
+        if r.get('light_types_verified')==['dome','sphere','rectangle','disk','cylinder','spot','directional']:types_qualified=True
+        if r.get('project_fill_verified'):fill_qualified=True
+        if r.get('material_controls_verified'):material_qualified=True
         if r.get('textured_delivery_verified'):seen.add('textured_disconnect' if r.get('renderer_disconnect') else ('textured_slow' if r.get('slow_receiver') else 'textured'))
         elif r.get('visible_camera_verified') and r.get('mask_iou',0)>=.95:seen.add('visible')
         elif r.get('renderer_disconnect'):seen.add('disconnect')
@@ -52,7 +63,7 @@ def qualify(folders):
         elif r.get('mask_iou',0)>=.95:seen.add('direct')
         evidence.append(str(folder.relative_to(ROOT)))
     if not {'direct','callback','slow','disconnect'}.issubset(seen) or seen-{'direct','callback','slow','disconnect','visible','textured','textured_slow','textured_disconnect'}:raise ValueError('Four distinct private gates required')
-    QUALIFICATION.write_text(json.dumps(dict(result='OFFLINE_PRIVATE_RETURN_QUALIFIED',source_hashes=hashes,binaries=binaries,evidence=evidence,visible_camera_qualified='visible' in seen,textured_delivery_qualified={'textured','textured_slow','textured_disconnect'}.issubset(seen),prepared_image_qualified=image_qualified),indent=2))
+    QUALIFICATION.write_text(json.dumps(dict(result='OFFLINE_PRIVATE_RETURN_QUALIFIED',source_hashes=hashes,binaries=binaries,evidence=evidence,visible_camera_qualified='visible' in seen,textured_delivery_qualified={'textured','textured_slow','textured_disconnect'}.issubset(seen),prepared_image_qualified=image_qualified,light_wiring_qualified=light_qualified,light_types_qualified=types_qualified,project_fill_qualified=fill_qualified,material_controls_qualified=material_qualified),indent=2))
     return require_qualification()
 
 class FreshReceiver(Receiver):
@@ -111,7 +122,7 @@ class FreshReceiver(Receiver):
                 model_name=mesh['refs']['model_filename'],packet_sha256=hashlib.sha256(source.read_bytes()).hexdigest(),
                 references_sha256=hashlib.sha256(source.with_suffix('.json').read_bytes()).hexdigest(),
                 native_mesh_sha256=hashlib.sha256(native).hexdigest(),seed_sha256=hashlib.sha256(seed).hexdigest(),
-                mesh=manifest,initial_offset=offset,material='Original primary images,surface color only;whole-hull emission off;provisional white directional inspection light;secondary roles unresolved' if self.textured else 'SDK opaque emissive magenta diagnostic,not recovered appearance',textures=texture,saved_template_used=False)
+                mesh=manifest,initial_offset=offset,material='Original primary colour plus provisional primary*secondary illumination;configurable Remix-only materials' if self.textured else 'SDK opaque emissive magenta diagnostic,not recovered appearance',textures=texture,saved_template_used=False)
             (self.folder/'fresh-asset.json').write_text(json.dumps(self.selected,indent=2))
             pending=self.folder/'live-asset.pending';pending.write_bytes(seed);pending.replace(self.folder/'live-asset.seed')
             break

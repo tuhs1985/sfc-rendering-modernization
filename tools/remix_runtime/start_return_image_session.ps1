@@ -1,7 +1,10 @@
 # Run only when ready to play, from the established elevated testing parent.
-param([switch]$InspectVisibility,[switch]$InspectEarlyDepth,[switch]$ObservationOnly,[switch]$SearchDepth,[switch]$BroadCapture,[switch]$DepthSnapshots,[switch]$Calibration,[switch]$PrivateShip,[switch]$VisibleShip,[switch]$TexturedShip,[switch]$CaptureShipImage)
+param([switch]$InspectVisibility,[switch]$InspectEarlyDepth,[switch]$ObservationOnly,[switch]$SearchDepth,[switch]$BroadCapture,[switch]$DepthSnapshots,[switch]$Calibration,[switch]$PrivateShip,[switch]$VisibleShip,[switch]$TexturedShip,[switch]$CaptureShipImage,[switch]$CaptureNativeLights,[switch]$LightWiring,[switch]$LightTuning)
 $ErrorActionPreference='Stop'
+if($LightTuning){$LightWiring=$true}
 if($CaptureShipImage){$TexturedShip=$true}
+if($CaptureNativeLights){$TexturedShip=$true}
+if($LightWiring){$CaptureNativeLights=$true;$TexturedShip=$true}
 if($TexturedShip -and ($PrivateShip -or $VisibleShip)){throw 'Choose TexturedShip alone'}
 if($TexturedShip){$VisibleShip=$true}
 if($VisibleShip -and $PrivateShip){throw 'Choose VisibleShip or PrivateShip,not both'}
@@ -26,6 +29,9 @@ if($PSVersionTable.PSVersion.Major -lt 7){
     if($BroadCapture){$forward+='-BroadCapture'}
     if($DepthSnapshots){$forward+='-DepthSnapshots'}
     if($Calibration){$forward+='-Calibration'}
+    if($CaptureNativeLights){$forward+='-CaptureNativeLights'}
+    if($LightWiring){$forward+='-LightWiring'}
+    if($LightTuning){$forward+='-LightTuning'}
     if($CaptureShipImage){$forward+='-CaptureShipImage'}elseif($TexturedShip){$forward+='-TexturedShip'}elseif($VisibleShip){$forward+='-VisibleShip'}elseif($PrivateShip){$forward+='-PrivateShip'}
     & $modern @forward
     if($LASTEXITCODE -ne 0){throw 'Prepared returned-image workflow failed; evidence retained'}
@@ -36,13 +42,18 @@ Import-Module (Join-Path $root 'tools/m0_probe/ProbeRunnerPolicy.psm1') -Force
 $identity=[Security.Principal.WindowsIdentity]::GetCurrent();$principal=[Security.Principal.WindowsPrincipal]::new($identity)
 [void](Test-ProbeElevation -IsElevated $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator) -ElevateProbeRequested $false)
 $clock=[Diagnostics.Stopwatch]::StartNew()
+if($LightTuning){& (Join-Path $PSScriptRoot 'build_tuning_launcher.ps1')}
 if($PrivateShip){& (Join-Path $PSScriptRoot 'build_live_return.ps1')}else{& (Join-Path $PSScriptRoot 'build_return_probe.ps1')}
 & (Join-Path $root 'tools/m1_component/build_m1_controller.ps1')
+if($CaptureNativeLights){& (Join-Path $root 'tools/m1_component/build_light_discovery.ps1')}
 # Calibration uses its offline-qualified semantic binary. Do not consume the
 # gameplay workflow budget rebuilding every unrelated observer experiment.
 $remaining=[Math]::Min(285,[Math]::Floor(300-$clock.Elapsed.TotalSeconds))
 if($remaining -lt 120){throw 'Build consumed prepared workflow budget; no game launched'}
 $runArgs=@((Join-Path $PSScriptRoot 'run_return_game.py'),'--execute','--budget-seconds',[string]$remaining)
+if($CaptureNativeLights){$runArgs+='--capture-native-lights'}
+if($LightWiring){$runArgs+='--light-wiring'}
+if($LightTuning){$runArgs+='--light-tuning'}
 if($InspectVisibility){$runArgs+='--inspect-visibility'}
 if($InspectEarlyDepth){$runArgs+='--inspect-early-depth'}
 if($ObservationOnly){$runArgs+='--observation-only'}

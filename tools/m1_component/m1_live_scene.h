@@ -1,6 +1,9 @@
 #pragma once
 #include "m1_live_bridge.h"
 #include "m1_present_calibration.h"
+#ifdef SFC_NATIVE_LIGHT_DISCOVERY
+#include "native_light_observer.h"
+#endif
 
 namespace sfc_m1 {
 constexpr DWORD kSceneBytes=16*1024*1024,kSceneOwners=32,kSceneRevisions=64;
@@ -31,7 +34,11 @@ struct LiveScene {
     DWORD capture_attempts=0,capture_failures=0,owner_overflow=0,dropped=0,invalid=0;
     LONGLONG max_capture_ticks=0;LARGE_INTEGER frequency{};
     volatile LONG enabled=0;
+    bool lightTuning=false;
     sfc_calibration::Mailbox* calibration=nullptr;
+#ifdef SFC_NATIVE_LIGHT_DISCOVERY
+    sfc_native_lights::Observer lights;
+#endif
     bool start(const std::wstring& name,const std::wstring& directory) {
         if(!LiveBridge::name_ok(name) || worker)return false;
         mapping=OpenFileMappingW(FILE_MAP_READ|FILE_MAP_WRITE,FALSE,name.c_str());
@@ -51,6 +58,16 @@ struct LiveScene {
             InterlockedExchange(&calibration->active,1);
         }
         QueryPerformanceFrequency(&frequency);
+        wchar_t tuningMode[4]{};
+        lightTuning=GetEnvironmentVariableW(L"SFC_LIGHT_TUNING",tuningMode,4)==1&&tuningMode[0]==L'1';
+#ifdef SFC_NATIVE_LIGHT_DISCOVERY
+        wchar_t lightMode[4]{};
+        if(GetEnvironmentVariableW(L"SFC_NATIVE_LIGHT_DISCOVERY",lightMode,4)==1&&lightMode[0]==L'1'){
+            std::array<sfc_native_lights::Word,4> words{};
+            std::memcpy(words.data(),h+4,16);lights.start(words.data());
+            lights.tuning=lightTuning;
+        }
+#endif
         // Fault in fixed storage before hook installation, not during first asset.
         for(auto& a:assets){a.mesh.positions={};a.mesh.corners={};a.mesh.polygons={};a.refs={};}
         InterlockedExchange(&enabled,1);worker=CreateThread(nullptr,0,run,this,0,nullptr);
@@ -60,6 +77,9 @@ struct LiveScene {
         if(view){UnmapViewOfFile(view);view=nullptr;}if(mapping){CloseHandle(mapping);mapping=nullptr;}
         if(stop_event){CloseHandle(stop_event);stop_event=nullptr;}}
     bool stop(){InterlockedExchange(&enabled,0);
+#ifdef SFC_NATIVE_LIGHT_DISCOVERY
+        InterlockedExchange(&lights.active,0);
+#endif
         if(calibration)InterlockedExchange(&calibration->active,0);
         if(!worker){close();return true;}
         SetEvent(stop_event);if(WaitForSingleObject(worker,5000)!=WAIT_OBJECT_0)return false;
@@ -76,7 +96,7 @@ struct LiveScene {
     }
     template<class Read,class Validate>
     void observe(const MeshIdentity& id,Read read,Validate valid){
-        if(!enabled || id.elapsed>90000 || id.caller!=0x0042E55D)return;
+        if(!enabled || id.elapsed>(lightTuning?1800000u:90000u) || id.caller!=0x0042E55D)return;
         std::array<DWORD,3> lod{};
         if(!read(id.visual+0x11c,lod.data(),12)){++invalid;return;}
         DWORD index=0;for(;index<owner_count;++index)if(owners[index].identity.owner==id.owner)break;
@@ -91,6 +111,9 @@ struct LiveScene {
         }
         auto& o=owners[index];
         if(o.retired)return; // owner epoch must be newly qualified by existing owner table
+#ifdef SFC_NATIVE_LIGHT_DISCOVERY
+        lights.observe(id,read,valid);
+#endif
         if(!o.identity.same_epoch(id) || o.lod!=lod){o.identity=id;o.lod=lod;o.revision=0;o.failed=false;o.last_ms=0;}
         if(!o.revision && !o.failed && id.frame!=last_capture_frame){
             if(revisions==(calibration?8:kSceneRevisions)){o.failed=true;++capture_failures;}
@@ -132,8 +155,30 @@ struct LiveScene {
         std::array<DWORD,32> last{},counts{};std::array<DWORD,4> generations{};
         DWORD bytes=0,records=0,transfers=0;bool failed=false,saturated=false;
         std::ofstream log(b.output+L"\\LIVE-SCENE-001-updates.jsonl",std::ios::binary|std::ios::trunc);
+#ifdef SFC_NATIVE_LIGHT_DISCOVERY
+        const bool lightRequested=InterlockedCompareExchange(&b.lights.active,0,0)!=0;
+        std::ofstream lightFile;
+        if(lightRequested){lightFile.open(b.output+L"\\native-lights.bin",std::ios::binary|std::ios::trunc);
+            if(!lightFile){b.lights.ioFailed=true;InterlockedExchange(&b.lights.active,0);}}
+#endif
         if(!log)failed=true;
         do{
+#ifdef SFC_NATIVE_LIGHT_DISCOVERY
+            if(lightRequested){
+                if(!b.lightTuning)b.lights.drain(lightFile);
+                else {sfc_native_lights::Snapshot snapshot{};
+                    for(unsigned n=0;n<8&&b.lights.take(snapshot);++n){
+                        const auto target=b.output+L"\\native-light-latest-"+std::to_wstring(snapshot.header[8])+L".bin";
+                        const auto temp=target+L".pending";
+                        {std::ofstream f(temp,std::ios::binary|std::ios::trunc);
+                         f.write(reinterpret_cast<const char*>(&snapshot),sizeof(snapshot));
+                         if(!f){b.lights.ioFailed=true;continue;}}
+                        if(MoveFileExW(temp.c_str(),target.c_str(),MOVEFILE_REPLACE_EXISTING))++b.lights.written;
+                        else ++b.lights.dropped;
+                    }
+                }
+            }
+#endif
             for(auto& a:b.assets)if(InterlockedCompareExchange(&a.ready,0,0)==1){
                 for(DWORD slot=0;slot<4;++slot){
                     auto* d=reinterpret_cast<DWORD*>(b.view+256+slot*64);
@@ -159,7 +204,7 @@ struct LiveScene {
                 if(r[0]<=last[i])continue;last[i]=r[0];
                 auto* guard=reinterpret_cast<LONG*>(b.view+4096+i*512);
                 InterlockedIncrement(guard);std::memcpy(b.view+4100+i*512,r.data(),sizeof(r));MemoryBarrier();InterlockedIncrement(guard);
-                if(failed || counts[i]>=2700)continue;
+                if(failed || counts[i]>=(b.lightTuning?100u:2700u))continue;
                 std::ostringstream row;row<<'[';for(DWORD w=0;w<96;++w){if(w)row<<',';row<<r[w];}row<<"]\n";
                 const auto text=row.str();
                 if(bytes+text.size()>16*1024*1024){saturated=true;continue;}
@@ -167,6 +212,13 @@ struct LiveScene {
             }
         }while(WaitForSingleObject(b.stop_event,10)==WAIT_TIMEOUT);
         log.close();
+#ifdef SFC_NATIVE_LIGHT_DISCOVERY
+        if(lightRequested){b.lights.drain(lightFile);lightFile.close();
+            std::ofstream ls(b.output+L"\\native-lights-summary.json");
+            ls<<"{\"written\":"<<b.lights.written<<",\"captured\":"<<b.lights.sequence
+              <<",\"dropped\":"<<b.lights.dropped<<",\"rejected\":"<<b.lights.rejected
+              <<",\"queued\":"<<b.lights.queued<<",\"io_failed\":"<<(b.lights.ioFailed?"true":"false")<<"}";}
+#endif
         DWORD unsent=0;for(const auto& a:b.assets)if(a.ready==1)++unsent;
         std::ofstream summary(b.output+L"\\LIVE-SCENE-001-worker.json");
         summary<<"{\"records\":"<<records<<",\"bytes\":"<<bytes<<",\"warning\":"<<(bytes>=8*1024*1024?"true":"false")

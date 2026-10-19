@@ -15,11 +15,14 @@ static void check(HRESULT h,const char* s){if(FAILED(h))throw std::runtime_error
 static void check(remixapi_ErrorCode e,const char* s){if(e!=REMIXAPI_ERROR_CODE_SUCCESS)throw std::runtime_error(s);}
 #include "ship_textured_asset.h"
 #include "remix_texture_coordinates.h"
+#include "remix_live_lights.h"
 static LRESULT CALLBACK proc(HWND w,UINT m,WPARAM p,LPARAM l){return DefWindowProcW(w,m,p,l);}
 struct SceneReader:sfc_calibration::Reader{~SceneReader(){close();}};
 int wmain(int argc,wchar_t** argv){
  if(argc!=2)return 2;std::cout.setf(std::ios::unitbuf);
  const bool textured=GetEnvironmentVariableW(L"SFC_REMIX_TEXTURED_SHIP",nullptr,0)!=0;
+ const bool lightWiring=GetEnvironmentVariableW(L"SFC_REMIX_LIGHT_WIRING",nullptr,0)!=0;
+ if(lightWiring&&!textured)return 2;
  const UINT outputWidth=textured?1920u:256u,outputHeight=textured?1080u:256u;
  remixapi_Interface api{};HMODULE dll=nullptr;HWND window=nullptr;int result=1;
  try{
@@ -59,8 +62,11 @@ int wmain(int argc,wchar_t** argv){
    Seed seed{};remixapi_MeshHandle mesh=nullptr;remixapi_MaterialHandle material=nullptr;remixapi_LightHandle light=nullptr;
    std::vector<remixapi_HardcodedVertex> vertices;std::vector<uint32_t> indices;
    TexturedAsset texture;std::vector<remixapi_MeshInfoSurfaceTriangles> surfaces;
+   RemixMaterialControls materialSettings;ULONGLONG lastMaterialPoll=0;unsigned materialRevisions=0;
+   RemixLiveLights nativeLights;
    const auto started=GetTickCount64();ULONGLONG lastRender=0;bool loaded=false,inflight=false,resolutionLogged=false;Key rendering{};uint64_t requestAt=0,busyPublications=0;unsigned detailed=0;
-   while(!return_path::read(state.stop)&&!load(wire.stop)&&GetTickCount64()-started<285000){
+   const ULONGLONG hostLimit=GetEnvironmentVariableW(L"SFC_LIGHT_TUNING",nullptr,0)?1980000ull:285000ull;
+   while(!return_path::read(state.stop)&&!load(wire.stop)&&GetTickCount64()-started<hostLimit){
     MSG msg{};while(PeekMessageW(&msg,nullptr,0,0,PM_REMOVE)){TranslateMessage(&msg);DispatchMessageW(&msg);}
     if(load(wire.error))throw std::runtime_error("private receiver failed");
     if(!loaded){
@@ -86,7 +92,8 @@ int wmain(int argc,wchar_t** argv){
      remixapi_MeshInfoSurfaceTriangles surface{};surface.vertices_values=vertices.data();surface.vertices_count=vertices.size();surface.indices_values=indices.data();surface.indices_count=indices.size();surface.material=material;
      remixapi_MeshInfo info{};info.sType=REMIXAPI_STRUCT_TYPE_MESH_INFO;info.hash=0x5346434c02;info.surfaces_values=&surface;info.surfaces_count=1;
      if(textured){
-      texture.load(static_cast<uint32_t>(vertices.size()));texture.create(api);
+      materialSettings.read();texture.load(static_cast<uint32_t>(vertices.size()));texture.create(api,materialSettings);
+      std::cout<<"MATERIAL_APPLIED initial=1 revision="<<materialSettings.revision<<" roughness="<<materialSettings.values[0]<<" illumination="<<materialSettings.values[1]<<"\n";
       for(auto g:texture.groups){auto part=surface;part.indices_values=texture.indices.data()+g.first;part.indices_count=g.count;part.material=texture.handles[g.material];surfaces.push_back(part);}
       info.hash=seed.meshHash;info.surfaces_values=surfaces.data();info.surfaces_count=static_cast<uint32_t>(surfaces.size());
       std::cout<<"TEXTURED_ASSET_READY materials="<<texture.materials.size()<<" groups="<<texture.groups.size()<<" output="<<wire.width<<"x"<<wire.height<<" policy=delayed_additive100ms\n";
@@ -111,10 +118,30 @@ int wmain(int argc,wchar_t** argv){
      if(detailed++<100)std::cout<<"FRESH_OUTPUT source_frame="<<rendering.frame<<" published="<<sent<<" elapsed_ticks="<<return_path::now()-requestAt<<"\n";
     }
     if(!return_path::read(state.armed)||!return_path::read(state.enabled)||GetTickCount64()-lastRender<34||load(wire.lease)!=Idle){Sleep(1);continue;}
+    // Only after output GPU completion and receiver release;no SFC callback IO.
+    if(textured&&GetTickCount64()-lastMaterialPoll>=500&&materialRevisions<256){
+     lastMaterialPoll=GetTickCount64();auto next=materialSettings;
+     if(next.read()){
+      TexturedAsset candidate=texture;candidate.handles.clear();remixapi_MeshHandle replacement=nullptr;auto parts=surfaces;
+      try{
+       candidate.create(api,next);for(size_t i=0;i<parts.size();++i)parts[i].material=candidate.handles[texture.groups[i].material];
+       remixapi_MeshInfo mi{};mi.sType=REMIXAPI_STRUCT_TYPE_MESH_INFO;mi.hash=seed.meshHash^next.revision;if(!mi.hash)mi.hash=1;mi.surfaces_values=parts.data();mi.surfaces_count=static_cast<uint32_t>(parts.size());
+       check(api.CreateMesh(&mi,&replacement),"material revision mesh");
+      }catch(const std::exception& e){if(replacement)api.DestroyMesh(replacement);replacement=nullptr;for(auto h:candidate.handles)if(h)api.DestroyMaterial(h);std::cout<<"MATERIAL_REJECTED "<<e.what()<<"\n";}
+      if(replacement){
+       // A retirement failure stops this optional host;never continue with a
+       // partially destroyed previous mesh. Original SFC rendering is independent.
+       check(api.DestroyMesh(mesh),"retire material revision mesh");for(auto h:texture.handles)check(api.DestroyMaterial(h),"retire material revision handle");
+       mesh=replacement;texture.handles=std::move(candidate.handles);surfaces=std::move(parts);materialSettings=next;++materialRevisions;
+       std::cout<<"MATERIAL_APPLIED revision="<<next.revision<<" roughness="<<next.values[0]<<" illumination="<<next.values[1]<<"\n";
+      }
+     }
+    }
     sfc_calibration::Snapshot snap{};if(!sfc_calibration::read(scene.mailbox,snap)){Sleep(1);continue;}
     uint32_t thread=0;for(const auto& row:snap.owner)if(row[1]==seed.key.owner)thread=row[47];
     Key key{};std::array<uint32_t,96> row{};if(!makeKey(seed,snap,seed.key.sourcePid,thread,key,row)){Sleep(1);continue;}
     Camera cameraState{};if(!camera(row,cameraState)){InterlockedIncrement(&cmd.invalid);Sleep(1);continue;}
+    if(lightWiring&&!nativeLights.update(api,seed,key,wire.frequency,cameraState.model)){Sleep(1);continue;}
     if(!offer(wire,cmd,key,row,return_path::now())||!ship_live::begin(wire,cmd,rendering,row,return_path::now()))continue;
     requestAt=return_path::now();lastRender=GetTickCount64();
     remixapi_CameraInfoParameterizedEXT cp{};cp.sType=REMIXAPI_STRUCT_TYPE_CAMERA_INFO_PARAMETERIZED_EXT;
@@ -122,7 +149,7 @@ int wmain(int argc,wchar_t** argv){
     remixapi_CameraInfo ci{};ci.sType=REMIXAPI_STRUCT_TYPE_CAMERA_INFO;ci.pNext=&cp;check(api.SetupCamera(&ci),"live camera");
     remixapi_InstanceInfoObjectPickingEXT pick{};pick.sType=REMIXAPI_STRUCT_TYPE_INSTANCE_INFO_OBJECT_PICKING_EXT;pick.objectPickingValue=29;
     remixapi_InstanceInfo instance{};instance.sType=REMIXAPI_STRUCT_TYPE_INSTANCE_INFO;instance.pNext=&pick;instance.mesh=mesh;instance.doubleSided=1;memcpy(&instance.transform,cameraState.model,48);for(unsigned i=0;i<3;++i)instance.transform.matrix[i][3]+=key.worldOffset[i];
-    check(api.DrawInstance(&instance),"live draw");check(api.DrawLightInstance(light),"live diagnostic lighting");check(api.Present(nullptr),"live present");
+    check(api.DrawInstance(&instance),"live draw");if(lightWiring)nativeLights.draw(api);else check(api.DrawLightInstance(light),"live diagnostic lighting");check(api.Present(nullptr),"live present");
     // Check AFTER Present: the SDK can silently ResetEx to its HWND size there.
     ComPtr<IDirect3DSwapChain9> actualSwap;D3DPRESENT_PARAMETERS actual{};
     check(device->GetSwapChain(0,&actualSwap),"live actual swapchain");check(actualSwap->GetPresentParameters(&actual),"live actual present parameters");
@@ -131,6 +158,7 @@ int wmain(int argc,wchar_t** argv){
     for(unsigned i=0;i<3;++i)check(api.dxvk_CopyRenderingOutput(outputs[i].surface.Get(),types[i]),"live three output copy");check(fence->Issue(D3DISSUE_END),"live output fence");inflight=true;
    }
    store(wire.ready,0);store(wire.stop,1);
+   nativeLights.close(api);
    if(mesh)check(api.DestroyMesh(mesh),"live destroy mesh");if(material)check(api.DestroyMaterial(material),"live destroy material");if(light)check(api.DestroyLight(light),"live destroy light");
    for(auto handle:texture.handles)check(api.DestroyMaterial(handle),"retire textured material");
    check(fence->Issue(D3DISSUE_END),"live retire fence");const auto deadline=GetTickCount64()+5000;HRESULT done;

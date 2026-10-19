@@ -7,6 +7,7 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include "../m1_component/native_light_snapshot.h"
 using namespace ship_live;
 static LRESULT CALLBACK procedure(HWND w,UINT m,WPARAM p,LPARAM l){return DefWindowProcW(w,m,p,l);}
 static void dump(ID3D11DeviceContext* c,ID3D11Texture2D* texture,const char* name){
@@ -17,6 +18,9 @@ int wmain(int argc,wchar_t** argv){wchar_t session[128]{};if(argc==2)wcscpy_s(se
  const bool addonMode=GetEnvironmentVariableW(L"SFC_PRIVATE_CALLBACK_FIXTURE",nullptr,0)!=0;
  const bool visibleMode=GetEnvironmentVariableW(L"SFC_REMIX_VISIBLE_SHIP",nullptr,0)!=0;bool visibleVerified=false;
  const bool texturedMode=GetEnvironmentVariableW(L"SFC_REMIX_TEXTURED_SHIP",nullptr,0)!=0;
+ const bool lightMode=GetEnvironmentVariableW(L"SFC_REMIX_LIGHT_WIRING",nullptr,0)!=0;
+ std::ofstream syntheticLights;ULONGLONG lightAt=0;uint32_t lightSequence=0;
+ if(lightMode)syntheticLights.open("gate/native-lights.bin",std::ios::binary|std::ios::trunc);
  unsigned steadySamples=0,steadyDisplayed=0;
  const unsigned frameWidth=visibleMode?1920u:800u,frameHeight=visibleMode?1080u:600u;
  std::vector<BYTE> visibleMask(visibleMode?size_t(frameWidth)*frameHeight:0);
@@ -33,6 +37,17 @@ int wmain(int argc,wchar_t** argv){wchar_t session[128]{};if(argc==2)wcscpy_s(se
   scene.mailbox->snapshot=snap;InterlockedExchange(&scene.mailbox->active,1);sfc_calibration::unlock(scene.mailbox);
   auto* base=reinterpret_cast<BYTE*>(scene.mailbox)-sfc_calibration::Offset;
   auto* guard=reinterpret_cast<LONG*>(base+4096);InterlockedIncrement(guard);memcpy(base+4100,row.data(),384);MemoryBarrier();InterlockedIncrement(guard);
+  if(lightMode&&GetTickCount64()-lightAt>=200){
+   lightAt=GetTickCount64();sfc_native_lights::Snapshot l{};
+   l.header={sfc_native_lights::Magic,1,sizeof(l),++lightSequence,scene.session[0],scene.session[1],scene.session[2],scene.session[3],row[1],row[2],row[3],0x12340000,row[5],row[6],row[47],0};
+   memcpy(l.supplied.data(),row.data()+8,68);memcpy(l.view.data(),row.data()+49,68);
+   const float dir[3]={.98893636f,0,-.14834046f};memcpy(l.records.data()+1,dir,12);
+   l.records[7]=l.records[8]=l.records[9]=0x3f800000;l.records[10]=0x3fc00000;
+   l.records[19]=l.records[23]=l.records[24]=l.records[25]=0x3f800000;l.records[26]=0x3e800000;
+   l.enables[0]=l.enables[1]=1;l.gate=1;
+   syntheticLights.write(reinterpret_cast<const char*>(&l),sizeof(l));syntheticLights.flush();
+   if(!syntheticLights)throw std::runtime_error("synthetic light fixture output");
+  }
  };
  state.gamePid=GetCurrentProcessId();publish();std::cout<<"FIXTURE_PID "<<GetCurrentProcessId()<<"\n";
  ComPtr<ID3D11Device> d;ComPtr<ID3D11DeviceContext> c;const D3D_FEATURE_LEVEL level=D3D_FEATURE_LEVEL_10_1;

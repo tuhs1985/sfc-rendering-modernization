@@ -1,5 +1,22 @@
 # Native light state — narrow static recovery
 
+## Current live corroboration — 2026-10-18
+
+[Run42](../runs/2026-10-18-codex-native-light-runtime-review.md) captures641snapshots
+over89.937s,twoowners/samebank. Slots0/1 persistent white native type0,directions
+(0.98893636,0,-0.14834046)/(0,0,1),multipliers1.5/.25. Local directions match
+transposed supplied3x3 within3e-8 across1282comparisons. Slots2/3 transient type5,
+orange/green,effect association STRONG HYPOTHESIS,exact physical mapping unknown.
+Two steady sources,not three confirmed;GI not established. Runtime final result
+file absent,reporting defect OPEN;raw capture,logs/cleanup/hash checks independently
+retained. Historical "no live values" statements below superseded for this run.
+
+Historical first offline continuation2026-10-18:[native lights and Remix controls](native-lights-and-remix-controls.md)
+records sponsor's two approved goals and first offline core. Earlier minimum
+snapshot proposal below is historical;new NATIVE-LIGHTS-001 defines bounded5Hz
+discovery intended to observe transients. At that earlier checkpoint no live light
+values had been captured;the Run42 corroboration above supersedes that limitation.
+
 2026-10-17;[Run18](../runs/2026-10-17-codex-light-state-investigation.md).
 Sponsor requests finding game lighting while away. No new gameplay,rendering
 implementation,light override or changes to prepared calibration component.

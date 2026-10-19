@@ -1,0 +1,33 @@
+{
+  "run_id": "SFC-RETURN-20261018-42",
+  "runtime": "20261018-223855-130708-in-game",
+  "result": "NATIVE_LIGHT_OBSERVATIONS_CONFIRMED_WORKFLOW_REPORT_PARTIAL",
+  "raw_sha256": "310ca33c008b9f7bbb5fadcf91501d0670b53c391c69943f963ced8028deaab3",
+  "raw_bytes": 3945996,
+  "records": 641,
+  "distinct_frames": 533,
+  "elapsed_ms": [47, 89984],
+  "owner_samples": {"1": 200, "2": 441},
+  "manager_process_local": 81199160,
+  "banks": 1,
+  "native_response_prefix_sample_counts": {"2": 635, "3": 3, "4": 3},
+  "steady_lights": [
+    {"slot": 0, "native_type": 0, "active_samples": 641, "direction": [0.9889363646507263, 0, -0.14834046363830566], "channels": [1, 1, 1], "native_strength_multiplier": 1.5},
+    {"slot": 1, "native_type": 0, "active_samples": 641, "direction": [0, 0, 1], "channels": [1, 1, 1], "native_strength_multiplier": 0.25}
+  ],
+  "transient_lights": [
+    {"slot": 2, "native_type": 5, "active_samples": 6, "active_elapsed_ms_extrema": [61141, 89375], "color_variants": 2, "role": "UNRESOLVED positional effect-like source"},
+    {"slot": 3, "native_type": 5, "active_samples": 3, "active_elapsed_ms_extrema": [61344, 61750], "color_variants": 1, "channels": [0.8799999952316284, 0.550000011920929, 0], "role": "UNRESOLVED positional effect-like source"}
+  ],
+  "view_variants": 384,
+  "supplied_transform_variants": 508,
+  "direction_transform_comparisons": 1282,
+  "native_transpose_R_direction_max_abs_error": 2.9794492206747236e-08,
+  "worker": {"written": 641, "captured": 641, "dropped": 0, "rejected": 0, "queued": 0, "io_failed": false},
+  "independent_cleanup_checks": {"launcher_child_exit": 0, "hook_bytes_restored_log": true, "component_unloaded_log": true, "host_sdk_shutdown": 0, "no_game_process_remaining": true, "accepted_critical_unchanged": true, "copied_critical_unchanged": true, "launcher_settings_unchanged": true},
+  "report_deficiency": "Runtime result.json is absent;exact failure not preserved. Independent review does not fabricate the missing original report or close the reporting defect.",
+  "archive": "artifacts/remix-runtime/archives/20261018-native-light-discovery-runtime.zip",
+  "archive_bytes": 6441003,
+  "archive_sha256": "5E52C1BEF99A005B1DE5504D5C7D0613C02E0DC5D377C2999EC2BE8A5D19FC66",
+  "limitations": ["Native strength is not calibrated physical radiance", "Three fixed lights not observed;two steady plus transient slots instead", "GI/ambient not established", "Type5 cannot yet be mapped faithfully to standard Remix point light", "Current capture samples may miss sub200ms pulses", "No native-light values applied to Remix yet"]
+}

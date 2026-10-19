@@ -37,5 +37,11 @@ try{
         if($LASTEXITCODE -ne 0){throw 'Remix UV adapter test build failed'}
         & (Join-Path $bin $uvname)
         if($LASTEXITCODE -ne 0){throw 'Remix UV adapter tests failed'}
+        $lightname=if($compiler -eq $vc){'light_wire32.exe'}else{'light_wire64.exe'}
+        $build='"{0}" && cl /nologo /std:c++20 /EHsc /W4 /WX "{1}\tests\remix_light_wire_tests.cpp" /Fe:{2} /link /Brepro' -f $compiler,$root,$lightname
+        & $env:ComSpec /d /s /c $build
+        if($LASTEXITCODE -ne 0){throw 'Light wire test build failed'}
+        & (Join-Path $bin $lightname)
+        if($LASTEXITCODE -ne 0){throw 'Light wire tests failed'}
     }
 }finally{Pop-Location}

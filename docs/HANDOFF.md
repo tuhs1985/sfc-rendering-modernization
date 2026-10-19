@@ -1,6 +1,248 @@
 # SFC Modernize — model handoff
 
-## NEWEST / AUTHORITATIVE CHECKPOINT — 2026-10-18 corrected textured return accepted
+## NEWEST / AUTHORITATIVE CHECKPOINT — 2026-10-18 approved lighting/material commit
+
+- Run51:[commit record](runs/2026-10-18-codex-light-material-baseline-commit.md).
+  Sponsor authorizes commit of completed Run40–50 light/material work and tentative
+  settings. Commit containing this entry is the checkpoint;resolve hash with Git.
+- Tentative settings/snapshots remain exactly Run50 below;no automatic retuning.
+  Emissive-light benefit is sponsor-observed,not a new native-light discovery or
+  milestone-completion claim. KnownSDK40and renderer-exit classification stay open.
+- Commit validation:257Python tests PASS,read-only source/binary tuning preflight
+  PASS,both client hashes unchanged. Run49 twelve final GPU gates remain valid.
+  Factory-default material test isolated from sponsor's active settings;historical
+  example/map labels clarified. No production runtime edits or gameplay this run.
+- One cohesive commit,no generated bulk/binaries/original assets,no push. Run51
+  records scope/checks;no additional implementation authorized by the commit request.
+- Exact next action:preserve baseline and await sponsor's next approved test or
+  integration instruction;do not reset settings or claim gate advancement.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-18 sponsor's tentative appearance baseline
+
+- Run50:[baseline record](runs/2026-10-18-codex-tentative-material-light-baseline.md).
+  Full immutable checkpoint:[settings and observation](reconnaissance/evidence/baselines/20261018-tentative-light-material/README.md),
+  with both TOML snapshots/source hashes/manifest. Active settings left untouched.
+- Roughness0.9,illumination0.35,metallic0.15,anisotropy0.5. Native-light conversion
+  0.15/master1;both directional lights enabled,multiplier1each,angular diameters
+  17/15degrees. Separate white dome enabled,intensity0.005. Full files retain all
+  dormant settings. TENTATIVE sponsor baseline,not factory defaults/calibration.
+- Sponsor confirms visually that restored illumination acts as a light source in
+  Remix. Evidence class:CONFIRMED sponsor observation,not independently quantified.
+  No new native SFC light discovered;no claim that returned light affects retained
+  original SFC geometry. Implementation remains Run49's scoped emissive mapping.
+- Documentation-only:no game/probe launch,implementation edit,session interruption,
+  stage or commit. Preserve Run49 qualification/limits and known open issues.
+- Exact next action:use this checkpoint unchanged for the next approved comparison;
+  do not reset to Run49 defaults,retune automatically or start another test unasked.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-18 illumination and Remix material controls
+
+- Run49:[material controls](runs/2026-10-18-codex-remix-material-controls.md),
+  [probe](reconnaissance/probes/REMIX-MATERIAL-CONTROLS-001.md). Active bounded
+  Remix return-path tuning;no milestone advancement or original-ship suppression.
+- Added separate tools/remix_runtime/config/materials.toml:roughness1 and
+  illumination_strength1,optional metallic/anisotropy at neutral
+  defaults,ordered explanations in file/configREADME. Preserve sponsor lights.toml.
+- Derived primary*secondary mask restored to Remix emission,not raw mask or whole
+  hull glow. Fresh pair hashes/group association,unequal-size bilinear bake declared
+  in manifest;source assets/UVs unchanged. Native exact lighting fidelity remains
+  PARTIAL. Remix-only adapter,not a new D3D backend rule.
+- Worker2Hz last-good56B settings;host completed-fence/idle-lease material+mesh
+  revisions,256edits/session. No new game hook/geometry logging. Ordinary textured
+  runs use initial settings;live reload requires existing wiring/tuning launcher.
+- 257Python tests,native89/14/25and material14checks perarch PASS. Preliminary SDK
+  material gate020736-930151PASS:0→2→1emission,.4→.7→.5roughness,invalid99rejected.
+  Full matrix/preflight/archive pins recorded inRun49 after completion. No SFC launch,
+  no stage/commit. Existing Run40–48 work retained,HEAD2fa8032,index empty.
+- Do NOT infer sponsor visual confirmation from offline SDK tests. KnownSDK40and
+  pre-task014955runner unexpected-renderer-exit classification remain unresolved.
+- Exact next action AFTER final qualification: SAME start_light_tuning_session.ps1;
+  observe restored markings,save materials.toml edits,exit SFC normally. No RE or
+  repeat camera/UV discovery;no hidden live process/session required to resume.
+- **READY FOR SPONSOR TUNING:**twelve FINAL source-matched GPU gates022120-968869
+  through022538-965332PASS;read-only tuning preflight PASS. Run49 has exact receipt/
+  archive/hash pins. Final receiptSHA3DEA262623CC30990F0C506C58DC9F0689B9F70DD20BC3BAE25E17985598FCD1.
+  30illumination pairs on recorded fca fixture;not new SFC gameplay. No active game/
+  renderer/test process. Total retained8,601,092,811B;both clients unchanged;
+  current light values preserved. No stage/commit. SDK emission fallback is black.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-18 separate project dome plus reader fix
+
+- Run48: [independent project light](runs/2026-10-18-codex-separate-project-dome.md).
+  New optional project_fill entry,disabled/dome/.05,independent of native weights/
+  conversion/master. Both captured lights and all sponsor tuning values preserved.
+  Can change type too. One enabled dome total. Native200B packet unchanged;
+  shape companion nowv2/808B/three rows,source-matched backend required.
+- Run47 Windows share-delete snapshot reader/nonfatal busy recovery retained.
+ 252Python/native89/14/25perarch PASS; preliminary independent-dome SDK on/off/on
+  PASS. Final11GPU/preflight/archive inRun48. No SFC launch,stage or commit.
+- Exact next action after qualification: SAME tuning launcher;enable project_fill
+  and adjust its own intensity;exit normally. Review new read counters/PROJECT
+  light receipts/normal exit. Do not re-open native-light RE or infer captured GI.
+- **READY FOR SPONSOR TUNING**: final11source-matched GPU gates and preflight
+  PASS,including independent .05dome on/off/on;252Python/native89/14/25checks
+  perarch PASS. Current active project_fill disabled;native settings preserved.
+  Run48 has exact receipt/archive pins. Actual gameplay/recovery still pending;
+  no stage/commit and no active game/renderer session.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-18 native light reader sharing fix
+
+- Run47: [snapshot read fix](runs/2026-10-18-codex-light-snapshot-sharing-fix.md).
+  Actual012229tuning run320.594s,15accepted edits,5566drawn/failed0,then uncaught
+  snapshot PermissionError. Original result PARTIAL,normal exit/unload not proven.
+  No game/controller remains at review;files/settings unchanged in original result.
+- Python reader now explicitly shares read/write/delete with atomic replacement;
+  skips busy/missing updates at next poll without extending native timestamp/TTL.
+  New busy/recovery counters;malformed/other IO not hidden. No config edits/native
+  changes/ACL relaxation.250Python tests PASS including actual Windows exclusive
+  lock→failure→next-read recovery and handle cleanup. GPU/preflight pins inRun47.
+- Exact next action after qualification: SAME start_light_tuning_session.ps1,
+  continue tuning and exit normally;review read_busy/read_recoveries and result.
+  Do not re-run short90s wiring test or force another movement exercise.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-18 interchangeable light types
+
+- Run46: [per-light type controls](runs/2026-10-18-codex-interchangeable-light-types.md),
+  [probe](reconnaissance/probes/REMIX-LIGHT-TYPES-001.md).
+- Sponsor corrected scope: either light can change type, not just added-only dome.
+  Active lights.toml now has type/settings on BOTH IDs; both still directional,
+  existing .07 conversion/master1/angle1 values preserved. Dome/sphere/spot/
+  rectangle/disk/cylinder supported as Remix overrides,not recovered native roles.
+- Companion552B revision/checksum contract plus existing200B source packet;
+  uniform or bounded8bit image-based dome,one enabled dome. Details/provenance/
+  limits in probe. Native geometry diagnostic remains OFF;original rendering ON.
+- Preliminary real SDK standalone type cycle PASS; final qualification recorded
+  in Run46. Long tuning launcher unchanged;no game started by Codex. No staging/
+  commit. Next exact action after qualified preflight: sponsor tunes desired type
+  in existing light entry and saves;review actual gameplay/normal-exit result.
+- **READY FOR SPONSOR TUNING**:247Python tests,89request/14UV/25wire eacharch,
+  ten final GPU gates and read-only --light-tuning preflight PASS. Final011520
+  SDK cycle all7types/123drawn/0failed; source-matched receipt requires new
+  light_types_qualified flag. Archive/pins inRun46. No stage/commit. Change
+  existing native_directional_1 type to dome (empty environment_image means
+  uniform fill),not a new ID/section. Existing source identity remains unchanged.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-18 light tuning launcher
+
+- Run45: [90s stop review](runs/2026-10-18-codex-tuning-mode-selection-review.md).
+  Latest005324run explicitly light_tuning=false/MaxSeconds90,clean short-mode
+  removal/normal exit/hashes. Not a demonstrated long-mode timer failure. Exact
+  launch command unknown;do not blame sponsor or invent root cause. Read-only
+  wrapper entry confirms LightTuning=True;preflight PASS. Next use tuning launcher,
+  not similarly named wiring launcher;long-mode gameplay still unverified.
+- Run44: [tuning preparation](runs/2026-10-18-codex-light-tuning-launcher.md),
+  [probe](reconnaissance/probes/REMIX-LIGHT-TUNING-001.md).
+- Sponsor confirms first wiring direction alignment; wants strength and softer
+  shadows. Actual002556run SDK .75/.125,544native samples,clean controlled hook
+  restore/unload,1150drawn/failed0. Final report PARTIAL due wrong analyze function
+  name; corrected, original result preserved. Do not claim complete past exit report.
+- New default-off start_light_tuning_session.ps1: edits config/lights.toml live;
+  normal user exit ends session,30minute tactical/33minute total safety ceilings.
+  Latest-only native bank/twoowners,100scene records/owner,5s presentation samples.
+  Normal process exit is OS reclamation,NOT controlled live hook-restoration proof.
+- No original suppression,weapon-light/GI mapping,architecture change or source
+  asset edits. Diagnostic geometry remains OFF. Previous active config retained.
+  Existing32MiB evidence/128MiB image limits. No staging/commit.
+- **READY FOR SPONSOR TUNING**:243Python tests,native9/13 and89/14/19
+  checks eacharchitecture,latest-only worker beyond90s,nine final GPU gates,
+  read-only tuning preflight/parser/diff PASS. Exact receipt/archive inRun44.
+  Active sponsor settings master.25/angular1degree preserved; configuration
+  edits apply2Hz. No active game/renderer session required. Normal process-exit
+  tuning cleanup remains to be exercised in actual gameplay;do not overclaim it.
+- Exact next action: launch tuning runner,edit/save config while playing,exit
+  normally; review runtime result. Long tuning gameplay not yet verified.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-18 first-pass live-light wiring ready
+
+- [Run43](runs/2026-10-18-codex-live-light-wiring-controls.md):explicit normal90s
+  `start_light_wiring_session.ps1`. Fresh type0slots0/1 feed2SDK directional lights;
+  provisional light not drawn. Active config `tools/remix_runtime/config/lights.toml`,
+  nativeRGB*scalar*conversion*master*per-light ratios,master.5 initially. Last-good
+  reload2Hz,outside game. Type5weapon lights/GI NOT mapped in this increment.
+- **READY FOR SPONSOR FIRST-PASS TEST**:240Python tests,89request/14UV/19wire
+  checks eachx86/x64,9GPU gates PASS. Synthetic SDK test accepts.75/.125 then
+  reloads.375/.0625;actual native runtime wiring still unproven. Source-matched
+  light_wiring_qualified flag/preflight PASS;exact pins/archive inRun43.
+- Atomic200B relay preserves session/owner/model/source/frame/native age;
+  config edits do not freshen old observations.500ms light-age,100ms returned
+  image-age;missing/invalid state omits extra copy,never native rendering. No SFC
+  callback IO/SDK,source asset changes or original suppression. Baseline intact.
+- Early atomic report checkpoint+exception fallback added;Run42missing-report
+  root still unknown,not retroactively declared fixed/reproduced. New runtime
+  report saving needs actual verification. No stage/commit;prior work retained.
+- **Exact next action:**sponsor launches normal wiring test,usual skirmish/motion,
+  exits at two-beep request. Review before preparing second,low-recording tuning
+  mode that ends on sponsor's normal exit. Longer tuning is NOT ready;do not
+  silently reuse90s limits or demand appearance tuning during first check.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-18 native lights captured
+
+- [Run42](runs/2026-10-18-codex-native-light-runtime-review.md):actual223855run,
+  641snapshots/533frames/89.937s,2owners/samebank. **CONFIRMED**2persistent white
+  type0directional lights:slot0dir(.98893636,0,-.14834046),weight1.5;slot1dir(0,0,1),
+  weight.25. Raw directions/weights stable despite384view/508supplied transforms;
+  local-direction R.T match1282samples max3e-8. No physical radiance calibration.
+- Slots2/3 transient native type5,orange/green;effect association hypothesis,
+  standard point-light mapping unqualified. No confirmed3fixedlights or GI.
+  Raw unused payload changes are NOT type0light movement. Current Remix inspection
+  light still provisional;no captured light/config applied yet.
+- Sponsor confirms weapons fire. Same-run active-only recheck:slot2orange moves
+  across5samples61.141..61.953s;slot3orange across3samples61.344..61.750s,allowner2.
+  Active position changes CONFIRMED,not stale disabled data. Speed/individual
+  projectile identity unqualified;do not connect later green sample as same light.
+- Worker641written/0drops/0rejected/0queued,3.95MBraw. Launcher exit0,controller
+  restoration/unload log true,SDKshutdown0. Critical files/settings independently
+  unchanged. **Open deficiency:**original result.json absent,root unrecorded;
+  independent curated review is not a fabricated complete workflow report.
+- Raw/archive/evidence inRun42;no active game/renderer/Python needed. No stage/
+  commit,prior Run40/41 preparation retained. No new production change this review.
+- **Exact next action:**offline diagnose/fix report persistence,then qualify
+  two type0light conversion and bind controls. Do not guess type5/GI,redo broad
+  capture or treat example config as active. No new gameplay requested yet.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-18 light discovery launcher ready
+
+- [Run41](runs/2026-10-18-codex-native-lights-launch-preparation.md):prepared
+  `tools/remix_runtime/start_light_discovery_session.ps1`. Dedicated observer DLL,
+  accepted component untouched. Existing semantic callback/worker,5Hz/2epochs/
+  max900raw6156Brecords90s,try-queue/no rendering-thread IO. Same textured extra
+  ship remains;NO captured light applied yet. Geometry diagnostic OFF.
+- **READY FOR SPONSOR RUNTIME TEST:**9core+10queue checks eachx86/x64,actual
+  scene-worker drain/decoder test,235Python tests,8GPU gates/preflight PASS.
+  Exact pins/archive inRun41. Normal installation hashes unchanged,indexempty;
+  uncommitted Run40/41 scoped preparation retained. No active session needed.
+- Three lights/GI is sponsor hypothesis,NOT confirmed or capture filter. Native
+  ambient/material and Remix indirect illumination may not be discrete bank lights.
+  Actual roles/units/world mapping/config binding/per-light shadow capability gap
+  remain unresolved. Existing SDK40/startup-partial risks remain separate.
+- **Exact next action:**sponsor runs prepared light-discovery launcher from
+  elevated parent,usual two ships,brief hold then camera/move/turn/fire normally,
+  exits at two-beep request. Analyze full bank/change/raw transforms before
+  feeding native lights to Remix or treating settings example as active controls.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-18 native lights / config increment begun
+
+- [Run40](runs/2026-10-18-codex-native-lights-controls-start.md) records sponsor's
+  two goals:[identify native lights and per-light Remix controls](reconnaissance/native-lights-and-remix-controls.md).
+  Start clean2fa8032. Existing light bank static41anchors reverified;NO actual
+  bank values in current captures. Slot0 is not proven sun;no light IDs guessed.
+- Completed offline raw6156B snapshot core/decoder and strict TOML validator/example.
+  Renderer-neutral raw capture;backend-specific control policy separate.9native
+  checks eachx86/x64,232Python tests PASS. No production hook inclusion,worker,
+  runner switch or actual controls binding yet. **NOT ready for gameplay test.**
+- Pinned public Remix SDK has no per-light shadow/non-raytraced illumination
+  toggle. Request tracked as interface gap;unsupported config rejected,not ignored.
+  enabled=false removes light entirely,not shadow-only. Existing textured light
+  remains provisional until native values/coordinate mapping are qualified.
+- Existing binaries/source qualification unchanged;read-only sponsor workflow
+  preflight PASS. No game run/client writes/security changes,stage or commit.
+  Working tree now holds this scoped new preparation;no active session required.
+- **Exact next action:**connect tested core to default-off existing semantic hook
+  with5Hz/2owner/900sample fixed queue,worker and bounded discovery runner;offline
+  qualify before sponsor skirmish. Do not feed guessed lights or promote synthetic
+  tests to runtime evidence. Then classify lights before wiring config to Remix.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-18 corrected textured return accepted
 
 - [Run39](runs/2026-10-18-codex-remix-texture-runtime-commit.md):sponsor confirms
   "that did it,works great" and authorizes commit. Actual214915run normal exit,

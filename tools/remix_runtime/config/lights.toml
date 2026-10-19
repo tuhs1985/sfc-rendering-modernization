@@ -1,0 +1,79 @@
+# ACTIVE only with the prepared light-wiring runner;SFC files remain unchanged.
+# Save edits during the test;last valid configuration survives invalid edits.
+schema_version = 1
+backend = "remix_sdk_0_6_4"
+
+# Provisional unit conversion,NOT physical calibration.
+conversion_scale = 0.15
+# 0.5 halves mapped brightness;1.0 leaves mapped brightness unchanged.
+master_multiplier = 1.0
+
+[[lights]]
+id = "native_directional_0"
+type = "directional" # directional, dome, sphere, spot, rectangle, disk, cylinder
+space = "ship" # position is relative to displayed ship; or "world"
+position = [0.0, 0.0, 0.0]
+radius = 1.0
+width = 2.0
+height = 2.0
+length = 2.0
+axis = [0.0, 1.0, 0.0]
+roll_degrees = 0.0
+cone_angle_degrees = 45.0
+cone_softness = 0.2
+focus_exponent = 0.0
+environment_image = "" # dome: empty means uniform white environment
+environment_rotation_degrees = 0.0
+enabled = true
+intensity_multiplier = 1.0
+color_multiplier = [1.0, 1.0, 1.0]
+angular_diameter_degrees = 17
+raytracing = "renderer_default"
+
+[[lights]]
+id = "native_directional_1"
+type = "directional" # change THIS to "dome" to try surrounding fill
+space = "ship"
+position = [0.0, 0.0, 0.0]
+radius = 1.0
+width = 2.0
+height = 2.0
+length = 2.0
+axis = [0.0, 1.0, 0.0]
+roll_degrees = 0.0
+cone_angle_degrees = 45.0
+cone_softness = 0.2
+focus_exponent = 0.0
+environment_image = ""
+environment_rotation_degrees = 0.0
+enabled = true
+intensity_multiplier = 1
+color_multiplier = [1.0, 1.0, 1.0]
+angular_diameter_degrees = 15
+raytracing = "renderer_default"
+# No per-light shadow-only switch in pinned public SDK;unsupported modes rejected.
+
+# SEPARATE project light;not captured from SFC. Turn enabled=true to try it.
+# This entry can use any listed type too;its strength is independent of SFC ratios.
+[[lights]]
+id = "project_fill"
+type = "dome"
+enabled = true
+intensity_multiplier = 0.005
+color_multiplier = [1.0, 1.0, 1.0]
+environment_image = "" # uniform white fill;no image needed
+environment_rotation_degrees = 0.0
+space = "ship"
+position = [0.0, 0.0, 0.0]
+radius = 1.0
+width = 2.0
+height = 2.0
+length = 2.0
+axis = [0.0, 1.0, 0.0]
+roll_degrees = 0.0
+cone_angle_degrees = 45.0
+cone_softness = 0.2
+focus_exponent = 0.0
+angular_diameter_degrees = 1.0
+volumetric_multiplier = 1.0
+raytracing = "renderer_default"

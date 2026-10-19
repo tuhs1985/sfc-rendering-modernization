@@ -25,8 +25,8 @@ class TexturedAssetTests(unittest.TestCase):
     def test_hull_material_does_not_emit_primary_texture(self):
         source=(Path(__file__).resolve().parents[1]/'tools/remix_runtime/ship_textured_asset.h').read_text()
         self.assertIn('info.albedoTexture=paths[i].c_str()',source)
-        self.assertIn('info.emissiveTexture=nullptr',source)
-        self.assertIn('info.emissiveIntensity=0',source)
+        self.assertIn('emissionPaths[i].empty()?nullptr:emissionPaths[i].c_str()',source)
+        self.assertIn('emissionPaths[i].empty()?0:v[1]',source)
         self.assertIn('info.emissiveColorConstant={0,0,0}',source)
         self.assertNotIn('info.emissiveTexture=paths[i].c_str()',source)
     def test_textured_inspection_light_is_directional_not_world_origin_point(self):

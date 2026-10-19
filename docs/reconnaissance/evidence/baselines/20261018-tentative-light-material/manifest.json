@@ -1,0 +1,58 @@
+{
+  "schema": "sfc.tentative-light-material-baseline.v1",
+  "recorded_at": "2026-10-18T22:56:25.9072402-04:00",
+  "starting_commit": "2fa8032fe8af00f9dee668a9ff0c1f10ef12d974",
+  "status": "TENTATIVE_SPONSOR_SELECTED_NOT_CALIBRATED",
+  "source_files": {
+    "materials.toml": {
+      "active_path": "tools/remix_runtime/config/materials.toml",
+      "sha256": "5AF94EE33CA8B2A658802D4B23D4BFBCE8A7D5D7AB93ED6DCD56BF14996BAD31",
+      "snapshot": "materials.toml"
+    },
+    "lights.toml": {
+      "active_path": "tools/remix_runtime/config/lights.toml",
+      "sha256": "FC55CE88326AC4D544D166D42882540C257B2E54671517F9F6CD2F93B3F70E2F",
+      "snapshot": "lights.toml"
+    }
+  },
+  "observation": {
+    "source": "Sponsor report in this session",
+    "quote": "illumination already adds a new feature without having to do anything special! it acts as a light source!",
+    "classification": "CONFIRMED — sponsor-observed emissive lighting;not independently quantified",
+    "limits": [
+      "No measured emitted radiance,lighting equivalence or performance result established",
+      "Not evidence of an additional recovered native SFC light",
+      "No formal milestone completion or universal asset coverage claimed"
+    ]
+  },
+  "material": {
+    "roughness": 0.9,
+    "illumination_strength": 0.35,
+    "metallic": 0.15,
+    "anisotropy": 0.5
+  },
+  "lighting": {
+    "conversion_scale": 0.15,
+    "master_multiplier": 1,
+    "native_directional_0": {
+      "enabled": true,
+      "type": "directional",
+      "intensity_multiplier": 1,
+      "angular_diameter_degrees": 17
+    },
+    "native_directional_1": {
+      "enabled": true,
+      "type": "directional",
+      "intensity_multiplier": 1,
+      "angular_diameter_degrees": 15
+    },
+    "project_fill": {
+      "enabled": true,
+      "type": "dome",
+      "intensity_multiplier": 0.005,
+      "environment_image": ""
+    }
+  },
+  "scope": "Remix extra ship only;source assets/native lights/client unchanged",
+  "snapshot_policy": "Full config text preserved;line endings may be normalized by repository tooling;compare parsed TOML as well as source-byte hashes"
+}
