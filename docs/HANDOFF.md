@@ -1,6 +1,51 @@
 # SFC Modernize — model handoff
 
-## NEWEST / AUTHORITATIVE CHECKPOINT — 2026-10-18 private publication VERIFIED
+## NEWEST / AUTHORITATIVE CHECKPOINT — 2026-10-18 README/CDD publication authorized
+
+- Run56: [commit/publication record](runs/2026-10-18-codex-readme-cdd-publication.md).
+  Sponsor authorizes committing and pushing reviewed Run54/55 documentation.
+  Commit containing this entry is the checkpoint; resolve exact SHA through Git.
+- README explains current research, setup and limits. Approved CDD v1.0 included
+  unchanged with provenance/amendment links. Exact-path .gitattributes preserves
+  its bytes through Git; original SHA256 remains BF5384D2586601AAA28DB36970937A3B40F598E12002B3450BF2E7D9562FA352.
+- Prior262 tests PASS; links/diff/staged CDD hash/publication audit checked for
+  this documentation-only commit. No code/settings/runtime/milestone changes.
+- Use codex/github-sanitized → private origin/master only. Do not merge/push
+  local recovery master or other refs. No new runtime/tool session active.
+- Exact next action: await sponsor's next authorized engineering task after the
+  scoped commit/push and remote verification; no further README/CDD work needed.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-18 approved CDD copied into repository
+
+- Run55: [CDD import record](runs/2026-10-18-codex-cdd-repository-copy.md).
+  Approved v1.0 is now included unchanged under docs/requirements/ with provenance;
+  source/copy SHA256 BF5384D2586601AAA28DB36970937A3B40F598E12002B3450BF2E7D9562FA352,
+  matching the original hash in approved SFC-GATE-20261014. No baseline change.
+- README links the included CDD and amendment guidance. External template wiki-link
+  remains untouched; no other vault content imported. Source original preserved.
+- Run54 work retained. Both runs are documentation-only, unstaged/uncommitted;
+  nothing pushed. Local links/hash/length/diff checks PASS. Prior262 tests PASS;
+  no game, renderer or new active session. Runtime settings remain unchanged.
+- Exact next action: sponsor reviews the combined README/CDD documentation before
+  authorizing commit/publication. Do not rewrite requirements or repeat runtime work.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-18 reader-facing README prepared
+
+- Run54: [README refresh](runs/2026-10-18-codex-readme-sharing-refresh.md).
+  Starting clean d9c7445 on codex/github-sanitized; private remote remains synced
+  to that committed checkpoint. README now explains project purpose, current
+  additive Remix path, setup/test prerequisites, controls and explicit limits.
+- Only README.md, this handoff and Run54 changed. Unstaged/uncommitted; no push.
+  Runtime code, configs, original assets and technical evidence unchanged.
+- All README local links and diff checks PASS. Python262 tests PASS using
+  workspace-local temporary storage after sandbox default-temp permission errors.
+  No native/GPU/gameplay or fresh-PC deployment test; no live tool/session started.
+- Existing semantic/render state and unresolved issues below remain authoritative;
+  do not restart runtime proof, reset sponsor tuning or merge local recovery refs.
+- Exact next action: sponsor reviews README before authorizing commit/publication
+  of this documentation-only update.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-18 private publication VERIFIED
 
 - PRIVATE repository: https://github.com/tuhs1985/sfc-rendering-modernization;
   default branch master. Independent GitHub clone verified b7371ef (13 commits);
