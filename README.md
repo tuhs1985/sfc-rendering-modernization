@@ -1,5 +1,25 @@
 # SFC Orion Pirates Rendering Modernization
 
+## Current project checkpoint
+
+Start with [the authoritative handoff](docs/HANDOFF.md),not the historical
+bootstrap description below. Current source includes semantic observation,
+fresh-asset/camera transport and a controlled additive Remix return path with
+live light/material tuning. This is not complete renderer replacement.
+
+Private project remote: https://github.com/tuhs1985/sfc-rendering-modernization.
+The publishing history is sanitized to exclude one desktop/chat screenshot;
+[publication policy](docs/decisions/2026-10-18-private-github-publication.md)
+defines the safe branch/backup boundary. Never merge local unsanitized history
+back into the publishing branch or mirror all local refs.
+
+A clone includes source/tests/docs/configuration,not a working game installation,
+downloaded SDK/runtime dependencies or bulk runtime evidence. Those stay local,
+must be obtained legitimately and qualified using the project runbooks. No grant
+to redistribute third-party game assets is implied.
+
+## Historical workspace bootstrap
+
 This repository is the controlled engineering workspace for technical discovery
 and, after requirements review, possible rendering modernization of *Starfleet
 Command II: Orion Pirates Community Edition*.

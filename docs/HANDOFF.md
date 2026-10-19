@@ -1,6 +1,42 @@
 # SFC Modernize — model handoff
 
-## NEWEST / AUTHORITATIVE CHECKPOINT — 2026-10-18 approved lighting/material commit
+## NEWEST / AUTHORITATIVE CHECKPOINT — 2026-10-18 sanitized publication AUTHORIZED
+
+- Run53:[sanitized publication](runs/2026-10-18-codex-sanitized-github-publication.md).
+  Sponsor explicitly authorizes removing the desktop/chat screenshot from all
+  published history. Original master history backed up outside project and stays
+  LOCAL-ONLY. No change to rendering implementation or tentative settings.
+- Rewrite ONLY fresh C:/Project/SFC-Modernize-Publish using pinned official
+  filter-repo;retain commits/messages/topology and old→new map. Remove exact image
+  path/blob,verify every commit tree differs only by that image,then re-audit.
+- Adopt new codex/github-sanitized in this working directory tracking origin/master;
+  configure explicit sanitized-only push. Never merge/push original local master,
+  refs/codex/*,backup bundles or other refs. Do not use --mirror/--all/force.
+- Private GitHub URL https://github.com/tuhs1985/sfc-rendering-modernization.
+  No push until sanitization/audit complete. Run53 appends actual validation.
+- Exact next action:finish authorized safe sanitization/publication,verify remote
+  privacy/content and clean working state;do not start another rendering test.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-18 private GitHub prepared,PUSH HELD
+
+- Run52:[publication preparation](runs/2026-10-18-codex-private-github-preparation.md),
+  [publication decision](decisions/2026-10-18-private-github-publication.md).
+  Created https://github.com/tuhs1985/sfc-rendering-modernization,verified PRIVATE
+  and empty;origin configured. **Nothing pushed;existing11commits unchanged.**
+- masterHEADa08ed6280a638990c5aab895736b0d975e3219fd. Entire selected ancestry
+  scanned:675blobs/10.65MB,no recognized credentials/excluded binaries/bulk data.
+  Ignore policy preserved. Never mirror app-local refs/codex/* or other refs.
+- Actual blocker:saved20261016-live-camera-sponsor.png includes unrelated chat/
+  sidebar content and exists in historical e96765a. Tip-only deletion cannot keep
+  it out of a history-preserving push. No image edits/history rewriting authorized.
+- Exact next action:ask sponsor to approve retaining that image in the PRIVATE
+  repository,or authorize sanitized publishing history. Do not push until resolved.
+  Final visual/privacy review and SHA/count/visibility verification follow approval.
+- New audit tool/tests/report/decision/run record and this handoff are UNCOMMITTED;
+  index empty. No rendering/config changes,gameplay or runtime session manipulation.
+  Tentative appearance baseline/Run49qualifications remain unchanged below.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-18 approved lighting/material commit
 
 - Run51:[commit record](runs/2026-10-18-codex-light-material-baseline-commit.md).
   Sponsor authorizes commit of completed Run40–50 light/material work and tentative

@@ -1,0 +1,68 @@
+# Run53 — remove desktop screenshot from publishing history and publish privately
+
+Sponsor explicitly authorizes sanitizing history after reviewing the image.
+Date2026-10-18 America/New_York. Starting mastera08ed6280a638990c5aab895736b0d975e3219fd,
+11commits;Run52 preparation is one modified HANDOFF/five untracked reviewed
+publication files,index empty. No rendering work,user-setting changes or gameplay.
+GitHub repo already PRIVATE/empty;origin configured. Preserve existing work.
+
+## Backup,scope and engineering decision
+
+Verified complete original master Git bundle,OUTSIDE active repository:
+C:/Project/SFC-Modernize Engine Backups/20261018-231607-before-github-sanitize.bundle
+SHA256829F6653632225EAA109BD473FCE28288E49A7F779FBD1CAE0ABC89ECF810AB3.
+Also backed up all six Run52 pending files to20261018-231607-publication-preparation.zip,
+same backup folder,SHA256CC31F63D68ED306F131BD44ECA7180561C3BE4CED088070B7CC3C8CB23BA27F1.
+Neither backup is uploaded. Original master ancestry remains a local-only ref.
+
+Fresh independent clone C:/Project/SFC-Modernize-Publish;only there rewrite history
+to drop exact path docs/reconnaissance/images/20261016-live-camera-sponsor.png,
+blobcbe09de36100a48eab37d68bd1d4a3f607946585. All ten remaining tracked PNGs visually
+reviewed:game/renderer scenes only,no unrelated chat window. Scene names/HUD and
+one Windows taskbar remain ordinary evidence,not credentials/private conversations.
+
+Git2.50.0.windows.1,gh2.102.0,Python3.12.14. git-filter-repo not installed globally;
+official portablev2.47.0 script downloaded ONLY to ignored artifacts/publication-tools,
+official source commit6f79afc8c90c592a3052e6cc53c2ca8907515bca,
+SHA25667447413E273FC76809289111748870B6F6072F08B17EFE94863A92D810B7D94,
+reported versiona40bce548d2c. No global package/auth/security changes. Sandbox Git
+shell help hit MSYS named-object access denied;scoped Git metadata/tool execution
+uses authorized elevated execution instead. FuelGuard current-thread hook attached.
+
+Review own Run52/53 publication code/docs and commit only those paths on original
+master before cloning;never stage unrelated work. No proprietary originals,
+captured mesh/texture assets,dependencies,binaries or bulk output. Git ignore policy
+unchanged. Rewrite command in fresh clone:
+python <pinned-tool> --path docs/reconnaissance/images/20261016-live-camera-sponsor.png
+--invert-paths --prune-empty never --prune-degenerate never --preserve-commit-hashes
+
+Keep commit sequence,authors/messages/times/topology;preserve textual old-hash
+references and publish an explicit old→new commit map. Compare every paired tree
+by path/object/mode:ONLY this image may differ. Scan full sanitized ancestry for
+excluded paths,binaries,credential patterns and exact forbidden blob. Verify code,
+configs and tentative baseline unchanged. No guessed recreation of the screenshot.
+
+Import sanitized master as new codex/github-sanitized in the original workspace;
+switch only with clean tree. Existing master stays LOCAL-ONLY,not rewritten.
+Normal push refspec must be codex/github-sanitized→master;no other refs. Existing
+ignored runtime dependencies stay put;no new GPU/renderer validation required for
+docs-only changes,but run Python tests/read-only runtime preflight and client hashes.
+
+## Publication/verification gates
+
+Before push:verify GitHub PRIVATE and no existing heads,source/history audit clean,
+forbidden image path/blob absent everywhere,reviewed metadata committed. Push exact
+sanitized branch without tags/force. Set remote default master after first push.
+Verify remoteSHA/count/private visibility,independently clone GitHub to an ignored
+local verification directory and repeat forbidden-path/blob/full-history checks.
+Remote API must not return the old blob. No hidden refs or unsanitized packs sent.
+
+Durable files:this record,publication decision/README/HANDOFF,Run52 audited tool/test/
+report,generated reviewed commit map and final curated publication verification.
+No client/source-asset/config changes. Existing Run49 qualifiers and tentative
+material/light values retained;SDK40and other technical uncertainties unchanged.
+Results,actual source/sanitized IDs,branch state and final checks appended below.
+
+Exact next action at this preparation checkpoint:commit reviewed publication
+preparation,clone and filter safely,validate,adopt sanitized branch,push PRIVATE,
+verify. Do not begin rendering implementation or reset appearance settings.
