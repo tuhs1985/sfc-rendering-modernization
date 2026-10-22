@@ -10,6 +10,12 @@ The current D3D9 display test deliberately selects the Federation heavy cruiser 
 
 This is a research/development workspace, not a ready-to-install graphics mod.
 
+## Video — latest good in-game test
+
+[![SFC Rendering Modernization — Live RTX Remix Rendering Test](https://img.youtube.com/vi/NCYvT6ypXLY/hqdefault.jpg)](https://youtu.be/NCYvT6ypXLY)
+
+Click the preview to watch on YouTube. The test shows the original FCA alongside its live Remix-rendered copy, with a 360-degree camera pan to demonstrate the lighting response. This is the additive integration proof, not original-ship replacement.
+
 ## What works today
 
 - **Semantic capture:** observe ship/model ownership before the engine reduces it to generic draw calls.

@@ -1,6 +1,18 @@
 # SFC Modernize — model handoff
 
-## NEWEST / AUTHORITATIVE CHECKPOINT — 2026-10-22 Run111 publication checkpoint
+## NEWEST / AUTHORITATIVE CHECKPOINT — 2026-10-22 Run112 demo video linked
+
+- [Run112](runs/2026-10-22-codex-readme-demo-video.md):sponsor-approved latestgood
+  test video nowlinked viaREADMEthumbnail:https://youtu.be/NCYvT6ypXLY.
+  CaptionFCA/additivecopy/360lighting;no videofileordesktopcaptureadded toGit.
+- Documentationonly,source/runtime/configstate remainsRun111,c583248baseline.
+  Sponsorauthorizescommit/push ofthisupdate;containingcommit identifiesit.
+  Noactivegametest needed;nohelper/agent/newrenderingimplementation.
+- Exactnextaction:defineboundedgeneric-asset/multi-ownerD3D9extensionusing
+  existingcapture/registry,retainFCA diagnostics,thenpreparemixed-race/all-visible
+  tests. Genericcoverage/originalreplacement/formalTRLremainNOTdelivered.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-22 Run111 publication checkpoint
 
 - [Run111](runs/2026-10-22-codex-readme-pipeline-publication.md) accompanies the
   sponsor-authorized commit/push ofRun103–110reviewed source/tests/evidence and
