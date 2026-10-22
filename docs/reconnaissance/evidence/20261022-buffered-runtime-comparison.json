@@ -1,0 +1,31 @@
+{
+  "run": "Run109",
+  "head": "0fc1300",
+  "result": "CORRECTED_BUFFER_RUNTIME_IMPROVEMENT_CONFIRMED_RESIDUAL_OMISSIONS",
+  "recording_causality": "UNRESOLVED; recording status is sponsor-reported",
+  "build_hashes_equal": true,
+  "without_recording_reported": {
+    "path": "artifacts/remix-runtime/runs/20261022-042446-565057-in-game",
+    "paired": 5382, "without_ship": 24, "missing_clusters": 23, "max_missing_records": 2,
+    "overwritten": 0, "expired_inputs": 22,
+    "input_to_output_completion_median_ms": 10.620, "completion_p95_ms": 14.179,
+    "render_output_interval_median_ms": 9.305,
+    "actual_query_sleep_median_us": 540.03,
+    "normal_exit": true, "controlled_unload": false, "controller_exit": 8,
+    "clients_unchanged_proxy_restored": true
+  },
+  "with_recording_reported": {
+    "path": "artifacts/remix-runtime/runs/20261022-042653-754380-in-game",
+    "paired": 5395, "without_ship": 5, "missing_clusters": 4, "max_missing_records": 2,
+    "overwritten": 0, "expired_inputs": 2,
+    "input_to_output_completion_median_ms": 6.854, "completion_p95_ms": 8.119,
+    "render_output_interval_median_ms": 5.6465,
+    "actual_query_sleep_median_us": 543.44,
+    "normal_exit": true, "controlled_unload": true, "controller_exit": 0,
+    "clients_unchanged_proxy_restored": true
+  },
+  "timing_scope": "CPU-observed elapsed intervals, not GPU-only or physical display latency",
+  "source_or_config_modified": false,
+  "staged": false,
+  "committed": false
+}

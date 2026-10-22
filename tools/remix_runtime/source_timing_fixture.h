@@ -36,7 +36,7 @@ struct SourceTimingFixture {
    if(!sfc_calibration::offer(source.mailbox,0,row))live.reject(frame);
    auto* base=reinterpret_cast<BYTE*>(source.mailbox)-sfc_calibration::Offset;
    auto* guard=reinterpret_cast<LONG*>(base+4096);InterlockedIncrement(guard);memcpy(base+4100,row.data(),sizeof(row));InterlockedIncrement(guard);
-   Sleep(16);return; // STANDALONE source lead only;never inserted into SFC
+   Sleep(GetEnvironmentVariableW(L"SFC_SYNC_FIXTURE_SHORT_LEAD",nullptr,0)?3:16);return; // STANDALONE only;never inserted into SFC
   }
   sfc_calibration::begin(source.mailbox,frame);
   std::array<DWORD,96> row{};row[1]=7;row[2]=frame;row[4]=1;row[5]=99;row[6]=98;row[7]=1;row[47]=GetCurrentThreadId();row[48]=1;

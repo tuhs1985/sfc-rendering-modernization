@@ -108,6 +108,14 @@ class AnalysisTests(unittest.TestCase):
             folder=Path(raw);self.fixture(folder)
             (folder/'manifest.json').write_text(json.dumps(dict(semantic_calibration=dict(scene_session='Local\\SFCBridge_'+'0'*32))))
             with self.assertRaises(ValueError):analyze(folder)
+    def test_base_movement_is_not_hidden_by_zero_added_translation(self):
+        with tempfile.TemporaryDirectory() as raw:
+            folder=Path(raw);self.fixture(folder)
+            path=folder/'OFFSCREEN-POSITION-001.jsonl';rows=[json.loads(l) for l in path.read_text().splitlines()]
+            for r in rows:r['base_position']=r['position'];r['position']=[0,0,0]
+            path.write_text(''.join(json.dumps(r)+'\n' for r in rows))
+            result=analyze(folder);self.assertEqual(result['result'],'OFFSCREEN_POSITION_UPDATES_OBSERVED_NOT_LIFETIME_PROOF')
+            self.assertEqual(result['tracks'][0]['gaps'][0]['movement_source'],'base_simulation_translation')
     def test_cues_request_actual_offscreen_movement_without_destruction(self):
         self.assertEqual([p[0] for p in PHASES],[15,25,40,50,60,75,80])
         self.assertIn('moving',PHASES[1][2]);self.assertFalse(any('destroy' in p[2] for p in PHASES))

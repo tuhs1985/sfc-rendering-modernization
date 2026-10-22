@@ -7,9 +7,10 @@
 struct GameOutputWriter {
  sfc_calibration::Reader source;game_output::Pool* pool=nullptr;
  Microsoft::WRL::ComPtr<ID3D11Texture2D> textures[2][3];uint64_t handles[2][3]{};
- bool enabled=false;uint64_t session=0;
+ bool enabled=false,retainReady=false;uint64_t session=0;
  ~GameOutputWriter(){if(pool){InterlockedExchange(&pool->header.stopped,1);InterlockedExchange(&pool->header.ready,0);}source.close();}
- void start(){wchar_t mode[2]{};enabled=GetEnvironmentVariableW(L"SFC_D3D9_GAME_OUTPUT",mode,2)==1&&mode[0]==L'1';}
+ void start(){wchar_t mode[2]{};enabled=GetEnvironmentVariableW(L"SFC_D3D9_GAME_OUTPUT",mode,2)==1&&mode[0]==L'1';
+  retainReady=GetEnvironmentVariableW(L"SFC_D3D9_SYNC_BUFFER",mode,2)==1&&mode[0]==L'1';}
  void prepare(ID3D11Device* device,const output_wire::Packet& input){
   if(!enabled||pool)return;
   check(source.prepare()&&source.requested,"game pool explicit semantic mapping");
@@ -29,6 +30,7 @@ struct GameOutputWriter {
   for(unsigned i=0;i<32;++i){unsigned byte=0;for(unsigned j=0;j<2;++j){const auto c=asset[2*i+j];check((c>=L'0'&&c<=L'9')||(c>=L'a'&&c<=L'f'),"game pool asset hex");byte=byte*16+unsigned(c<=L'9'?c-L'0':c-L'a'+10);}pool->asset[i]=static_cast<BYTE>(byte);}
   wchar_t offset[64]{};check(GetEnvironmentVariableW(L"SFC_D3D9_OFFSET_X",offset,64)>0,"diagnostic world offset required");
   pool->camera_offset[0]=static_cast<float>(_wtof(offset));check(std::isfinite(pool->camera_offset[0])&&pool->camera_offset[0]<-1e-5f&&pool->camera_offset[0]>=-1e6f,"diagnostic camera-left bound");pool->diagnostic_mode=1;
+  pool->reserved[3]=retainReady?1u:0u;
   memcpy(h.session,source.session,16);h.receiver_pid=GetCurrentProcessId();h.host_pid=input.producer_pid;session=input.session;
   check(game_output::valid(h,source.session,game),"game pool header");InterlockedExchange(&h.ready,1);
  }
@@ -36,7 +38,9 @@ struct GameOutputWriter {
   prepare(device,input);
   if(!game_output::valid(metadata,source.session))return -1; // Bootstrap is never displayed.
   check(input.session==session&&input.producer_pid==pool->header.host_pid,"game pool source identity changed");
-  int slot=game_output::reserve(*pool);if(slot<0)return -1;
+  // Buffered presentation still needs READY images;never replace one before
+  // the game acquires it. Busy skips this publication,never waits on SFC.
+  int slot=game_output::reserve(*pool,retainReady);if(slot<0)return -1;
   for(unsigned i=0;i<3;++i)context->CopyResource(textures[slot][i].Get(),images[i]);
   return slot;
  }

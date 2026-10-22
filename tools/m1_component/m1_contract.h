@@ -83,6 +83,12 @@ public:
         }
         return nullptr;
     }
+    void retain_simulation_owner(std::uint32_t id,std::uint32_t frame){
+        if(auto* slot=find_by_id(id))slot->last_frame=frame;
+    }
+    void destroy_ship(std::uintptr_t ship){
+        for(auto& slot:slots_)if(slot.active&&slot.ship==ship)slot.active=false;
+    }
 
     template <typename RetireCallback>
     void retire_before(std::uint32_t oldest_live_frame, RetireCallback callback) {

@@ -43,7 +43,7 @@ template<class T,unsigned P>inline bool take(Slot<T,P>(&slots)[4],const Header& 
   packet=p;last=p.sequence;found=true;
  }return found;
 }
-inline bool header_valid(const Header& h,const DWORD* session){return h.magic==Magic&&h.version==1&&h.bytes==sizeof(Store)&&same_session(h.session,session);}
+inline bool header_valid(const Header& h,const DWORD* session){return h.magic==Magic&&(h.version==1||h.version==2)&&h.bytes==sizeof(Store)&&same_session(h.session,session);}
 struct Source {
  Store* store=nullptr;uint64_t counter=0;
  bool attach(BYTE* mapping,const DWORD* session){

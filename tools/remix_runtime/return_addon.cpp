@@ -106,7 +106,8 @@ void init(reshade::api::effect_runtime* runtime){
        directCount=runtime->get_back_buffer_count();if(!directCount||directCount>4)throw std::runtime_error("Bounded game backbuffer count");
        for(unsigned i=0;i<directCount;++i){directBack[i]=runtime->get_back_buffer(i).handle;auto* back=reinterpret_cast<ID3D11Texture2D*>(static_cast<uintptr_t>(directBack[i]));
         if(!back)throw std::runtime_error("Game backbuffer missing");ship_triplet::checked(device->CreateRenderTargetView(back,nullptr,&directTargets[i]),"Game target view");}
-       directGame=std::make_unique<d3d9_game::Receiver>(*channel,device.Get());
+       auto* firstBack=reinterpret_cast<ID3D11Texture2D*>(static_cast<uintptr_t>(directBack[0]));
+       directGame=std::make_unique<d3d9_game::Receiver>(*channel,device.Get(),firstBack);
       }
       activeRuntime=runtime;s.gamePid=GetCurrentProcessId();InterlockedIncrement(&s.epoch);return_path::write(s.ready,1);return;}
     if(depth_snapshot::capture)depth_snapshot::capture->init(device.Get());

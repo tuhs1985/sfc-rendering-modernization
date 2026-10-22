@@ -1,0 +1,20 @@
+{
+  "run": "Run105",
+  "starting_commit": "0fc1300",
+  "result": "BOUNDED_STAGE_OPTIMIZATION_PREPARED_GAME_COMPARISON_PENDING",
+  "sfc_launched": false,
+  "change": "Fuse existing nonneutral grade and depth-derived owner coverage into one worker GPU MRT pass",
+  "python_tests": 415,
+  "actual_gpu_checks": 65,
+  "equivalence": "Exact colour/alpha/owner/depth-sentinel equality at 1920x1080",
+  "small_stage_timestamp_medians_us": {"separate": 45.595, "combined": 38.368, "batches_each": 8, "draws_per_batch": 32},
+  "performance_scope": "15.85 percent less GPU time for this small stage only;not whole-renderer/gameplay speedup",
+  "actual_remix_fixture": "artifacts/remix-runtime/runs/20261022-031459-406014-return-fixture",
+  "delivery": {"frames": 600, "draws": 595, "unchanged_vs_prior_fixture": true, "state_errors": 0, "normal_owned_exit": true},
+  "unchanged": ["visual settings", "resolution", "frame identity checks", "game hooks", "original drawing"],
+  "pending": ["Sponsor camera-switch comparison", "First-launch short frame budget", "Actual destruction hook", "Multi-object display"],
+  "client_sha256": "4D65761D7DD69EF1504070261B81E9C200C0AF18105033E1C4D2222C62320C29",
+  "staged": false,
+  "committed": false,
+  "next_action": "One sponsor run of start_d3d9_persistent_scene_session.ps1,then review and move on rather than open-ended harness polishing"
+}

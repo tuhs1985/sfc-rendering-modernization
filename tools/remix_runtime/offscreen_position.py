@@ -198,10 +198,12 @@ def analyze(folder):
             if not start or not ends:continue
             lo=min(r[8] for r in start);hi=min(r[8] for r in ends)
             inside=[r for r in samples if lo<r['qpc_before']<=r['qpc_after']<hi]
-            moving=len({tuple(r['position']) for r in inside})>1
+            def position(r):return r.get('base_position',r['position'])
+            moving=len({tuple(position(r)) for r in inside})>1
             gaps.append(dict(old_epoch=event[1],new_epoch=new[0],retired_frame=event[2],return_frame=new[1],
                 conservative_window_ms=(hi-lo)*1000/head[12],samples=len(inside),position_changed=moving,
-                first_position=inside[0]['position'] if inside else None,last_position=inside[-1]['position'] if inside else None,
+                movement_source='base_simulation_translation' if inside and 'base_position' in inside[0] else 'legacy_position_field',
+                first_position=position(inside[0]) if inside else None,last_position=position(inside[-1]) if inside else None,
                 cache_variants=len({tuple(r['cache_words']) for r in inside}),
                 native_tick_variants=len({r['native_tick_before'] for r in inside}),
                 missing_owner_render_offers=sum(r[3] in labels for r in start)))

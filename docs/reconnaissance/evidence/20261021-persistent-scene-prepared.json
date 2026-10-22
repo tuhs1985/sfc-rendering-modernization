@@ -1,0 +1,62 @@
+{
+  "run": "Run103",
+  "date": "2026-10-21",
+  "starting_commit": "0fc1300",
+  "result": "OFFLINE_PERSISTENT_SCENE_PREPARED_RUNTIME_PENDING",
+  "sfc_launched": false,
+  "registry_capacity": 32,
+  "displayed_asset_capacity_in_this_increment": 1,
+  "source_protocol_version": 2,
+  "pose_refresh": "once_per_qualified_scene_frame_no_fixed_Hz_limit",
+  "geometry_hook_enabled": false,
+  "original_rendering_enabled": true,
+  "python_tests_passed": 415,
+  "registry_tests_per_architecture": 18,
+  "architectures": ["x86", "x64"],
+  "native_worker": {
+    "path": "artifacts/d3d9-proof/persistent-tests/worker-71a5bb1ee6904a0d8e3c4f9996962df1",
+    "admitted": 1,
+    "captures": 1,
+    "instance_generations": 1,
+    "offscreen_pose_updates": 120,
+    "publications": 120,
+    "failed_updates": 0,
+    "destroyed": 1,
+    "stopped": true,
+    "update_ticks": 2757,
+    "frames": 121,
+    "frequency": 10000000,
+    "max_update_ticks": 66,
+    "limitation": "Synthetic one-owner cost; not gameplay or 32-owner performance"
+  },
+  "gpu_fixture": {
+    "path": "artifacts/remix-runtime/runs/20261022-010604-302271-return-fixture",
+    "delivery_draws": 595,
+    "delivery_frames": 600,
+    "source_records": 1896,
+    "exact_pairs": 948,
+    "state_errors": 0,
+    "normal_owned_exit": true,
+    "acknowledgements": 3,
+    "rejected_acknowledgements": 0,
+    "limitation": "Actual GPU runtime, synthetic source, not SFC camera-switch proof"
+  },
+  "failed_fixture": {
+    "path": "artifacts/remix-runtime/runs/20261022-010339-773260-return-fixture",
+    "cause": "Stale output_receiver.exe accepted version1 only; rebuilt and actual repeat passed",
+    "partial_retained": true
+  },
+  "client_sha256": "4D65761D7DD69EF1504070261B81E9C200C0AF18105033E1C4D2222C62320C29",
+  "qualification": "artifacts/d3d9-proof/persistent-tests/qualification.json",
+  "runtime_pending": [
+    "Current full-pose correlation and camera transitions in SFC",
+    "No camera-triggered asset/owner churn",
+    "Actual destruction-hook invocation and gameplay death paths",
+    "Gameplay performance comparison and remaining GPU deadline misses",
+    "Multiple displayed assets and broader object coverage"
+  ],
+  "open_vendor_warning": "common device objects were not disposed of (40)",
+  "staged": false,
+  "committed": false,
+  "next_action": "Run tools/d3d9_proof/start_d3d9_persistent_scene_session.ps1 with the familiar FCA two-ship fixture"
+}

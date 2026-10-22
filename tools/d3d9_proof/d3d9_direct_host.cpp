@@ -88,6 +88,9 @@ int wmain(int argc,wchar_t** argv){
    DirectVisualControls visuals;visuals.start(external,native.Get(),outputs[0].image.Get());
    NormalCoverage coverage;coverage.start(native.Get(),outputs[1].image.Get(),outputs[2].image.Get());
    WorkerGpuFence postFence;if(coverage.enabled)postFence.start(native.Get(),context.Get());
+   const auto postValues=visuals.image.post();
+   const bool combinedPost=coverage.enabled&&visuals.enabled&&(postValues[0]!=1||postValues[1]!=1||postValues[2]!=1);
+   if(combinedPost){visuals.grade.prepareCoverage(native.Get(),outputs[1].image.Get(),outputs[2].image.Get());std::cout<<"COMBINED_POST grade_coverage=1 draws_per_frame=1\n";}
    float offsetX=0;if(coverage.enabled){wchar_t text[64]{};require(GetEnvironmentVariableW(L"SFC_D3D9_OFFSET_X",text,64)>0,"Additive offset required");offsetX=static_cast<float>(_wtof(text));require(std::isfinite(offsetX)&&std::abs(offsetX)>1e-5f&&std::abs(offsetX)<=1e6f,"Additive offset bounds");}
    const auto sceneBytes=read(root/L"scene.bin",2*1024*1024);const auto sceneHash=output_wire::hash(sceneBytes.data(),sceneBytes.size());
    OutputPeer peer;if(argc==5)peer.start(fs::absolute(argv[3]),root,argv[4]);
@@ -136,8 +139,8 @@ int wmain(int argc,wchar_t** argv){
      const auto copiesQueued=outputTicks();
      const auto renderPoll=wait9(fence.Get(),renderPollWait);
      const auto renderReady=outputTicks();
-     const bool graded=visuals.apply(context.Get(),outputs[0].image.Get());
-     const bool covered=coverage.draw(context.Get(),state.owner,scene.width,scene.height);
+     const bool graded=combinedPost?visuals.grade.drawCoverage(context.Get(),outputs[0].image.Get(),visuals.image.post(),state.owner):visuals.apply(context.Get(),outputs[0].image.Get());
+     const bool covered=combinedPost||coverage.draw(context.Get(),state.owner,scene.width,scene.height);
      if(graded||covered){
       if(coverage.enabled)postFence.wait();else{
       context->End(consumerFence.Get());context->Flush();const auto limit=GetTickCount64()+5000;BOOL done=FALSE;HRESULT status;

@@ -1,6 +1,8 @@
 # Run only when ready to play, from the established elevated testing parent.
-param([switch]$InspectVisibility,[switch]$InspectEarlyDepth,[switch]$ObservationOnly,[switch]$SearchDepth,[switch]$BroadCapture,[switch]$DepthSnapshots,[switch]$Calibration,[switch]$PrivateShip,[switch]$VisibleShip,[switch]$TexturedShip,[switch]$CaptureShipImage,[switch]$CaptureNativeLights,[switch]$LightWiring,[switch]$LightTuning,[switch]$SceneDepth,[switch]$SourceTiming,[switch]$LiveOwnerTiming,[switch]$D3D9Additive,[switch]$LifecycleCapture,[switch]$CameraRecovery,[switch]$OffscreenPosition)
+param([switch]$InspectVisibility,[switch]$InspectEarlyDepth,[switch]$ObservationOnly,[switch]$SearchDepth,[switch]$BroadCapture,[switch]$DepthSnapshots,[switch]$Calibration,[switch]$PrivateShip,[switch]$VisibleShip,[switch]$TexturedShip,[switch]$CaptureShipImage,[switch]$CaptureNativeLights,[switch]$LightWiring,[switch]$LightTuning,[switch]$SceneDepth,[switch]$SourceTiming,[switch]$LiveOwnerTiming,[switch]$D3D9Additive,[switch]$LifecycleCapture,[switch]$CameraRecovery,[switch]$OffscreenPosition,[switch]$PersistentScene,[switch]$SynchronizedBuffer)
 $ErrorActionPreference='Stop'
+if($SynchronizedBuffer){if(-not $D3D9Additive){throw 'SynchronizedBuffer requires D3D9Additive'};$PersistentScene=$true}
+if($PersistentScene){if(-not $D3D9Additive){throw 'PersistentScene requires D3D9Additive'};$CameraRecovery=$true}
 if($OffscreenPosition){if(-not $D3D9Additive){throw 'OffscreenPosition requires D3D9Additive'};$CameraRecovery=$true}
 if($CameraRecovery){$LifecycleCapture=$true}
 if($LifecycleCapture -and -not $D3D9Additive){throw 'LifecycleCapture requires the separate D3D9Additive test'}
@@ -45,6 +47,8 @@ if($PSVersionTable.PSVersion.Major -lt 7){
     if($LifecycleCapture){$forward+='-LifecycleCapture'}
     if($CameraRecovery){$forward+='-CameraRecovery'}
     if($OffscreenPosition){$forward+='-OffscreenPosition'}
+    if($PersistentScene){$forward+='-PersistentScene'}
+    if($SynchronizedBuffer){$forward+='-SynchronizedBuffer'}
     if($CaptureNativeLights){$forward+='-CaptureNativeLights'}
     if($LightWiring){$forward+='-LightWiring'}
     if($LightTuning){$forward+='-LightTuning'}
@@ -92,6 +96,8 @@ if($D3D9Additive){$runArgs+='--d3d9-additive'}
 if($LifecycleCapture){$runArgs+='--lifecycle-capture'}
 if($CameraRecovery){$runArgs+='--camera-recovery'}
 if($OffscreenPosition){$runArgs+='--offscreen-position'}
+if($PersistentScene){$runArgs+='--persistent-scene'}
+if($SynchronizedBuffer){$runArgs+='--synchronized-buffer'}
 if($CaptureShipImage){$runArgs+='--capture-ship-image'}elseif($TexturedShip){$runArgs+='--textured-ship'}elseif($VisibleShip){$runArgs+='--visible-ship'}elseif($PrivateShip){$runArgs+='--private-ship'}
 & 'C:\Users\rober\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe' @runArgs
 if($LASTEXITCODE -ne 0){throw 'Returned-image test needs review; original installation untouched by runner'}

@@ -87,6 +87,14 @@ Limits/unsupported/failed read produce PARTIAL,not fallback poses or game writes
 
 ## Evidence and acceptance
 
+Run103 interpretation correction: future analysis uses the captured moving
+`base_position` (+34/+38/+3C) rather than additional translation (+E6/+EA/+EE)
+alone. Run101's original automated PARTIAL is preserved as historical evidence;
+its curated review confirms24/28/94 changing base positions inside three gaps.
+No repeat discovery run is required. The new persistent path/probe is
+[PERSISTENT-SCENE-001](PERSISTENT-SCENE-001.md);this external reader is not its
+live renderer input.
+
 `OFFSCREEN-POSITION-001.jsonl`:external QPC before/after,frequency,PID,native ship
 address,initial observer label,stable/rejected status,position/raw comparison
 fields. `offscreen-position-worker.json`:fresh seeds/epoch provenance,counts,

@@ -21,6 +21,13 @@ ENV={'DXVK_LOG_LEVEL':'error','DXVK_GRAPHICS_PRESET_TYPE':'4','RTX_INTEGRATE_IND
 def digest(p):
     with open(p,'rb') as stream:
         return hashlib.file_digest(stream,'sha256').hexdigest().upper()
+def capture_file_bytes(path):
+    # A worker atomically renames its tiny .pending light packet while this
+    # supervisor inventories output. Vanished names are not missing evidence;
+    # their destination is included on this or the next bounded poll.
+    try:return path.stat().st_size if path.is_file() else 0
+    except FileNotFoundError:return 0
+
 def main():
     parser=argparse.ArgumentParser()
     parser.add_argument('--graceful',action='store_true',help='Signal stop instead of intentional renderer crash')
@@ -34,11 +41,19 @@ def main():
     parser.add_argument('--live-owner-timing',action='store_true',help='Standalone raw owner/proxy/ordinary-D3D9 GPU fixture,no SFC')
     parser.add_argument('--d3d9-additive',action='store_true',help='Offline actual-proxy/ordinary-D3D9 additive GPU fixture;NOT SFC')
     parser.add_argument('--rebind-owner',action='store_true',help='Standalone synthetic owner epochs through actual resident renderer;requires additive')
+    parser.add_argument('--persistent-scene',action='store_true',help='Exercise version2 persistent-source wire through actual GPU return fixture')
+    parser.add_argument('--synchronized-buffer',action='store_true',help='Exercise complete-game-frame/ship one-frame pairing,standalone fixture only')
+    parser.add_argument('--buffer-early-ready',action='store_true',help='Use normal16ms source lead to exercise queued output before the saved scene is presented')
     parser.add_argument('--slow-end-scene',action='store_true',help='Offline only: detach while simulated original COM call sleeps')
     parser.add_argument('--with-depth',action='store_true',help='Bind known synthetic D24S8 descriptor, not actual scene depth')
     parser.add_argument('--observation-only',action='store_true',help='No Remix runtime/image; control channel and depth observations only')
     args=parser.parse_args()
+    if args.buffer_early_ready and not args.synchronized_buffer:parser.error('--buffer-early-ready requires --synchronized-buffer')
     if args.rebind_owner and not args.d3d9_additive:parser.error('--rebind-owner requires --d3d9-additive')
+    if args.persistent_scene and not args.d3d9_additive:parser.error('--persistent-scene requires --d3d9-additive')
+    if args.synchronized_buffer:
+        if not args.d3d9_additive:parser.error('--synchronized-buffer requires --d3d9-additive')
+        args.persistent_scene=True
     if args.d3d9_additive:args.live_owner_timing=True;args.source_timing=True;args.observation_only=True;args.graceful=True
     inspect_requested=args.inspect_visibility or args.inspect_early_depth
     if args.with_depth and not (args.inspect_early_depth or args.search_depth or args.broad_capture or args.depth_snapshots):parser.error('--with-depth requires --inspect-early-depth or --search-depth or --broad-capture or --depth-snapshots')
@@ -86,7 +101,7 @@ def main():
             from run_offline import CAPTURE
             from scene_bundle import snapshots
             from live_scene import decode_mesh
-            live_relay=Relay(work,semantic,TEST,additive=args.d3d9_additive,offline_fixture=args.d3d9_additive)
+            live_relay=Relay(work,semantic,TEST,additive=args.d3d9_additive,offline_fixture=args.d3d9_additive,persistent=args.persistent_scene,buffered=args.synchronized_buffer)
             mesh=decode_mesh((CAPTURE/'LIVE-SCENE-001-asset-3.bin').read_bytes(),(CAPTURE/'LIVE-SCENE-001-asset-3.json').read_bytes())
             selected_frames=snapshots(mesh,CAPTURE/'LIVE-SCENE-001-updates.jsonl',3)
             all_rows=(CAPTURE/'LIVE-SCENE-001-updates.jsonl').read_text().splitlines()
@@ -108,6 +123,11 @@ def main():
         if args.broad_capture:env['SFC_REMIX_BROAD_OUTPUT']=str(work/'broad.bin')
         env['SFC_REMIX_INSPECT_VISIBILITY']='3' if args.search_depth else ('2' if args.inspect_early_depth else ('1' if args.inspect_visibility else '0'))
         env.pop('SFC_RETURN_FIXTURE_DEPTH',None)
+        env.pop('SFC_D3D9_SYNC_BUFFER',None)
+        env.pop('SFC_SYNC_FIXTURE_SHORT_LEAD',None)
+        if args.synchronized_buffer:
+            env['SFC_D3D9_SYNC_BUFFER']='1'
+            if not args.buffer_early_ready:env['SFC_SYNC_FIXTURE_SHORT_LEAD']='1'
         env.pop('SFC_RETURN_OBSERVATION_ONLY',None)
         env.pop('SFC_RETURN_EXPANDED_SEARCH',None)
         env.pop('SFC_RETURN_SLOW_END',None)
@@ -120,9 +140,9 @@ def main():
         disabled_at=None;reenabled=False;killed=False;last=0;rebind_requests=[]
         while fixture.poll() is None:
             elapsed=time.monotonic()-start
-            size=sum(p.stat().st_size for p in work.rglob('*') if p.is_file())
+            size=sum(capture_file_bytes(p) for p in work.rglob('*'))
             if args.d3d9_additive:
-                images=sum(p.stat().st_size for p in (work/'gpu').rglob('*') if p.is_file() and (p.suffix.lower()=='.dds' or re.fullmatch(r'texture-\d+\.bin',p.name)))
+                images=sum(capture_file_bytes(p) for p in (work/'gpu').rglob('*') if p.suffix.lower()=='.dds' or re.fullmatch(r'texture-\d+\.bin',p.name))
                 if images>128*1024*1024:raise RuntimeError('Additive original/derived image128MiB cap')
                 size-=images # Separate established image budget;logs remain32MiB.
             if elapsed>100 or size>(broad_capture.HARD+32*1024*1024 if args.broad_capture else (96*1024*1024 if args.depth_snapshots else 32*1024*1024)):raise RuntimeError('Fixture time/output cap')
@@ -235,6 +255,9 @@ def main():
         for f in streams:f.close()
         (work/'result.json').write_text(json.dumps({'probe':'REMIX-RETURN-001-FIXTURE','expanded_search':search,'observation_only':args.observation_only,'graceful':args.graceful,'inspect_early_depth':args.inspect_early_depth,'inspect_visibility':args.inspect_visibility,'known_fixture_depth':args.with_depth,'error':error,'seconds':time.monotonic()-start,'host_exit':host.returncode if host else None,'fixture_exit':fixture.returncode if fixture else None,'history':history,'final':final,'runtime_environment':ENV,'source_files':{p.name:digest(p) for p in (BIN/'return_host.exe',BIN/'SFCRemixReturn.dll',BIN/'d3d11_return_fixture.exe',BIN/'return_launcher.exe')}},indent=2))
     receipt=json.loads((work/'result.json').read_text());receipt.update(source_timing_requested=args.source_timing,source_timing=timing_result,live_owner_timing=live_result)
+    receipt['persistent_wire_fixture']=args.persistent_scene
+    receipt['synchronized_buffer_fixture']=args.synchronized_buffer
+    receipt['buffer_early_ready_fixture']=args.buffer_early_ready
     if args.rebind_owner:receipt['synthetic_rebind_requests']=rebind_requests
     (work/'result.json').write_text(json.dumps(receipt,indent=2))
     print(f'Evidence: {work}')

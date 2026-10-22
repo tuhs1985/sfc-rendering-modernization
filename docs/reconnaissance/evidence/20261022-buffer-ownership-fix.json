@@ -1,0 +1,40 @@
+{
+  "run": "Run108",
+  "head": "0fc1300",
+  "result": "OFFLINE_BUFFER_OWNERSHIP_FIX_PREPARED",
+  "sfc_retest_pending": true,
+  "python_tests": 425,
+  "native_slot_checks": 649,
+  "actual_GPU_checks_per_architecture": 33,
+  "old_early_fixture": {"path": "artifacts/remix-runtime/runs/20261022-041110-375397-return-fixture", "draws": 298, "window": 600, "partial": true},
+  "early_ready": {
+    "path": "artifacts/remix-runtime/runs/20261022-041830-729796-return-fixture",
+    "draws": 589, "window": 600, "total_paired": 590, "records": 604,
+    "without_ship": 7, "warmup": 5, "reset": 2, "dropped": 0, "failed": 0,
+    "overwritten": 0, "busy": 3, "retain_ready": true, "worker_releases": 590,
+    "max_saved_age_us": 43901,
+    "audit_sha256": "a56340e1d1674d36cb3b4cfbf0b2e59fc47a515ebbb58d771773b44c53ed5fad"
+  },
+  "late_ready": {
+    "path": "artifacts/remix-runtime/runs/20261022-041923-373411-return-fixture",
+    "draws": 588, "window": 600, "total_paired": 589, "records": 599,
+    "without_ship": 4, "warmup": 4, "reset": 2, "dropped": 0, "failed": 0,
+    "overwritten": 0, "busy": 5, "retain_ready": true, "worker_releases": 589,
+    "max_saved_age_us": 31893,
+    "audit_sha256": "467a18f5f68235d2746905fe86a2451df5f483ba40065e5d1c2c3b86652ffc9d"
+  },
+  "unbuffered_baseline": {"path": "artifacts/remix-runtime/runs/20261022-042011-310157-return-fixture", "draws": 595, "window": 600},
+  "qualified_early_and_late": true,
+  "no_extra_image_surfaces": true,
+  "conservative_output_bytes": 116121600,
+  "history_bytes": 33177600,
+  "limit_frames": 1,
+  "hard_expiry_ms": 50,
+  "artifacts_bytes_after_archiving": 12606421165,
+  "original_copied_client_sha256": "4D65761D7DD69EF1504070261B81E9C200C0AF18105033E1C4D2222C62320C29",
+  "copied_proxy_sha256": "E35E4E2E47F4765F0799CB54C88E5ADE49B50CD7895C137B9D557F263344CAB7",
+  "no_active_owned_processes": true,
+  "staged": false,
+  "committed": false,
+  "limits": ["Not zero omissions", "Not physical input latency", "No corrected SFC gameplay yet", "No actual device-loss injection", "No original ship suppression or formal milestone claim"]
+}

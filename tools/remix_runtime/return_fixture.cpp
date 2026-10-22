@@ -14,6 +14,7 @@
 #include "broad_trace.h"
 #include "source_timing_fixture.h"
 #include "../d3d9_proof/game_output_wire.h"
+#include "../d3d9_proof/synchronized_frame.h"
 using Microsoft::WRL::ComPtr;
 static void check(HRESULT h,const char* text){if(FAILED(h))throw std::runtime_error(text);}
 static LRESULT CALLBACK proc(HWND w,UINT m,WPARAM p,LPARAM l){return DefWindowProcW(w,m,p,l);}
@@ -139,11 +140,19 @@ struct Scene {
     D3D11_PRIMITIVE_TOPOLOGY topology{};context->IAGetPrimitiveTopology(&topology);
     return bs.Get()==blend.Get()&&ds.Get()==depth.Get()&&rs.Get()==raster.Get()&&rt.Get()==target.Get()&&boundDepth.Get()==(depthUnbound?nullptr:fixtureDepth.Get())&&mask==0xFFFFFFFA&&stencil==42&&factor[0]==0.1f&&factor[3]==0.4f&&n==1&&vp.TopLeftX==3&&vp.TopLeftY==4&&vp.Width==width-10&&vp.Height==height-20&&vp.MinDepth==0.2f&&vp.MaxDepth==0.8f&&nr==1&&rect.left==10&&rect.bottom==400&&topology==D3D11_PRIMITIVE_TOPOLOGY_LINELIST;
   }
-  void shipSample(){
+  void stampFrame(DWORD frame){
+    ComPtr<ID3D11Texture2D> back;check(swap->GetBuffer(0,IID_PPV_ARGS(&back)),"stamp back");
+    DWORD markers[]{0xff000000u|(frame&0xffffffu),0xff000000u|((frame^0x55aa55u)&0xffffffu)};
+    const unsigned y[]{4,height-5};for(unsigned i=0;i<2;++i){D3D11_BOX box{100,y[i],0,101,y[i]+1,1};context->UpdateSubresource(back.Get(),0,&box,&markers[i],4,4);}
+  }
+  void shipSample(DWORD expectedScene=0){
     ComPtr<ID3D11Texture2D> back;check(swap->GetBuffer(0,IID_PPV_ARGS(&back)),"game fixture backbuffer");D3D11_TEXTURE2D_DESC desc{};back->GetDesc(&desc);
     desc.Usage=D3D11_USAGE_STAGING;desc.BindFlags=desc.MiscFlags=0;desc.CPUAccessFlags=D3D11_CPU_ACCESS_READ;
     ComPtr<ID3D11Texture2D> staging;check(device->CreateTexture2D(&desc,nullptr,&staging),"game fixture one-shot staging");context->CopyResource(staging.Get(),back.Get());
     D3D11_MAPPED_SUBRESOURCE p{};check(context->Map(staging.Get(),0,D3D11_MAP_READ,0,&p),"game fixture one-shot pixels");unsigned changed=0;bool border=true;
+    if(expectedScene){DWORD actual[2]{};memcpy(&actual[0],static_cast<BYTE*>(p.pData)+4*p.RowPitch+400,4);memcpy(&actual[1],static_cast<BYTE*>(p.pData)+(height-5)*p.RowPitch+400,4);
+      const bool exact=actual[0]==(0xff000000u|(expectedScene&0xffffffu))&&actual[1]==(0xff000000u|((expectedScene^0x55aa55u)&0xffffffu));
+      std::cout<<"BUFFERED_SCENE_PIXELS frame="<<expectedScene<<" native_HUD_and_scene_exact="<<exact<<'\n';if(!exact)throw std::runtime_error("Buffered background/HUD mixed with newer frame");}
     for(unsigned y=0;y<height;++y){const auto* row=static_cast<const unsigned char*>(p.pData)+y*p.RowPitch;for(unsigned x=0;x<width;++x){const auto* c=row+x*4;
       const bool different=std::abs(int(c[0])-77)>3||std::abs(int(c[1])-13)>3||std::abs(int(c[2])-5)>3;
       changed+=different;if(x<80&&y>height-80&&different)border=false;
@@ -214,15 +223,19 @@ int wmain(){
           auto* rt=scene.target.Get();scene.context->OMSetRenderTargets(1,&rt,nullptr);
         }
         if(expanded){if(!preserved(probeBegin)||!preserved(probeEnd)||!preserved(invokeAfterFlush,true)||!preserved(probePresent))throw std::runtime_error("engine observer stack/flags/FP state changed");}
+        const bool synchronized=GetEnvironmentVariableW(L"SFC_D3D9_SYNC_BUFFER",nullptr,0)!=0;
+        if(synchronized)scene.stampFrame(200001+frames);
         if(!gameOutput)sourceTiming.publish(frames+1);check(scene.swap->Present(0,0),"fixture present");++frames;if(!scene.statePreserved(broad||snapshot||gameOutput))++stateErrors;
         if(gameOutput){
           auto* base=reinterpret_cast<BYTE*>(sourceTiming.source.mailbox)-sfc_calibration::Offset;auto& pool=*reinterpret_cast<game_output::Pool*>(base+game_output::Offset);
-          if(!imageSample&&pool.stats.drawn&&pool.stats.frame==200000+frames){scene.shipSample();imageSample=true;imageStartFrame=frames;imageStartDraws=pool.stats.drawn;}
+          if(!imageSample&&pool.stats.drawn&&pool.stats.frame+(synchronized?1u:0u)==200000+frames){scene.shipSample(synchronized?pool.stats.frame:0);imageSample=true;imageStartFrame=frames;imageStartDraws=pool.stats.drawn;}
+          if(synchronized&&imageSample&&frames==imageStartFrame+200){return_path::write(s.enabled,0);std::cout<<"BUFFER_FIXTURE_DISABLED frame="<<frames<<'\n';}
+          if(synchronized&&imageSample&&frames==imageStartFrame+205){return_path::write(s.enabled,1);std::cout<<"BUFFER_FIXTURE_REENABLED frame="<<frames<<'\n';}
           if(!resized&&imageSample&&frames>=imageStartFrame+600){std::cout<<"GAME_DELIVERY_WINDOW frames="<<frames-imageStartFrame<<" draws="<<pool.stats.drawn-imageStartDraws<<'\n';scene.resize();resized=true;resizedFrame=frames;}
           if(resized&&!recreated&&frames>=resizedFrame+90){scene.reset();scene.width=1920;scene.height=1080;scene.init(window);recreated=true;}
           if(recreated&&frames>=resizedFrame+180)break;
         }
-        if(sourceTiming.enabled){if(!gameOutput&&frames==(sourceTiming.liveEnabled?450u:90u)){scene.resize();resized=true;}if(!gameOutput&&frames==(sourceTiming.liveEnabled?900u:180u)){scene.reset();scene.init(window);recreated=true;}if(!gameOutput&&frames>=(sourceTiming.liveEnabled?1800u:210u))break;if(!sourceTiming.liveEnabled)Sleep(16);continue;}
+        if(sourceTiming.enabled){if(!gameOutput&&frames==(sourceTiming.liveEnabled?450u:90u)){scene.resize();resized=true;}if(!gameOutput&&frames==(sourceTiming.liveEnabled?900u:180u)){scene.reset();scene.init(window);recreated=true;}if(!gameOutput&&frames>=(sourceTiming.liveEnabled?1800u:210u))break;if(!sourceTiming.liveEnabled)Sleep(16);else if(synchronized)Sleep(13);continue;}
         if(snapshot){if(GetTickCount64()-start>16000)break;Sleep(16);continue;}
         if(broad){
           if(frames==90){scene.resize();resized=true;}

@@ -10,14 +10,15 @@ class Compositor {
  ComPtr<ID3D11DeviceContext> immediate,deferred;
  ComPtr<ID3D11VertexShader> vertex;
  ComPtr<ID3D11PixelShader> pixel;
- const bool sceneDepth,nativeScreen;
+ const bool sceneDepth,nativeScreen,resolvedDepth;
  ComPtr<ID3D11Buffer> parameters;
  ComPtr<ID3D11RasterizerState> raster;
  ComPtr<ID3D11DepthStencilState> noDepth;
  ComPtr<ID3D11BlendState> opaque;
  struct Parameters {float origin[2],scale[2];uint32_t owner,width,height,pad;float nativeMap[4];};
 public:
- explicit Compositor(ID3D11Device* device,bool useSceneDepth=false,bool nativeScreenOutput=false):sceneDepth(useSceneDepth),nativeScreen(nativeScreenOutput){
+ explicit Compositor(ID3D11Device* device,bool useSceneDepth=false,bool nativeScreenOutput=false,bool resolvedSceneDepth=false):sceneDepth(useSceneDepth),nativeScreen(nativeScreenOutput),resolvedDepth(resolvedSceneDepth){
+  if(resolvedDepth&&!sceneDepth)throw std::runtime_error("Resolved depth requires scene depth");
   if(device->GetFeatureLevel()<D3D_FEATURE_LEVEL_10_1)throw std::runtime_error("compositor feature level");
   device->GetImmediateContext(&immediate);
   checked(device->CreateDeferredContext(0,&deferred),"compositor deferred");
@@ -27,7 +28,11 @@ Texture2D<float4> color:register(t0);
 Texture2D<float> depth:register(t1);
 Texture2D<float> picking:register(t2);
 #ifdef SCENE_DEPTH
+#ifdef RESOLVED_DEPTH
+Texture2D<float> scene:register(t3);
+#else
 Texture2DMS<float,8> scene:register(t3);
+#endif
 #endif
 cbuffer Params:register(b0){float2 origin;float2 scale;uint owner;uint width;uint height;uint pad;float4 nativeMap;};
 float4 main(float4 p:SV_Position):SV_Target{
@@ -37,14 +42,18 @@ float4 main(float4 p:SV_Position):SV_Target{
  float z=depth.Load(int3(q,0));if(!isfinite(z)||z<0||z>1)discard;
 #ifdef SCENE_DEPTH
  int2 n=int2(floor(nativeMap.xy+(float2(q)+.5)*nativeMap.zw));
+#ifdef RESOLVED_DEPTH
+ float closest=scene.Load(int3(n,0));if(!isfinite(closest)||closest<0||closest>1)discard;
+#else
  float closest=1;
  [unroll]for(int s=0;s<8;++s){float d=scene.Load(n,s);if(!isfinite(d)||d<0||d>1)discard;closest=min(closest,d);}
+#endif
  if(z>closest)discard;
 #endif
  return float4(color.Load(int3(q,0)).rgb,1);
 })";
   ComPtr<ID3DBlob> vb,pb;
-  const D3D_SHADER_MACRO definitions[]={{"SCENE_DEPTH","1"},{nullptr,nullptr}};
+  const D3D_SHADER_MACRO definitions[]={{"SCENE_DEPTH","1"},{resolvedDepth?"RESOLVED_DEPTH":nullptr,resolvedDepth?"1":nullptr},{nullptr,nullptr}};
   checked(D3DCompile(vs,strlen(vs),nullptr,nullptr,nullptr,"main","vs_4_1",D3DCOMPILE_ENABLE_STRICTNESS,0,&vb,nullptr),"compositor VS compile");
   checked(D3DCompile(ps,strlen(ps),nullptr,sceneDepth?definitions:nullptr,nullptr,"main","ps_4_1",D3DCOMPILE_ENABLE_STRICTNESS,0,&pb,nullptr),"compositor PS compile");
   checked(device->CreateVertexShader(vb->GetBufferPointer(),vb->GetBufferSize(),nullptr,&vertex),"compositor VS");
@@ -74,8 +83,9 @@ float4 main(float4 p:SV_Position):SV_Target{
    ComPtr<ID3D11Texture2D> t;if(FAILED(r.As(&t)))return false;D3D11_TEXTURE2D_DESC n{};t->GetDesc(&n);
    D3D11_SHADER_RESOURCE_VIEW_DESC s{};nativeDepth->GetDesc(&s);
    ComPtr<ID3D11Device> a,b;target->GetDevice(&a);nativeDepth->GetDevice(&b);
-   if(a.Get()!=b.Get()||s.ViewDimension!=D3D11_SRV_DIMENSION_TEXTURE2DMS||s.Format!=DXGI_FORMAT_R32_FLOAT||
-      n.Format!=DXGI_FORMAT_R32_TYPELESS||n.SampleDesc.Count!=8||n.SampleDesc.Quality||n.ArraySize!=1||n.MipLevels!=1||
+   const bool shape=resolvedDepth?(s.ViewDimension==D3D11_SRV_DIMENSION_TEXTURE2D&&n.Format==DXGI_FORMAT_R32_FLOAT&&n.SampleDesc.Count==1):
+     (s.ViewDimension==D3D11_SRV_DIMENSION_TEXTURE2DMS&&n.Format==DXGI_FORMAT_R32_TYPELESS&&n.SampleDesc.Count==8);
+   if(a.Get()!=b.Get()||!shape||s.Format!=DXGI_FORMAT_R32_FLOAT||n.SampleDesc.Quality||n.ArraySize!=1||n.MipLevels!=1||
       uint64_t(key.viewport[0])+key.viewport[2]>n.Width||uint64_t(key.viewport[1])+key.viewport[3]>n.Height)return false;
   }else if(nativeDepth)return false;
   Parameters p{{viewport.TopLeftX,viewport.TopLeftY},{key.width/viewport.Width,key.height/viewport.Height},key.objectId,key.width,key.height,0,

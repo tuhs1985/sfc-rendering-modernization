@@ -52,13 +52,14 @@ enum EventKind : DWORD {
     kRetire = 6,
     kWrapper = 7,
     kPrepare = 8,
-    kEventKindCount = 9,
+    kDestroy = 9,
+    kEventKindCount = 10,
 };
 
 const char* event_name(DWORD kind) {
     static const char* names[] = {
         "scene_begin", "ship_owner", "visual_model", "model0",
-        "visual_exit", "geometry_submit", "owner_retired", "polygon_wrapper", "polygon_prepare"
+        "visual_exit", "geometry_submit", "owner_retired", "polygon_wrapper", "polygon_prepare", "ship_destroy"
     };
     return kind < kEventKindCount ? names[kind] : "unknown";
 }
@@ -310,6 +311,9 @@ void* g_tramp_visual_exit = nullptr;
 void* g_tramp_geometry = nullptr;
 void* g_tramp_wrapper = nullptr;
 void* g_tramp_prepare = nullptr;
+void* g_tramp_destroy = nullptr;
+bool g_persistent_requested=false;
+const BYTE kDestroyBytes[]={0xb8,0x13,0xbb,0x75,0x00};
 
 const BYTE kSceneBytes[] = {0x53, 0x56, 0x8B, 0xF1, 0x57};
 const BYTE kShipBytes[] = {0x55, 0x8B, 0xEC, 0x83, 0xEC, 0x50};
@@ -328,6 +332,7 @@ extern "C" void HookVisualExit();
 extern "C" void HookGeometry();
 extern "C" void HookWrapper();
 extern "C" void HookPrepare();
+extern "C" void HookDestroy();
 
 #ifdef M1_GATE_ONLY
 std::array<Hook, 1> g_hooks = {{
@@ -335,7 +340,7 @@ std::array<Hook, 1> g_hooks = {{
         reinterpret_cast<void*>(&HookShip)},
 }};
 #else
-std::array<Hook, 8> g_hooks = {{
+std::array<Hook, 9> g_hooks = {{
     {"scene_begin", 0x0029E300, kSceneBytes, sizeof(kSceneBytes),
         reinterpret_cast<void*>(&HookScene)},
     {"ship_owner", 0x000162B9, kShipBytes, sizeof(kShipBytes),
@@ -352,6 +357,7 @@ std::array<Hook, 8> g_hooks = {{
         reinterpret_cast<void*>(&HookWrapper)},
     {"polygon_prepare",0x002ABFC0,kPrepareBytes,sizeof(kPrepareBytes),
         reinterpret_cast<void*>(&HookPrepare)},
+    {"ship_destroy",0x000158C1,kDestroyBytes,sizeof(kDestroyBytes),reinterpret_cast<void*>(&HookDestroy)},
 }};
 #endif
 
@@ -954,7 +960,18 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
     EnterCriticalSection(&g_lock);
     ThreadState* state = thread_state(thread_id);
 
-    if(kind==kPrepare) {
+    if(kind==kDestroy) {
+        event.origin=0x004158C1;event.ship=event.ecx;event.owner_id=g_owners.find_by_ship(event.ship);
+        if(g_persistent_requested&&event.owner_id){
+            const auto elapsed=static_cast<DWORD>(GetTickCount64()-g_gate_tick);
+            g_live_scene.retire(event.owner_id,static_cast<DWORD>(g_frame),elapsed);
+            if(auto* m=g_live_scene.calibration){if(sfc_calibration::lock(m)){
+                for(auto& row:m->snapshot.owner)if(row[1]==event.owner_id)row[4]=2;
+                sfc_calibration::unlock(m);
+            }}
+            g_owners.destroy_ship(event.ship);append_event_locked(event);
+        }
+    } else if(kind==kPrepare) {
         if(g_config.enable_surface_lighting && g_surface_graphs.built) {
             const DWORD pointer=event.arg3;
             DWORD phase=0;
@@ -991,6 +1008,8 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
         ++g_wrapper_total;++g_wrapper_outcomes[outcome];
         if(outcome==1 || outcome==2) ++state->wrapper_pending;
         observe_mesh_export(state,event,outcome,safe_copy);
+        if(outcome==1&&g_live_scene_mode&&g_live_scene.persistent)
+            g_live_scene.updatePersistent(event.ecx,static_cast<DWORD>(g_frame),static_cast<DWORD>(GetTickCount64()-g_gate_tick),safe_copy);
         const auto index=g_wrapper_total<=32?g_wrapper_total-1:32+(g_wrapper_total-33)%32;
         auto& s=g_wrapper_samples[static_cast<std::size_t>(index)];
         s.data={static_cast<DWORD>(g_gate?GetTickCount64()-g_gate_tick:0),
@@ -1063,6 +1082,8 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
             DWORD frame = static_cast<DWORD>(InterlockedIncrement(&g_frame));
             if(g_live_scene_mode){g_live_scene.directSource.begin(frame);sfc_calibration::begin(g_live_scene.calibration,frame);}
             if (frame > 2) {
+                if(g_live_scene.persistent)for(const auto& entry:g_live_scene.registry.entries)
+                    if(entry.live)g_owners.retain_simulation_owner(entry.id.owner,frame);
                 g_owners.retire_before(frame - 2, [&](const auto& slot) {
                     if(!g_config.live_channel.empty()){
                         const auto elapsed=static_cast<DWORD>(GetTickCount64()-g_gate_tick);
@@ -1338,6 +1359,7 @@ extern "C" void __declspec(naked) HookWrapper() {
 extern "C" void __declspec(naked) HookPrepare() {
     M1_HOOK_BODY(8, g_tramp_prepare)
 }
+extern "C" void __declspec(naked) HookDestroy() {M1_HOOK_BODY(9,g_tramp_destroy)}
 
 #undef M1_HOOK_BODY
 
@@ -1428,6 +1450,7 @@ void assign_trampolines() {
     g_tramp_geometry = g_hooks[5].trampoline;
     g_tramp_wrapper = g_hooks[6].trampoline;
     g_tramp_prepare = g_hooks[7].trampoline;
+    g_tramp_destroy = g_hooks[8].trampoline;
 #endif
 }
 
@@ -1857,8 +1880,14 @@ extern "C" UINT WINAPI timeSetEvent(UINT delay, UINT resolution,
 #endif
 
 extern "C" DWORD WINAPI M1StartW(void* parameter) {
+    wchar_t persistentMode[2]{};
+    g_persistent_requested=GetEnvironmentVariableW(L"SFC_PERSISTENT_SCENE",persistentMode,2)==1&&persistentMode[0]==L'1';
+#ifdef M1_GATE_ONLY
+    g_persistent_requested=false;
+#endif
     if (InterlockedCompareExchange(&g_running, 0, 0)) return 10;
     if (!load_config(static_cast<const wchar_t*>(parameter))) return 1;
+    if(g_persistent_requested&&g_config.live_channel.empty())return 1;
     const DWORD module_base = reinterpret_cast<DWORD>(GetModuleHandleW(nullptr));
     if (module_base != kImageBase) return 2;
 
@@ -1891,6 +1920,7 @@ extern "C" DWORD WINAPI M1StartW(void* parameter) {
     }
 
     for (Hook& hook : g_hooks) {
+        if(!g_persistent_requested&&std::strcmp(hook.name,"ship_destroy")==0)continue;
         if(!g_config.enable_private_copy && std::strcmp(hook.name,"polygon_prepare")==0) continue;
         if(!g_config.enable_wrapper_observation && std::strcmp(hook.name,"polygon_wrapper")==0) continue;
         if (!g_config.enable_geometry_hook &&
@@ -1909,6 +1939,7 @@ extern "C" DWORD WINAPI M1StartW(void* parameter) {
     if (!suspend_ok) { write_thread_failure("start"); stop_live(); return 5; }
     bool installed = true;
     for (Hook& hook : g_hooks) {
+        if(!g_persistent_requested&&std::strcmp(hook.name,"ship_destroy")==0)continue;
         if(!g_config.enable_private_copy && std::strcmp(hook.name,"polygon_prepare")==0) continue;
         if(!g_config.enable_wrapper_observation && std::strcmp(hook.name,"polygon_wrapper")==0) continue;
         if (!g_config.enable_geometry_hook &&

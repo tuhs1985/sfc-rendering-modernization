@@ -20,9 +20,9 @@ struct alignas(64) Stats {volatile LONG drawn,stale,invalid,not_ready,retired,gp
 struct alignas(64) Pool {Header header;BYTE asset[32];float camera_offset[3];uint32_t diagnostic_mode,reserved[4];output_wire::Channel slots[2];Stats stats;};
 static_assert(sizeof(Header)==64&&sizeof(Stats)==64&&sizeof(Pool)==576&&Offset+sizeof(Pool)<12*1024*1024);
 inline bool valid(const Header& h,const DWORD* session,uint32_t game){return h.magic==Magic&&h.version==Version&&h.bytes==sizeof(Pool)&&h.game_pid==game&&game&&h.receiver_pid&&h.host_pid&&memcmp(h.session,session,16)==0;}
-inline int reserve(Pool& pool){
+inline int reserve(Pool& pool,bool retainReady=false){
  if(InterlockedCompareExchange(&pool.header.stopped,0,0))return -1;
- for(unsigned pass=0;pass<2;++pass)for(unsigned i=0;i<2;++i){const LONG prior=pass?output_wire::ready:output_wire::idle;
+ for(unsigned pass=0;pass<(retainReady?1u:2u);++pass)for(unsigned i=0;i<2;++i){const LONG prior=pass?output_wire::ready:output_wire::idle;
   if(InterlockedCompareExchange(&pool.slots[i].state,Writing,prior)==prior){if(pass)InterlockedIncrement(&pool.header.overwritten);return static_cast<int>(i);}
  }InterlockedIncrement(&pool.header.busy);return -1;
 }

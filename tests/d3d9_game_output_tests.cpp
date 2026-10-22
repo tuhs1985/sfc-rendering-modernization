@@ -32,6 +32,21 @@ int main(){unsigned checks=0;auto test=[&](bool ok){++checks;if(!ok){std::cerr<<
  p.slots[0].state=output_wire::acquired;test(game_output::reserve(p)==-1);test(p.slots[0].state==output_wire::acquired);
  p.slots[1].state=output_wire::idle;test(game_output::reserve(p)==1);
  p.header.stopped=1;p.slots[0].state=output_wire::idle;test(game_output::reserve(p)==-1);
+ // Regression:one GPU read pending,one exact next-frame output queued. The
+ // old latest-wins policy overwrites it;buffered policy must preserve it.
+ p.header.stopped=0;p.slots[0].state=output_wire::acquired;p.slots[1].state=output_wire::ready;
+ const auto overwritten=p.header.overwritten;test(game_output::reserve(p,true)==-1);
+ test(p.slots[0].state==output_wire::acquired&&p.slots[1].state==output_wire::ready&&p.header.overwritten==overwritten);
+ p.slots[0].state=output_wire::idle;test(game_output::reserve(p,true)==0);test(p.slots[1].state==output_wire::ready);
+ // Deterministic early-ready pipeline:worker observes GPU read completion and
+ // releases a slot BEFORE producer publication;queued frame is immutable.
+ p={};unsigned delivered=0;int pending=-1;uint64_t queuedFrame[2]{};
+ for(uint64_t frame=1;frame<=600;++frame){
+  if(pending>=0){p.slots[pending].state=output_wire::idle;pending=-1;}
+  const int slot=game_output::reserve(p,true);test(slot>=0);queuedFrame[slot]=frame;p.slots[slot].state=output_wire::ready;
+  for(int i=0;i<2;++i)if(p.slots[i].state==output_wire::ready&&queuedFrame[i]+1==frame){p.slots[i].state=output_wire::acquired;pending=i;++delivered;break;}
+ }
+ test(delivered==599&&p.header.overwritten==0&&p.header.busy==0);
  DWORD session[4]{1,2,3,4};game_output::Metadata m{};m.source_sequence=7;memcpy(m.source_session,session,16);m.checksum=game_output::checksum(m);
  test(game_output::valid(m,session));game_output::metadata(p.slots[0],m);test(game_output::metadata(p.slots[0]).source_sequence==7);
  auto bad=m;bad.checksum^=1;test(!game_output::valid(bad,session));bad=m;bad.source_session[0]=9;bad.checksum=game_output::checksum(bad);test(!game_output::valid(bad,session));

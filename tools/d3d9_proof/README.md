@@ -1,5 +1,12 @@
 # Plain D3D9 offline proof
 
+**Current path:** the live in-game experiment now uses this D3D9 adapter with
+persistent FCA tracking and a synchronized GPU return buffer. See the
+[project pipeline overview](../../README.md#how-it-fits-together) and newest
+[handoff](../../docs/HANDOFF.md). The sections below preserve the individual
+offline/interception gates and their then-current limitations; do not treat
+their original unlit/offline-only scope as the latest integrated status.
+
 No SFC launch,game modification,Remix DLL/SDK,Toolkit,USD ingestion or live bridge.
 See [contract](../../docs/reconnaissance/scene-contract-v1.md) and current HANDOFF.
 Source assets are bounded historical runtime captures;model filenames are labels,

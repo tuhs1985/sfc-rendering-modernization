@@ -107,6 +107,8 @@ def main():
     parser.add_argument('--lifecycle-capture',action='store_true',help='Separate bounded camera-gap/destruction observations;no native death inference')
     parser.add_argument('--camera-recovery',action='store_true',help='Two alive camera-away/back checks;no destruction requested')
     parser.add_argument('--offscreen-position',action='store_true',help='Default-off external read-only ship position across camera gaps;not renderer input')
+    parser.add_argument('--persistent-scene',action='store_true',help='Simulation-driven retained native instances;player-ship display first')
+    parser.add_argument('--synchronized-buffer',action='store_true',help='One complete game-frame delay paired with same-frame ship/depth;default off')
     inspect.add_argument('--private-ship',action='store_true',help='Fresh semantic SDK ship return into private game-side target;no visible change')
     inspect.add_argument('--visible-ship',action='store_true',help='Fresh matching magenta ship at world-offset position in original camera viewport;original ships unchanged')
     inspect.add_argument('--textured-ship',action='store_true',help='Original textures,screen-resolution output,bounded delayed additive display;no suppression')
@@ -118,6 +120,16 @@ def main():
     parser.add_argument('--light-tuning',action='store_true',help='Low-recording live controls until normal game exit;30minute tactical ceiling')
     parser.add_argument('--scene-depth',action='store_true',help='Default-off depth-filtered additive ship;original drawing/UI path unchanged')
     args=parser.parse_args()
+    if args.synchronized_buffer:
+        if not args.d3d9_additive:parser.error('--synchronized-buffer requires --d3d9-additive')
+        args.persistent_scene=True
+        from qualify_synchronized_buffer import require_qualification as buffer_qualified
+        buffer_qualified()
+    if args.persistent_scene:
+        if not args.d3d9_additive or args.offscreen_position:parser.error('--persistent-scene requires additive and excludes diagnostic external reader')
+        args.camera_recovery=True
+        from qualify_persistent_scene import require_qualification as persistent_qualified
+        persistent_qualified()
     if args.scene_depth:
         if args.light_tuning or args.capture_ship_image:parser.error('--scene-depth is a bounded standalone test,not tuning/image capture')
         args.light_wiring=True
@@ -245,9 +257,16 @@ def main():
     if args.source_timing:metadata['scene']='Semantic source/Present timing,no game drawing'
     if args.live_owner_timing:metadata['scene']='Fresh semantic owner to separate ordinary-D3D9/Remix GPU receiver;current Present audit only,no game drawing'
     if args.d3d9_additive:metadata.update(probe='D3D9-ADDITIVE-001',scene='Fresh ordinary-D3D9/Remix textured ship at fixed world offset;exact-current-frame GPU return;original drawing ON',output_resources_bytes=82944000,image_limit_bytes=128*1024*1024,display_policy='Exact source identity/frame only;no stale hold;resize hides until fresh session')
+    if args.persistent_scene:metadata['persistent_scene']=dict(protocol=2,registry_owners=32,pose_source='SHIP_SIMULATION_FIELDS',renderer='Existing ordinary D3D9 retained assets',initial_display='Configured player fixture',visibility_does_not_retire=True)
+    if args.synchronized_buffer:
+        metadata['synchronized_buffer']=dict(frames=1,max_age_ms=50,complete_native_HUD_delayed=True,prediction=False,stale_overlay_hold=False)
+        metadata.update(output_resources_bytes=1920*1080*4*14,display_policy='One adjacent complete game frame with matching output/depth;50ms bound;no stale overlay on a newer scene')
     if args.lifecycle_capture:
         from lifecycle_capture import PHASES,RECOVERY_PHASES
         if args.camera_recovery:PHASES=RECOVERY_PHASES
+        if args.persistent_scene:
+            from offscreen_position import PHASES
+        if args.synchronized_buffer:PHASES=()
         if args.offscreen_position:
             from offscreen_position import PHASES
             metadata['offscreen_position']=dict(probe='OFFSCREEN-POSITION-001',owners=2,hz_max=20,
@@ -255,6 +274,7 @@ def main():
                 renderer_input=False,lifetime_proven=False)
         metadata['lifecycle_capture']=dict(probe='D3D9-LIFECYCLE-001',detail_hz_max=20,detail_records_per_slot=2700,detail_bytes=16*1024*1024,event_queue_records=256,event_bytes=1024*1024,phases=PHASES,native_death_signal_qualified=False)
         metadata['lifecycle_capture']['mode']='camera_return_alive' if args.camera_recovery else 'camera_gap_then_destruction'
+        if args.synchronized_buffer:metadata['lifecycle_capture']['mode']='freeform_buffered_comparison_alive'
     if args.broad_capture:metadata['scene']='No Remix renderer; full-support read-only resource/binding/draw metadata'
     if args.depth_snapshots:metadata['scene']='No Remix renderer; three paired read-only depth/color snapshots; no original draws suppressed'
     (work/'manifest.json').write_text(json.dumps(metadata,indent=2))
@@ -338,6 +358,10 @@ def main():
         if args.lifecycle_capture:env['SFC_LIFECYCLE_CAPTURE']='1'
         if args.d3d9_additive:env.update(SFC_D3D9_GAME_OUTPUT='1',SFC_LIGHT_TUNING='1')
         env.pop('SFC_D3D9_SHARED_LIGHTS',None)
+        env.pop('SFC_PERSISTENT_SCENE',None)
+        env.pop('SFC_D3D9_SYNC_BUFFER',None)
+        if args.synchronized_buffer:env['SFC_D3D9_SYNC_BUFFER']='1'
+        if args.persistent_scene:env['SFC_PERSISTENT_SCENE']='1'
         if args.d3d9_additive:env['SFC_D3D9_SHARED_LIGHTS']='1'
         if args.light_tuning:env['SFC_LIGHT_TUNING']='1'
         if args.capture_native_lights:env['SFC_NATIVE_LIGHT_DISCOVERY']='1'
@@ -347,7 +371,7 @@ def main():
             if receiver is None:receiver=Receiver()
             if args.live_owner_timing:
                 from live_owner_timing import Relay
-                timing_relay=Relay(work,receiver,TEST,additive=args.d3d9_additive)
+                timing_relay=Relay(work,receiver,TEST,additive=args.d3d9_additive,persistent=args.persistent_scene,buffered=args.synchronized_buffer)
             env['SFC_REMIX_CALIBRATION_SCENE']=receiver.name
             env.pop('SFC_REMIX_VISIBLE_SHIP',None)
             env.pop('SFC_REMIX_TEXTURED_SHIP',None)
@@ -447,7 +471,9 @@ def main():
         if args.capture_ship_image:image_reader=sp.Popen([str(live_bin/'ship_image_reader.exe'),session,str(work)],cwd=work,stdout=out('ship-image-reader.log'),stderr=sp.STDOUT,creationflags=sp.CREATE_NO_WINDOW)
         camera_cued=False;motion_cued=False
         source_cues=set()
-        if args.offscreen_position:print('OFFSCREEN POSITION TEST:keep both ships alive. At the first single cue accelerate your ship and LEAVE IT MOVING. TWO HIGH=look at the enemy,leaving your own ship out of view. THREE HIGH=return to your ship. Follow the turn/setup cue for the second pass. TWO LOW=exit only after restoration. No new visual effect is expected.',flush=True)
+        if args.synchronized_buffer:print('BUFFERED SHIP TEST:one complete game frame and matching extra ship are displayed together. Play normally and swap cameras freely;keep both ships alive. Check return flicker and whether controls/HUD feel normal. No movement cues;TWO LOW beeps=exit normally after restoration.',flush=True)
+        elif args.persistent_scene:print('PERSISTENT SHIP TEST:keep both ships alive. At the timed single cue accelerate your ship and leave it moving. TWO HIGH=enemy camera;THREE HIGH=return to your ship. The extra ship should follow current motion without reloading. Follow the gentle-turn cue for the second pass. TWO LOW=exit only after restoration.',flush=True)
+        elif args.offscreen_position:print('OFFSCREEN POSITION TEST:keep both ships alive. At the first single cue accelerate your ship and LEAVE IT MOVING. TWO HIGH=look at the enemy,leaving your own ship out of view. THREE HIGH=return to your ship. Follow the turn/setup cue for the second pass. TWO LOW=exit only after restoration. No new visual effect is expected.',flush=True)
         elif args.camera_recovery:print('CAMERA RETURN TEST:keep both ships alive;do NOT destroy your ship. ONE beep=hold;TWO HIGH=enemy camera;THREE HIGH=return to own ship. This repeats twice. The extra ship should return beside your own. TWO LOW=exit normally;restoration may take a short wait after recording.',flush=True)
         elif args.lifecycle_capture:print('LIFECYCLE TEST:First15seconds settle the view. ONE beep=hold alive;TWO HIGH=enemy camera;THREE HIGH=return to own ship;FOUR HIGH=destroy OWN ship. Stay in mission after destruction. TWO LOW=exit normally.',flush=True)
         elif args.source_timing:print(('OFFSET SHIP TEST:extra textured ship,original stays visible. Keep both ships alive. ' if args.d3d9_additive else 'TIMING CHECK:no visual change. ')+ 'Do not pause;keep both ships visible. First15seconds:find a comfortable view. LOW single beep=hold. TWO HIGH beeps=small camera moves. THREE HIGH=accelerate/turn your ship. TWO LOW=exit normally.',flush=True)
@@ -625,6 +651,9 @@ def main():
             try:result['lifecycle_capture']=analyze_lifecycle(work/'gate')
             except (OSError,ValueError) as exc:result['lifecycle_capture']=dict(result='PARTIAL',error=str(exc),native_death_signal_qualified=False)
             if result['lifecycle_capture']['result']=='PARTIAL':result['result']='PARTIAL'
+        if args.persistent_scene:
+            try:result['persistent_scene']=json.loads((work/'gate/PERSISTENT-SCENE-001.json').read_text())
+            except (OSError,ValueError) as exc:result['persistent_scene']=dict(error=str(exc));result['result']='PARTIAL'
         if args.offscreen_position:
             from offscreen_position import analyze as analyze_offscreen
             try:result['offscreen_position']=analyze_offscreen(work)

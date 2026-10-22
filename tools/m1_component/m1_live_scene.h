@@ -2,6 +2,7 @@
 #include "m1_live_bridge.h"
 #include "m1_present_calibration.h"
 #include "../d3d9_proof/live_owner_wire.h"
+#include "../scene_bridge/persistent_scene.h"
 #ifdef SFC_NATIVE_LIGHT_DISCOVERY
 #include "native_light_observer.h"
 #include "m1_light_transport.h"
@@ -43,6 +44,10 @@ struct LiveScene {
     DWORD lifecycleRead=0,lifecycleWrite=0,lifecycleDropped=0;
     sfc_calibration::Mailbox* calibration=nullptr;
     live_owner::Source directSource;
+    bool persistent=false;
+    sfc_scene::Registry registry;
+    DWORD persistentFrame=0,persistentPublications=0,persistentFailures=0;
+    DWORD persistentFrames=0;LONGLONG persistentTicks=0,persistentMaxTicks=0;
 #ifdef SFC_NATIVE_LIGHT_DISCOVERY
     sfc_native_lights::Observer lights;
     sfc_light_transport::Raw* sharedLights=nullptr;
@@ -72,6 +77,8 @@ struct LiveScene {
         if(GetEnvironmentVariableW(L"SFC_D3D9_LIVE_TIMING",liveMode,2)==1&&liveMode[0]==L'1'){
             if(!calibration||!sourceTiming||!directSource.attach(view,h+4)){close();return false;}
         }
+        persistent=GetEnvironmentVariableW(L"SFC_PERSISTENT_SCENE",liveMode,2)==1&&liveMode[0]==L'1';
+        if(persistent&&(!directSource.store||directSource.store->header.version!=2)){close();return false;}
         wchar_t tuningMode[4]{};
         lightTuning=GetEnvironmentVariableW(L"SFC_LIGHT_TUNING",tuningMode,4)==1&&tuningMode[0]==L'1';
         lifecycleCapture=GetEnvironmentVariableW(L"SFC_LIFECYCLE_CAPTURE",tuningMode,4)==1&&tuningMode[0]==L'1';
@@ -124,6 +131,7 @@ struct LiveScene {
     }
     void retire(DWORD owner,DWORD frame,DWORD elapsed){
         if(!enabled)return;
+        if(auto* e=registry.find(owner))registry.destroy(e->id.ship);
         directSource.retire(owner,frame);
 #ifdef SFC_NATIVE_LIGHT_DISCOVERY
         lights.retire(owner);
@@ -183,12 +191,47 @@ struct LiveScene {
             !MeshPacket::finite(r[i])){++invalid;return;}
         r[46]=lod[1]!=0xffffffffu?lod[1]:(lod[0]>1?lod[2]:0);
         r[48]=1;
-        if(calibration){auto exact=r;exact[47]=GetCurrentThreadId();
+        bool registered=false;
+        if(persistent && o.revision && !o.failed){
+            const std::array<sfc_scene::Word,3> registryLod{lod[0],lod[1],lod[2]};
+            registered=registry.admit(id,o.revision,registryLod,r.data()+8,read);}
+        if(calibration && !registered){auto exact=r;exact[47]=GetCurrentThreadId();
             if(sourceTiming){LARGE_INTEGER q{};if(QueryPerformanceCounter(&q))sfc_calibration::stamp(exact,static_cast<ULONGLONG>(q.QuadPart));}
             directSource.offer(exact);
             if(!sfc_calibration::offer(calibration,index,exact))directSource.reject(exact[2]);}
         if(sampled)return;
         o.last_ms=id.elapsed;offer(index,r);
+    }
+    // Called once per scene frame at the first qualified semantic wrapper,where
+    // the active game camera is already installed. No fixed-Hz state throttle.
+    template<class Read>void updatePersistent(DWORD manager,DWORD frame,DWORD elapsed,Read read){
+        if(!persistent||persistentFrame==frame||!frame)return;persistentFrame=frame;
+        DWORD vt=0;if(!read(manager,&vt,4)||vt!=0x007b8d4c)return;
+        std::array<DWORD,40> camera{},check{};
+        if(!read(manager+0x628,camera.data(),68)||!read(manager+0x55c,camera.data()+17,68)||!read(manager+0x75c,camera.data()+34,24)||
+           !read(manager+0x628,check.data(),68)||!read(manager+0x55c,check.data()+17,68)||!read(manager+0x75c,check.data()+34,24)||camera!=check)return;
+        LARGE_INTEGER started{};QueryPerformanceCounter(&started);
+        for(auto& e:registry.entries)if(e.live){
+            if(!registry.update(e,frame,read)){++persistentFailures;
+                if(directSource.store&&static_cast<DWORD>(InterlockedCompareExchange64(&directSource.store->header.selected,0,0))==e.id.owner)directSource.reject(frame);
+                continue;}
+            std::array<DWORD,96> r{};r[1]=e.id.owner;r[2]=frame;r[3]=elapsed;r[4]=1;r[5]=e.id.model;r[6]=e.id.source;r[7]=e.revision;
+            memcpy(r.data()+8,e.world.data(),64);r[24]=0x100;memcpy(r.data()+49,camera.data(),160);
+            if(!read(0x00c69ff0,&r[42],4)||!read(0x00c69ff4,&r[43],4)||!read(0x00c74058,&r[44],4)||r[42]||r[43]||r[44]){++persistentFailures;continue;}
+            sfc_scene::Matrix v{},p{};memcpy(v.data(),camera.data(),64);memcpy(p.data(),camera.data()+17,64);
+            auto s=sfc_scene::identity();float viewport[6]{};memcpy(viewport,camera.data()+34,24);
+            s[0]=viewport[4];s[5]=-viewport[5];s[3]=viewport[0]+viewport[4];s[7]=viewport[1]+viewport[5];
+            const auto composed=sfc_scene::multiply(s,sfc_scene::multiply(p,sfc_scene::multiply(v,e.world)));memcpy(r.data()+25,composed.data(),64);r[41]=0;
+            r[46]=e.lod[1]!=0xffffffffu?e.lod[1]:(e.lod[0]>1?e.lod[2]:0);r[47]=GetCurrentThreadId();r[48]=1;
+            LARGE_INTEGER q{};if(!QueryPerformanceCounter(&q))continue;sfc_calibration::stamp(r,static_cast<ULONGLONG>(q.QuadPart));
+            directSource.offer(r);DWORD slot=0;for(;slot<owner_count;++slot)if(owners[slot].identity.owner==e.id.owner)break;
+            if(slot==owner_count||!sfc_calibration::offer(calibration,slot,r)){directSource.reject(frame);continue;}
+            // Only low-volume diagnostic state is rate limited;frame publication above isn't.
+            if(elapsed-owners[slot].last_ms>=34){owners[slot].last_ms=elapsed;offer(slot,r);}
+            ++persistentPublications;
+        }
+        LARGE_INTEGER finished{};QueryPerformanceCounter(&finished);const auto ticks=finished.QuadPart-started.QuadPart;
+        ++persistentFrames;persistentTicks+=ticks;if(ticks>persistentMaxTicks)persistentMaxTicks=ticks;
     }
     static DWORD WINAPI run(void* raw){
         auto& b=*static_cast<LiveScene*>(raw);
@@ -295,6 +338,11 @@ struct LiveScene {
           <<",\"lifecycle_bytes\":"<<eventBytes<<",\"lifecycle_dropped\":"<<b.lifecycleDropped
           <<",\"lifecycle_omitted\":"<<eventOmitted<<",\"lifecycle_pending\":"<<(b.lifecycleWrite-b.lifecycleRead)
           <<",\"unsent_assets\":"<<unsent<<",\"io_failed\":"<<(failed?"true":"false")<<",\"stopped\":true}";
+        if(b.persistent){std::ofstream persistent(b.output+L"\\PERSISTENT-SCENE-001.json");
+            persistent<<"{\"schema\":1,\"admitted\":"<<b.registry.admitted<<",\"destroyed\":"<<b.registry.destroyed
+              <<",\"rejected\":"<<b.registry.rejected<<",\"pose_updates\":"<<b.registry.updated<<",\"offscreen_updates\":"<<b.registry.offscreen
+              <<",\"publications\":"<<b.persistentPublications<<",\"failed_updates\":"<<b.persistentFailures
+              <<",\"frames\":"<<b.persistentFrames<<",\"update_ticks\":"<<b.persistentTicks<<",\"max_update_ticks\":"<<b.persistentMaxTicks<<",\"qpc_frequency\":"<<b.frequency.QuadPart<<",\"stopped\":true}";}
         InterlockedExchange(reinterpret_cast<LONG*>(b.view+12),failed?3:2);return 0;
     }
 };

@@ -27,5 +27,12 @@ try{
  if($LASTEXITCODE -ne 0){throw 'Worker poll tests build failed'}
  & .\worker_poll_tests.exe
  if($LASTEXITCODE -ne 0){throw 'Worker poll tests failed'}
+ $cmd='"{0}" && set "CL=" && set "_CL_=" && cl /nologo /std:c++20 /EHsc /W4 /WX {2} /fp:precise "{1}\tests\d3d9_combined_post_tests.cpp" /Fe:combined_post_tests.exe /link /Brepro d3d11.lib dxgi.lib d3dcompiler.lib' -f $vc,$root,$opt
+ & $env:ComSpec /d /s /c $cmd
+ if($LASTEXITCODE -ne 0){throw 'Combined post test build failed'}
+ $combinedResult=& .\combined_post_tests.exe
+ if($LASTEXITCODE -ne 0){throw 'Combined post GPU test failed'}
+ $combinedResult | Set-Content -Encoding UTF8 combined-post-tests.txt
+ $combinedResult | Write-Output
  @{optimization=$opt;floating_point='/fp:precise';inherited_cl_options='cleared in compiler child';architecture='x64'} | ConvertTo-Json | Set-Content build-policy.json
 }finally{Pop-Location}

@@ -68,16 +68,16 @@ def require_qualification():
     return q
 
 
-def initialize(channel):
+def initialize(channel,persistent=False):
     words=[int(channel.name[-32:][i:i+8],16) for i in range(0,32,8)]
-    h=HEADER.pack(MAGIC,1,STORE_BYTES,*words,0,0,0,0,0,*([0]*7),bytes(48))
+    h=HEADER.pack(MAGIC,2 if persistent else 1,STORE_BYTES,*words,0,0,0,0,0,*([0]*7),bytes(48))
     channel.write(OFFSET,h+bytes(STORE_BYTES-HEADER.size))
 
 
 def parse_audits(raw,session,pid):
     if not HEADER.size<=len(raw)<=STORE_BYTES:raise ValueError('Live owner byte cap')
     h=HEADER.unpack_from(raw);words=tuple(int(session[-32:][i:i+8],16) for i in range(0,32,8))
-    if h[:3]!=(MAGIC,1,STORE_BYTES) or h[3:7]!=words or h[7]!=pid or not h[9] or not 0<=h[16]<=CAPACITY or len(raw)!=2688+h[16]*AUDIT.size:raise ValueError('Live owner final header/session/process/count')
+    if h[0]!=MAGIC or h[1] not in (1,2) or h[2]!=STORE_BYTES or h[3:7]!=words or h[7]!=pid or not h[9] or not 0<=h[16]<=CAPACITY or len(raw)!=2688+h[16]*AUDIT.size:raise ValueError('Live owner final header/session/process/count')
     rows=[];previous=0
     for a in AUDIT.iter_unpack(raw[2688:]):
         if a[3] not in (1,2,3,4,5,6) or a[4]<previous or a[14] or any(a[15]):raise ValueError('Live owner malformed audit')
@@ -88,9 +88,9 @@ def parse_audits(raw,session,pid):
 
 
 class Relay:
-    def __init__(self,folder,receiver,game_root,additive=False,offline_fixture=False):
+    def __init__(self,folder,receiver,game_root,additive=False,offline_fixture=False,persistent=False,buffered=False):
         self.folder=Path(folder);self.receiver=receiver;self.root=Path(game_root);self.process=None;self.selected=None;self.error=None;self.attempted=False;self.started=time.monotonic()
-        initialize(receiver.channel)
+        initialize(receiver.channel,persistent=persistent);self.persistent=persistent;self.buffered=buffered
         self.additive=additive;self.offline_fixture=offline_fixture;self.pending=None;self.lights=None;self.light_replay=None
         self.selected_model=None
         self.binding_generation=0;self.binding_pending=None;self.binding_events=[];self.bound_row=None;self.binding_requested_at=0
@@ -172,7 +172,7 @@ class Relay:
                     self.light_replay=Replay(gpu,manifest,self.receiver)
                 else:
                     from live_light_binding import Binding
-                    self.lights=Binding(self.folder,gpu,self.receiver,row)
+                    self.lights=Binding(self.folder,gpu,self.receiver,row,persistent=self.persistent)
                 self.pending=(gpu,manifest,row,pid);return
             self.launch(gpu,manifest,row,pid);return
 
@@ -187,6 +187,7 @@ class Relay:
                  'SFC_DIRECT64_TIMING_ONLY':'1','SFC_DIRECT64_PACED_FRAMES':'0','SFC_DIRECT64_LATEST_INPUT':'0','SFC_DIRECT64_SINGLE_PRESENT':'1','SFC_DIRECT64_INJECT_LAG_MS':'0'}
         for key in ('DXVK_RTX_CAPTURE_ENABLE_ON_FRAME','DXVK_DUMP_SCREENSHOT_FRAME','DXVK_TERMINATE_APP_FRAME'):env.pop(key,None)
         for key in ('SFC_D3D9_GAME_OUTPUT','SFC_D3D9_VISUAL_SETTINGS','SFC_D3D9_LIGHT_SETTINGS'):env[key]='1' if self.additive else '0'
+        env['SFC_D3D9_SYNC_BUFFER']='1' if self.buffered else '0'
         env['SFC_D3D9_SHARED_LIGHTS']='1' if self.additive else '0'
         if self.additive:
             if self.content_signature is None:
@@ -299,6 +300,10 @@ class Relay:
                              **dict(zip(('drawn','stale','invalid','not_ready','retired','gpu_busy','resource_failed','depth_missing','last_frame'),stats)),
                              asset_sha256=pool_raw[64:96].hex(),camera_offset=list(struct.unpack_from('<3f',pool_raw,96)),
                              lights=self.lights.summary() if self.lights else 'OFFLINE_REPLAY_ONLY')
+            pool_result.update(lease_worker_releases=struct.unpack_from('<I',pool_raw,112)[0],retain_ready=bool(struct.unpack_from('<I',pool_raw,124)[0]))
+            if self.buffered:
+                from synchronized_buffer import save
+                pool_result['synchronized_buffer']=save(self.receiver.channel,self.folder,pid)
             if pool_result['asset_sha256']!=self.selected['asset_sha256']:raise ValueError('Additive asset identity changed')
         if not self.process:raise ValueError('No fresh qualified live asset/renderer')
         gpu=self.folder/'gpu';job=json.loads((gpu/'job-result.json').read_text());log=(gpu/'job-console.log').read_text()
@@ -311,6 +316,7 @@ class Relay:
         report['result']='LIVE_TIMING_OBSERVED_ADJUDICATION_REQUIRED' if counts[0] and rows and not any((counts[1],h[15],h[17],h[18])) else 'PARTIAL'
         if self.additive:
             report.update(game_output=pool_result,backbuffer_drawing=True,scope='Diagnostic offset one-owner ordinary-D3D9 output;exact current source identity;no stale hold or original suppression')
+            if self.buffered:report['scope']='One adjacent complete native game-frame/HUD and matching ship/depth paired;see separate buffered correspondence audit,not current-Present audit for display matching'
             report['owner_bindings']=self.binding_events
             from owner_rebind import OFFSET as BIND_OFFSET,MAGIC as BIND_MAGIC,TARGET
             binding=self.receiver.channel.read(BIND_OFFSET,128)

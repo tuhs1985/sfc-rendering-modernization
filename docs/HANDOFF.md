@@ -1,6 +1,266 @@
 # SFC Modernize — model handoff
 
-## NEWEST / AUTHORITATIVE CHECKPOINT — 2026-10-21 Run101 offscreen updates CONFIRMED
+## NEWEST / AUTHORITATIVE CHECKPOINT — 2026-10-22 Run111 publication checkpoint
+
+- [Run111](runs/2026-10-22-codex-readme-pipeline-publication.md) accompanies the
+  sponsor-authorized commit/push ofRun103–110reviewed source/tests/evidence and
+  expanded [README](../README.md). The containingcommit supersedes historical
+  "unstaged/uncommitted" status below;parent0fc1300. No newrenderingimplementation.
+- README explains native32-bitsemanticdetours→boundedbridge/workerassets→64-bit
+  ordinaryD3D9draws→Remixinterception→sharedGPUoutput/x86receiver→ReShadeD3D11
+  in-gamecompositor;noOBJ/model-fileconversion orSDKmeshinput oncurrentpath.
+  PreservesFCA-onlyscope,bufferedomissions,early-unloadcaveat andrecordingunknowns.
+-425Python,native18×2registry/649slot/33×2GPUtests,bothread-onlypreflights PASS.
+  Clientsunchanged. CurrentrepoPUBLIC verified;sanitizedbranch→masteronly,
+  nolocalmaster/recoveryrefs/images/binaries/rawassets. Post-push verification
+  receipt lives atignored`artifacts/publication/20261022-d3d9-checkpoint-receipt.json`.
+- Noactivegametest/sessionrequired. Use currentHEAD/remoteSHA to identifythis
+  publishedcheckpoint,notanyhistoricalruntime-onlyqualificationreceipt. A fresh
+  clone needspinneddependencies/ownedcapturefixtures/localpaths/nativeGPU gates.
+- Exactnextaction:define boundedgeneric-asset/multi-ownerD3D9extensionusing
+  existingcapture/registry,retainFCA diagnostics,thenpreparemixed-race/all-visible
+  tests. Genericcoverage/originalreplacement/formalTRLremainNOTdelivered.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-22 Run110 generic-model coverage next
+
+- [Run110](runs/2026-10-22-codex-model-selection-scope-review.md):sponsortried
+  Romulan,noextraimage;asksaboutfullmodeltest. CONFIRMED currentselector hard
+  filters`assets/models/fca/fca.mod`,uniquematchingownerandcontentrebindonly.
+  Notactualplayerflag. Native32-ownerregistry != multiassetD3D9displaybackend.
+- Latest045558-548894/045744-572970 noqualifiedimagewithin30s,noselection;
+  normalgameexit,controlledunloadNOTconfirmed. Subsequentempty-poolanalysis
+  errornotgeometryevidence. FixedFCAexclusionstrongexplanation;noRomulanformat
+  failureconfirmed. Do NOT repeattransform/cameradiscovery orblameRemixformat.
+- Run109correctedbufferresults remain valid below;noadditionalrenderingchanges
+  thisreview. Source/configunchanged;Run110/HANDOFFonly,allpendingunstagedon
+  0fc1300,indexempty,nocommit/push/helper/agent/newruntime.
+- Exactnextaction:defineboundedgenericasset/multi-ownerD3D9extensionusing
+  existingcapture/registry,retainingFCA diagnostics,thenpreparemixed-race/all-
+  visible-shiptests. RemovingfilenamefilteraloneisNOTthemultiassetimplementation.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-22 Run109 actual buffer greatly improved
+
+- [Run109](runs/2026-10-22-codex-buffered-runtime-comparison.md),
+  [evidence](reconnaissance/evidence/20261022-buffered-runtime-comparison.json).
+  Sponsor:unrecorded run stable/minor camera-LOS flicker;NVIDIArecorded run no
+  noticed flicker. Both actual correctedbuffer runs,samebuild/runtimeconfig.
+- CONFIRMED:first042446-5650575382paired/24missing;second042653-7543805395/5.
+  Zerooverwrite/invalid/retired/resourceerrors;stableowner2/rev2,retainedasset.
+  Constant alternateframe regression fixed inactualSFC;notzero-omission PASS.
+- Offeredinput→completionmedian10.620→6.854ms,p9514.179→8.119ms;sourcelead
+  ~15.2msandhistoryage~16.66msunchanged. Querysleep~540→543us,not evidence of
+  improved timer granularity. These CPUelapsed intervals are NOTGPU-only time.
+  Recordingstate sponsorreported;causalityunresolved. GPUclocks/scheduling/warm
+  state/gameplaydifferencespossible,SPECULATIVEmechanisms;notmeasured.
+- Firstnormalexit/hash/proxyPASS,butcontroller8,controlledunloadNOTconfirmed.
+  Secondcontroller0,hookrestoration/unload/nativeworker/persistentstop/normal
+  exit/clienthashesPASS. Secondtwoassetscaptured/transferred,14388poseupdates,
+  no failures;no reload evidence. Noactiveownedprocess;newlaunchfreshsession.
+- SecondgeneratedinputsrecoverablyZIParchived/rawretained;firstpartialleft
+  untouched. Artifacts12.716GB<20GB. Source/configUNCHANGEDthisreview. Only
+  Run109/evidence/HANDOFFadded;allpendingworkunstagedon0fc1300,indexempty,
+  nocommit/push/helper/agent/newgame. No recordingmedia copied into repository.
+- Do NOT require NVIDIArecording asfix,claimcausalproof/seamless/formalTRL,
+  treatmissingnativeunloadreceiptasrendering-evidenceinvalidity,orredoidentity/
+  assetdiscovery. OriginalshipsON;boundeddefault-offbufferandallcapsunchanged.
+- Exactnextaction:localize residual readinessmisses using existing worker
+  input/output timestamps before another codechange or sponsor runtime request.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-22 Run108 ownership fix READY FOR RETEST
+
+- [Run108](runs/2026-10-22-codex-buffer-ownership-fix.md),
+  [contract](reconnaissance/synchronized-buffer-contract.md),
+  [probe](reconnaissance/probes/D3D9-SYNC-BUFFER-001.md),
+  [evidence](reconnaissance/evidence/20261022-buffer-ownership-fix.json).
+- CONFIRMED offline reproduction ofRun107:early-ready fixture041110-375397
+  298/600draws. Corrected buffered READY-image protection plus independent
+  worker GPU-read fence completion;no wait/contextlock/extraimagebuffers.
+  Game thread Signal only;worker polls device-child fence,never immediatecontext.
+  Explicit child mode propagation required;intermediate041648hadwrongpolicy,
+  retained as intermediate NOTqualified final. Unbuffered path unchanged.
+- Final early041830-729796589/600,late041923-373411588/600,bothzerooverwrite,
+  workerrelease590/589,threeowner/revision epochs,exactnativeHUD/scene pixels,
+  state/disable/resize/normalfixtureexitPASS. Unbuffered042011-310157595/600.
+ 425Python,649nativeslotchecks,33actualGPUchecks eachx86/x64 PASS. Both-phase
+  source/binary/config gate andboth launcherpreflights PASS. Details inRun108.
+- Does NOT establish zero omissions,seamlessSFC or physical latency. Actual
+  correctedbuffer SFC gameplay PENDING;Run107 failure remains historicalfact.
+  Device-removal guard notactualfaultinjected;unsupportedfences omit effect.
+  Actualdeath/multiobjectdisplay/firstlaunch/vendor40warning remain as before.
+- Exactsourcefiles inRun108. No semantic ABI/hook/light/material changes;
+  originalshipsON,diagnosticgeometryOFF;oneframe/50msexpiry andallcapsunchanged.
+  Conservative116,121,600GPUbytes;artifact12.606GB<20GB. Fivegeneratedsets
+  recoverablyZIParchived,rawretained. Clients/proxyhashesunchanged/restored.
+  Noactiveownedprocess/session;newlaunchfreshIDs. Allprior/newworkunstaged,
+  indexempty,HEAD0fc1300,nocommit/push/helper/agent.
+- Do NOT remove GPU ownership fences,reintroduce READY overwrite inbuffered
+  mode,only forbid overwrite without completion retirement,or certifybuffer
+  fromshort-lead alone. Do not redo position/assetdiscovery orappearancework.
+- Exactnextaction:sponsor runs `tools/d3d9_proof/start_d3d9_buffered_scene_session.ps1`
+  ONCE,freeformcamera/movement,keepbothalive,normalexitfinaltwoLOWbeeps;then
+  review actual flicker/control feel andpaired/cleanup evidence beforeexpansion.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-22 Run107 buffered runtime REGRESSION
+
+- [Run107](runs/2026-10-22-codex-buffered-runtime-regression.md): actual buffered
+  run040533-028542 ended early by sponsor:constant flicker. Do NOT recommend
+  another unchanged buffered test. Run106 READY means offline preparation only.
+- CONFIRMED:215paired/215withoutship,206overwrites,428paired/missing status flips
+  across430usableauditrecords. Identity stable,zero retired/invalid/resource
+  failures;no asset reload evidence. Maxsavedage19.206ms;no age-cap explanation.
+- STRONG HYPOTHESIS supported by code/counters:two-slot latest-wins writer
+  overwrites deliberately retained next-frame output while other slot awaits
+  GPU-read completion. Offline short-lead test missed early-ready phase. Keep
+  fences,exact-frame matching andoriginaldrawing;do not solve by stale hold.
+- Normal process exit/client hashes/proxy restoration confirmed;controlled
+  hook unload NOTconfirmed(controller8/earlyexit,missingnativefinalsummaries).
+  Noactiveownedprocess. Source unchanged this review;Run107/HANDOFFonly added.
+  Everything remains unstaged/uncommitted on0fc1300,indexempty,nopush/helper.
+- Exact next action:standalone early-ready/pending-GPU-lease reproduction,then
+  bounded slot-ownership correction coveringearly/late delivery before another
+  sponsor run. Simple no-overwrite can still dropalternateframes;not sufficient.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-22 Run106 synchronized buffer READY
+
+- [Run106](runs/2026-10-21-codex-synchronized-buffer-implementation.md),
+  [contract](reconnaissance/synchronized-buffer-contract.md),
+  [probe](reconnaissance/probes/D3D9-SYNC-BUFFER-001.md),
+  [evidence](reconnaissance/evidence/20261021-synchronized-buffer-prepared.json).
+- Default-off one-adjacent-frame history pairs saved full native scene/HUD/depth
+  with its exact returned ship sequence/camera hash. No old pixels on a new
+  scene, prediction, Reflex, original suppression, new hooks or appearance work.
+  One frame intended;50ms hard expiry, not target delay. Missing ship output
+  leaves advancing saved original scene; invalid/disconnect/disable flushes.
+- CONFIRMED offline:424Python tests;23GPU checks each x86/x64;native build and
+  separate buffered/unbuffered qualifications/preflights PASS. Final buffered
+  fixture035401-772393:593paired,4withoutship,4warmup,1reset,602records,
+  zero failed/dropped;native scene/HUD exact;state/disable/resize/exit safe.
+  Scene age median16.965ms,p9517.459ms,NOTphysical latency measurement.
+  Unsupported resize/recreation may need fresh session;no auto-recovery claim.
+- Sponsor concurrent actual unbuffered run034936-435486 normal,5378drawn/3stale,
+  clean exit/unload/restoration;reported no camera-model reload delay. Useful
+  persistent-path result,NOTnew buffered gameplay proof. Actual buffered SFC
+  continuity/control response still PENDING;no seamless/formalTRL claim.
+- Exact file list/commands inRun106. New files include synchronized_frame.h,
+  scene_frame_buffer.h,audit decoder/qualifier,GPU/Python tests andlauncher.
+  Native pose/identity/geometry sources unchanged;diagnostic geometry hook OFF,
+  original ships ON. Registry32owners;displaybackendstilloneplayerfixture.
+  Actual destructor4158C1 still untested;vendor40warning/firstlaunchlimits remain.
+- ExtraGPU33,177,600bytes,conservative total116,121,600<128MiB;audit8192records.
+  Four fixturegeneratedsetsZIParchived recoverably;raw retained;artifacts12.48GB
+  <20GB. Clients unchanged,proxyrestored,noactiveownedprocess/session. No helper,
+  agent/stage/commit/push. PriorRun103–105andnewchangesallunstagedon0fc1300.
+- Do NOT redo pose discovery, discard resident assets on camera absence, use
+  current-Present equality to reject intentional N−1 pairing, overwrite the
+  unbuffered qualification withbuffered proof, or imply SFC buffered success.
+- Exact next action: sponsor runs `tools/d3d9_proof/start_d3d9_buffered_scene_session.ps1`
+  ONCE,freeform play/camera switches,keepbothalive,exitfinaltwoLOWbeeps;then review
+  buffer provenance,visible continuity/control feel and cleanup before expansion.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-21 Run105 bounded efficiency pass READY
+
+- [Run105](runs/2026-10-21-codex-bounded-delivery-efficiency-pass.md),
+  [evidence](reconnaissance/evidence/20261021-bounded-delivery-pass.json).
+  Sponsor authorizes ONEimproving pass,then move on,not endless Remixpolishing.
+- Existing recorded audit/source/input joins support deadline misses,NOTasset
+  reload. Largest96audit-mismatch cluster1.583s is NOT visible-gap duration;
+  latercompositormaydraw. No positionrediscovery or newgame needed for diagnosis.
+- Implemented one MRTworkerpass combining SAME nonneutral colourgrade and
+  depth-sentinel ownercoverage;no appearance/pose/lifetime/framecheckchanges,
+  no stale-camera hold. Neutralgrade retains existing coverage-only path.
+  No new texturepool or API/architecture. Exact files/commands in Run105.
+-415Python PASS,new65actualGPU checks EXACTcolour/alpha/owner/sentinel at1920,
+  nativebuilds/light/persistentworker requalified PASS. Eight timestampbatches
+  median45.595->38.368us,15.85%less THISsmallstage,NOTwhole-renderer speedup.
+  FinalactualRemixfixture031459-406014595/600delivery,state/resize/exitPASS,
+  ACK3/reject0;overallfixture deliveryUNCHANGED,no fewerSFCblips claim.
+- Firstlaunchshortbudget NOTfixed;deathhook/multiobjectdisplay/vendor40warning
+  remain. PS5UTF16testlogfixedexplicitUTF8;archiveusedmodernpwsh,notsecuritychange.
+  BothfixturesgeneratedcopiesrecoverablyZIParchived/rawlogsretained;clients
+  unchanged. No active ownedprocess. OfflinepreflightPASS;noSFCgameplaythisturn.
+- Allprior/newsource/docsunstaged/uncommittedon0fc1300,indexempty,nopush/helper/
+  agent. No active mapping/session must survive restart;newrunnerfreshIDs.
+- Exactnextaction:sponsor runs `tools/d3d9_proof/start_d3d9_persistent_scene_session.ps1`
+  ONCE,samecamera/movementcues,exitfinaltwoLOWbeeps. Reviewbetter/same/worse,
+  continuity/timing/safety,thenmoveonperdecision;doNOTstartanotheroptimization
+  loopwithoutapproval orpromote this toseamless/replacement/formalTRL PASS.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-21 Run104 residency CONFIRMED, gaps remain
+
+- [Run104](runs/2026-10-21-codex-persistent-scene-runtime-review.md) reviews actual
+  runs025117-824436(first,no image) and025321-515918(second,working/manycamera
+  swaps,briefreturngap). Sponsor asks seamless feasibility;diagnosis/docs only.
+- CONFIRMED second:2persistent owners,14396poseupdates/publications,0failures/
+  rejections,2captures/transfers TOTAL,generation1retained,zero rebinds. No
+  visibility-triggered model unload. Counter7197offscreen_updatesalsoincludes
+  later-visible-this-frame objects;NOTindependent invisibility measurement.
+-5174drawn,136stale,33expiredinputs,47unqualified;sourceinvalid2/snapshotmiss6.
+  Normalgame/rendererexit,controller0,controlledunload/workerstop/config/proxy/
+  clienthashesPASS. Actualdeathhooknotexercised;vendor40warning remains.
+- First actually generated1655outputs,but0drawn/1507stale;availableleadmedian
+  3.6223msvsGPUoutput5.9585ms,strongtiming-budgethypothesis. Aborted30sprep;
+  process exited beforecontrolledunload(controller8),native summariesmissing.
+  Not missing-model proof or cleanupPASS. Raw partial results preserved.
+- Secondlead15.4ms,GPUmedian9.442ms/p9512.727ms/max22.579ms;registrytwo-owner
+  mean4.6247us/max63.3us. Notcontrolledbenchmark or measuredcamera-returndelay.
+  Remaining briefgapSTRONGHYPOTHESIScurrentcamera/frameadmission/delivery,NOT
+  confirmedassetreload. SeamlessruntimeNOTPASS;noformalTRL/replacementclaim.
+- Only Run104/HANDOFFmodified this review;Run103source remains as-is,unstaged/
+  uncommittedon0fc1300,indexempty,nocommit/push/helper/agent/newgame.
+- Exactnextaction:join existing source/input/output/audit timestamps around
+  camera-state changes to isolate residual delivery/readiness mismatch and
+  first-launch budget BEFORE scheduling changes or another gameplay request.
+  DoNOTrepeatpositiondiscovery,displayold-cameraimages,disablelifetimechecks,
+  inferregistryfailurefrombriefpixelgap,orhidefailurewithlargertimeoutalone.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-21 Run103 persistent scene READY
+
+- [Run103](runs/2026-10-21-codex-persistent-scene-implementation.md),
+  [contract](reconnaissance/persistent-scene-contract.md),
+  [probe](reconnaissance/probes/PERSISTENT-SCENE-001.md),
+  [evidence](reconnaissance/evidence/20261021-persistent-scene-prepared.json).
+  Clean starting commit0fc1300;implementation authorized,not another proposal.
+- Implemented fixed32-entry living registry, retained geometry/asset revision,
+  simulation-derived full pose, per-qualified-scene-frame publication with NO
+  fixed-Hz pose cap. Existing diagnostic log sampling is not publication rate.
+  Visibility no longer retires registered living owners. Initial backend still
+  displays one FCA player-fixture ship,not32ships or a native-player-flag claim.
+- Pose from getter00419DD2/base00413B34 arithmetic:base+34/+38/+3C,8192-period
+  angle composition,additional+980matrix,+E6/+EA/+EEtranslation. Native trig
+  tables used. Double-read/finite/affine checks and actual supplied+6F4admission
+  oracle. NEVERpoll shared manager as retained ship pose or call game getter.
+- New default-off destruction hook004158C1 before teardown;static5-byte MOV
+  prefix and deleting-wrapper/free chain verified. Existing register/flags/
+  FPU/SIMD preservation/trampoline reused; actual destruction invocation still
+  runtime-pending. Invalid links/model/LOD quarantine. No disabling lifetime
+  checks,holding old camera frames or fabricated fresh light timestamps.
+- Source protocol2,existing ordinaryD3D9->Remix->GPU->game return path retained.
+  Current wrapper provides camera/world-directional bank;derived light context
+  preserves original bank owner/model and capture time. Original drawing ON,
+  diagnostic geometry hook OFF,all visual settings unchanged. No modelOBJ.
+-415Python tests PASS,x86/x64registry18each;native realworker120synthetic
+  offscreenframes,onecapture/generation,120publications,explicitremoval/no stale,
+  stop/join PASS. One-owner timedupdate~2.28usmean/6.6usmax,NOTgame benchmark.
+  Actual v2GPUfixture010604-302271595/600,ACK3/reject0,state/resize/exitPASS.
+  Earlier010339failed stalev1receiver;rebuiltrepeatPASS,partial retained.
+- No SFC gameplay this turn; seamless camera transitions/current full rotation,
+  actual death/destructor coverage and multi-object display remain pending.
+  No aggregate gate/TRL claim. If no qualified current-camera wrapper exists,
+  no fresh frame is fabricated. Vendor40shutdown warning remains unresolved.
+- New launcher CheckOnly/native qualifications/builds/PS5parsers/diffcheckPASS.
+  Both clients4D65761D...20C29unchanged. GeneratedfixtureinputsrecoverablyZIP
+  archived with hashes;rawlogs retained. No active game/ownedworker/renderer.
+  No session/channel survives restart or is needed;new runner creates fresh IDs.
+- Files changed exactly in Run103;all current changes unstaged/uncommitted on
+  0fc1300,index empty,no helper/agents/commit/push. Earlier Run101/102state is
+  historical. Do NOTrepeat position discovery,remove freshness/death validation,
+  use old camera-recovery runner or infer multi-object success from registry32.
+- Exact next action:run `tools/d3d9_proof/start_d3d9_persistent_scene_session.ps1`
+  in familiar FCA two-ship fixture;follow moving own/enemy camera cues and exit
+  at twoLOWbeeps. Review persistent summary,asset/identity continuity,frame
+  timing,reported blips,cleanup/hashes BEFORE extending multi-object rendering.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-21 Run101 offscreen updates CONFIRMED
 
 - [Run101](runs/2026-10-21-codex-offscreen-position-runtime-review.md). Actual
   `artifacts/remix-runtime/runs/20261022-001430-318823-in-game`;sponsor reports
