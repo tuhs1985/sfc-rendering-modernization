@@ -22,6 +22,13 @@ remains unchanged.
 
 ## Decision
 
+2026-10-19 Run70 progress:normal D3D9 interception captures complete FCA/KFF
+geometry and exact primary-image assignments without SDK mesh registration.
+[Evidence/limitations](../runs/2026-10-19-codex-normal-d3d9-remix-proof.md):camera
+export omits vertical field,current native D3D9 revalidation fails before drawing,
+and runtime disposal warnings remain. Gate stays OPEN;no live presentation,
+depth/coverage/timing or final-source multi-backend qualification claim.
+
 Preserve SFC capture as a reusable game-facing adapter. Separate its recovered
 scene meaning from Remix-specific registration/rendering and platform image-return
 details. Future renderer technology should require a new backend adapter,not
@@ -74,6 +81,22 @@ plan. Reuse existing packets/tests where sound;avoid a speculative general-purpo
 engine/framework or needless scene serialization/conversion layers.
 
 ## Disposition / scheduling
+
+2026-10-19 Run69:[plain D3D9 proof](../runs/2026-10-19-codex-plain-d3d9-proof.md)
+and [neutral offline view](../reconnaissance/scene-contract-v1.md) now exist.
+Two genuine captured assets render through plain system D3D9 without Remix,with
+independent projection/texture tests. This is evidence of a second consumer,NOT
+gate closure:the SDK adapter does not yet consume this exact neutral view,and
+live frame/output integration remains unqualified. Normal Remix interception is
+the next separately reviewed bounded gate. Historical scheduling below preserved.
+
+2026-10-19 sponsor clarification:D3D9 proof first,D3D12 adapter afterward against
+the same scene boundary. [Updated transition plan](../reconnaissance/d3d9-adapter-transition-plan.md)
+and [Run68](../runs/2026-10-19-codex-d3d9-transition-planning.md) supersede the
+immediate Run67 SDK-cadence-fix next action. SDK path retained as reference;
+first implementation target is offline plain-D3D9 scene replay,not another game
+test. Presentation/timing architecture must be qualified before live replacement.
+This records direction/planning,not proof,requirements change or gate closure.
 
 **OPEN — not demonstrated.** Existing semantic capture/live bridge and public
 Remix SDK integration are useful starting evidence,but renderer independence

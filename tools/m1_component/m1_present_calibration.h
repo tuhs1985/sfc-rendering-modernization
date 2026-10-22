@@ -5,6 +5,10 @@
 #include <cstring>
 namespace sfc_calibration {
 constexpr DWORD Offset=32768,Magic=0x314C4143,Version=1,Owners=32,Words=96;
+constexpr DWORD TimingMagic=0x31544d53; // opt-in row89..93 extension,not a frame seal
+inline void stamp(std::array<DWORD,Words>& row,ULONGLONG qpc){
+ row[89]=row[91]=static_cast<DWORD>(qpc);row[90]=row[92]=static_cast<DWORD>(qpc>>32);row[93]=TimingMagic;
+}
 struct Snapshot {
  DWORD magic=Magic,version=Version,bytes=sizeof(Snapshot),frame=0;
  DWORD session[4]{},rows=0,reserved[3]{};
@@ -29,7 +33,8 @@ inline bool offer(Mailbox* m,DWORD index,const std::array<DWORD,Words>& row){
   if(old[1]&&(old[4]!=1||old[1]!=row[1]||old[5]!=row[5]||old[6]!=row[6]||old[7]!=row[7]||
       old[46]!=row[46]||std::memcmp(old.data()+8,row.data()+8,37*sizeof(DWORD))||
       std::memcmp(old.data()+48,row.data()+48,41*sizeof(DWORD))))old[4]=3;
-  else {old=row;old[45]=index;}
+  else {const bool keepFirst=old[1]&&old[93]==TimingMagic&&row[93]==TimingMagic;const DWORD lo=old[89],hi=old[90];
+   old=row;old[45]=index;if(keepFirst){old[89]=lo;old[90]=hi;}}
   m->snapshot.rows=0;for(const auto& r:m->snapshot.owner)if(r[1])++m->snapshot.rows;
  }unlock(m);return ok;
 }

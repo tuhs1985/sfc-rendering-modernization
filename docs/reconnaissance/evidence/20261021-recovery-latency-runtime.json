@@ -1,0 +1,33 @@
+{
+  "run": "20261021-062533-368618-in-game",
+  "disposition": "FUNCTIONAL_RECOVERY_LATENCY_REJECTED_BY_SPONSOR_PARTIAL_CLEANUP",
+  "hashes": {
+    "result.json": "c08f6bcfb566ff30a939c0706a5d02764824a1a24ae91709ebdad95845e7553e",
+    "source_timing": "f74f69947ab508dd63eb008c9b6fcf9bb19acfa87cf62e43a137f49ad770e587",
+    "live_audits": "7b63f32aa3ab43d52a8a597b999c352ad22e0e31b2bb5ead6489d2a4e3c778ed",
+    "binding_control": "705538d865add60dc2e30c2095b89823d6986bd7e8884b6e285f0693cf9aad53"
+  },
+  "actual_player_rebinds": 1,
+  "old_owner_revision": [2,2],
+  "new_owner_revision": [3,3],
+  "acknowledged_generation": 2,
+  "request_rejected": 0,
+  "coarse_ack_observed_ms": 63.000000023748726,
+  "timing_origin": "First fresh semantic observation of owner3/revision3 frame2613;NOT camera action timestamp or photon time",
+  "first_producing_input_frame": 2635,
+  "first_producing_input_offer_ms": 365.0606,
+  "first_returned_output_ms": 381.3986,
+  "first_strict_matching_present_frame": 2647,
+  "first_strict_matching_present_ms": 580.3088,
+  "old_assets_resident": true,
+  "draws": 5192,
+  "invalid_inputs": 0,
+  "unqualified_inputs": 1,
+  "source_timing_invalid": 2,
+  "normal_game_exit": true,
+  "controlled_unload_confirmed": false,
+  "original_and_copied_critical_baselines_equal": true,
+  "evidence_bytes": 90650137,
+  "implementation_changed": false,
+  "next": "Remove serial recovery/light handoff latency and investigate re-entry frame-budget misses offline without stale-pixel fallback."
+}

@@ -1,6 +1,34 @@
 # One-ship return integration — readiness at 2026-10-17
 
-## Current — 2026-10-18 visible additive ship return demonstrated
+## Current — 2026-10-19 depth runtime PARTIAL
+
+[Run67](../runs/2026-10-19-codex-scene-depth-runtime-review.md):native depth access
+confirmed3646/3652frames;extra display only1060frames,severe sponsor-observed
+flicker. Fix per-frame fresh-output-only delivery using safe raw-result caching
+and current-depth filtering before retest. Low-placement suspicion unresolved.
+Normal exit/unload/rollback/client hashes PASS;originals ON,no replacement claim.
+
+## Historical — 2026-10-19 depth-first additive test READY
+
+[Run66](../runs/2026-10-19-codex-scene-depth-preparation.md) and
+[probe](probes/REMIX-SCENE-DEPTH-001.md):default-off native-depth filtering of the
+extra copy,originals ON,existing UI callback retained.66native checks per arch,
+283Python,14existing return gates and3depth callback cases PASS;preflight PASS.
+Sponsor's UI/grid descriptions are direct observations;grid mechanics remain
+unqualified. Extra may blink from fresh-output refusal even stationary. This is
+depth diagnosis,NOT original suppression,steady replacement or milestone PASS.
+
+## Historical — 2026-10-19 replacement started; offline foundation only
+
+Sponsor authorizes replacement. [Run65](../runs/2026-10-19-codex-replacement-depth-foundation.md)
+and [contract](ship-replacement-contract.md):exact-state admission and native8MSAA
+depth compositor pass55checks in each architecture. NOT installed into SFC;
+no original suppressed. Actual owner/batch-safe insertion and pre-UI/effects
+ordering remain open. Existing stable1920x1080 textured additive output and R2
+appearance baseline are preserved. Historical Run28 coarse/flicker description
+below is no longer the current quality checkpoint. No new sponsor test ready yet.
+
+## Historical — 2026-10-18 visible additive ship return demonstrated
 
 [Run28](../runs/2026-10-18-codex-offset-copy-runtime-review.md):actual SDK ship
 reaches SFC display,285visible submissions and sponsor sighting.953published,

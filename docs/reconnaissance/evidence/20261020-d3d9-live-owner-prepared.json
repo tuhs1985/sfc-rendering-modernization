@@ -1,0 +1,22 @@
+{
+  "run": "Run79",
+  "status": "READY_FOR_SPONSOR_SHADOW_TIMING_TEST",
+  "gate": "Gate3 CONTINUES",
+  "sfc_launched": false,
+  "game_image_composed": false,
+  "original_suppressed": false,
+  "qualification": "artifacts/d3d9-proof/live-owner-qualification.json",
+  "fixture": "artifacts/remix-runtime/runs/20261020-124416-713021-return-fixture",
+  "source_kind": "replayed captured raw state with synthetic source frame/time",
+  "publications": 1288,
+  "current_present_matches": 1288,
+  "audits": 1289,
+  "startup_ineligible": 1,
+  "invalid_rejected_dropped": 0,
+  "normal_owned_exit": true,
+  "fixture_ack_ms": {"median": 11.23115, "p95": 12.40374, "max": 13.8156},
+  "python_tests": 344,
+  "no_launch_preflight": "PASS",
+  "client_sha256": "4D65761D7DD69EF1504070261B81E9C200C0AF18105033E1C4D2222C62320C29",
+  "next_action": "Sponsor shadow timing run; adjudicate real current-frame misses before display wiring"
+}

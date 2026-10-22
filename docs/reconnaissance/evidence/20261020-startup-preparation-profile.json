@@ -1,0 +1,22 @@
+{
+  "run": 85,
+  "result": "BOTTLENECK_IDENTIFIED_FIX_NOT_IMPLEMENTED",
+  "sfc_launched": false,
+  "remix_launched": false,
+  "os_cache_flushed": false,
+  "unprofiled_sample": "artifacts/d3d9-proof/material-runs/20261021-025857-973940",
+  "unprofiled_seconds": {
+    "geometry_and_original_images": 0.247860,
+    "output_extent": 0.020182,
+    "material_preparation": 16.401657
+  },
+  "profiled_material_seconds": [38.116658, 38.172323],
+  "profiled_dds_decoder_seconds": [36.1858, 36.331831],
+  "decoder_calls_per_profile": 139,
+  "profiling_overhead_warning": "Millions of Python calls inflate cProfile timings; these are not ordinary startup measurements.",
+  "confirmed_bottleneck": "Generated DDS exact-pixel verification uses Pillow pure-Python per-pixel decoder.",
+  "next_action": "Strict bulk generated-DDS validation with unchanged output and malformed-input regressions.",
+  "client_hash_unchanged": true,
+  "staged": false,
+  "committed": false
+}

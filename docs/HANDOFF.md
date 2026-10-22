@@ -1,6 +1,1260 @@
 # SFC Modernize — model handoff
 
-## NEWEST / AUTHORITATIVE CHECKPOINT — 2026-10-19 authorized PUBLIC publication checkpoint
+## NEWEST / AUTHORITATIVE CHECKPOINT — 2026-10-21 Run101 offscreen updates CONFIRMED
+
+- [Run101](runs/2026-10-21-codex-offscreen-position-runtime-review.md). Actual
+  `artifacts/remix-runtime/runs/20261022-001430-318823-in-game`;sponsor reports
+  much faster,still blips. Review only,no code change/new run/formal gate claim.
+- CONFIRMED direct external ship-local position changes INSIDE three selected
+  render-observation gaps:24/28/94stable samples across1.202/1.419/4.725seconds,
+  all distinct base positions ANDcached translations. Same seeded ship/visual/
+  model checks,no quarantine. E6additional translation stayszero;true varying
+  base inputs+34/+38/+3Cand+9C4cachewere ALSO recorded. Automatic criterion
+  wrongly used E6alone as total position,so raw automated PARTIALis retained.
+  No duplicate test needed;correct interpretation from existing data.
+-3741stable/21changing-during-read rejected;no error/saturation,worker joined/
+  handle closed. No recorded FCAoffer inside these windows;source invalid2/
+  snapshot_miss4remain,not exhaustive no-render proof. Cache/base can differ
+  slightly during update phases;not atomic pose snapshots. Native generation/
+  removal/full rotation remain unqualified. No probe data feeds renderer yet.
+- Actual normal game/renderer exit,controller0,hook restoration/component unload,
+  hashes/config/proxy restore NOWCONFIRMED.4835draws,75stale,39expired admissions,
+  ACK4/reject0,0light omissions. Sponsor faster/blips not assigned a numeric cause.
+  Initial additive preparation5.922s;48.375sselected timer is broader start clock,
+  NOT asset-conversion duration. Raw95.52MBpreserved,no cleanup/promotion.
+- Changed only Run101record/HANDOFF;diff check PASS. HEADd29111f7,index empty,
+  prior/new changes unstaged/uncommitted,no helper/agent/commit/push.
+- Subsequent sponsor commit authorization:[Run102](runs/2026-10-21-codex-d3d9-checkpoint-commit.md)
+  checkpoints accumulated Run69–101source/tests/curated evidence.410tests and
+  read-only preflight rerun PASS;generated/game assets excluded,no push. Resolve
+  containing checkpoint via `git log -1 --format=%H -- docs/runs/2026-10-21-codex-d3d9-checkpoint-commit.md`;
+  prior unstaged status above is historical once that commit succeeds. Technical
+  limitations and exact next action unchanged;this is not a gate-PASS commit.
+- Exact next action:correct pose contract/analyzer total-position interpretation
+  using existing base/cache captures,then qualify persistent lifetime/full pose
+  consumption;do not rerun identical camera test or simply disable retirement.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-21 Run100 offscreen position probe READY
+
+- [Run100](runs/2026-10-21-codex-offscreen-position-probe-preparation.md),
+  [probe](reconnaissance/probes/OFFSCREEN-POSITION-001.md),
+  [evidence](reconnaissance/evidence/20261021-offscreen-position-prepared.json).
+  Sponsor go authorizes targeted position/visibility test,not another speed-only
+  run. No actual game run here,no lifetime fix or formal TRL/gate claim.
+- Exact original-PE12anchors confirm getter00419DD2FLOAT32ship+E6/+EA/+EE
+  source and ship+9C4render cache. New default-off EXTERNAL read-only worker,
+  process access0x1010,path-verified copied PID,current fresh captured ship/visual/
+  model checks,double reads. NO remote getter/calls,writes,new hook or ABI change.
+  Shared manager+6F4NOT polled. Same-vtable pointer reuse/lifetime still unproven;
+  no diagnostic sample drives renderer. Epoch retirement unchanged intentionally.
+- Two ships,<=20Hz each,120sreader max,2700rows/ship,8MiBdetail;existing90sformal,
+  five-minute workflow/32MiBlog/128MiBimages/20GBaggregate. Read/identity failure
+  quarantines track;worker joins before read handle release. Existing geometry
+  hook OFF,original drawing ON,all visual settings unchanged.
+- `OFFSCREEN-POSITION-001.jsonl`+worker summary capture raw position/cache/
+  rotation comparison and external QPC. Analyzer joins conservative interior
+  render gaps from same-session source timing/lifecycle;requires3changing stable
+  positions and zero missing-ship render offers. Constant readable memory doesn't
+  pass. Positive result is offscreen UPDATE observation,NOT generation/death or
+  allocation-safe lifetime proof. Detailed schema and safety limits in probe.
+-410Python tests PASS,12new external-reader/worker/QPC tests,exact12PEanchors,
+  native light/lifecycle worker reruns PASS;no new native build. Existing actual
+  D3D9/Remix standalone replay115840-152608595/600delivery,ACK3/reject0,
+  invalid0/unqualified0,state/resize/cleanup PASS. Vendor40warning persists.
+  PS5parser,NEWlauncher CheckOnly,diff check PASS. Both clients4D65761D...20C29
+  unchanged. Fixture generated copies recoverably hash-verified ZIP archived;
+  raw evidence retained,11.951GB/20GBartifacts. No active game/owned worker.
+- Exact files in Run100. HEADd29111f7,index empty,all prior/new changes unstaged/
+  uncommitted;no helper/agents/commit/push. Do NOT use old camera-recovery script
+  for this new question,turn off retirement,show cached poses,or infer fresh
+  rotation/lifetime from readable cache. Initial load/actual unload remain open.
+- Exact next action:sponsor runs `tools/d3d9_proof/start_d3d9_offscreen_position_session.ps1`,
+  accelerates OWNship at15scue,leaves it moving while enemy camera is selected
+  at25/60s,returns at40/75s,keeps both alive and exits only after two LOWbeeps;
+  analyze position changes inside gaps before implementing persistent tracking.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-21 Run99 offscreen evidence review
+
+- [Run99](runs/2026-10-21-codex-offscreen-position-evidence-review.md). Sponsor
+  asks to check existing short camera breaks,no implementation/new run authorized.
+  Run98prepared build remains intact;no formal gate change.
+- CONFIRMED Run97FCA2→3andKFF1→4→5fresh packet ship/visual/model/manager/source/
+  caller/list/base addresses SAME across our epoch changes. FCA stationary;
+  moving KFFtranslation changes across1.063s and14.906s detail gaps. Our tracker
+  retires via `retire_before(frame-2)`,NOT native destruction. No evidence SFC
+  actually changed persistent identity. Address continuity isn't lifetime proof.
+- STRONG HYPOTHESIS same ship persists and offscreen simulation/position updates
+  continue. Existing collector has ZERO fresh missing-ship samples within those
+  retired intervals;other ship keeps producing55/57/887offers. Thus before/after
+  displacement supports sponsor's explanation,not direct continuous offscreen
+  sampling. Offscreen drawing still SPECULATIVE and separate.
+- Existing mapped ship getter00419DD2builds cache+9C4from translation+E6/+EA/+EE
+  and rotation+92A/+92E/+980;render hands it to006AA550. Static candidate only:
+  field formats/freshness/lifetime-safe offscreen reads not qualified. Manager
+  +6F4is SHARED contextual state across both ships;do not poll it as a retained
+  per-ship pose. Do not invoke getter from worker or assume cache updates offscreen.
+- Docs only:Run99,this HANDOFF. Diff check PASS,HEADd29111f7,index empty,prior/new
+  changes unstaged/uncommitted,no game/build/helper/agent/commit/push. Existing
+  Run98tests/qualifications remain historical valid for unchanged code.
+- Exact next action:qualify already mapped ship-local position/rotation source
+  and lifetime protection from existing exact getter/setter evidence before
+  designing any bounded offscreen probe;no repeat same-path gameplay capture.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-21 Run98 fast recovery offline READY
+
+- [Run98](runs/2026-10-21-codex-fast-recovery-shared-lights.md),
+  [evidence](reconnaissance/evidence/20261021-fast-recovery-offline.json),
+  [amended contract](reconnaissance/d3d9-owner-rebind-contract.md),
+  [probe](reconnaissance/probes/D3D9-CAMERA-RECOVERY-001.md). Sponsor go authorizes
+  measured delay reduction;no new SFC run or formal gate claim.
+- Dedicated external recovery worker exclusively drains fresh asset transfers,
+  reuses validated decoded packets,stages new-owner lights BEFORE rebind request.
+  Original native captureQPC carried via fixed shared-memory light cells,then
+  existing Remix light adapter;no serial main50ms/recovery100ms/light100ms/file
+  reader10ms handoff. Diagnostic files retained but not delivery dependencies.
+  Existing16MiB current-user mapping,default-off explicit shared mode;no new
+  detour,ABI change,30Hz cap,appearance settings or original suppression.
+- Native render callback only adds QPC to fixed queue;worker publishes raw before
+  files. Renderer rejects already-old input before GPU work/currentFrame+<=2ms
+  offered age,not a guaranteed total render deadline. Freshness/identity/retirement
+  checks retained,no old-light or stale-pixel fallback. Worker join precedes unmap;
+  failed join forbids freeing its mapping. Exact changed files in Run98.
+- CONFIRMED synthetic first-new-epoch→first-exact-matched-Present improved from
+ 66.11/66.25ms to33.19/33.10ms,repeat33.24/32.70ms. Actual ordinaryD3D9/Remix/
+  GPU/x86receiver/proxy replay twice594/600delivery. Final782inputs,invalid0/
+  unqualified0,ACK3/reject0,2stale/3light omissions retained,expired0. State/
+  resize/recreation/owned exit PASS. Not camera/photon timing;synthetic binding/
+  lights do not measure real SFC discovery delay. Game improvement still
+  STRONG HYPOTHESIS,pending sponsor run—not "instant return fixed".
+-398Python tests PASS,x86/x64 ingress142+owner/admission51+shared-light9+
+  observer17checks each PASS. Dedicated capture/Direct64builds PASS,actual shared
+  native worker/QPC/stopped-before-unmap,normal/tuning/lifecycle worker PASS.
+  Actual Relay dedicated-worker ownership/decoded-transfer reuse PASS.
+  PS5CheckOnly and diff check PASS;additive receipt requires fast-path evidence.
+- Final fixture `artifacts/remix-runtime/runs/20261021-112631-606560-return-fixture`;
+  first `20261021-112219-768773-return-fixture`. Generated copies recoverably ZIP/
+  decompression-hash verified,raw logs/packets retained.11.942GB/20GBartifacts.
+  Both clients4D65761D...20C29 unchanged. No active game/owned renderer/helper/
+  agents. HEADd29111f7,index empty,prior/new changes unstaged/uncommitted.
+- Still open:real game camera-return latency,Run97controlled-unload failure,
+  initial~16.6s game preparation,vendor40-object warning,one-asset scaling.
+  Don't bypass retirement/strict frame checks or tune appearance to hide omissions.
+  Existing camera-recovery launcher and HIGHcues unchanged,keep both ships ALIVE.
+- Sponsor clarification2026-10-21:epoch changes are CONFIRMED OUR tracker labels,
+  not confirmed SFC identity changes. Working assumption:same SFC ship persists.
+  Offscreen simulation/position updates are STRONG HYPOTHESIS from reported
+  projectile/fighter behavior;continuous offscreen drawing is SPECULATIVE and
+  separate. Selected-hook absence does not prove destruction or stopped motion.
+  Clarification is documentation only,no implementation change or new capture.
+- Exact next action:sponsor runs `tools/d3d9_proof/start_d3d9_camera_recovery_session.ps1`,
+  switches enemy/own camera at HIGH cues twice,waits for two LOW exit beeps after
+  restoration;then analyze first fresh-owner→matched-Present delay and unload.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-21 Run97 functional return;latency REJECTED
+
+- [Run97](runs/2026-10-21-codex-recovery-latency-runtime-review.md),
+  [evidence](reconnaissance/evidence/20261021-recovery-latency-runtime.json).
+  Sponsor says works,slight offscreen-camera delay NOT acceptable. Actual062533run
+  FCA2/2->3/3 ACK2/rejected0,resident content retained,new epoch fresh lights. Only
+  ONE actual FCA rebind observed despite two camera cycles cued;KFF got other epochs.
+- Raw QPC join:first fresh FCA3/3observation frame2613 ->first producing input
+  offer365.061ms,first returned output381.399ms(frame2635),first strict matching
+  Present580.309ms(frame2647). NOT actual camera/photon timestamps. Coarse ACK63ms
+  alone understates total delay. Light omissions2627..2634,then outputs miss frame
+  deadlines until2647. Confirmed our critical-path delay,not merely engine culling.
+-5192draws,96stale;input invalid0/unqualified1,source timing invalid2. No all-zero
+  anomaly/PASS claim. Initial preparation16.640s also unresolved. Original drawing
+  ON. Sponsor functional report does not independently confirm full HUD checklist.
+- PARTIAL controlled unload still:controller8,target exit before removal,no worker
+  summary;normal game/renderer exit and hash/config/proxy restoration PASS. New
+  watchdog wait exists;do NOT reassert old15s timeout as this run's cause. Exit
+  timing relative to cue unresolved. No active SFC/owned renderer,vendor warning40open.
+- Analysis/docs only,no implementation/test launch/helper/agents/stage/commit/push.
+  HEADd29111f7,index empty,prior/new work unstaged/uncommitted;raw90.65MB retained.
+  Do not ask repeated gameplay merely to confirm known delay or declare this baseline.
+- Exact next action:bounded offline work to remove serial recovery/light handoffs
+  and measured re-entry deadline misses from first usable-frame path,retaining
+  fresh identity/provenance and resident assets;no stale pixels/retirement bypass.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-21 Run96 camera return/rebind READY;runtime pending
+
+- [Run96](runs/2026-10-21-codex-owner-rebind-and-shutdown-fix.md),
+  [contract](reconnaissance/d3d9-owner-rebind-contract.md),
+  [probe](reconnaissance/probes/D3D9-CAMERA-RECOVERY-001.md),
+  [evidence](reconnaissance/evidence/20261021-owner-rebind-prepared.json).
+  Sponsor go authorizes shutdown fix then epoch reconnection. No new SFC run.
+- Fixed wait against controller's actual gate-relative120s watchdog+bounded35s
+  stop/unload allowance,not15s from formal end. Stop owned renderer before wait.
+  Do not exit on "recording finished/restoring";wait for two LOW exit beeps.
+  Real controlled unload remains unconfirmed until next sponsor run.
+- Fresh packet/content+LOD/group/image SHA qualification,unique configured FCA
+  fixture only. New128byte acknowledged generation control in verified mapping
+  gap;current-frame/session/sequence/output checks unchanged. Keep resident assets
+  and renderer,not full conversion/restart. Missing/changed/ambiguous content hides
+  copy and reports partial. No stale pixels or pointer-only resurrection.
+- Fixed additional first-two-epochs light collector limitation ONLY in live D3D9
+  mode:reuse two fixed observation slots on retirement/staleness,fresh provenance.
+  No replay fallback in SFC,death flag/new detour or ABI change. Original rendering ON.
+-393Python tests PASS,x86/x64 ingress142+owner46+light17checks PASS,actual native
+  normal/tuning/lifecycle worker tests PASS. Actual ordinary-D3D9/Remix061525fixture
+  two rebinds,ACK3/rejected0,matched owners3/12/13:122/180/292;591/600delivered,
+  state/resize/shutdown PASS. Synthetic lights clearly labelled,not game light proof.
+  Final qualifications require matched presentation across both rebinds. PS5
+  CheckOnly and parser checks PASS. Current control evidence exported128bytes.
+- READY tools/d3d9_proof/start_d3d9_camera_recovery_session.ps1. Keep both ships
+  ALIVE. One hold;two HIGH enemy camera;three HIGH own camera,repeat twice.
+  No destruction this check. State/journal full window preserved. Real recovery
+  latency/fresh lights still pending;initial~14s asset preparation NOT fixed here.
+- Exact files in Run96. Both clients4D65761D...20C29 unchanged. Fixture generated
+  inputs recoverably archived/hash-verified,raw logs/packets retained;10.273GB/20GB.
+  HEADd29111f7,index empty,all prior/new changes unstaged/uncommitted,no active
+  game/owned worker/helper/agents/commit/push. Existing vendor warning40unresolved.
+  M1/component/adapter gate allocation unchanged,no new formal TRL PASS.
+- Exact next action:sponsor runs dedicated camera-recovery launcher with usual
+  Federation-cruiser/different-enemy fixture and confirms copy returns BOTH times,
+  then exits at two LOW beeps so live removal and fresh-light recovery can be checked.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-21 Run95 lifecycle data useful;cleanup scheduling defect
+
+- [Run95](runs/2026-10-21-codex-lifecycle-runtime-review.md),
+  [curated evidence](reconnaissance/evidence/20261021-lifecycle-runtime-review.json).
+  Actual053837run1829valid state rows through97.031s,6complete transition rows.
+  FCA2/2retires33.094s,returns3/3at36.703s,then retires82.985s(component clock,
+  NOT formal cue clock). Geometry/groups/resource associations identical across
+  FCA return. Renderer pinned2/2,lastframe1984;no rebind. Run92 diagnosis repeated.
+-1661draws,21stale,zero invalid/resource/depth errors;one source rejection retained.
+  All source-timing anomaly counters zero,renderer0,game normal exit. Sponsor
+  subsequently answers yes:alive camera-away/return then own-ship destruction at
+  cue confirmed by human observation;no exact explosion timestamp. Terse answer
+  does not separately describe rendering/control issues or their absence.
+  Status2 still observation absence,NOT native death proof. No guessed fields/hooks.
+- PARTIAL cleanup:controller8,no worker summary,controlled unload NOT confirmed.
+  CONFIRMED static mismatch:controller waits120s fromgate;runner90sformal+actual
+ 4.625sprep+15swait can expire BEFORE controller reaches stop. Don't repeat test
+  unchanged or mislabel data useless;fix stop synchronization offline first.
+  No failed hook-restoration result exists;target exited before attempt.
+- Original/copied critical baselines equal,launcher settings/proxy restored,
+  client4D65761D...20C29 unchanged. Logs/CSV/JSONL2.088MB,total88.69MB. Raw partial
+  evidence retained,no archive safety guard bypass. No active game/owned renderer.
+  Existing vendor warning40unresolved. HEADd29111f7,index empty,all prior/new work
+  unstaged/uncommitted. This run docs/evidence only,no launch/helper/agents/commit.
+- Exact next action:correct controller/runner stop synchronization offline so
+  journal/worker drain and live-hook removal complete BEFORE asking sponsor to exit.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-21 Run94 separate lifecycle runner READY
+
+- [Run94](runs/2026-10-21-codex-lifecycle-runner-preparation.md),
+  [probe](reconnaissance/probes/D3D9-LIFECYCLE-001.md). Sponsor ran anyway and asks
+  separate tuned runner. Latest051331game1905draws,normal exit/hashes/proxy PASS,
+  early exit/controller8 means NO controlled unload. First100detail ends~4.86s;
+  no native death signal.044755late relay-exit error also retained as PARTIAL.
+- New tools/d3d9_proof/start_d3d9_lifecycle_session.ps1;normal offset entry
+  unchanged. Default-off opt-in keeps <=20Hz detail/2700rows per slot/16MiB for
+  full120s watchdog,independent prefaulted256record transition ring/1MiB event log.
+  Nonwaiting callbacks;worker serialization/drain,counters for missing evidence.
+  Existing90s formal window,20GB aggregate,geometry hook OFF,exact-frame checks,
+ 8asset revisions,original drawing and frozen visual settings preserved.
+- Prepared cues after image ready:15s one hold alive;25s two-high enemy camera;
+ 40s three-high return own ship alive;60s four-high destroy OWN ship;remain in
+  mission until two-low exit cue. Cues are requests,not actual action/death evidence.
+- Native normal/tuning/lifecycle worker tests PASS,381Python tests PASS,parsers and
+  new CheckOnly PASS. Standalone052314fixture599/600,state/resize/shutdown PASS.
+  Final native-light/lifecycle/additive dependency receipts current. Generated
+  fixture copies hash-verified recoverably archived;aggregate10.157GB/20GB.
+- Camera-return recovery is still OPEN and intentionally NOT fixed in diagnostic.
+  Copy can disappear after look-away;continue test. Status2 is observation
+  retirement,NOT death. No guessed health flag/destructor/new hook. Required late
+  retirement/new-epoch journal receipts verified offline;no lossless runtime claim.
+  Existing static owners2/2 pinned pipeline must eventually rebind by fresh content,
+  not by pointer alone. Do not remove retirement or reuse stale output blindly.
+- Exact files/commands/results in Run94. HEADd29111f7,index empty,all work unstaged/
+  uncommitted;clients both4D65761D...20C29 unchanged,no active game/owned renderer.
+  Fuel Guard SANDBOX_ACCESS_DENIED;no daemon spawned. No helper/agents/commit/push.
+  No new formal TRL claim;vendor warning40unresolved. Tool handles/maps/jobs from
+  offline checks closed;only durable generated receipts survive restart.
+- Exact next action:sponsor runs dedicated lifecycle launcher from established
+  elevated parent,performs alive camera-away/back then own-ship destruction at
+  cues,waits for exit request,and reports whether destruction actually occurred.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-21 Run93 endurance archive cannot identify destruction
+
+- [Run93](runs/2026-10-21-codex-endurance-destruction-evidence-review.md). Sponsor
+  asks reuse old enemy-explosion endurance before short player destruction test.
+  Correct run20261014-005117;archive SHA and all22entries match retained raw.
+- Detailed semantic evidence only first2.109s/frames0..119,1189records. Summary9
+  retirements over109688frames,not timed/per-owner death observations. Explosion
+  near end un-timestamped;no native death flag/qualified destructor captured.
+  CONFIRMED insufficient for death-vs-camera-gap distinction;endurance PASS retained.
+- Sponsor can destroy selected player ship,but do not launch unchanged runner:
+  current bounded detail/absence rule alone won't establish a destruction signal.
+  Exact next action:prepare bounded before/during/after lifecycle comparison and
+  qualify smallest native lifetime/death observation,then short camera-gap/alive
+  followed by selected-ship destruction test. No broad RE or guessed death flags.
+- Run92fresh-epoch recovery remains OPEN,no fix/probe implemented. NO NEW LAUNCHER
+  READY. Retain safe retirement/identity checks;actual death detection is not a
+  prerequisite to safe content-qualified fresh-epoch rebind if unavailable.
+- HEADd29111f7,index empty,all dirty work unstaged/uncommitted. Audit docs only,
+  no client/runtime change,helper/agents/stage/commit/push/active owned runtime.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-21 Run92 camera-switch epoch recovery OPEN,no fix yet
+
+- [Run92](runs/2026-10-21-codex-camera-switch-epoch-loss.md). Sponsor target-camera
+  switch/back loses overlay. Actual044306selected2/2,last display1798;fresh FCA
+  returns4/4frame1864. Geometry/groups/resource associations IDENTICAL. Renderer
+  did not crash;received1508,invalid0,unqualified0.914observer ineligible checks.
+- CONFIRMED tracking retires owners absent>twoframes;return assigns fresh epoch.
+  Source/renderer are pinned initial2/2and Relay stops selecting while process exists.
+  Missing recovery/rebind,not texture or scale bug. Identical pointers are NOT
+  authority to revive old epoch. Keep retirement/identity/stale-output safeguards.
+- Exact next action:bounded fresh returning-owner/asset requalification plus
+  acknowledged generation rebind;reuse resident assets ONLY by verified content.
+  Test delayed old outputs,pointer reuse,mismatch/ambiguity,repeated camera changes.
+  No implementation yet;do not expand all models or substitute enemy.
+- Run91gap/Run90texture+viewport corrections retained. Latest normal game exit,
+  client/settings/proxy restoration PASS,but incomplete tactical duration/controller8
+  ->controlled unload NOT confirmed. Keep raw evidence;no clean-baseline/PASS claim.
+- HEADd29111f7,index empty,all dirty work unstaged/uncommitted. Audit docs only,
+  no helper/agents/stage/commit/push or active runtime. M1 CONTINUES,recovery OPEN.
+  Existing launcher reproduces bug;NO CORRECTED CAMERA-RECOVERY LAUNCHER READY.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-21 Run91 smaller gap READY,same launcher
+
+- [Run91](runs/2026-10-21-codex-smaller-diagnostic-gap.md). Sponsor one-third
+  closer means gap reduced1.5->1.0captured bounds span;NOT camera depth/model scale.
+  Shared helper supplies manifest/host env consistently. Camera-left anchoring
+  retained:copy's world offset rotates with camera,explaining observed orbit.
+  Earlier world-X variant was static;do not silently switch anchor mode back.
+- Run90texture-origin/native-viewport fixes retained.377Python tests PASS;offline
+ 044105fixture599/600,pixels/state/resize/normal exit PASS. Receipt refreshed and
+  no-launch preflight PASS. SAME start_d3d9_offset_ship_session.ps1 READY;no SFC launch.
+- Generated copies recoverably archived/hash-verified,aggregate9,886,547,286B/20GB;
+  clients untouched,warning40unresolved. HEADd29111f7,index empty,all work unstaged/
+  uncommitted,no helper/agents/stage/commit/push/active owned runtime. M1 CONTINUES.
+- Exact next action:sponsor SAME Federation-cruiser fixture;check corrected saucer,
+  apparent size and closer left-hand copy,exit at cue for controlled unload.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-21 Run90 texture-origin/viewport corrections READY
+
+- [Run90](runs/2026-10-21-codex-texture-origin-and-viewport-scale.md). Sponsor actual
+ 041259run fairly stable;5290/5402observer matches(~97.93%),5292draws,75stale,
+  zero invalid/resource/depth errors. Normal game exit/hash/proxy restore PASS;
+  controller8,target exited before controlled removal,so NOT controlled unload.
+  Preserve partial cleanup classification,no evidence invalidation/clean-baseline claim.
+- Found actual scaling defect:full-frustum1920x1080image treated as tactical native
+  pixels instead of viewport[200,30,1720,1020]. Was11.63%wider/5.88%taller plus
+  coordinate displacement. Fixed output sampling+depth mapping,NOT model scaling.
+ 3493positions*64captured rows agree with native projection within.000135px;
+  camera-left depth change0. Real-game silhouette comparison still pending.
+- Remix replacement DDS derivatives now vertically reverse rows once for ALL
+  color/emission/roughness maps. Neutral captured UVs,ordinary D3D9uploads/source
+  images and SDK path unchanged. Actual ordinary-D3D9/Remix quadrant control PASS,
+  old topR/G ->corrected topB/Y. No global DirectX flip or double conversion.
+-376Python tests,native mapping44+wire/source/state tests PASS;corrected actual-
+  proxy fixture042218599/600,state/resize/normal exit PASS. Light qualification,
+  additive source/binary/config receipt and no-launch preflight refreshed. READY
+  SAME tools/d3d9_proof/start_d3d9_offset_ship_session.ps1;no SFC auto-launch.
+- Raw source evidence kept;generated control/fixture copies recoverably archived,
+  aggregate9,877,923,768B/20GB. Client hashes unchanged,warning40unresolved.
+  HEADd29111f7,index empty,all dirty work unstaged/uncommitted,no helper/agents/
+  stage/commit/push or active owned runtime. M1 CONTINUES,not universal PASS.
+- Exact next action:sponsor SAME Federation-cruiser fixture,compare saucer markings
+  and size across camera views;exit at cue so controlled unload can be verified.
+  Keep one ship until satisfactory;do not expand all models or tune scale by eye.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-20 Run89 worker efficiency READY FOR ONE-SHIP SPONSOR TEST
+
+- [Run89](runs/2026-10-20-codex-worker-efficiency-preparation.md). Fixed6MiB worker
+  text/CSV buffers remove per-frame disk/pipe writes;flush at teardown,crash may
+  lose buffered detail,saturation marked/rejected. /O2 /fp:precise worker builds,
+  inherited compiler options cleared. SFC hooks/ABI/client untouched.
+- Private250us wait replaces critical input/query Sleep(1),no global timer change,
+  busy-spin,unrelated fence or stale hold. Actual D3D9completion/lease checks remain.
+  Added query/input/pool-publication timing. Legacy0option OFFLINE only;qualified
+  game preflight rejects policy override. No material/light/resolution changes.
+- Optimized legacy median9.921ms/p9510.927;private8.485/9.290,repeat8.467/9.486ms.
+  Actual final-query observation gaps~2.0ms ->.515ms median,NOT all pure wasted time.
+  Query wakeups5->14;no CPU utilization gain claim. First private worst13.595ms,
+  so no guarantee worst tails/flicker fixed. Synthetic lead,not SFC contention.
+- Final offline599/600display window,pixels/state/border/resize/normal exit PASS.
+ 372Python tests,native timer/log safety/wire/light tests PASS. Source/binary/config
+  qualification and no-launch preflight refreshed;READY same playerFCA launcher:
+  tools/d3d9_proof/start_d3d9_offset_ship_session.ps1. No automatic SFC launch.
+- Sponsor explicitly raised aggregate budget to20GB(decimal);central guards updated,
+  per-run caps unchanged. Generated copies recoverably zipped/hash-verified after
+  analysis;aggregate9,778,503,054B/20GB. Clients unchanged,warning40unresolved.
+- HEADd29111f7,index empty,prior/current work unstaged/uncommitted. No helper,agents,
+  stage/commit/push or active owned runtime. M1 CONTINUES,actual delivery OPEN.
+- Exact next action:sponsor SAME Federation-cruiser two-ship skirmish,brief static
+  camera then ordinary movement and brief fast camera changes;observe extra ship
+  left of player,report flicker/load delay,exit at cue. Codex adjudicates logs.
+  Do not expand all models or loosen identity checks before satisfactory result.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-20 Run88 frame-path efficiency audit;critical polling still present
+
+- [Run88](runs/2026-10-20-codex-frame-path-efficiency-audit.md). Source confirms
+  D3D9wait9 still GetData(FLUSH)+Sleep(1) every output;prior event fences only
+  covered later D3D11stages. Input worker also Sleep(1)polls. Unitbuf per-frame
+  logs flush synchronously on renderer/receiver path. Individual costs unmeasured.
+- Render-ready wait is NOT pure GPU shader cost;includes polling/scheduler delay.
+  Build scripts lack explicit optimized-release flags;verify build environment,
+  no fast-math/ABI changes. Sample projection checks repeat per update;optimize
+  invariant work only after measuring,not remove identity/finite safeguards.
+- Single producer waits receiver GPU-copy ACK before reuse. Copy is~24.88MB/frame
+  at1080p,not CPU readback. Cannot remove fences/ACK without new safe ownership.
+  Assets/resources allocated once,live CPU image dumps disabled,one normal Present.
+- Multi-model constraint:one shared scene/frame with resident asset cache and one
+  output/grade/transfer,not per-owner full pipeline. Current draw clears each call;
+  cannot simply loop it for all ships. Isolated-owner coverage not multiship IDs.
+- Exact next action:bounded critical-path timing separating input/checks,D3D9poll
+  wakeups,output readiness and ACK,with off-path logging and explicit optimized
+  build comparison. Do not silently substitute unrelated D3D11fence for Remix work,
+  busy-spin,hold stale ship pixels or add whole-frame buffering.
+- Run86startup fix retained;Run87deadline diagnosis retained. M1 CONTINUES,delivery
+  OPEN,NO NEW LAUNCHER READY. HEADd29111f7,index empty,all dirty work preserved and
+  unstaged/uncommitted. Audit only;no runtime/client/source/build changes,helper,
+  agents,stage/commit/push or active renderer/session. No sponsor action needed now.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-20 Run87 camera flicker deadline attribution;no rendering fix
+
+- [Run87](runs/2026-10-20-codex-fast-camera-flicker-analysis.md). Offline Run84 join:
+ 475eligible observer misses,459with eventual output;457completion after observer,
+ 2input taken after observer,16without retained expected output. No completed-by-
+ observer mismatch.346timed misses definitely pre-peer late,113transfer/ACK timing
+ ambiguous. Observer and compositor callbacks differ;NOT431pool stale rejections.
+- Camera-hash changed miss rate13.18%vs3.10%unchanged. State association CONFIRMED,
+  not measured rotation speed or complete causality. Render-ready wait median
+ 13.053ms missed vs9.691matched;available14.628vs15.435ms. Light update.0042ms.
+  Tight same-frame deadline + render/queue tails strongest supported explanation.
+- Runtime rejects old image instead of drawing it;that makes misses flicker. Do
+  not loosen exact identity checks,hold stale ship pixels or claim GPU wait equals
+  ray-tracing shader time. Some startup/ACK-boundary uncertainty retained in Run87.
+- Run86 startup fix retained:offline1.2..1.35s,identical images/settings. Delivery
+  still OPEN,M1 CONTINUES;no new gameplay/native/rendering change or milestone PASS.
+  NO NEW LAUNCHER READY. HEADd29111f7,index empty,all prior/current dirty work
+  unstaged/uncommitted;no helper,agents,stage/commit/push or active runtime session.
+- Exact next action:bounded offline critical-path experiment separating worker
+  polling/queue from render-ready work using changing-camera inputs;no promise a
+  wakeup improvement eliminates tails. Whole-frame buffering/pacing needs explicit
+  decision if same-frame completion remains unreliable;no new sponsor action now.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-20 Run86 expensive texture readback removed;flicker next
+
+- [Run86](runs/2026-10-20-codex-texture-preparation-readback-fix.md). Sponsor
+  explicitly authorized removing per-load pixel verification;SFC already uses
+  original images. Conversion roundtrip correctness now covered offline only.
+  Runtime retains cheap RGBA/DDS layout/dimensions/byte bounds,resource limits,
+  provenance/source associations and hashes. No image-quality or settings changes.
+- CONFIRMED offline replay:material stage16.402s BEFORE ->1.097/0.983s AFTER;
+  total preparation16.670s ->1.355/1.230s. Both produce identical image hashes,
+  groups,settings,material USD hash and byte totals. No actual new gameplay timing
+  or promise of instant first display;runtime initialization remains unmeasured.
+-364Python tests PASS(including11material tests),client hashes unchanged,
+  diagnostic generated copies recoverably archived;aggregate9,799,270,644B/10GB.
+  No SFC/Remix launch,native changes,helper,agents,stage/commit/push.
+- Fast-camera flicker remains OPEN:Run84 deadline/stale evidence retained;no
+  stale-pixel hold,whole-frame buffering,quality reduction or replacement added.
+  M1 CONTINUES;not satisfactory delivery or formal PASS. Existing launcher
+  qualification stale;NO NEW LAUNCHER READY. HEADd29111f7,index empty,dirty work
+  preserved,all changes unstaged/uncommitted;no active runtime session.
+- Exact next action:investigate Run84 frame-delivery tails/stale-output rejection
+  offline before changing synchronization or requesting another gameplay test.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-20 Run85 preparation bottleneck identified;fix NOT implemented
+
+- [Run85](runs/2026-10-20-codex-startup-preparation-profile.md). Offline replay of
+  Run84 fresh FCA packet:unprofiled geometry/original images0.248s,extent0.020s,
+  material preparation16.402s. No SFC/Remix launch or game/client modifications.
+- CONFIRMED:material_binding.prepare/save reopens generated DDS files for exact
+  pixel validation;Pillow uses a pure-Python per-pixel decoder. Two profiled
+  material passes~38.1s each,~36.2s in that decoder. Profiler magnifies millions
+  of calls;38s is NOT actual runtime load. No OS cache flush/cold-boot claim.
+- Next smallest action:replace only generated-DDS validation with a strict bulk
+  validation path,retaining exact header/dimension/channel/pixel checks and output
+  bytes/hashes. Add malformed/truncated/asymmetric-image tests;measure again.
+  Do not remove validation,modify global Pillow,reduce quality or redesign capture.
+- Run84 gameplay height/current appearance accepted;fast-camera flicker remains
+  OPEN and independent. No steady-delivery/satisfactory-baseline/formal PASS claim.
+  Existing source qualification stale;NO NEW LAUNCHER READY. No new gameplay needed
+  for this diagnosis. Generated diagnostic copies recoverably archived after checks.
+- HEADd29111f7,index empty,prior/current work unstaged/uncommitted. No stage/commit/
+  push,helper,agents or active game/runtime sessions. M1 CONTINUES.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-20 Run84 actual height/appearance accepted;startup/camera delivery OPEN
+
+- [Run84](runs/2026-10-20-codex-current-effects-runtime-review.md),actual UTC-folder
+  20261021-024303(localOct20). Sponsor confirms correct scene height/good current
+  settings and texture appearance;fast camera flicker remains,20s initial load
+  explicitly unacceptable. Partial result,M1 CONTINUES,not satisfactory baseline.
+- Formal90s completed after20.047s preparation. Normal game/renderer exits0;
+  controlled hook restoration/unload and test-proxy/launcher/critical hashes PASS.
+  No fresh explicit HUD/control attestation;do not infer one. Raw-owner source
+  rejection1retained,separate source-timing validation has zero invalid/drop.
+-4956/5430eligible presentation matches(~91.27%),474old/different;4965image draws,
+  431stale,zero invalid/resource/depth errors. Do not divide by all5983publications
+  to claim formal coverage:those include intentionally disabled teardown work.
+  All-outputmedian13.218ms/p9515.753ms;through-last-display13.091/15.783ms.
+- Current lights/materials remain applied;background light-checkp95.005ms. Remaining
+  render/transferp9514.562ms;not repeated texture uploads. Sponsor's fast-camera
+  observation CONFIRMED;individual miss/input causality not yet fully correlated.
+- Two OPEN defects:startup preparation latency and frame-delivery tails. No new
+  rendering implementation,stale holds,quality reductions or buffering authorized
+  by this review. After satisfactory single-ship path:shared-scene stress,then
+  identity survey. Agnostic adapter gates separate from Remix/game-result gates.
+- Generated input copies compressed,196entries/decompressed hashes verified;
+  original gate packets/logs/manifests retained. No game assets removed. Archive
+  recorded in Run84;aggregate9,770,159,898B/10GB. Explicit completed-game archival
+  guards added;old additive source qualification now stale. NO NEW LAUNCHER READY.
+- HEADd29111f7,index empty,all prior/current dirty work unstaged/uncommitted. No
+  owned processes/tool sessions,helper,agents,stage/commit/push. Warning40unresolved.
+- Exact next action:offline profile cold/warm initial preparation stages using
+  retained captures to isolate image/material work,runtime startup and first-ready
+  time. No identical gameplay rerun;do not silently add whole-frame buffering.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-20 Run83 camera-left + light cache READY FOR SPONSOR TEST
+
+- [Run83](runs/2026-10-20-codex-camera-left-and-current-effects-profile.md).
+  Current lighting/material mapping preserved;four appearance TOMLs unchanged.
+  Actual225915:playerFCA worked,height reportedly right,world offset behind and
+  flicker (~77%submission) remained. Intentional exit0,not controlled live unload.
+- Camera-left now uses exact view row0 each frame,not world-X;no camera-depth/up
+  displacement. Raw game state/geometry/UV unchanged. Same576B pool version2;
+  native rotation/projection checks PASS. Do not mix v1/v2 or old qualifications.
+- Removed overwritten vendor picking copy only;depth/semantic coverage retained.
+  Profiling found light-file IO on critical worker despite only3descriptors. New
+  fixed-size background cache moves IO off that path;source/identity/checksum/
+  frame/expiry validation unchanged,no renewed timestamp or API calls on IO thread.
+  No SFC waits,stale ship hold,quality reduction,buffering or original suppression.
+- Final offline actual-proxy231447:599/600fixed-window images,median9.8595ms,
+  p9510.9348ms,max13.9169ms.16,120changed pixels,state/border preserved,normal
+  owned exit and resize/recreation safe-hide. Replay lights/synthetic source lead,
+  NOT actual SFC contention or live light-sync PASS. M1 CONTINUES.
+-360Python tests,29wire/18timing/31pool,11loaded-light tests PASS;legacy SDK host
+  compile-only compatibility PASS. Source/binary/config qualification refreshed;
+  no-launch preflight PASS. SAME Federation-cruiser launcher,elevated parent:
+  tools/d3d9_proof/start_d3d9_offset_ship_session.ps1. No magenta/on-off cycle.
+- Client hashes/appearance configs unchanged. Vendor warning40 unresolved;startup
+  prep not optimized. Assets upload once,not per frame;no universal scalability
+  claim. No owned processes/tool sessions;handles require fresh session on restart.
+- Generated copies recoverably zipped/decompressed-hash-verified,source evidence
+  retained. Aggregate9,754,639,428B/10GB with192MiB reservation PASS. HEADd29111f7,
+  index empty,all changes unstaged/uncommitted;no helper/agents/commit/push.
+- Exact next action:sponsor repeats SAME Federation-cruiser fixture,follows cues
+  and exits normally;Codex adjudicates left placement,current lighting/mapping
+  and delivery before replacement/buffering. Do not claim in-game flicker fixed
+  from offline result. Buffering still requires separate sponsor approval.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-20 Run83 camera-left/current-effects profiling IN PROGRESS
+
+- [Run83](runs/2026-10-20-codex-camera-left-and-current-effects-profile.md). Sponsor
+  means CURRENT lighting/material mapping,not weapons;preserve appearance settings.
+- Actual225915:player FCA selection worked,height reportedly correct;offset behind,
+  flicker remains.1883/2438submitted(~77%),531stale,median13.837ms,p9518.937ms.
+  Current lights/material/image policy applied;textures/mesh are not reloaded each
+  frame. Intentional early exit code0,not controlled hook unload;critical files/
+  proxy restored. M1 CONTINUES;steady delivery FAIL remains,not a formal PASS.
+- Camera-left correction uses source view row0,producer/game agree;poolv2 same576B.
+  Removed overwritten vendor-picking copy only in additive mode;no policy reduction.
+  Added GPU-stage/light-update profile counters. Native29/18/31checks,360Python PASS.
+- Standalone profiling fixture active/pending. NO CURRENT QUALIFIED GAME LAUNCHER.
+  No SFC,helper,agents,stage/commit/push;HEADd29111f7,index empty,dirty work retained.
+- Exact next action:finish current offline600-frame fixture,adjudicate preserved
+  pixel/state/camera-left behavior and real remaining GPU cost;qualify only a
+  justified changed test,or seek separate approval for synchronized buffering.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-20 corrective player-fixture test READY; gameplay delivery unqualified
+
+- [Run82](runs/2026-10-20-codex-offset-selection-and-delivery-triage.md): first
+  game223526 delivery FAIL (23/1736 images),enemy-first selection. M1 CONTINUES.
+  No formal PASS. Current correction is offline-tested,NOT gameplay validated.
+- Explicit `tools/d3d9_proof/offset_ship.toml` selects assets/models/fca/fca.mod,
+  the known Federation player-cruiser fixture. No first-enemy fallback;missing/
+  duplicate matches reject. NOT a generic native player-ownership field. Use same
+  Federation cruiser next run;other fixtures require deliberate requalification.
+- Combined grade/coverage fence and D3D11.4 GPU completion events in RENDERER/
+  RECEIVER WORKERS. No SFC callback waits,stale hold,appearance-policy change or
+  original suppression. Unsupported event API fails safely. Added stage timings.
+- Final actual-proxy offline fixture224656:588/600 fixed-window images (~10s,98%),
+  median10.704ms,p9515.527ms,max18.280ms.935 exact source pairs,no invalid/drop/
+  wrong-thread;pixels/state/border preserved,normal exit,resize hides safely.
+  Offline lights replayed,not live proof. Earlier175/180corroborates improvement.
+  Actual game contention and remaining omissions still require sponsor test.
+-360 Python tests/native29wire+18timing+22pool and existing return/light checks
+  PASS. Fixed600-frame delivery guard replaces occasional-success readiness.
+  Source/binary/config qualification refreshed;read-only preflight PASS. Launcher
+  unchanged:tools/d3d9_proof/start_d3d9_offset_ship_session.ps1,elevated parent.
+- Intentional first-game early exit was launcher0,not crash;classification fixed
+  for future runs. Controller8/process reclamation was NOT controlled live unload.
+  Accepted/copied critical files unchanged/proxy restored. Four appearance TOMLs
+  unchanged/frozen. No owned processes/tool sessions;new session on restart.
+  Vendor warning40 unresolved. No helper,agents,stage/commit/push.
+- Generated copies archived/decompressed-hash-verified,raw evidence retained.
+  Aggregate9,705,574,806B/10GB,192MiB reservation PASS. HEADd29111f7,index empty;
+  all previous/current dirty work preserved,unstaged/uncommitted.
+- Exact next action:sponsor repeats SAME Federation-cruiser two-ship fixture with
+  corrected offset launcher,observes player copy,follows cues/exits normally;
+  Codex then adjudicates delivery fraction/latency and flicker. Do not claim game
+  flicker fixed from offline98% or reuse old qualified binaries blindly.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-20 offset-ship delivery FAIL; correction under offline test
+
+- [Run82](runs/2026-10-20-codex-offset-selection-and-delivery-triage.md) supersedes
+  Run81's launch-ready checkpoint. Sponsor stopped223526 early:enemy selected,
+  flicker/mostly absent. CONFIRMED23/1736 image submissions,1705 stale rejections;
+  median28.188ms arrival vs15.616ms typical available time. This is delivery FAIL,
+  not invalid geometry/texture evidence. Native light joins worked. M1 CONTINUES.
+- Game launcher exit0; old runner mislabeled normal exit after early termination.
+  Fixed future classification. Controlled hook unload NOT proved (controller8);
+  process reclamation only. Accepted/copied critical files unchanged/proxy restored,
+  renderer job exit0. Partial evidence retained; no new SFC test started.
+- Explicit offset_ship.toml selects known player-fixture FCA,not first enemy.
+  Missing/duplicate matches reject. NOT native generic player-ownership detection.
+ 357 Python tests PASS. Combined grade/coverage completion improved offline median
+  to15.444ms,but p9520.638ms still insufficient to claim fixed flicker.
+- Worker-only GPU fence-event correction and fixed180-frame delivery-window check
+  now under standalone GPU test. New preparation guard>=90% does NOT amend CDD.
+  NO VALID SPONSOR LAUNCHER:old receipt stale. No stale holds/buffering/prediction,
+  SFC callback waits, original suppression, helper, agents, stage/commit/push.
+- HEADd29111f7,index empty; existing dirty work preserved. Settings/client untouched.
+  Exact next action:finish current standalone GPU session,adjudicate timed delivery,
+  qualify only if responsible;otherwise report synchronization blocker for sponsor
+  architecture decision. Check active tools/processes before rebuilding/compacting.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-20 ordinary-D3D9 offset ship READY FOR SPONSOR TEST
+
+- [Run81](runs/2026-10-20-codex-normal-d3d9-material-binding.md) final section
+  supersedes its WIP entries. [Probe](reconnaissance/probes/D3D9-ADDITIVE-001.md).
+  M1 CONTINUES. No actual SFC image test or formal gate PASS claimed this run.
+- Ordinary D3D9 geometry now uses native Remix material-only replacements for
+  fresh primary textures, existing provisional emission/roughness, and unchanged
+  sponsor light/material/image/quality settings. NO SDK geometry, OBJ or Toolkit.
+  All5 KFF and56 FCA texture hashes independently matched saved runtime captures.
+- Final standalone actual-proxy fixture `20261020-222142-946534-return-fixture`:
+  120 exact-current image submissions,18,596 changed backbuffer pixels, original
+  border intact; state_errors=0, resize/recreation exercised, normal owned exit.
+  110 stale images omitted,21 unclaimed slots overwritten,zero invalid/resource/
+  depth errors. This is NOT steady live-game delivery proof. Offline light input
+  explicitly historical replay; actual same-session native-light join awaits SFC.
+- Source/binary/config qualification and no-launch preflight PASS.353 Python
+  tests PASS; native29 wire/18 timing/21 pool checks plus existing return/light
+  regressions PASS. Accepted/copied client hashes unchanged. Full-event proxy
+  temporarily installed in TEST COPY ONLY and restored after normal game exit.
+- Launcher: `tools/d3d9_proof/start_d3d9_offset_ship_session.ps1`. Existing elevated
+  parent,90s formal tactical test after up to30s preparation; five-minute workflow.
+  Settings frozen for this test: do not edit TOMLs after qualification. One selected
+  ship/asset, fixed world-X offset; original drawing remains ON. No magenta/cycle.
+- Exact-frame gaps may flicker; no stale hold/prediction or waits added to SFC.
+  Resize/device recreation hides this output generation until a new session.
+  Vendor disposal warning40 remains unresolved, not declared harmless or repaired.
+  No owned game/renderer processes or tool sessions left running. Current-user
+  mapping and renderer processes will NOT survive restart; start a fresh session.
+- Generated copies/derived images compacted into SHA-verified recoverable ZIPs;
+  raw source captures, logs/manifests retained. Counted evidence9,667,896,417B of
+  existing10GB cap, with192MiB next-run reservation passing. No game files removed.
+- HEAD `d29111f7`, index empty. Existing dirty work plus this implementation/docs
+  remain unstaged/uncommitted. No helper, agents, commit or push. Do not rebuild or
+  reuse older timing qualification/launchers blindly: file changes invalidate gates.
+- Exact next action: sponsor runs the offset-ship launcher, enters the usual
+  two-ship skirmish, keeps both alive/visible, follows hold/camera/movement cues,
+  exits normally at two LOW beeps, then Codex adjudicates the generated evidence.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-20 normal-D3D9 material binding observed; additive wiring IN PROGRESS
+
+- Sponsor authorized proceeding. [Run81](runs/2026-10-20-codex-normal-d3d9-material-binding.md)
+  closes Run80's material-binding blocker offline:all5ordinary texture hashes
+  independently match prior runtime capture;native material-only USDA binds
+  original images/provisional emission/generated roughness. NO SDK geometry.
+- Material/image-quality/light A/B fixture212733:338covered pixels,197emission
+  changed,319image/quality changed,253light changed. Light input explicitly
+  historical replay with synthetic identity/time,NOT live synchronization proof.
+  All4sponsor appearance TOMLs unchanged.350Python tests PASS.
+- Native host reuses existing image/quality/light adapters. Default OFF. New
+  two-slot GPU pool/schema576B at11MiB+128KiB is being wired;native21ownership/
+  exact-identity checks PASS,x86 receiver/direct64/add-on builds PASS so far.
+  Import worker,exact-current-frame consumer,scissored native-screen composition,
+  depth-sentinel-derived coverage and GPU-fenced leases still need combined GPU
+  qualification. Normal picking0can be real geometry:do not use it as background.
+- Runtime/fixture runner additive branches and fresh native-light relay are WIP.
+  NO SPONSOR LAUNCHER READY. Old source/binary qualification stale;do not reuse.
+  No SFC launched,staging,commit,push,helper or agents. HEADd29111f7,index0;
+  existing dirty work preserved. No buffering/stale display/original suppression.
+- Exact next action:complete standalone actual-proxy additive fixture and verify
+  output/state/depth/lease/cleanup before exposing a source/binary-qualified
+  copied-game launcher. Inspect active build/session state before another build.
+  Run81 has source changes,generated archive locations and remaining limits.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-20 live timing observed; insertion blocked on material binding
+
+- [Run80](runs/2026-10-20-codex-live-timing-result-and-insertion-blocker.md):sponsor
+  completed shadow test with no observed issues.1670GPU transfers;1511/1673eligible
+  exact current-Present matches,median12.678ms,p9515.816ms. Selected output spans
+  27.867s,not full90s;3538other audits ineligible,not extra delivery misses.
+- Useful runtime evidence accepted separately from confirmed receiver60s timeout.
+  Game normal exit,hooks restored/unloaded,critical hashes unchanged. GPUjob1
+  due receiver timeout,no remaining owned processes;warning40 still unresolved.
+- Receiver corrected to110s ONLY explicit live mode;offline60s/source90s/outer
+  job limits retained.27wire+18timing native checks and344Python tests PASS.
+  OLD LIVE QUALIFICATION IS NOW STALE. Do not give/reuse its gameplay launcher.
+- Sponsor authorized extra-ship insertion using existing visual settings,original
+  untouched. BLOCKER:ordinaryD3D9 uses primary textures/diagnostic state;prior PBR
+  material/illumination settings attach only to SDK mesh surfaces. No qualified
+  ordinary-draw material binding exists yet. All four baseline TOMLs unchanged.
+  No additive image enabled;no source geometry redesign or silentSDK rollback.
+- Exact next action:offline qualify one native Remix material replacement binding
+  for ordinaryD3D9 fresh textures,including roughness/emission;then port remaining
+  settings and qualify live receiver/composition before sponsor launcher. No new
+  sponsor gameplay required now. No buffering/stale identity permission inferred.
+- HEADd29111f7,index0;dirty work preserved,no stage/commit/push. Runtime raw evidence
+  retained;full identity-only survey remains separate backlog item below.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-20 live-owner wiring READY FOR SPONSOR SHADOW TIMING TEST
+
+- [Run79](runs/2026-10-20-codex-d3d9-live-owner-wiring.md) final section supersedes
+  its early WIP checkpoint. [Probe](reconnaissance/probes/D3D9-LIVE-TIMING-001.md).
+- Fresh raw semantic owner observations now traverse ordinary D3D9/Remix rendering,
+  separate x86 GPU receiver ACK and exact current-Present metadata auditing.
+  NO image composition, original suppression, prediction or complete-scene seal.
+- Offline source/binary qualification PASS:1288 exact matches,one startup
+  ineligible audit,zero invalid/rejected/dropped records; normal owned shutdown.
+  Synthetic/replayed source,NOT actual SFC contention evidence.344Python tests,
+  native conversion/inbox/component/proxy regressions and no-launch preflight PASS.
+- Qualification is `artifacts/d3d9-proof/live-owner-qualification.json`.
+  Old launchers/receipts must not be reused. Current wrapper:
+  `tools/d3d9_proof/start_live_owner_timing_session.ps1`.
+- One fresh qualified owner/revision only; source geometry from runtime packet,
+  original images resolved off-thread. Geometry firehose OFF;appearance unchanged.
+  Warning40,unsupported1280x360 and in-place deformation remain unresolved.
+- Generated copies/compiler intermediates archived recoverably,source captures
+  preserved;10GB cap retained. No SFC process/session must survive restart.
+  HEADd29111f7,index0;all work unstaged/uncommitted,no push.
+- Exact next action:sponsor runs the wrapper from the usual elevated parent,
+  enters two-ship skirmish,keeps both visible,follows cues,exits normally.
+  Expect unchanged picture;adjudicate real timing before wiring additive display.
+- Future need recorded: [full identity-only rendering survey](reconnaissance/full-render-identity-survey-need.md)
+  for a longer mission,including unknown/unassociated paths without mesh/image
+  payloads. Bounded summaries,lifetime-safe identities and explicit coverage gaps;
+  separate duration/budget approval/design before execution. Not implemented;
+  current test and limits unchanged.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-20 live-owner wiring IN PROGRESS; NOT GAMEPLAY READY
+
+- [Run79](runs/2026-10-20-codex-d3d9-live-owner-wiring.md) is active after sponsor
+  explicitly authorized wiring. Prior Run78 results preserved below. No SFC run,
+  commit,push,helper or agents. HEADd29111f7,index0;dirty work preserved.
+- Default-off raw owner publisher before34ms throttle,128bit session/exact source
+  sequence in calibration words94/95,worker native17word decoding,completion after
+  actual GPU receiver ACK and current-Present exact-identity audit are being wired.
+  Fixed1,154,688byte store at10MiB below existing12MiB timing store;four input/output
+  slots,12,000audits. No display/suppression/prediction/whole-frame buffering.
+- Native wire25checks each x86/x64 and existing142inbox checks pass. Positive
+  captured-row conversion and integrated proxy/GPU qualification still REQUIRED.
+  Semantic component native build was launched;inventory active tools/processes
+  before starting another build. No game process started.
+- OLD SOURCE/BINARY QUALIFICATIONS ARE STALE after these source changes. Do not
+  run old launchers blindly or claim a combined launcher is ready. Next:finish
+  synthetic-source offline proxy/GPU fixture and runner wiring/validation.
+  Run79 records remaining work;no sponsor action required yet.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-20 offline latest-frame inbox and stall recovery; Gate3 CONTINUES
+
+- [Run78](runs/2026-10-20-codex-d3d9-frame-ingress-and-recovery.md),
+  [input contract](reconnaissance/d3d9-frame-ingress-contract.md),
+  [curated receipt](reconnaissance/evidence/20261020-d3d9-input-recovery.json).
+  Sponsor authorized autonomous offline tests. No SFC launch or image wiring.
+- Experimental296byte immutable OWNER packet,1,344byte/four-slot input inbox,
+  bounded CAS/no waits/allocations/I/O. Exact session/sequence/frame/epoch/revision/
+  state/content key and deadline admission. Consumer keeps newest acquired state;
+  never overwrite owned slots. NOT a complete-scene seal or production live wire.
+- Native142checks each x86/x64 including100,000concurrent offers;actual private
+  mapping x86producer/x64consumer normal/slow/disconnect/malformed/stop all PASS.
+  Stop/join before unmap required. No active process/session to preserve.
+- Actual ordinary-D3D9/Remix1080p host with independent synthetic60Hz source
+  cycles3captured FCA states,NOT original-rate replay or live SFC. Final no-stall
+  case053644-865593:300/300timely,median10.0281ms,p9510.530775ms,max11.0735ms.
+  Inject35ms053706:299consumed,late75/77/78,first timely79;inject60ms053728:
+  297consumed,late75and82,first timely79. Final input300reached both. Backlog
+  clears,not persistent lag. Later82miss retained,not filtered out.
+- Late outputs copied to OFFLINE private cache for full timing,no display exists.
+  Admission helper tested separately,not installed into game compositor. Input
+  source sequence differs from legacy output transport sequence;do NOT confuse
+  them or claim actual current-frame matching. default-off --latest-input only.
+- Default1080p pixels053840:IoU1,depth error1.58e-6,all3images byte-identical across
+  processes.338Python tests PASS,native/fixture/build/parser/diff/hash checks PASS.
+  Six finished runs'generated payloads177.4MB->10.1MB hash-verified recoverable
+  ZIPs;raw source captures untouched. Counted outputs9,841,731,678B/10GB.
+- Exact next action:bind fresh semantic raw OWNER snapshots to immutable input,
+  qualify raw-to-neutral conversion and authoritative current-Present expectation/
+  conflict/retirement invalidation offline. Then prepare combined SFC/renderer
+  no-drawing timing test. No sponsor action needed until that workflow is ready.
+  No automatic prediction,game buffering,stale display or original suppression.
+- HEADd29111f7,index0,18modified tracked/93untracked individual files;all earlier
+  work preserved,unstaged/uncommitted,no push. Component/old source-timing binary
+  qualification unchanged. Geometry firehose OFF;four appearance TOMLs unchanged.
+  Warning40and1280x360layout unresolved. Gate3 live binding/seal/contention remains
+  open;Gates4–5 not executed. Credits-continuation authorization still active.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-20 actual source timing captured; Gate3 CONTINUES
+
+- [Run77](runs/2026-10-20-codex-d3d9-source-timing-result.md) adjudicates actual
+  game run051149-684568. Sponsor reports "done, no issues noted". Normal game
+  exit,all hooks restored/unloaded,controller/host0,critical/client hashes and
+  launcher settings unchanged. No Remix/image submission or original suppression.
+- 14,832records/7,416exact owner-frame pairs/5,398observed frames;zero invalid,
+  dropped,ambiguous,thread errors or pose/camera disagreement between callbacks.
+  32snapshot misses explicit,not silently treated as complete tactical coverage.
+  KFF epoch1 retires;fresh epoch3 captures same labels. FCA epoch2 spans5,397frames.
+  Do not merge epochs or infer physical destruction. Geometry firehose remains OFF.
+- Median source interval~16.98ms(~59Hz),not legacy30Hz. Typical source lead15.6ms;
+  minimum6.938ms. Overlay adds only~0.144ms. Separate offline renderer p95~12ms
+  is promising but some actual source windows are shorter. NOT simultaneous
+  timing or a complete frame seal. No prediction/buffering/identity relaxation.
+- Added offline analyze_source_lead.py and4tests;334Python tests PASS after
+  approved unsandboxed rerun (sandbox temp-file access failed). Diff check PASS.
+  [Curated receipt](reconnaissance/evidence/20261020-d3d9-source-timing-result.json).
+  Actual metadata SHA256 and detailed per-owner distributions in Run77. Raw run
+  retained,~5.3MB before derived analysis. Native sources/binaries unchanged;
+  Run76 qualification not invalidated. No active owned game/host/session.
+- Exact next action:implement/offline-test bounded immutable owner/frame
+  publication,conflict/retirement invalidation and exact matching output;establish
+  source completion/seal before live claims. Then measure renderer with SFC
+  without drawing extra ship first. No repeat identical timing-only run needed.
+  No sponsor action needed for the next offline unit. Gates4–5 not executed.
+- HEADd29111f7,index0,18modified tracked/82untracked individual files;all prior
+  work preserved,unstaged/uncommitted,no push. Credits continuation remains active.
+  Unsupported1280x360GPU layout and warning40remain unresolved separate findings.
+  Inherited manifest scene wording inaccurate;probe/mode/logs correct;fix runner
+  wording on next preparation,not by rewriting original evidence.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-20 READY for read-only source timing gameplay
+
+- [Run76](runs/2026-10-20-codex-d3d9-source-timing-preparation.md) prepared. Run75
+  output/timing results below retained;actual SFC frame lead/sealing remains
+  missing. NO SFC launch or additive image test in this unit.
+- Added default-off calibration row89..93 first/last QPC extension with magic;
+ 96word layout/ABI and pose/camera words unchanged. Conflicting same-frame states
+  still ambiguous. Metadata recorder at12MiB in existing16MiB current-user scene
+  mapping:128byte header+32768x80byte rows,8owners/callback,counters after cap.
+  Present/overlay observations perform no graphics calls,waits,allocation or I/O.
+- Actual same-proxy final fixture050039-941168:416records/208exact synthetic
+  frame-owner pairs,both callbacks,all loss/invalid/thread counters0;native graphics
+  state/resize/recreation/exit PASS. No actual SFC lead measured. Native timing18,
+  full M1 capture/QPC/worker and330Python tests PASS. Dry gameplay preflight,
+  source/binary qualification,PowerShell parser/launcher checks PASS.
+- First real-proxy standalone044913-635514:418callbacks correctly reject a
+  synthetic publisher's uninitialized Snapshot header;graphics state/resize/
+  recreation/exit PASS. Fixed publisher initialization only,not validation.
+- [Curated receipt](reconnaissance/evidence/20261020-d3d9-source-timing-prepared.json),
+  [probe/instructions](reconnaissance/probes/D3D9-SOURCE-TIMING-001.md).
+  tools/d3d9_proof/start_source_timing_session.ps1 is ready from existing elevated
+  testing parent. No rebuild during setup;exact qualification at
+  artifacts/d3d9-proof/source-timing-qualification.json. No visible change expected.
+- Exact next action:sponsor enters familiar two-ship skirmish,keeps both visible,
+  does not pause;two HIGH beeps=small camera moves,three HIGH=move/turn own ship,
+  single LOW=hold,final two LOW=exit.15secondsinitial settling and10second
+  prep windows included.90second auto gate,five-minute workflow;no timestamps/RE.
+  Then Codex analyzes source first/last lead and actual frame coherence before
+  image wiring. Never infer sufficient lead from Run75's~12ms offline timing.
+- Changes to semantic/add-on sources invalidate old source-qualified gameplay
+  receipts. Requalify relevant source/ABI/proxy tests before gameplay;do NOT use
+  an old launcher blindly. Existing client/proxy/security/appearance files remain
+  untouched. All owned jobs/builds finished,no game/host/session to preserve.
+  Generated fixture input copies and direct64payloads recoverably ZIP-compacted,
+  hashes verified;initial partial kept. Counted outputs9,822,558,358B/10GB.
+  18modified tracked/78untracked individual files,index0,HEADd29111f7;no commit/push.
+  Credits-continuation authority still active;next progress requires gameplay.
+- Intentionally OFF:geometry firehose,SDK image host in this probe,extra-ship
+  display,source suppression. Fixed1080poutput pixels and short60Hz offline cost
+  proven in Run75;1280x360layout remains unsupported and warning40unresolved.
+  Do not repeat settled startup/OBJ/UV questions or blindly use old SDK launchers.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-20 one-present output and offline 1080p cadence confirmed
+
+- [Run75](runs/2026-10-20-codex-d3d9-one-present-and-cadence.md) builds on Run74.
+  One draw after each changed captured pose/camera matches actual output;24warm
+  presents retained only for first startup. KFFIoU1,FCA>=.9997397866/depth<1e-6.
+  Cross-process images byte-identical,private receiver GPU cache/ownership valid.
+- Short artificial60Hz demand cycles3captured states,NOT original recording/live
+  rate. First120update sampled run has5deadline misses including recording stalls.
+  Timing-only960x540FCA300updates0misses;1080p polling has20misses. Retain both.
+  Current-user event READY/ACK wake-up reduces peer overhead~6ms->~2ms. Final
+  1080p300update timing-only043044-681667:0/299steady misses,p95~11.98ms,max14.04ms.
+  No CPU pixels saved in timing-only cases;do NOT claim same-run pixel proof.
+- Six final-event fault/normal/slow cases043220through043410 pass;normal/slow
+  exact pixels,clean retirement/rejection. No SFC/Toolkit launch,SDK geometry,
+  installation/proxy/security/appearance changes. Runtime warning40unresolved.
+- New QPC stage CSV,analyze_schedule.py and tests;output extent override changes
+  only consumer dimensions,not source viewport/camera/geometry. Optional sampled
+  image outputs stay bounded/archive recoverably. No Map/files/waits in game.
+- Portrait640x960controls043452IoU1;1280x360043513has CONFIRMED scrambled depth
+  layout(allIoU0)despite matching transfer bytes. Root cause unresolved;GPU-layout
+  hypothesis,NOT source camera error. Retain partial. Default adapter allowlist
+  only960x540,640x960,1920x1080;explicit offline --investigate-extent otherwise.
+- Actual1080pFCA final043953-529063 one-snapshot pixels:IoU1/deptherror1.58e-6,
+  all3images cross-process identical. Guarded source binary validated. Analyzer
+  now CLIexit2on failed pixel adjudication;do not treat transfer PASS as pixels.
+- [Curated receipt](reconnaissance/evidence/20261020-d3d9-cross-process-and-cadence.json).
+  323Python tests PASS,24native wire checks PASS. Both clients unchanged;four
+  appearance TOMLs no diff. All owned processes exited;ZIPs hash-verified.
+  Counted outputs9,811,055,015B/10GB. No unfinished build/capture.
+- Exact next action:prepare read-only source-offer-to-
+  presentation timing observation. Need actual game-frame lead/sealing evidence
+  before live additive image wiring. No sponsor gameplay requested yet.
+- HEADd29111f7,index0;all Run65–75 work unstaged/uncommitted,no push. Credits
+  authorization remains active;only actual blocker or user stop parks work.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-20 standalone x86 output receiver CONFIRMED
+
+- [Run74](runs/2026-10-20-codex-d3d9-cross-process-output.md) supersedes Run73's
+  separate-consumer missing fact. Actual64bit ordinary-D3D9/Remix output opened
+  by independent32bit native D3D11 process,same GPU. Normal KFF/FCA and slow
+  receiver all color/depth/picking images SHA256-identical to local reference.
+- One192byte current-user-only metadata mapping,128byte fixed wire,unique session,
+  source/frame/state/scene hashes,owner/revision,resource epoch,GPU handles/LUID.
+  GPU completion before READY/acquire;exact ACK only after receiver GPU completion.
+  No overwrite while owned. Wrong ACK/invalid packet rejected;disconnect before
+  and after acquisition retires generation,original ordinary rendering continues.
+- Seven final-source cases041655 through041926 under direct64-runs all owned
+  trees exit0/remaining0/API Shutdown0;invalid receiver expected exit1. Generated
+  payloads ZIP-compacted and hash-verified. No active game launch,proxy change,
+  SDK geometry,helper or agents. Warning40remains,not leak-qualified.
+- 316Python tests PASS,21native wire checks PASS,x86/x64 builds PASS. Both clients
+  hashes unchanged. All Run65–74 changes unstaged/uncommitted,index0,HEADd29111f7.
+- Source contract still OFFLINE immutable held snapshots;waiting/Map/file output
+  are diagnostics ONLY. Legacy shared handles are not ACL-secured NT textures;
+  mapping restricts discovery,not malicious same-user isolation. Picking0does
+  not mean no ship. No timing/live/in-game/appearance/TRL advancement claim.
+- Sponsor explicitly added credits and authorized continued work until stopped;
+  advisory fuel warnings alone do not stop authorized work. On user stop,park
+  smallest unit and update this checkpoint with active-process state.
+- Exact next action:test one-present pose/camera correspondence using the existing
+  offline host,without24steady-state warmup presents,before cadence/scheduling.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-19 approved direct64 D3D9 output subproof CONFIRMED
+
+- Sponsor YES approved bounded64bit ordinary-D3D9 helper after32bit output limit.
+  [Run73](runs/2026-10-19-codex-direct64-d3d9-output.md),
+  [receipt](reconnaissance/evidence/20261019-direct64-d3d9-output.json),
+  [output contract](reconnaissance/d3d9-direct64-output-contract.md).
+  HEADd29111f7 unchanged,index0;all Run65–72 dirty work preserved,no commit/push.
+- Newx64 host reuses SAME parser/Renderer via types-only guard in native C++ file;
+  ordinary Direct3DCreate9Ex/CreateDeviceEx,not SDK-created device/mesh/material/
+  instance. Output API registration/copy/Shutdown only. Source geometry remains
+  runtime BINs,original images via same-capture associations;no MOD conversion.
+- Pinned64bit Remix exposes usable copy APIs. GPU shared triplet returned into
+  native D3D11 matching GPU LUID;D3D9completion before consumer copy/readback.
+  ALL THIS IS ONE PROCESS;not a separate receiver/live wire or timing qualification.
+- Final KFF025637-591642 all3silhouette IoU1/deptherror<=3.28e-7 WITHOUT ordinary
+  backbuffer readback or auto capture. FCA025141-248593 IoU>=.9997397866/depth
+  <=8.24e-7;earlier host included extra offline backbuffer diagnostic. Independent
+  asymmetric025019-125516 controls IoU1/depth.9±2e-7;plate black,NOT texture-color
+  control. Paths under artifacts/d3d9-intercept/direct64-runs.
+- Actual output FULL FRUSTUM,half-pixel samples;source viewport separate. Compose
+  into source viewport,not entire game frame. Raw UVs/FOV/geometry unchanged.
+  This actual pixel evidence resolves those snapshot camera projections without
+  repairing USD vertical aperture. Do not silently change native integer sampling.
+- Normal pickingID0 occurs on visible geometry as well as background;NOT old SDK
+  explicit owner-ID contract. Isolated one-ship coverage proven by finite[0,1]
+  depth vs -1234background,not black-color key. No multiple-owner/overlap claim.
+- Initial024243empty outputs retained PARTIAL. Explicit raytracing config,message
+  pumping and offline warmup make later runs valid;changes not individually
+  isolated. Do NOT infer root cause or carry24present warmup/10ms sleeps/GPU waits/
+  staging Maps into SFC callbacks. No image data CPU-transfer between APIs.
+- 313Python tests PASS;native final025443-326239 PASS after shared types guard/
+  explicit oracle modes;currentx64 build PASS. Runtime disposal37/40warnings persist,
+  not qualified by exit0. Output color/lighting parity and lifecycle not claimed.
+- Six direct64payloads179,655,221B ->8,148,493B recoverable ZIP;final native
+ 65,669,351B->2,079,711B. Decompressed hashes verified,metadata/PNGs retained.
+  Restore exact generated ZIP into matching case to reanalyze. Aggregate~9.772GB.
+- Gate1 PASS;Gate2 CONTINUES(output core subproof confirmed,cross-process receiver
+  missing). Gates3–5 not started. No SFC/Toolkit launch,proxy/security/appearance
+  settings change,SDK mesh calls,helper/agents/new daemon. No TRL claim.
+- Exact next action:standalone32bit D3D11 consumer opens64bit host's shared triplet
+  with bounded source-frame/completion/ownership metadata;test matching pixels and
+  disconnect/retirement,then live-cadence offline scheduling. No gameplay yet.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-19 native D3D9 PASS;normal32bit bridge output BLOCKED
+
+- [Run72](runs/2026-10-19-codex-d3d9-awake-and-output-capabilities.md),
+  [curated receipt](reconnaissance/evidence/20261019-awake-d3d9-and-bridge-output.json).
+  Approved [extra-ship execution plan](reconnaissance/d3d9-to-sfc-additive-execution-plan.md)
+  Gate1 PASS,Gate2 BLOCKED;Gates3–5 NOT STARTED. HEADd29111f7 unchanged,index0,
+  all Run65–71 dirty work preserved;no stage/commit/push.
+- Sponsor woke desktop;same probe now Default/Default,all6devices succeed versus
+  Screen-saver/Default0before. Same session/token/driver/adapters/EXE. Native
+  startup recovery CONFIRMED without code/driver/security change. User says saver
+  timeout60min;do not disable it. Avoid testing native D3D9 on inactive desktop.
+- Final ordinary native reference023149-082425 PASS(both captured ships,oracles,
+  Reset/resize,synthetic and6negative cases). Earlier awake022619-811119 also PASS.
+  Generated payloads of EACH65,669,351B ZIP-compacted to2,079,711B with decompressed
+  hashes;metadata/PNGs/startup logs stay loose. No source assets changed.
+- New x86 capability probe initializes pinned bridge interface0.6.4 SUCCESS,
+  but copy-output,external-swapchain,Vk-image,default-output,picking all NULL.
+  Actual DLL result CONFIRMED,not assumption from source or API export. SDK mesh
+  calls0;jobexit0/ownedchildren0/clientrefs0;runtime warning37remains unresolved.
+  Evidence artifacts/d3d9-intercept/capabilities/20261020-023023-270504.
+- Effective bridge config lives in PRIVATE .trex/bridge.conf,not beside client
+  DLL. Corrected run_intercept.config and regression-tested. First API probe
+  initialization11was wrong config location,NOT capability proof. Private config
+  restored afterward;accepted/copied SFC unchanged. Run70 intended bridge settings
+  did not establish effective settings;keep its actual logs/captures authoritative.
+- Bridge binary label68edea01 differs from core source pinb81a7b56;record both.
+  Official pinned-tree bridge source corroborates unset output entries;actual
+  shipped initialized interface is decisive. Header hash verified,REMIX_ALLOW_X86
+  used for interface inspection only,no vendor edits or32bit raytrace assumption.
+- 309Python tests PASS,capability/native builds PASS;full native proof PASS.
+  Actual normal-Remix pixel/camera parity,output transfer/depth/coverage and
+  synchronized live delivery remain UNQUALIFIED. No SFC/Toolkit/SDKhost launched.
+- Do NOT patch Remix,switch translator,send SDK meshes,inherit30Hz,or proceed to
+  gameplay around missing public output interface. This blocks this planned route,
+  not proof all D3D9 interoperability is impossible. No milestone/TRL advancement.
+- Proposed alternative,NOT implemented/approved:separate64bit host submits ordinary
+  D3D9 draws directly to64bit Remix and qualifies output API;SFC semantic component
+  remains32bit. Existing SDK output supports feasibility only,not this combination.
+- Exact next action:obtain sponsor approval to qualify that bounded64bit ordinary
+  D3D9 host/output alternative. Then offline replay/output tests before frame
+  scheduling or SFC. No repeat of already-confirmed missing-function probe.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-19 D3D9 Gate1 blocked by inactive input desktop
+
+- Sponsor approved [startup-to-SFC additive execution plan](reconnaissance/d3d9-to-sfc-additive-execution-plan.md),
+  EXTRA SHIP ONLY;originals stay ON. [Run71](runs/2026-10-19-codex-d3d9-startup-and-return-gates.md),
+  [startup evidence](reconnaissance/evidence/20261019-native-d3d9-startup.json).
+  HEADd29111f7 unchanged,index empty;all prior Run65–70 work preserved,no commit.
+- Implemented bounded standalone native startup probe and ordinary-consumer
+  admission. Both adapters/all three formats fail capabilities/device creation
+  before assets,isolating failure from mesh/texture/camera data and adapter0 alone.
+- CONFIRMED:thread desktop Default,input desktop Screen-saver,session1,WinSta0.
+  Both sandbox and approved contexts actually TOKEN_ELEVATED0;do not call this
+  elevated-vs-normal Windows testing. Probe logs identical. Driver/display changes
+  not indicated by evidence. STRONG HYPOTHESIS:inactive desktop causes native
+  device failure;requires awake-desktop paired test,NOT yet confirmed.
+- `build.ps1` builds probe plus native replay;`startup.py --execute` creates small
+  source/binary/log-hashed receipts. Native run021518-525578 now reports explicit
+  BLOCKED_INACTIVE_INPUT_DESKTOP before asset tests;startup receipts021517-099306
+  and021527-927934 under artifacts/d3d9-proof/startup. Source/client assets unchanged.
+- Native builds PASS,302Python tests PASS;full native reference remains BLOCKED.
+  New startup tests cover incomplete/ambiguous observations and prohibit calling
+  startup availability a render PASS. No Remix/SFC/Toolkit launched,no geometry
+  hook/appearance/security/display changes,no helper/agents/new daemon.
+- Gate1 not passed;Gates2–5 unexecuted. x86 bridge's API export exists but useful
+  output/completion/coverage are NOT demonstrated. Run70 geometry progress retained;
+  camera USD omission and runtime warnings remain as historical unresolved findings.
+- New probe/startup/test plus durable plan/receipt/run;build/runner/README/transition
+  and HANDOFF updated. Nothing staged/committed;all original dirty work preserved.
+- Exact next action:sponsor wakes/unlocks the normal Windows desktop;do NOT launch
+  SFC yet. Codex reruns startup probe then native reference to test causality.
+  Never bypass admission,switch desktops,disable monitors or change security.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-19 normal D3D9 Remix delivery CONFIRMED; qualification PARTIAL
+
+- [Run70](runs/2026-10-19-codex-normal-d3d9-remix-proof.md),
+  [receipt](reconnaissance/evidence/20261019-normal-d3d9-remix-proof.json),
+  [instructions](../tools/d3d9_proof/README.md). HEADd29111f7 unchanged,index empty;
+  all Run65–69 work preserved;new work unstaged/uncommitted,no push.
+- Active engineering gate:renderer-independent boundary/D3D9 transition remains
+  OPEN. Approved M1/M2 allocation and M1 closure disposition unchanged;this work
+  adds no formal maturity claim. Reuse existing CDD/amendment,not old chat claims.
+- Ordinary x86 D3D9 VB/IB/textures/transforms reaches pinned Remix1.5.2 without
+  public SDK registration. Actual capture matches FCA6370tri/58groups and
+  KFF452tri/5groups,all corner data and decoded primary-image assignments.
+  Runtime BIN geometry,not MOD conversion;no saved template/USD ingestion.
+  No SFC/Toolkit launch or installed proxy/appearance-setting changes.
+- Final source-matched runs under artifacts/d3d9-intercept/runs:
+  20261020-014701-350695(FCA snapshot2),014721-432618(KFF snapshot0).
+  Historical FCA snapshot0 also matched. Source/capture/EXE hashes in receipt.
+- Camera export PARTIAL:USD verticalAperture absent;view/horizontal projection
+  match. Analysis-only source viewport reconstruction gives<0.00014px error,
+  but raw export differs up to67.23px. Do NOT claim actual runtime camera/viewport
+  parity or silently patch capture/UVs. USD exporter V/winding normalization
+  belongs to comparison only,not D3D9/shared input.
+- Native regression OPEN:final Windows D3D9 recheck fails before drawing,
+  HRESULT8876086a windowed backbuffer compatibility;earlier CreateDevice8876086c.
+  Final partial artifacts/d3d9-proof/runs/20261020-014807-215394.
+  NVIDIA4070Ti,D3D9 mode1920x1080/XRGB60Hz;OS reports1920x1200 plus installed
+  virtual displays. Cause unresolved;environment is a HYPOTHESIS. Temporary
+  format/window/loading trials reverted. Do NOT bypass checks/disable adapters
+  or use historical Run69 receipt to certify the final changed common source.
+- Both builds PASS,296Python tests PASS after scoped temp-permission rerun.
+  PSparse/diff/path checks in Run70 closeout. Both client hashes/four sponsor
+  settings unchanged. Bridge jobs exit0/owned children0/client refs0;runtime
+ 37/40common-device disposal warnings remain unresolved.
+- Harness:90s owned tree/128MiB scratch,2MiB console;private runtime generated
+  extras64MiB/logs32MiB;120–600presents/export-marker drain. Process-local
+  replacement-assets FALSE required for capture;initial refusal and truncated
+  async export retained as partials. No runtime patches.
+- Ten payloads303,241,287B ZIP-compacted to44,054,283B after decompressed hashes.
+  Metadata/logs remain loose;restore exact named generated ZIP into matching run
+  before reanalysis. Source captures unchanged. Combined outputs~9.752GB/10GB.
+  Pinned507MB release input and local read-only USD parser do not travel with Git.
+- No active owned game/host/bridge/replay;no new daemon/helper/agents. No sponsor
+  gameplay needed. Park flickering SDK replacement,appearance work and suppression.
+  Geometry delivery is NOT milestone/portability/TRL completion.
+- Exact next action:reproduce and resolve native windowed-D3D9 compatibility
+  failure with display/session state recorded;then independently qualify actual
+  Remix camera/viewport output before the presentation architecture gate.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-19 plain D3D9 offline proof CONFIRMED
+
+- [Run69](runs/2026-10-19-codex-plain-d3d9-proof.md),
+  [neutral view contract](reconnaissance/scene-contract-v1.md),
+  [source-hashed proof](reconnaissance/evidence/20261019-plain-d3d9-proof.json),
+  [build/replay instructions](../tools/d3d9_proof/README.md).
+  HEADd29111f7 unchanged,index empty;all Run65–69 work UNSTAGED/UNCOMMITTED,no push.
+- Completed x86 ordinary Windows D3D9 replay of captured KFF452tri/5groups and
+  FCA6370tri/58groups. Geometry from runtime packets,not MOD files;original image
+  files resolved through capture associations. Three same-row camera/pose snapshots
+  per asset. No Remix/SDK/USD/template or game launch. System PE32/module audit PASS.
+- Independent native-composed masks IoU>=0.998;qualified primary-texture interior
+  agreement99.49–100%,raw UVs unchanged/no Remix V flip. VB/IB/texture readbacks,
+  known transform/UV controls,Reset/resize,primitive hide/reappear,zero final
+  device/APIrefs and6native malformed/missing-input cases PASS.292Python tests
+  PASS,PSparse and diff/link checks PASS. Both client hashes/R2settings unchanged.
+- Final local proof`artifacts/d3d9-proof/runs/20261020-001211-991720` (UTC folder,
+  local dateOct19). Exact source/binary/input hashes in curated result. Generated
+  binary fixtures/readbacks recoverably ZIP-compacted after decompressed hashes;
+  source captures,scene manifests/logs/PNGs preserved. Restore only exact named
+  run inputs from generated archive before reanalysis. Do not publish game assets.
+- New files listed in Run69:scene_bundle.py,new d3d9_proof directory,9test cases,
+  contract/proof/run record. Existing production sources/settings untouched in
+  this run;earlier dirty replacement/depth code preserved,not deployed.
+- Partial:unlit primary only;secondary/lights unavailable to this consumer. No live
+  frame sealing/timing,pointer reuse,simultaneous scene or native depth interchange
+  qualification. Normal Remix interception NOT tested. SDK does not yet consume
+  this exact neutral view;renderer-independence gate remains OPEN. No TRL claim.
+- Fuel Guard attached,10%advisory during closeout;user asks handoff by5%. Final
+  usage94%used(~6%remaining)before final record/link checks;all tests finished.
+  Git13modified/29untracked files including prior work,index empty. Combined
+  evidence9,704,951,833B;128MiB next offline reservation fits10GB. No new
+  gate started during closeout. No active SFC/Toolkit/SDKhost/D3D9process/proxy.
+  No helper/agents/new daemon/security changes. Ignored artifacts do not travel
+  with Git;another model needs these local captures/dependencies to reproduce.
+- Do NOT redo semantic RE,load MOD geometry,inherit SDK texture flip,tune appearance,
+  resume flickering depth probe or silently substitute fallback for synchronization.
+- Exact next action:review plain-D3D9 proof,then obtain authorization for normal
+  pinned x86 Remix interception of the SAME replay without SDK mesh registration.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-19 D3D9 transition plan updated
+
+- Sponsor directs D3D9 first,D3D12 afterward using shared scene boundary.
+  [Run68](runs/2026-10-19-codex-d3d9-transition-planning.md),
+  [updated plan](reconnaissance/d3d9-adapter-transition-plan.md).
+  Planning only,not adapter implementation or gate approval/PASS.
+- Park SDK-specific cadence fix/replacement and appearance work. Existing SDK
+  backend remains reference;Run67 native depth finding and flicker remain PARTIAL.
+  No further gameplay required before first offline D3D9 consumer proof.
+- First proof:captured geometry/images/owner/camera via minimal neutral contract
+  to ordinary x86 D3D9,WITHOUT Remix. Then separately qualify normal Remix D3D9
+  interception. Explicit frame/presentation architecture gate before live integration:
+  timing,ownership,depth/coverage availability and retained UI/effects correspondence.
+  No arbitrary30Hz inheritance,no claim same-process alone solves synchronization.
+- CDD playability intact;original fallback emergency-only,not steady-state fix.
+  D3D12 remains coarse future adapter,not an input format to Remix. Do not redo
+  SFC semantic RE,inherit Remix UV correction or rebuild lost shim blindly.
+- HEADd29111f7 unchanged,index empty;all Run65–68 edits unstaged/uncommitted,
+  no push. No game/host launched or runtime/config/client changes in planning.
+  Local ignored receipts/dependencies may not survive new checkout.
+- Exact next action:inventory fresh scene payload and isolate minimal neutral
+  contract/dependency map for the offline D3D9 reference consumer.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-19 depth runtime PARTIAL; fix cadence before retest
+
+- Sponsor clarification after Run67:playable synchronized replacement is the
+  objective. Original-model fallback is a last-resort safety contingency,NOT
+  the normal delivery strategy or acceptance of recurring gaps. CDD KPP-3 remains
+  authoritative. Raw-result caching is only an intermediate diagnostic mechanism;
+  unchanged-state reuse does not resolve moving-camera/ship correspondence.
+  Next engineering action must qualify end-to-end capture/render/transfer/present
+  timing and feasible frame scheduling before another visual test. Do not call
+  blanking,indefinite stale pixels or control-blocking lockstep a solution.
+
+- [Run67](runs/2026-10-19-codex-scene-depth-runtime-review.md):actual run
+  `20261019-222440-846106-in-game`. Sponsor reports severe flicker and suspects
+  copy low. Flicker confirmed;low-position cause unproven,not silently corrected.
+- Native depth3646/3652qualified frames,zero unsupported/wrong-thread/failure.
+ 1060displayed/1227rendered,166state mismatches;display covers only29.1%of
+  qualified receiver frames. Source resets display every frame and needs new
+  asynchronous output. This is a delivery policy defect,not missing depth.
+- Normal exit,unload,proxy restoration,client-critical hashes and launcher settings
+  PASS. No original suppressed. Gameplay behavior beyond flicker not adjudicated.
+  Initial offset was camera-right,not screen-down;later placement still unknown.
+- No implementation fix this review. Source/settings unchanged;all Run65/66 work
+  preserved,HEADd29111f7 unchanged,index empty,unstaged/uncommitted,no push.
+  No game/owned host active. SDK40warning remains. No helper/security changes.
+- Do NOT repeat this same sponsor test,hold old filtered pixels,read producer
+  surfaces after ACK,relax identity or suppress original ships.
+- Exact next action:implement bounded receiver-owned raw-triplet caching and
+  re-filter against CURRENT native depth while pose/camera/identity remain valid;
+  offline-qualify steady delivery before requesting another gameplay run.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-19 depth-first additive test READY
+
+- [Run66](runs/2026-10-19-codex-scene-depth-preparation.md),
+  [prepared probe](reconnaissance/probes/REMIX-SCENE-DEPTH-001.md),
+  [offline receipt](reconnaissance/evidence/20261019-scene-depth-offline.json).
+  Starting/current HEAD `d29111f7a513c4510c4d33aeeda2c355d98443a5` unchanged.
+  Current work is a bounded replacement prerequisite,NOT replacement or a TRL claim.
+- CONFIRMED sponsor observations:existing extra ship appeared under UI;normal
+  grid passes through ships at a particular height. Preserve working UI callback;
+  grid implementation/depth policy remains unknown,not the observed appearance.
+- Completed default-off `-SceneDepth`:read-only public native draw callbacks retain
+  actual R32/D32 8MSAA scene depth;SDK pixels map through native viewport offset;
+  returned depth is filtered before the existing additive display. Originals ON.
+  Current native frame,owner/revision and camera/pose guards refuse mismatches.
+  Native depth is read,not overwritten. Full-support pinned proxy temporarily
+  replaces only copied-test proxy through existing verified rollback.
+- Validation CONFIRMED:66native GPU checks per x86/x64;283Python tests PASS;
+  14existing actual return gates plus3new actual Remix/ReShade depth cases
+  normal/slow/disconnect PASS. Both depth and regular tuning read-only preflight
+  PASS after native light-observer qualification refreshed with actual worker test.
+  Both client hashes unchanged4D65761D...62320C29;R2 settings untouched.
+- Partial/unproven:actual SFC depth behavior,grid/effects visibility and owner-safe
+  suppression. Extra copy may blink even stationary:30Hz asynchronous output
+  against faster game frames;we omit unmatched frames instead of holding a stale
+  depth-filtered image. No steady replacement claim or relaxed suppression gate.
+  SDK40warning remains. No appearance/AA/supersampling changes.
+- Exact changed-file inventory is in Run66. Prior Run65 work preserved. All
+  changes UNSTAGED/UNCOMMITTED,index empty,no push. Generated fixture copies/images
+  recoverably ZIP-compacted only after decompressed hashes matched;logs,packets,
+  provenance,source and clients retained.10GBcap retained,384MiB test reserve fits.
+- Runtime state:no game/owned renderer running,no test proxy deployed. Receipts
+  and ignored binaries are local and may not survive another checkout. No helper,
+  agents,new daemon or security changes. Geometry diagnostic remains OFF.
+- Do NOT blindly redo the return path,change UI ordering,reset R2,arm suppression
+  or infer a grid plane. User will pause manually AFTER entering normal skirmish.
+- Exact next action:sponsor launches the prepared `-SceneDepth` command in the
+  linked probe,pauses in tactical view and compares occlusion before brief motion.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-19 replacement foundation; NOT runtime-ready
+
+- Sponsor authorizes proceeding with one-ship replacement. Clean starting HEAD
+  `d29111f7a513c4510c4d33aeeda2c355d98443a5`,sanitized branch. [Run65](runs/2026-10-19-codex-replacement-depth-foundation.md),
+  [contract](reconnaissance/ship-replacement-contract.md),[offline probe](reconnaissance/probes/REMIX-REPLACEMENT-OFFLINE-001.md).
+- Completed:separate exact-current admission and native8MSAA depth compositor,
+  synthetic GPU fixture/build runner;55native checks PASS each x86/x64,278Python
+  PASS,existing read-only tuning preflight PASS. These new headers are NOT wired
+  to SFC/no suppression. PARTIAL foundation,not replacement or milestone PASS.
+- Changed files:7new listed in Run65;HANDOFF and replacement-readiness amended.
+  Existing production sources/binaries/active R2 settings unchanged. No supersampling
+  or appearance work. Original/copy client hashes still4D65761D...62320C29.
+- Critical facts:semantic004162B9→0042FD3F→0042E4B2;primary wrapperreturn0042E55D,
+  secondary0042E626,wrapper006AC5A0;006AB380flush/native006AB3C0 may batchowners.
+  Whole Model0 skip bypasses state changes/restoration and secondary work. Native
+  scene-end0069E41B alone is not a qualified pre-HUD insertion point.
+- Open:ready-at-original-draw timing,owner-specific batch-safe suppression and
+  native scene/UI/effects ordering. Current late ImGui additive callback and
+ 100ms policy deliberately permit old pose/camera;NEVER use them to hide original.
+  New admission flags defaultfalse and exactframe may refuse all delayed requests;
+  practical timing/stationary-reuse not yet qualified. Existing SDK40warning open.
+- Runtime state:none,no game/host/proxy deployed. Geometry diagnostic OFF,existing
+  accepted additive path retained. New fixture logs/binaries ignored (~1.1MB),no
+  new asset/texture/image capture. No helper/agents/security changes. No sponsor
+  gameplay requested yet;existing tuning command is NOT a replacement test.
+- Final HEAD unchanged,index empty;2modified/7untracked,all UNSTAGED/UNCOMMITTED,
+  no push. Public visibility intentional;never push recovery refs.
+- Exact next action:implement and offline-validate a default-off read-only
+  owner-boundary observation joining existing wrapper scope to native target,
+  depth and draw ordering before preparing a runtime probe or arming suppression.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-19 authorized PUBLIC publication checkpoint
 
 - Sponsor authorizes commit/push. [Run64](runs/2026-10-19-codex-appearance-controls-publication.md)
   records reviewed Run57–63 appearance controls,cache safety,tests,evidence and R2
@@ -1820,8 +3074,9 @@ exposing the offset copy. Do not suppress original ships or claim on-screen proo
 
 ## HISTORICAL VERIFIED CHECKPOINT — 2026-10-16 camera-aligned live bridge demonstrated
 
-- Sponsor reports "we did it! it worked!" and supplied side-by-side screenshot,
-  preserved at [comparison](reconnaissance/images/20261016-live-camera-sponsor.png).
+- Sponsor reports "we did it! it worked!" and supplied side-by-side screenshot.
+  Historical comparison image was subsequently removed during approved privacy
+  sanitization because it included unrelated chat;do not restore or republish it.
   [Runtime adjudication](runs/2026-10-16-codex-live-camera-runtime.md).
 - Actual SFC component0.19/protocol2 session009e8edf0d2340919622c3be0426dc6d,
   run20261016-215022-enabled:1858 accepted ship/camera updates from1859 native

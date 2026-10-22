@@ -56,8 +56,10 @@ def main():
     p.add_argument('--image-controls',action='store_true')
     p.add_argument('--quality-controls',action='store_true')
     p.add_argument('--image-proof',type=Path)
+    p.add_argument('--scene-depth',action='store_true')
     # Parse the added optional offline image control alongside existing modes.
     args=p.parse_args()
+    if args.scene_depth:args.textured=True;args.addon=True
     if args.light_types:args.light_wiring=True
     if args.project_fill:args.light_wiring=True
     if args.material_controls:args.textured=True;args.addon=True
@@ -79,7 +81,11 @@ def main():
     if args.addon:
         from run_return_fixture import TEST
         if digest(TEST/'dxgi.dll')!='E35E4E2E47F4765F0799CB54C88E5ADE49B50CD7895C137B9D557F263344CAB7':raise ValueError('Copied proxy mismatch')
-        for source,name in ((TEST/'dxgi.dll','dxgi.dll'),(BIN/'SFCRemixReturn.dll','SFCRemixReturn.dll'),(BIN/'ship_live_gpu_fixture.exe','d3d11_return_fixture.exe')):shutil.copyfile(source,work/name)
+        proxy=TEST/'dxgi.dll'
+        if args.scene_depth:
+            from broad_capture import qualified_full
+            proxy=qualified_full()
+        for source,name in ((proxy,'dxgi.dll'),(BIN/'SFCRemixReturn.dll','SFCRemixReturn.dll'),(BIN/'ship_live_gpu_fixture.exe','d3d11_return_fixture.exe')):shutil.copyfile(source,work/name)
         (work/'ReShade.ini').write_text('[GENERAL]\nEffectSearchPaths=./no-effects\nPresetPath=./fixture.ini\n[OVERLAY]\nTutorialProgress=4\nShowFPS=0\nShowFrameTime=0\n[INPUT]\nInputProcessing=0\n')
     original=json.loads((SOURCE/'semantic.analysis.json').read_text())['snapshots'][0]['associations']
     association=next(a for a in original if a['owner']==2);row=association['record']
@@ -139,6 +145,8 @@ def main():
         env={**os.environ,**ENV,'SFC_REMIX_CALIBRATION_SCENE':receiver.name,'DXVK_LOG_PATH':str(work)}
         env.pop('SFC_REMIX_TEXTURED_SHIP',None)
         env.pop('SFC_REMIX_LIGHT_WIRING',None)
+        env.pop('SFC_REMIX_SCENE_DEPTH',None)
+        if args.scene_depth:env['SFC_REMIX_SCENE_DEPTH']='1'
         if args.light_wiring:env['SFC_REMIX_LIGHT_WIRING']='1'
         if args.textured:env['SFC_REMIX_TEXTURED_SHIP']='1'
         if args.slow:env['SFC_PRIVATE_SLOW']='1'
@@ -227,6 +235,7 @@ def main():
                         control_path.write_text(text);types_step+=1;types_next=time.monotonic()+.6
             marker=(work/'fixture.log').read_text(errors='replace')
             ready_to_disconnect='TEXTURED_PIXELS_PASS' in marker if args.textured else ('PRIVATE_MASK ' in marker or 'PRIVATE_CALLBACK_ACTIVE ' in marker)
+            if args.scene_depth:ready_to_disconnect='SCENE_DEPTH_PHASES_READY' in marker
             if args.disconnect and not disconnected and ready_to_disconnect:
                 host.terminate();host.wait(timeout=5);disconnected=True;displayed_at_disconnect=channel.state.drawCount
             if host.poll() is not None:
@@ -267,7 +276,8 @@ def main():
                 if states!=[1,0,1] or 'PROJECT_LIGHT_APPLIED slot=2 enabled=1 radiance=0.05,0.05,0.05' not in hostlog:
                     raise RuntimeError('Independent project dome on/off/on not confirmed')
         if args.visible and 'VISIBLE_CAMERA_PIXELS_PASS' not in log:raise RuntimeError('Visible game-camera pixel proof missing')
-        if args.textured and ('TEXTURED_PIXELS_PASS' not in log or (not args.disconnect and 'STEADY_DISPLAY_PASS' not in log)):raise RuntimeError('Textured/cadence proof missing')
+        if args.textured and ('TEXTURED_PIXELS_PASS' not in log or (not args.disconnect and not args.scene_depth and 'STEADY_DISPLAY_PASS' not in log)):raise RuntimeError('Textured/cadence proof missing')
+        if args.scene_depth and 'SCENE_DEPTH_CALLBACK_PASS' not in log:raise RuntimeError('Actual scene-depth callbacks/occlusion/fallback proof missing')
         if 'PRIVATE_GPU_FIXTURE_PASS' not in log or 'retired_draws_stopped=1 disabled_draws_stopped=1' not in log:raise RuntimeError('Private lifecycle proof incomplete')
         if not args.addon and (work/'private-picking.bin').stat().st_size!=256*256*4:raise RuntimeError('Picking output missing')
         # Reuse the independent native projection oracle with the SAME source
@@ -321,6 +331,11 @@ def main():
         if image_relay:result.update(image_controls_verified=True,image_changes=image_relay.accepted,image_invalid_rejected=image_relay.rejected)
         if quality_relay:result.update(quality_controls_verified=True,quality_changes=quality_relay.accepted,quality_invalid_rejected=quality_relay.rejected)
         result.update(prepared_image_verified=bool(image_result),prepared_image=image_result)
+        if args.scene_depth:
+            from live_return import depth_telemetry
+            depth=depth_telemetry(channel.address)
+            if not depth['qualified'] or not depth['found'] or depth['failed'] or depth['wrong_thread']:raise RuntimeError('Native scene-depth qualification failed')
+            result.update(scene_depth_verified=True,scene_depth=depth,proxy_sha256=digest(work/'dxgi.dll'))
     except Exception as exc:error=str(exc);result=dict(result='PARTIAL',error=error,sfc_launched=False)
     finally:
         if channel:channel.set('stop',1)

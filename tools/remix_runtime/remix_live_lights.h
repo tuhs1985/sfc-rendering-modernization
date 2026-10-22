@@ -6,15 +6,18 @@ struct RemixLiveLights {
  remixapi_LightHandle handles[3]{};LiveLightRow previous[3]{};
  bool created[3]{};unsigned logs=0;uint64_t applied=0,configRevision=0;
  LightShapeRow previousShapes[3]{};
- bool update(remixapi_Interface& api,const ship_live::Seed& seed,const ship_live::Key& key,uint64_t frequency,const float* model){
-  LiveLightPacket p{};std::ifstream file("live-lights.bin",std::ios::binary);
-  if(!file||!file.read(reinterpret_cast<char*>(&p),sizeof(p))||file.peek()!=EOF)return false;
+ bool update(remixapi_Interface& api,const ship_live::Seed& seed,const ship_live::Key& key,uint64_t frequency,const float* model,const LiveLightPacket* loaded=nullptr,const LightShapePacket* loadedShapes=nullptr){
+  LiveLightPacket p{};
+  if(loaded)p=*loaded;else{std::ifstream file("live-lights.bin",std::ios::binary);
+   if(!file||!file.read(reinterpret_cast<char*>(&p),sizeof(p))||file.peek()!=EOF)return false;}
   const auto now=return_path::now();
   if(!validLightPacket(p,key.sourceSession,key.owner,seed.model,seed.source,key.frame,frequency,now))return false;
   LightShapePacket shapes{};
   if(p.rows[0].values[10]||p.rows[1].values[10]){
-   std::ifstream sf("light-shapes.bin",std::ios::binary);
-   if(!sf||!sf.read(reinterpret_cast<char*>(&shapes),sizeof(shapes))||sf.peek()!=EOF||!validShapes(shapes,p.revision))return false;
+   if(loaded){if(!loadedShapes)return false;shapes=*loadedShapes;}
+   else{std::ifstream sf("light-shapes.bin",std::ios::binary);
+    if(!sf||!sf.read(reinterpret_cast<char*>(&shapes),sizeof(shapes))||sf.peek()!=EOF)return false;}
+   if(!validShapes(shapes,p.revision))return false;
   }else for(unsigned i=0;i<3;++i)shapes.rows[i].slot=i;
   LiveLightRow added{};added.slot=2;added.enabled=shapes.rows[2].reserved;
   memcpy(added.values,shapes.rows[2].v+18,12);memcpy(added.values+3,shapes.rows[2].v+15,12);

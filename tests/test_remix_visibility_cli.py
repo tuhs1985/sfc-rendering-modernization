@@ -45,6 +45,22 @@ class VisibilityCliTests(unittest.TestCase):
     def test_broad_fixture_requires_graceful_control(self):
         self.rejected('run_return_fixture.py',['--broad-capture'],
                       '--broad-capture requires --observation-only and --graceful')
+    def test_scene_depth_is_not_long_tuning(self):
+        self.rejected('run_return_game.py',['--scene-depth','--light-tuning'],
+                      '--scene-depth is a bounded standalone test')
+    def test_scene_depth_does_not_mix_calibration(self):
+        self.rejected('run_return_game.py',['--scene-depth','--calibration'],
+                      '--private-ship is separate from calibration/observation-only')
+    def test_source_timing_cannot_start_renderer(self):
+        self.rejected('run_return_game.py',['--source-timing'],'--source-timing requires observation-only')
+    def test_source_timing_fixture_requires_observation(self):
+        self.rejected('run_return_fixture.py',['--source-timing'],'--source-timing requires --observation-only --graceful')
+    def test_additive_cannot_mix_sdk_geometry(self):
+        self.rejected('run_return_game.py',['--d3d9-additive','--private-ship'],
+                      '--d3d9-additive is separate from SDK/private/capture modes')
+    def test_additive_cannot_mix_extended_tuning(self):
+        self.rejected('run_return_game.py',['--d3d9-additive','--light-tuning'],
+                      '--d3d9-additive is separate from SDK/private/capture modes')
 
 
 if __name__ == '__main__':

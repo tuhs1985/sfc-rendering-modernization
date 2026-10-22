@@ -32,6 +32,7 @@ def main():
         if len(added)!=1:raise RuntimeError('Exact single fixture expected')
         folder=added.pop();folders.append(folder)
         sp.run([str(pwsh),'-NoProfile','-File',str(root/'archive_fixture_textures.ps1'),'-RunDirectory',str(folder)],check=True,timeout=60)
+        sp.run([str(pwsh),'-NoProfile','-File',str(root/'archive_fixture_binaries.ps1'),'-RunDirectory',str(folder)],check=True,timeout=60)
     receipt=qualify(folders,image,quality)
     print(json.dumps(dict(result=receipt['result'],gates=[str(f.relative_to(ROOT)) for f in folders],
         image_proof=str(image.relative_to(ROOT)),quality_proof=str(quality.relative_to(ROOT))),indent=2))

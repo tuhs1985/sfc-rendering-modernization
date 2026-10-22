@@ -1,8 +1,10 @@
 #pragma once
 #include "m1_live_bridge.h"
 #include "m1_present_calibration.h"
+#include "../d3d9_proof/live_owner_wire.h"
 #ifdef SFC_NATIVE_LIGHT_DISCOVERY
 #include "native_light_observer.h"
+#include "m1_light_transport.h"
 #endif
 
 namespace sfc_m1 {
@@ -34,10 +36,16 @@ struct LiveScene {
     DWORD capture_attempts=0,capture_failures=0,owner_overflow=0,dropped=0,invalid=0;
     LONGLONG max_capture_ticks=0;LARGE_INTEGER frequency{};
     volatile LONG enabled=0;
-    bool lightTuning=false;
+    bool lightTuning=false,sourceTiming=false,lifecycleCapture=false;
+    // Default-off diagnostic journal, protected by the existing nonwaiting mailbox.
+    // Independent of the latest-state table: a retirement cannot be coalesced away.
+    std::array<std::array<DWORD,96>,256> lifecycle{};
+    DWORD lifecycleRead=0,lifecycleWrite=0,lifecycleDropped=0;
     sfc_calibration::Mailbox* calibration=nullptr;
+    live_owner::Source directSource;
 #ifdef SFC_NATIVE_LIGHT_DISCOVERY
     sfc_native_lights::Observer lights;
+    sfc_light_transport::Raw* sharedLights=nullptr;
 #endif
     bool start(const std::wstring& name,const std::wstring& directory) {
         if(!LiveBridge::name_ok(name) || worker)return false;
@@ -58,14 +66,31 @@ struct LiveScene {
             InterlockedExchange(&calibration->active,1);
         }
         QueryPerformanceFrequency(&frequency);
+        wchar_t sourceMode[2]{};
+        sourceTiming=calibration&&GetEnvironmentVariableW(L"SFC_D3D9_SOURCE_TIMING",sourceMode,2)==1&&sourceMode[0]==L'1';
+        wchar_t liveMode[2]{};
+        if(GetEnvironmentVariableW(L"SFC_D3D9_LIVE_TIMING",liveMode,2)==1&&liveMode[0]==L'1'){
+            if(!calibration||!sourceTiming||!directSource.attach(view,h+4)){close();return false;}
+        }
         wchar_t tuningMode[4]{};
         lightTuning=GetEnvironmentVariableW(L"SFC_LIGHT_TUNING",tuningMode,4)==1&&tuningMode[0]==L'1';
+        lifecycleCapture=GetEnvironmentVariableW(L"SFC_LIFECYCLE_CAPTURE",tuningMode,4)==1&&tuningMode[0]==L'1';
+        if(lifecycleCapture)for(auto& row:lifecycle)row={}; // prefault before hooks
 #ifdef SFC_NATIVE_LIGHT_DISCOVERY
         wchar_t lightMode[4]{};
         if(GetEnvironmentVariableW(L"SFC_NATIVE_LIGHT_DISCOVERY",lightMode,4)==1&&lightMode[0]==L'1'){
             std::array<sfc_native_lights::Word,4> words{};
             std::memcpy(words.data(),h+4,16);lights.start(words.data());
             lights.tuning=lightTuning;
+            wchar_t gameOutput[2]{};
+            lights.followEpochs=directSource.store&&GetEnvironmentVariableW(L"SFC_D3D9_GAME_OUTPUT",gameOutput,2)==1&&gameOutput[0]==L'1';
+            wchar_t sharedMode[2]{};
+            if(GetEnvironmentVariableW(L"SFC_D3D9_SHARED_LIGHTS",sharedMode,2)==1&&sharedMode[0]==L'1'){
+                sharedLights=reinterpret_cast<sfc_light_transport::Raw*>(view+sfc_light_transport::RawOffset);
+                if(!lights.followEpochs||!sfc_light_transport::valid(sharedLights->header,sfc_light_transport::RawMagic,sizeof(*sharedLights),h+4,0)){sharedLights=nullptr;close();return false;}
+                sharedLights->header.pid=GetCurrentProcessId();
+                for(DWORD n=0;n<sizeof(*sharedLights);n+=4096){auto* page=reinterpret_cast<volatile BYTE*>(sharedLights)+n;*page=*page;}
+            }
         }
 #endif
         // Fault in fixed storage before hook installation, not during first asset.
@@ -73,7 +98,10 @@ struct LiveScene {
         InterlockedExchange(&enabled,1);worker=CreateThread(nullptr,0,run,this,0,nullptr);
         if(!worker){enabled=0;close();return false;}return true;
     }
-    void close(){if(calibration){InterlockedExchange(&calibration->active,0);calibration=nullptr;}
+    void close(){directSource.close();if(calibration){InterlockedExchange(&calibration->active,0);calibration=nullptr;}
+#ifdef SFC_NATIVE_LIGHT_DISCOVERY
+        sharedLights=nullptr;
+#endif
         if(view){UnmapViewOfFile(view);view=nullptr;}if(mapping){CloseHandle(mapping);mapping=nullptr;}
         if(stop_event){CloseHandle(stop_event);stop_event=nullptr;}}
     bool stop(){InterlockedExchange(&enabled,0);
@@ -86,10 +114,20 @@ struct LiveScene {
         CloseHandle(worker);worker=nullptr;close();return true;}
     void offer(DWORD index,std::array<DWORD,96> r){
         if(!TryAcquireSRWLockExclusive(&mailbox)){++dropped;return;}
-        r[0]=++owners[index].sequence;r[45]=index;pending[index]=r;ReleaseSRWLockExclusive(&mailbox);
+        r[0]=++owners[index].sequence;r[45]=index;
+        const auto& previous=pending[index];
+        if(lifecycleCapture && (r[1]!=previous[1] || r[4]!=previous[4] || r[7]!=previous[7])){
+            if(lifecycleWrite-lifecycleRead<lifecycle.size())lifecycle[lifecycleWrite++%lifecycle.size()]=r;
+            else ++lifecycleDropped;
+        }
+        pending[index]=r;ReleaseSRWLockExclusive(&mailbox);
     }
     void retire(DWORD owner,DWORD frame,DWORD elapsed){
         if(!enabled)return;
+        directSource.retire(owner,frame);
+#ifdef SFC_NATIVE_LIGHT_DISCOVERY
+        lights.retire(owner);
+#endif
         for(DWORD i=0;i<owner_count;++i)if(owners[i].identity.owner==owner){
             auto& o=owners[i];o.retired=true;std::array<DWORD,96> r{};
             r[1]=owner;r[2]=frame;r[3]=elapsed;r[4]=2;r[7]=o.revision;offer(i,r);return;}
@@ -145,16 +183,21 @@ struct LiveScene {
             !MeshPacket::finite(r[i])){++invalid;return;}
         r[46]=lod[1]!=0xffffffffu?lod[1]:(lod[0]>1?lod[2]:0);
         r[48]=1;
-        if(calibration){auto exact=r;exact[47]=GetCurrentThreadId();sfc_calibration::offer(calibration,index,exact);}
+        if(calibration){auto exact=r;exact[47]=GetCurrentThreadId();
+            if(sourceTiming){LARGE_INTEGER q{};if(QueryPerformanceCounter(&q))sfc_calibration::stamp(exact,static_cast<ULONGLONG>(q.QuadPart));}
+            directSource.offer(exact);
+            if(!sfc_calibration::offer(calibration,index,exact))directSource.reject(exact[2]);}
         if(sampled)return;
         o.last_ms=id.elapsed;offer(index,r);
     }
     static DWORD WINAPI run(void* raw){
         auto& b=*static_cast<LiveScene*>(raw);
         InterlockedExchange(reinterpret_cast<LONG*>(b.view+12),1);
-        std::array<DWORD,32> last{},counts{};std::array<DWORD,4> generations{};
+        std::array<DWORD,32> last{},counts{},loggedMs{};std::array<DWORD,4> generations{};
         DWORD bytes=0,records=0,transfers=0;bool failed=false,saturated=false;
         std::ofstream log(b.output+L"\\LIVE-SCENE-001-updates.jsonl",std::ios::binary|std::ios::trunc);
+        std::ofstream events;DWORD eventBytes=0,eventRecords=0,eventOmitted=0;
+        if(b.lifecycleCapture){events.open(b.output+L"\\LIFECYCLE-001-events.jsonl",std::ios::binary|std::ios::trunc);if(!events)failed=true;}
 #ifdef SFC_NATIVE_LIGHT_DISCOVERY
         const bool lightRequested=InterlockedCompareExchange(&b.lights.active,0,0)!=0;
         std::ofstream lightFile;
@@ -162,12 +205,31 @@ struct LiveScene {
             if(!lightFile){b.lights.ioFailed=true;InterlockedExchange(&b.lights.active,0);}}
 #endif
         if(!log)failed=true;
+        auto drainLifecycle=[&](){
+            if(b.lifecycleCapture){
+                for(DWORD n=0;n<256;++n){
+                    std::array<DWORD,96> r{};bool found=false;
+                    if(TryAcquireSRWLockExclusive(&b.mailbox)){
+                        if(b.lifecycleRead!=b.lifecycleWrite){r=b.lifecycle[b.lifecycleRead++%b.lifecycle.size()];found=true;}
+                        ReleaseSRWLockExclusive(&b.mailbox);
+                    }
+                    if(!found)break;
+                    std::ostringstream row;row<<'[';for(DWORD w=0;w<96;++w){if(w)row<<',';row<<r[w];}row<<"]\n";
+                    const auto text=row.str();
+                    if(eventBytes+text.size()>1024*1024){++eventOmitted;saturated=true;continue;}
+                    events<<text;if(!events)failed=true;eventBytes+=static_cast<DWORD>(text.size());++eventRecords;
+                }
+            }
+        };
         do{
+            drainLifecycle();
 #ifdef SFC_NATIVE_LIGHT_DISCOVERY
             if(lightRequested){
                 if(!b.lightTuning)b.lights.drain(lightFile);
                 else {sfc_native_lights::Snapshot snapshot{};
-                    for(unsigned n=0;n<8&&b.lights.take(snapshot);++n){
+                    ULONGLONG captured=0;
+                    for(unsigned n=0;n<8&&b.lights.take(snapshot,&captured);++n){
+                        if(b.sharedLights)sfc_light_transport::publish(b.sharedLights->header,b.sharedLights->cells[snapshot.header[8]%sfc_light_transport::Owners],snapshot,captured);
                         const auto target=b.output+L"\\native-light-latest-"+std::to_wstring(snapshot.header[8])+L".bin";
                         const auto temp=target+L".pending";
                         {std::ofstream f(temp,std::ios::binary|std::ios::trunc);
@@ -204,16 +266,20 @@ struct LiveScene {
                 if(r[0]<=last[i])continue;last[i]=r[0];
                 auto* guard=reinterpret_cast<LONG*>(b.view+4096+i*512);
                 InterlockedIncrement(guard);std::memcpy(b.view+4100+i*512,r.data(),sizeof(r));MemoryBarrier();InterlockedIncrement(guard);
-                if(failed || counts[i]>=(b.lightTuning?100u:2700u))continue;
+                if(failed || counts[i]>=((b.lightTuning&&!b.lifecycleCapture)?100u:2700u))continue;
+                // 20Hz detail spans the full120s watchdog; event journal is independent.
+                if(b.lifecycleCapture && counts[i] && r[4]==1 && r[3]-loggedMs[i]<50)continue;
                 std::ostringstream row;row<<'[';for(DWORD w=0;w<96;++w){if(w)row<<',';row<<r[w];}row<<"]\n";
                 const auto text=row.str();
                 if(bytes+text.size()>16*1024*1024){saturated=true;continue;}
-                log<<text;if(!log)failed=true;bytes+=static_cast<DWORD>(text.size());++counts[i];++records;
+                log<<text;if(!log)failed=true;bytes+=static_cast<DWORD>(text.size());++counts[i];++records;loggedMs[i]=r[3];
             }
         }while(WaitForSingleObject(b.stop_event,10)==WAIT_TIMEOUT);
-        log.close();
+        drainLifecycle(); // producer disabled and callbacks drained by caller before stop
+        log.close();if(b.lifecycleCapture)events.close();
 #ifdef SFC_NATIVE_LIGHT_DISCOVERY
         if(lightRequested){b.lights.drain(lightFile);lightFile.close();
+            if(b.sharedLights)InterlockedExchange(&b.sharedLights->header.stopped,1);
             std::ofstream ls(b.output+L"\\native-lights-summary.json");
             ls<<"{\"written\":"<<b.lights.written<<",\"captured\":"<<b.lights.sequence
               <<",\"dropped\":"<<b.lights.dropped<<",\"rejected\":"<<b.lights.rejected
@@ -225,6 +291,9 @@ struct LiveScene {
           <<",\"saturated\":"<<(saturated?"true":"false")<<",\"transfers\":"<<transfers<<",\"capture_attempts\":"<<b.capture_attempts
           <<",\"capture_failures\":"<<b.capture_failures<<",\"owner_overflow\":"<<b.owner_overflow<<",\"dropped\":"<<b.dropped
           <<",\"invalid\":"<<b.invalid<<",\"max_capture_ticks\":"<<b.max_capture_ticks<<",\"qpc_frequency\":"<<b.frequency.QuadPart
+          <<",\"lifecycle_capture\":"<<(b.lifecycleCapture?"true":"false")<<",\"lifecycle_records\":"<<eventRecords
+          <<",\"lifecycle_bytes\":"<<eventBytes<<",\"lifecycle_dropped\":"<<b.lifecycleDropped
+          <<",\"lifecycle_omitted\":"<<eventOmitted<<",\"lifecycle_pending\":"<<(b.lifecycleWrite-b.lifecycleRead)
           <<",\"unsent_assets\":"<<unsent<<",\"io_failed\":"<<(failed?"true":"false")<<",\"stopped\":true}";
         InterlockedExchange(reinterpret_cast<LONG*>(b.view+12),failed?3:2);return 0;
     }

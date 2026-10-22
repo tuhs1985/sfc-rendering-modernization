@@ -29,6 +29,7 @@ class Receiver:
     def __init__(self):
         self.channel=SceneChannel(create=True)
         self.revisions={}
+        self.assets={}
 
     @property
     def name(self):return self.channel.name
@@ -44,6 +45,7 @@ class Receiver:
             identity=hashlib.sha256(mesh+refs).hexdigest()
             if revision in self.revisions and self.revisions[revision]!=identity:raise ValueError('Reused asset revision')
             self.revisions[revision]=identity
+            self.assets[revision]=data # immutable decoded packet;do not decode again in recovery
             self.channel.acknowledge(slot,generation)
 
     def close(self):self.channel.close()

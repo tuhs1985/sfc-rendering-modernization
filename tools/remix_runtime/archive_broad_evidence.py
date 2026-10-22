@@ -16,8 +16,8 @@ def archive(output,runs):
         files.extend((p,run.name+'/'+p.relative_to(run).as_posix()) for p in run.rglob('*') if p.is_file() and (p.suffix in ('.json','.log','.ini') or p.name=='broad.bin' or re.fullmatch(r'depth-[012](?:\.bin|-(?:color|sample0|min|max|mean)\.png)|semantic-[012]\.bin|LIVE-SCENE-001-asset-[1-8]\.bin',p.name)))
     if not files:raise ValueError('No selected evidence')
     total=sum(p.stat().st_size for p,_ in files)
-    if total*2+16*1024*1024>OVERALL:raise ValueError('Source plus archive allowance would exceed10GB')
-    if storage_bytes()+total+16*1024*1024>OVERALL:raise ValueError('Existing runtime output plus archive allowance would exceed10GB')
+    if total*2+16*1024*1024>OVERALL:raise ValueError('Source plus archive allowance would exceed20GB')
+    if storage_bytes()+total+16*1024*1024>OVERALL:raise ValueError('Existing runtime output plus archive allowance would exceed20GB')
     base.mkdir(exist_ok=True)
     with zipfile.ZipFile(output,'x',zipfile.ZIP_DEFLATED,compresslevel=1,allowZip64=True) as z:
         for p,name in files:z.write(p,name)

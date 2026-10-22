@@ -19,6 +19,8 @@ int wmain(int argc,wchar_t** argv){wchar_t session[128]{};if(argc==2)wcscpy_s(se
  const bool visibleMode=GetEnvironmentVariableW(L"SFC_REMIX_VISIBLE_SHIP",nullptr,0)!=0;bool visibleVerified=false;
  const bool texturedMode=GetEnvironmentVariableW(L"SFC_REMIX_TEXTURED_SHIP",nullptr,0)!=0;
  const bool lightMode=GetEnvironmentVariableW(L"SFC_REMIX_LIGHT_WIRING",nullptr,0)!=0;
+ const bool sceneMode=GetEnvironmentVariableW(L"SFC_REMIX_SCENE_DEPTH",nullptr,0)!=0;
+ float sceneZ=1;bool sceneBound=true;unsigned sceneHidden=0,sceneMissing=0,sceneRestored=0;
  std::ofstream syntheticLights;ULONGLONG lightAt=0;uint32_t lightSequence=0;
  if(lightMode)syntheticLights.open("gate/native-lights.bin",std::ios::binary|std::ios::trunc);
  unsigned steadySamples=0,steadyDisplayed=0;
@@ -62,9 +64,31 @@ int wmain(int argc,wchar_t** argv){wchar_t session[128]{};if(argc==2)wcscpy_s(se
   if(visibleMode){visibleBack=back;D3D11_TEXTURE2D_DESC v{};back->GetDesc(&v);v.BindFlags=v.MiscFlags=0;v.Usage=D3D11_USAGE_STAGING;v.CPUAccessFlags=D3D11_CPU_ACCESS_READ;checked(d->CreateTexture2D(&v,nullptr,&visibleStage),"visible fixture staging");}
  }else checked(D3D11CreateDevice(nullptr,D3D_DRIVER_TYPE_HARDWARE,nullptr,0,&level,1,D3D11_SDK_VERSION,&d,nullptr,&c),"fixture10_1");
  std::unique_ptr<Receiver> receiver;if(!addonMode)receiver=std::make_unique<Receiver>(mapping,d.Get());state.armed=state.enabled=1;
+ ComPtr<ID3D11Texture2D> sceneColor,sceneDepth;ComPtr<ID3D11RenderTargetView> sceneTarget;ComPtr<ID3D11DepthStencilView> sceneView;
+ ComPtr<ID3D11VertexShader> sceneVS;ComPtr<ID3D11PixelShader> scenePS;ComPtr<ID3D11DepthStencilState> sceneNoWrite;
+ if(sceneMode){
+  if(!addonMode||!texturedMode)throw std::runtime_error("scene fixture requires textured callbacks");
+  D3D11_TEXTURE2D_DESC sd{};sd.Width=frameWidth;sd.Height=frameHeight;sd.ArraySize=sd.MipLevels=1;sd.SampleDesc.Count=8;
+  sd.Format=DXGI_FORMAT_B8G8R8A8_UNORM;sd.BindFlags=D3D11_BIND_RENDER_TARGET;
+  checked(d->CreateTexture2D(&sd,nullptr,&sceneColor),"synthetic native scene color");checked(d->CreateRenderTargetView(sceneColor.Get(),nullptr,&sceneTarget),"synthetic scene RTV");
+  sd.Format=DXGI_FORMAT_R32_TYPELESS;sd.BindFlags=D3D11_BIND_DEPTH_STENCIL|D3D11_BIND_SHADER_RESOURCE;
+  checked(d->CreateTexture2D(&sd,nullptr,&sceneDepth),"synthetic native scene depth");D3D11_DEPTH_STENCIL_VIEW_DESC sv{};sv.Format=DXGI_FORMAT_D32_FLOAT;sv.ViewDimension=D3D11_DSV_DIMENSION_TEXTURE2DMS;
+  checked(d->CreateDepthStencilView(sceneDepth.Get(),&sv,&sceneView),"synthetic scene DSV");
+  const char* shader="float4 vs(uint i:SV_VertexID):SV_Position{float2 p[3]={float2(-1,-1),float2(-1,3),float2(3,-1)};return float4(p[i],0,1);}float4 ps():SV_Target{return float4(0,0,0,1);}";
+  ComPtr<ID3DBlob> vs,ps;checked(D3DCompile(shader,strlen(shader),nullptr,nullptr,nullptr,"vs","vs_4_1",0,0,&vs,nullptr),"scene VS compile");
+  checked(D3DCompile(shader,strlen(shader),nullptr,nullptr,nullptr,"ps","ps_4_1",0,0,&ps,nullptr),"scene PS compile");
+  checked(d->CreateVertexShader(vs->GetBufferPointer(),vs->GetBufferSize(),nullptr,&sceneVS),"scene VS");checked(d->CreatePixelShader(ps->GetBufferPointer(),ps->GetBufferSize(),nullptr,&scenePS),"scene PS");
+  D3D11_DEPTH_STENCIL_DESC noWrite{};checked(d->CreateDepthStencilState(&noWrite,&sceneNoWrite),"scene no-write state");
+ }
  const auto step=[&](){if(receiver)receiver->step();else{
   MSG message{};while(PeekMessageW(&message,nullptr,0,0,PM_REMOVE)){TranslateMessage(&message);DispatchMessageW(&message);}
-  const float blue[]={.02f,.05f,.3f,1};c->ClearRenderTargetView(originalTarget.Get(),blue);auto* target=originalTarget.Get();c->OMSetRenderTargets(1,&target,nullptr);c->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+  const float blue[]={.02f,.05f,.3f,1};c->ClearRenderTargetView(originalTarget.Get(),blue);
+  if(sceneMode){
+   c->ClearDepthStencilView(sceneView.Get(),D3D11_CLEAR_DEPTH,sceneZ,0);auto* rt=sceneTarget.Get();c->OMSetRenderTargets(1,&rt,sceneBound?sceneView.Get():nullptr);
+   c->OMSetDepthStencilState(sceneNoWrite.Get(),0);c->VSSetShader(sceneVS.Get(),nullptr,0);c->PSSetShader(scenePS.Get(),nullptr,0);
+   c->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);D3D11_VIEWPORT vp{0,0,static_cast<float>(frameWidth),static_cast<float>(frameHeight),0,1};c->RSSetViewports(1,&vp);c->Draw(3,0);
+  }
+  auto* target=originalTarget.Get();c->OMSetRenderTargets(1,&target,nullptr);c->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
   checked(swap->Present(0,0),"callback Present");D3D11_PRIMITIVE_TOPOLOGY topology{};c->IAGetPrimitiveTopology(&topology);if(topology!=D3D11_PRIMITIVE_TOPOLOGY_LINELIST)throw std::runtime_error("callback immediate state changed");
   // ReShade's own transient startup banner modifies this standalone frame.
   // Wait it out rather than excluding any pixels from the comparison.
@@ -83,6 +107,12 @@ int wmain(int argc,wchar_t** argv){wchar_t session[128]{};if(argc==2)wcscpy_s(se
     visibleVerified=true;std::cout<<"VISIBLE_CAMERA_PIXELS_PASS magenta="<<magenta<<" width="<<frameWidth<<" height="<<frameHeight<<" excluded_banner_rows=96\n";
     if(texturedMode)std::cout<<"TEXTURED_PIXELS_PASS pixels="<<texturedPixels<<" colors="<<unique<<" output="<<wire.width<<"x"<<wire.height<<"\n";
    }
+  }
+  if(sceneMode&&visibleVerified&&(!sceneBound||sceneZ==0)){
+   c->CopyResource(visibleStage.Get(),visibleBack.Get());D3D11_MAPPED_SUBRESOURCE m{};checked(c->Map(visibleStage.Get(),0,D3D11_MAP_READ,0,&m),"scene hidden readback");
+   unsigned nonblue=0;for(unsigned y=96;y<frameHeight;++y)for(unsigned x=0;x<frameWidth;++x){const auto* p=static_cast<const BYTE*>(m.pData)+size_t(y)*m.RowPitch+x*4;nonblue+=std::abs(int(p[0])-77)>2||std::abs(int(p[1])-13)>2||std::abs(int(p[2])-5)>2;}
+   c->Unmap(visibleStage.Get(),0);if(nonblue)throw std::runtime_error("scene near-depth/missing-depth did not hide additive image");
+   if(sceneBound)++sceneHidden;else ++sceneMissing;
   }
  }};
  const auto waitUntil=GetTickCount64()+(texturedMode?30000:10000);while(!load(registration(mapping).ready)){
@@ -105,12 +135,16 @@ int wmain(int argc,wchar_t** argv){wchar_t session[128]{};if(argc==2)wcscpy_s(se
   const auto rawTime=qualifiedAt?GetTickCount64()-qualifiedAt:0;
   const auto rawElapsed=rawTime>cacheHold?rawTime-cacheHold:0;
   const auto elapsed=visibleMode?(rawElapsed>2000?rawElapsed-2000:0):rawElapsed;
+  if(sceneMode){sceneBound=!(elapsed>=1000&&elapsed<1400);sceneZ=(elapsed>=400&&elapsed<900)?0.f:1.f;}
   if(elapsed<2000){hold=load(cmd.drawn);}
   else if(elapsed<3000){++snap.frame;row[2]=snap.frame;if(texturedMode){float x=0;memcpy(&x,&row[11],4);x+=.01f;memcpy(&row[11],&x,4);}}
   else if(elapsed<3500){if(!disabled){disabled=true;disabledAt=load(cmd.drawn);state.enabled=0;}}
   else if(elapsed<4500){state.enabled=1;}
   else {if(!retirement){retirement=true;retiredAt=load(cmd.drawn);}row[4]=2;}
   publish();const auto beforeDisplay=state.drawCount;step();c->Flush();
+  if(sceneMode&&visibleVerified&&elapsed>=1500&&elapsed<2000&&state.drawCount>beforeDisplay){
+   if(++sceneRestored==1)std::cout<<"SCENE_DEPTH_PHASES_READY\n";
+  }
   if(texturedMode&&elapsed>=2000&&elapsed<3000){++steadySamples;steadyDisplayed+=state.drawCount>beforeDisplay;}
   if(texturedMode&&!visibleVerified&&captured)qualifiedAt=GetTickCount64();
   if(retirement&&load(cmd.drawn)!=retiredAt)throw std::runtime_error("retired owner accepted");
@@ -135,7 +169,11 @@ int wmain(int argc,wchar_t** argv){wchar_t session[128]{};if(argc==2)wcscpy_s(se
  while(load(wire.lease)==Reading&&GetTickCount64()<drain){step();c->Flush();Sleep(1);}if(receiver)receiver->stop();state.stop=1;
  const bool disconnect=GetEnvironmentVariableW(L"SFC_PRIVATE_DISCONNECT",nullptr,0)!=0;
  if(!captured||!hold||(!disconnect&&!texturedMode&&!load(wire.rejected))||load(cmd.failed)||load(wire.lease)==Reading||(visibleMode&&!visibleVerified)){std::cout<<"FIXTURE_PARTIAL captured="<<captured<<" hold="<<hold<<" rejected="<<load(wire.rejected)<<" failed="<<load(cmd.failed)<<" lease="<<load(wire.lease)<<"\n";throw std::runtime_error("fixture acceptance/rejection/drain");}
- if(texturedMode&&!disconnect){
+ if(sceneMode){
+  if(!sceneHidden||!sceneMissing||!sceneRestored)throw std::runtime_error("scene depth phases incomplete");
+  std::cout<<"SCENE_DEPTH_CALLBACK_PASS hidden="<<sceneHidden<<" missing="<<sceneMissing<<" restored="<<sceneRestored<<"\n";
+ }
+ if(texturedMode&&!disconnect&&!sceneMode){
   if(!steadySamples||steadyDisplayed*4<steadySamples*3)throw std::runtime_error("textured steady-display duty below75percent");
   std::cout<<"STEADY_DISPLAY_PASS samples="<<steadySamples<<" displayed="<<steadyDisplayed<<" max_request_age_ms=100\n";
  }

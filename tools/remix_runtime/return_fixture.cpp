@@ -12,6 +12,8 @@
 #include "return_wire.h"
 #include "depth_search_wire.h"
 #include "broad_trace.h"
+#include "source_timing_fixture.h"
+#include "../d3d9_proof/game_output_wire.h"
 using Microsoft::WRL::ComPtr;
 static void check(HRESULT h,const char* text){if(FAILED(h))throw std::runtime_error(text);}
 static LRESULT CALLBACK proc(HWND w,UINT m,WPARAM p,LPARAM l){return DefWindowProcW(w,m,p,l);}
@@ -86,12 +88,12 @@ struct Scene {
     if(GetEnvironmentVariableW(L"SFC_RETURN_FIXTURE_DEPTH",nullptr,0)){
       D3D11_TEXTURE2D_DESC desc{};desc.Width=width;desc.Height=height;desc.MipLevels=desc.ArraySize=1;
       desc.Format=DXGI_FORMAT_D24_UNORM_S8_UINT;desc.SampleDesc.Count=1;desc.BindFlags=D3D11_BIND_DEPTH_STENCIL;
-      const bool snapshot=GetEnvironmentVariableW(L"SFC_REMIX_DEPTH_OUTPUT",nullptr,0)!=0;
+      const bool snapshot=GetEnvironmentVariableW(L"SFC_REMIX_DEPTH_OUTPUT",nullptr,0)!=0||GetEnvironmentVariableW(L"SFC_D3D9_GAME_OUTPUT",nullptr,0)!=0;
       if(snapshot){desc.Format=DXGI_FORMAT_R32_TYPELESS;desc.SampleDesc.Count=8;desc.BindFlags|=D3D11_BIND_SHADER_RESOURCE;}
       ComPtr<ID3D11Texture2D> resource;check(device->CreateTexture2D(&desc,nullptr,&resource),"fixture known depth resource");
       D3D11_DEPTH_STENCIL_VIEW_DESC vd{};vd.Format=DXGI_FORMAT_D32_FLOAT;vd.ViewDimension=D3D11_DSV_DIMENSION_TEXTURE2DMS;
       check(device->CreateDepthStencilView(resource.Get(),snapshot?&vd:nullptr,&fixtureDepth),"fixture known depth view");
-      if(snapshot)context->ClearDepthStencilView(fixtureDepth.Get(),D3D11_CLEAR_DEPTH,.625f,0);
+      if(snapshot)context->ClearDepthStencilView(fixtureDepth.Get(),D3D11_CLEAR_DEPTH,GetEnvironmentVariableW(L"SFC_D3D9_GAME_OUTPUT",nullptr,0)?1.f:.625f,0);
       D3D11_TEXTURE2D_DESC actual{};resource->GetDesc(&actual);
       D3D11_DEPTH_STENCIL_VIEW_DESC actualView{};fixtureDepth->GetDesc(&actualView);
       std::cout<<"KNOWN_FIXTURE_DEPTH width="<<width<<" height="<<height<<" resource_format="<<actual.Format<<" view_format="<<actualView.Format<<" flags="<<actual.BindFlags<<"\n";
@@ -108,7 +110,7 @@ struct Scene {
     D3D11_RASTERIZER_DESC rd{};rd.FillMode=D3D11_FILL_SOLID;rd.CullMode=D3D11_CULL_FRONT;rd.DepthClipEnable=TRUE;rd.ScissorEnable=TRUE;check(device->CreateRasterizerState(&rd,&raster),"fixture raster");
     D3D11_BLEND_DESC bd{};bd.RenderTarget[0].RenderTargetWriteMask=D3D11_COLOR_WRITE_ENABLE_ALL;check(device->CreateBlendState(&bd,&blend),"fixture blend");
     D3D11_DEPTH_STENCIL_DESC dd{};dd.DepthEnable=FALSE;dd.DepthWriteMask=D3D11_DEPTH_WRITE_MASK_ZERO;dd.DepthFunc=D3D11_COMPARISON_ALWAYS;check(device->CreateDepthStencilState(&dd,&depth),"fixture depth");
-    if(GetEnvironmentVariableW(L"SFC_REMIX_BROAD_OUTPUT",nullptr,0)||GetEnvironmentVariableW(L"SFC_REMIX_DEPTH_OUTPUT",nullptr,0)){
+    if(GetEnvironmentVariableW(L"SFC_REMIX_BROAD_OUTPUT",nullptr,0)||GetEnvironmentVariableW(L"SFC_REMIX_DEPTH_OUTPUT",nullptr,0)||GetEnvironmentVariableW(L"SFC_D3D9_GAME_OUTPUT",nullptr,0)){
       const char* code="float4 vs(uint id:SV_VertexID):SV_Position { float2 p[3]={float2(-.5,-.5),float2(0,.5),float2(.5,-.5)};return float4(p[id],.5,1); } float4 ps():SV_Target { return float4(.02,.05,.3,1); }";
       ComPtr<ID3DBlob> vs,ps,errors;
       check(D3DCompile(code,std::strlen(code),nullptr,nullptr,nullptr,"vs","vs_4_0",D3DCOMPILE_ENABLE_STRICTNESS,0,&vs,&errors),"fixture VS compile");
@@ -126,7 +128,7 @@ struct Scene {
     context->RSSetState(raster.Get());D3D11_VIEWPORT viewport{3,4,static_cast<float>(width-10),static_cast<float>(height-20),0.2f,0.8f};context->RSSetViewports(1,&viewport);
     const D3D11_RECT scissor{10,20,500,400};context->RSSetScissorRects(1,&scissor);
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);auto* rt=target.Get();
-    if(GetEnvironmentVariableW(L"SFC_REMIX_DEPTH_OUTPUT",nullptr,0))context->OMSetRenderTargets(0,nullptr,fixtureDepth.Get());
+    if(GetEnvironmentVariableW(L"SFC_REMIX_DEPTH_OUTPUT",nullptr,0)||GetEnvironmentVariableW(L"SFC_D3D9_GAME_OUTPUT",nullptr,0))context->OMSetRenderTargets(0,nullptr,fixtureDepth.Get());
     else context->OMSetRenderTargets(1,&rt,fixtureDepth.Get());
   }
   bool statePreserved(bool depthUnbound=false){
@@ -136,6 +138,17 @@ struct Scene {
     UINT n=1;D3D11_VIEWPORT vp{};context->RSGetViewports(&n,&vp);UINT nr=1;D3D11_RECT rect{};context->RSGetScissorRects(&nr,&rect);
     D3D11_PRIMITIVE_TOPOLOGY topology{};context->IAGetPrimitiveTopology(&topology);
     return bs.Get()==blend.Get()&&ds.Get()==depth.Get()&&rs.Get()==raster.Get()&&rt.Get()==target.Get()&&boundDepth.Get()==(depthUnbound?nullptr:fixtureDepth.Get())&&mask==0xFFFFFFFA&&stencil==42&&factor[0]==0.1f&&factor[3]==0.4f&&n==1&&vp.TopLeftX==3&&vp.TopLeftY==4&&vp.Width==width-10&&vp.Height==height-20&&vp.MinDepth==0.2f&&vp.MaxDepth==0.8f&&nr==1&&rect.left==10&&rect.bottom==400&&topology==D3D11_PRIMITIVE_TOPOLOGY_LINELIST;
+  }
+  void shipSample(){
+    ComPtr<ID3D11Texture2D> back;check(swap->GetBuffer(0,IID_PPV_ARGS(&back)),"game fixture backbuffer");D3D11_TEXTURE2D_DESC desc{};back->GetDesc(&desc);
+    desc.Usage=D3D11_USAGE_STAGING;desc.BindFlags=desc.MiscFlags=0;desc.CPUAccessFlags=D3D11_CPU_ACCESS_READ;
+    ComPtr<ID3D11Texture2D> staging;check(device->CreateTexture2D(&desc,nullptr,&staging),"game fixture one-shot staging");context->CopyResource(staging.Get(),back.Get());
+    D3D11_MAPPED_SUBRESOURCE p{};check(context->Map(staging.Get(),0,D3D11_MAP_READ,0,&p),"game fixture one-shot pixels");unsigned changed=0;bool border=true;
+    for(unsigned y=0;y<height;++y){const auto* row=static_cast<const unsigned char*>(p.pData)+y*p.RowPitch;for(unsigned x=0;x<width;++x){const auto* c=row+x*4;
+      const bool different=std::abs(int(c[0])-77)>3||std::abs(int(c[1])-13)>3||std::abs(int(c[2])-5)>3;
+      changed+=different;if(x<80&&y>height-80&&different)border=false;
+    }}context->Unmap(staging.Get(),0);std::cout<<"GAME_IMAGE_PIXELS changed="<<changed<<" border_untouched="<<border<<'\n';
+    if(changed<8||!border)throw std::runtime_error("No actual additive ship pixels or original border damaged");
   }
   unsigned sample(const char* phase,bool save){
     ComPtr<ID3D11Texture2D> back;check(swap->GetBuffer(0,IID_PPV_ARGS(&back)),"fixture sampled backbuffer");D3D11_TEXTURE2D_DESC desc{};back->GetDesc(&desc);
@@ -172,7 +185,8 @@ int wmain(){
     WNDCLASSW wc{};wc.lpfnWndProc=proc;wc.hInstance=GetModuleHandleW(nullptr);wc.lpszClassName=L"SFC_ReturnFixture";if(!RegisterClassW(&wc))throw std::runtime_error("fixture class");
     window=CreateWindowW(wc.lpszClassName,L"Offline returned-image fixture — NOT SFC",WS_POPUP,100,100,800,600,nullptr,nullptr,wc.hInstance,nullptr);if(!window)throw std::runtime_error("fixture window");ShowWindow(window,SW_SHOWNOACTIVATE);
     {
-      Scene scene;scene.init(window);const auto start=GetTickCount64();bool enabled=false,disabled=false,resized=false,recreated=false,afterResize=false,afterRecreate=false,disconnected=false;unsigned frames=0,stateErrors=0;
+      const bool gameOutput=GetEnvironmentVariableW(L"SFC_D3D9_GAME_OUTPUT",nullptr,0)!=0;bool imageSample=false;unsigned resizedFrame=0,imageStartFrame=0;LONG imageStartDraws=0;
+      SourceTimingFixture sourceTiming;Scene scene;if(gameOutput){scene.width=1920;scene.height=1080;}scene.init(window);const auto start=GetTickCount64();bool enabled=false,disabled=false,resized=false,recreated=false,afterResize=false,afterRecreate=false,disconnected=false;unsigned frames=0,stateErrors=0;
       const bool observationOnly=GetEnvironmentVariableW(L"SFC_RETURN_OBSERVATION_ONLY",nullptr,0)!=0;
       const bool expanded=GetEnvironmentVariableW(L"SFC_RETURN_EXPANDED_SEARCH",nullptr,0)!=0;
       const bool broad=GetEnvironmentVariableW(L"SFC_REMIX_BROAD_OUTPUT",nullptr,0)!=0;
@@ -185,10 +199,11 @@ int wmain(){
         void* points[]={reinterpret_cast<void*>(&probeBegin),reinterpret_cast<void*>(&probeEnd),reinterpret_cast<void*>(&probeAfterFlush),reinterpret_cast<void*>(&probePresent)};
         if(!install||!install(points))throw std::runtime_error("fixture search installation");
       }
-      while(GetTickCount64()-start<25000){
+      while(GetTickCount64()-start<(gameOutput?45000ull:25000ull)){
         MSG m{};while(PeekMessageW(&m,nullptr,0,0,PM_REMOVE)){TranslateMessage(&m);DispatchMessageW(&m);}
+        if(gameOutput)sourceTiming.publish(frames+1);
         scene.clear();
-        if(broad||snapshot){
+        if(broad||snapshot||gameOutput){
           // Valid original geometry exercises both public draw callbacks. Same
           // blue as clear; depth testing remains explicitly disabled.
           scene.context->VSSetShader(scene.fixtureVS.Get(),nullptr,0);scene.context->PSSetShader(scene.fixturePS.Get(),nullptr,0);
@@ -199,7 +214,15 @@ int wmain(){
           auto* rt=scene.target.Get();scene.context->OMSetRenderTargets(1,&rt,nullptr);
         }
         if(expanded){if(!preserved(probeBegin)||!preserved(probeEnd)||!preserved(invokeAfterFlush,true)||!preserved(probePresent))throw std::runtime_error("engine observer stack/flags/FP state changed");}
-        check(scene.swap->Present(0,0),"fixture present");++frames;if(!scene.statePreserved(broad||snapshot))++stateErrors;
+        if(!gameOutput)sourceTiming.publish(frames+1);check(scene.swap->Present(0,0),"fixture present");++frames;if(!scene.statePreserved(broad||snapshot||gameOutput))++stateErrors;
+        if(gameOutput){
+          auto* base=reinterpret_cast<BYTE*>(sourceTiming.source.mailbox)-sfc_calibration::Offset;auto& pool=*reinterpret_cast<game_output::Pool*>(base+game_output::Offset);
+          if(!imageSample&&pool.stats.drawn&&pool.stats.frame==200000+frames){scene.shipSample();imageSample=true;imageStartFrame=frames;imageStartDraws=pool.stats.drawn;}
+          if(!resized&&imageSample&&frames>=imageStartFrame+600){std::cout<<"GAME_DELIVERY_WINDOW frames="<<frames-imageStartFrame<<" draws="<<pool.stats.drawn-imageStartDraws<<'\n';scene.resize();resized=true;resizedFrame=frames;}
+          if(resized&&!recreated&&frames>=resizedFrame+90){scene.reset();scene.width=1920;scene.height=1080;scene.init(window);recreated=true;}
+          if(recreated&&frames>=resizedFrame+180)break;
+        }
+        if(sourceTiming.enabled){if(!gameOutput&&frames==(sourceTiming.liveEnabled?450u:90u)){scene.resize();resized=true;}if(!gameOutput&&frames==(sourceTiming.liveEnabled?900u:180u)){scene.reset();scene.init(window);recreated=true;}if(!gameOutput&&frames>=(sourceTiming.liveEnabled?1800u:210u))break;if(!sourceTiming.liveEnabled)Sleep(16);continue;}
         if(snapshot){if(GetTickCount64()-start>16000)break;Sleep(16);continue;}
         if(broad){
           if(frames==90){scene.resize();resized=true;}
@@ -232,7 +255,8 @@ int wmain(){
         }
         Sleep(16);
       }
-      if(snapshot){
+      if(sourceTiming.enabled){std::cout<<"SOURCE_TIMING_END frames="<<frames<<" state_errors="<<stateErrors<<" resized="<<resized<<" recreated="<<recreated<<'\n';if(stateErrors||!resized||!recreated)throw std::runtime_error("source timing state/resize/recreation");}
+      else if(snapshot){
         std::cout<<"DEPTH_SNAPSHOT_END frames="<<frames<<" state_errors="<<stateErrors<<"\n";
         if(stateErrors)throw std::runtime_error("snapshot fixture original state changed");
       }else if(broad){

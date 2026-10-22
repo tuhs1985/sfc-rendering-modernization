@@ -30,25 +30,38 @@ def main():
     inspect.add_argument('--search-depth',action='store_true',help='Expanded six-phase engine/presentation search')
     inspect.add_argument('--broad-capture',action='store_true',help='Full-support public event capture,10seconds,2GB ceiling')
     inspect.add_argument('--depth-snapshots',action='store_true',help='Three read-only 8sample depth snapshots, no SFC')
+    inspect.add_argument('--source-timing',action='store_true',help='Metadata-only offer/Present/overlay timing;no runtime rendering')
+    parser.add_argument('--live-owner-timing',action='store_true',help='Standalone raw owner/proxy/ordinary-D3D9 GPU fixture,no SFC')
+    parser.add_argument('--d3d9-additive',action='store_true',help='Offline actual-proxy/ordinary-D3D9 additive GPU fixture;NOT SFC')
+    parser.add_argument('--rebind-owner',action='store_true',help='Standalone synthetic owner epochs through actual resident renderer;requires additive')
     parser.add_argument('--slow-end-scene',action='store_true',help='Offline only: detach while simulated original COM call sleeps')
     parser.add_argument('--with-depth',action='store_true',help='Bind known synthetic D24S8 descriptor, not actual scene depth')
     parser.add_argument('--observation-only',action='store_true',help='No Remix runtime/image; control channel and depth observations only')
     args=parser.parse_args()
+    if args.rebind_owner and not args.d3d9_additive:parser.error('--rebind-owner requires --d3d9-additive')
+    if args.d3d9_additive:args.live_owner_timing=True;args.source_timing=True;args.observation_only=True;args.graceful=True
     inspect_requested=args.inspect_visibility or args.inspect_early_depth
     if args.with_depth and not (args.inspect_early_depth or args.search_depth or args.broad_capture or args.depth_snapshots):parser.error('--with-depth requires --inspect-early-depth or --search-depth or --broad-capture or --depth-snapshots')
-    if args.observation_only and (not (args.inspect_early_depth or args.search_depth or args.broad_capture or args.depth_snapshots) or not args.graceful):parser.error('--observation-only requires --inspect-early-depth or --search-depth or --broad-capture or --depth-snapshots and --graceful')
+    if args.observation_only and (not (args.inspect_early_depth or args.search_depth or args.broad_capture or args.depth_snapshots or args.source_timing) or not args.graceful):parser.error('--observation-only requires a read-only mode and --graceful')
+    if args.source_timing and not(args.observation_only and args.graceful):parser.error('--source-timing requires --observation-only --graceful')
+    if args.live_owner_timing and not args.source_timing:parser.error('--live-owner-timing requires --source-timing')
     if args.depth_snapshots and not (args.observation_only and args.graceful):parser.error('--depth-snapshots requires --observation-only and --graceful')
     if args.broad_capture and not (args.observation_only and args.graceful):parser.error('--broad-capture requires --observation-only and --graceful')
     if args.search_depth and not args.observation_only:parser.error('--search-depth requires --observation-only')
     if args.slow_end_scene and not args.search_depth:parser.error('--slow-end-scene requires --search-depth')
     if digest(DLL)!='F7C310821AA98BCDFDEC120330B0A89457B7C5EBA58D21464AF32639611C809F':raise RuntimeError('Pinned Remix changed')
     if digest(TEST/'dxgi.dll')!='E35E4E2E47F4765F0799CB54C88E5ADE49B50CD7895C137B9D557F263344CAB7':raise RuntimeError('Copied proxy changed')
+    if args.d3d9_additive:
+        import sys
+        sys.path.insert(0,str(ROOT/'tools/d3d9_proof'))
+        from run_offline import storage,AGGREGATE_BYTES
+        if storage()+192*1024*1024>AGGREGATE_BYTES:raise RuntimeError('Additive fixture lacks192MiB reservation within20GB cap')
     work=ROOT/'artifacts/remix-runtime/runs'/dt.datetime.now(dt.timezone.utc).strftime('%Y%m%d-%H%M%S-%f-return-fixture');work.mkdir()
-    for source,name in [(broad_capture.qualified_full() if args.broad_capture or args.depth_snapshots else TEST/'dxgi.dll','dxgi.dll'),(BIN/'d3d11_return_fixture.exe','d3d11_return_fixture.exe'),(BIN/'SFCRemixReturn.dll','SFCRemixReturn.dll')]:shutil.copyfile(source,work/name)
+    for source,name in [(broad_capture.qualified_full() if args.broad_capture or args.depth_snapshots or args.d3d9_additive else TEST/'dxgi.dll','dxgi.dll'),(BIN/'d3d11_return_fixture.exe','d3d11_return_fixture.exe'),(BIN/'SFCRemixReturn.dll','SFCRemixReturn.dll')]:shutil.copyfile(source,work/name)
     # No existing game config changed. Disable fixture menu/input capture only.
     (work/'ReShade.ini').write_text('[GENERAL]\nEffectSearchPaths=./no-effects\nPresetPath=./fixture.ini\n[OVERLAY]\nTutorialProgress=4\nShowFPS=0\nShowFrameTime=0\n[INPUT]\nInputProcessing=0\n')
     env={**os.environ,**ENV,'DXVK_LOG_PATH':str(work)}
-    host=fixture=channel=None;streams=[];start=time.monotonic();error=None;history=[]
+    host=fixture=channel=None;semantic=None;timing_result=None;streams=[];start=time.monotonic();error=None;history=[];live_relay=None;live_result=None;live_manifest=None;live_rows=[]
     try:
         def output(name):
             f=open(work/name,'wb');streams.append(f);return f
@@ -63,6 +76,32 @@ def main():
         if not session or not valid_name(session):raise RuntimeError('Runtime session startup failed')
         channel=Channel(session)
         env.update(SFC_REMIX_RETURN_SESSION=session,SFC_REMIX_EXPECTED_IMAGE=str(work/'d3d11_return_fixture.exe'),SFC_REMIX_PRELOAD_REQUIRED='1')
+        env.pop('SFC_D3D9_SOURCE_TIMING',None)
+        env.pop('SFC_D3D9_LIVE_TIMING',None);env.pop('SFC_D3D9_FIXTURE_ROWS',None)
+        if args.source_timing:
+            from present_calibration import Receiver
+            semantic=Receiver();env.update(SFC_D3D9_SOURCE_TIMING='1',SFC_REMIX_CALIBRATION_SCENE=semantic.name)
+        if args.live_owner_timing:
+            from live_owner_timing import Relay
+            from run_offline import CAPTURE
+            from scene_bundle import snapshots
+            from live_scene import decode_mesh
+            live_relay=Relay(work,semantic,TEST,additive=args.d3d9_additive,offline_fixture=args.d3d9_additive)
+            mesh=decode_mesh((CAPTURE/'LIVE-SCENE-001-asset-3.bin').read_bytes(),(CAPTURE/'LIVE-SCENE-001-asset-3.json').read_bytes())
+            selected_frames=snapshots(mesh,CAPTURE/'LIVE-SCENE-001-updates.jsonl',3)
+            all_rows=(CAPTURE/'LIVE-SCENE-001-updates.jsonl').read_text().splitlines()
+            live_rows=[json.loads(all_rows[f['line']-1]) for f in selected_frames]
+            gate=work/'gate';gate.mkdir()
+            for extension in ('bin','json'):shutil.copyfile(CAPTURE/f'LIVE-SCENE-001-asset-3.{extension}',gate/f'LIVE-SCENE-001-asset-3.{extension}')
+            (gate/'LIVE-SCENE-001-updates.jsonl').write_bytes(b'')
+            (work/'manifest.json').write_text(json.dumps(dict(synthetic_source=True,source_packet_sha256=digest(CAPTURE/'LIVE-SCENE-001-asset-3.bin'),semantic_calibration={'scene_session':semantic.name}),indent=2))
+            import struct
+            (work/'fixture-rows.bin').write_bytes(b''.join(struct.pack('<96I',*r) for r in live_rows))
+            env.update(SFC_D3D9_LIVE_TIMING='1',SFC_D3D9_FIXTURE_ROWS=str(work/'fixture-rows.bin'))
+        env.pop('SFC_D3D9_GAME_OUTPUT',None)
+        if args.d3d9_additive:env['SFC_D3D9_GAME_OUTPUT']='1'
+        env.pop('SFC_D3D9_REBIND_FIXTURE',None)
+        if args.rebind_owner:env['SFC_D3D9_REBIND_FIXTURE']='1'
         env.pop('SFC_REMIX_BROAD_OUTPUT',None)
         env.pop('SFC_REMIX_DEPTH_OUTPUT',None)
         if args.depth_snapshots:env['SFC_REMIX_DEPTH_OUTPUT']=str(work)
@@ -73,21 +112,40 @@ def main():
         env.pop('SFC_RETURN_EXPANDED_SEARCH',None)
         env.pop('SFC_RETURN_SLOW_END',None)
         if args.with_depth:env['SFC_RETURN_FIXTURE_DEPTH']='1'
+        if args.d3d9_additive:env['SFC_RETURN_FIXTURE_DEPTH']='1'
         if args.observation_only:env['SFC_RETURN_OBSERVATION_ONLY']='1'
         if args.search_depth:env['SFC_RETURN_EXPANDED_SEARCH']='1'
         if args.slow_end_scene:env['SFC_RETURN_SLOW_END']='1'
         fixture=sp.Popen([str(BIN/'return_launcher.exe'),'--fixture',str(work/'d3d11_return_fixture.exe'),str(work/'SFCRemixReturn.dll'),digest(work/'d3d11_return_fixture.exe'),digest(work/'SFCRemixReturn.dll')],cwd=work,env=env,stdout=output('fixture.log'),stderr=sp.STDOUT,creationflags=sp.CREATE_NO_WINDOW)
-        disabled_at=None;reenabled=False;killed=False;last=0
+        disabled_at=None;reenabled=False;killed=False;last=0;rebind_requests=[]
         while fixture.poll() is None:
             elapsed=time.monotonic()-start
             size=sum(p.stat().st_size for p in work.rglob('*') if p.is_file())
+            if args.d3d9_additive:
+                images=sum(p.stat().st_size for p in (work/'gpu').rglob('*') if p.is_file() and (p.suffix.lower()=='.dds' or re.fullmatch(r'texture-\d+\.bin',p.name)))
+                if images>128*1024*1024:raise RuntimeError('Additive original/derived image128MiB cap')
+                size-=images # Separate established image budget;logs remain32MiB.
             if elapsed>100 or size>(broad_capture.HARD+32*1024*1024 if args.broad_capture else (96*1024*1024 if args.depth_snapshots else 32*1024*1024)):raise RuntimeError('Fixture time/output cap')
             text=(work/'fixture.log').read_text(errors='replace')
+            if live_relay:
+                verified=re.search(r'VERIFIED_CHILD pid=(\d+) suspended_path_match=1 disk_sha_match=1',text)
+                raw_pid=struct.unpack_from('<I',semantic.channel.read(10*1024*1024,32),28)[0]
+                if verified and raw_pid==int(verified[1]):live_relay.poll(raw_pid)
             state=channel.snapshot()
+            if args.rebind_owner and live_relay and live_relay.process and len(rebind_requests)<2:
+                from owner_rebind import acknowledged,request
+                generation=len(rebind_requests)+2
+                if acknowledged(semantic.channel)==generation-1 and state['drawCount']>=(120 if generation==2 else 300):
+                    row=list(live_rows[0]);row[1]=generation+10;row[7]=generation+10;row[5]+=generation;row[6]+=generation
+                    request(semantic.channel,generation,row,int(live_relay.content_signature[:16],16) or 1)
+                    # Historical-light replay carries matching SYNTHETIC identity only.
+                    replay=live_relay.light_replay;replay.owner=row[1]
+                    replay.snapshot.update(owner_epoch=row[1],model_process_local=row[5],source_process_local=row[6])
+                    rebind_requests.append(dict(generation=generation,owner=row[1],revision=row[7]))
             if args.search_depth and elapsed>8:channel.set('stop',1)
             if args.slow_end_scene and state['ready'] and depth_search_channel.snapshot(channel.address)['reserved']==1:channel.set('stop',1)
             if state['ready'] and not disabled_at:
-                channel.set('armed',1);channel.set('enabled',int(not args.observation_only))
+                channel.set('armed',1);channel.set('enabled',int(args.d3d9_additive or not args.observation_only))
             if 'SAMPLE enabled ' in text and disabled_at is None:
                 channel.set('enabled',0);disabled_at=time.monotonic()
             if disabled_at and 'SAMPLE disabled ' in text and time.monotonic()-disabled_at>1 and not reenabled:
@@ -124,11 +182,22 @@ def main():
             report=analyze_run(work,images=True)
             if bool(report['complete'])!=args.with_depth:raise RuntimeError('Depth snapshot positive/negative evidence failed')
             if not args.with_depth and report['snapshots']:raise RuntimeError('Unexpected depth without candidate')
+        elif args.source_timing:
+            if 'SOURCE_TIMING_END ' not in text or 'state_errors=0 resized=1 recreated=1' not in text:raise RuntimeError('Source timing fixture state evidence incomplete')
+            from source_timing import save
+            timing_result=save(semantic.channel,work)
+            if timing_result['result']!='SOURCE_TIMING_OBSERVATION_COMPLETE_ADJUDICATION_REQUIRED' or timing_result['records']<300 or timing_result['exact_frame_owner_pairs']<150:raise RuntimeError('Source timing callbacks incomplete')
+            channel.set('stop',1)
         elif args.observation_only:
             if 'OBSERVATION_END ' not in text or 'state_errors=0 samples=8 resized=1 recreated=1' not in text:raise RuntimeError('Observation fixture state evidence incomplete')
             channel.set('stop',1)
         elif 'phases=11111' not in text or 'state_errors=0' not in text or not killed:raise RuntimeError('Fixture phase/state evidence incomplete')
         if not channel.state.startupRestored or not channel.state.startupVerified:raise RuntimeError('Startup preload/path evidence incomplete')
+        if args.rebind_owner:
+            from owner_rebind import acknowledged
+            native_log=(work/'gpu/job-console.log').read_text()
+            if len(rebind_requests)!=2 or acknowledged(semantic.channel)!=3 or 'OWNER_REBOUND generation=3' not in native_log:
+                raise RuntimeError('Actual resident-renderer rebind acknowledgements incomplete')
         if inspect_requested:
             s=channel.state
             if s.visibilitySamples!=8 or s.depthPresentSamples!=(8 if args.with_depth else 0) or s.visibilityScope!=(2 if args.inspect_early_depth else 1):raise RuntimeError('Unexpected fixture visibility count/scope')
@@ -157,9 +226,19 @@ def main():
             try:search=depth_search_channel.snapshot(channel.address)
             except ValueError:pass
         if channel:channel.close()
+        if live_relay:
+            try:
+                raw_pid=struct.unpack_from('<I',semantic.channel.read(10*1024*1024,32),28)[0]
+                live_result=live_relay.finish(raw_pid)
+            except Exception as exc:error=(error+'; ' if error else '')+'Live fixture: '+str(exc)
+        if semantic:semantic.close()
         for f in streams:f.close()
         (work/'result.json').write_text(json.dumps({'probe':'REMIX-RETURN-001-FIXTURE','expanded_search':search,'observation_only':args.observation_only,'graceful':args.graceful,'inspect_early_depth':args.inspect_early_depth,'inspect_visibility':args.inspect_visibility,'known_fixture_depth':args.with_depth,'error':error,'seconds':time.monotonic()-start,'host_exit':host.returncode if host else None,'fixture_exit':fixture.returncode if fixture else None,'history':history,'final':final,'runtime_environment':ENV,'source_files':{p.name:digest(p) for p in (BIN/'return_host.exe',BIN/'SFCRemixReturn.dll',BIN/'d3d11_return_fixture.exe',BIN/'return_launcher.exe')}},indent=2))
+    receipt=json.loads((work/'result.json').read_text());receipt.update(source_timing_requested=args.source_timing,source_timing=timing_result,live_owner_timing=live_result)
+    if args.rebind_owner:receipt['synthetic_rebind_requests']=rebind_requests
+    (work/'result.json').write_text(json.dumps(receipt,indent=2))
     print(f'Evidence: {work}')
+    if timing_result:print(json.dumps(timing_result,indent=2))
     if (work/'fixture.log').exists():print((work/'fixture.log').read_text(errors='replace'))
     if error:raise RuntimeError(error)
 if __name__=='__main__':main()

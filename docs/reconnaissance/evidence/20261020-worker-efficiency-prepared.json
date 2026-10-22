@@ -1,0 +1,26 @@
+{
+  "run": 89,
+  "result": "OFFLINE_WORKER_EFFICIENCY_PREPARED_NOT_SFC_PASS",
+  "sfc_launched": false,
+  "aggregate_output_budget_bytes": 20000000000,
+  "aggregate_output_observed_bytes": 9778503054,
+  "fixed_worker_diagnostic_storage_bytes": 6291456,
+  "native_optimization": "/O2 /fp:precise;CL and _CL_ cleared in compiler child",
+  "input_and_gpu_query_poll_request_us": 250,
+  "completion_authority": "Original D3D9 query plus existing D3D11 completion fences and resource leases",
+  "samples": [
+    {"fixture": "20261021-033807-214685-return-fixture", "optimization": "Off", "poll": "Sleep(1)", "delivery": [599,600], "end_to_end_ms_p50_p95_max": [10.004,11.20355,13.5678]},
+    {"fixture": "20261021-034102-429000-return-fixture", "optimization": "Speed", "poll": "Sleep(1)", "delivery": [599,600], "end_to_end_ms_p50_p95_max": [9.9213,10.92745,13.5025]},
+    {"fixture": "20261021-034200-721375-return-fixture", "optimization": "Speed", "poll": "Private250us", "delivery": [598,600], "end_to_end_ms_p50_p95_max": [8.4851,9.28992,13.5946]},
+    {"fixture": "20261021-034352-842284-return-fixture", "optimization": "Speed", "poll": "Private250us", "delivery": [599,600], "end_to_end_ms_p50_p95_max": [8.4668,9.48637,11.0755]}
+  ],
+  "timing_scope": "First599nonbootstrap host input/output rows;fixed600-frame display window separate denominator",
+  "last_query_observation_interval_median_us": {"legacy":1999.9,"private_repeat":515.0},
+  "python_tests": {"passed":372},
+  "native_tests": ["x86 and x64 deferred diagnostics","x64 private worker timer lifecycle/options","11loaded light checks","29output wire checks","18source timing checks","31game pool checks"],
+  "original_and_copied_client_hash_unchanged": true,
+  "preflight": "PASS_NO_LAUNCH",
+  "remaining": ["Actual SFC fast-camera workload untested","Worst-case latency not eliminated","Native vendor disposal warning40 remains unresolved","No all-model or original-replacement claim"],
+  "staged": false,
+  "committed": false
+}

@@ -1,0 +1,50 @@
+{
+  "run": "Run70",
+  "date_local": "2026-10-19",
+  "head": "d29111f7a513c4510c4d33aeeda2c355d98443a5",
+  "overall": "PARTIAL",
+  "confirmed": "Normal x86 D3D9 interception delivers both captured geometries and exact primary image assignments to Remix without SDK registration",
+  "sfc_launched": false,
+  "release": "remix-1.5.2",
+  "release_commit": "b81a7b566b1eeb9edb4dc2b3c9d3972e0f253ad4",
+  "release_zip_sha256": "cc424be4dd1a0c6fd922bc6a7f8e5f6582baea7043a38afa6686d8b6faabad01",
+  "native_source_sha256": "2e7d92f96140673b25426cab76c7ffadcb855c5efa1f17e839ea50bb32f8ed80",
+  "intercept_exe_sha256": "7676b032e0760b84206ff5a76137ad159145293050075a86aad6046b5e20b6f6",
+  "analysis_source_sha256": "aa1b1f2b2b1c3fd1c0e5a874ae73b2f4e1dea03d18f83e15cfac432a1d81ba1f",
+  "cases": [
+    {
+      "folder": "artifacts/d3d9-intercept/runs/20261020-014701-350695",
+      "model": "FCA", "groups": 58, "triangles": 6370,
+      "source_index": 2, "source_frame": 5363,
+      "capture_sha256": "0cd41f3041d4cd4abf7b4d761f664a7a046ace61033e5c5fbbb3241e877ff1c6",
+      "replay_sha256": "7f9bbccf49ae7928ac81e8273a363d59a88cebe91c6e6c6f0b92ad9bd7c6c94b",
+      "analysis_only_reconstructed_projection_error_px": 0.00013524299356504343,
+      "raw_export_projection_error_px": 66.68999196316031,
+      "job_exit": 0, "remaining_processes": 0, "runtime_disposal_warning_objects": 40
+    },
+    {
+      "folder": "artifacts/d3d9-intercept/runs/20261020-014721-432618",
+      "model": "KFF", "groups": 5, "triangles": 452,
+      "source_index": 0, "source_frame": 4117,
+      "capture_sha256": "432ad76b77542ac789d69032f8713eb07cad52d141ca9a5e4f14e706c0efbecf",
+      "replay_sha256": "5a25f6ee813ebcacc823c1f9bfc097d5d96d91e5af667c71b6fe4c29a11e7bae",
+      "analysis_only_reconstructed_projection_error_px": 0.00007524770671807346,
+      "raw_export_projection_error_px": 27.775063587088425,
+      "job_exit": 0, "remaining_processes": 0, "runtime_disposal_warning_objects": 40
+    }
+  ],
+  "camera_status": "PARTIAL: verticalAperture not authored; source-viewport reconstruction is analysis only,not a runtime correction",
+  "uv_status": "D3D9 raw UVs unchanged; USD exporter V/winding conventions normalized only in analysis",
+  "native_regression": {
+    "folder": "artifacts/d3d9-proof/runs/20261020-014807-215394",
+    "result": "PARTIAL",
+    "error": "HRESULT 8876086a D3D9_PROOF_FAIL windowed backbuffer compatibility",
+    "cause": "UNRESOLVED; environment hypothesis not confirmed",
+    "historical_plain_pass": "Run69 does not qualify final modified common source"
+  },
+  "validation": {"cpp_builds": "PASS both /W4 /WX", "python_tests": 296, "python_result": "PASS", "client_hashes": "unchanged", "settings": "unchanged"},
+  "client_sha256": "4D65761D7DD69EF1504070261B81E9C200C0AF18105033E1C4D2222C62320C29",
+  "recoverable_compaction": {"runs": 10, "generated_bytes": 303241287, "zip_bytes": 44054283},
+  "not_demonstrated": ["complete exported camera projection", "final native regression", "runtime object disposal", "live integration/timing/depth/coverage", "boundary gate closure", "formal TRL completion"],
+  "staged": false, "committed": false
+}

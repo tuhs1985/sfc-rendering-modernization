@@ -1,0 +1,202 @@
+{
+  "result": "OFFLINE_PLAIN_D3D9_TWO_ASSET_PASS",
+  "sfc_launched": false,
+  "remix_loaded": false,
+  "exe_sha256": "f6c1ac762424087b3368d385d9cec385adee83f6fab354df6e2759ea29bdcfa7",
+  "inputs": {
+    "artifacts\\m1\\runs\\20261016-223535-enabled\\LIVE-SCENE-001-asset-1.bin": "375fc597ce363804d3ec16e1b9eb9a226d8f001e7533718635d48aa3b691029b",
+    "artifacts\\m1\\runs\\20261016-223535-enabled\\LIVE-SCENE-001-asset-1.json": "e7ea22ff23146f8a04aa13abeb941f18246d1c693e9646feb07d868acedcbfef",
+    "artifacts\\m1\\runs\\20261016-223535-enabled\\LIVE-SCENE-001-asset-2.bin": "d28cd7f0a4259b7dab215349e63ec0d3e751514a44112741da83dc62a03a5c04",
+    "artifacts\\m1\\runs\\20261016-223535-enabled\\LIVE-SCENE-001-asset-2.json": "da093cdeeaf6cd03ecadf7fdd56b7a64a3185631a84dd7716dba16a67d5a801e",
+    "artifacts\\m1\\runs\\20261016-223535-enabled\\LIVE-SCENE-001-asset-3.bin": "e2224623876e71fae3aa25a5ca731af1fd0f9b60b7a732cf953707ffd6a806a7",
+    "artifacts\\m1\\runs\\20261016-223535-enabled\\LIVE-SCENE-001-asset-3.json": "4d92ee040ccbc0ed90cfeaa2ac83cdda1fef27e65c6c009aa228633ee3e787e5",
+    "artifacts\\m1\\runs\\20261016-223535-enabled\\LIVE-SCENE-001-asset-4.bin": "df7f5849d2eb72a321ffd3048630f8b688358d160662eda9e00ac9da92f09bda",
+    "artifacts\\m1\\runs\\20261016-223535-enabled\\LIVE-SCENE-001-asset-4.json": "d4a5df4528f1d9db469717093cfa90f9da6313663a926a3e79cf8c1ef331218e",
+    "artifacts\\m1\\runs\\20261016-223535-enabled\\LIVE-SCENE-001-asset-5.bin": "cccb002e2e413fb59ffa8853eef3d3a640e9c2e85a5e14864997440356d49c9f",
+    "artifacts\\m1\\runs\\20261016-223535-enabled\\LIVE-SCENE-001-asset-5.json": "cbd54424c7b28494995a7ca80021fb4c9efed66a5f0999927ec053c7384b2c86",
+    "artifacts\\m1\\runs\\20261016-223535-enabled\\LIVE-SCENE-001-updates.jsonl": "a4400f1abdd13a7d101934402a42ba0e04658e7e567b00af5b182c78fb1c19a6",
+    "artifacts\\m1\\runs\\20261016-223535-enabled\\LIVE-SCENE-001-worker.json": "2cdcbb5d7fa0d939f90d8b76ee983ffa6e97f2575b1eeab64115072dee671441",
+    "artifacts\\m1\\runs\\20261016-223535-enabled\\run-metadata.json": "feab4c34de22fb815e297e514381cbd6617f0ee4b4feaaced3ccdb4cd991bad2",
+    "artifacts\\m1\\runs\\20261016-223535-enabled\\run-result.json": "e2574584ce3d7844b638a03622d23fa955921efd3e29030de70f952284c3a7d3"
+  },
+  "cases": [
+    {
+      "model": "assets/models/kff/kff.mod",
+      "geometry_sha256": "74cd4f327c589b7b6445123a640dae27e947df3ae9e649077795f78b0c0425e4",
+      "replay_sha256": "5a25f6ee813ebcacc823c1f9bfc097d5d96d91e5af667c71b6fe4c29a11e7bae",
+      "folder": "artifacts\\d3d9-proof\\runs\\20261020-001211-991720\\asset-4",
+      "frames": [
+        {
+          "frame": 0,
+          "pixels": 40,
+          "iou": 1.0,
+          "unexpected_beyond1px": 0,
+          "missing_beyond1px": 0,
+          "colors": 32,
+          "texture_interior_samples": 39,
+          "texture_exact_fraction": 0.9743589743589743,
+          "texture_qualified": false,
+          "color_sha256": "6a1001aa43de35805db304faa353e8cd21240664da388a8c50d7bd43336a626a"
+        },
+        {
+          "frame": 1,
+          "pixels": 108,
+          "iou": 1.0,
+          "unexpected_beyond1px": 0,
+          "missing_beyond1px": 0,
+          "colors": 73,
+          "texture_interior_samples": 95,
+          "texture_exact_fraction": 1.0,
+          "texture_qualified": true,
+          "color_sha256": "fa7e12f39323b0e1ac702a0496764979f8e886da343d09269e6682167d0b9768"
+        },
+        {
+          "frame": 2,
+          "pixels": 504,
+          "iou": 0.998015873015873,
+          "unexpected_beyond1px": 0,
+          "missing_beyond1px": 0,
+          "colors": 227,
+          "texture_interior_samples": 437,
+          "texture_exact_fraction": 1.0,
+          "texture_qualified": true,
+          "color_sha256": "9548af6044b21555c8646e5234853e068bfb5584dbc988722b4b88b03b258bea"
+        }
+      ]
+    },
+    {
+      "model": "assets/models/fca/fca.mod",
+      "geometry_sha256": "16981bd6f5b84f8d9f17f1395a92b34011387ddba5e1a64fbff4b21bd81e65a5",
+      "replay_sha256": "7f9bbccf49ae7928ac81e8273a363d59a88cebe91c6e6c6f0b92ad9bd7c6c94b",
+      "folder": "artifacts\\d3d9-proof\\runs\\20261020-001211-991720\\asset-3",
+      "frames": [
+        {
+          "frame": 0,
+          "pixels": 3252,
+          "iou": 1.0,
+          "unexpected_beyond1px": 0,
+          "missing_beyond1px": 0,
+          "colors": 250,
+          "texture_interior_samples": 2818,
+          "texture_exact_fraction": 0.9964513839602555,
+          "texture_qualified": true,
+          "color_sha256": "c303881f95cd7eb92ee08cac2c72dd38d9a6b3f29260697102abd1380aeaa00d"
+        },
+        {
+          "frame": 1,
+          "pixels": 3213,
+          "iou": 0.9996887643946467,
+          "unexpected_beyond1px": 0,
+          "missing_beyond1px": 0,
+          "colors": 247,
+          "texture_interior_samples": 2753,
+          "texture_exact_fraction": 0.9949146385760989,
+          "texture_qualified": true,
+          "color_sha256": "da6d9e72457e3006309f38ea0b3e6453cd1294e6c91088673f65dbcb5a5b1356"
+        },
+        {
+          "frame": 2,
+          "pixels": 3812,
+          "iou": 0.9997376705141658,
+          "unexpected_beyond1px": 0,
+          "missing_beyond1px": 0,
+          "colors": 339,
+          "texture_interior_samples": 3313,
+          "texture_exact_fraction": 0.99728342891639,
+          "texture_qualified": true,
+          "color_sha256": "70d126e2670a9a3c92ada5c36cfab19a17f1874b8cf645859b7a99a04823e0c7"
+        }
+      ]
+    }
+  ],
+  "sources": {
+    "tools/scene_bridge/scene_bundle.py": "c6e5f8c616536ba4d839db3926e386ac09347453d78683a7edbc7bd16b50650c",
+    "tools/d3d9_proof/d3d9_replay.cpp": "432d09de1f3fff0f2eb8d63e628542ef2f7efa6a98eed6324f15024d9acb6c45",
+    "tools/d3d9_proof/build.ps1": "babdf4775affa9444ce6e6ff1edea5d746c30bdcf24b077b989297673542bf49",
+    "tools/d3d9_proof/run_offline.py": "37af181d06e1521cac6018a5d13502eca112607946879a2697272363f48a7bb2",
+    "tools/d3d9_proof/synthetic.py": "dc66739c0e6b4a477a3da7cecd5d739be5d6cb9b70789b3311ba2cb6c988cca7",
+    "tools/remix_ingest/live_scene.py": "8942b3712eb474ed6ede6e3569d389ddf5a7948df6d20397329eadeefd0c7bb0",
+    "tools/remix_ingest/live_camera.py": "30d595b5b6a080015f39359d055ed5e91aaf8158b9784c8cb05bdf82b781048f",
+    "tools/remix_ingest/live_bridge.py": "d78ed514f3dac8edc27d4046e8525de0bdb82815492c5663bd6b908dcff8250e",
+    "tools/m1_component/analyze_live_camera.py": "4375c2ba0f490c81a63902e936a2c04549807937b9fe976c9bacf6fb6bfccb9f"
+  },
+  "system_d3d9_x86_sha256": "fd72e021c128a98a5d688eb9acc07e3eb1948ca6b630b9fa5f328898e78c7dbc",
+  "known_transform_uv_tests": [
+    {
+      "frame": 0,
+      "pixels": 5832,
+      "iou": 0.9763937719738824,
+      "unexpected_beyond1px": 0,
+      "missing_beyond1px": 0,
+      "colors": 6,
+      "texture_interior_samples": 5152,
+      "texture_exact_fraction": 1.0,
+      "texture_qualified": true,
+      "color_sha256": "87f1622c2089849f888b677922fe6d9bfdace96a73dedd5a9b7c3361f3174b2d"
+    },
+    {
+      "frame": 1,
+      "pixels": 5832,
+      "iou": 0.9763937719738824,
+      "unexpected_beyond1px": 0,
+      "missing_beyond1px": 0,
+      "colors": 6,
+      "texture_interior_samples": 5152,
+      "texture_exact_fraction": 1.0,
+      "texture_qualified": true,
+      "color_sha256": "b27c3a0e8db97dfed7999644ed30a0f6fd9e22d24bd3950cb8f0ad0f44572a58"
+    },
+    {
+      "frame": 2,
+      "pixels": 5832,
+      "iou": 0.9763937719738824,
+      "unexpected_beyond1px": 0,
+      "missing_beyond1px": 0,
+      "colors": 6,
+      "texture_interior_samples": 5152,
+      "texture_exact_fraction": 1.0,
+      "texture_qualified": true,
+      "color_sha256": "2baeb39093b29e221b6d41b0bb8b9a24ffffb1246d2b1f07e15a1714e9cf6d62"
+    },
+    {
+      "frame": 3,
+      "pixels": 5832,
+      "iou": 0.9763937719738824,
+      "unexpected_beyond1px": 0,
+      "missing_beyond1px": 0,
+      "colors": 6,
+      "texture_interior_samples": 5152,
+      "texture_exact_fraction": 1.0,
+      "texture_qualified": true,
+      "color_sha256": "7261e471f4fb593f882ab47bff752bd7bfba6c295751e779cca447285cf57258"
+    }
+  ],
+  "native_rejections": [
+    {
+      "case": "truncated",
+      "exit": 1
+    },
+    {
+      "case": "nonfinite",
+      "exit": 1
+    },
+    {
+      "case": "bad-index",
+      "exit": 1
+    },
+    {
+      "case": "bad-group",
+      "exit": 1
+    },
+    {
+      "case": "bad-frame",
+      "exit": 1
+    },
+    {
+      "case": "missing-texture",
+      "exit": 1
+    }
+  ],
+  "seconds": 6.844000000011874,
+  "output_bytes": 65827501
+}

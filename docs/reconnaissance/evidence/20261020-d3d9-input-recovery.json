@@ -1,0 +1,28 @@
+{
+  "schema": "sfc.curated-evidence.v1",
+  "run": "Run78",
+  "classification": "CONFIRMED_OFFLINE_ONLY",
+  "result": "OWNER_INPUT_AND_STALL_RECOVERY_OBSERVED_GATE3_CONTINUES",
+  "native_checks_per_architecture": 142,
+  "python_tests": 338,
+  "packet_bytes": 296,
+  "channel_bytes": 1344,
+  "input_slots": 4,
+  "final_transport_runs": ["20261020-053537-256360-normal", "20261020-053537-972457-slow", "20261020-053538-535546-disconnect", "20261020-053538-741597-malformed", "20261020-053539-332766-stop"],
+  "gpu_cases": [
+    {"run": "20261020-053644-865593", "lag_ms": 0, "consumed": 300, "late": 0, "median_ms": 10.0281, "p95_ms": 10.530775, "max_ms": 11.0735},
+    {"run": "20261020-053706-942518", "lag_ms": 35, "consumed": 299, "late": 3, "late_sequences": [75,77,78], "first_timely_after_75": 79},
+    {"run": "20261020-053728-970432", "lag_ms": 60, "consumed": 297, "late": 2, "late_sequences": [75,82], "first_timely_after_75": 79}
+  ],
+  "pixel_regression": {"run": "20261020-053840-137605", "iou": 1.0, "max_depth_error": 0.0000015770470580545037, "cross_process_images_equal": true},
+  "sfc_launched": false,
+  "sdk_mesh_calls": 0,
+  "source": "Independent synthetic60Hz demand cycling three actual captured FCA states",
+  "late_outputs": "Copied into standalone private receiver cache, not displayed;admission unit tests separate",
+  "unresolved": ["Actual semantic publisher/raw-to-neutral binding", "Authoritative current-frame seal/expectation", "Simultaneous SFC GPU contention", "Live display matching", "Runtime disposal warning40", "Unsupported1280x360 layout"],
+  "generated_bytes_zip_archived": 177403328,
+  "verified_zip_bytes": 10107000,
+  "output_storage_bytes": 9841731678,
+  "staged": false,
+  "committed": false
+}

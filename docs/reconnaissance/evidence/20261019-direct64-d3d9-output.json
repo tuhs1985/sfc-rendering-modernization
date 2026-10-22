@@ -1,0 +1,53 @@
+{
+  "run": "Run73",
+  "status": "DIRECT64_OFFLINE_OUTPUT_SUBPROOF_CONFIRMED",
+  "scope": "Ordinary D3D9 geometry and shared GPU return to native D3D11 within one process;not live/cross-process qualification",
+  "head": "d29111f7a513c4510c4d33aeeda2c355d98443a5",
+  "sdk_mesh_calls": 0,
+  "output_api_device_registration": true,
+  "release": "remix-1.5.2",
+  "runtime_sha256": "f7c310821aa98bcdfdec120330b0a89457b7c5eba58d21464af32639611c809f",
+  "header_version": "0.6.4",
+  "shared_parser_renderer_sha256": "2df5a42401bdcfa8b52b76c55812d74b92a0cf5a1a75bda116de5d8e60020a17",
+  "analysis_source_sha256": "1d8ba72fc652ad5b0c48fb0570dcb494961fef78e4dcd672c7300a8c018aad07",
+  "oracle_source_sha256": "d540f387f679fccae85e1eda3cc871a5111cbbb76289ee7fa3b41b5ba854c8a1",
+  "kff_final": {
+    "folder": "artifacts/d3d9-intercept/direct64-runs/20261020-025637-591642",
+    "exe_sha256": "ee8dd1198d6216819801f038bbf26efef9dd4ff9cc687e7acaafacb5eb194f08",
+    "cpp_sha256": "cbe037faed923f7a9115d175b9c49aa449a5d83ac53504ab91229245671ab913",
+    "snapshots": 3,
+    "silhouette_iou": [1.0,1.0,1.0],
+    "max_normalized_depth_error": 3.2783999159846644e-7,
+    "backbuffer_cpu_diagnostic": false,
+    "automatic_scene_capture": false
+  },
+  "fca": {
+    "folder": "artifacts/d3d9-intercept/direct64-runs/20261020-025141-248593",
+    "exe_sha256": "5d111c1255a589f39a37cc9f166efa2ea9cfdb11523da80c4bc2e61c9f05ff6b",
+    "snapshots": 3,
+    "silhouette_iou": [0.9997397866250325,1.0,1.0],
+    "max_normalized_depth_error": 8.235663446765074e-7,
+    "backbuffer_cpu_diagnostic": true,
+    "automatic_scene_capture": false
+  },
+  "independent_control": {
+    "folder": "artifacts/d3d9-intercept/direct64-runs/20261020-025019-125516",
+    "snapshots": 4,
+    "silhouette_iou": [1.0,1.0,1.0,1.0],
+    "expected_depth": 0.9,
+    "max_depth_error_less_than": 2e-7,
+    "texture_color_control": "UNQUALIFIED:plate black under provisional lighting"
+  },
+  "output_coordinates": "full frustum,half-pixel sampling;source viewport is separate metadata",
+  "coverage": "finite normalized depth versus explicit -1234 background for isolated one-ship case;not color-keying",
+  "picking_caveat": "ID0 occurs on visible surfaces;not SDK owner identity",
+  "final_native_reference": "artifacts/d3d9-proof/runs/20261020-025443-326239",
+  "final_native_result": "OFFLINE_PLAIN_D3D9_TWO_ASSET_PASS",
+  "python_tests": 313,
+  "python_result": "PASS",
+  "archive": {"direct64_runs": 6,"generated_bytes": 179655221,"zip_bytes": 8148493},
+  "unqualified": ["separate x86 receiver", "live cadence/latency", "owner lifetime", "appearance parity", "in-game composition", "runtime disposal warnings"],
+  "sfc_launched": false,
+  "staged": false,
+  "committed": false
+}

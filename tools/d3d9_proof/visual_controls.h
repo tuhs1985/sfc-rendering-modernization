@@ -1,0 +1,23 @@
+// Remix backend adapter only. Frozen worker-prepared baseline;no game callback IO.
+#pragma once
+static void check(HRESULT h,const char* why){ok(h,why);}
+static void check(remixapi_ErrorCode e,const char* why){apiok(e,why);}
+#include "../remix_runtime/remix_image_controls.h"
+#include "../remix_runtime/remix_quality_controls.h"
+#include "../remix_runtime/remix_image_adjust.h"
+struct DirectVisualControls {
+ bool enabled=false;RemixImageControls image;RemixQualityControls quality;RemixImageAdjust grade;
+ void start(remixapi_Interface& api,ID3D11Device* device,ID3D11Texture2D* color){
+  wchar_t flag[2]{};enabled=GetEnvironmentVariableW(L"SFC_D3D9_VISUAL_SETTINGS",flag,2)==1&&flag[0]==L'1';
+  if(!enabled)return;
+  require(image.read()&&quality.read(),"Prepared image/quality baseline required");
+  auto set=[&](const char* key,const char* value){return api.SetConfigVariable(key,value)==REMIXAPI_ERROR_CODE_SUCCESS;};
+  require(image.apply(set)&&quality.apply(set),"Pinned runtime rejected visual baseline");
+  grade.prepare(device,color);
+  std::cout<<"D3D9_VISUAL_BASELINE_APPLIED image="<<image.revision<<" quality="<<quality.revision<<"\n";
+ }
+ bool apply(ID3D11DeviceContext* context,ID3D11Texture2D* color){
+  // Queue grade and coverage together;caller fences the whole batch once.
+  return enabled&&grade.draw(context,color,image.post());
+ }
+};

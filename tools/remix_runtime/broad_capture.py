@@ -13,7 +13,8 @@ FULL=ROOT/'artifacts/remix-runtime/deps/reshade-full-6.7.1/extracted/ReShade32.d
 FULL_SHA='A1BA732B5E31E0405CDE322CC5EC62CF972B3FBAEFBB6CBDC8A24DA00D58AE24'
 OLD_SHA='E35E4E2E47F4765F0799CB54C88E5ADE49B50CD7895C137B9D557F263344CAB7'
 HARD=2_000_000_000
-OVERALL=10_000_000_000
+from evidence_budget import AGGREGATE_BYTES
+OVERALL=AGGREGATE_BYTES
 NAMES=('unused','device','device_end','resource','resource_end','view','view_end',
        'command','command_end','command_reset','targets','draw','indexed',
        'clear_depth','clear_color','copy','copy_texture','resolve','present',
@@ -34,7 +35,7 @@ def reserve_capture_budget():
     # Include previous runtime outputs, not just this run. Reserve worst-case ZIP
     # coexistence plus ancillary/rollback/ZIP overhead; dependencies are inputs.
     reserve=2*(HARD+32*1024*1024)+16*1024*1024
-    if storage_bytes()+reserve>OVERALL:raise ValueError('10GB capture/archive allowance lacks room; analyze/archive and review exact old raw cleanup first')
+    if storage_bytes()+reserve>OVERALL:raise ValueError('20GB capture/archive allowance lacks room; analyze/archive and review exact old raw cleanup first')
     if shutil.disk_usage(ROOT).free<reserve:raise ValueError('Insufficient disk space for bounded capture plus archive')
     return reserve
 def install_test_proxy(target,backup):

@@ -1,0 +1,21 @@
+{
+  "run":93,
+  "result":"HISTORICAL_ENDURANCE_INSUFFICIENT_FOR_DESTRUCTION_DISCRIMINATOR",
+  "source":"artifacts/m1/runs/20261014-005117-enabled",
+  "archive_sha256":"2380E4A9C905EC7550621F7E02C377531424739D273428B1EC1EFBB1095E7220",
+  "verified_archive_entries":22,
+  "all_entries_match_retained_raw":true,
+  "detailed_records":1189,
+  "detailed_elapsed_ms_range":[0,2109],
+  "detailed_frame_range":[0,119],
+  "detail_retirement_events":0,
+  "summary_retirements":9,
+  "summary_frames_observed":109688,
+  "known_explosion_timestamp":false,
+  "qualified_death_signal_captured":false,
+  "new_gameplay_requested":false,
+  "next_action":"Prepare bounded lifecycle evidence and qualify native death/lifetime observation before quick selected-ship destruction test",
+  "source_or_client_modified":false,
+  "staged":false,
+  "committed":false
+}

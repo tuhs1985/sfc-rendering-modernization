@@ -12,6 +12,8 @@
 #include "depth_search.h"
 #include "broad_events.h"
 #include "depth_snapshot.h"
+#include "source_timing_addon.h"
+#include "d3d9_game_receiver.h"
 #ifdef SFC_LIVE_RETURN
 #include "ship_live_receiver.h"
 #endif
@@ -32,9 +34,23 @@ LONG pending=0;uint64_t visibleAt=0;bool firstPacket=true;
 bool inspectVisibility=false,inspectEarly=false;ULONGLONG lastVisibility=0;
 bool searchMode=false,searchFixture=false;depth_search::Search search;
 bool broadMode=false;
+bool sourceTimingRequested=false;std::unique_ptr<source_timing::Observer> sourceTiming;
+bool directGameRequested=false;std::unique_ptr<d3d9_game::Receiver> directGame;
+ComPtr<ID3D11RenderTargetView> directTargets[4];uint64_t directBack[4]{};uint32_t directCount=0;
+bool directDraw(reshade::api::command_list* c,uint32_t,uint32_t,uint32_t,uint32_t){if(directGame)directGame->observe(c->get_native());return false;}
+bool directIndexed(reshade::api::command_list* c,uint32_t,uint32_t,uint32_t,int32_t,uint32_t){return directDraw(c,0,0,0,0);}
+bool directClear(reshade::api::command_list* c,reshade::api::resource_view,const float*,const uint8_t*,uint32_t,const reshade::api::rect*){if(directGame)directGame->cleared(c->get_native());return false;}
 #ifdef SFC_LIVE_RETURN
 std::unique_ptr<ship_live::Receiver> liveReceiver;
 bool visibleShip=false;
+bool sceneDepthTest=false;
+bool sceneDraw(reshade::api::command_list* c,uint32_t,uint32_t,uint32_t,uint32_t){
+ if(liveReceiver&&sceneDepthTest)liveReceiver->observeDepth(c->get_native());return false;
+}
+bool sceneIndexed(reshade::api::command_list* c,uint32_t,uint32_t,uint32_t,int32_t,uint32_t){return sceneDraw(c,0,0,0,0);}
+bool sceneClear(reshade::api::command_list* c,reshade::api::resource_view,const float*,const uint8_t*,uint32_t,const reshade::api::rect*){
+ if(liveReceiver&&sceneDepthTest)liveReceiver->depthCleared(c->get_native());return false;
+}
 #endif
 void inspectDepth(return_path::State& s){
   // Presence/descriptor only, NOT proof of tactical depth or occlusion. No
@@ -64,6 +80,8 @@ void inspectDepth(return_path::State& s){
 }
 void hide(){visibleAt=0;}
 void releaseResources(){
+  directGame.reset();for(auto& target:directTargets)target.Reset();directCount=0;
+  sourceTiming.reset();
 #ifdef SFC_LIVE_RETURN
   if(liveReceiver){liveReceiver->stop();liveReceiver.reset();}
 #endif
@@ -83,6 +101,14 @@ void init(reshade::api::effect_runtime* runtime){
     auto& s=*channel->state;if(return_path::read(s.stop)||!return_path::valid(s))return;
     device=reinterpret_cast<ID3D11Device*>(static_cast<uintptr_t>(runtime->get_device()->get_native()));
     device->GetImmediateContext(&context);
+    if(sourceTimingRequested){sourceTiming=std::make_unique<source_timing::Observer>();sourceTiming->prepare();
+      if(directGameRequested){
+       directCount=runtime->get_back_buffer_count();if(!directCount||directCount>4)throw std::runtime_error("Bounded game backbuffer count");
+       for(unsigned i=0;i<directCount;++i){directBack[i]=runtime->get_back_buffer(i).handle;auto* back=reinterpret_cast<ID3D11Texture2D*>(static_cast<uintptr_t>(directBack[i]));
+        if(!back)throw std::runtime_error("Game backbuffer missing");ship_triplet::checked(device->CreateRenderTargetView(back,nullptr,&directTargets[i]),"Game target view");}
+       directGame=std::make_unique<d3d9_game::Receiver>(*channel,device.Get());
+      }
+      activeRuntime=runtime;s.gamePid=GetCurrentProcessId();InterlockedIncrement(&s.epoch);return_path::write(s.ready,1);return;}
     if(depth_snapshot::capture)depth_snapshot::capture->init(device.Get());
     if(searchMode)search.setContext(context.Get());
 #ifdef SFC_LIVE_RETURN
@@ -112,7 +138,7 @@ void beforePresent(reshade::api::command_queue* queue,reshade::api::swapchain* s
   const reshade::api::rect*,const reshade::api::rect*,uint32_t,const reshade::api::rect*){
   // Public, limited-build permitted Present event precedes effect processing.
   // Ignore other devices/windows/swapchains; never infer that a DSV is scene depth.
-  if((!inspectEarly&&!depth_snapshot::capture
+  if((!inspectEarly&&!depth_snapshot::capture&&!sourceTimingRequested
 #ifdef SFC_LIVE_RETURN
       &&!liveReceiver
 #endif
@@ -120,6 +146,8 @@ void beforePresent(reshade::api::command_queue* queue,reshade::api::swapchain* s
      queue->get_device()!=activeRuntime->get_device()||
      swap->get_hwnd()!=activeRuntime->get_hwnd()||
      swap->get_current_back_buffer().handle!=activeRuntime->get_current_back_buffer().handle)return;
+  if(sourceTimingRequested){if(sourceTiming&&return_path::read(channel->state->armed)&&!return_path::read(channel->state->stop))sourceTiming->observe(1);
+    if(directGame){auto handle=swap->get_current_back_buffer().handle;for(unsigned i=0;i<directCount;++i)if(directBack[i]==handle){directGame->step(directTargets[i].Get());break;}}return;}
 #ifdef SFC_LIVE_RETURN
   if(liveReceiver){liveReceiver->step();return;}
 #endif
@@ -131,6 +159,7 @@ void beforePresent(reshade::api::command_queue* queue,reshade::api::swapchain* s
 }
 void overlay(reshade::api::effect_runtime* runtime){
   if(runtime!=activeRuntime||!channel)return;
+  if(sourceTimingRequested){if(sourceTiming&&return_path::read(channel->state->armed)&&!return_path::read(channel->state->stop))sourceTiming->observe(2);if(directGame)directGame->retire();return;}
 #ifdef SFC_LIVE_RETURN
   if(liveReceiver){
     if(visibleShip){
@@ -191,6 +220,7 @@ static BOOL attach(HMODULE module){
 #ifdef SFC_LIVE_RETURN
     wchar_t live[2]{};if(GetEnvironmentVariableW(L"SFC_REMIX_PRIVATE_SHIP",live,2)!=1||live[0]!=L'1')return FALSE;
     wchar_t show[2]{};visibleShip=GetEnvironmentVariableW(L"SFC_REMIX_VISIBLE_SHIP",show,2)==1&&show[0]==L'1';
+    sceneDepthTest=GetEnvironmentVariableW(L"SFC_REMIX_SCENE_DEPTH",nullptr,0)!=0;
 #endif
     const auto length=GetModuleFileNameW(nullptr,actual,1024);
     if(!length||length>=1024||CompareStringOrdinal(actual,-1,expected,-1,TRUE)!=CSTR_EQUAL)return TRUE;
@@ -199,6 +229,10 @@ static BOOL attach(HMODULE module){
     searchMode=inspectLength==1&&inspect[0]==L'3';
     inspectEarly=inspectLength==1&&(inspect[0]==L'2'||searchMode);
     inspectVisibility=!searchMode&&inspectLength==1&&(inspect[0]==L'1'||inspectEarly);
+    wchar_t timing[2]{};sourceTimingRequested=GetEnvironmentVariableW(L"SFC_D3D9_SOURCE_TIMING",timing,2)==1&&timing[0]==L'1';
+    wchar_t direct[2]{};directGameRequested=GetEnvironmentVariableW(L"SFC_D3D9_GAME_OUTPUT",direct,2)==1&&direct[0]==L'1';
+    if(directGameRequested&&!sourceTimingRequested)return FALSE;
+    if(sourceTimingRequested&&(searchMode||inspectVisibility||GetEnvironmentVariableW(L"SFC_REMIX_DEPTH_OUTPUT",nullptr,0)||GetEnvironmentVariableW(L"SFC_REMIX_BROAD_OUTPUT",nullptr,0)))return FALSE;
     try{channel=std::make_unique<return_path::Mapping>(false,session);channel->state->gamePid=GetCurrentProcessId();return_path::write(channel->state->startupRestored,restored?1:0);return_path::write(channel->state->startupVerified,1);}
     catch(...){return FALSE;}
     if(searchMode){
@@ -213,6 +247,10 @@ static BOOL attach(HMODULE module){
     }
     if(!reshade::register_addon(module))return FALSE;
     registered=true;
+    if(directGameRequested){reshade::register_event<reshade::addon_event::draw>(directDraw);reshade::register_event<reshade::addon_event::draw_indexed>(directIndexed);reshade::register_event<reshade::addon_event::clear_depth_stencil_view>(directClear);}
+#ifdef SFC_LIVE_RETURN
+    if(sceneDepthTest){reshade::register_event<reshade::addon_event::draw>(sceneDraw);reshade::register_event<reshade::addon_event::draw_indexed>(sceneIndexed);reshade::register_event<reshade::addon_event::clear_depth_stencil_view>(sceneClear);}
+#endif
     wchar_t depthPath[1024]{};
     const auto depthLength=GetEnvironmentVariableW(L"SFC_REMIX_DEPTH_OUTPUT",depthPath,1024);
     if(depthLength&&depthLength<1024){
@@ -231,7 +269,7 @@ static BOOL attach(HMODULE module){
     reshade::register_event<reshade::addon_event::init_effect_runtime>(init);
     reshade::register_event<reshade::addon_event::destroy_effect_runtime>(destroy);
     reshade::register_event<reshade::addon_event::reshade_overlay>(overlay);
-    if(inspectEarly||depth_snapshot::capture
+    if(inspectEarly||depth_snapshot::capture||sourceTimingRequested
 #ifdef SFC_LIVE_RETURN
        ||true
 #endif
@@ -245,9 +283,13 @@ BOOL WINAPI DllMain(HMODULE module,DWORD reason,LPVOID){
   if(DetourIsHelperProcess())return TRUE;
   if(reason==DLL_PROCESS_ATTACH)return attach(module);
   if(reason==DLL_PROCESS_DETACH&&registered){
+    if(directGameRequested){reshade::unregister_event<reshade::addon_event::draw>(directDraw);reshade::unregister_event<reshade::addon_event::draw_indexed>(directIndexed);reshade::unregister_event<reshade::addon_event::clear_depth_stencil_view>(directClear);}
+#ifdef SFC_LIVE_RETURN
+    if(sceneDepthTest){reshade::unregister_event<reshade::addon_event::draw>(sceneDraw);reshade::unregister_event<reshade::addon_event::draw_indexed>(sceneIndexed);reshade::unregister_event<reshade::addon_event::clear_depth_stencil_view>(sceneClear);}
+#endif
     if(broadMode)broad_events::events(false);
     if(depth_snapshot::capture)depth_snapshot::events(false);
-    if(inspectEarly||depth_snapshot::capture
+    if(inspectEarly||depth_snapshot::capture||sourceTimingRequested
 #ifdef SFC_LIVE_RETURN
        ||true
 #endif

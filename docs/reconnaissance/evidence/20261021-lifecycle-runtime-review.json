@@ -1,0 +1,35 @@
+{
+  "run": "20261021-053837-052998-in-game",
+  "classification": "PARTIAL_USEFUL_RUNTIME_OBSERVATIONS_UNLOAD_NOT_CONFIRMED",
+  "source_hashes": {
+    "result.json": "f7a1a90502f52b97a6802712d209c180a30f4759dfa80f3c8f1cca2352a4d525",
+    "gate/LIFECYCLE-001-events.jsonl": "02c2862704ef435fcb79a84796476fa4ec9398aa69836c460ccc11da9bc2a275",
+    "gate/LIVE-SCENE-001-updates.jsonl": "21246009f0fc352a8b126b43746179e05048d7a7be7108ea5810aff1dd1192f7"
+  },
+  "state_rows": 1829,
+  "retained_events": [
+    {"owner":1,"revision":1,"frame":0,"elapsed_ms":0,"status":1},
+    {"owner":2,"revision":2,"frame":3,"elapsed_ms":47,"status":1},
+    {"owner":2,"revision":2,"frame":1987,"elapsed_ms":33094,"status":2},
+    {"owner":3,"revision":3,"frame":2203,"elapsed_ms":36703,"status":1},
+    {"owner":3,"revision":3,"frame":4980,"elapsed_ms":82985,"status":2},
+    {"owner":1,"revision":1,"frame":5223,"elapsed_ms":97031,"status":2}
+  ],
+  "return_content_equal": true,
+  "geometry_sha256": "16981bd6f5b84f8d9f17f1395a92b34011387ddba5e1a64fbff4b21bd81e65a5",
+  "renderer_rebound": false,
+  "native_death_signal_qualified": false,
+  "sponsor_actions_confirmed": true,
+  "sponsor_confirmation": "Sponsor answered yes to alive enemy-camera/own-camera return followed by own-ship destruction at the four-beep cue. No independent native death flag or exact explosion timestamp.",
+  "normal_game_exit": true,
+  "controlled_unload_confirmed": false,
+  "worker_summary_present": false,
+  "client_and_configuration_integrity": true,
+  "draws":1661,
+  "stale":21,
+  "source_rejected":1,
+  "log_csv_jsonl_bytes":2087600,
+  "total_run_bytes":88690172,
+  "cleanup_defect": "Controller waits120s after tactical gate;runner waits only15s after90s formal plus actual4.625s image preparation. Removal deadline can precede controller stop.",
+  "next_action": "Correct stop synchronization offline;retain useful data and then implement content-qualified returning-epoch rebind."
+}

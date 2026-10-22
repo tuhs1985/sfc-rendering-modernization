@@ -1,0 +1,56 @@
+{
+  "date": "2026-10-20",
+  "authority": "Approved additive D3D9 execution plan and sponsor continuation with credits",
+  "starting_commit": "d29111f7a513c4510c4d33aeeda2c355d98443a5",
+  "status": "OFFLINE_SUBPROOFS_CONFIRMED_NOT_LIVE_INTEGRATION",
+  "records": [
+    "docs/runs/2026-10-20-codex-d3d9-cross-process-output.md",
+    "docs/runs/2026-10-20-codex-d3d9-one-present-and-cadence.md"
+  ],
+  "evidence_root": "artifacts/d3d9-intercept/direct64-runs",
+  "event_receiver_cases": {
+    "normal": "20261020-043220-494860",
+    "slow": "20261020-043244-617410",
+    "disconnect": "20261020-043308-453207",
+    "exit_acquired": "20261020-043329-239923",
+    "stale_ack": "20261020-043349-853829",
+    "invalid": "20261020-043410-447089"
+  },
+  "timing_only_1080p_event_case": {
+    "run": "20261020-043044-681667",
+    "frames": 300,
+    "steady_frames": 299,
+    "synthetic_demand_hz": 60,
+    "deadline_misses": 0,
+    "completion_from_due_p95_us": 11979.8,
+    "completion_from_due_max_us": 14036,
+    "same_run_cpu_pixel_verification": false,
+    "original_recording_rate_or_live_game": false
+  },
+  "full_resolution_pixel_case": {
+    "run": "20261020-043953-529063",
+    "extent": [1920, 1080],
+    "source_frame": 1312,
+    "silhouette_iou": 1,
+    "max_normalized_depth_error": 0.0000015770470580545037,
+    "cross_process_byte_identical_images": 3,
+    "color_raw32_sha256": "ffa445d4f9064567a786b99d73727d184d4c79e857ecf34f08ad396e8b1d0967"
+  },
+  "unqualified_extent": {
+    "run": "20261020-043513-017654",
+    "extent": [1280, 360],
+    "result": "CONFIRMED_SCRAMBLED_OUTPUT_LAYOUT",
+    "root_cause": "UNRESOLVED_GPU_IMPORT_COPY_LAYOUT_HYPOTHESIS",
+    "admitted_by_default": false
+  },
+  "final_host_sha256": "D97F7B905F416E728867E615C04A5C6B02030304E8CB12F7690D0E1BA1B5DC84",
+  "final_receiver_sha256": "5296748E6A5F7E5F868B534C4BC3C2CE84D6034E11F401BD8935CDE3DF8380C5",
+  "python_tests": 323,
+  "native_wire_checks": 24,
+  "client_sha256_unchanged": "4D65761D7DD69EF1504070261B81E9C200C0AF18105033E1C4D2222C62320C29",
+  "sdk_mesh_calls": 0,
+  "sfc_launched": false,
+  "staged_files": 0,
+  "known_warning": "40 common device objects not disposed;not leak-qualified",
+  "next_action": "Prepare read-only source-offer-to-presentation lead and frame-sealing observation before live additive image integration"
+}

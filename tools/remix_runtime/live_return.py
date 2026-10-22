@@ -29,6 +29,7 @@ LIVE_SOURCES+=('material_controls.py','remix_material_controls.h')
 LIVE_SOURCES+=('roughness_maps.py',)
 LIVE_SOURCES+=('image_controls.py','remix_image_controls.h','remix_image_adjust.h')
 LIVE_SOURCES+=('quality_controls.py','remix_quality_controls.h')
+LIVE_SOURCES+=('ship_scene_depth.h','scene_depth.py','qualify_scene_depth.py')
 QUALIFICATION=ROOT/'artifacts/remix-runtime/deps/live-return-qualification.json'
 def source_hashes():return {n:digest(Path(__file__).parent/n) for n in LIVE_SOURCES}
 def binary_hashes():
@@ -163,3 +164,9 @@ def telemetry(address):
     return dict(lease=i(512+112),sequence=i(512+116),ack=i(512+120),
                 offered=i(1024+560),invalid=i(1024+564),acquired=i(1024+568),drawn=i(1024+572),
                 late=i(1024+576),failed=i(1024+580),rendered=i(1024+584),cancelled=i(1024+588))
+
+def depth_telemetry(address):
+    raw=C.string_at(address+2048,128)
+    values=struct.unpack('<32I',raw)
+    if values[:4]!=(0x31504453,1,128,0) or any(values[20:]):raise ValueError('Scene depth telemetry header')
+    return dict(zip(('draws','found','missing','wrong_thread','ambiguous','unsupported','frames','qualified','state_mismatch','displayed','resource_epoch','failed','width','height','samples','engine_frame'),values[4:20]))

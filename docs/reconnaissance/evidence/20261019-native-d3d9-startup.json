@@ -1,0 +1,36 @@
+{
+  "run": "Run71",
+  "status": "BLOCKED_INACTIVE_INPUT_DESKTOP",
+  "thread_desktop": "Default",
+  "active_input_desktop": "Screen-saver",
+  "session": 1,
+  "actual_token_elevated": false,
+  "contexts": ["sandbox", "approved execution outside sandbox"],
+  "identical_final_probe_logs": true,
+  "adapters": [
+    {"ordinal": 0, "device": "DISPLAY2", "mode": "1920x1080@60", "hardware": "NVIDIA RTX 4070 Ti"},
+    {"ordinal": 1, "device": "DISPLAY1", "mode": "1200x1920@59", "hardware": "NVIDIA RTX 4070 Ti"}
+  ],
+  "backbuffer_formats_tested_per_adapter": [21, 22, 0],
+  "capability_hresult": "0x8876086a",
+  "device_creation_hresult": "0x8876086c",
+  "successful_device_creations": 0,
+  "final_api_refs": 0,
+  "probe_exe_sha256": "e18c1b0c8e52eec9b384866563cc4c7e4bae090dde66201f1d1cd491224fea7a",
+  "probe_source_sha256": "652ad49be6a8adc743e40268fb884176a0efd76882ea31612ac40f2b25e45243",
+  "probe_log_sha256": "b0a93b9abcdb24c90bc847ab4f8b672eeb3d68ae6311d2a24abe92108ac95f6e",
+  "evidence": [
+    "artifacts/d3d9-proof/startup/20261020-021517-099306",
+    "artifacts/d3d9-proof/startup/20261020-021527-927934",
+    "artifacts/d3d9-proof/runs/20261020-021518-525578"
+  ],
+  "cause_classification": "STRONG HYPOTHESIS: inactive desktop explains device failure; awake-desktop comparison required for confirmation",
+  "required_external_action": "Wake/unlock the normal Windows desktop;do not launch SFC yet",
+  "later_plan_gates_executed": false,
+  "sfc_launched": false,
+  "desktop_or_security_changed": false,
+  "python_tests": 302,
+  "python_result": "PASS",
+  "staged": false,
+  "committed": false
+}

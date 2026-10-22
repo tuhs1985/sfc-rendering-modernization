@@ -1,0 +1,4 @@
+# Diagnostic fixture selection, NOT automatic player-ownership discovery.
+# The accepted two-ship fixture has your Federation heavy cruiser and a Klingon.
+# Require this exact fresh model; never silently fall back to the first enemy.
+selected_model = "assets/models/fca/fca.mod"

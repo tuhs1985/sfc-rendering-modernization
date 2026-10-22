@@ -1,0 +1,66 @@
+{
+  "run": 98,
+  "date": "2026-10-21",
+  "result": "OFFLINE_IMPROVEMENT_CONFIRMED_SFC_RUNTIME_PENDING",
+  "confidence": "CONFIRMED for measured synthetic replay only",
+  "head": "d29111f7a513c4510c4d33aeeda2c355d98443a5",
+  "baseline_fixture": "artifacts/remix-runtime/runs/20261021-061525-988799-return-fixture",
+  "new_fixtures": [
+    "artifacts/remix-runtime/runs/20261021-112219-768773-return-fixture",
+    "artifacts/remix-runtime/runs/20261021-112631-606560-return-fixture"
+  ],
+  "first_observed_epoch_to_first_exact_matched_present_ms": {
+    "baseline": {"12": 66.1145, "13": 66.2475},
+    "first_new_replay": {"12": 33.1874, "13": 33.0968},
+    "repeat": {"12": 33.2385, "13": 32.7042}
+  },
+  "repeat_frames": {
+    "12": {"first_observed": 200380, "first_matched": 200381},
+    "13": {"first_observed": 200560, "first_matched": 200561}
+  },
+  "repeat_result_sha256": "b9dfe698573e5a6f4a15710a56fed671f5b30fd8163359217c47dc8b9d0ed395",
+  "repeat_source_timing_sha256": "17556308fbcf9ff92e6cd278dcad1047e152a0ff649143725cb4550a7b88b81e",
+  "repeat_live_timing_sha256": "0d400d4ba2d68248b30d5ed6e11793876d38e1d3b137ac607ff8c4bb909c75a4",
+  "repeat_delivery_window": {"frames": 600, "draws": 594},
+  "repeat_total": {
+    "inputs": 782, "invalid": 0, "unqualified": 0,
+    "published_output": 599, "drawn": 595, "stale": 2,
+    "light_omitted": 3, "output_transfers": 780,
+    "rebind_ack": 3, "rebind_rejected": 0,
+    "input_expired": 0, "old_epoch_input": 0,
+    "resource_errors": 0, "state_errors": 0,
+    "resized": true, "recreated": true, "normal_owned_exit": true
+  },
+  "native_shared_worker": {
+    "evidence": "artifacts/remix-runtime/native-light-tests/shared-6a72378e87874479b5bd30e8d93759ab",
+    "owners": [1, 2], "original_capture_qpc": true, "stopped_before_unmap": true,
+    "sfc_launched": false
+  },
+  "validation": {
+    "python_tests": 398,
+    "native_each_arch": {"ingress": 142, "owner_and_admission": 51, "shared_lights": 9, "light_observer": 17},
+    "direct64_build": "PASS",
+    "light_component_build": "PASS",
+    "native_worker_and_lifecycle_qualification": "PASS",
+    "camera_recovery_check_only": "PASS",
+    "git_diff_check": "PASS"
+  },
+  "client_sha256_original_and_test": "4D65761D7DD69EF1504070261B81E9C200C0AF18105033E1C4D2222C62320C29",
+  "artifact_bytes_after_archiving": 11942283735,
+  "aggregate_cap_bytes": 20000000000,
+  "archives": [
+    {"path": "artifacts/remix-runtime/archives/20261021-112219-768773-return-fixture-binaries.zip", "sha256": "8eb240e709d44e8898777e1404af30d88e7df8a49e318a90ae5fa1185fd67dcb"},
+    {"path": "artifacts/remix-runtime/archives/20261021-112631-606560-return-fixture-binaries.zip", "sha256": "0825718ba19a8344220d11b95b72bdeb18dfea572fd295e5997c9eb49fa11d32"}
+  ],
+  "limitations": [
+    "Synthetic epoch/light replay does not reproduce all real SFC discovery and capture delays",
+    "Actual game camera-return latency remains unconfirmed after this change",
+    "Three light omissions and two stale outputs retained,not zero-loss proof",
+    "2ms admission is not a guaranteed GPU or display deadline",
+    "Initial asset preparation remains unresolved",
+    "Actual controlled game unload remains unresolved from Run97",
+    "Vendor40 common-device-object shutdown warning persists",
+    "One resident qualified asset,not all-ship scaling or original replacement"
+  ],
+  "staged": false, "committed": false, "sfc_launched": false
+}

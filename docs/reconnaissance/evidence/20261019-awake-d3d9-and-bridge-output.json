@@ -1,0 +1,41 @@
+{
+  "run": "Run72",
+  "head": "d29111f7a513c4510c4d33aeeda2c355d98443a5",
+  "native_startup": {
+    "before_input_desktop": "Screen-saver", "after_input_desktop": "Default",
+    "thread_desktop": "Default", "same_probe_exe": true,
+    "probe_exe_sha256": "e18c1b0c8e52eec9b384866563cc4c7e4bae090dde66201f1d1cd491224fea7a",
+    "before_successful_devices": 0, "after_successful_devices": 6,
+    "receipt": "artifacts/d3d9-proof/startup/20261020-022606-760638"
+  },
+  "gate1": {
+    "status": "PASS", "result": "OFFLINE_PLAIN_D3D9_TWO_ASSET_PASS",
+    "folder": "artifacts/d3d9-proof/runs/20261020-023149-082425",
+    "exe_sha256": "269dedbafcd38575842c2df49af9bdd6a8a4df4ea33e123345af09a77fe62280",
+    "original_capture_hashes": "unchanged",
+    "two_real_assets": true, "native_rejections": 6,
+    "archive_generated_bytes": 65669351, "archive_bytes": 2079711
+  },
+  "gate2": {
+    "status": "BLOCKED_NORMAL_BRIDGE_OUTPUT_ENTRYPOINTS_ABSENT",
+    "folder": "artifacts/d3d9-intercept/capabilities/20261020-023023-270504",
+    "header_version": "0.6.4", "initialize_result": 0,
+    "header_sha256": "e623e4956a76894eeef02361334c7c0458d4ec8bf49f729ec9038c36128bbf47",
+    "probe_exe_sha256": "80091fbc840301c3cbe0247df2b45cb51ef812d9eb63f2e2cda5d431cb103178",
+    "probe_cpp_sha256": "019ad4ec2a2b07e2547a4f5350ebdb876d1bbeaa03916c250e32974fffb19fb2",
+    "bridge_build_label": "remix-main+68edea01",
+    "runtime_core_source_commit": "b81a7b566b1eeb9edb4dc2b3c9d3972e0f253ad4",
+    "copy_output": false, "external_swapchain": false, "vk_image": false,
+    "set_default_output": false, "request_picking": false,
+    "sdk_mesh_calls": 0, "job_exit": 0, "remaining_owned_processes": 0,
+    "device_refs": 0, "api_refs": 0, "runtime_disposal_warning_objects": 37,
+    "actual_pixel_projection": "UNQUALIFIED",
+    "effective_private_config": ".trex/bridge.conf;exposeRemixApi=True",
+    "private_config_restored": true
+  },
+  "gate3_to_5": "NOT STARTED",
+  "recommended_alternative": "Sponsor approval required:64bit ordinary D3D9 host/direct64bit Remix output;keep32bit SFC capture;no SDK mesh registration",
+  "tests": {"python": 309, "result": "PASS"},
+  "sfc_launched": false, "security_changed": false,
+  "staged": false, "committed": false
+}

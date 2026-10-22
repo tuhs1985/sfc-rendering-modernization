@@ -106,16 +106,48 @@ def qualify():
         if len(latest)!=2 or any(p.stat().st_size!=SIZE for p in latest):raise ValueError('Tuning latest-only storage invalid')
         if max(decode(p.read_bytes())['elapsed_ms'] for p in latest)<100000:raise ValueError('Tuning stopped at90seconds')
     finally:receiver.close()
+    # Exercise the actual scene worker's raw shared-memory publication, not only
+    # a transport round trip or diagnostic file decoder. No game is launched.
+    from live_owner_timing import initialize as init_owner
+    from light_transport import initialize as init_lights,read_native
+    shared_dir=BIN/('shared-'+uuid.uuid4().hex);shared_dir.mkdir()
+    receiver=Receiver();init_owner(receiver.channel);init_lights(receiver.channel)
+    shared_seen={};process=None
+    try:
+        shared_env={**env,'SFC_LIGHT_TUNING':'1','SFC_REMIX_CALIBRATION_SCENE':receiver.name,
+            'SFC_D3D9_SOURCE_TIMING':'1','SFC_D3D9_LIVE_TIMING':'1',
+            'SFC_D3D9_GAME_OUTPUT':'1','SFC_D3D9_SHARED_LIGHTS':'1'}
+        process=sp.Popen([str(BIN/'scene_observer.exe'),receiver.name,str(shared_dir)],env=shared_env,
+            stdout=sp.PIPE,stderr=sp.STDOUT,creationflags=sp.CREATE_NO_WINDOW)
+        limit=time.monotonic()+10
+        while process.poll() is None:
+            if time.monotonic()>limit:raise ValueError('Shared native worker10s limit')
+            receiver.drain()
+            for owner in (1,2):
+                sample=read_native(receiver.channel,owner,process.pid)
+                if sample:
+                    raw,captured=sample;decoded=decode(raw)
+                    if decoded['owner_epoch']!=owner or captured<=0:raise ValueError('Shared native provenance')
+                    shared_seen[owner]=dict(captured_qpc=captured,sha256=hashlib.sha256(raw).hexdigest())
+            time.sleep(.002)
+        (shared_dir/'test.txt').write_bytes(process.communicate()[0])
+        if process.returncode or sorted(shared_seen)!=[1,2]:raise ValueError('Actual shared native worker publication failed')
+        if receiver.channel.read(15*1024*1024+32,4)!=b'\x01\0\0\0':raise ValueError('Shared worker not stopped before unmap')
+        (shared_dir/'shared.json').write_text(json.dumps(shared_seen,indent=2))
+    finally:
+        if process and process.poll() is None:process.terminate();process.wait(timeout=5)
+        receiver.close()
     checks=[]
     for arch in ('32','64'):
         log=(BIN/f'observer{arch}.txt').read_text()
-        if 'NATIVE_LIGHT_OBSERVER_PASS checks=13' not in log:raise ValueError('Observer native tests missing')
+        if 'NATIVE_LIGHT_OBSERVER_PASS checks=17' not in log:raise ValueError('Observer native tests missing')
         evidence=analyze(BIN/f'observer{arch}.bin')
         if evidence['records']!=8 or evidence['owner_epochs']!=[1,2]:raise ValueError('Observer output decoder mismatch')
         checks.append(dict(arch=arch,output=evidence['sha256'],records=8))
     q=dict(result='OFFLINE_NATIVE_LIGHT_DISCOVERY_QUALIFIED',sources=sources(),
         component_sha256=digest(BIN/'m1_light_component.dll'),checks=checks,
         scene_worker=dict(records=scene['records'],sha256=scene['sha256'],evidence=str(directory.relative_to(ROOT))),
+        shared_worker=dict(owners=sorted(shared_seen),evidence=str(shared_dir.relative_to(ROOT)),stopped_before_unmap=True),
         limits=dict(hz_per_owner=5,owners=2,records=900,bytes=900*SIZE),sfc_launched=False)
     RECEIPT.write_text(json.dumps(q,indent=2));require_qualification()
     print('Native light discovery native queue/decoder qualification PASS')

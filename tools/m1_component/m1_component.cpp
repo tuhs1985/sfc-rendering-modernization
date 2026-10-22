@@ -1061,7 +1061,7 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
         event.origin = 0x0069E300;
         if (g_gate) {
             DWORD frame = static_cast<DWORD>(InterlockedIncrement(&g_frame));
-            if(g_live_scene_mode)sfc_calibration::begin(g_live_scene.calibration,frame);
+            if(g_live_scene_mode){g_live_scene.directSource.begin(frame);sfc_calibration::begin(g_live_scene.calibration,frame);}
             if (frame > 2) {
                 g_owners.retire_before(frame - 2, [&](const auto& slot) {
                     if(!g_config.live_channel.empty()){

@@ -1,0 +1,44 @@
+{
+  "run": 100,
+  "date": "2026-10-21",
+  "result": "READY_FOR_SPONSOR_OFFSCREEN_POSITION_TEST",
+  "head": "d29111f7a513c4510c4d33aeeda2c355d98443a5",
+  "native_static_source": {
+    "getter": "0x00419DD2",
+    "translation_float32_offsets": [230,234,238],
+    "cache_offset": 2500,
+    "verified_exact_pe_anchors": 12,
+    "confidence": "CONFIRMED static reads;offscreen updates unproven"
+  },
+  "probe": "OFFSCREEN-POSITION-001",
+  "process_access": "0x1010 QUERY_LIMITED_INFORMATION|VM_READ only",
+  "game_state_modified": false,
+  "renderer_input_modified": false,
+  "lifetime_proven": false,
+  "limits": {"ships":2,"hz_per_ship":20,"seconds":120,"records_per_ship":2700,"bytes":8388608,"fresh_asset_revisions":8},
+  "validation": {
+    "python_tests":410,
+    "new_external_reader_tests":12,
+    "actual_external_memory_read_fixture":"PASS",
+    "exact_original_pe_anchors":"PASS",
+    "native_shared_lights_and_lifecycle_worker":"PASS",
+    "ps5_parser":"PASS",
+    "new_launcher_check_only":"PASS",
+    "git_diff_check":"PASS"
+  },
+  "regression_fixture": {
+    "path":"artifacts/remix-runtime/runs/20261021-115840-152608-return-fixture",
+    "result_sha256":"a90a04e1847a167153f62c661ae1bafef4e635368b2b54285e73cb8cdafcdd47",
+    "fixed_delivery_frames":600,
+    "fixed_delivery_draws":595,
+    "inputs":782,"invalid":0,"unqualified":0,"ack":3,"rejected":0,
+    "normal_owned_exit":true,
+    "offscreen_sfc_proof":false
+  },
+  "client_sha256_original_and_test":"4D65761D7DD69EF1504070261B81E9C200C0AF18105033E1C4D2222C62320C29",
+  "artifacts_bytes":11951058098,
+  "aggregate_cap_bytes":20000000000,
+  "sfc_launched":false,"staged":false,"committed":false,
+  "remaining":["Fresh offscreen position in SFC","Native object generation/removal safety","Frame-coherent rotation/pose consumer","Actual game controlled unload confirmation","Initial asset preparation latency","Vendor40 shutdown warning"],
+  "next":"Run start_d3d9_offscreen_position_session.ps1;keep own ship moving while camera looks away;analyze interior render-gap samples."
+}

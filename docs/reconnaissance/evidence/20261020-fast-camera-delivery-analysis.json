@@ -1,0 +1,34 @@
+{
+  "run": 87,
+  "source": "artifacts/remix-runtime/runs/20261021-024303-198180-in-game",
+  "classification": "OFFLINE_ATTRIBUTION_NOT_RENDERING_FIX",
+  "eligible_observer_misses": 475,
+  "miss_attribution": {
+    "render_or_transfer_crossed_observer": 457,
+    "not_taken_until_after_observer": 2,
+    "no_retained_output_for_expected_source": 16
+  },
+  "misses_with_timing": 459,
+  "pre_peer_work_definitely_late": 346,
+  "transfer_publication_or_ack_boundary_unresolved": 113,
+  "camera_state_unchanged": {"matched": 2314, "missed": 74},
+  "camera_state_changed": {"matched": 2642, "missed": 401},
+  "after_first_observer_match": {"matched": 4956, "missed": 445},
+  "median_ms": {
+    "matched_available": 15.43525,
+    "missed_available": 14.628,
+    "matched_end_to_end": 12.46945,
+    "missed_end_to_end": 15.8727,
+    "matched_render_ready_wait": 9.6905,
+    "missed_render_ready_wait": 13.053,
+    "missed_completion_lateness": 1.1951,
+    "missed_light_update": 0.0042
+  },
+  "limits": [
+    "No camera rotation magnitude/speed or precise user input timestamps.",
+    "Observer audit is not the compositor draw;do not equate475misses with431stale pool rejections.",
+    "Host completion follows peer ACK;113near-boundary misses cannot locate actual publication time.",
+    "GPU wait includes queued work/scheduling/transfer;not isolated ray tracing shader time.",
+    "No rendering changes,no new gameplay run,no physical-display measurement."
+  ]
+}

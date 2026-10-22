@@ -4,7 +4,14 @@
 #include "../tools/m1_component/m1_live_scene.h"
 static LiveScene scene;
 static LiveMeshPacket large_packet;
+static LiveScene journal;
 int wmain(int argc,wchar_t** argv){
+    std::array<DWORD,96> event{};event[1]=1;event[7]=1;event[4]=1;
+    journal.offer(0,event);check_mesh(journal.lifecycleWrite==0,"default-off lifecycle journal");
+    journal.lifecycleCapture=true;
+    for(DWORD n=0;n<300;++n){event[4]=n%2?1:2;journal.offer(0,event);}
+    check_mesh(journal.lifecycleWrite==256 && journal.lifecycleDropped==44,"fixed lifecycle queue never overwrites unread transition");
+    check_mesh(journal.lifecycle[0][4]==2 && journal.lifecycle[255][4]==1,"transition ordering preserved through saturation");
     check_mesh(argc==3,"scene channel and output required");
     check_mesh(scene.start(argv[1],argv[2]),"scene worker start/current-user mapping");
     Memory x;x.id.frame=1;x.id.elapsed=34;
@@ -54,12 +61,33 @@ int wmain(int argc,wchar_t** argv){
     check_mesh(sfc_calibration::read(&calibration,snap)&&snap.frame==id.frame&&snap.owner[0][1]==999,
         "current-frame observation bypasses 30Hz throttle");
     check_mesh(snap.owner[0][47]==GetCurrentThreadId(),"calibration render-thread provenance");
+    scene.sourceTiming=true;++id.frame;sfc_calibration::begin(&calibration,id.frame);
+    scene.observe(id,read,[]{return true;});
+    check_mesh(sfc_calibration::read(&calibration,snap)&&snap.owner[0][93]==sfc_calibration::TimingMagic&&
+        (snap.owner[0][89]||snap.owner[0][90])&&snap.owner[0][89]==snap.owner[0][91]&&snap.owner[0][90]==snap.owner[0][92],
+        "opt-in source QPC annotation before independent stream throttle");
+    static live_owner::Store directStore;directStore.header.bytes=sizeof(directStore);
+    directStore.header.selected=static_cast<LONG64>(live_owner::selection(id.owner,scene.owners[0].revision));
+    scene.directSource.store=&directStore;++id.frame;sfc_calibration::begin(&calibration,id.frame);scene.directSource.begin(id.frame);
+    scene.observe(id,read,[]{return true;});live_owner::Packet raw;uint64_t latest=0;DWORD malformed=0;
+    check_mesh(sfc_calibration::read(&calibration,snap)&&live_owner::sequence(snap.owner[0])==1&&
+        live_owner::take(directStore.input,directStore.header,raw,latest,malformed)&&raw.row==snap.owner[0]&&!malformed,
+        "live raw publication precedes30Hz throttle and binds exact calibration row");
     if(scene.lightTuning){id.owner=2;id.elapsed=100000;++id.frame;
         const auto old=scene.owners[1].sequence;
         scene.observe(id,read,[]{return true;});
         check_mesh(scene.owners[1].sequence>old,"tuning stream survives90seconds");}
+    if(scene.lifecycleCapture){
+        // More than the old100records, then coalesced retirement/reappearance.
+        // No executable death flag is invented: these are observation epochs.
+        std::array<DWORD,96> later{};later[1]=2;later[4]=1;later[7]=2;
+        for(DWORD n=0;n<140;++n){later[2]=500+n;later[3]=100100+n*50;scene.offer(1,later);Sleep(15);}
+        scene.retire(2,640,107100);
+        later[1]=1001;later[2]=641;later[3]=107150;later[7]=8;scene.offer(1,later);
+    }
     Sleep(100);check_mesh(scene.stop(),"worker drains and joins before unmap");
     check_mesh(!calibration.active,"calibration deactivated before producer storage removed");
+    check_mesh(directStore.header.stopped==1,"live raw storage stopped before source view removal");
     check_mesh(!scene.worker&&!scene.mapping&&!scene.view,"native scene handles closed");
     std::cout<<"Fresh scene native capture/multi-owner/bounds/worker tests passed\n";
 }
