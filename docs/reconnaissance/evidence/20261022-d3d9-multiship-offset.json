@@ -1,0 +1,53 @@
+{
+  "run": "Run115",
+  "result": "OFFSET_DIAGNOSTIC_OFFLINE_PREPARED_NOT_GAMEPLAY_STABILITY_PASS",
+  "confidence": "CONFIRMED offline",
+  "placement_source": "Accepted FCA run20261022-042653-754380-in-game/live-owner.analysis.json selected.camera_offset",
+  "requested_camera_offset": [-15.897722721099854, 0, 0],
+  "float32_camera_offset": [-15.897722244262695, 0, 0],
+  "scope": "One common camera-left translation of retained returned ships;source poses,scale,lighting,materials,image settings and original drawing unchanged",
+  "configuration": "tools/d3d9_proof/multi_ship.toml",
+  "late_ready_fixture": {
+    "path": "artifacts/remix-runtime/runs/20261023-023729-602838-return-fixture",
+    "result_sha256": "87c68ab7ef0f103f706c10d0587611e8b115f7f8afbffe2a2a6e16d53c89d63a",
+    "steady_draws": 581,
+    "steady_frames": 600,
+    "paired_all_audited": 731,
+    "owner1_draws": 805,
+    "owner3_draws": 910
+  },
+  "early_ready_fixture": {
+    "path": "artifacts/remix-runtime/runs/20261023-023920-264420-return-fixture",
+    "result_sha256": "c01713d80d9ad7517c7b8691396857c61ed9a2aa1bddbb194a640d6fa0af349c",
+    "steady_draws": 550,
+    "steady_frames": 600,
+    "paired_all_audited": 668,
+    "owner1_draws": 748,
+    "owner3_draws": 849
+  },
+  "both": {
+    "distinct_assets": ["assets/models/fca/fca.mod", "assets/models/rca/rca.mod"],
+    "fresh_asset_acknowledgements": 2,
+    "asset_rejected": 0,
+    "changed_pixels": 25919,
+    "original_border_untouched": true,
+    "native_HUD_and_scene_exact": true,
+    "state_errors": 0,
+    "resize_recreation": true,
+    "normal_owned_exit": true,
+    "original_suppressed": false,
+    "image_bytes": 91506338
+  },
+  "validation": {
+    "python": "433 PASS",
+    "native": "host/receiver/addon builds;slot649,combinedpost65,light11,return37 and existing worker/calibration/search checks PASS",
+    "dependency_requalification": "Native light receipt correctly rejected changed runner source;actual offline tests rerun PASS,not manually relocked",
+    "native_source": "120updates/onecapture/retirement/stop PASS via qualification",
+    "preflight": "PASS;no game started",
+    "git_diff_check": "PASS"
+  },
+  "client_sha256_original_and_copy": "4D65761D7DD69EF1504070261B81E9C200C0AF18105033E1C4D2222C62320C29",
+  "copied_proxy_sha256": "E35E4E2E47F4765F0799CB54C88E5ADE49B50CD7895C137B9D557F263344CAB7",
+  "limitations": ["Actual offset multi-model SFC stability pending", "Omissions are not fixed by lateral separation", "No original suppression or new buffering", "No universal-model or milestone claim"],
+  "git": "HEADd40f8f2;prior work preserved;unstaged/uncommitted;no push"
+}

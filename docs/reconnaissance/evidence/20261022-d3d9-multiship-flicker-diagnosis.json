@@ -1,0 +1,50 @@
+{
+  "run": "Run116",
+  "result": "DIAGNOSIS_COMPLETE_IMPLEMENTATION_NOT_STARTED",
+  "source": "artifacts/remix-runtime/runs/20261023-024532-240443-in-game",
+  "confirmed": {
+    "qualified_assets": ["kff", "fca", "kft"],
+    "paired": 4713,
+    "missing": 697,
+    "post_first_match_records": 5405,
+    "post_first_match_missing": 692,
+    "missing_without_completed_output_record": 690,
+    "missing_cluster_lengths": {"1": 504, "2": 39, "3": 11, "4": 3, "65": 1},
+    "long_gap_frames": [3370, 3434],
+    "long_gap_first_to_last_ms": 1071.1142,
+    "frame3370_gpu_query_wait_ms": 1073.464,
+    "received_inputs": 5162,
+    "live_cohort_outputs": 4718,
+    "aggregate_failed_admissions": 186,
+    "static_early_anchor_publication_race": true,
+    "gpu_output_ms_p50_p95_p99": [10.405, 16.171, 18.497],
+    "persistent_pose_publications": 18293,
+    "offscreen_updates": 11094,
+    "persistent_failed_updates": 0,
+    "asset_rejections": 0,
+    "backend_instance_rejections": 11,
+    "unprepared_instance_omissions": 8,
+    "images_bytes": 93870746,
+    "cohort_samples": 91,
+    "normal_exit_cleanup_hashes": true
+  },
+  "strong_hypothesis": [
+    "Early anchor publication causes a substantial share of frequent discarded tracked-set updates; exact cause partition is not logged.",
+    "Increased GPU turnaround aggravates the unchanged two-ms input admission window.",
+    "Late fighter/material admission causes runtime warmup contributing to the long GPU wait; exact runtime operation unproven."
+  ],
+  "unresolved": [
+    "Stage-specific exact-cohort lookup versus post-take admission failures; control-flow bound 258 to 444 lookup failures.",
+    "Eleven individual instance rejections and eight unprepared-instance omissions lack per-event reasons.",
+    "Two source timing invalid/snapshot-miss observations and 40 undisposed runtime common objects at shutdown."
+  ],
+  "raw_sha256": {
+    "D3D9-SYNC-BUFFER-001.bin": "08ce5ed32aa9540d589082b92b5156530615c056744a105fff69549bf99cffb5",
+    "D3D9-LIVE-TIMING-001.bin": "1f0fae4686621e678588140f5c704bc5b9d0ccae1d42b88932c686ea2e99c3dc",
+    "D3D9-SOURCE-TIMING-001.bin": "979e4685c24b7aab2423d6d46be18b49e4cc3d5a5db6d6a11fbbdf6fb3df269e",
+    "gpu/frame-timing.csv": "9221d0944da3d6553c27a111c68073efb2443679068ae31a9d6f429918b07fda",
+    "gpu/live-input.csv": "44b788fda622efc58016f20b71e8f24cd00708112b2627c1e8627668d998f656",
+    "gpu/job-console.log": "96886efe580af872eb82abe88416b6cac7a3818db24178695d1c264b9a23ed28",
+    "result.json": "806260b10c34244036332e7d96508374c6485dd6814910c41726f08fad8c2929"
+  }
+}

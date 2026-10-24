@@ -87,7 +87,8 @@ def shader(name,images,values):
             '            token outputs:out\n'+'\n'.join(inputs)+'\n        }\n    }\n')
 
 
-def prepare(folder,game_root,config=None):
+def prepare(folder,game_root,config=None,*,evidence_mode='test'):
+    if evidence_mode not in ('performance','test'):raise ValueError('Material evidence mode')
     from PIL import Image
     import numpy as np
     folder=Path(folder);scene=json.loads((folder/'scene.json').read_text())
@@ -133,9 +134,10 @@ def prepare(folder,game_root,config=None):
         group=groups[identity];primary=resource[group['primary']]
         color,original_sha=original(primary['filename']);decoded=scene['textures'][index]
         if original_sha!=decoded['original_sha256']:raise ValueError('Primary image mismatch')
-        packed=folder/f'texture-{index}.bin';metadata,bgra=texture(resolve_image(game_root,primary['filename']).read_bytes())
-        if packed.read_bytes()!=struct.pack('<4I',0x31544653,metadata['width'],metadata['height'],len(bgra))+bgra:
-            raise ValueError('Ordinary texture upload differs from source')
+        if evidence_mode=='test':
+            packed=folder/f'texture-{index}.bin';metadata,bgra=texture(resolve_image(game_root,primary['filename']).read_bytes())
+            if packed.read_bytes()!=struct.pack('<4I',0x31544653,metadata['width'],metadata['height'],len(bgra))+bgra:
+                raise ValueError('Ordinary texture upload differs from source')
         name=hashes[index].upper().zfill(16)
         images=dict(color=save(color));secondary_sha=None
         if group.get('flags',0)&0x20 and group.get('secondary') in resource:
@@ -154,6 +156,7 @@ def prepare(folder,game_root,config=None):
     (output/'mod.usda').write_text(stage,encoding='utf-8')
     # Runtime parses material tokens itself; no Toolkit,USD geometry,or mesh replacement.
     report=dict(schema='sfc.normal-remix.material-policy.v1',sdk_mesh_calls=0,geometry_modified=False,
+                evidence_mode=evidence_mode,upload_pixel_comparison=evidence_mode=='test',
                 config_sha256=hashlib.sha256(raw).hexdigest(),values=list(values),groups=rows,images=image_records,
                 image_bytes=total,image_warning=total>=64*1024*1024,
                 generated_image_validation='Header/layout/dimensions/byte bounds only;pixel roundtrip tested offline',

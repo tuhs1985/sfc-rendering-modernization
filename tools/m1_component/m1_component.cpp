@@ -16,6 +16,7 @@
 #include "m1_corner_snapshot.h"
 #include "m1_thread_suspend.h"
 #include "m1_rejection_diagnostics.h"
+#include "m1_identity_census.h"
 #include "m1_private_copy.h"
 #include "m1_surface_graph.h"
 #include "m1_mesh_export.h"
@@ -164,6 +165,7 @@ sfc_m1::TextureReferences g_texture_references;
 sfc_m1::MeshCaptureBudget g_mesh_budget;
 sfc_m1::LiveBridge g_live_bridge;
 sfc_m1::LiveScene g_live_scene;
+bool g_performance_mode=false;
 bool g_live_scene_mode=false;
 bool stop_live(){const bool scene=g_live_scene.stop();const bool legacy=g_live_bridge.stop();return scene && legacy;}
 std::array<LONGLONG,2> g_mesh_capture_ticks{};
@@ -186,6 +188,7 @@ volatile LONG g_sampled_uncorrelated_geometry = 0;
 volatile LONG g_exception_509843 = 0;
 volatile LONG g_rejected_semantics = 0;
 sfc_m1::RejectionDiagnostics g_rejection_diagnostics;
+sfc_m1::IdentityCensus g_identity_census;
 struct WrapperSample {
     std::array<DWORD,15> data{};
 };
@@ -565,6 +568,7 @@ ThreadState* thread_state(DWORD thread_id) {
 }
 
 bool detail_available() {
+    if(g_performance_mode)return false;
     if (!g_gate || g_saturated) return false;
     if (static_cast<DWORD>(g_frame) >= g_config.max_frames ||
         static_cast<DWORD>(g_event_count) >= g_config.max_events) {
@@ -800,6 +804,19 @@ void record_rejection(const EventRecord& e, DWORD reason) {
     g_rejection_diagnostics.record(sample);
 }
 
+// Observe existing ownership decisions,never change them. Context is copied
+// before the current model callback can overwrite ThreadState with its choice.
+struct IdentityContext {DWORD ship=0,visual=0,owner=0;};
+void record_identity(const EventRecord& e,const IdentityContext& context,DWORD reason){
+    if(g_performance_mode)return;
+    if(!g_gate||!g_live_scene_mode||!g_live_scene.cohort.store)return;
+    DWORD matches=0;for(const auto& owner:g_owners.slots())if(owner.active&&owner.visual==e.visual&&e.visual)++matches;
+    sfc_m1::IdentityCensus::Key key{e.kind,e.return_address,e.ship,e.visual,e.model0,e.source,e.owner_id,
+        context.ship,context.visual,context.owner,g_owners.find_by_ship(e.ship),g_owners.find_by_ship(context.ship),
+        e.visual?g_owners.find_by_visual(e.visual):0,matches,reason,e.ship_vtable,e.visual_vtable,e.model0_vtable,e.thread_id};
+    g_identity_census.record(key,static_cast<DWORD>(g_frame),static_cast<DWORD>(GetTickCount64()-g_gate_tick));
+}
+
 // Only validates already-established fields; raw filter equality never merges IDs.
 bool validated_copy_owner(const ThreadState& state) {
     const auto* owner=g_owners.find_by_id(state.owner_id);
@@ -959,9 +976,11 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
 
     EnterCriticalSection(&g_lock);
     ThreadState* state = thread_state(thread_id);
+    const IdentityContext identity_context{state?state->ship:0,state?state->visual:0,state?state->owner_id:0};
 
     if(kind==kDestroy) {
         event.origin=0x004158C1;event.ship=event.ecx;event.owner_id=g_owners.find_by_ship(event.ship);
+        if(event.owner_id)record_identity(event,{},0);
         if(g_persistent_requested&&event.owner_id){
             const auto elapsed=static_cast<DWORD>(GetTickCount64()-g_gate_tick);
             g_live_scene.retire(event.owner_id,static_cast<DWORD>(g_frame),elapsed);
@@ -1112,6 +1131,7 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
                     retired.owner_id = slot.id;
                     retired.ship = static_cast<DWORD>(slot.ship);
                     retired.visual = static_cast<DWORD>(slot.visual);
+                    record_identity(retired,{},0);
                     InterlockedIncrement(&g_counts[kRetire]);
                     append_event_locked(retired);
                 });
@@ -1158,6 +1178,7 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
         } else {
             record_rejection(event,reason);
         }
+        record_identity(event,{},reason);
     } else if (kind == kVisual) {
         event.origin = 0x0042FD3F;
         event.visual = event.ecx;
@@ -1194,6 +1215,7 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
         } else {
             record_rejection(event,reason);
         }
+        record_identity(event,identity_context,reason);
     } else if (kind == kModel0) {
         event.origin = 0x0042E4B2;
         event.model0 = event.ecx;
@@ -1202,7 +1224,15 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
         event.source = event.arg2;
         const bool model_read=safe_read32(event.model0, event.model0_vtable);
         const bool visual_read=safe_read32(event.visual, event.visual_vtable);
-        event.owner_id = g_owners.find_by_visual(event.visual);
+        const bool matching_context=state&&state->visual==event.visual;
+        event.owner_id = g_owners.model_owner(event.visual,matching_context?state->ship:0,
+                                             matching_context?state->owner_id:0);
+        if(const auto* owner=g_owners.find_by_id(event.owner_id)){
+            DWORD linked_visual=0;
+            event.ship=static_cast<DWORD>(owner->ship);
+            if(!safe_read32(event.ship,event.ship_vtable)||event.ship_vtable!=kShipVtable||
+               !safe_read32(event.ship+0x88,linked_visual)||linked_visual!=event.visual)event.owner_id=0;
+        }
         const bool mainline = event.return_address == kVisualMainlineReturn &&
             event.model0_vtable == kModel0Vtable &&
             event.visual_vtable == kVisualVtable && event.owner_id;
@@ -1230,12 +1260,13 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
                 state->model0 = 0;
             }
         }
-        if (!mainline && event.return_address != kKnownExceptionReturn) {
-            const DWORD reason=event.return_address!=kVisualMainlineReturn ? 7 :
+        const DWORD identity_reason=mainline?0:(event.return_address!=kVisualMainlineReturn ? 7 :
                 (!model_read ? 8 : (event.model0_vtable!=kModel0Vtable ? 9 :
-                (!visual_read ? 10 : (event.visual_vtable!=kVisualVtable ? 11 : 12))));
-            record_rejection(event,reason);
+                (!visual_read ? 10 : (event.visual_vtable!=kVisualVtable ? 11 : 12)))));
+        if (!mainline && event.return_address != kKnownExceptionReturn) {
+            record_rejection(event,identity_reason);
         }
+        record_identity(event,identity_context,identity_reason);
         append_event_locked(event);
     } else if (kind == kGeometry) {
         event.origin = 0x006AB410;
@@ -1455,6 +1486,7 @@ void assign_trampolines() {
 }
 
 bool load_config(const wchar_t* path) {
+    g_performance_mode=pipeline_mode::performance();
     if (!path || !*path) return false;
     std::array<wchar_t, 32768> output{};
     GetPrivateProfileStringW(L"m1", L"OutputDirectory", L"", output.data(),
@@ -1730,6 +1762,8 @@ bool write_outputs(bool hooks_restored) {
     const auto rejection_json=rejection_section.str();
     if(rejection_json.size()<=65536) summary << rejection_json;
     else summary << "{\"schema\":\"m1.rejections.v1\",\"output_truncated\":true}";
+    summary << ",\n  \"identity_census\":";
+    g_identity_census.write(summary);
     summary << ",\n  \"wrapper_observation\":";
     write_wrapper_observation(summary);
     summary << ",\n  \"private_copy\":{\"enabled\":" << (g_config.enable_private_copy?"true":"false")

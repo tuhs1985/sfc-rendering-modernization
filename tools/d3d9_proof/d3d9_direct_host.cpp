@@ -18,6 +18,10 @@ static void apiok(remixapi_ErrorCode result,const char* why){if(result!=REMIXAPI
 #include "worker_gpu_fence.h"
 #include "camera_left.h"
 #include "deferred_diagnostics.h"
+#include "multi_scene_runtime.h"
+#include "pipeline_mode.h"
+#include "warm_start.h"
+#include "startup_profile.h"
 static int64_t outputTicks(){LARGE_INTEGER t{};require(QueryPerformanceCounter(&t)!=FALSE,"output QPC");return t.QuadPart;}
 struct SharedOutput{
  ComPtr<ID3D11Texture2D> image,staging;ComPtr<IDirect3DTexture9> imported;ComPtr<IDirect3DSurface9> surface;
@@ -30,6 +34,8 @@ static PollTiming wait9(IDirect3DQuery9* query,WorkerPoll& poll){
   timing.last_pending=observed;require(GetTickCount64()<deadline,"offline GPU completion5s limit");++timing.sleeps;poll.pause();timing.sleep_ticks+=outputTicks()-observed;}
  ok(status,"output completion");return timing;
 }
+#include "render_prewarm.h"
+#include "texture_prefetch.h"
 static void read11(ID3D11DeviceContext* context,ID3D11Query* query,SharedOutput& output,const fs::path& path,UINT width,UINT height){
  context->CopyResource(output.staging.Get(),output.image.Get());context->End(query);context->Flush();const auto deadline=GetTickCount64()+5000;BOOL complete=FALSE;HRESULT status;
  while((status=context->GetData(query,&complete,sizeof(complete),0))==S_FALSE||!complete){require(SUCCEEDED(status),"consumer query error");require(GetTickCount64()<deadline,"consumer5s limit");Sleep(1);}ok(status,"consumer completion");
@@ -39,12 +45,15 @@ static void read11(ID3D11DeviceContext* context,ID3D11Query* query,SharedOutput&
  context->Unmap(output.staging.Get(),0);require(bool(file),"readback file write");
 }
 int wmain(int argc,wchar_t** argv){
+ const bool detailed=!pipeline_mode::performance();
  wchar_t buffered[2]{};const bool bufferedDiagnostics=GetEnvironmentVariableW(L"SFC_D3D9_LIVE_TIMING",buffered,2)==1&&buffered[0]==L'1';
  DeferredDiagnostics diagnosticLog(std::cout,bufferedDiagnostics);
  std::cout.setf(std::ios::unitbuf);remixapi_Interface external{};bool registered=false;
  Module module;Window window;ComPtr<IDirect3D9Ex> api;ComPtr<IDirect3DDevice9Ex> device;int result=1;
+ StartupProfile startup;
  try{
-  require(argc==3||argc==5,"replay directory,runtime and optional receiver/mode required");const fs::path root=fs::absolute(argv[1]),library=fs::absolute(argv[2]);const auto scene=load(root);
+  require(argc==3||argc==5,"replay directory,runtime and optional receiver/mode required");const fs::path root=fs::absolute(argv[1]),library=fs::absolute(argv[2]);
+  const bool prewarm=warm_start::requested();Scene scene;if(prewarm){scene.width=1920;scene.height=1080;}else scene=load(root);
   wchar_t investigate[2]{};require(output_wire::qualified_extent(scene.width,scene.height)||(GetEnvironmentVariableW(L"SFC_DIRECT64_INVESTIGATE_EXTENT",investigate,2)==1&&investigate[0]==L'1'),"unqualified output extent;explicit offline investigation required");
   module.value=LoadLibraryExW(library.c_str(),nullptr,LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR|LOAD_LIBRARY_SEARCH_SYSTEM32);require(module.value!=nullptr,"direct runtime load");
   wchar_t actual[MAX_PATH]{};require(GetModuleFileNameW(module.value,actual,MAX_PATH)>0&&fs::equivalent(library,actual),"loaded runtime differs");
@@ -62,6 +71,7 @@ int wmain(int argc,wchar_t** argv){
   window.value=CreateWindowW(wc.lpszClassName,L"Offline direct64 D3D9 output",WS_POPUP,0,0,scene.width,scene.height,nullptr,nullptr,wc.hInstance,nullptr);require(window.value!=nullptr,"direct64 window");
   D3DPRESENT_PARAMETERS pp{};pp.BackBufferWidth=scene.width;pp.BackBufferHeight=scene.height;pp.BackBufferFormat=D3DFMT_A8R8G8B8;pp.BackBufferCount=1;pp.Windowed=TRUE;pp.hDeviceWindow=window.value;pp.SwapEffect=D3DSWAPEFFECT_DISCARD;pp.EnableAutoDepthStencil=TRUE;pp.AutoDepthStencilFormat=D3DFMT_D24S8;pp.PresentationInterval=D3DPRESENT_INTERVAL_IMMEDIATE;
   ok(api->CreateDeviceEx(0,D3DDEVTYPE_HAL,window.value,D3DCREATE_HARDWARE_VERTEXPROCESSING|D3DCREATE_FPU_PRESERVE,&pp,nullptr,&device),"ordinary D3D9Ex device");
+  startup.mark("device_ready");
   apiok(external.dxvk_RegisterD3D9Device(device.Get()),"register ordinary device for output only");registered=true;
   {
    LUID adapterLuid{};ok(api->GetAdapterLUID(0,&adapterLuid),"renderer adapter LUID");
@@ -91,9 +101,22 @@ int wmain(int argc,wchar_t** argv){
    const auto postValues=visuals.image.post();
    const bool combinedPost=coverage.enabled&&visuals.enabled&&(postValues[0]!=1||postValues[1]!=1||postValues[2]!=1);
    if(combinedPost){visuals.grade.prepareCoverage(native.Get(),outputs[1].image.Get(),outputs[2].image.Get());std::cout<<"COMBINED_POST grade_coverage=1 draws_per_frame=1\n";}
-   float offsetX=0;if(coverage.enabled){wchar_t text[64]{};require(GetEnvironmentVariableW(L"SFC_D3D9_OFFSET_X",text,64)>0,"Additive offset required");offsetX=static_cast<float>(_wtof(text));require(std::isfinite(offsetX)&&std::abs(offsetX)>1e-5f&&std::abs(offsetX)<=1e6f,"Additive offset bounds");}
+   wchar_t multiFlag[2]{};const bool multiMode=GetEnvironmentVariableW(L"SFC_D3D9_MULTISCENE",multiFlag,2)==1&&multiFlag[0]==L'1';
+   float offsetX=0;if(coverage.enabled){wchar_t text[64]{};require(GetEnvironmentVariableW(L"SFC_D3D9_OFFSET_X",text,64)>0,"Additive offset required");offsetX=static_cast<float>(_wtof(text));require(std::isfinite(offsetX)&&(multiMode?(offsetX<=0&&offsetX>=-1e6f):(std::abs(offsetX)>1e-5f&&std::abs(offsetX)<=1e6f)),"explicit aligned-cohort or diagnostic offset bounds");}
+   if(render_prewarm::requested()){require(prewarm,"render warm requires early-start workflow");render_prewarm::run(device.Get(),renderPollWait,startup);}
+   ApiTexturePrefetch texturePrefetch;
+   if(prewarm){startup.mark("idle_begin");
+    if(ApiTexturePrefetch::requested()&&ApiTexturePrefetch::overlap())warm_start::wait(root,[&]{texturePrefetch.pump(root,external,fence.Get(),renderPollWait,startup);});
+    else warm_start::wait(root);
+    startup.mark("activated");scene=load(root);require(scene.width==1920&&scene.height==1080,"warm output extent unchanged");
+    startup.mark("scene_loaded");
+    if(ApiTexturePrefetch::requested())texturePrefetch.run(root,external,fence.Get(),renderPollWait,startup);
+    apiok(external.SetConfigVariable("rtx.enableReplacementAssets","True"),"enable complete initial material library");
+    startup.mark("materials_enabled");
+    std::cout<<"WARM_ACTIVATED complete_material_library=1 replacements=1\n";}
    const auto sceneBytes=read(root/L"scene.bin",2*1024*1024);const auto sceneHash=output_wire::hash(sceneBytes.data(),sceneBytes.size());
    OutputPeer peer;if(argc==5)peer.start(fs::absolute(argv[3]),root,argv[4]);
+   startup.mark("receiver_started");
    wchar_t single[2]{};const bool singlePresent=GetEnvironmentVariableW(L"SFC_DIRECT64_SINGLE_PRESENT",single,2)==1&&single[0]==L'1';
    wchar_t pacedValue[16]{};GetEnvironmentVariableW(L"SFC_DIRECT64_PACED_FRAMES",pacedValue,16);const unsigned paced=static_cast<unsigned>(_wtoi(pacedValue));require(paced==0||(paced>=60&&paced<=300),"offline paced frame cap");
    wchar_t liveValue[2]{};const bool liveMode=GetEnvironmentVariableW(L"SFC_D3D9_LIVE_TIMING",liveValue,2)==1&&liveValue[0]==L'1';
@@ -105,28 +128,40 @@ int wmain(int argc,wchar_t** argv){
    require(!liveMode||!latest,"live input excludes synthetic source");
    LARGE_INTEGER frequency{};require(QueryPerformanceFrequency(&frequency)!=FALSE,"output QPC frequency");
    IngressReplay ingress;uint64_t ingressAsset=0;std::ofstream inputTiming;if(latest){ingressAsset=ingressAssetHash(scene,root);inputTiming.open(root/L"input-timing.csv");inputTiming<<"sequence,source_frame,offered_qpc,deadline_qpc,completed_qpc,frequency,on_time\n";}
-   LiveOwnerInput ownerInput;std::ofstream liveTiming;if(liveMode){liveTiming.open(root/L"live-input.csv");liveTiming<<"sequence,source_frame,owner,revision,offered_qpc,completed_qpc,frequency,state_hash,output_sequence,taken_qpc,light_ready_qpc\n";}
-   std::ofstream timing(root/L"frame-timing.csv");
-   DeferredDiagnostics deferredLive(liveTiming,liveMode),deferredTiming(timing,liveMode,2*1024*1024);
-   timing<<"sequence,source_frame,presents,draw_present_us,output_gpu_us,local_readback_us,peer_us,scheduled_us,completed_us,copy_submit_us,render_ready_wait_us,postprocess_us,query_polls,query_sleeps,query_sleep_us,query_last_pending_qpc,query_ready_qpc,input_empty_polls,input_sleep_us,input_validation_us\n";int64_t scheduleStart=0;
-   {Renderer renderer(device.Get(),scene,root);DirectLights lights;lights.start();uint64_t outputSequence=0;unsigned lightOmitted=0;
+   LiveOwnerInput ownerInput;std::ofstream liveTiming;if(liveMode&&detailed){liveTiming.open(root/L"live-input.csv");liveTiming<<"sequence,source_frame,owner,revision,offered_qpc,completed_qpc,frequency,state_hash,output_sequence,taken_qpc,light_ready_qpc\n";}
+   std::ofstream timing;if(detailed)timing.open(root/L"frame-timing.csv");
+   DeferredDiagnostics deferredLive(liveTiming,liveMode&&detailed),deferredTiming(timing,liveMode&&detailed,2*1024*1024);
+   if(detailed)timing<<"sequence,source_frame,presents,draw_present_us,output_gpu_us,local_readback_us,peer_us,scheduled_us,completed_us,copy_submit_us,render_ready_wait_us,postprocess_us,query_polls,query_sleeps,query_sleep_us,query_last_pending_qpc,query_ready_qpc,input_empty_polls,input_sleep_us,input_validation_us\n";int64_t scheduleStart=0;
+   {Renderer renderer(device.Get(),scene,root);DirectLights lights;lights.start();MultiSceneRuntime cohort;cohort.start(root,device.Get(),scene,renderer);
+    startup.mark("renderer_assets_started");
+    if(cohort.enabled){ownerInput.idleWork=[](void* p){static_cast<MultiSceneRuntime*>(p)->assets();};ownerInput.idleContext=&cohort;}
+    bool measuredCohort=false;
+    uint64_t outputSequence=0;unsigned lightOmitted=0;
     for(size_t frame=0;frame<(liveMode?6001:paced?paced+(latest?1u:0u):scene.frames.size());++frame){
+     if(frame<2)startup.mark("frame_begin",static_cast<unsigned>(frame));
      Frame state=scene.frames[frame%scene.frames.size()];frame_ingress::Packet input{};
      live_owner::Packet rawInput{};if(liveMode&&frame){if(!ownerInput.next(scene,state,rawInput))break;}
+     if(cohort.enabled&&frame&&!cohort.next(rawInput))continue;
      const auto takenAt=outputTicks();
      if(latest&&frame){if(!ingress.next(input,state))break;}
      float displacement[3]{};
-     if(coverage.enabled){require(diagnostic_offset::camera_left(state.view,-offsetX,displacement),"qualified camera-left offset");for(unsigned i=0;i<3;++i)state.model[i*4+3]+=displacement[i];} // Raw packet unchanged.
+     if(coverage.enabled&&offsetX!=0){require(diagnostic_offset::camera_left(state.view,-offsetX,displacement),"qualified camera-left offset");for(unsigned i=0;i<3;++i)state.model[i*4+3]+=displacement[i];} // Raw packet unchanged.
      if(!(liveMode&&!frame)&&!lights.update(external,state,liveMode&&frame?&rawInput:nullptr,ownerInput,static_cast<uint64_t>(frequency.QuadPart))){
       require(liveMode,"Offline light fixture association required");if(lightOmitted++<32)std::cout<<"LIGHT_INPUT_UNAVAILABLE source_sequence="<<rawInput.sequence<<" source_frame="<<state.frame<<'\n';continue;
      }
      if(liveMode&&frame&&!ownerInput.admit(rawInput))continue;
+     const bool measureCohort=cohort.enabled&&frame&&!measuredCohort;
      if(paced&&frame&&!latest){if(!scheduleStart)scheduleStart=outputTicks();const auto due=scheduleStart+static_cast<int64_t>(frame-1)*frequency.QuadPart/60;while(outputTicks()<due)Sleep(1);}
      const auto began=outputTicks();const unsigned presents=(singlePresent||liveMode)&&frame?1u:24u;
-     for(unsigned warm=0;warm<presents;++warm){lights.draw(external);renderer.draw(state,false,scene.width,scene.height);ok(device->PresentEx(nullptr,nullptr,nullptr,nullptr,0),"normal D3D9 PresentEx");
+     if(measureCohort)startup.mark("cohort_draw_begin");
+     bool submitted=false;
+     for(unsigned warm=0;warm<presents;++warm){if(!frame)startup.mark("bootstrap_begin",warm,false);lights.draw(external);if(cohort.enabled&&frame){if(!cohort.draw(scene.width,scene.height,displacement))break;}else renderer.draw(state,false,scene.width,scene.height);if(!frame)startup.mark("bootstrap_drawn",warm,false);submitted=true;ok(device->PresentEx(nullptr,nullptr,nullptr,nullptr,0),"normal D3D9 PresentEx");
+      if(!frame)startup.mark("bootstrap_presented",warm,false);
       MSG message{};while(PeekMessageW(&message,nullptr,0,0,PM_REMOVE)){TranslateMessage(&message);DispatchMessageW(&message);}if(presents>1)Sleep(10);
      }
+     if(!submitted)continue;
      const auto drawn=outputTicks();
+     if(measureCohort)startup.mark("cohort_draw_end");
      // Offline independent check:did ordinary rasterization produce the ship
      // while returned ray-traced output remained empty? Never a live transport.
      wchar_t diagnostic[2]{};
@@ -148,17 +183,22 @@ int wmain(int argc,wchar_t** argv){
       }
      }
      const auto outputDone=outputTicks();
+     if(measureCohort)startup.mark("cohort_output_complete");
+     if(frame<2)startup.mark("output_complete",static_cast<unsigned>(frame));
      if(!noReadback&&(!paced||frame==0||(frame+1)%output_wire::verification_stride==0))for(unsigned i=0;i<3;++i)read11(context.Get(),consumerFence.Get(),outputs[i],root/(L"returned-"+std::to_wstring(frame)+L"-"+std::to_wstring(i)+L".raw32"),scene.width,scene.height);
      const auto localDone=outputTicks();
-     std::cout<<"RETURNED frame="<<frame<<" source_frame="<<state.frame<<" completed=1 ordinary_draws=1\n";
+     if(detailed)std::cout<<"RETURNED frame="<<frame<<" source_frame="<<state.frame<<" completed=1 ordinary_draws=1\n";
      ++outputSequence;
      if(argc==5){output_wire::Packet p{};p.sequence=outputSequence;p.source_frame=state.frame;p.owner=state.owner;p.revision=state.revision;p.source_state_hash=liveMode&&frame?rawInput.state_hash:output_wire::hash(&state,sizeof(Frame));p.scene_hash=sceneHash;p.width=scene.width;p.height=scene.height;p.luid_low=adapterLuid.LowPart;p.luid_high=adapterLuid.HighPart;memcpy(p.handles,sharedHandles.data(),sizeof(p.handles));
       if(liveMode&&frame){game_output::Metadata meta{};meta.source_sequence=rawInput.sequence;memcpy(meta.source_session,rawInput.session,16);meta.checksum=game_output::checksum(meta);game_output::metadata(*peer.channel,meta);}
+      if(cohort.enabled&&frame)p.source_state_hash=cohort.packet.checksum;
       peer.publish(p);}
+     if(frame<2)startup.mark("receiver_ack",static_cast<unsigned>(frame));
+     if(measureCohort){startup.mark("cohort_receiver_ack");measuredCohort=true;}
      const auto peerDone=outputTicks();const auto us=[&](int64_t a,int64_t b){return (b-a)*1000000/frequency.QuadPart;};
      if(liveMode){if(!frame)ownerInput.start(scene);
-      else{if(!coverage.enabled||!peer.channel->reserved){ownerInput.complete(rawInput,static_cast<uint64_t>(peerDone));liveTiming<<rawInput.sequence<<','<<state.frame<<','<<state.owner<<','<<state.revision<<','<<rawInput.offered<<','<<peerDone<<','<<frequency.QuadPart<<','<<rawInput.state_hash<<','<<outputSequence<<','<<takenAt<<','<<began<<'\n';require(bool(liveTiming),"live timing output");}else std::cout<<"GAME_POOL_OMITTED source_sequence="<<rawInput.sequence<<'\n';}}
-     timing<<frame+1<<','<<state.frame<<','<<presents<<','<<us(began,drawn)<<','<<us(drawn,outputDone)<<','<<us(outputDone,localDone)<<','<<us(localDone,peerDone)<<','<<(paced&&frame&&!latest?static_cast<int64_t>(frame-1)*1000000/60:-1)<<','<<(paced&&frame&&!latest?us(scheduleStart,peerDone):-1)<<','<<us(drawn,copiesQueued)<<','<<us(copiesQueued,renderReady)<<','<<us(renderReady,outputDone)<<','<<renderPoll.polls<<','<<renderPoll.sleeps<<','<<us(0,renderPoll.sleep_ticks)<<','<<renderPoll.last_pending<<','<<renderPoll.ready<<','<<ownerInput.empty_polls<<','<<us(0,ownerInput.sleep_ticks)<<','<<us(0,ownerInput.validation_ticks)<<'\n';require(bool(timing),"timing output");
+      else{if(!coverage.enabled||!peer.channel->reserved){ownerInput.complete(rawInput,static_cast<uint64_t>(peerDone));if(detailed){liveTiming<<rawInput.sequence<<','<<state.frame<<','<<state.owner<<','<<state.revision<<','<<rawInput.offered<<','<<peerDone<<','<<frequency.QuadPart<<','<<rawInput.state_hash<<','<<outputSequence<<','<<takenAt<<','<<began<<'\n';require(bool(liveTiming),"live timing output");}}else if(detailed)std::cout<<"GAME_POOL_OMITTED source_sequence="<<rawInput.sequence<<'\n';}}
+     if(detailed){timing<<frame+1<<','<<state.frame<<','<<presents<<','<<us(began,drawn)<<','<<us(drawn,outputDone)<<','<<us(outputDone,localDone)<<','<<us(localDone,peerDone)<<','<<(paced&&frame&&!latest?static_cast<int64_t>(frame-1)*1000000/60:-1)<<','<<(paced&&frame&&!latest?us(scheduleStart,peerDone):-1)<<','<<us(drawn,copiesQueued)<<','<<us(copiesQueued,renderReady)<<','<<us(renderReady,outputDone)<<','<<renderPoll.polls<<','<<renderPoll.sleeps<<','<<us(0,renderPoll.sleep_ticks)<<','<<renderPoll.last_pending<<','<<renderPoll.ready<<','<<ownerInput.empty_polls<<','<<us(0,ownerInput.sleep_ticks)<<','<<us(0,ownerInput.validation_ticks)<<'\n';require(bool(timing),"timing output");}
      if(latest){
       if(!frame)ingress.start(scene,ingressAsset,paced,static_cast<uint64_t>(frequency.QuadPart),injectedLag);
       else{const bool onTime=frame_ingress::usable(input,input.key,static_cast<uint64_t>(peerDone),true);
@@ -168,15 +208,19 @@ int wmain(int argc,wchar_t** argv){
     if(latest)std::cout<<"INPUT_REPLAY_COMPLETE source_late="<<ingress.source_late<<" obsolete="<<ingress.stats.obsolete<<" expired="<<ingress.stats.expired<<" invalid="<<ingress.stats.invalid<<" lag_used="<<ingress.lag_used<<" lag_sequence="<<ingress.lag_sequence<<" mapping_bytes="<<sizeof(frame_ingress::Channel)<<'\n';
     if(liveMode)std::cout<<"LIVE_OWNER_COMPLETE received="<<ownerInput.received<<" invalid="<<ownerInput.invalid<<" unqualified="<<ownerInput.unqualified<<" game_drawing=0\n";
     if(liveMode)std::cout<<"LIVE_OUTPUT_SUMMARY outputs="<<outputSequence<<" light_omitted="<<lightOmitted<<'\n';
-    if(liveMode)std::cout<<"LIVE_ADMISSION expired="<<ownerInput.expired<<" old_epoch="<<ownerInput.oldPackets<<" maximum_age_us=2000\n";
+    if(liveMode){std::cout<<"LIVE_ADMISSION expired="<<ownerInput.expired<<" old_epoch="<<ownerInput.oldPackets<<" maximum_age_us="<<(ownerInput.closedFrame?50000:2000)<<'\n';
+     for(unsigned stage=0;stage<2;++stage){std::cout<<"LIVE_ADMISSION_STAGE stage="<<stage;
+      for(unsigned reason=0;reason<static_cast<unsigned>(live_owner::Admission::Count);++reason)std::cout<<" reason"<<reason<<'='<<ownerInput.admissionCounts[stage][reason];std::cout<<'\n';}}
     lights.close(external);
    }
    if(argc==5)peer.finish();
+   texturePrefetch.close(fence.Get(),renderPollWait);
    ok(device->SetTexture(0,nullptr),"unbind texture");ok(device->SetStreamSource(0,nullptr,0,0),"unbind VB");ok(device->SetIndices(nullptr),"unbind IB");wait9(fence.Get(),renderPollWait);context->ClearState();context->Flush();
    ok(native->GetDeviceRemovedReason(),"consumer device remains valid");
   }
   auditModules();std::cout<<"DIRECT64_OUTPUT_RETURNED sdk_mesh_calls=0 offline_readback_only=1\n";result=0;
- }catch(const std::exception& error){std::cerr<<"DIRECT64_FAILED "<<error.what()<<'\n';}
+ }catch(const warm_start::Cancelled&){std::cout<<"WARM_CANCELLED no_scene_submitted=1\n";result=0;}
+ catch(const std::exception& error){std::cerr<<"DIRECT64_FAILED "<<error.what()<<'\n';}
  if(registered){device.Detach();api.Detach();const auto status=external.Shutdown();std::cout<<"OUTPUT_API_SHUTDOWN "<<status<<'\n';if(status!=REMIXAPI_ERROR_CODE_SUCCESS)result=1;}
  return result;
 }

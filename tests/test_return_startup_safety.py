@@ -28,7 +28,20 @@ class StartupSafetyTests(unittest.TestCase):
     def test_wrong_pid_cannot_satisfy_readiness(self):
         ticks=iter([0,0,2])
         with self.assertRaises(RuntimeError):runner.wait_component_ready(lambda:{**self.state(),'ready':1},2,lambda:None,lambda:None,timeout=1,clock=lambda:next(ticks),pause=lambda _:None)
+    def test_multi_ship_selection_timeout_preserves_legacy_and_total_budget(self):
+        self.assertEqual(runner.tactical_gate_timeout(False),90)
+        self.assertEqual(runner.tactical_gate_timeout(True),120)
+        self.assertLessEqual(runner.tactical_gate_timeout(True)+120+30+15,285)
+    def test_only_recorded_supported_proxy_transactions_are_recoverable(self):
+        for probe in ('D3D9-ADDITIVE-001','D3D9-MULTISHIP-001'):
+            self.assertTrue(recovery.supported_transaction({'probe':probe,'full_support_qualification':{'result':'qualified'}}))
+            self.assertFalse(recovery.supported_transaction({'probe':probe}))
+        self.assertFalse(recovery.supported_transaction({'probe':'UNKNOWN','full_support_qualification':{'result':'qualified'}}))
     def test_verified_recovery_and_live_game_refusal(self):
+        self.recovery_case({'broad_capture':{'enabled':True}})
+    def test_verified_multi_ship_recovery_and_live_game_refusal(self):
+        self.recovery_case({'probe':'D3D9-MULTISHIP-001','full_support_qualification':{'result':'qualified'}})
+    def recovery_case(self,transaction):
         with tempfile.TemporaryDirectory() as folder:
             root=Path(folder);run=root/'artifacts/remix-runtime/runs/test-in-game';run.mkdir(parents=True)
             test=root/'test';test.mkdir();(test/'dxgi.dll').write_bytes(b'full');(test/'ReShade.ini').write_bytes(b'changed')
@@ -36,7 +49,7 @@ class StartupSafetyTests(unittest.TestCase):
             (run/'dxgi-original.rollback').write_bytes(b'old');(run/'ReShade.original.ini').write_bytes(b'config')
             old=broad.digest(run/'dxgi-original.rollback');full=broad.digest(test/'dxgi.dll')
             expected={'dxgi.dll':old,'ReShade.ini':broad.digest(run/'ReShade.original.ini'),'StarFleetOP.exe':broad.digest(test/'StarFleetOP.exe')}
-            (run/'manifest.json').write_text(json.dumps({'broad_capture':{'enabled':True},'copied_critical_before':expected}))
+            (run/'manifest.json').write_text(json.dumps({**transaction,'copied_critical_before':expected}))
             with mock.patch.multiple(recovery,ROOT=root,TEST=test,OLD_SHA=old,FULL_SHA=full),mock.patch.multiple(broad,OLD_SHA=old,FULL_SHA=full):
                 with self.assertRaises(RuntimeError):recovery.recover(run,lambda:True)
                 self.assertEqual((test/'dxgi.dll').read_bytes(),b'full')

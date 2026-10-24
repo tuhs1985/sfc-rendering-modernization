@@ -29,7 +29,10 @@ struct GameOutputWriter {
   wchar_t asset[66]{};check(GetEnvironmentVariableW(L"SFC_D3D9_ASSET_SHA256",asset,66)==64,"game pool content identity required");
   for(unsigned i=0;i<32;++i){unsigned byte=0;for(unsigned j=0;j<2;++j){const auto c=asset[2*i+j];check((c>=L'0'&&c<=L'9')||(c>=L'a'&&c<=L'f'),"game pool asset hex");byte=byte*16+unsigned(c<=L'9'?c-L'0':c-L'a'+10);}pool->asset[i]=static_cast<BYTE>(byte);}
   wchar_t offset[64]{};check(GetEnvironmentVariableW(L"SFC_D3D9_OFFSET_X",offset,64)>0,"diagnostic world offset required");
-  pool->camera_offset[0]=static_cast<float>(_wtof(offset));check(std::isfinite(pool->camera_offset[0])&&pool->camera_offset[0]<-1e-5f&&pool->camera_offset[0]>=-1e6f,"diagnostic camera-left bound");pool->diagnostic_mode=1;
+  wchar_t multi[2]{};const bool cohort=GetEnvironmentVariableW(L"SFC_D3D9_MULTISCENE",multi,2)==1&&multi[0]==L'1';
+  pool->camera_offset[0]=static_cast<float>(_wtof(offset));
+  check(std::isfinite(pool->camera_offset[0])&&(cohort?(pool->camera_offset[0]<=0&&pool->camera_offset[0]>=-1e6f):(pool->camera_offset[0]<-1e-5f&&pool->camera_offset[0]>=-1e6f)),"explicit aligned-cohort or camera-left diagnostic offset");
+  pool->diagnostic_mode=pool->camera_offset[0]==0?0u:1u;pool->reserved[2]=cohort?1u:0u; // Union coverage,not a native per-owner picking map.
   pool->reserved[3]=retainReady?1u:0u;
   memcpy(h.session,source.session,16);h.receiver_pid=GetCurrentProcessId();h.host_pid=input.producer_pid;session=input.session;
   check(game_output::valid(h,source.session,game),"game pool header");InterlockedExchange(&h.ready,1);

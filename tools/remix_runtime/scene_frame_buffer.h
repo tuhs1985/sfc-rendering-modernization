@@ -6,7 +6,7 @@
 namespace scene_frame_buffer {
 using Microsoft::WRL::ComPtr;
 struct Frame {ComPtr<ID3D11Texture2D> color,depth;ComPtr<ID3D11RenderTargetView> depthTarget;ComPtr<ID3D11ShaderResourceView> depthView;
- live_owner::Row row{};uint64_t captured=0;bool valid=false;};
+ live_owner::Row row{};uint64_t captured=0,stateHash=0;bool valid=false;};
 class History {
  ComPtr<ID3D11DeviceContext> context,deferred;ComPtr<ID3D11VertexShader> vertex;ComPtr<ID3D11PixelShader> pixel;
  Frame frames[2];unsigned next=0;D3D11_TEXTURE2D_DESC descriptor{};
@@ -27,7 +27,7 @@ public:
  }
  void reset(){for(auto& f:frames)f.valid=false;next=0;}
  Frame* prior(){auto& p=frames[next^1];return p.valid?&p:nullptr;}
- void capture(ID3D11Texture2D* target,ID3D11ShaderResourceView* depth,const live_owner::Row& row,uint64_t now){
+ void capture(ID3D11Texture2D* target,ID3D11ShaderResourceView* depth,const live_owner::Row& row,uint64_t now,uint64_t stateHash=0){
   if(!target||!depth||!row[2])throw std::runtime_error("Buffered scene inputs missing");
   D3D11_SHADER_RESOURCE_VIEW_DESC view{};depth->GetDesc(&view);ComPtr<ID3D11Resource> resource;depth->GetResource(&resource);ComPtr<ID3D11Texture2D> source;
   ship_triplet::checked(resource.As(&source),"Buffered depth resource");D3D11_TEXTURE2D_DESC sourceDesc{};source->GetDesc(&sourceDesc);
@@ -37,7 +37,7 @@ public:
   auto* r=f.depthTarget.Get();deferred->OMSetRenderTargets(1,&r,nullptr);deferred->VSSetShader(vertex.Get(),nullptr,0);deferred->PSSetShader(pixel.Get(),nullptr,0);deferred->PSSetShaderResources(0,1,&depth);
   deferred->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);D3D11_VIEWPORT v{0,0,float(d.Width),float(d.Height),0,1};deferred->RSSetViewports(1,&v);deferred->Draw(3,0);
   ComPtr<ID3D11CommandList> commands;ship_triplet::checked(deferred->FinishCommandList(FALSE,&commands),"buffer capture commands");context->ExecuteCommandList(commands.Get(),TRUE);
-  f.row=row;f.captured=now;f.valid=true;next^=1;
+  f.row=row;f.captured=now;f.stateHash=stateHash?stateHash:live_owner::row_hash(row);f.valid=true;next^=1;
  }
  void restore(ID3D11Texture2D* target,Frame& f){context->CopyResource(target,f.color.Get());}
 };

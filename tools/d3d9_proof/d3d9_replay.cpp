@@ -71,28 +71,31 @@ static void auditModules(){
  std::cout<<"MODULE_AUDIT_PASS count="<<count<<" reshade=absent normal_interception=1\n";
 #endif
 }
+#include "pipeline_mode.h"
 struct Renderer{
  ComPtr<IDirect3DDevice9> device;ComPtr<IDirect3DVertexBuffer9> vb;ComPtr<IDirect3DIndexBuffer9> ib;
  std::vector<ComPtr<IDirect3DTexture9>> textures;const Scene& scene;
- explicit Renderer(IDirect3DDevice9* d,const Scene& s,const fs::path& root):device(d),scene(s){
+ explicit Renderer(IDirect3DDevice9* d,const Scene& s,const fs::path& root,const std::vector<std::vector<BYTE>>* prepared=nullptr):device(d),scene(s){
   constexpr DWORD fvf=D3DFVF_XYZ|D3DFVF_NORMAL|D3DFVF_TEX1;
   const auto nv=static_cast<UINT>(s.vertices.size()),ni=static_cast<UINT>(s.indices.size());
   ok(d->CreateVertexBuffer(nv*sizeof(Vertex),0,fvf,D3DPOOL_MANAGED,&vb,nullptr),"vertex buffer");
   void* p=nullptr;ok(vb->Lock(0,0,&p,0),"VB upload lock");memcpy(p,s.vertices.data(),nv*sizeof(Vertex));ok(vb->Unlock(),"VB unlock");
-  ok(vb->Lock(0,0,&p,D3DLOCK_READONLY),"VB readback");require(memcmp(p,s.vertices.data(),nv*sizeof(Vertex))==0,"VB bytes differ");ok(vb->Unlock(),"VB read unlock");
+  if(!pipeline_mode::performance()){ok(vb->Lock(0,0,&p,D3DLOCK_READONLY),"VB readback");require(memcmp(p,s.vertices.data(),nv*sizeof(Vertex))==0,"VB bytes differ");ok(vb->Unlock(),"VB read unlock");}
   ok(d->CreateIndexBuffer(ni*4,0,D3DFMT_INDEX32,D3DPOOL_MANAGED,&ib,nullptr),"index buffer");
   ok(ib->Lock(0,0,&p,0),"IB upload lock");memcpy(p,s.indices.data(),ni*4);ok(ib->Unlock(),"IB unlock");
-  ok(ib->Lock(0,0,&p,D3DLOCK_READONLY),"IB readback");require(memcmp(p,s.indices.data(),ni*4)==0,"IB bytes differ");ok(ib->Unlock(),"IB read unlock");
+  if(!pipeline_mode::performance()){ok(ib->Lock(0,0,&p,D3DLOCK_READONLY),"IB readback");require(memcmp(p,s.indices.data(),ni*4)==0,"IB bytes differ");ok(ib->Unlock(),"IB read unlock");}
   uint32_t count=0;for(auto g:s.groups)count=std::max(count,g.material+1);textures.resize(count);size_t total=0;
-  for(uint32_t i=0;i<count;++i){const auto b=read(root/(L"texture-"+std::to_wstring(i)+L".bin"),64*1024*1024+16);size_t at=0;const auto h=take<std::array<uint32_t,4>>(b,at);
+  require(!prepared||prepared->size()==count,"prepared texture count");
+  for(uint32_t i=0;i<count;++i){std::vector<BYTE> disk;if(!prepared)disk=read(root/(L"texture-"+std::to_wstring(i)+L".bin"),64*1024*1024+16);
+   const auto& b=prepared?(*prepared)[i]:disk;size_t at=0;const auto h=take<std::array<uint32_t,4>>(b,at);
    require(h[0]==0x31544653&&h[1]&&h[1]<=4096&&h[2]&&h[2]<=4096&&h[3]==uint64_t(h[1])*h[2]*4&&b.size()==16ull+h[3],"texture schema");
    total+=h[3];require(total<=128*1024*1024,"decoded texture cap");
    ok(d->CreateTexture(h[1],h[2],1,0,D3DFMT_A8R8G8B8,D3DPOOL_MANAGED,&textures[i],nullptr),"texture create");D3DLOCKED_RECT lock{};
    ok(textures[i]->LockRect(0,&lock,nullptr,0),"texture upload lock");require(lock.Pitch>=static_cast<INT>(h[1]*4),"texture pitch");for(uint32_t y=0;y<h[2];++y)memcpy(static_cast<BYTE*>(lock.pBits)+y*lock.Pitch,b.data()+16+size_t(y)*h[1]*4,h[1]*4);ok(textures[i]->UnlockRect(0),"texture unlock");
-   ok(textures[i]->LockRect(0,&lock,nullptr,D3DLOCK_READONLY),"texture readback");for(uint32_t y=0;y<h[2];++y)require(memcmp(static_cast<BYTE*>(lock.pBits)+y*lock.Pitch,b.data()+16+size_t(y)*h[1]*4,h[1]*4)==0,"texture row differs");ok(textures[i]->UnlockRect(0),"texture read unlock");
+   if(!pipeline_mode::performance()){ok(textures[i]->LockRect(0,&lock,nullptr,D3DLOCK_READONLY),"texture readback");for(uint32_t y=0;y<h[2];++y)require(memcmp(static_cast<BYTE*>(lock.pBits)+y*lock.Pitch,b.data()+16+size_t(y)*h[1]*4,h[1]*4)==0,"texture row differs");ok(textures[i]->UnlockRect(0),"texture read unlock");}
   }
  }
- void draw(const Frame& f,bool mask,uint32_t width,uint32_t height){
+ void draw(const Frame& f,bool mask,uint32_t width,uint32_t height,bool clear=true){
   auto* d=device.Get();ok(d->SetVertexShader(nullptr),"fixed VS");ok(d->SetPixelShader(nullptr),"fixed PS");ok(d->SetFVF(D3DFVF_XYZ|D3DFVF_NORMAL|D3DFVF_TEX1),"FVF");
   ok(d->SetStreamSource(0,vb.Get(),0,sizeof(Vertex)),"stream");ok(d->SetIndices(ib.Get()),"indices");
   auto w=matrix(f.model),v=matrix(f.view),p=matrix(f.projection);ok(d->SetTransform(D3DTS_WORLD,&w),"world");ok(d->SetTransform(D3DTS_VIEW,&v),"view");ok(d->SetTransform(D3DTS_PROJECTION,&p),"projection");
@@ -109,7 +112,7 @@ struct Renderer{
   // Clear the WHOLE proof target,not only the captured offset viewport. Otherwise
   // undefined backbuffer contents outside it could be mistaken for scene pixels.
   D3DVIEWPORT9 full{0,0,width,height,0,1};ok(d->SetViewport(&full),"full clear viewport");
-  ok(d->Clear(0,nullptr,D3DCLEAR_TARGET|D3DCLEAR_ZBUFFER,0xff000000,1,0),"clear");ok(d->SetViewport(&viewport),"restore scene viewport");ok(d->BeginScene(),"begin");
+  if(clear)ok(d->Clear(0,nullptr,D3DCLEAR_TARGET|D3DCLEAR_ZBUFFER,0xff000000,1,0),"clear");ok(d->SetViewport(&viewport),"restore scene viewport");ok(d->BeginScene(),"begin");
   if(f.active)for(auto g:scene.groups){ok(d->SetTexture(0,mask?nullptr:textures[g.material].Get()),"group texture");ok(d->DrawIndexedPrimitive(D3DPT_TRIANGLELIST,0,0,static_cast<UINT>(scene.vertices.size()),g.first,g.count/3),"indexed triangle group");}
   ok(d->EndScene(),"end");
  }

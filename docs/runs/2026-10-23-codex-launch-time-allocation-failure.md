@@ -1,0 +1,31 @@
+# Run131 — actual launch-time renderer allocation failure
+
+Date2026-10-23 America/New_York (evidence20261024UTC). Active bounded D3D9 retained multi-ship startup increment; no M1/TRL acceptance. Trigger: sponsor pasted failure from `20261024-010857-214073-in-game`. Authority/context: Run130 handoff/startup contract/run record. FuelGuard attached through verified trusted hook; no daemon/helper/agent. HEAD `d40f8f230fc7504023e4a052c99a81b5a08ce6b4`, branch `codex/github-sanitized`, extensive prior dirty work/indexempty; preserved. No source/config implementation this diagnosis.
+
+## Question and direct evidence
+
+Why did the early-start host exit before source stopped? Read existing run result/manifest, native job console/receipt, receiver and gate-controller logs,16byte readiness and104byte activation; no new game or GPU work.
+
+CONFIRMED:
+
+- Actual runtime identifies `DXVK_Remix: remix-1.5.2+68edea01`. Initialization starts21:08:59.582, initial swapchain21:09:01.159, readiness receiptQPC5566100298766/hostPID36524. Four fresh assets captured (KFF,FDD,FFF,FCA), activation contains gamePID17088/mask15/session identity; native reaches first-scene renderpass initialization21:10:08.847. Readiness and real scene rendering are different stages; no complete return-image measurement.
+-21:10:09.256 native log `DxvkMemoryAllocator: Memory allocation failed`, Size4423680, Alignment1024, Mempropertyflags0x1, Memtypes0x3;21:10:09.258 `Exception on CS thread!` and same allocator failure. Native jobexit1,stop_reason0 (not guardtime/sizecap),elapsed70203ms,peak_scratch194033732bytes,noownedleft. Receiver `RECEIVER_REJECTED producer disconnected`.
+- Startup system report24.22GiB/31.84GiBphysicalused,43.91GiB/47.84GiBcommitted. At failure heap0allocated1575MB/used1568MB/driverallocated1857MB/driverbudget11228MB/total11996MB. Heap1allocated776MB/driver833MB/budget15535MB;heap2allocated10MB/driver116MB/budget97MB. These are allocator/driver-specific snapshots, NOT proof all VRAM exhausted or heap2 caused the reported allocation. Exact underlying Vulkan/Windows failure result is not supplied.
+- Direct returned pool never completed initialization (`Additive pool session/process/layout` while finishing), native first-output receiver disconnected. Those messages follow host failure; do not diagnose stale-epoch or protocol mismatch as root cause without new evidence. Deferred native diagnostic messages were not flushed by abnormal runtime failure; no fabricated WARM_ACTIVATED log/timing.
+- Run result:normal_game_exittrue,original_critical_unchangedtrue,launcher_settings_unchangedtrue,broad_proxy_restoredtrue. Native runtime jobexit1 must NOT be confused with separate supervisor `renderer_exit:0`. Controllerexit8,`Target exited before controlled component removal.` Consequently controlled hook restoration/unload not proven; process exit removes process-local hooks. Persistent summary missing because orderly component export did not occur. No claim this failed test passed cleanup in every respect.
+
+STRONG HYPOTHESIS: high system commitment contributed to driver/runtime allocation rejection. Post-run GlobalMemoryStatusEx totalcommit51,369,877,504bytes/available5,220,765,696bytes,75%physicalused corroborates ongoing pressure, but not exact failure-time exhaustion. Read-only outside-sandbox inventory shows several independent multi-GiB processes, no lingering owned SFC/native host/receiver/job. Snapshot cannot reconstruct process allocations at failure; unrelated apps NOT terminated. Do not blame a particular app, model complexity, disabled comparisons or early initialization as confirmed cause. Early-start menu-duration interaction remains unresolved.
+
+## Tools, safe checks, bounds
+
+Bundled Python `C:\Users\rober\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe` used pathlib/json/struct/hashlib/ctypes for read-only evidence and GlobalMemoryStatusEx. PowerShell Get-Content/Get-Process/Get-CimInstance read-only; sandbox process inventory was incomplete and CIM denied, so repeated host memory/process query under approved escalation. `nvidia-smi --query-gpu=memory.used,memory.total --format=csv,noheader` post-run5041MiB/12282MiB is NOT failure-time telemetry. No web claim, vendor patch, setting reduction, shared-memory dump, screenshot or extra gameplay. Existing runtime/capture bounds unchanged.
+
+Reproduction: inspect `artifacts/remix-runtime/runs/20261024-010857-214073-in-game/{result.json,manifest.json,gate-controller.log,gpu/job-console.log,gpu/job-result.json,gpu/receiver.log,gpu/renderer-ready.bin,gpu/renderer-activate.bin}`. Hashes in curated JSON. Compare native log first SystemInformationReport, last allocation errors and separate supervisor/gate exits. Do not overwrite failed evidence or equate directory/output allowance with Windows memory.
+
+## Result / decision
+
+PARTIAL — first-game Run130 startup qualification failed on an observed runtime allocation rejection. Host initialization and asset preparation happened, but no successful returned frame/latency or normal controlled unload proof. Earlier standalone PASS evidence remains valid for its scope, not game success. Root symptom CONFIRMED; environment contribution STRONG HYPOTHESIS; exact allocation cause unresolved. No responsible source fix identified from this run, so no speculative rendering/quality changes made.
+
+Files added: this record and `docs/reconnaissance/evidence/20261023-launch-time-allocation-failure.json`. Modified:`docs/HANDOFF.md` newestcheckpoint; `docs/reconnaissance/pipeline-modes.md` actual-game qualification caveat. No existing evidence overwritten, raw captures retained ignored. Fast validation: curated JSON parses/referenced evidence hashes and paths match,`git diff --check`,indexempty/HEADunchanged. No staging/commit/push. No active owned process; no persistent new tool/server/session.
+
+Exact next action: sponsor closes unused memory-heavy apps or restarts Windows, then repeats SAME Performance launcher and fixture. Do not terminate unrelated software or change paging/driver/security policy automatically. If failure repeats with adequate headroom, use captured assets for a bounded long-idle vs near-activation initialization comparison to isolate startup regression before editing pipeline. No new broad capture/appearance work.

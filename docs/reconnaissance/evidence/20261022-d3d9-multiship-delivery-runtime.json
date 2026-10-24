@@ -1,0 +1,36 @@
+{
+  "run": "Run118",
+  "source": "artifacts/remix-runtime/runs/20261023-034547-144070-in-game",
+  "result": "ACTUAL_TWO_SHIP_DELIVERY_IMPROVEMENT_CONFIRMED_NOT_UNIVERSAL_OR_REPLACEMENT_PASS",
+  "sponsor_observation": "No flicker noticed during aggressive testing.",
+  "models": ["kff", "fca"],
+  "owner_draws": [5403, 5401],
+  "incomplete_cohort_lookups": 0,
+  "admission_rejections": 0,
+  "instance_projection_rejections": 1,
+  "unprepared_instance_omissions": 3,
+  "sync": {
+    "records": 5410,
+    "paired": 5392,
+    "missing": 16,
+    "post_first_match_records": 5403,
+    "post_first_match_missing": 11,
+    "missing_scene_frames_after_first_match": [331, 332, 333, 334, 336, 337, 338, 339, 340, 345, 4383],
+    "after_scene_frame600": {"paired": 5132, "missing": 1}
+  },
+  "output_gpu_ms_p50_p95_p99_max": [9.344, 13.229, 16.015, 27.491],
+  "persistent_publications": 14394,
+  "offscreen_updates": 7196,
+  "failed_pose_updates": 0,
+  "image_bytes": 91506338,
+  "cohort_samples": 91,
+  "normal_exit_cleanup_hashes": true,
+  "remaining": ["Late-material reload stall not exercised by this two-asset run.", "One projection rejection,seven stale outputs and40undisposed runtime common objects remain recorded."],
+  "second_run_at_inspection": {"folder": "20261023-034948-568962-in-game", "result": "IN_PROGRESS", "final_report_complete": false},
+  "raw_sha256": {
+    "result.json": "d61ae5e6d44daf4cfc6652b5517b06b0906716bedaf6176f99aa8c193d44f472",
+    "D3D9-SYNC-BUFFER-001.bin": "1d80834ff7feab60141b88d542d61bae27d7a843776679fae887e957b8cbfb85",
+    "gpu/frame-timing.csv": "6d75097539fb22e3b0762cbccc6e0b33c2fb4f010a85c97827f5f994ec09ce15",
+    "gpu/job-console.log": "67a966da3e01ab4b5c730f5009253b103f6990047b9b78b3fb986a564b1d0878"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "run": "Run132",
+  "date_local": "2026-10-23",
+  "scope": "Read-only historical startup memory and current host inventory;not peak or crash-time telemetry",
+  "system_metric_definition": "https://learn.microsoft.com/en-us/troubleshoot/windows-client/performance/introduction-to-the-page-file",
+  "historical_actual_game_startups": [
+    {"folder": "20261023-191630-707670-in-game", "physical_used_gib": 26.00, "system_commit_gib": 41.18, "native_exit": 0},
+    {"folder": "20261023-194205-307246-in-game", "physical_used_gib": 26.08, "system_commit_gib": 42.26, "native_exit": 0},
+    {"folder": "20261023-205121-223108-in-game", "physical_used_gib": 23.90, "system_commit_gib": 40.86, "native_exit": 0},
+    {"folder": "20261024-000410-735623-in-game", "physical_used_gib": 26.69, "system_commit_gib": 43.46, "native_exit": 0},
+    {"folder": "20261024-010857-214073-in-game", "physical_used_gib": 24.22, "system_commit_gib": 43.91, "native_exit": 1}
+  ],
+  "physical_total_gib_as_logged": 31.84,
+  "commit_limit_gib_as_logged": 47.84,
+  "current_host_snapshot": {
+    "committed_bytes": 43078246400,
+    "commit_limit_bytes": 51369877504,
+    "available_physical_mib": 9212,
+    "physical_total_bytes": 34190008320,
+    "paged_pool_bytes": 1748226048,
+    "nonpaged_pool_bytes": 1289297920,
+    "pagefile_allocated_mib": 16384,
+    "pagefile_used_mib": 339,
+    "pagefile_peak_used_mib": 362,
+    "automatic_pagefile_management": false,
+    "webview_group_private_gib": 9.261,
+    "chatgpt_group_private_gib": 3.975,
+    "wsl_private_gib": 2.806,
+    "lghub_agent_private_gib": 1.978,
+    "largest_two_webview_owner": "FLC8.0.0",
+    "largest_two_webview_private_gib_later_sample": [4.801, 3.833],
+    "same_two_processes_prior_review_private_gib_rounded": [3.93, 2.53],
+    "orphaned_harness_or_python_processes_found": false,
+    "process_metric": "Private bytes;not equivalent to resident physical RAM"
+  },
+  "conclusions": {
+    "allocator_failure": "CONFIRMED from Run131",
+    "high_commit_alone_explains_failure": false,
+    "run131_memory_pressure_contributor_strong_hypothesis_superseded": true,
+    "memory_pressure_contribution": "Possible;unproven",
+    "flc_memory_leak_confirmed": false,
+    "transient_harness_or_driver_growth_excluded": false
+  },
+  "source_or_settings_changed": false,
+  "processes_stopped": false,
+  "game_or_gpu_test_launched": false,
+  "index_empty": true,
+  "head": "d40f8f230fc7504023e4a052c99a81b5a08ce6b4",
+  "next_action": "With implementation authority,record bounded owned-process/system memory at startup/idle/activation/firstoutput and isolate menu-duration versus near-tactical startup using captured assets."
+}

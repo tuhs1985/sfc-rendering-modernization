@@ -88,15 +88,15 @@ def parse_audits(raw,session,pid):
 
 
 class Relay:
-    def __init__(self,folder,receiver,game_root,additive=False,offline_fixture=False,persistent=False,buffered=False):
+    def __init__(self,folder,receiver,game_root,additive=False,offline_fixture=False,persistent=False,buffered=False,multi_scene=False):
         self.folder=Path(folder);self.receiver=receiver;self.root=Path(game_root);self.process=None;self.selected=None;self.error=None;self.attempted=False;self.started=time.monotonic()
-        initialize(receiver.channel,persistent=persistent);self.persistent=persistent;self.buffered=buffered
+        initialize(receiver.channel,persistent=persistent);self.persistent=persistent;self.buffered=buffered;self.multi_scene=multi_scene
         self.additive=additive;self.offline_fixture=offline_fixture;self.pending=None;self.lights=None;self.light_replay=None
         self.selected_model=None
         self.binding_generation=0;self.binding_pending=None;self.binding_events=[];self.bound_row=None;self.binding_requested_at=0
         self.content=None;self.content_signature=None;self.mesh_cache={};self.recovery_polled=0;self.recovery_rejected=set()
         self.service=None
-        if additive:
+        if additive and not multi_scene:
             from owner_selection import selected_model
             self.selected_model=selected_model()
             (self.folder/'offset-ship-config-accepted.toml').write_bytes((ROOT/'tools/d3d9_proof/offset_ship.toml').read_bytes())
@@ -144,7 +144,7 @@ class Relay:
                 camera_state(row,[0,0,0],mesh['used_points'])
             except (ValueError,OSError):continue
             candidates.append((row,mesh))
-        if self.additive:
+        if self.additive and not self.multi_scene:
             from owner_selection import choose
             choice=choose(candidates,self.selected_model)
             candidates=[choice] if choice else []
@@ -179,15 +179,25 @@ class Relay:
     def launch(self,gpu,manifest,row,pid):
         if self.process:raise ValueError('Live renderer already started')
         self.selected=dict(owner=row[1],revision=row[7],model=manifest['model_name'],asset_sha256=manifest['asset_sha256'],preparation_seconds=time.monotonic()-self.started)
-        if self.additive:self.selected.update(selection='Explicit known player-fixture model;not engine player flag',selected_model=self.selected_model)
+        if self.additive:self.selected.update(selection='First qualified fresh asset,cohort scheduling anchor;not player flag' if self.multi_scene else 'Explicit known player-fixture model;not engine player flag',selected_model=self.selected_model)
         env={**os.environ,'DXVK_CONFIG_FILE':str(gpu/'rtx.conf'),'RTX_AUTOMATION_DISABLE_BLOCKING_DIALOG_BOXES':'1','RTX_CAPTURE_REMIX_CONFIGS':'0',
                  'DXVK_ENABLE_RAYTRACING':'1','DXVK_GRAPHICS_PRESET_TYPE':'4','RTX_INTEGRATE_INDIRECT_MODE':'0','DXVK_DLSS_PRESET':'0',
                  'SFC_D3D9_LIVE_TIMING':'1','SFC_D3D9_GAME_PID':str(pid),'SFC_REMIX_CALIBRATION_SCENE':self.receiver.name,
                  'SFC_D3D9_EXPECTED_MODEL':str(row[5]),'SFC_D3D9_EXPECTED_SOURCE':str(row[6]),
                  'SFC_DIRECT64_TIMING_ONLY':'1','SFC_DIRECT64_PACED_FRAMES':'0','SFC_DIRECT64_LATEST_INPUT':'0','SFC_DIRECT64_SINGLE_PRESENT':'1','SFC_DIRECT64_INJECT_LAG_MS':'0'}
         for key in ('DXVK_RTX_CAPTURE_ENABLE_ON_FRAME','DXVK_DUMP_SCREENSHOT_FRAME','DXVK_TERMINATE_APP_FRAME'):env.pop(key,None)
+        if not self.offline_fixture:
+            for key in ('SFC_DIRECT64_BACKBUFFER_DIAGNOSTIC','SFC_D3D9_REBIND_FIXTURE','SFC_D3D9_FIXTURE_ROWS','SFC_SYNC_FIXTURE_SHORT_LEAD'):
+                env.pop(key,None) # Offline diagnostic settings must not leak into gameplay.
         for key in ('SFC_D3D9_GAME_OUTPUT','SFC_D3D9_VISUAL_SETTINGS','SFC_D3D9_LIGHT_SETTINGS'):env[key]='1' if self.additive else '0'
         env['SFC_D3D9_SYNC_BUFFER']='1' if self.buffered else '0'
+        env['SFC_D3D9_MULTISCENE']='1' if self.multi_scene else '0'
+        env['SFC_PIPELINE_MODE']=getattr(self,'mode','test')
+        env.pop('SFC_D3D9_INITIAL_ASSET_MASK',None)
+        if self.multi_scene:
+            mask=sum(1<<(a['id']-1) for a in self.catalog if a.get('initial'))
+            if not mask:raise ValueError('Initial material/catalog batch required')
+            env['SFC_D3D9_INITIAL_ASSET_MASK']=format(mask,'x')
         env['SFC_D3D9_SHARED_LIGHTS']='1' if self.additive else '0'
         if self.additive:
             if self.content_signature is None:
@@ -199,7 +209,12 @@ class Relay:
             from scene_bundle import read_replay
             vertices=read_replay(gpu/'scene.bin')['vertices'];span=max(max(v[axis] for v in vertices)-min(v[axis] for v in vertices) for axis in range(3))
             from owner_selection import camera_left_offset
-            self.selected['camera_offset']=camera_left_offset(span)
+            if self.multi_scene:
+                from multi_scene import camera_offset,CONFIG as placement_config
+                self.selected['camera_offset']=camera_offset()
+                self.selected['placement']='common camera-left diagnostic translation;no original suppression'
+                (self.folder/'multi-ship-config-accepted.toml').write_bytes(placement_config.read_bytes())
+            else:self.selected['camera_offset']=camera_left_offset(span)
             env.update(SFC_D3D9_ASSET_SHA256=manifest['asset_sha256'],SFC_D3D9_OFFSET_X=str(self.selected['camera_offset'][0]))
             from owner_rebind import initialize as init_binding,request
             self.binding_generation=1;self.bound_row=list(row)
@@ -208,9 +223,16 @@ class Relay:
             cookie=int(self.content_signature[:16],16) or 1
             init_binding(self.receiver.channel,pid);request(self.receiver.channel,1,row,cookie)
             env['SFC_D3D9_REBIND_COOKIE']=f'{cookie:x}'
-        command=[str(GUARD),str(gpu),'120' if self.additive else '90',str(128*1024*1024),str(2*1024*1024),str(EXE),str(gpu),str(RUNTIME),str(RECEIVER),'normal']
-        self.process=sp.Popen(command,env=env,creationflags=sp.CREATE_NO_WINDOW)
-        print(('Offset ordinary-D3D9 ship: ' if self.additive else 'Separate D3D9 renderer timing: ')+manifest['model_name']+('. Original ship stays visible;existing visual baseline.' if self.additive else '. No new picture will be displayed.'),flush=True)
+        from evidence_budget import AGGREGATE_BYTES
+        scratch_limit=AGGREGATE_BYTES if self.multi_scene else 128*1024*1024
+        command=[str(GUARD),str(gpu),'120' if self.additive else '90',str(scratch_limit),str(2*1024*1024),str(EXE),str(gpu),str(RUNTIME),str(RECEIVER),'normal']
+        if getattr(self,'prewarm_process',None):
+            if self.prewarm_process.poll() is not None:raise ValueError('Prepared renderer exited before activation')
+            from warm_start import activate
+            activate(gpu,env,self.receiver.name)
+            self.process=self.prewarm_process
+        else:self.process=sp.Popen(command,env=env,creationflags=sp.CREATE_NO_WINDOW)
+        print(('Multi-ship ordinary-D3D9 diagnostic: ' if self.multi_scene else 'Offset ordinary-D3D9 ship: ' if self.additive else 'Separate D3D9 renderer timing: ')+manifest['model_name']+('. Original ship stays visible;existing visual baseline.' if self.additive else '. No new picture will be displayed.'),flush=True)
         if self.additive and not self.offline_fixture:self.start_service(pid)
 
     def recover(self,pid):
@@ -331,6 +353,9 @@ class Relay:
             if not admission or 'SHARED_LIGHTS active=1 per_frame_file_reads=0' not in log:
                 raise ValueError('Fast recovery light/admission receipt missing')
             report['input_admission']=dict(expired=int(admission[1]),old_epoch=int(admission[2]),maximum_age_us=int(admission[3]))
+            stage_rows=re.findall(r'LIVE_ADMISSION_STAGE stage=(\d+) reason0=(\d+) reason1=(\d+) reason2=(\d+) reason3=(\d+) reason4=(\d+) reason5=(\d+)',log)
+            report['input_admission']['stages']=[dict(stage=int(s),**dict(zip(('accepted','clock','frame','bad_frame','age','closed'),map(int,values)))) for s,*values in stage_rows]
+            report['input_admission']['policy']='Actual compositor closed-scene watermark,current/adjacent frame,50ms age guard' if self.multi_scene else 'Legacy2ms current-frame admission'
             report['shared_light_delivery']=True
             summary=re.search(r'LIVE_OUTPUT_SUMMARY outputs=(\d+) light_omitted=(\d+)',log)
             if not summary:raise ValueError('Additive output/omission accounting missing')

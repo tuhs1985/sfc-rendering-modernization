@@ -1,0 +1,33 @@
+{
+  "run": "Run138",
+  "date": "2026-10-24",
+  "runtime": "remix-1.5.2",
+  "source_commit": "b81a7b566b1eeb9edb4dc2b3c9d3972e0f253ad4",
+  "sfc_launched": false,
+  "custom_loader_added": false,
+  "native_renderer_changed": false,
+  "production_defaults_changed": false,
+  "two_second_target_met": false,
+  "residency_boundary_proven": false,
+  "cases": [
+    {"folder": "20261024-144854-230825-return-fixture", "mode": "performance", "loading": "original-preload", "discovery_to_matching_seconds": 5.4534479, "activation_to_matching_seconds": 2.9430741, "discovery_to_activation_seconds": 2.5103738, "maximum_bootstrap_present_seconds": 2.2079947, "steady_draws": 600, "draws_each_owner": 839, "result_sha256": "38960bc0ff68197d5d67087715feb3a616d8f9dc3517491714811c9706530a4c"},
+    {"folder": "20261024-144935-036157-return-fixture", "mode": "performance", "loading": "stream-eligible", "discovery_to_matching_seconds": 3.1863824, "activation_to_matching_seconds": 0.7102547, "discovery_to_activation_seconds": 2.4761277, "maximum_bootstrap_present_seconds": 0.0604963, "steady_draws": 596, "draws_each_owner": 800, "result_sha256": "e454ca0f9f6c2d2a7d92e1da963176979d98493b6d9a30e80e5b52a0ae0e9f7d"},
+    {"folder": "20261024-145124-177894-return-fixture", "mode": "performance", "loading": "rtxio-original-preload", "discovery_to_matching_seconds": 5.4223987, "activation_to_matching_seconds": 3.0753484, "discovery_to_activation_seconds": 2.3470503, "maximum_bootstrap_present_seconds": 0.0931604, "steady_draws": 593, "draws_each_owner": 785, "result_sha256": "b401378e1155edd99b585bf95934d0cbd072f3ed567654f06f3322cf03ad957c"},
+    {"folder": "20261024-145322-155590-return-fixture", "mode": "test", "loading": "final-source-original-preload", "discovery_to_matching_seconds": 5.7720989, "activation_to_matching_seconds": 3.0378662, "discovery_to_activation_seconds": 2.7342327, "maximum_bootstrap_present_seconds": 0.0620153, "steady_draws": 593, "draws_each_owner": 783, "result_sha256": "5665394b1d961bea283a1c069826a2d103875d265e08c1396e5ecf65419cb5c5"}
+  ],
+  "independent_owners_per_case": 4,
+  "captured_contents_per_case": 3,
+  "generated_image_files_compared": 432,
+  "first_three_image_sha256_multisets_equal": true,
+  "pixel_equivalence_claimed": false,
+  "early_late_covered_mean_rgb_delta": {"original": 2.3536750226, "stream": 9.6824418543, "rtxio": 13.6681781894},
+  "python_tests_passed": 488,
+  "normal_qualification": "20261024-145322-155590-return-fixture",
+  "game_preflight_modes_passed": ["performance", "test"],
+  "owned_processes_remaining": 0,
+  "archived_completed_image_sets": 5,
+  "recoverable_bytes_saved": 762840015,
+  "governed_artifact_bytes_before_curated_docs": 18960507810,
+  "allowed_bytes": 20000000000,
+  "next_action": "Obtain sponsor approval to install official NVIDIA Nsight Systems, then prepare a bounded process-tree-only Vulkan timeline using unchanged runtime;no system-wide injection or new loader."
+}

@@ -84,14 +84,24 @@ def texture(raw):
         return dict(width=image.width,height=image.height,format=image.format),pixels
 
 
-def prepare(source,output,game_root,*,live_record=None):
+def prepare(source,output,game_root,*,live_record=None,evidence_mode='test',qualified_mesh=None):
     """Read original runtime mesh;resolve original IMAGE files only,never MOD geometry."""
+    if evidence_mode not in ('performance','test'):raise ValueError('Scene evidence mode')
+    if evidence_mode=='performance' and live_record is None:raise ValueError('Performance preparation requires fresh live row')
     source=Path(source).resolve();source.relative_to(ROOT/'artifacts')
     output=Path(output).resolve();output.relative_to(ROOT/'artifacts')
     if output.exists():raise ValueError('Refuse to overwrite replay evidence')
     if source.stat().st_size>2*1024*1024 or source.with_suffix('.json').stat().st_size>256*1024:raise ValueError('Source packet/reference cap')
     raw=source.read_bytes();refs=source.with_suffix('.json').read_bytes()
-    mesh=decode_mesh(raw,refs);revision=int(source.stem.rsplit('-',1)[1])
+    if qualified_mesh is None:mesh=decode_mesh(raw,refs)
+    else:
+        # Reuse this worker's fully validated immutable decode. Cheap byte hashes
+        # still bind it to the current packet AND associations;never trust IDs.
+        if (sha(raw)!=qualified_mesh.get('packet_sha256') or
+                sha(refs)!=qualified_mesh.get('_capture_refs_sha256')):
+            raise ValueError('Qualified mesh packet/reference changed')
+        mesh=qualified_mesh
+    revision=int(source.stem.rsplit('-',1)[1])
     updates=source.parent/'LIVE-SCENE-001-updates.jsonl'
     capture_metadata_path=source.parent/'run-metadata.json'
     if capture_metadata_path.is_file():
@@ -143,7 +153,8 @@ def prepare(source,output,game_root,*,live_record=None):
     result=dict(schema='SFC-neutral-offline-scene-1',source_packet=str(source.relative_to(ROOT)),
         source_session=source_session,source_metadata=str(capture_metadata_path.relative_to(ROOT)),source_metadata_sha256=sha(capture_metadata_path.read_bytes()),
         source_packet_sha256=sha(raw),source_references_sha256=sha(refs),updates=str(updates.relative_to(ROOT)),
-        updates_sha256=sha(updates.read_bytes()),model_name=mesh['refs']['model_filename'],
+        updates_sha256=sha(updates.read_bytes()) if evidence_mode=='test' else None,
+        evidence_mode=evidence_mode,model_name=mesh['refs']['model_filename'],
         geometry_sha256=mesh['geometry_sha256'],asset_sha256=sha(json.dumps(identity,sort_keys=True).encode()),
         replay_sha256=sha(payload),vertices=len(vertices),triangles=len(vertices)//3,groups=groups,
         textures=textures,frames=frames,image_bytes=total,image_warning=total>=64*1024*1024,

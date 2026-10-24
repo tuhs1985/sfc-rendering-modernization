@@ -110,6 +110,16 @@ class SceneBundleTests(unittest.TestCase):
             self.assertEqual(manifest['textures'][0]['original_sha256'],hashlib.sha256((folder/'image.bmp').read_bytes()).hexdigest())
             self.assertEqual(read_replay(folder/'out/scene.bin')['vertices'][0][-2:],(0,1))
             with patch('scene_bundle.decode_mesh',return_value=mesh),self.assertRaises(ValueError):prepare(source,folder/'out',folder)
+            mesh['packet_sha256']=hashlib.sha256(b'capture').hexdigest()
+            mesh['_capture_refs_sha256']=hashlib.sha256(b'{}').hexdigest()
+            (folder/'LIVE-SCENE-001-updates.jsonl').unlink()
+            with patch('scene_bundle.decode_mesh',side_effect=AssertionError('No duplicate decode')):
+                fast=prepare(source,folder/'fast',folder,live_record=row,evidence_mode='performance',qualified_mesh=mesh)
+            self.assertIsNone(fast['updates_sha256'])
+            self.assertEqual((folder/'fast/scene.bin').read_bytes(),(folder/'out/scene.bin').read_bytes())
+            mesh['_capture_refs_sha256']='0'*64
+            with self.assertRaisesRegex(ValueError,'packet/reference changed'):
+                prepare(source,folder/'stale',folder,live_record=row,evidence_mode='performance',qualified_mesh=mesh)
             metadata.write_text('{}')
             with patch('scene_bundle.decode_mesh',return_value=mesh),self.assertRaises(ValueError):prepare(source,folder/'bad-session',folder)
 

@@ -49,7 +49,10 @@ int wmain(int argc,wchar_t** argv){
     if(ResumeThread(child.hThread)==static_cast<DWORD>(-1))throw std::runtime_error("resume verified client");resumed=true;CloseHandle(child.hThread);child.hThread=nullptr;
     wchar_t tuning[4]{};
     const bool lightTuning=GetEnvironmentVariableW(L"SFC_LIGHT_TUNING",tuning,4)==1&&tuning[0]==L'1';
-    const auto waited=WaitForSingleObject(child.hProcess,fixture?60000:lightTuning?1980000:300000);
+    // Only the explicit standalone menu-idle experiment needs a longer fixture
+    // watchdog. Never extend the game or ordinary fixture deadline implicitly.
+    wchar_t idle[16]{};const bool idleExperiment=fixture&&GetEnvironmentVariableW(L"SFC_FIXTURE_MENU_IDLE_MS",idle,16)&&!wcscmp(idle,L"60000");
+    const auto waited=WaitForSingleObject(child.hProcess,fixture?(idleExperiment?100000:60000):lightTuning?1980000:300000);
     if(waited==WAIT_OBJECT_0){DWORD code=1;GetExitCodeProcess(child.hProcess,&code);std::cout<<"CHILD_EXIT code="<<code<<"\n";result=static_cast<int>(code);}
     else{std::cout<<"CHILD_WAIT_LIMIT original_game_left_running="<<!fixture<<"\n";result=120;}
   }catch(const std::exception& e){std::cout<<"LAUNCH_FAILED "<<e.what()<<" win32="<<GetLastError()<<"\n";if(child.hProcess&&!resumed)TerminateProcess(child.hProcess,97);}

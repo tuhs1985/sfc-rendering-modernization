@@ -53,16 +53,22 @@ struct Source {
  void begin(DWORD frame){if(store)InterlockedExchange(&store->header.frame,static_cast<LONG>(frame));}
  void reject(DWORD frame){if(store){InterlockedExchange(&store->header.bad_frame,static_cast<LONG>(frame));++store->header.source_rejected;}}
  void retire(DWORD owner,DWORD frame){if(store&&static_cast<DWORD>(InterlockedCompareExchange64(&store->header.selected,0,0))==owner)InterlockedExchange(&store->header.bad_frame,static_cast<LONG>(frame));}
- void offer(Row& row){
-  if(!store)return;auto& h=store->header;if(frame_ingress::state(&h.stopped))return;
+ bool prepare(Row& row,Packet& p){
+  if(!store)return false;auto& h=store->header;if(frame_ingress::state(&h.stopped))return false;
   const auto selected=static_cast<uint64_t>(InterlockedCompareExchange64(&h.selected,0,0));
-  if(selected!=selection(row[1],row[7]))return;
-  if(h.source_thread&&h.source_thread!=GetCurrentThreadId()){reject(row[2]);return;}h.source_thread=GetCurrentThreadId();
-  if(row[4]!=1||!row[48]){reject(row[2]);return;}
-  LARGE_INTEGER q{};if(!QueryPerformanceCounter(&q)){reject(row[2]);return;}
-  Packet p{};memcpy(p.session,h.session,16);p.sequence=++counter;p.offered=static_cast<uint64_t>(q.QuadPart);
+  if(selected!=selection(row[1],row[7]))return false;
+  if(h.source_thread&&h.source_thread!=GetCurrentThreadId()){reject(row[2]);return false;}h.source_thread=GetCurrentThreadId();
+  if(row[4]!=1||!row[48]){reject(row[2]);return false;}
+  LARGE_INTEGER q{};if(!QueryPerformanceCounter(&q)){reject(row[2]);return false;}
+  p={};memcpy(p.session,h.session,16);p.sequence=++counter;p.offered=static_cast<uint64_t>(q.QuadPart);
   row[94]=static_cast<DWORD>(p.sequence);row[95]=static_cast<DWORD>(p.sequence>>32);p.row=row;p.state_hash=row_hash(row);p.checksum=checksum(p);
-  if(!publish(store->input,p,h.replaced)){row[94]=row[95]=0;reject(row[2]);return;}++h.published;
+  return true;
+ }
+ bool commit(const Packet& p){
+  if(!store||frame_ingress::state(&store->header.stopped))return false;auto& h=store->header;
+  if(!valid(p,h)||!publish(store->input,p,h.replaced)){reject(p.row[2]);return false;}++h.published;return true;
+ }
+ void offer(Row& row){Packet p{};if(prepare(row,p)&&!commit(p))row[94]=row[95]=0;
  }
  void close(){if(store)InterlockedExchange(&store->header.stopped,1);store=nullptr;}
 };

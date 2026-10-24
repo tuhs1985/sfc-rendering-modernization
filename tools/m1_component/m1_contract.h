@@ -77,6 +77,19 @@ public:
         return 0;
     }
 
+    // A visual may be shared by several living ships. Prefer the current native
+    // call context;never silently substitute another owner for a stale epoch.
+    std::uint32_t model_owner(std::uintptr_t visual,std::uintptr_t ship,std::uint32_t epoch) const {
+        if(!visual)return 0;
+        if(ship||epoch){
+            for(const auto& slot:slots_)if(slot.active&&slot.ship==ship&&slot.id==epoch&&slot.visual==visual)return epoch;
+            return 0;
+        }
+        std::uint32_t unique=0;
+        for(const auto& slot:slots_)if(slot.active&&slot.visual==visual){if(unique)return 0;unique=slot.id;}
+        return unique;
+    }
+
     Slot* find_by_id(std::uint32_t id) {
         for (Slot& slot : slots_) {
             if (slot.active && slot.id == id) return &slot;

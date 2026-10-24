@@ -7,6 +7,7 @@ import json
 import os
 import re
 import shutil
+import struct
 import subprocess as sp
 import time
 from return_channel import Channel,valid_name
@@ -44,10 +45,45 @@ def main():
     parser.add_argument('--persistent-scene',action='store_true',help='Exercise version2 persistent-source wire through actual GPU return fixture')
     parser.add_argument('--synchronized-buffer',action='store_true',help='Exercise complete-game-frame/ship one-frame pairing,standalone fixture only')
     parser.add_argument('--buffer-early-ready',action='store_true',help='Use normal16ms source lead to exercise queued output before the saved scene is presented')
+    parser.add_argument('--multi-ship',action='store_true',help='Two different historical fresh packets through aligned retained scene;offline only')
+    parser.add_argument('--pipeline-mode',choices=('performance','test'),default='test')
+    parser.add_argument('--prewarm',action='store_true',help='Start native renderer before discovering prepared fixture assets')
+    parser.add_argument('--startup-profile',action='store_true',help='Offline only: bounded native startup phase/QPC/memory measurements')
+    parser.add_argument('--loading-policy',choices=('inherit','async','blocking','rtxio'),default='inherit',help='Offline startup only: explicitly exercise pinned Remix loading/compilation settings')
+    parser.add_argument('--material-library',choices=('layers','flat'),default='layers',help='Offline startup only: same materials/images without layered USD composition')
+    parser.add_argument('--material-texture-loading',choices=('preload','stream'),default='preload',help='Offline only: compare existing Remix per-material preload flag with native streaming;image bytes unchanged')
+    parser.add_argument('--native-log-level',choices=('inherit','error'),default='inherit',help='Offline startup only: test built-in runtime logging cost;errors remain')
+    parser.add_argument('--api-texture-prefetch',action='store_true',help='Offline only: qualify public material API texture-cache reuse before first draw;not GPU-residency proof')
+    parser.add_argument('--overlap-texture-prefetch',action='store_true',help='Offline only: feed finalized per-asset texture requests during remaining preparation')
+    parser.add_argument('--menu-idle-seconds',type=int,choices=(0,60),default=0,help='Offline startup profile only: wait before any synthetic scene publication')
+    parser.add_argument('--render-prewarm',choices=('off','empty','triangle'),default='off',help='Experimental offline startup only: render unpublished warm-up frames before scene activation')
+    parser.add_argument('--isolate-initial-material-library',action='store_true',help='Offline diagnosis ONLY: retain empty master material library;not appearance/qualification evidence')
+    parser.add_argument('--multi-ship-resources',action='store_true',help='Offline three captured assets plus independent shared-asset owner;not game evidence')
+    parser.add_argument('--multi-ship-late-asset',action='store_true',help='Offline third distinct asset first observed after120returned frames')
+    parser.add_argument('--isolate-late-material-reload',action='store_true',help='Offline diagnosis ONLY:skip late material-list rewrite;not appearance/qualification evidence')
     parser.add_argument('--slow-end-scene',action='store_true',help='Offline only: detach while simulated original COM call sleeps')
     parser.add_argument('--with-depth',action='store_true',help='Bind known synthetic D24S8 descriptor, not actual scene depth')
     parser.add_argument('--observation-only',action='store_true',help='No Remix runtime/image; control channel and depth observations only')
     args=parser.parse_args()
+    if args.startup_profile and not(args.multi_ship and args.prewarm):parser.error('--startup-profile requires --multi-ship --prewarm')
+    if args.loading_policy!='inherit' and not args.startup_profile:parser.error('--loading-policy requires --startup-profile')
+    if args.material_library!='layers' and not args.startup_profile:parser.error('--material-library requires --startup-profile')
+    if args.material_texture_loading!='preload' and (not args.startup_profile or args.material_library!='layers' or args.api_texture_prefetch):parser.error('Texture streaming comparison requires startup profile/layers and excludes API prefetch')
+    if args.native_log_level!='inherit' and not args.startup_profile:parser.error('--native-log-level requires --startup-profile')
+    if args.api_texture_prefetch and not args.startup_profile:parser.error('--api-texture-prefetch requires --startup-profile')
+    if args.overlap_texture_prefetch and not args.api_texture_prefetch:parser.error('--overlap-texture-prefetch requires --api-texture-prefetch')
+    if args.menu_idle_seconds and not args.startup_profile:parser.error('--menu-idle-seconds requires --startup-profile')
+    if args.render_prewarm!='off' and not args.startup_profile:parser.error('--render-prewarm requires --startup-profile')
+    if args.isolate_initial_material_library and not args.startup_profile:parser.error('--isolate-initial-material-library requires --startup-profile')
+    os.environ.pop('SFC_D3D9_RENDER_PREWARM',None)
+    if args.render_prewarm!='off':os.environ['SFC_D3D9_RENDER_PREWARM']=args.render_prewarm
+    # Relay workers inherit the supervisor environment; this switch exists ONLY
+    # on the standalone fixture, never a normal gameplay or callback setting.
+    if args.startup_profile:os.environ['SFC_D3D9_STARTUP_PROFILE']='1'
+    if args.multi_ship_resources and not args.multi_ship:parser.error('--multi-ship-resources requires --multi-ship')
+    if args.multi_ship_late_asset and not args.multi_ship_resources:parser.error('--multi-ship-late-asset requires --multi-ship-resources')
+    if args.isolate_late_material_reload and not args.multi_ship:parser.error('--isolate-late-material-reload requires --multi-ship')
+    if args.multi_ship:args.d3d9_additive=True;args.synchronized_buffer=True
     if args.buffer_early_ready and not args.synchronized_buffer:parser.error('--buffer-early-ready requires --synchronized-buffer')
     if args.rebind_owner and not args.d3d9_additive:parser.error('--rebind-owner requires --d3d9-additive')
     if args.persistent_scene and not args.d3d9_additive:parser.error('--persistent-scene requires --d3d9-additive')
@@ -71,11 +107,20 @@ def main():
         sys.path.insert(0,str(ROOT/'tools/d3d9_proof'))
         from run_offline import storage,AGGREGATE_BYTES
         if storage()+192*1024*1024>AGGREGATE_BYTES:raise RuntimeError('Additive fixture lacks192MiB reservation within20GB cap')
+    backend_locks=None
+    if args.multi_ship:
+        from qualify_multiship import locks
+        backend_locks=locks()
     work=ROOT/'artifacts/remix-runtime/runs'/dt.datetime.now(dt.timezone.utc).strftime('%Y%m%d-%H%M%S-%f-return-fixture');work.mkdir()
     for source,name in [(broad_capture.qualified_full() if args.broad_capture or args.depth_snapshots or args.d3d9_additive else TEST/'dxgi.dll','dxgi.dll'),(BIN/'d3d11_return_fixture.exe','d3d11_return_fixture.exe'),(BIN/'SFCRemixReturn.dll','SFCRemixReturn.dll')]:shutil.copyfile(source,work/name)
     # No existing game config changed. Disable fixture menu/input capture only.
     (work/'ReShade.ini').write_text('[GENERAL]\nEffectSearchPaths=./no-effects\nPresetPath=./fixture.ini\n[OVERLAY]\nTutorialProgress=4\nShowFPS=0\nShowFrameTime=0\n[INPUT]\nInputProcessing=0\n')
     env={**os.environ,**ENV,'DXVK_LOG_PATH':str(work)}
+    env.pop('SFC_FIXTURE_SHIP_SNAPSHOT',None)
+    if args.startup_profile:env['SFC_FIXTURE_SHIP_SNAPSHOT']='1'
+    env.pop('SFC_FIXTURE_MENU_IDLE_MS',None)
+    if args.menu_idle_seconds:env['SFC_FIXTURE_MENU_IDLE_MS']=str(args.menu_idle_seconds*1000)
+    env['SFC_PIPELINE_MODE']=args.pipeline_mode if args.multi_ship else 'test'
     host=fixture=channel=None;semantic=None;timing_result=None;streams=[];start=time.monotonic();error=None;history=[];live_relay=None;live_result=None;live_manifest=None;live_rows=[]
     try:
         def output(name):
@@ -93,26 +138,43 @@ def main():
         env.update(SFC_REMIX_RETURN_SESSION=session,SFC_REMIX_EXPECTED_IMAGE=str(work/'d3d11_return_fixture.exe'),SFC_REMIX_PRELOAD_REQUIRED='1')
         env.pop('SFC_D3D9_SOURCE_TIMING',None)
         env.pop('SFC_D3D9_LIVE_TIMING',None);env.pop('SFC_D3D9_FIXTURE_ROWS',None)
+        env.pop('SFC_D3D9_MULTISCENE',None)
+        env.pop('SFC_MULTISCENE_LATE_ASSET',None)
         if args.source_timing:
             from present_calibration import Receiver
             semantic=Receiver();env.update(SFC_D3D9_SOURCE_TIMING='1',SFC_REMIX_CALIBRATION_SCENE=semantic.name)
         if args.live_owner_timing:
-            from live_owner_timing import Relay
+            if args.multi_ship:from multi_scene_relay import Relay
+            else:from live_owner_timing import Relay
             from run_offline import CAPTURE
             from scene_bundle import snapshots
             from live_scene import decode_mesh
-            live_relay=Relay(work,semantic,TEST,additive=args.d3d9_additive,offline_fixture=args.d3d9_additive,persistent=args.persistent_scene,buffered=args.synchronized_buffer)
-            mesh=decode_mesh((CAPTURE/'LIVE-SCENE-001-asset-3.bin').read_bytes(),(CAPTURE/'LIVE-SCENE-001-asset-3.json').read_bytes())
-            selected_frames=snapshots(mesh,CAPTURE/'LIVE-SCENE-001-updates.jsonl',3)
-            all_rows=(CAPTURE/'LIVE-SCENE-001-updates.jsonl').read_text().splitlines()
-            live_rows=[json.loads(all_rows[f['line']-1]) for f in selected_frames]
-            gate=work/'gate';gate.mkdir()
-            for extension in ('bin','json'):shutil.copyfile(CAPTURE/f'LIVE-SCENE-001-asset-3.{extension}',gate/f'LIVE-SCENE-001-asset-3.{extension}')
-            (gate/'LIVE-SCENE-001-updates.jsonl').write_bytes(b'')
-            (work/'manifest.json').write_text(json.dumps(dict(synthetic_source=True,source_packet_sha256=digest(CAPTURE/'LIVE-SCENE-001-asset-3.bin'),semantic_calibration={'scene_session':semantic.name}),indent=2))
-            import struct
-            (work/'fixture-rows.bin').write_bytes(b''.join(struct.pack('<96I',*r) for r in live_rows))
-            env.update(SFC_D3D9_LIVE_TIMING='1',SFC_D3D9_FIXTURE_ROWS=str(work/'fixture-rows.bin'))
+            mode_args={'pipeline_mode':args.pipeline_mode} if args.multi_ship else {}
+            live_relay=Relay(work,semantic,TEST,additive=args.d3d9_additive,offline_fixture=args.d3d9_additive,persistent=args.persistent_scene,buffered=args.synchronized_buffer,**mode_args)
+            if args.multi_ship:live_relay.isolate_late_material_reload=args.isolate_late_material_reload
+            if args.multi_ship:live_relay.isolate_initial_material_library=args.isolate_initial_material_library
+            if args.multi_ship:live_relay.loading_policy=args.loading_policy
+            if args.multi_ship:live_relay.material_library=args.material_library
+            if args.multi_ship:live_relay.material_texture_loading=args.material_texture_loading
+            if args.multi_ship:live_relay.native_log_level=args.native_log_level
+            if args.multi_ship:live_relay.api_texture_prefetch=args.api_texture_prefetch
+            if args.multi_ship:live_relay.overlap_texture_prefetch=args.overlap_texture_prefetch
+            if args.multi_ship:
+                from multi_scene_fixture import rows_and_packets
+                live_rows=rows_and_packets(work,semantic.name,extended=args.multi_ship_resources)
+                env.update(SFC_D3D9_LIVE_TIMING='1',SFC_D3D9_MULTISCENE='1',SFC_D3D9_FIXTURE_ROWS=str(work/'fixture-rows.bin'))
+                if args.multi_ship_late_asset:env['SFC_MULTISCENE_LATE_ASSET']='1'
+            else:
+                mesh=decode_mesh((CAPTURE/'LIVE-SCENE-001-asset-3.bin').read_bytes(),(CAPTURE/'LIVE-SCENE-001-asset-3.json').read_bytes())
+                selected_frames=snapshots(mesh,CAPTURE/'LIVE-SCENE-001-updates.jsonl',3)
+                all_rows=(CAPTURE/'LIVE-SCENE-001-updates.jsonl').read_text().splitlines()
+                live_rows=[json.loads(all_rows[f['line']-1]) for f in selected_frames]
+                gate=work/'gate';gate.mkdir()
+                for extension in ('bin','json'):shutil.copyfile(CAPTURE/f'LIVE-SCENE-001-asset-3.{extension}',gate/f'LIVE-SCENE-001-asset-3.{extension}')
+                (gate/'LIVE-SCENE-001-updates.jsonl').write_bytes(b'')
+                (work/'manifest.json').write_text(json.dumps(dict(synthetic_source=True,source_packet_sha256=digest(CAPTURE/'LIVE-SCENE-001-asset-3.bin'),semantic_calibration={'scene_session':semantic.name}),indent=2))
+                (work/'fixture-rows.bin').write_bytes(b''.join(struct.pack('<96I',*r) for r in live_rows))
+                env.update(SFC_D3D9_LIVE_TIMING='1',SFC_D3D9_FIXTURE_ROWS=str(work/'fixture-rows.bin'))
         env.pop('SFC_D3D9_GAME_OUTPUT',None)
         if args.d3d9_additive:env['SFC_D3D9_GAME_OUTPUT']='1'
         env.pop('SFC_D3D9_REBIND_FIXTURE',None)
@@ -143,14 +205,16 @@ def main():
             size=sum(capture_file_bytes(p) for p in work.rglob('*'))
             if args.d3d9_additive:
                 images=sum(capture_file_bytes(p) for p in (work/'gpu').rglob('*') if p.suffix.lower()=='.dds' or re.fullmatch(r'texture-\d+\.bin',p.name))
-                if images>128*1024*1024:raise RuntimeError('Additive original/derived image128MiB cap')
+                if not args.multi_ship and images>128*1024*1024:raise RuntimeError('Additive original/derived image128MiB cap')
                 size-=images # Separate established image budget;logs remain32MiB.
             if elapsed>100 or size>(broad_capture.HARD+32*1024*1024 if args.broad_capture else (96*1024*1024 if args.depth_snapshots else 32*1024*1024)):raise RuntimeError('Fixture time/output cap')
             text=(work/'fixture.log').read_text(errors='replace')
             if live_relay:
                 verified=re.search(r'VERIFIED_CHILD pid=(\d+) suspended_path_match=1 disk_sha_match=1',text)
                 raw_pid=struct.unpack_from('<I',semantic.channel.read(10*1024*1024,32),28)[0]
-                if verified and raw_pid==int(verified[1]):live_relay.poll(raw_pid)
+                if verified and raw_pid==int(verified[1]):
+                    if args.prewarm and args.multi_ship:live_relay.start_on_launch(raw_pid)
+                    live_relay.poll(raw_pid)
             state=channel.snapshot()
             if args.rebind_owner and live_relay and live_relay.process and len(rebind_requests)<2:
                 from owner_rebind import acknowledged,request
@@ -258,6 +322,23 @@ def main():
     receipt['persistent_wire_fixture']=args.persistent_scene
     receipt['synchronized_buffer_fixture']=args.synchronized_buffer
     receipt['buffer_early_ready_fixture']=args.buffer_early_ready
+    receipt['multi_ship_fixture']=args.multi_ship
+    receipt['pipeline_mode']=args.pipeline_mode
+    receipt['prewarm']=args.prewarm
+    receipt['startup_profile']=args.startup_profile
+    receipt['menu_idle_seconds']=args.menu_idle_seconds
+    receipt['render_prewarm']=args.render_prewarm
+    receipt['loading_policy']=args.loading_policy
+    receipt['material_library']=args.material_library
+    receipt['material_texture_loading']=args.material_texture_loading
+    receipt['native_log_level']=args.native_log_level
+    receipt['api_texture_prefetch']=args.api_texture_prefetch
+    receipt['overlap_texture_prefetch']=args.overlap_texture_prefetch
+    receipt['diagnostic_skip_initial_material_library']=args.isolate_initial_material_library
+    receipt['multi_ship_resources_fixture']=args.multi_ship_resources
+    receipt['multi_ship_late_asset_fixture']=args.multi_ship_late_asset
+    receipt['diagnostic_skip_late_material_reload']=args.isolate_late_material_reload
+    if backend_locks:receipt['multi_ship_build_locks']=backend_locks
     if args.rebind_owner:receipt['synthetic_rebind_requests']=rebind_requests
     (work/'result.json').write_text(json.dumps(receipt,indent=2))
     print(f'Evidence: {work}')

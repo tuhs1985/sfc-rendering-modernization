@@ -65,6 +65,11 @@ def wait_component_ready(snapshot,pid,poll,enforce,timeout=60,clock=time.monoton
         pause(.05)
     raise RuntimeError('Graphics initialization readiness timed out; no tactical gate injection attempted')
 
+def tactical_gate_timeout(multi_ship):
+    # Multi-ship selection needs longer;retain the285s overall workflow ceiling.
+    return 120 if multi_ship else 90
+
+
 def wait_live_gate(pid,controller,enforce,timeout=90):
     k=C.WinDLL('kernel32',use_last_error=True)
     k.OpenEventW.argtypes=[W.DWORD,W.BOOL,W.LPCWSTR];k.OpenEventW.restype=W.HANDLE
@@ -109,6 +114,8 @@ def main():
     parser.add_argument('--offscreen-position',action='store_true',help='Default-off external read-only ship position across camera gaps;not renderer input')
     parser.add_argument('--persistent-scene',action='store_true',help='Simulation-driven retained native instances;player-ship display first')
     parser.add_argument('--synchronized-buffer',action='store_true',help='One complete game-frame delay paired with same-frame ship/depth;default off')
+    parser.add_argument('--multi-ship',action='store_true',help='Fresh retained different models,configured camera-left diagnostic;originals remain')
+    parser.add_argument('--pipeline-mode',choices=('performance','test'),default='test',help='Multi-ship evidence policy;essential safeguards remain in both')
     inspect.add_argument('--private-ship',action='store_true',help='Fresh semantic SDK ship return into private game-side target;no visible change')
     inspect.add_argument('--visible-ship',action='store_true',help='Fresh matching magenta ship at world-offset position in original camera viewport;original ships unchanged')
     inspect.add_argument('--textured-ship',action='store_true',help='Original textures,screen-resolution output,bounded delayed additive display;no suppression')
@@ -120,16 +127,17 @@ def main():
     parser.add_argument('--light-tuning',action='store_true',help='Low-recording live controls until normal game exit;30minute tactical ceiling')
     parser.add_argument('--scene-depth',action='store_true',help='Default-off depth-filtered additive ship;original drawing/UI path unchanged')
     args=parser.parse_args()
+    if args.multi_ship:args.d3d9_additive=True;args.synchronized_buffer=True
     if args.synchronized_buffer:
         if not args.d3d9_additive:parser.error('--synchronized-buffer requires --d3d9-additive')
         args.persistent_scene=True
         from qualify_synchronized_buffer import require_qualification as buffer_qualified
-        buffer_qualified()
+        if not args.multi_ship:buffer_qualified()
     if args.persistent_scene:
         if not args.d3d9_additive or args.offscreen_position:parser.error('--persistent-scene requires additive and excludes diagnostic external reader')
         args.camera_recovery=True
         from qualify_persistent_scene import require_qualification as persistent_qualified
-        persistent_qualified()
+        if not args.multi_ship:persistent_qualified()
     if args.scene_depth:
         if args.light_tuning or args.capture_ship_image:parser.error('--scene-depth is a bounded standalone test,not tuning/image capture')
         args.light_wiring=True
@@ -147,10 +155,11 @@ def main():
         from qualify_offscreen_position import require_qualification as offscreen_qualified
         offscreen_qualified()
     if args.camera_recovery:args.lifecycle_capture=True
+    if args.multi_ship and args.pipeline_mode=='performance':args.lifecycle_capture=False
     if args.lifecycle_capture and not args.d3d9_additive:parser.error('--lifecycle-capture requires --d3d9-additive')
     if args.lifecycle_capture:
         from qualify_lifecycle_capture import require_qualification as lifecycle_qualified
-        lifecycle_qualified()
+        if not args.multi_ship:lifecycle_qualified()
     if args.d3d9_additive:
         if args.private_ship or args.calibration or args.light_tuning or args.broad_capture or args.depth_snapshots or args.search_depth:parser.error('--d3d9-additive is separate from SDK/private/capture modes')
         args.source_timing=True;args.live_owner_timing=True;args.observation_only=True;args.capture_native_lights=True
@@ -174,7 +183,8 @@ def main():
             if recovered:print('Recovered prior interrupted test: '+recovered,flush=True)
     preflight()
     if args.source_timing:
-        if args.d3d9_additive:from additive_qualification import require_qualification
+        if args.multi_ship:from qualify_multiship import require_qualification
+        elif args.d3d9_additive:from additive_qualification import require_qualification
         elif args.live_owner_timing:from live_owner_timing import require_qualification
         else:from source_timing import require_qualification
         q=require_qualification()
@@ -234,6 +244,8 @@ def main():
     if args.source_timing:metadata.update(probe='D3D9-SOURCE-TIMING-001',scene='Metadata-only semantic offer to Present/overlay;no image or Remix runtime',output_resources_bytes=0,
         source_timing={'geometry_hook':False,'record_capacity':32768,'record_bytes':80,'max_detailed_owners_per_callback':8,'storage_bytes':2621568,'stages':['present','overlay'],'source_qpc_extension_words':[89,90,91,92,93]})
     metadata['light_tuning']=args.light_tuning
+    from pipeline_mode import policy as mode_policy
+    metadata['pipeline_policy']=mode_policy(args.pipeline_mode)
     if args.light_tuning:metadata.update(capture_seconds=1800,workflow_seconds=1980,detail_policy='100 scene rows per owner;latest-only native bank;5second presentation samples')
     if args.private_ship:
         metadata.update(probe='REMIX-LIVE-RETURN-001',scene='Fresh selected ship rendered by SDK to PRIVATE game-side target;no backbuffer changes',output_resources_bytes=4*256*256*4)
@@ -283,17 +295,26 @@ def main():
     rollback=work/'dxgi-original.rollback'
     config_backup=work/'ReShade.original.ini'
     def out(name):f=open(work/name,'wb');streams.append(f);return f
+    last_output_check=0
     def enforce():
+        nonlocal last_output_check
         if offscreen and offscreen.error:raise RuntimeError('Offscreen position reader: '+offscreen.error)
         if timing_relay and timing_relay.servicing:timing_relay.check_service()
         elif receiver:receiver.drain()
         if timing_relay and pid:timing_relay.poll(pid)
         if light_relay:light_relay.poll()
+        if args.multi_ship and args.pipeline_mode=='performance':
+            now=time.monotonic()
+            if now>deadline:raise RuntimeError('Prepared workflow time limit')
+            if now-last_output_check<1:return
+            last_output_check=now
         size=sum(p.stat().st_size for p in work.rglob('*') if p.is_file())
         other=sum(p.stat().st_size for p in work.rglob('*') if p.is_file() and p.name!='broad.bin')
         if args.d3d9_additive:
             images=sum(p.stat().st_size for p in (work/'gpu').rglob('*') if p.is_file() and (p.suffix.lower()=='.dds' or re.fullmatch(r'texture-\d+\.bin',p.name)))
-            if images>128*1024*1024:raise RuntimeError('Additive image128MiB cap;original rendering retained')
+            if not args.multi_ship and images>128*1024*1024:raise RuntimeError('Additive image128MiB cap;original rendering retained')
+            # Multi-ship asset worker checks authorized project/disk capacity
+            # before/after preparation;never rescan the whole project each poll.
             size-=images;other-=images
         if args.textured_ship:
             textures=sum(p.stat().st_size for p in (work/'textures').glob('*') if p.is_file())
@@ -360,6 +381,9 @@ def main():
         env.pop('SFC_D3D9_SHARED_LIGHTS',None)
         env.pop('SFC_PERSISTENT_SCENE',None)
         env.pop('SFC_D3D9_SYNC_BUFFER',None)
+        env.pop('SFC_D3D9_MULTISCENE',None)
+        if args.multi_ship:env['SFC_D3D9_MULTISCENE']='1'
+        env['SFC_PIPELINE_MODE']=args.pipeline_mode if args.multi_ship else 'test'
         if args.synchronized_buffer:env['SFC_D3D9_SYNC_BUFFER']='1'
         if args.persistent_scene:env['SFC_PERSISTENT_SCENE']='1'
         if args.d3d9_additive:env['SFC_D3D9_SHARED_LIGHTS']='1'
@@ -370,8 +394,10 @@ def main():
             from present_calibration import Receiver
             if receiver is None:receiver=Receiver()
             if args.live_owner_timing:
-                from live_owner_timing import Relay
-                timing_relay=Relay(work,receiver,TEST,additive=args.d3d9_additive,persistent=args.persistent_scene,buffered=args.synchronized_buffer)
+                if args.multi_ship:from multi_scene_relay import Relay
+                else:from live_owner_timing import Relay
+                mode_args={'pipeline_mode':args.pipeline_mode} if args.multi_ship else {}
+                timing_relay=Relay(work,receiver,TEST,additive=args.d3d9_additive,persistent=args.persistent_scene,buffered=args.synchronized_buffer,**mode_args)
             env['SFC_REMIX_CALIBRATION_SCENE']=receiver.name
             env.pop('SFC_REMIX_VISIBLE_SHIP',None)
             env.pop('SFC_REMIX_TEXTURED_SHIP',None)
@@ -379,7 +405,11 @@ def main():
             if args.visible_ship:env['SFC_REMIX_VISIBLE_SHIP']='1'
             if args.textured_ship:env['SFC_REMIX_TEXTURED_SHIP']='1'
             component_path=ROOT/('artifacts/remix-runtime/native-light-tests/m1_light_component.dll' if args.capture_native_lights else 'artifacts/m1/bin/m1_component.dll')
-            metadata['semantic_calibration']={'probe':'REMIX-CALIBRATION-001','scene_session':receiver.name,'maximum_asset_revisions':8,'geometry_hook':False,'same_process_render_thread_required':True,'component_sha256':digest(component_path)}
+            metadata['semantic_calibration']={'probe':'REMIX-CALIBRATION-001','scene_session':receiver.name,'maximum_asset_revisions':64 if args.multi_ship else 8,'geometry_hook':False,'same_process_render_thread_required':True,'component_sha256':digest(component_path)}
+            if args.multi_ship:
+                from multi_scene_resources import policy
+                metadata.update(probe='D3D9-MULTISHIP-001',scene='Fresh retained multi-model diagnostic;placement recorded in live-owner analysis',original_suppressed=False,tracked_set_capacity=32,asset_revisions=64,
+                                image_limit_bytes=broad_capture.OVERALL,image_policy=policy())
             (work/'manifest.json').write_text(json.dumps(metadata,indent=2))
         if args.depth_snapshots:env['SFC_REMIX_DEPTH_OUTPUT']=str(work)
         env.pop('SFC_REMIX_SCENE_DEPTH',None)
@@ -399,6 +429,7 @@ def main():
             if launcher.poll() is not None:raise RuntimeError('Verified copied client did not launch')
             time.sleep(.1)
         if not pid or Path(image_path(pid))!=TEST/'StarFleetOP.exe':raise RuntimeError('Actual process path does not match isolated test copy; no gate activated')
+        if args.multi_ship:timing_relay.start_on_launch(pid)
         if args.private_ship:receiver.context(session,pid)
         # Do not enumerate/inject the gate while the translator and proxy are
         # still populating the target's loader/module list. No fixed blind sleep.
@@ -435,10 +466,15 @@ def main():
         controller_args=[str(controller_exe),'--pid',str(pid),'--dll',str(gate),'--config',str(config),'--max-seconds','24' if args.calibration else '90','--stop-on-burst','0' if semantic_enabled else '1','--already-loaded','0','--unload-after-stop','1']
         if args.light_tuning:controller_args[controller_args.index('--max-seconds')+1]='1800'
         if args.d3d9_additive:controller_args[controller_args.index('--max-seconds')+1]='120'
-        if semantic_enabled:controller_args+=['--gate-timeout-seconds','90']
+        gate_timeout=tactical_gate_timeout(args.multi_ship)
+        if semantic_enabled:
+            controller_args+=['--gate-timeout-seconds',str(gate_timeout)]
+            metadata['gate_timeout_seconds']=gate_timeout
+            (work/'manifest.json').write_text(json.dumps(metadata,indent=2))
+            print(f'Enter the skirmish within {gate_timeout} seconds. The90second recording starts automatically in the tactical scene,not during ship selection.',flush=True)
         controller=sp.Popen(controller_args,cwd=ROOT,stdout=out('gate-controller.log'),stderr=sp.STDOUT,creationflags=sp.CREATE_NO_WINDOW)
         if semantic_enabled:
-            wait_live_gate(pid,controller,enforce);controller_gate_observed=time.monotonic()
+            wait_live_gate(pid,controller,enforce,timeout=gate_timeout);controller_gate_observed=time.monotonic()
             if args.offscreen_position:
                 from offscreen_position import Capture
                 offscreen=Capture(work,pid,TEST/'StarFleetOP.exe')
@@ -471,7 +507,8 @@ def main():
         if args.capture_ship_image:image_reader=sp.Popen([str(live_bin/'ship_image_reader.exe'),session,str(work)],cwd=work,stdout=out('ship-image-reader.log'),stderr=sp.STDOUT,creationflags=sp.CREATE_NO_WINDOW)
         camera_cued=False;motion_cued=False
         source_cues=set()
-        if args.synchronized_buffer:print('BUFFERED SHIP TEST:one complete game frame and matching extra ship are displayed together. Play normally and swap cameras freely;keep both ships alive. Check return flicker and whether controls/HUD feel normal. No movement cues;TWO LOW beeps=exit normally after restoration.',flush=True)
+        if args.multi_ship:print('MULTI-SHIP OFFSET TEST:use different ship models. Returned copies sit to CAMERA LEFT of the originals at the previous test distance. Original ships stay visible. Keep both alive and briefly visible together,then move/turn and switch cameras normally. Watch the copies for flicker,missing/wrong models or placement problems. TWO LOW beeps=exit normally after restoration.',flush=True)
+        elif args.synchronized_buffer:print('BUFFERED SHIP TEST:one complete game frame and matching extra ship are displayed together. Play normally and swap cameras freely;keep both ships alive. Check return flicker and whether controls/HUD feel normal. No movement cues;TWO LOW beeps=exit normally after restoration.',flush=True)
         elif args.persistent_scene:print('PERSISTENT SHIP TEST:keep both ships alive. At the timed single cue accelerate your ship and leave it moving. TWO HIGH=enemy camera;THREE HIGH=return to your ship. The extra ship should follow current motion without reloading. Follow the gentle-turn cue for the second pass. TWO LOW=exit only after restoration.',flush=True)
         elif args.offscreen_position:print('OFFSCREEN POSITION TEST:keep both ships alive. At the first single cue accelerate your ship and LEAVE IT MOVING. TWO HIGH=look at the enemy,leaving your own ship out of view. THREE HIGH=return to your ship. Follow the turn/setup cue for the second pass. TWO LOW=exit only after restoration. No new visual effect is expected.',flush=True)
         elif args.camera_recovery:print('CAMERA RETURN TEST:keep both ships alive;do NOT destroy your ship. ONE beep=hold;TWO HIGH=enemy camera;THREE HIGH=return to own ship. This repeats twice. The extra ship should return beside your own. TWO LOW=exit normally;restoration may take a short wait after recording.',flush=True)
@@ -483,7 +520,7 @@ def main():
             enforce();elapsed=time.monotonic()-active;state=channel.snapshot()
             if args.light_tuning and launcher.poll() is not None:
                 tuning_exited=True;break
-            if args.source_timing:
+            if args.source_timing and not args.multi_ship:
                 cues=PHASES if args.lifecycle_capture else ((15,1,'Hold your ship and camera still for10seconds.'),(25,1,'Prepare a freely movable camera;keep both ships visible.'),(35,2,'Make small camera movements for15seconds.'),(50,1,'Hold the camera still;prepare to move your ship.'),(60,3,'Accelerate and gently turn your ship for20seconds;keep both ships visible.'),(80,1,'Hold a steady view until the exit request.'))
                 for second,count,message in cues:
                     if elapsed>=second and second not in source_cues:
@@ -506,7 +543,7 @@ def main():
             if state['error']:raise RuntimeError('Image component reported an error; original rendering retained')
             if launcher.poll() is not None:raise RuntimeError('Game exited before the requested tactical observation completed')
             if host.poll() is not None and not host_shutdown_expected:raise RuntimeError('Renderer exited unexpectedly; original rendering retained')
-            if elapsed-last>(5 if args.light_tuning else .25):
+            if elapsed-last>(5 if args.light_tuning or (args.multi_ship and args.pipeline_mode=='performance') else .25):
                 item={'seconds':elapsed,'phase':phase,**state}
                 if args.private_ship:
                     from live_return import telemetry
@@ -646,6 +683,9 @@ def main():
         if args.d3d9_additive:
             result.update(probe='D3D9-ADDITIVE-001',backbuffer_ship_drawing=True,original_ship_suppressed=False,legacy_host_observation_only=True,observation_only=False)
             result['result']='OFFSET_SHIP_SUBMITTED_SPONSOR_REVIEW_REQUIRED' if not error and live_timing_result and live_timing_result['result']=='OFFSET_SHIP_SUBMITTED_REVIEW_REQUIRED' else 'PARTIAL'
+        if args.multi_ship:
+            result.update(probe='D3D9-MULTISHIP-001',aligned_overlay=bool(live_timing_result and live_timing_result.get('selected',{}).get('camera_offset')==[0,0,0]),original_ship_suppressed=False)
+            result['result']='MULTISHIP_OVERLAY_SPONSOR_REVIEW_REQUIRED' if not error and live_timing_result and live_timing_result['result']=='MULTISHIP_OVERLAY_REVIEW_REQUIRED' else 'PARTIAL'
         if args.lifecycle_capture:
             from lifecycle_capture import analyze as analyze_lifecycle
             try:result['lifecycle_capture']=analyze_lifecycle(work/'gate')
@@ -701,6 +741,18 @@ def main():
             try:result['broad_capture']=broad_capture.save_analysis(work/'broad.bin')
             except ValueError as exc:error=(error+'; ' if error else '')+str(exc);result['error']=error;result['result']='PARTIAL'
         if search:result['expanded_search_verdict']=depth_search_channel.verdict(search)
+        if args.multi_ship and args.pipeline_mode=='test':
+            try:
+                sys.path.insert(0,str(ROOT/'tools/m1_component'))
+                from identity_census import analyze_summary
+                result['identity_census']=analyze_summary(work/'gate/M1-A-summary.json')
+                if not result['identity_census']['enabled']:raise ValueError('Full-window identity census inactive')
+                if result['identity_census']['omitted_observations']:result['result']='PARTIAL'
+            except (ValueError,OSError,KeyError) as exc:
+                error=(error+'; ' if error else '')+'Identity census: '+str(exc);result['error']=error;result['result']='PARTIAL'
+        if args.multi_ship and args.pipeline_mode=='performance':
+            result['identity_census']={'enabled':False,'reason':'Performance mode;identity safeguards remain active'}
+        result['pipeline_policy']=mode_policy(args.pipeline_mode)
         result['final_report_complete']=True
         run_report.save(work,result)
     print('Evidence: '+str(work),flush=True)

@@ -8,6 +8,7 @@
 #include "ship_scene_depth.h"
 #include "scene_frame_buffer.h"
 #include "game_gpu_read_lease.h"
+#include "../d3d9_proof/multi_scene_wire.h"
 #include <thread>
 #include <atomic>
 namespace d3d9_game {
@@ -22,6 +23,7 @@ class Receiver {
  DWORD thread=GetCurrentThreadId();sfc_calibration::Snapshot snapshot{};
  bool buffered=false;std::unique_ptr<scene_frame_buffer::History> history;synchronized_frame::Store* bufferAudit=nullptr;
  Microsoft::WRL::ComPtr<ID3D11DeviceContext4> fencedContext;
+ multi_scene::Store* cohort=nullptr;multi_scene::Frame cohortFrame{};
  void resetHistory(){if(history)history->reset();}
  void audit(synchronized_frame::Audit a){if(bufferAudit)synchronized_frame::append(*bufferAudit,a);}
  void imports(){
@@ -70,6 +72,15 @@ public:
    if(shape.Width==1920&&shape.Height==1080)history=std::make_unique<scene_frame_buffer::History>(d,back);
    // Unsupported resize remains original drawing only,until a fresh runtime.
   }
+  wchar_t multi[2]{};if(GetEnvironmentVariableW(L"SFC_D3D9_MULTISCENE",multi,2)==1&&multi[0]==L'1'){
+   if(!buffered)throw std::runtime_error("Multi-scene requires paired buffer");
+   cohort=reinterpret_cast<multi_scene::Store*>(reinterpret_cast<BYTE*>(source.mailbox)-sfc_calibration::Offset+multi_scene::Offset);
+   const auto& h=cohort->header;
+   // Presentation initializes BEFORE the native semantic component attaches.
+   // Only the native producer claims pid;step requires its confirmed identity.
+   if(h.magic!=multi_scene::Magic||h.version!=1||h.bytes!=sizeof(*cohort)||memcmp(h.session,source.session,16)||
+      (h.pid&&h.pid!=GetCurrentProcessId()))throw std::runtime_error("Multi-scene game mapping identity");
+  }
   worker=std::thread([this]{imports();});
  }
  ~Receiver(){stop();source.close();if(receiver)CloseHandle(receiver);}
@@ -94,23 +105,30 @@ public:
   if(!live_owner::header_valid(live->header,source.session)||live->header.pid!=GetCurrentProcessId()||frame_ingress::state(&live->header.stopped)||static_cast<DWORD>(frame_ingress::state(&live->header.bad_frame))==snapshot.frame){InterlockedIncrement(&pool->stats.retired);depth.discardFrame();resetHistory();return;}
   const live_owner::Row* row=nullptr;for(const auto& r:snapshot.owner)if(r[1]==DWORD(chosen)&&r[7]==DWORD(chosen>>32)&&r[2]==snapshot.frame&&r[4]==1&&r[47]==thread&&r[48]==1&&!r[42]&&!r[43]&&!r[44]){row=&r;break;}
   const auto* currentRow=row;
+    uint64_t currentHash=row?live_owner::row_hash(*row):0;
+    if(cohort&&row){if(!multi_scene::valid(cohort->header,source.session,GetCurrentProcessId())||!multi_scene::read(*cohort,(*row)[2],live_owner::sequence(*row),cohortFrame)){row=nullptr;currentRow=nullptr;currentHash=0;}else currentHash=cohortFrame.checksum;}
+    uint64_t expectedHash=currentHash;
   auto* nativeDepth=depth.finish(snapshot.frame,1920,1080);
   synchronized_frame::Audit delayed{};
   if(buffered){
    try{
    LARGE_INTEGER q{};QueryPerformanceCounter(&q);delayed.current=snapshot.frame;delayed.qpc=static_cast<uint64_t>(q.QuadPart);
+   // The saved N-1 scene is being consumed now. Never start new work for that
+   // scene after its actual callback;N remains eligible until the next callback.
+   if(cohort&&snapshot.frame)InterlockedExchange(&cohort->header.closed_frame,static_cast<LONG>(snapshot.frame-1));
    if(!history||!row||!nativeDepth){resetHistory();delayed.status=4;audit(delayed);return;}
    auto* previous=history->prior();const auto current=*row;
    const bool valid=previous&&synchronized_frame::adjacent(previous->row,current,previous->captured,delayed.qpc,mapping.state->qpcFrequency);
    if(!valid){if(previous)++pool->stats.reserved[3];resetHistory();previous=nullptr;}
    Microsoft::WRL::ComPtr<ID3D11Resource> resource;target->GetResource(&resource);Microsoft::WRL::ComPtr<ID3D11Texture2D> back;
    ship_triplet::checked(resource.As(&back),"Buffered game target texture");
-   history->capture(back.Get(),nativeDepth,current,delayed.qpc);
+   history->capture(back.Get(),nativeDepth,current,delayed.qpc,currentHash);
    if(!previous){++pool->stats.reserved[2];delayed.status=3;audit(delayed);return;}
    // Capture CURRENT untouched frame before replacing it with the complete
    // PREVIOUS scene. HUD/background/depth/camera/ship identity now move together.
    history->restore(back.Get(),*previous);row=&previous->row;nativeDepth=previous->depthView.Get();
-   delayed.scene=(*row)[2];delayed.owner=(*row)[1];delayed.revision=(*row)[7];delayed.input_sequence=live_owner::sequence(*row);delayed.expected_hash=live_owner::row_hash(*row);
+   expectedHash=previous->stateHash;
+   delayed.scene=(*row)[2];delayed.owner=(*row)[1];delayed.revision=(*row)[7];delayed.input_sequence=live_owner::sequence(*row);delayed.expected_hash=expectedHash;
    delayed.age_us=static_cast<DWORD>((delayed.qpc-previous->captured)*1000000/mapping.state->qpcFrequency);delayed.status=2;
    ++pool->stats.reserved[0];pool->stats.reserved[5]=(std::max)(pool->stats.reserved[5],static_cast<uint32_t>(delayed.age_us));pool->stats.reserved[6]=delayed.scene;
    }catch(...){
@@ -126,14 +144,15 @@ public:
    const bool resource=output_wire::valid(p,expected.session,pool->header.receiver_pid)&&p.scene_hash==expected.scene_hash&&p.resource_epoch==expected.resource_epoch&&p.width==expected.width&&p.height==expected.height&&memcmp(p.handles,expected.handles,sizeof(p.handles))==0;
    // The next matching frame may already be ready. Keep its lease for the next
    // presentation instead of discarding it merely because we display N-1 now.
-   if(buffered&&resource&&currentRow&&game_output::matches(p,meta,currentRow->data(),source.session,live_owner::row_hash(*currentRow),live_owner::sequence(*currentRow))){InterlockedExchange(&wire.state,output_wire::ready);continue;}
-   if(!resource||!row||!game_output::matches(p,meta,row->data(),source.session,live_owner::row_hash(*row),live_owner::sequence(*row))){InterlockedIncrement(resource?&pool->stats.stale:&pool->stats.invalid);InterlockedExchange(&wire.state,output_wire::idle);continue;}
+   if(buffered&&resource&&currentRow&&game_output::matches(p,meta,currentRow->data(),source.session,currentHash,live_owner::sequence(*currentRow))){InterlockedExchange(&wire.state,output_wire::ready);continue;}
+   if(!resource||!row||!game_output::matches(p,meta,row->data(),source.session,expectedHash,live_owner::sequence(*row))){InterlockedIncrement(resource?&pool->stats.stale:&pool->stats.invalid);InterlockedExchange(&wire.state,output_wire::idle);continue;}
    if(!nativeDepth){InterlockedIncrement(&pool->stats.depth_missing);InterlockedExchange(&wire.state,output_wire::idle);continue;}
    ship_triplet::Key key{};memcpy(key.session,source.session,16);memcpy(key.sourceSession,source.session,16);memcpy(key.asset,pool->asset,32);
    key.owner=p.owner;key.objectId=p.owner;key.revision=p.revision;key.frame=DWORD(p.source_frame);key.pose=key.camera=p.source_state_hash;
    key.width=p.width;key.height=p.height;key.resourceEpoch=DWORD(p.resource_epoch);key.depthConvention=1;key.sourcePid=GetCurrentProcessId();key.diagnosticMode=pool->diagnostic_mode;
    float view[16]{};memcpy(view,row->data()+49,64);
-   if(pool->camera_offset[1]!=0||pool->camera_offset[2]!=0||!diagnostic_offset::camera_left(view,-pool->camera_offset[0],key.worldOffset)){InterlockedIncrement(&pool->stats.invalid);InterlockedExchange(&wire.state,output_wire::idle);continue;}
+   const bool aligned=cohort&&pool->reserved[2]==1&&pool->diagnostic_mode==0&&pool->camera_offset[0]==0;
+   if(pool->camera_offset[1]!=0||pool->camera_offset[2]!=0||(!aligned&&!diagnostic_offset::camera_left(view,-pool->camera_offset[0],key.worldOffset))){InterlockedIncrement(&pool->stats.invalid);InterlockedExchange(&wire.state,output_wire::idle);continue;}
    float viewport[4]{};memcpy(viewport,row->data()+83,16);bool valid=true;for(unsigned i=0;i<4;++i){valid&=std::isfinite(viewport[i])&&viewport[i]>=0&&viewport[i]<=1920&&fabs(viewport[i]-round(viewport[i]))<.001f;key.viewport[i]=valid?static_cast<DWORD>(viewport[i]):0;}
    ID3D11ShaderResourceView* views[]={item.views[0].Get(),item.views[1].Get(),item.views[2].Get()};const D3D11_VIEWPORT full{0,0,1920,1080,0,1};
    if(!valid||!compositor.draw(target,views,key,full,nativeDepth)){InterlockedIncrement(&pool->stats.invalid);InterlockedExchange(&wire.state,output_wire::idle);continue;}

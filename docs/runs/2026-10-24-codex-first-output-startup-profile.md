@@ -1,0 +1,64 @@
+# Run134 — isolate the post-activation first-output gap
+
+Date2026-10-24 America/New_York. Active bounded D3D9 retained multi-ship performance investigation. Sponsor authorized investigating Run133's3.603spostactivationgap usingexistingcaptures,notappearancechanges/newrendererarchitecture. Readnewesthandoff/Run133evidence andactivecurrentmode/startupcontracts. FuelGuardattachedviaverifiedtrustedhook,no taskdaemon/helper/agent. StartingHEAD `d40f8f230fc7504023e4a052c99a81b5a08ce6b4`,indexempty,extensivepriorworkpreserved. No staging/commit/push authorization.
+
+## Technical question / implementation
+
+Separate sceneparse/materialAPI/receiverlaunch/upload/firstDraw/Present/outputtransfer time, rather than attribute the entire gap to modelconversion or GPUthroughput. Adddefault-OFF external-native-worker startup profiler:128fixedpoints(~8KiB),QPCtimestamps,selectedownprocessprivate/working-set plusmachinesystemcommit/limit samples. No per-frame tracing,no newmapping/callback/geometryhook,no render-thread work insideSFC. Capturesonlystartup(first2outeriterations/24bootstrapPresents),emitsatscopeexitthrough existingdeferredconsole;crashescanlosebufferedpoints. Memory0meansquerynotrequested/failed,notzeroconsumption. Fixedbounds doNOTlimitproductioninstance/frameupdates.
+
+`tools/d3d9_proof/startup_profile.h`: opt-in `SFC_D3D9_STARTUP_PROFILE=1`;callsaroundactivation,sceneparse,material-enableAPI,receivercreation,renderassetsetup,bootstrapdraw/Presentandfirstoutput/ACK. `startup_profile.py`:offlinebounded2MiBconsoleparse,128pointclock/phasechecks,perPresentdurationandmemorysummary. The asynchronousmaterial-enableAPI returningquicklydoesNOTprovebackgroundmaterialloadingfinished.
+
+Standalone `run_return_fixture.py --startup-profile --prewarm --multi-ship` enablesmeasurements. Optional `--menu-idle-seconds 60` withholdsallsyntheticgeometry/statefor60s AFTERnativefixturePIDpublication;realrendererinitializesandidlesduringthatwait. NativeSourceTimingFixtureguardallows0..60000ms; onlystandalonefixtureusesit,notgamecode. Longidlefixturewatchdogexplicitly100sinsteadofordinary60s;game300s/normalprepared285s/tactical90slimitsunchanged. No waits addedtoSFC. Holdingbeforefixturegraphicsinitisolatesidlealone,notallSFCgraphicscontention.
+
+Publiclauncheroptional `-StartupProfile` forwardsacrossWindowsPowerShell5->pwsh7 usingargumentarray,setsflagonlyforownedworkflow,restorespreviousenvironmentinfinally. Defaultlauncherexplicitlyclearsprofilingforitschild,thenrestorescallerstate. DefaultPerformanceevidence/visualsettingsunchanged. No bootstrapcount/sleep/lighting/material/image/quality/asset-discovery change; no optimization speedclaim from instrumentation.
+
+## Measurements / evidence classes
+
+CONFIRMED:
+
+- HistoricaldetailedTest004236-434695frame-timingfirstrow24Presentsdraw+Present2.981426s;outputGPU0.001599s,receiver0.126462s. ExistingCSVaggregatesall24; cannotseparateDraw/Presentorbackgroundworkfromthatrowalone.
+- Newshort-idlePerformance043250-612637:sceneparse1.528ms,material-enableAPI0.232ms,receiverlaunch3.865ms,asset/lightsetup57.019ms;24bootstrapwall0.390743s,activation->bootstrapoutput0.465844s,ACK0.161791s;activation->firstmatchingfixturecomposition0.776631s. All4owners/3contentsdrawn791times,599paired,steady594/600,normalexit/HUD/resize/recreationPASS,noassetpartials.
+- Short-idleTest043424-734797:24bootstrapwall0.371141s,activation->bootstrapoutput0.419911s,ACK0.132227s;all4drawn785times,594paired,steady593/600,samevalidationPASS. Test'sretainedcomparisonsalone doNOTexplainold3secondbootstrap. Differentprocess/cache/OSconditionsnotfullycontrolled.
+- Long-idlePerformance043835-394679:24bootstrapwall2.543062s;DrawCPUtotal0.0050774s,Presentcalltotal2.292827s;singlePresentindex3blocks1.992942s. Activation->bootstrapoutput2.604478s,ACK0.125742s,firstmatchingcomposition2.876563safteractivation. All4drawn840times,650paired,steady592/600,Hud/device/exitPASS,noassetpartials. ThuslargeblockinsidePresentcanbereproducedwithoutSFCbylongidle;anidlecausality/generalregressionclaimrequiresmorethanonecase.
+- Final-source long-idleTest044102-656244:24bootstrapwall0.361809s,activation->bootstrapoutput0.431351s,ACK0.130996s;largestPresent0.068447s,all4owners801drawseach,614paired,steady596/600,HUD/device/exit/ownedcleanupPASS. Therefore60sidlealone doesNOTreliablycause2sblock;intermittentinitialization/material/presentationworkremains,notasimplemenutimer. CurrentexactsourcequalificationusesTHIScase;earlierprototypefixturesremainmeasurementsfortheirstatedsource,notcurrentlockreceipts.
+- Vendorlogduringlong-idlefirstframesshowsraytracepassinitialization,swapchainFIFO->IMMEDIATEchange,assetsearchpathregistrationandtextureingestion. Supportsdeferredruntime/material/presentationwork;doesNOTisolatewhichinternalfeaturecausesthePresentstall. Callingitshadercompilation,specificswapchainsleeporUSDparseasCONFIRMEDwouldoverreach. MaterialAPIitselfsubmillisecondisnotfullmaterialreadiness.
+- Explicit10mssleepsacross24bootstrapframesaccountforroughlyquartersecond;removingthem alonecannoteliminatethe2secondPresentblock. Bootstrapcount/sleepsleftunchangedpendingcorrectness-evidencedoptimization. No fakefastresultbyreturninguntextured/incompleteoutput.
+- Nativeprocessprivatecommit~2.2GiBdevice-ready/~2.9GiBassetsetup/~4.3GiBfirstoutput acrossshort/longcases;working-setfirstoutput~1.6GiB. Theseincludevendor/driverallocations,notonlyourmeshbuffer. SystemcommitlargeriswholePC. Startup-onlysamplesarenotpeak/leakproofanddonotresolveRun131allocationfailure.
+
+Knownexperimentfailure:043620-834543long-idleattemptkilledbyexisting60sfixturelauncherwatchdog (`CHILD_WAIT_LIMIT`,exit120)beforetestcouldcomplete;nativeownedjobsubsequentexit3221225477duringabort,zeroownedleft. PreservedPARTIAL,infrastructure-timeoutNOTgeometry/renderproof. Fixedonlyexplicitlong-idleexperimentwatchdogto100s;ordinaryfixture/gameboundsunchanged. Laterlong-idlecasepasses.
+
+STRONG HYPOTHESIS: significantpartofactual3.603sgap isdeferredruntimeworkinsidefirstfewPresentcalls,notneutralgeometryconversion. Exactvendorinternalcauseandcorrectwaytomovethatworktomenu-timewithoutstale/unqualifiedpixelsremainunresolved. ModelsarenotidenticaltoRun133KDDset;comparisonnotactualgameA/B. Neednotrequestanotherbroadcaptureorredesignsemanticseam.
+
+The minute-idle repeat weakens any causalclaimaboutidleduration: bothslow2.54s andfast0.36sbootstrap occurredafter60s. Driver/cache/material/presentercomponentsnotindependentlyisolated. A boundedprofileofthenextnormalSFCrun ispreparedtoattributeactualgame3.603sgap ratherthanassumeofflinepatternisidentical.
+
+## Files / reproducibility / validation
+
+New:`tools/d3d9_proof/startup_profile.h`, `tools/d3d9_proof/startup_profile.py`, `tests/test_startup_profile.py`,thisrecord,curatedevidenceJSON. Modifiedpreservingpriorwork:`tools/d3d9_proof/d3d9_direct_host.cpp`, `tools/d3d9_proof/start_d3d9_multiship_session.ps1`, `tools/remix_runtime/run_return_fixture.py`, `tools/remix_runtime/source_timing_fixture.h`, `tools/remix_runtime/return_launcher.cpp`,handoff/modecontract. Noimplementationchangeinthegamecomponent/hookABI.
+
+BundledPython `C:\Users\rober\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe`,bundledpwsh `C:\Users\rober\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\powershell\pwsh.exe`,VS2026x86/x64existingbuildscripts,pinnedRemix1.5.2. TestsTEMP/TMP=`C:\Project\SFC-Modernize Engine\artifacts\test-temp`. Current-usernative/GPUfixturesrequireapprovedoutside-sandboxexecution;noOS/securitychanges. NeverrunfullPython/GPUconcurrentlygivenearliermemoryfailure.
+
+```text
+pwsh -NoProfile -File tools/d3d9_proof/build_direct64.ps1
+pwsh -NoProfile -File tools/remix_runtime/build_return_probe.ps1
+python -m unittest discover -s tests -p "test_*.py" -q
+python tools/remix_runtime/run_return_fixture.py --multi-ship --multi-ship-resources --pipeline-mode performance --prewarm --startup-profile
+python tools/remix_runtime/run_return_fixture.py --multi-ship --multi-ship-resources --pipeline-mode test --prewarm --startup-profile
+python tools/remix_runtime/run_return_fixture.py --multi-ship --multi-ship-resources --pipeline-mode performance --prewarm --startup-profile --menu-idle-seconds 60
+python tools/remix_runtime/run_return_fixture.py --multi-ship --multi-ship-resources --pipeline-mode test --prewarm --startup-profile --menu-idle-seconds 60
+```
+
+Analyzeexistingfoldervia `startup_profile.analyze(folder)`;no runtimefileconversionextra. Fourowners/threecapturedcontents/freshsyntheticidentitiesfromexistingfixture,actualRemixGPUreturn/HUDoracle/devicechecks. Sameimages/material/lightsettings,bounds32owners/64revisions/four2MiBslots/256MiBretained/20GBdiskremain. Nocontinuousscreenshot/image/GPUreadbackadded. Historicalcapturegeometrynotmodel-foldergeometryimport.
+
+Buildchecks:loadedlights11,deferredbuffers,WorkerPoll,combinedGPU65PASS;returnwire37/expanded13/broad14/presentcalibration22PASS. Python471testsPASSincluding4newstartupanalysis/opt-inchecks;launcherparsePASS. Finalqualification/resultsrecordedincuratedevidenceandnewesthandoffafterfinalsourcefixture. Existingexactsource/binary/configreceiptsrefreshednormally,notbypassed. Clients/proxyhashesunchanged.
+
+NoSFCgameopenedthisrun;onlyownedstandalonefixtures. Allimplementation/evidenceunstaged/uncommitted,HEADunchanged,indexempty,nopush. Rawfailed/successfulevidencepreservedignored;smallversionablefindingsretainprovenance. No milestone/under2s/replacementclaim.
+
+Finalvalidation:Test60sidle044102-656244exact-sourcefixturequalifiednormally(light-discoveryreceiptrefreshed,nativepersistentchecksTest+PerformancePASS);bothread-onlygamepreflightsPASS. Default-OFFPerformance044404-661245passesall4owners798drawseach,595paired/steady593of600,HUD/device/normalexit/zeroownedleft;NO`STARTUP_PROFILE`lines. Python471PASSandlauncherparsePASS. Finalartifactinventory18,088,389,968bytes<20GB;no rawoutputdeleted,checkbudgetbeforeadditionalbulkfixtures. BothclientsSHA `4D65761D7DD69EF1504070261B81E9C200C0AF18105033E1C4D2222C62320C29`,copiedproxy `E35E4E2E47F4765F0799CB54C88E5ADE49B50CD7895C137B9D557F263344CAB7`,unchanged. JSON/evidencehash/pathchecksgitdiffcheckPASS. Noactiveownedfixture/rendererprocess;receiptslocalgeneratedandmustrefreshaftersourcechanges.
+
+Preparednext-normal-runcommand(noextraon/offorappearancechanges):
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\Project\SFC-Modernize Engine\tools\d3d9_proof\start_d3d9_multiship_session.ps1" -StartupProfile
+```
+
+Exactnextengineeringaction:boundedexperimentthatseparatesdeferredmaterialingestionfrompresenter/runtimefirst-frameinitialization,andtestsactualrender-pipelinewarmupatlaunchif supported—notmerelydevicecreation. Retaincorrect-texturedoutput/identity/GPUfences. Optionalnextnormalgame`-StartupProfile`canattributeactualSFCgapwith84boundedmarks;nogameplayrequiredfortheofflineresultsabove. DoNOTremove240ms sleepsanddeclare3.6sproblemfixedorassumeallPresentblockistheGPUdrawingthemesh.

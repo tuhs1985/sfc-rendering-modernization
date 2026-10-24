@@ -1,0 +1,30 @@
+{
+  "run": "Run119",
+  "source": "artifacts/remix-runtime/runs/20261023-034948-568962-in-game",
+  "result": "PARTIAL_THREE_OF_SIX_DISPLAYED",
+  "sponsor": {"ships": 6, "displayed": 3, "three_identical_klingon_enemies": true, "cycled_offscreen_ships": true, "initial_flicker_then_stable": true},
+  "captured_owners": 4,
+  "captured_models": ["fdd", "fca", "fff", "kff"],
+  "displayed_owners": [1, 3, 4],
+  "budget_rejected_owner": 2,
+  "budget_rejected_model": "fca",
+  "image_output_bytes": 127424806,
+  "image_output_cap_bytes": 134217728,
+  "resident_cpu_gpu_bytes": 60669336,
+  "native_owner_overflow": 0,
+  "cohort_lookup_rejections": 0,
+  "admission_rejections": 0,
+  "sync": {"paired": 5227, "missing": 176, "post_first_match_missing": 173, "post_first_match_records": 5400, "after_frame1000_paired": 4707, "after_frame1000_missing": 4},
+  "long_output_waits_us": [1287807, 1107872],
+  "semantic_rejections": {"total": 5454, "visual_ship_vtable_guard": 2727, "model_missing_visual_owner": 2727, "first_recorded_ms": 78906},
+  "capture_hypothesis": "STRONG HYPOTHESIS:visual-only first-match owner lookup collapses repeated instances if they share a visual. Static ambiguity confirmed;actual shared visual tuples not retained/proven.",
+  "normal_exit_cleanup_hashes": true,
+  "implementation_changed": false,
+  "staged_or_committed": false,
+  "raw_sha256": {
+    "result.json": "4dd924805214df5c76f656817b72857c3e418a395650d7d9f0bf16a74d5c6c7f",
+    "D3D9-SYNC-BUFFER-001.bin": "55ea3b01018f08d495b149d116c7ca3fd673781e2fd8a9360cbe6d7c65e340bd",
+    "gpu/frame-timing.csv": "f3c63357de2cb676e203592dbbdce6c7e6e51b0d9d1d0fe991e9edb0e4118ad0",
+    "gpu/job-console.log": "a7ff213335e4c9c367622fd2f7468a7a318020c65ea1030809ff0404bd1f43a6"
+  }
+}

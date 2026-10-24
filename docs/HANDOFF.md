@@ -1,6 +1,503 @@
 # SFC Modernize — model handoff
 
-## NEWEST / AUTHORITATIVE CHECKPOINT — 2026-10-22 Run112 demo video linked
+## NEWEST / AUTHORITATIVE CHECKPOINT — 2026-10-24 Run141 two Toolkit installations audited; no cleanup executed
+
+- [Run141](runs/2026-10-24-codex-remix-install-comparison.md), [comparison/cleanup scope](reconnaissance/2026-10-24-remix-install-comparison.md). Userrequestedcompare/figureoutcleanup, NOTdelete. Managed `C:\Program Files\NVIDIA Corporation\RTX Remix`1.6.1-0+1-6-1-0.30549.7d65b007.gl9,375,146,294filebytes;portable `C:\Project\RTXRemix`1.6.0-dev+main.30229.3f23f80a.gl4,914,104,839bytes;originalZIP2,118,847,088bytes;separateRemixJobs130,965,303bytesPRESERVE. FilebytescompressionadjustedNOTexactclusters;zeroerrors/reparse/sharedfileIDs. Managedpackagehasdifferentadditionalrendererpayloads, doNOTstripDLLs/Installer2byhand.
+- Currentgameusespinned1.5.2runtime, NEITHERToolkit. Threehistoricaldependenciesstilloldroot: run_mesh_preview.py/run_remix_ingest.py(version+whitespacechecks),inspect_intercept.py(USDparserlibrary). Removingportablewithoutmigrationexplicitlyretiresthoseofflineentrypoints, notgamepipeline. Noautomaticpath/versionbypassorrewritinghistoricalevidence. Shortcutsmanaged;bothKitexecutablesvalidNVIDIAsignature/sameSHA, appsdifferentversion/schemaidenticaldoesNOTqualifymigration.
+- RetainedZIPhashmatches83F3E5C2B6094CCF5084EE3AE2652D91D6F43F3F729274519741C130FDAFB781. FullCRCdiffattemptstoppedat180sboundbeforecompletereport: doNOTclaimportableunmodifiedorZIPalonebacksupcurrentchanges. BeforeANYdeletioncompletecheckpointeddiff+verifiedoverlayORfullyverifycompletebackup. Installmods/capturetreesnosavedUSD/imagecandidatesobserved;preserveallRemixJobs/per-userprofilesregardless. No backup/deletion/extraction/move/uninstall/code/runtimechange thisrun.
+- Rawinventory `artifacts/d3d9-proof/install-audit-20261024.json` andone-offignoredscripts. Onlycomparison/run/handoffdocsadded. HEADd40f8f2/indexempty/priorworkpreserved/nocommit/push/helper/agent. No newbuild/test/capture/appstartup; prior488passesunchanged. Nosource/clientmodification. NsightinstalledfromRun140; actualboundedtimelineSTILLpending.
+- Exact next action: getcleanupauthorization, thenpreserveverifiedportablechangesandexplicitlyretireorqualifythreelegacytoolsbeforeremovingexact `C:\Project\RTXRemix`. RecommendedkeepmanagedToolkit+pinnedruntime+savedjobs+initialvendorZIP;~4.91GBextractioncandidate, notpromiseexactreclaimafterbackup. No managedDLL/cache/userprofile/runtimecleanupinferred. ResumeNsightprofilingseparatelyaftercleanupdecision; noarchitecturepivot.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-24 Run140 Minecraft API review; Nsight installation confirmed
+
+- [Run140](runs/2026-10-24-codex-minecraft-api-watch-review.md), [bounded source review](reconnaissance/2026-10-24-minecraft-remix-api-review.md). Userrequestedlimitedarchitectureconsiderationwhileinstallingprofiler. Official1.6.1releaseverified, but releasedrepositorydxvkgitlink0a6cd5b1ee814ec390c358e0c9c32ece8895ddc0headerAPI0.6.5 differsfromMinecraftcommitf2c6fdaa763f45676f1576e63f8e054bf4ef16afheaderAPI0.16.0/specialpackage minecraft-rtx2-71a581da-win64-release. DoNOTmixheader/DLLorassumeordinary1.6.1containsallMinecraftAPIcalls; nobinaryqualificationperformed.
+- Memorytexturecreation/update, retainedSceneInstanceAdd/Update/Remove, Submit andexplicitoutputinteroparemeaningfuloptionalbackendcandidates. DirectAPIalreadyexistsinSFCreturn_host.cpp/ship_live_host.cpphistoricalproofs, notanewdiscovery/reasonstartover. CurrentordinaryD3D9baselineunchanged. Reusesemanticcapture/neutralregistry/ownerframes/camera/lights/sync/cleanup; preservefutureD3D9/D3D12adapterobjectives. MinecraftOpenGLinteropisNOTqualifiedD3D11crossprocessreturn. SpeedbenefitsSTRONGHYPOTHESISonly, noguaranteedsub2s/milestonePASS.
+- NsightnowINSTALLED, x64CLIat `C:\Program Files\NVIDIA Corporation\Nsight Systems 2026.5.1\target-windows-x64\nsys.exe`, version2026.5.1.161-265138896106v0. Localhelpconfirmedadminrequirements/processdetourvsystemwideflags. No trace started; installationdoesNOTelevatecurrentshell. Driver617.42confirmedunchanged/meetsstated616.92floor, notqualificationofallnewfeatures. PinnedRemix1.5.2unchanged.
+- Noimplementation/config/runtime/gamecapture/build/testsuite/stage/commit/push/helper/agent. Prior488testpasses/currentnormal145322qualificationpreserved, NOTnewarchitecturevalidation. HEADd40f8f2/indexempty/priorworkpreserved. Onlyresearch/run/handoffdocsadded. Run139NOTinstalledblockerisnowhistorical; remainingcaptureprivilegemuststillbeverified.
+- Exact next action: preparealreadyapprovedfixed-duration/storage-reservedNsightprocess-tree-onlystandalonecapturewithinstalledx64CLI andactualelevatedparent. Neverusesystem-wideinjection/unrelatedapps/SFC/driverpolicychange. KeepcurrentperformanceinvestigationbeforeoptionalMinecraftbackend; isolatepairedSDKavailabilityandoutputownershipasfuturegate, notimmediatepivot.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-24 Run139 Nsight setup requires Windows elevation
+
+- [Run139](runs/2026-10-24-codex-nsight-installation-checkpoint.md), [evidence](reconnaissance/evidence/20261024-nsight-installation-checkpoint.json). Sponsor approved Nsight installation. Downloaded actualofficialNVIDIAlink, validNVIDIAAuthenticodesignature,663,678,976bytes/SHA256379C0A15A9CF7B8028081073FDD1D9798B9AAA618FB46C6A01785B69ED01D5F2. Existingignoreddependencycache installer `artifacts/remix-runtime/deps/nsight-systems-2026.5.1.161.msi`; tracebudgetunchanged. CorefeatureONLY/nooptionalVCredists/noreboot. No differentprofiler substituted afterwingetnoSystemsentry.
+- ActualWindows-tokenadministratorfalse. OneMSIattemptreturned1603; logexplicitly: “Setup requires Administrator privileges to install.  Please install using an administor user account. Application has not been installed.” Installed-statechecksconfirmNOTinstalled. SandboxescalationisNOTWindowsUACelevation; doNOTchangepermissions/securitypolicy/forceperuserorclaimsuccess. MSIlog `artifacts/remix-runtime/deps/nsight-install-20261024.log`. OSInstaller serviceleftalone, notatestorphan.
+- NoSFC/fixture/trace/newcode/build/testsuite/runtime/graphicsdriverchange. PriorRun138488tests/qualificationspreserved, NOTnewpasses. HEADd40f8f2/indexempty/priorunstagedworkpreserved/nocommit/push/helper/agent. Onlyrun/evidence/handoffdocsadded. Noactiveownedtestsession; signedinstallerready.
+- Exact next action: user runs the one-time UAC-elevated core-install command in Run139 (inlinePowerShell, noPS1policychange), then CodexverifiesinstalledCLIversion/help/privilege. Continue with oneboundedprocess-tree-onlyVulkancaptureofexistingstandalonefixture/nativehost. No system-wide injection/unrelatedapps/driverpolicychange/SFC. CaptureCLIalsorequiresWindowsadminperNVIDIAdocs; iftokenstilllimited, prepareboundedadmin-parentlauncher, doNOTbypassOSsecurity. Remainingprofilingnotcomplete; exactdelaybreakdown/sub2stargetstillOPEN.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-24 Run138 NVIDIA loading paths tested; native profiler setup next
+
+- [Run138](runs/2026-10-24-codex-vendor-texture-loading-paths.md), [evidence](reconnaissance/evidence/20261024-vendor-texture-loading-paths.json). Used pinned NVIDIA documentation/source, no customloader/vendorpatch/nativecodechange. Offline `--material-texture-loading stream` makes session-only sibling stages changing ONLYpreloadbool; originalstages/images/shadingvalues untouched. `--loading-policy rtxio` selects already-packaged NVIDIA backend; native config recognized/providerregistered/noRTXIOerror. Both OFFnormally/rejectedbyqualification. Source confirms even nonforce firstpreload schedulesinitialstagingwithasyncfalse; stream flag is NOT proof nonblockingfirstupload.
+- Performance original5.453s/stream3.186s/RTXIO5.422s discovery→matching; finalsource normalTest5.772s. Singlecases/cachevariance, no dependablefix/sub2sPASS. Preparation alone2.35–2.73s exceeds2s in these runs. NativebootstrapPresent62–93ms can coexist with3.04–3.08spostactivationgap; doNOTblamewholegapongraphicscopy or bootstrap. Actual material/residency/first-use timeline unresolved, not enough stocklog/publicAPIreadinessdata.
+- All4cases4owners/3contents/noassetpartials/HUD+state+resize+recreation+normalexit+owned0PASS. First3casesall432generatedimagefilesSHA-multisetidentical; lateBMPsvisuallyrecognizable but nonidentical. Early-latechanges2.35/9.68/13.67overcoveredpixels; materialloading OR temporalconvergencepossible, not a pixel-derived readiness latch. NormalTest145322 qualifies current source,783draws/owner,594paired,593/600steady.
+-488PythonPASS/nativecollectorworker+lightqualificationPASS/bothread-onlygamepreflightsPASS; nativebinariesunchangedfromRun137. NoSFC/newbuild/driverchange/helper/agent/stage/commit/push. HEADd40f8f2/indexempty/priorworkpreserved. Accepted/copyclient+proxyhashesunchanged. Noactiveownedtestsession.5completedgeneratedimage sets recoverably archived,762,840,015bytes saved, allentriesdecompressedSHAverified. Latestnormal145322intact; comparisonBMPs/logs/packets/sourcecapturespreserved. Governedartifacts18,960,507,810bytes beforecurateddocs<20GB.
+- Exact next action: obtain sponsor approval to install official NVIDIA Nsight Systems (notfoundonPATH/standardlocations/installedrecords), then prepare one fixed-duration/process-tree-only Vulkan capture of existing standalonefixture+nativehost. NVIDIA docs support profiling unmodifiedruntime onWindows; doNOT use system-wideinjection/captureunrelatedapps/newloader or silentlyrebuildRemix. Tracy is alternative but documented enable_tracy rebuild required; samecommitinstrumentedbuild onlyif separatelyapproved/needed. No gameplay requested; noexperimentalgameflagpromoted.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-24 Run137 public texture-cache preload tested, not promoted
+
+- [Run137](runs/2026-10-24-codex-public-texture-prefetch.md), [evidence](reconnaissance/evidence/20261024-public-texture-prefetch.json). Public API preload reaches shared texture cache; actual worker/native overlap CONFIRMED (first call1.453s before activation),268paths/3incremental requests. Private materials never drawn; geometry still ordinaryD3D9. Queued command drain is NOT asynchronous GPU texture residency completion. API external material registry remains distinct; forceLoad/demotion policy differs from USD path. Pinned1.5.2 unchanged, no vendor patch/custom loader.
+- Standalone/defaultOFF API flags tested: batch5.259s/overlap5.252s discovery→matching output vs normal3.338s (60sidle); final0sidle normal5.817s/overlap5.162s. Single samples/cache conditions, NOT dependable speedup; sub2s target OPEN. All successful cases4owners/3contents, no partial, normal cleanup/owned0. Do NOT enable API preload in game or qualify experimental fixtures as normal.
+- Important pixel finding: normal early→late mean RGB change21.429/255 over31315coveredpixels; API2.343. First matching geometry does NOT prove final-material-ready. Final pair all432generated image files SHA-multisetidentical; late images visually much closer but nonidentical (2.502mean over differingpixels/7461pixels delta>3); appearance equivalence unresolved, no color/default changes justified. Optional profiled standalone now saves at most2boundedBMPs, no continuous/game readback.
+- Incomplete142745/143128/143403 cases explicitly refused asset reservations against20GB cap, then cohort/fixture failed; NOT shader/preload timing evidence.7completedgeneratedimage sets recoverably archived,1,067,976,021bytes saved; each432files/162,619,600bytes→10,051,597byteZIP after full decompressedSHAcheck. Receipts perrun, ZIPs artifacts/remix-runtime/archives. Latestnormal143326 and overlap143542 intact, allsourcecaptures/packets/BMPs preserved. Governedartifact18,960,723,811bytes<20GB.
+-485PythonPASS/native64light11+combined65/nativefixture37/13/14/22PASS. FinalsourceNORMALTest143326 qualifies:783draws/owner,594paired,593/600steady,HUD/device/exitPASS. Nativeworker/lightmappingtestsPASS via approved outside-sandbox execution; bothread-onlygamepreflightsPASS. Client/proxyhashesunchanged. NoSFClaunched, noactiveownedjobs, HEADd40f8f2/indexempty/allworkunstaged/uncommitted/nopush/helper/agent. Sourcefiles/limits/commands/knownvendorwarning in runrecord; olddirtyworkpreserved.
+- Exact next smallest action: separate replacement-material stage activation from texture-upload/first-use completion using supported pinned-runtime profiling on the SAME accepted library. Establish a material-ready boundary before another startup optimization. Keep API preload OFF; do not repeat warmups/drop maps/change translators/claim sub2s or ask sponsor for another broad game capture.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-24 Run136 built-in loading tested, no speed fix promoted
+
+- [Run136](runs/2026-10-24-codex-built-in-loading-investigation.md), [evidence](reconnaissance/evidence/20261024-built-in-loading-investigation.json). Pinned Remix1.5.2 source confirms async initial USD loading/shader preparation, but later library changes follow frame-end unload/load processing with a1000ms watchdog. Runtime texture preloading can still use synchronous staging when forced waiting is OFF. Our early host has an empty library then receives changed full materials; late ingestion is a STRONG HYPOTHESIS, exact cost split unresolved. No vendor patch or custom loader.
+- Configuration correction CONFIRMED: old fixture `ENV` async=False goes to observation wrapper, NOT automatically to the actual native host (separate `os.environ` launch). New `gpu/loading-inputs.json` shows no inherited loading overrides in baseline. Explicit async options recognized in native runtime log did NOT fix delay. Baseline5.111s/async5.721s/async+flat-material-file5.097s/async+error-only-logging5.458s discovery→matched output; one sample each, NOT statistical improvement/regression. All432generated image/native files byte-content-equivalent (318distinct content entries, NOT318materials), all4owners840–841draws, no partials, sampled31315changedpixels, background/HUD/state/exit/zeroownedPASS. Steady600frame windows600/592/600/595matched; no claim universally seamless.
+- New offline-only `loading_policy.py`/`material_library.py`, flags on standalone profiled prewarm fixture; no normal shader/material/light/image/quality change. Flat experiment rebases generated references without modifying image files, values, UVs or geometry. All experimental loading/library/logging cases refused by normal qualifier. Optional profile fixture saves one sampled actual compositor BMP, not continuous capture or first-image residency proof. Normal layered publication/normal logging retained.
+- Final-source NORMAL Test053427-819810 qualifies:4owners802draws/3contents,610paired,594/600steady, no partial, HUD/border/device/exit/owned0PASS. First matching postactivation0.711s/full3.018s without experimental flags; confirms intermittent fast cases, NOT new speed fix.482PythonPASS; native fixture37/13/14/22PASS; light/native transport qualification and both read-only game preflightsPASS. Existing native64host unchanged. No SFC launched; accepted/copyclient/proxy hashes unchanged.
+- Extra upstream `RTX_PREWARM_ALL_VARIANTS=1` control053736-954145 FAILED supervisory time/output cap110s including teardown; incomplete cohort (2preparedcontents/3admissions), no matching-image/clean API shutdown/job-result receipt. Exact cause unresolved; failed finalization also lost detailed multi-preparation report. Do NOT call this a timing/appearance comparison, fix, or proof all-variant prewarming itself caused the failure. Independent approved process inventory after forced cleanup found NO owned leftovers. Partial evidence retained; no blind repeat or promotion.
+- Recoverable generated-image compaction of8completed experiments (Run135044939/045226/045536/045933 and Run136052333/052518/052832/053101): per run432files162,619,600bytes→verified10,051,597byte ZIP, ALL entries decompressed+SHA256checked before exact generated files removed. Total1,220,544,024bytes recovered. Each run retains `generated-images-archive.json`, logs/results/packets/single BMPs; ZIPs in ignored `artifacts/remix-runtime/archives`. Restore entries relative to corresponding run root. Latest normal053427, failed053736 and original source captures remain uncompressed/intact. Artifact18,763,498,782bytes<20GB. HEADd40f8f2/indexempty, all work unstaged/uncommitted/no push/helper/agent. No active owned game/test job.
+- Exact next smallest action: qualify public Remix `CreateMaterial` texture-preload/cache reuse for the SAME generated DDS resources while individual assets finish preparation, not SDK mesh submission. Source confirms API queues work and returns before completion; ordinary-D3D9 replacement registry remains distinct. Prove resolved-path/cache identity and actual queued processing/completion before expecting overlap or counting pixels as ready. No further dummy warm-up or map removal; sub2s target OPEN, earlier SFC asset discovery still deferred.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-24 Run135 rendering warm-up not promoted
+
+- [Run135](runs/2026-10-24-codex-render-prewarm-experiment.md), [evidence](reconnaissance/evidence/20261024-render-prewarm-experiment.json). Tested actualrenderwarmupOFFnormal/standaloneonly:empty24framesfailedtotriggerearlyraytrace;private1triangle24frames+32blankframesDIDinitializeRTXbefore60sidle,butpostactivationstill3.206swithsingle2.473sPresentstall. Corewarm-upaloneNOTsufficient,uses~4.19GiBprivatevs~2.21device-readywhileidle. No normalstartup/appearancechange,noSFCgame.
+- DiagnosticwithsameprivatewarmupbutmastermateriallibraryWITHHELD:postactivation0.718svsfull3.206s;all432generatednativeimage/DDSfiles(318uniquecontententries)SHA-multisetIDENTICAL. Runtimepublicationispathdifference,butOS/cachevarianceuncontrolled. Withheldcasechangedpixelcount170015vsnormal31315,NOTacceptableappearance,still2.869send-to-end. Materialingestion/first-usepathSTRONG HYPOTHESISmajorcontributor;exactUSD/texture/shader/presentershareunresolved. DoNOTdisableglow/roughness/materiallibraryorclaimfastunqualifiedpixelsasfix.
+- Newexperimental`render_prewarm.h`andstandalone`--render-prewarm empty|triangle`/`--isolate-initial-material-library`requireprofile/multi/prewarm;gamerelaystripswarmflag,qualifierrejectsbothdiagnosticmodes. SyntheticwarmgeometryNEVERpublished,notshipcapture;stateblock/GPUfencebeforeactivation,retainedprimitiveabsenceNOTuniversallyqualified. Noordinarybootstrap/sleep/discovery/tuningchanges. Existingprofileradds4firstCOMPLETEcohortpointswithin128bound.
+-475PythonPASS(native11/combined65PASS);final-sourceNORMALTest050416-088363all4owners788drawseach,steady596/600,598paired,0partial/invalid/rejected,HUD/device/exit/zeroownedPASS. FirstcompletecohortDraw+Present2.962ms/copy10.853ms/ACK1.704msinthisfastcase;postactivation0.956s,end-to-end3.392s. Confirmsintermittence,notcontrolledspeedup. Exactsource/lightqualificationandbothpreflightsPASS,clients/proxyunchanged. Previous045933controlbootstrap0.568sbutpostactivation3.405smeansstallcanoccurAFTERbootstrap/laterassetfirst-use.
+- HEADd40f8f2/indexempty,allprior/currentworkunstaged/uncommitted,nopush/helper/agent. Rawexperimentsretainedignored,curatedrecordsversionable;artifactinventory18,959,296,830bytes<20GB(~1.04GBheadroom). No activeownedtestprocess;archiveconsumedgeneratedbulkbeforemorelargeexperiments,doNOTraiseallowanceblindly. No usergameplayneededthisrun.
+- Exactnextengineeringaction:qualify supportedpreload/cache/reuseofACTUALgeneratedmaterialresourcesconcurrentwithpreparation,oravoidrepeatedmaterial-stageingestion,keepingexactacceptedmaterialpolicyandD3D9semanticinterface. Isolateinternalmaterialloadingcostfirst;doNOTadoptprivatewarmupasprovenfix,blamegeometryupload,disablematerialpreloadblindly,claimsub2s/milestonePASS,orreopenearlierdiscovery. OptionalnextnormalSFC`-StartupProfile`stillavailable,notrequiredtorepeatofflinefinding.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-24 Run134 first-output profiler
+
+- [Run134](runs/2026-10-24-codex-first-output-startup-profile.md), [evidence](reconnaissance/evidence/20261024-first-output-startup-profile.json). InvestigatedRun1333.603sgapoffline. Optionaldefault-OFFnativeprofile128fixedQPC/memorypoints,84retainedinprofilefixtures,noSFCcallback/filework;standalone0/60sidleexperimentandpubliclauncher`-StartupProfile`added. Noappearance,bootstrapcount/sleep,identity/fenceordefaultstartupbehaviorchange. Thisisdiagnosticwork,NOTspeedfix/sub2sPASS.
+- CONFIRMEDstallcanoccurinsideearlyRemixPresent:longidlePerformance04383524bootstrap2.543s,DrawCPUtotal5.077ms,Presenttotal2.293s,singlePresent1.993s. Parse/API/receiver/assetsetupmillisecondscale;vendorlogsdeferredmaterialingestion/raytraceinitialization/presentermodechanges. ExactinternalcauseNOTisolated. ShortPerformance/Testbootstrap0.391/0.371s;repeat60sidleTest0.362s. IdlealoneisNOTsufficientcause;shadercache/USDparse/swapchaincausationunproven. Removing~240msexplicitsleepsalonecannotfixwholegap.
+- Startupnativeprivate~2.2GiBdevice/~4.3GiBfirstoutput,notwholePCcommit;nopeak/leakproof. Longidleinitialattempt043620hit60sfixturewatchdog,partial/ownedcleanupretained;onlyexplicit60sexperimentwatchdognow100s,ordinaryfixture/gameboundsunchanged. NoSFCgameopenedthisrun.
+-471PythonPASS,loadedlight11/combinedGPU65/returnwire37/expanded13/broad14/calibration22PASS;launcherparsePASS. Final-sourceTest60sidle044102-656244all4owners801draws,steady596/600;default-OFFPerformance044404-661245all4owners798draws,steady593/600,noSTARTUP_PROFILElines. HUD/resize/recreation/normalexit/zeroownedleftPASS. Exactsourcequalification+bothpreflightsrefreshedPASS;clients/proxyunchanged. Artifactinventory18,088,389,968bytes<20GB;approachingallowance,checkbeforemorebulkfixtures.
+- HEADd40f8f2/indexempty,allprior/currentworkunstaged/uncommitted,nopush/helper/agent. Exactnextengineeringaction:separatedeferredmaterialingestion/presenterruntimeinitializationinsidePresentandtestactualrenderpipelinewarmup(notjustdevicecreation)if supported. ForNEXTnormalSFCrun,useusualmulti-shiplauncherwith`-StartupProfile`toattributeactualgamegapwithoutfulltracing. NoimmediateextrabroadcaptureorsponsorREneeded. DoNOTclaimsleepsremoved,undocumentedvendorcause,orunder2sachieved.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-24 Run133 stable early-start game retry
+
+- [Run133](runs/2026-10-24-codex-launch-time-stable-runtime-review.md), [evidence](reconnaissance/evidence/20261024-launch-time-stable-runtime.json). Actual042240-261146 game retryerrornull; sponsor reports loaded/stable,initialwaitstill>2s. Fourinitialowners plus3laterrevisions,6uniquecontents,total7instancesallACKed/drawn;0assetpartials/identity/decode/projectionfailures. Nativejobexit0/Shutdown0/noownedleft,normalgameexit,hooksrestored/unloaded,client/launcherchecks/proxyrestorePASS. Early-start path now corroborated in ONE actualgame,not universal/seamless/TRLclaim.
+- CONFIRMED discovery->activation2.179857s->firstmatchinggamecomposition5.783051s;postactivation3.603194s. Rendererready56.558sbeforefirstdiscovery. Initial4nativeassetCPU+GPUadmissiontotal0.087958s,alladmittedby3.130240sfromdiscovery. DeviceinitoverlapdoesNOTeliminateasset-dependentfirstoutputdelay. Run129actual6.600scomparisonhasdifferentmodels;~0.82sdifferenceNOTcontrolledA/Bproof. Selectedpreparation62.547sincludesmenus,NOTmodelconversiontime.
+- Returnedcohort5262matchinggamecompositions/5568auditrecords,304withoutship,1warmup/1reset,0bufferfail;noCPUdetailCSVsinPerformance. Sponsorstableappearanceobserved,NOTzeroomissionclaim. Sevenowners[KDD,FDD,FFF,FCA,KFF,KFF,FMS],sharedKFFcontent;lateunique5/6layermaterialrewritesremain,deferredblipnotfixed.
+- Startupmemory21.79GiBphysical/36.48GiBsystemcommit;failedrun24.22/43.91. Moreheadroomconsistentwithpressurehypothesis,butchangedmodels/environmentandnosynchronizedpeaktelemetrymeanRun131allocatorcauseSTILLunresolved. No need blindlyreverttheearly-startpathorclaimmemoryfixconfirmed.
+- Review/docs-only,noimplementation/configchange,newgame/GPUtest/helper/agent/stage/commit/push. Priorworkpreserved,HEADd40f8f2,indexempty. Artifactinventory17,210,529,459bytes<20GB. Exactnextengineeringaction(withauthority):profile3.603spostactivationthroughmaterialactivation/bootstrap/runtimefirstoutputusingcapturedassets;retainappearance/identity/fences,doNOTreopendiscoveryorclaimnativeuploadtakesseconds. Boundedmemorysamplingremainsusefulifallocatorfailurerecurs.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-23 Run132 system-memory cross-check
+
+- [Run132](runs/2026-10-23-codex-system-memory-crosscheck.md), [evidence](reconnaissance/evidence/20261023-system-memory-crosscheck.json). Read-only comparison corrects interpretation:43.91GiB is SYSTEM commit,notSFC/RemixRAM. Failedrunphysical24.22/31.84GiB;priorSUCCESSFULgame000410-735623physical26.69/31.84GiB,commit43.46/47.84GiB. Failedstartupcommitonly0.45GiBhigher,physical2.47GiBlower. Highcommit alone doesNOTexplainfailure. Run131's memory-pressure-contributor STRONG HYPOTHESIS is downgraded to possible/unproven;allocatorfailure itselfremainsCONFIRMED.
+- Host-readonly snapshot:32GiBphysical,16GiBpagefile,automaticmanagementfalse;pagefileusage339MiB/peak362MiB (postrun,notcrash). Systemcommit40.12/47.84GiB,availablephysical9212MiB. FLC-ownedWebViewchildren4.801+3.833GiBprivate (~8.63GiB);previousRun131rounded3.93+2.53 (~6.46GiB),growthsuggestionNOTleakproof. OtherappgroupsaccountforseveralGiB;noorphanedSFC/Remix/harness/Pythonprocessesfound. Noapptermination/settingschanges.
+- Bothclienthashes/copiedproxyunchanged;noextraGPU/game/capture/test,source/configedits,stage/commit/push. Priorworkpreserved,HEADd40f8f2,indexempty. DoNOTattribute43.9GiBtoourassets,assertVRAMexhaustion,diagnoseFLCleakfromtwosnapshots,orclaimno transientharnessgrowthwithoutmeasurements.
+- Exact next engineering action with implementation authority: add bounded systemcommit+ownedprocessmemory sampling around launch,menuidle,assetactivation andfirstoutput; compare long-idle/near-tactical startup using SAMEcapturedassets/settings,not anotherbroadcapture or speculativequalityreduction. Closing/restartingunusedFLC mayfreeheadroom ifsponsorchooses,but isNOTprovenrenderfix or prerequisite replacingstartupdiagnosis.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-23 Run131 first-game allocation failure
+
+- [Run131](runs/2026-10-23-codex-launch-time-allocation-failure.md), [evidence](reconnaissance/evidence/20261023-launch-time-allocation-failure.json). Sponsor attempted Run130; actual010857-214073 game run failed before first returned ship. Native renderer/device ready, four fresh asset packets/prepared models, activation delivered, then pinned Remix CS thread reported `DxvkMemoryAllocator: Memory allocation failed` (4,423,680byte request). Hostexit1/ownedguardstop0/noownedleft; receiver rejected disconnected producer. Recovery-service/pool-layout messages are downstream failures, NOT proven root identity/protocol defects.
+- CONFIRMED startup log43.91GiB/47.84GiB system commit used,24.22GiB/31.84GiB physical used; at failure runtime heap0driverallocated1857MB/budget11228MB. TotalVRAM exhaustion NOT established. STRONG HYPOTHESIS memory pressure contributes; OS/driver allocation cause and early-start causal relationship unresolved. Do NOT attribute this to20GBdiskcap, giantmodels, heap2alone, or remove safeguards/reduce appearance settings blindly. Prior Run130 also recorded concurrent synthetic memory failure; final sequential fixtures passed.
+- Normalgameexit/client+launcherunchanged/proxyrestored confirmed by runner; gatecontroller8 explicitly `Target exited before controlled component removal.` Therefore controlled hook restoration/unload NOT demonstrated here. No new user-visible gameplay claim or startup-performance measurement. Runtime resultPARTIAL,not acceptance. Early startup remains implemented/offline-qualified,NOT game-qualified.
+- Read-only investigation plus durable records only,no source/config change or new game/GPUtest. Read-only host memory inventory approved outside sandbox; unrelated processes NOT stopped. No active owned host/receiver/game left. HEADd40f8f2,indexempty,allpriorworkpreservedunstaged/uncommitted,nopush.
+- Exact next action: sponsor frees memory by closing unused heavy applications or restarting Windows, then retries SAME default Performance multi-ship launcher. No automatic app termination, pagefile/driver/security change. If repeated with adequate headroom, isolate menu-duration vs near-tactical initialization using current captured assets before editing the rendering path. Preserve original files and all failed evidence.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-23 Run130 launch-time renderer baseline
+
+- [Run130](runs/2026-10-23-codex-launch-time-renderer-baseline.md), [evidence](reconnaissance/evidence/20261023-launch-time-renderer-baseline.json), [mode/operating contract](reconnaissance/pipeline-modes.md). Sponsor requested costly comparisons OFF and renderer initialization at game launch. Performance now also skips native VB/IB/texture upload readback comparisons; Test retains them. Required schema/bounds/content/session/owner/fence checks remain.
+- The SAME real 64-bit Remix/D3D9 host now starts immediately after copied SFC PID/path verification, before component readiness. Initializes devices/shared outputs/shaders, then sleeps without Presents or dummy geometry. One immutable104-byte session/PID/catalog activation loads the fresh scene after complete initial material publication. Replacement assets OFF only during empty idle; supported runtime config API enables them at activation. No Toolkit/OBJ/prepared-ship substitute or earlier asset discovery. Image/quality settings frozen at launch; menu-time edits require restart.
+- 467PythonPASS, native build/loaded-light11/combinedGPU65PASS; final-source standalone Performance004135-988733 and Test004236-434695 both PASS,4owners/3contents/noassetpartials,steady595/600 and596/600,HUD/device/reset/normalexit/ownedcleanupPASS. Exact-source qualification and both read-only preflights PASS. No SFCgame launched this turn. Accepted/copy client and copied proxy SHA unchanged.
+- Sub2s target STILL OPEN. Synthetic discovery->firstmatchedcomposition6.155s performance/6.481s test,activation->match3.337s/3.305s. These fixtures start renderer only~0.27s before discovery, NOT a menu-time performance measurement. 24asset-dependent bootstrapPresents/10mssleeps remain; do not report allstartup moved/removed. Idle cancellation/wrong-session rejection proved, but vendor teardown~13.2s; cancellation grace30s, owned guard285s. One concurrent suite/GPU allocation failure preserved; sequential reruns pass.
+- Prior work preserved,HEADd40f8f2,indexempty,allchangesunstaged/uncommitted;nohelper/agent/push/securitychange. Generated artifacts16,789,906,111bytes<20GB at final inventory. No owned renderer/test process left. Earlier discovery,fighter-arrival reload blip,appearance tuning,replacement and CDD completion remain outside this change.
+- Exact next action: sponsor repeats the familiar six-ship skirmish with the default Performance `tools/d3d9_proof/start_d3d9_multiship_session.ps1`; judge fresh-asset-to-matching-in-game-image, normal controls and initial copies, exit at two LOW beeps. Compare against Run129's6.600s actual game result; do NOT equate prep subtotal or synthetic clocks to user-visible improvement.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-23 Run129 actual performance startup
+
+- [Run129](runs/2026-10-23-codex-performance-startup-runtime-review.md), [evidence](reconnaissance/evidence/20261023-performance-startup-runtime.json). Actual UTC000410-735623 run reviewed. Sponsor7–8s initial wait confirmed by instrumentation: collector discovery->prepare2.569s->hostlaunch2.695s->allinitialnativeadmissions6.270s->firstmatchinggamecomposition6.600s. Physicaldisplay/exactfirstengineavailability not measured; manifest tacticalpreparation6.859s separately.
+- Remaining hostlaunch->firstmatchedoutput3.905s dominates, not included in old2.37s subtotal. Native4assetCPU+GPUadmissiononly0.140s. Runtime/device/bootstrap/material/first-output substage attribution still needed; don't claim RTX throughput or a specific vendor feature is the cause. Source still has24bootstrapPresents/10mssleeps; inspect/measure before removing.
+- Performance policyactive; all8owners/5contentsACKed/noassetpartials, original4models drawn5340each,5307paired,123withoutship/0bufferfail. Auditstarts6.136s,so doesNOTcoverinitialload. Normalexit/hooks/ownedcleanup/client+launcherchecksPASSperrunner. Known00509843 finite7202; no new exception RE.
+- Exact next action with implementation authority: offline native startup substage instrumentation using captures; total freshasset->matchingin-gameimage is acceptance clock, subtotals not substitutes. Earlier discovery and fighter-arrival blip fix deferred by sponsor. No new game/source/config changes, commits/push; prior work preserved,indexempty,HEADd40f8f2.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-23 Run128 performance/test modes
+
+- [Modes/launcher](reconnaissance/pipeline-modes.md), [Run128](runs/2026-10-23-codex-performance-test-modes.md). Public multi launcher defaults Performance; `-Mode Test` retains bounded detailed evidence. Mode explicitly reaches native capture/host/receiver; essential source/live/epoch/fence paths remain. No appearance changes or earlier discovery.
+- Historical asset-worker inventory scans/lock convoy removed: pregame snapshot + concurrent reservation/actual-commit ledger. Performance disables census/detail/lifecycle journals, duplicate light files, cohort snapshots, CSV/per-output lines; fresh packet/reference hashes protect reuse of validated decode. Shared lighting/current scene updates still work. Fixed protocol/correspondence audit buffers/final summaries retained, not confused with scene refresh limits.
+- 463PythonPASS; native builds/light/shared-publication/persistent/receiver/combinedGPU tests PASS. Final GPUtest215402-299547 and performance215456-184002:4owners/3contents/all841draws,595/600vs596/600steady,Hud/device/exitPASS,noassetpartials. Performance CSVs absent/cohort0; native performance has no detail/light mirrors. Current exact-build qualification and both preflights PASS; client/proxy hashes unchanged.
+- Sub2s target OPEN: fourasset complete identify+prepare2.395/2.371sperformance,2.690stest; one preflightinventory2.6s outsidegame, runtime/GPUstartup additional. No false speed claim. Late unique material reload still known. Exact next action: offline profile remaining essential preparation and native startup; earlier discovery deferred. Sponsor launcher available for comparison, not acceptance of the2s target.
+- No SFCgame launched/helper/agent/commit/push; HEADd40f8f2,indexempty,priorworkpreserved,allchangesunstaged. Sandbox native mapping tests required approved outside-sandbox synthetic execution; no Windows security changes. See record for tools/reproducible commands, generated evidence and limits.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-23 Run127 pipeline diagnostics audit
+
+- [Canonical audit](reconnaissance/pipeline-work-and-diagnostics-audit.md), [Run127](runs/2026-10-23-codex-pipeline-diagnostics-audit.md). Documentation-only inventory of essentials, safeguards, diagnostics and test policy in active ordinary-D3D9 multi-ship path. Audit IDs are not requirement IDs.
+- Confirmed expensive historical-budget scans/lock convoy; several always-on diagnostics lack independent controls. Mixed dependencies include update-journal provenance, asset/material input files, source/live flags and shared-light capture. Do not disable those blindly. CSV/census/current-run walks/light mirrors are audit findings, not independently proven stall causes.
+- Prior read-only profiling now recorded durably: four-model batch16.264s vs isolated inventory-snapshot2.148/2.100/2.057s,499 files byte-identical; one-time inventory2.362s additional. Not a production fix or end-to-end sub2s PASS. User defers earlier discovery until current loading meets target.
+- No source/config/runtime changes, no game/helper/agent, staging/commit/push. Prior work preserved. Exact next action with authorization: implement correct session budget accounting off asset critical path, preserve safeguards/appearance, then profile initial batch and separate host startup. Audit lists optional evidence controls as proposed, NOT available today.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-23 Run126 actual parallel loading latency
+
+- [Run126](runs/2026-10-23-codex-parallel-runtime-latency-review.md): completed actual 205121-223108 run. Sponsor reports loading worked but approximately17s is unacceptable. Four concurrent preparation workers CONFIRMED; initial identification0.278–0.443s, fullpreparation9.412–12.269s, renderer launch12.866s after firstdiscovery. No substage attribution yet; do not blame rendering effects or claim morethreads solves it.
+- Six jobs/fivecontents/onealias; fifth firstoffered14.307s, sixth25.133s. Those are discovery times, not exact displayed appearance. Normalexit/unload/client/launcherchecks pass per runner. Noimplementation, compression, gameplay launch, staging, commit or push; prior work preserved.
+- Exact next action: offline substage/CPU-vs-wall profile using these captured assets; isolate scene conversion/material binding/proof hashing/capacity checks before further optimization. No sponsor run needed for profiling.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-23 Run125 parallel preparation/initial batch ready
+
+- [Run125](runs/2026-10-23-codex-parallel-preparation-initial-batch.md),
+  [evidence](reconnaissance/evidence/20261023-d3d9-parallel-initial-batch.json),
+  currentcontract/probe. Sponsor authorizedmultithreading+initialshipsbatch.
+  4boundedworkers/64descriptors,duplicatecontentcoalesced,coordinator-onlycatalog
+  mutation. Fullconversion/proofhashingoffcoordinator;deviceworkstillowningthread.
+- Initialknownsetseals750ms/200msquiet,max2s;25spreparewatchdoginsideexisting
+  workflow. OnemateriallibrarypublicationBEFORERemixstartup,thenexplicitnative
+  initialcatalogGPUreadinessgate. No newSFC hook/ABI,earlierloaderdiscovery,
+  appearancechange,suppression,stale-frameholdornewrendererarchitecture.
+- 4x256MiBtemporarydiskreservationsunder20GB;resident/protocolboundsunchanged.
+  Immutablegate/sessionmetadataavoidsparallelmanifestraces. Budgetinventory
+  toleratesatomiclatest-lightnames. Workerjoin/cancelbeforemappingrelease.
+- 456PythonPASS,actual4threadoverlaptestPASS,50nativewirechecks/arch,persistent18/
+  arch,lightworker/loaded11/combinedGPU65PASS. Finalinitialfixture201728-165994:
+  3asset/4owner,3overlappingprepares,all4drawn841times,one3layerinitiallibrary,
+  mask15readybeforevisibleoutput,594/600steady,max17.794ms/no>50msGPUwaits.
+  Batchready10.416sfromdiscoveryinthatofflinefixture,NOTproductioninstantloadclaim.
+- Deliberatelatefixture201855-869087PASSsurvival/all4owners/595of600steady;
+  oneadditionalmaterialrewriteand1439.768msstallremain. Late-reloadNOTfixed;
+  lastnativeowner29.9sdiscoveryfromRun124stillrequiresearlierinventorywork.
+- Exactbuildqualification/read-onlypreflightPASS;client/copy/proxyhashesunchanged.
+  NoactualSFCrunthisturn. Artifactinventory13.465GB<20GB. HEADd40f8f2,indexempty,
+  allworkunstaged/uncommitted,nopush;noactiveownedprocess/helper/agent.
+- Exactnextaction:sponsorrepeatssixshipfixturewithFCA+duplicateKlingons,same
+  start_d3d9_multiship_session.ps1;120sentry,normalplay/cameras,exitattwoLOWbeeps.
+  Assessinitialcopiesappearingtogetherandlateloadsflickerseparately. Donotreopen
+  provenownershiporclaimarbitrarymissioncoverage/formalTRLcompletion.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-23 Run124 all six ships;loading bottleneck
+
+- [Run124](runs/2026-10-23-codex-six-ship-fixes-runtime-loading-review.md),
+  [evidence](reconnaissance/evidence/20261023-d3d9-six-ship-loading-runtime.json).
+  Actual194205-307246complete:all6owners/epochs,allACKed/drawn,FCAincluded,
+  5residentcontents+1KFFalias,zerocontextmismatches/retirements/assetpartials/
+  lookup/decode/projection/admissionfailure. Ownership/imagebudgetfixescorroborated.
+- Sponsor:almost30stoallships,serialCLIloads,wholeRemixsceneflickersperload,
+  originalSFCunaffected. CONFIRMEDsinglepreparer/fourlatematerialrewritesandfour
+  outputwaits1.116–1.570s. Afterframe2000max15.366ms,no>50mswaits. SharedKFFalias
+  addsNOmaterialrewrite. Allreturnedshipsinoneimageexplainswholecopyomissions.
+- First4nativecaptures0/47/63/78ms;KFF5firstobserved20.672s,KFF6=29.906s.
+  Last30sappearanceNOTsolelyconversioncost;currentrenderseamofferslateobjects
+  late. End-to-endPythonpreparecostnotfullytimed;backend2–30msreadstage/0–4ms
+  GPUadmissionexcludesimage/materialgenerationandreload. DoNOTmisreadselected
+  preparation26.125sasconversiontime(itincludesmenus).
+- Images217153856bytes/168images,retained105951816byteswithinbound. Normalexit,
+  hookrestore/unload,renderer/ownedcleanup/client/proxy/launcherPASS. Paired5044/
+  5411,365withoutship,notseamlessdeliveryPASS. Knownload/reloaddeficiencyopen.
+- Read-onlyreview;onlydocs/evidencechanged. HEADd40f8f2,indexempty,priorwork
+  preservedunstaged/uncommitted;nogamelaunch/helper/agent/commit/push.
+- Exactnextaction:withauthorization,profilePythonpreparationandremoveglobal
+  materialreloaddisruptionusingexistingcapturedbeforeanothergameplayrun.
+  Earlierloading-timeassetdiscoveryremainsseparatelyunqualified. Do notreopen
+  provenowner/geometrysharingorselectnewrendererjusttoavoidthisbottleneck.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-23 Run123 ownership/resources fixed offline
+
+- [Run123](runs/2026-10-23-codex-shared-owner-and-resource-fixes.md),
+  [evidence](reconnaissance/evidence/20261023-d3d9-shared-owner-resource-fixes.json),
+  currentcontract/probe. Sponsor authorized shared-owner fix,image-limit removal
+  andtestrestrictionaudit. Modelstage nowpreservesqualified nativecontext,
+  rechecksship/link,andrejects ambiguous/no-context andstaleepochs safely.
+- Scene-wide128MiB/256image testcaps removed across admission,game/standalone
+  supervisors,qualification andownedjob. Useauthorized20GBdiskallowance/free
+  spacewith32MiBevidencereserve;not20GBVRAM. Per-ASSET128MiBdecode/256resources/
+  4096²,256MiBpending+resident,32owners/64revisionsremainexplicitformat/memory
+  safeguards. Noappearancechange,originalsuppression orlimitlesscoverageclaim.
+- Offline fixture delays stayoffline;normalworker stripsinheritedfixtureflags.
+  Removedirrelevantcamera-recovery actioncues inmulti-ship. Leftoffset,exitcue,
+  120sentrywait/90scapture/285stotal remain. Knownmaterialreload/~5sfirstload
+  notfixed;earlierpreloadingstillnotimplemented.
+- 448PythonPASS,13identitychecks/archPASS;actualrecorder3sharedowners/zerochoice
+  mismatches+3negativeguardsPASS;M1/nativepersistent/lightworkerregressionsPASS.
+  5ownedjobtestsPASS. ExtendedGPU193719-104356:3assets/4ownersincludingFCAalias,
+  157271228imagebytes,144463338actualscratch>old128MiB,allACK/noassetpartials,
+  zerolookup/decode/projectionfailure,595/600steady,Hud/state/resize/exitPASS.
+- Exactbuildqualification/read-onlypreflightPASS;original/copiedclient/proxy
+  hashesunchanged. NoactualSFCtestthisturn. HEADd40f8f2,indexempty,allprior/new
+  workunstaged/uncommitted,nopush. Noactiveownedprocess;ignoredrawfixturesretained.
+- Exact next action:sponsorrepeats6shipfixturewithFCAandduplicateKlingonsusing
+  same start_d3d9_multiship_session.ps1;cycleeachintoview,playnormally,exitattwo
+  LOWbeeps. Reviewownerassignment/FCAadmission,boundsandcleanupbeforefurtherwork.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-23 Run122 shared-owner cause CONFIRMED
+
+- [Run122](runs/2026-10-23-codex-shared-visual-runtime-review.md),
+  [evidence](reconnaissance/evidence/20261023-d3d9-shared-visual-runtime.json).
+  Completed191630-707670:47censustuples/114287observations,zeroomitted,full120s.
+  Sixnative ships,11epochs NOT11ships. Sponsor reports2distinctKlingonmodels,
+  onemissingKlingon. Fourreturned instances:KDD/FDD/FFF/KFF.
+- CONFIRMED actual two KDDships0x18FB37A8/0x18F84F88sharevisual0x18D676B8.
+  Modelcallback enters with qualified secondshipowner5,butfind_by_visual chooses
+  firstowner1;4482wrongchoices including later secondship epochs7–11. Missing
+  duplicate never reaches persistentcapture;5renderretirements are bookkeeping,
+  not proven nativeidentity change. No more discovery run needed for thiscause.
+- FCAowner3captured but stillimagebudgetblocked:133335826/134217728bytes,
+  115images. Priorinstrumentation didNOTfixthis. Separate from sharedownerbug.
+- Normalexit,hookrestore/unload,rendererexit,launcher/original/copiedhashesPASS.
+  PARTIALcoverage;41projectionrejects/268unpaired presentations andknownlate
+  materialreload issues remain. No sponsor all-behavior acceptance invented.
+- Only reviewdocs/evidence changed;no source/config/budgetfix or newgame.
+  HEADd40f8f2,indexempty,allpriorworkunstaged/uncommitted;nohelper/agent/push.
+- Exact next action:withauthorization,preserve validated incoming nativeowner
+  through modelstage and reject ambiguous visual-onlyassignment;test sharedasset
+  instances independently. SeparatelyauditFCAaccounting/dedup withinexistingcap.
+  Earlierassetpreparation remains futureoptimization,not implemented.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-23 Run121 retry restored
+
+- [Run121](runs/2026-10-23-codex-multiship-selection-timeout-recovery.md).
+  Actual190828-113725timedout in selection before gate;zero ship evidence.
+  Component hooks restored/unloaded but game remained open,so proxy rollback
+  deferred. No game running at review;exact backup recovery completed and
+  recorded in recovery.json. Historical PARTIAL result preserved.
+- Fixed recovery eligibility for known recorded D3D9additive/multi transactions;
+  all hash,path,liveprocess and ambiguity checks retained. Multi-ship gate wait
+  now120seconds in both controller/runner,console instruction and manifest.
+  Overall285seconds/capture90seconds unchanged;no renderer/identity/material fix.
+- Startup11/fullPython442testsPASS;nativeworker qualificationPASS;standalone
+  fixture191449-284367twoassets/592of600steady/HUD/state/resize/normalexitPASS;
+  exact-buildqualification andread-onlypreflightPASS. All7criticalcopyhashes
+  restored;original/clienthashesunchanged. No actual game launch.
+  HEADd40f8f2,indexempty,prior work preserved,allchangesunstaged/uncommitted.
+- Exact next action:same six-ship identity test,enter tactical scene within
+  120seconds of setup message;normal two-low-beep exit request. Same launcher.
+  Earlier preload investigation remains read-only suggestion,not implemented.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-23 Run120 full-window identity census
+
+- [Run120](runs/2026-10-23-codex-full-window-identity-census.md),
+  [probe](reconnaissance/d3d9-retained-multiship-probe.md).
+  Sponsor authorized small full-window native identity observations. No ownership
+  correction yet;actual shared-visual cause remains STRONG HYPOTHESIS.
+- Multi-ship only:component-local27,680byte fixed table,256distinct native
+  ship/visual/model/source/context/chosen-owner/guard tuples,repeat counters and
+  first/last time/frame. Continues after120frame detail cap;no callback IO or
+  allocation. Post-stop summary section<128KiB;overflow explicit PARTIAL.
+- Production recorder synthetic test reproduces3native ships sharing1visual and
+  2existing first-match context mismatches after9265ms/frame600. This confirms
+  diagnostic coverage,NOT actual Klingon sharing. Portable9checks/arch and
+  Python439testsPASS;M1 regressions,light observer and persistent testsPASS.
+- Existing rendering/material/image settings and capture caps unchanged. No
+  extra hooks or memory-field discovery. Image-output rejection and late-material
+  reload stall remain separate limitations. Original ships remain drawn.
+- Exact source/binary qualification refreshed. Standalone fixtures042843-170556
+  and042921-889275:594/600 and600/600steady draws,two assets,Hud/scene/state/
+  resize/recreation/normalexitPASS;read-only launcherpreflightPASS. Actual
+  collector120updates/onecapture/retire/stopPASS. SeeRun120final evidence.
+  Original/copied client and baseline proxy hashesunchanged. No SFC run this turn.
+  HEADd40f8f2,indexempty,prior dirty work preserved;no stage/commit/push.
+  No active gameplay/tool session needed after offline validation.
+- Exact next action:repeat the six-ship fixture with three identical Klingon
+  enemies,cycle cameras,and inspect the full-window census before fixing owner
+  assignment. Same start_d3d9_multiship_session.ps1 launcher. FCA may still hit
+  existing image budget;this diagnostic is not a six-ship display PASS.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-22 Run119 six-ship coverage PARTIAL
+
+- [Run119](runs/2026-10-22-codex-six-ship-runtime-review.md),
+  [evidence](reconnaissance/evidence/20261022-d3d9-six-ship-runtime.json).
+  Larger completed run034948-568962. Sponsor:3of6displayed,initial flicker quickly
+  settled;cycled ships initially offscreen;three identical Klingon enemies.
+- CONFIRMEDfour captured owners:FDD/FCA/FFF/KFF;onlyFDD/FFF/KFFadmitted/displayed.
+  FCA blocked by conservative image-output budget127,424,806of134,217,728bytes,
+  NOTGPUmemoryexhaustion(resident60.7MB<256MiB). Ownercap32,nooverflow. Two repeated
+  Klingon instances missing at capture/registry stage,not explained by image cap.
+- Static first-match`g_owners.find_by_visual`at model observation can collapse
+  different ships IFthey share a visual. STRONGHYPOTHESIS for repeated Klingons,
+  actual sharedvisual tuple evidence absent. Do not declare sharing confirmed,
+  assume four assets means four instances,or silently weaken identity guards.
+ 5454semantic rejections begin78.906s;visualreason2/modelreason12,not independently
+  linked to missing initial ships. Capture/detailed CSV alone is not full census.
+- Oct23follow-up:full native tuple CSV stops at2015ms/frame119;first Klingon
+  capture9265ms/frame555. All raw asset headers/lifecycle/summary checked;onlyone
+  Klingon ship/visual tuple retained. Movement/cohort evidence is downstream of
+  owner assignment and cannot prove a collapsed identity. Shared-visual cause
+  remains hypothesis. If needed,retain first-seen/changed identity tuples across
+  the window,not a broad full-rate trace. No new gameplay/probe requested yet.
+- Zero cohort lookup/decode/projection/admission failures.5227paired/5405records;
+  initial82/69frame gaps coincide1.288/1.108sGPU waits(material reload known).
+  Afterframe1000:4707paired/4711. Normalexit/cleanup/clienthashesPASS;40runtime
+  commonobjects still unresolved. No source/config/budget change or new game.
+- Only review records/evidence/HANDOFF changed;HEADd40f8f2,indexempty,all prior
+  work preserved unstaged/uncommitted. No active session needed;no helper/agent.
+  Exact next action:qualify repeated-owner association at existing semantic seam;
+  then separately review image accounting/dedup. No replacement/material-cache
+  implementation authorized by these observations.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-22 Run118 actual repair review
+
+- [Run118](runs/2026-10-22-codex-multiship-delivery-runtime-review.md),
+  [evidence](reconnaissance/evidence/20261022-d3d9-multiship-delivery-runtime.json).
+  Actual run034547-144070:KFF/FCA captured/retained,5403/5401instance draws.
+  Sponsor reports no noticed flicker despite aggressive testing.
+- CONFIRMEDzero incomplete-cohort lookups and zero admission rejections.
+  Raw audit5392paired/5410records;afterfirstmatch11missing/5403(0.204%),versus
+  Run116692/5405. Ten early-settling misses,one later isolated miss(frame4383).
+  Afterframe600:5132paired/5133. No>50msoutput wait(max27.491ms). Not literal
+  zero-omission/universal/replacement PASS. One projection rejection remains.
+- Persistent14394publications/7196offscreen,zero failed updates. Normalexit,
+  restoration/unload/proxy/launcher/client hashesPASS. Images91.5MB<128MiB,
+  samples91<120.40runtimecommonobjects unresolved atshutdown. Late material
+  reload issue NOT exercised by this two-asset run;prepared caching is laterwork.
+- Sponsor is running a larger fixture. Second034948-568962 exists but reports
+  IN_PROGRESS/stageprepared/final_report_complete=false at inspection. Do not
+  treat result.json existence as completion,modify code/config mid-run or clean
+  active captures. No gameplay launch or source change by Codex during review.
+- Only records/evidence/HANDOFF changed;HEADd40f8f2,indexempty,prior work preserved,
+  no stage/commit/push/helper/agent. Exact next action:review larger run after
+  sponsor completion and final report,including all owners,limits,stalls/cleanup.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-22 Run117 delivery repairs prepared
+
+- [Run117](runs/2026-10-22-codex-multiship-delivery-repair.md),
+  [evidence](reconnaissance/evidence/20261022-d3d9-multiship-delivery-repair.json).
+  Sponsor authorized Run116 fixes. Complete cohort now precedes anchor notification;
+  actual compositor closed-frame watermark replaces multi-mode2ms input cutoff.
+  Legacy mode unchanged;no extra buffering,stale image hold or original suppression.
+- One CPU asset future prepares immutable mesh/images;D3D9 creation remains on
+  owning worker.256MiB pending+resident bound;shutdown drains future. Stage reason
+  counters and asset timings added. No lighting/material/image/offset TOML changes.
+- 434PythonPASS,new native45checks×2,legacy51/ingress142/shared9×2,persistent18×2,
+  GPU history33×2,slot649,combinedpost65 and M1 regressions PASS. Final normal-material
+  actual offline fixtures033707-223604 and033751-568413:595/600 and600/600steady,
+  zero cohort lookup or admission failures,two assets ACKed,HUD/scene/state/resize/
+  cleanupPASS. Native120update/onecapture/retire/stop PASS;read-onlypreflightPASS.
+  Exact source/binary/config receipt current. No actual SFC test this turn.
+- REMAINING BLOCKER:normal late material-list reload still stalls output about
+  1.11–1.12seconds. Offline A/B033158-986947 skips ONLY late material publication:
+  maximum20.296ms,no>50mswait. Marked negative diagnostic,cannot qualify normal
+  appearance and unavailable in game runner. Source-tag review links reload to
+  stopping/joining a1000ms watchdog (STRONG HYPOTHESIS for shipped-binary stack).
+  Do not patch vendor runtime,drop materials or claim seamless late arrivals.
+- Original/copied client hashes unchanged,baseline proxy restored. Six completed
+  fixture generated copies recoverably archived493MB→41MB;raw evidence retained.
+  Artifact inventory16.215GB<20GB. HEADd40f8f2,indexempty,all prior work preserved,
+  all changes unstaged/uncommitted,no push/helper/agent. No active owned session.
+- Exact next action:assess frequent-flicker repairs with existing multi-ship
+  launcher if sponsor chooses,with explicit residual late-material pause;otherwise
+  adjudicate a supported nonblocking material-binding approach before proceeding.
+  Original replacement remains separate. Do not redo camera/pose discovery.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-22 Run116 flicker diagnosis
+
+- [Run116](runs/2026-10-22-codex-multiship-flicker-diagnosis.md),
+  [evidence](reconnaissance/evidence/20261022-d3d9-multiship-flicker-diagnosis.json).
+  Actual offset run `20261023-024532-240443-in-game`:KFF/FCA/KFT all delivered,
+  including fresh fighter; sponsor reports frequent flicker and disappearances.
+- CONFIRMED692/5405 post-first-match returned-image omissions (12.803%),versus
+  prior aligned655/5407 and accepted single-FCA3/5400.690 misses have no completed
+  output record. Persistent poses continue:18293 publications,11094 offscreen,
+  zero failed updates/destruction. Not evidence of geometry repeatedly unloading.
+- CONFIRMED source-order race:anchor input becomes visible before full cohort
+  publication;host consumes anchor then drops it if one exact-cohort read fails.
+  STRONG HYPOTHESIS substantial frequent-flicker cause;exact counts uninstrumented.
+ 5162 accepted inputs,4718 live outputs,186 aggregate failed admissions;control-flow
+  accounting bounds lookup failures258–444. Two-ms admission unchanged despite
+  multi-ship GPU median10.405ms/p9516.171ms (single5.646/6.912).
+- CONFIRMED65-frame gap3370–3434 with1073.464ms GPU query wait. Fighter first
+  drawn3315;runtime warmup/material reload link STRONG HYPOTHESIS,not isolated.
+  Eleven instance rejections/eight unprepared omissions remain unlocalized.
+  No new source/config/rebuild/test session;diagnosis only. Cleanup/exit/hashes
+  pass,source timing partial(2invalid/2snapshotmiss),40runtime objects unresolved.
+- HEADd40f8f2,indexempty,prior Run113–115 work preserved unstaged. Only review
+  docs/evidence changed;no stage/commit/push/helper/agent or active session.
+  Exact next action:fix/test atomic cohort readiness with stage counters before
+  another sponsor test;then address actual admission budget/late-asset GPU stalls.
+  Implementation requires authorization;do not redo camera RE or start replacement.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-22 Run115 previous offset restored
+
+- [Run115](runs/2026-10-22-codex-multiship-offset-diagnostic.md),
+  [evidence](reconnaissance/evidence/20261022-d3d9-multiship-offset.json).
+  Sponsor requests previousleftoffset toinspect copies without coincidentdepth
+  interference,before optimizing/replacement. READY FOR SPONSOR OFFSET TEST.
+- `tools/d3d9_proof/multi_ship.toml`:camera_left_distance15.897722721099854,
+  exactacceptedFCA Run20261022-042653-754380distance. Samecamera-lefttranslation
+  for ALLreturnedinstances,not per-model rescaling;sourceheight/scale/pose,
+  lighting/material/image settings,originaldrawing unchanged. No newbuffer or
+  suppression. Zeroalignedlayout is now historicalRun113/114,not nexttest.
+- 433PythonPASS;host/receiver/addon strictbuild/nativeGPU checksPASS. Actual
+  two-model offsetfixtures20261023-023729-602838 and023920-264420 yield581/600
+  and550/600steadycohorts;offset matchesfloat32at bothends,HUD/scene/state/
+  resize/recreation/cleanupPASS. Native-light sourcegate refreshed by actual
+  offline tests;newmulti-ship receipt locks currentconfig/source/binaries.
+  Read-onlypreflightPASS,client/proxyhashesunchanged;nogameplayed thisturn.
+- Run114655post-startupmisses remain unresolved;movingcopies doesNOTfix them.
+  No actualstability/replacement/TRLclaim. No helper/agent,newrenderer design,
+  stage/commit/push. HEADd40f8f2,all priorunstagedwork preserved,indexempty.
+  No activesession needed;do not hand-editqualificationreceipts or repeatRE.
+- Exact next action:run`tools/d3d9_proof/start_d3d9_multiship_session.ps1`from
+  established elevatedparent,two differentmodels,brieflybothvisible,keepalive,
+  move/switchcameras normally,watchleftcopies andexitafterfinaltwoLOWbeeps.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-22 Run114 actual multi-ship overlay
+
+- [Run114](runs/2026-10-22-codex-multiship-overlay-runtime.md):actualrun
+  `artifacts/remix-runtime/runs/20261023-020135-192159-in-game`(UTCfolder,
+  sponsor localOct22). FreshKFFowner1/rev1 andFCAowner2/rev2 loaded/retained,
+  4757/4756instance draws. Sponsor:precise overlays,clipping-like surface conflict;
+  unable to assess flicker. Original suppressionOFF,zerooffset.
+- CONFIRMED5506paired-buffer records:4752matched,752unmatched,onewarmup/reset;
+  97initialmisses,655latermisses. Mostisolated;NOTseamlessPASS. No invalid output,
+  overwrite/resourcefailure/auditloss. Onebackendinstance rejection/oneunqualified
+  input unlocalized. STRONGHYPOTHESIS coincident depth/coverage conflict,not
+  isolated classicz-fighting. Unioncoverage is NOTnative ownerpicking/suppression.
+- Actual two-model fresh aligned delivery demonstrated;presentationstability
+  PARTIAL. Controller0,hookrestoration/unload,normalexit,hashes/proxy/configPASS.
+  Pinnedruntime logs40undisposedcommonobjects atshutdown:unresolveddiagnostic,
+  not a zero-leak claim. Images91.5MB<128MiB;92cohort samples<120;capturesbounded.
+- Reviewonly this turn,no source/config/build/game changes. NewRun114+HANDOFF;
+  priorRun113unstaged work preserved,HEADd40f8f2,indexempty,nocommit/push/helper.
+  No runtime session required to resume. Do not redo camera/pose discovery or
+  assume overlay conflict proves a texture regression or missing gameframes.
+- Exact next action:inspect existing owner-specific suppression and compositor
+  depth/coverage for the smallest controlled replacement test;do not implement
+  broad geometry suppression or silently dismiss measured output omissions.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-22 Run113 multi-ship aligned overlay ready
+
+- [Run113](runs/2026-10-22-codex-d3d9-retained-multiship.md),
+  [contract](reconnaissance/d3d9-retained-multiship-contract.md),
+  [probe/instructions](reconnaissance/d3d9-retained-multiship-probe.md),
+  [curated evidence](reconnaissance/evidence/20261022-d3d9-retained-multiship.json).
+  READY FOR FIRST SPONSOR MULTI-MODEL SFC TEST;not runtime/replacement/TRL PASS.
+- Sponsor expanded generic fresh D3D9 retained ships to first replacement-or-
+  overlay test. Selected **aligned overlay**,zero displacement,original ships
+  underneath;no suppression. Test is **different models**,not “mixed race”.
+  FCA-only diagnostic remains separate;do not silently broaden its selector.
+- New default-off`SFC_D3D9_MULTISCENE=1`:existing persistent simulation registry
+  publishes same-camera tracked-set frames;worker admits fresh supported assets,
+  original images/material-only policy;one retained ordinaryD3D9 scene/onePresent
+  through pinned Remix and existing paired GPU/D3D11 return. NoOBJ/MODgeometry/
+  Toolkit mesh/SDKmesh/per-ship renderer processes. No30Hz source cap.
+- Map107072bytes at15MiB−128KiB,NOT12MiB(source-timing occupies that region).
+  32owners,8frame slots,64immutable asset ACK entries;whole-set hash binds return.
+  Anchor is scheduling/light context,not native player flag or per-pixel owner.
+  Coverage is union of qualified submitted instances;not owner-suppression proof.
+  Native geometry hook remainsOFF. Existing transforms/addresses/ABI unchanged.
+- CONFIRMED offline:431Python PASS;newwire29×2,persistent18×2,GPUbuffer33×2,
+  slots649,combinedpost65;actual native120full-rate offscreen publications,one
+  geometry capture,retirement/worker stop/checksum pass. Finaltwo-model fixtures
+  `061042-924464` and`061206-530221`:568/600 and569/600 steady matching overlays,
+  two different historical packet assets(FCA/RCA),late second admission after
+  ≥90displayed outputs,material sublayer reload,unchanged native HUD/scene pixels,
+  state/resize/recreation/owned cleanup. Synthetic poses,NOTactualSFC evidence.
+- Asset backing45,271,248bytes conservativeCPU+GPU;images91,506,338bytes(<128MiB,
+  above64MiBwarning);sampled full-cohort frames17/16(<120cap). All omissions
+  retained separately from steady window;not zero-flicker/instant loading claim.
+  Actualdeath/retired Remix pixel removal,arbitrarydeformation/alpha/effects,
+  all-model/stress coverage remain unqualified. Keep ships alive firsttest.
+- Source/copy client hashes unchanged`4D6576…320C29`;copied baseline proxy restored
+  `E35E4E…44CAB7`. Read-only`run_return_game.py --multi-ship`preflight PASS.
+  No active game/owned fixture/map/service needs preserving. Nine completed
+  fixture generatedcopies recoverably archived under ignoredruntime archives;
+  original source captures/assets/logs retained. Artifact inventory11,293,274,781
+  bytes of20,000,000,000cap after compaction.
+- HEAD remains`d40f8f230fc7504023e4a052c99a81b5a08ce6b4`;all Run113source/docs/
+  tests unstaged/uncommitted,indexempty,no push/helper/agent. Exactfiles inRun113.
+  New mode receipt`artifacts/d3d9-proof/multiship-tests/qualification.json`
+  locks current sources/binaries/config. Rebuild/edits invalidate qualification;
+  legacy source-locked receipts may need refresh before legacy launcher reuse.
+  Do not rerun simulation/camera discovery,replace original assets,enable broad
+  geometry logs or claim actual replacement from this aligned overlay.
+- Exact next action:run`tools/d3d9_proof/start_d3d9_multiship_session.ps1`from the
+  established elevated parent,enter a two-ship skirmish with different models,
+  briefly show both then move/switch cameras normally,keep them alive and exit
+  after final two LOW beeps;analyze fresh assets/cohort/cleanup before expanding.
+
+## HISTORICAL / SUPERSEDED CHECKPOINT — 2026-10-22 Run112 demo video linked
 
 - [Run112](runs/2026-10-22-codex-readme-demo-video.md):sponsor-approved latestgood
   test video nowlinked viaREADMEthumbnail:https://youtu.be/NCYvT6ypXLY.

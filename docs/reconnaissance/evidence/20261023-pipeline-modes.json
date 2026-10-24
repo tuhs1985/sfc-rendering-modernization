@@ -1,0 +1,29 @@
+{
+  "run": "Run128",
+  "date": "2026-10-23",
+  "status": "OFFLINE_MODES_VALIDATED_SUB2S_TARGET_OPEN",
+  "default_public_mode": "performance",
+  "test_selection": "-Mode Test",
+  "historical_scans_in_asset_critical_path": 0,
+  "source_capture": "artifacts/remix-runtime/runs/20261023-205121-223108-in-game",
+  "final_benchmarks": [
+    {"folder": "artifacts/d3d9-proof/performance-mode-tests/20261023-215203-958043-performance", "mode": "performance", "identify_prepare_seconds": 2.3954829000867903, "inventory_setup_seconds": 2.6129148999461904},
+    {"folder": "artifacts/d3d9-proof/performance-mode-tests/20261023-215210-616753-performance", "mode": "performance", "identify_prepare_seconds": 2.370516199967824, "inventory_setup_seconds": 2.6831793999299407},
+    {"folder": "artifacts/d3d9-proof/performance-mode-tests/20261023-215217-280470-test", "mode": "test", "identify_prepare_seconds": 2.689678700058721, "inventory_setup_seconds": 2.6495420000283048}
+  ],
+  "benchmark_scope": "Four captured assets, fresh outputs, complete concurrent identification and preparation. Setup inventory/input copies and native runtime startup excluded. 499 scene/upload/DDS files per batch byte-identical to accepted capture outputs.",
+  "gpu_fixtures": [
+    {"folder": "artifacts/remix-runtime/runs/20261023-215402-299547-return-fixture", "mode": "test", "result_sha256": "e73469f9cc9c70df62545fc49600fa98e894aa68fe97c88599f63c15a37dfc83", "initial_discovery_to_host_launch_seconds": 2.5615531, "owners": 4, "contents": 3, "draws_per_owner": 841, "steady_delivered": 595, "steady_frames": 600, "csv_files": true, "cohort_samples": 14},
+    {"folder": "artifacts/remix-runtime/runs/20261023-215456-184002-return-fixture", "mode": "performance", "result_sha256": "bc7e7a45a553a3c1f2ed051afc9f8f104397887bb7b1bdcc03cdaf4f550771ab", "initial_discovery_to_host_launch_seconds": 2.2313652, "owners": 4, "contents": 3, "draws_per_owner": 841, "steady_delivered": 596, "steady_frames": 600, "csv_files": false, "cohort_samples": 0}
+  ],
+  "native_shared_light_evidence": "artifacts/d3d9-proof/performance-mode-tests/shared-lights-a938f15e28554c47af45fab947d4d640/result.json",
+  "python_tests": 463,
+  "python_result": "PASS",
+  "both_mode_preflights": "PASS",
+  "actual_sfc_run": false,
+  "original_and_copied_client_sha256": "4D65761D7DD69EF1504070261B81E9C200C0AF18105033E1C4D2222C62320C29",
+  "copied_proxy_sha256": "E35E4E2E47F4765F0799CB54C88E5ADE49B50CD7895C137B9D557F263344CAB7",
+  "staged": false,
+  "committed": false,
+  "limitations": ["Sub2s readiness not achieved", "Native host/GPU startup is additional", "Late unique material reload pause remains", "Session ledger does not account for arbitrary unrelated concurrent artifact writers", "No universal mission/model coverage or formal TRL claim"]
+}

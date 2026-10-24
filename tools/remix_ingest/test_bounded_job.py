@@ -33,6 +33,13 @@ class JobTests(unittest.TestCase):
         self.assertEqual(report['stop_reason'], 20)
         self.assertEqual(report['console_bytes'], 4096)
 
+    def test_multi_ship_scratch_can_exceed_old_image_cap(self):
+        # Sparse disposable file proves admission above128MiB without image dumps.
+        result,report=self.run_job('import time;f=open("sparse.bin","wb");f.seek(129*1024*1024);f.write(b"x");f.close();time.sleep(.2)',disk=20_000_000_000)
+        self.assertEqual(result.returncode,0,result.stderr)
+        self.assertEqual(report['stop_reason'],0)
+        self.assertGreater(report['peak_scratch_bytes'],128*1024*1024)
+
     def test_scratch_poll_stops_writer(self):
         result, report = self.run_job('import time;open("bulk.bin","wb").write(b"x"*131072);time.sleep(10)', disk=65536)
         self.assertNotEqual(result.returncode, 0)

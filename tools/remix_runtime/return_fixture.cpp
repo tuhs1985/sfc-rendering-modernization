@@ -145,7 +145,7 @@ struct Scene {
     DWORD markers[]{0xff000000u|(frame&0xffffffu),0xff000000u|((frame^0x55aa55u)&0xffffffu)};
     const unsigned y[]{4,height-5};for(unsigned i=0;i<2;++i){D3D11_BOX box{100,y[i],0,101,y[i]+1,1};context->UpdateSubresource(back.Get(),0,&box,&markers[i],4,4);}
   }
-  void shipSample(DWORD expectedScene=0){
+  void shipSample(DWORD expectedScene=0,bool late=false){
     ComPtr<ID3D11Texture2D> back;check(swap->GetBuffer(0,IID_PPV_ARGS(&back)),"game fixture backbuffer");D3D11_TEXTURE2D_DESC desc{};back->GetDesc(&desc);
     desc.Usage=D3D11_USAGE_STAGING;desc.BindFlags=desc.MiscFlags=0;desc.CPUAccessFlags=D3D11_CPU_ACCESS_READ;
     ComPtr<ID3D11Texture2D> staging;check(device->CreateTexture2D(&desc,nullptr,&staging),"game fixture one-shot staging");context->CopyResource(staging.Get(),back.Get());
@@ -156,7 +156,17 @@ struct Scene {
     for(unsigned y=0;y<height;++y){const auto* row=static_cast<const unsigned char*>(p.pData)+y*p.RowPitch;for(unsigned x=0;x<width;++x){const auto* c=row+x*4;
       const bool different=std::abs(int(c[0])-77)>3||std::abs(int(c[1])-13)>3||std::abs(int(c[2])-5)>3;
       changed+=different;if(x<80&&y>height-80&&different)border=false;
-    }}context->Unmap(staging.Get(),0);std::cout<<"GAME_IMAGE_PIXELS changed="<<changed<<" border_untouched="<<border<<'\n';
+    }}
+    if(GetEnvironmentVariableW(L"SFC_FIXTURE_SHIP_SNAPSHOT",nullptr,0)){
+      if(width>1920||height>1080)throw std::runtime_error("fixture image extent cap");
+      BITMAPFILEHEADER f{};f.bfType=0x4D42;f.bfOffBits=sizeof(f)+sizeof(BITMAPINFOHEADER);f.bfSize=f.bfOffBits+width*height*4;
+      BITMAPINFOHEADER b{};b.biSize=sizeof(b);b.biWidth=static_cast<LONG>(width);b.biHeight=-static_cast<LONG>(height);b.biPlanes=1;b.biBitCount=32;
+      std::ofstream image(late?"fixture-ship-late.bmp":"fixture-ship.bmp",std::ios::binary);image.write(reinterpret_cast<const char*>(&f),sizeof(f));image.write(reinterpret_cast<const char*>(&b),sizeof(b));
+      for(unsigned y=0;y<height;++y)image.write(static_cast<const char*>(p.pData)+y*p.RowPitch,width*4);
+      if(!image)throw std::runtime_error("fixture image write");
+      std::cout<<"SHIP_SNAPSHOT once=1 late="<<late<<" source_frame="<<expectedScene<<" width="<<width<<" height="<<height<<'\n';
+    }
+    context->Unmap(staging.Get(),0);std::cout<<"GAME_IMAGE_PIXELS changed="<<changed<<" border_untouched="<<border<<'\n';
     if(changed<8||!border)throw std::runtime_error("No actual additive ship pixels or original border damaged");
   }
   unsigned sample(const char* phase,bool save){
@@ -194,7 +204,7 @@ int wmain(){
     WNDCLASSW wc{};wc.lpfnWndProc=proc;wc.hInstance=GetModuleHandleW(nullptr);wc.lpszClassName=L"SFC_ReturnFixture";if(!RegisterClassW(&wc))throw std::runtime_error("fixture class");
     window=CreateWindowW(wc.lpszClassName,L"Offline returned-image fixture — NOT SFC",WS_POPUP,100,100,800,600,nullptr,nullptr,wc.hInstance,nullptr);if(!window)throw std::runtime_error("fixture window");ShowWindow(window,SW_SHOWNOACTIVATE);
     {
-      const bool gameOutput=GetEnvironmentVariableW(L"SFC_D3D9_GAME_OUTPUT",nullptr,0)!=0;bool imageSample=false;unsigned resizedFrame=0,imageStartFrame=0;LONG imageStartDraws=0;
+      const bool gameOutput=GetEnvironmentVariableW(L"SFC_D3D9_GAME_OUTPUT",nullptr,0)!=0;bool imageSample=false;unsigned resizedFrame=0,imageStartFrame=0,multiReadyAt=0;LONG imageStartDraws=0;
       SourceTimingFixture sourceTiming;Scene scene;if(gameOutput){scene.width=1920;scene.height=1080;}scene.init(window);const auto start=GetTickCount64();bool enabled=false,disabled=false,resized=false,recreated=false,afterResize=false,afterRecreate=false,disconnected=false;unsigned frames=0,stateErrors=0;
       const bool observationOnly=GetEnvironmentVariableW(L"SFC_RETURN_OBSERVATION_ONLY",nullptr,0)!=0;
       const bool expanded=GetEnvironmentVariableW(L"SFC_RETURN_EXPANDED_SEARCH",nullptr,0)!=0;
@@ -228,10 +238,14 @@ int wmain(){
         if(!gameOutput)sourceTiming.publish(frames+1);check(scene.swap->Present(0,0),"fixture present");++frames;if(!scene.statePreserved(broad||snapshot||gameOutput))++stateErrors;
         if(gameOutput){
           auto* base=reinterpret_cast<BYTE*>(sourceTiming.source.mailbox)-sfc_calibration::Offset;auto& pool=*reinterpret_cast<game_output::Pool*>(base+game_output::Offset);
-          if(!imageSample&&pool.stats.drawn&&pool.stats.frame+(synchronized?1u:0u)==200000+frames){scene.shipSample(synchronized?pool.stats.frame:0);imageSample=true;imageStartFrame=frames;imageStartDraws=pool.stats.drawn;}
+          if(sourceTiming.cohort.store&&!multiReadyAt&&sourceTiming.cohort.store->header.asset_ready==static_cast<LONG>(sourceTiming.rows.size())){multiReadyAt=frames;std::cout<<"MULTISCENE_BOTH_READY frame="<<frames<<" first_draws="<<pool.stats.drawn<<'\n';}
+          const bool cohortSettled=!sourceTiming.cohort.store||(multiReadyAt&&frames>=multiReadyAt+60);
+          if(!imageSample&&cohortSettled&&pool.stats.drawn&&pool.stats.frame+(synchronized?1u:0u)==200000+frames){scene.shipSample(synchronized?pool.stats.frame:0);imageSample=true;imageStartFrame=frames;imageStartDraws=pool.stats.drawn;}
           if(synchronized&&imageSample&&frames==imageStartFrame+200){return_path::write(s.enabled,0);std::cout<<"BUFFER_FIXTURE_DISABLED frame="<<frames<<'\n';}
           if(synchronized&&imageSample&&frames==imageStartFrame+205){return_path::write(s.enabled,1);std::cout<<"BUFFER_FIXTURE_REENABLED frame="<<frames<<'\n';}
-          if(!resized&&imageSample&&frames>=imageStartFrame+600){std::cout<<"GAME_DELIVERY_WINDOW frames="<<frames-imageStartFrame<<" draws="<<pool.stats.drawn-imageStartDraws<<'\n';scene.resize();resized=true;resizedFrame=frames;}
+          if(!resized&&imageSample&&frames>=imageStartFrame+600){std::cout<<"GAME_DELIVERY_WINDOW frames="<<frames-imageStartFrame<<" draws="<<pool.stats.drawn-imageStartDraws<<'\n';
+            if(GetEnvironmentVariableW(L"SFC_FIXTURE_SHIP_SNAPSHOT",nullptr,0)&&pool.stats.frame+(synchronized?1u:0u)==200000+frames)scene.shipSample(synchronized?pool.stats.frame:0,true);
+            scene.resize();resized=true;resizedFrame=frames;}
           if(resized&&!recreated&&frames>=resizedFrame+90){scene.reset();scene.width=1920;scene.height=1080;scene.init(window);recreated=true;}
           if(recreated&&frames>=resizedFrame+180)break;
         }

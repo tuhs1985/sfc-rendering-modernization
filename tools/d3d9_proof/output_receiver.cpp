@@ -17,7 +17,9 @@ static uint64_t ticks(){LARGE_INTEGER q{};check(QueryPerformanceCounter(&q)!=FAL
 #include "game_output_writer.h"
 #include "worker_gpu_fence.h"
 #include "deferred_diagnostics.h"
+#include "pipeline_mode.h"
 int wmain(int argc,wchar_t** argv){
+ const bool detailed=!pipeline_mode::performance();
  auto* outbuf=std::cout.rdbuf();auto* errbuf=std::cerr.rdbuf();
  std::ofstream log;if(argc==6){log.open(std::filesystem::path(argv[4])/L"receiver.log");if(!log)return 2;std::cout.rdbuf(log.rdbuf());std::cerr.rdbuf(log.rdbuf());}
  wchar_t buffered[2]{};const bool bufferedDiagnostics=GetEnvironmentVariableW(L"SFC_D3D9_LIVE_TIMING",buffered,2)==1&&buffered[0]==L'1';
@@ -81,7 +83,7 @@ int wmain(int argc,wchar_t** argv){
    channel->reserved=game.enabled&&gameSlot<0?1:0;
    channel->ack_session=p.session;channel->ack_epoch=p.resource_epoch;channel->ack_sequence=p.sequence+(mode==L"stale-ack"?1:0);
    InterlockedExchange(&channel->state,output_wire::acknowledged);check(SetEvent(doneEvent)!=FALSE,"acknowledgement notification");last=p.sequence;previous=p;++received;
-   std::cout<<"RECEIVED sequence="<<p.sequence<<" source_frame="<<p.source_frame<<" owner="<<p.owner<<" revision="<<p.revision<<" gpu_complete="<<(!game.enabled||gameSlot>=0)<<" game_slot="<<gameSlot<<" copy_started_qpc="<<copyStarted<<" copy_completed_qpc="<<copyCompleted<<" pool_published_qpc="<<poolPublished<<'\n';
+   if(detailed)std::cout<<"RECEIVED sequence="<<p.sequence<<" source_frame="<<p.source_frame<<" owner="<<p.owner<<" revision="<<p.revision<<" gpu_complete="<<(!game.enabled||gameSlot>=0)<<" game_slot="<<gameSlot<<" copy_started_qpc="<<copyStarted<<" copy_completed_qpc="<<copyCompleted<<" pool_published_qpc="<<poolPublished<<'\n';
    if(mode==L"disconnect"){result=0;break;}
   }
   if(context){context->ClearState();context->Flush();hr(device->GetDeviceRemovedReason(),"receiver healthy");}

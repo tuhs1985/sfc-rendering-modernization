@@ -12,6 +12,9 @@ int wmain(int argc, wchar_t** argv) {
     std::array<DWORD, 0x1ECC / 4 + 1> manager{};
     std::array<DWORD, 8> model{};
     std::array<DWORD, 1> visual{kVisualVtable}, visual2{kVisualVtable};
+    std::array<DWORD,35> ship{},ship2{};
+    ship[0]=ship2[0]=kShipVtable;
+    ship[34]=reinterpret_cast<DWORD>(visual.data());ship2[34]=reinterpret_cast<DWORD>(visual2.data());
     std::array<BYTE, 36> source{};
     source[0] = 0xA7; source[4] = 80; source[5] = 120; source[6] = 160;
     const auto original = source;
@@ -26,7 +29,7 @@ int wmain(int argc, wchar_t** argv) {
     saved[1] = reinterpret_cast<DWORD>(visual.data());
     saved[3] = reinterpret_cast<DWORD>(stack.data()) - 4;
     saved[6] = reinterpret_cast<DWORD>(model.data());
-    g_owners.observe(0x1000, saved[1], 0);
+    g_owners.observe(reinterpret_cast<DWORD>(ship.data()), saved[1], 0);
     g_config.enable_geometry_hook = false; g_config.enable_shading_off = true;
     g_running = g_gate = g_saturated = 1;
     g_frame = 120; // detail exhausted before all phases: intervention must continue
@@ -71,7 +74,7 @@ int wmain(int argc, wchar_t** argv) {
           "manager mode already suppressing lighting is a no-op");
     manager[0x1ECC / 4] = 0;
     saved[1] = reinterpret_cast<DWORD>(visual2.data());
-    g_owners.observe(0x2000, saved[1], 120);
+    g_owners.observe(reinterpret_cast<DWORD>(ship2.data()), saved[1], 120);
     invoke(30000); check(stack[2] == source_pointer, "second owner remains untouched");
     saved[1] = reinterpret_cast<DWORD>(visual.data());
     stack[0] = kKnownExceptionReturn;
@@ -100,7 +103,7 @@ int wmain(int argc, wchar_t** argv) {
     stack[1] = good_manager;
     // Target retirement does not automatically transfer the effect to another owner.
     g_owners.retire_before(121, [](const auto&) {});
-    g_owners.observe(0x1000, saved[1], 121);
+    g_owners.observe(reinterpret_cast<DWORD>(ship.data()), saved[1], 121);
     invoke(34000); check(stack[2] == source_pointer, "retired identity is never retargeted");
     // Configuration rejects incompatible intervention modes and hot geometry hook.
     std::array<wchar_t, MAX_PATH> temp{};

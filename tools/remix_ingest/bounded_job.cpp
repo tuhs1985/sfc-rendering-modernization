@@ -33,7 +33,7 @@ int wmain(int argc,wchar_t** argv){
         const auto seconds=std::stoul(argv[2]);const auto max_bytes=std::stoull(argv[3]);
         const auto log_limit=std::stoull(argv[4]);
         // Offline entry still requests180; approved live workflow requests<=300.
-        if(seconds<1 || seconds>300 || max_bytes<65536 || max_bytes>256ull*1024*1024 ||
+        if(seconds<1 || seconds>300 || max_bytes<65536 || max_bytes>20000000000ull ||
            log_limit<1024 || log_limit>8ull*1024*1024 || !fs::is_directory(work) || !fs::is_regular_file(argv[5]))return 2;
         const auto log_path=work/L"job-console.log",result_path=work/L"job-result.json";
         if(fs::exists(log_path) || fs::exists(result_path))return 2;
@@ -90,7 +90,7 @@ int wmain(int argc,wchar_t** argv){
                     if(entry.is_regular_file())bytes+=entry.file_size();
                 }
             }catch(...){reason=24;TerminateJobObject(job.h,24);break;}
-            peak=(std::max)(peak,bytes);warning|=bytes>=128ull*1024*1024;
+            peak=(std::max)(peak,bytes);warning|=bytes>=max_bytes*4/5;
             unsigned expected=0;
             if(bytes>max_bytes)reason.compare_exchange_strong(expected,21);
             expected=0;

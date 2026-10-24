@@ -1,0 +1,53 @@
+{
+  "run": "Run117",
+  "result": "FREQUENT_DELIVERY_REPAIR_OFFLINE_QUALIFIED_LATE_MATERIAL_STALL_UNRESOLVED",
+  "actual_sfc_test_performed": false,
+  "confirmed_changes": [
+    "Complete tracked-set publication precedes selected-anchor notification.",
+    "Actual compositor consumed-frame watermark replaces multi-mode2ms admission;50ms history guard and exact camera/cohort correspondence retained.",
+    "One bounded backend CPU asset future;D3D9 creation stays on owner thread;preloaded images avoid repeated render-worker IO/hash pass.",
+    "Aggregate lookup/admission reasons and asset CPU/GPU timings retained."
+  ],
+  "python_tests": 434,
+  "native_multi_scene_checks_per_arch": 45,
+  "final_fixtures": [
+    {
+      "folder": "artifacts/remix-runtime/runs/20261023-033707-223604-return-fixture",
+      "result_sha256": "690e1562a1d01c30597903470eef0bafbca246e099a935a03f643486c666ca69",
+      "steady_frames": 600,
+      "steady_draws": 595,
+      "cohort_lookup_rejections": 0,
+      "admission_rejections": 0,
+      "late_asset_cpu_us": 1912,
+      "late_asset_gpu_admit_us": 578,
+      "late_material_output_wait_us": 1113801
+    },
+    {
+      "folder": "artifacts/remix-runtime/runs/20261023-033751-568413-return-fixture",
+      "result_sha256": "65d8f3abbd5888be966dad0022ebb78508ccf9d1261ed056523dfe822adca04c",
+      "steady_frames": 600,
+      "steady_draws": 600,
+      "cohort_lookup_rejections": 0,
+      "admission_rejections": 0,
+      "late_asset_cpu_us": 2234,
+      "late_asset_gpu_admit_us": 330,
+      "late_material_output_wait_us": 1123745
+    }
+  ],
+  "negative_diagnostic": {
+    "folder": "artifacts/remix-runtime/runs/20261023-033158-986947-return-fixture",
+    "only_late_material_list_reload_skipped": true,
+    "maximum_output_gpu_us": 20296,
+    "qualification_rejected_as_required": true,
+    "normal_appearance_qualified": false
+  },
+  "remaining_blocker": "Seamless introduction of previously unseen normal material bindings through the pinned runtime hot-reload path.",
+  "vendor_internal_explanation_confidence": "STRONG HYPOTHESIS:release-tagged source stops/joins a1000ms-sleep watchdog during USD reload;no shipped-binary profiler stack captured.",
+  "original_client_sha256": "4D65761D7DD69EF1504070261B81E9C200C0AF18105033E1C4D2222C62320C29",
+  "original_suppression": false,
+  "appearance_configs_changed": false,
+  "staged": false,
+  "committed": false,
+  "artifacts_bytes_after_compaction": 16214551555,
+  "artifacts_cap_bytes": 20000000000
+}

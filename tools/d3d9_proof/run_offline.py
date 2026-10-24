@@ -138,8 +138,13 @@ def compare(folder):
 
 
 def storage():
-    return sum(p.stat().st_size for sub in ('remix-runtime/runs','remix-runtime/archives','d3d9-proof','d3d9-intercept/runs','d3d9-intercept/reference','d3d9-intercept/capabilities','d3d9-intercept/direct64-runs')
-               for p in (ROOT/'artifacts'/sub).rglob('*') if p.is_file())
+    total=0
+    for sub in ('remix-runtime/runs','remix-runtime/archives','d3d9-proof','d3d9-intercept/runs','d3d9-intercept/reference','d3d9-intercept/capabilities','d3d9-intercept/direct64-runs'):
+        for p in (ROOT/'artifacts'/sub).rglob('*'):
+            try:
+                if p.is_file():total+=p.stat().st_size
+            except FileNotFoundError:pass # Native latest-light packets are atomically renamed.
+    return total
 
 
 def run_native(case):

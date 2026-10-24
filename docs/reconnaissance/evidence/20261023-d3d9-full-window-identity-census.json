@@ -1,0 +1,40 @@
+{
+  "run": "Run120",
+  "date": "2026-10-23",
+  "result": "OFFLINE_IDENTITY_CENSUS_PREPARED_RUNTIME_ASSOCIATION_PENDING",
+  "confidence": "CONFIRMED for offline behavior; shared-visual runtime cause remains STRONG HYPOTHESIS",
+  "head": "d40f8f230fc7504023e4a052c99a81b5a08ce6b4",
+  "sfc_launched": false,
+  "ownership_changed": false,
+  "rendering_configuration_changed": false,
+  "bounds": {"unique_tuples": 256, "storage_bytes": 27680, "serialized_max_bytes": 131072, "overflow": "explicit PARTIAL; existing tuple counters continue"},
+  "tests": {
+    "python": {"passed": 439},
+    "portable_native": {"checks_per_arch": 9, "architectures": [32, 64], "passed": true},
+    "production_x86_recorder": {"native_ship_epoch_pairs": 3, "shared_visuals": 1, "context_choice_mismatches": 2, "first_frame": 600, "elapsed_ms": 10000, "detailed_capture_already_saturated": true, "synthetic_memory_not_game_evidence": true},
+    "m1_regressions": "PASS",
+    "persistent_native": "18 checks per architecture PASS; actual collector qualification PASS",
+    "light_observer": "17 checks per architecture and actual worker qualification PASS",
+    "launcher_preflight": "PASS; no game/renderer started",
+    "git_diff_check": "PASS"
+  },
+  "fixtures": [
+    {"path": "artifacts/remix-runtime/runs/20261023-042843-170556-return-fixture", "result_sha256": "F03B70F7CB18B7A0B40980469C21E24E0C8DF76E852CF1B3616A8106A707D3BA", "steady_frames": 600, "steady_draws": 594, "assets_accepted": 2, "native_hud_scene_exact": true, "state_errors": 0, "resize_and_recreation": true, "normal_owned_exit": true},
+    {"path": "artifacts/remix-runtime/runs/20261023-042921-889275-return-fixture", "result_sha256": "17EE03698063C086AA0CFB555BF470F1488BD664FA9B04307488F6018690EB1E", "early_ready": true, "steady_frames": 600, "steady_draws": 600, "assets_accepted": 2, "native_hud_scene_exact": true, "state_errors": 0, "resize_and_recreation": true, "normal_owned_exit": true}
+  ],
+  "qualification": {
+    "path": "artifacts/d3d9-proof/multiship-tests/qualification.json",
+    "sha256": "A00F0D0FB03B0817A2DF70B9AD8269024E086F2D048F200C3116BF3F5CBA862F",
+    "component_sha256": "A152FAF1293DE07DB8AC0253C012D75F640F1B74A26F7D8FAD5F3571A9455483",
+    "production_fixture_sha256": "73E27697386894CF643F530AD5D6565BB651E819972FE3058BBA4B5FE06D88EF"
+  },
+  "original_and_copy_client_sha256": "4D65761D7DD69EF1504070261B81E9C200C0AF18105033E1C4D2222C62320C29",
+  "copied_proxy_sha256": "E35E4E2E47F4765F0799CB54C88E5ADE49B50CD7895C137B9D557F263344CAB7",
+  "evidence_budget_inventory_bytes": 12179658445,
+  "evidence_budget_cap_bytes": 20000000000,
+  "remaining": ["Actual repeated Klingon native associations", "Separate conservative image-output budget accounting", "Known late material reload pause", "Previously recorded 40 runtime common objects on shutdown"],
+  "next": "Repeat six-ship fixture with three identical Klingon enemies; cycle cameras; analyze census before ownership changes",
+  "staged": false,
+  "committed": false,
+  "pushed": false
+}

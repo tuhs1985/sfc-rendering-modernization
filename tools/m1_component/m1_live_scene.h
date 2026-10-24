@@ -3,6 +3,8 @@
 #include "m1_present_calibration.h"
 #include "../d3d9_proof/live_owner_wire.h"
 #include "../scene_bridge/persistent_scene.h"
+#include "../d3d9_proof/multi_scene_wire.h"
+#include "../d3d9_proof/pipeline_mode.h"
 #ifdef SFC_NATIVE_LIGHT_DISCOVERY
 #include "native_light_observer.h"
 #include "m1_light_transport.h"
@@ -37,7 +39,7 @@ struct LiveScene {
     DWORD capture_attempts=0,capture_failures=0,owner_overflow=0,dropped=0,invalid=0;
     LONGLONG max_capture_ticks=0;LARGE_INTEGER frequency{};
     volatile LONG enabled=0;
-    bool lightTuning=false,sourceTiming=false,lifecycleCapture=false;
+    bool lightTuning=false,sourceTiming=false,lifecycleCapture=false,performance=false;
     // Default-off diagnostic journal, protected by the existing nonwaiting mailbox.
     // Independent of the latest-state table: a retirement cannot be coalesced away.
     std::array<std::array<DWORD,96>,256> lifecycle{};
@@ -46,6 +48,7 @@ struct LiveScene {
     live_owner::Source directSource;
     bool persistent=false;
     sfc_scene::Registry registry;
+    multi_scene::Source cohort;
     DWORD persistentFrame=0,persistentPublications=0,persistentFailures=0;
     DWORD persistentFrames=0;LONGLONG persistentTicks=0,persistentMaxTicks=0;
 #ifdef SFC_NATIVE_LIGHT_DISCOVERY
@@ -53,6 +56,7 @@ struct LiveScene {
     sfc_light_transport::Raw* sharedLights=nullptr;
 #endif
     bool start(const std::wstring& name,const std::wstring& directory) {
+        performance=pipeline_mode::performance();
         if(!LiveBridge::name_ok(name) || worker)return false;
         mapping=OpenFileMappingW(FILE_MAP_READ|FILE_MAP_WRITE,FALSE,name.c_str());
         if(!mapping)return false;
@@ -79,9 +83,14 @@ struct LiveScene {
         }
         persistent=GetEnvironmentVariableW(L"SFC_PERSISTENT_SCENE",liveMode,2)==1&&liveMode[0]==L'1';
         if(persistent&&(!directSource.store||directSource.store->header.version!=2)){close();return false;}
+        if(GetEnvironmentVariableW(L"SFC_D3D9_MULTISCENE",liveMode,2)==1&&liveMode[0]==L'1'){
+            if(!persistent||!cohort.attach(view,h+4)){close();return false;}
+            cohort.begin(); // prefault the fixed multi-owner publication before hooks
+        }
         wchar_t tuningMode[4]{};
         lightTuning=GetEnvironmentVariableW(L"SFC_LIGHT_TUNING",tuningMode,4)==1&&tuningMode[0]==L'1';
         lifecycleCapture=GetEnvironmentVariableW(L"SFC_LIFECYCLE_CAPTURE",tuningMode,4)==1&&tuningMode[0]==L'1';
+        if(performance)lifecycleCapture=false;
         if(lifecycleCapture)for(auto& row:lifecycle)row={}; // prefault before hooks
 #ifdef SFC_NATIVE_LIGHT_DISCOVERY
         wchar_t lightMode[4]{};
@@ -105,7 +114,7 @@ struct LiveScene {
         InterlockedExchange(&enabled,1);worker=CreateThread(nullptr,0,run,this,0,nullptr);
         if(!worker){enabled=0;close();return false;}return true;
     }
-    void close(){directSource.close();if(calibration){InterlockedExchange(&calibration->active,0);calibration=nullptr;}
+    void close(){cohort.close();directSource.close();if(calibration){InterlockedExchange(&calibration->active,0);calibration=nullptr;}
 #ifdef SFC_NATIVE_LIGHT_DISCOVERY
         sharedLights=nullptr;
 #endif
@@ -162,7 +171,7 @@ struct LiveScene {
 #endif
         if(!o.identity.same_epoch(id) || o.lod!=lod){o.identity=id;o.lod=lod;o.revision=0;o.failed=false;o.last_ms=0;}
         if(!o.revision && !o.failed && id.frame!=last_capture_frame){
-            if(revisions==(calibration?8:kSceneRevisions)){o.failed=true;++capture_failures;}
+            if(revisions==((calibration&&!cohort.store)?8:kSceneRevisions)){o.failed=true;++capture_failures;}
             else for(auto& a:assets)if(InterlockedCompareExchange(&a.ready,0,0)==0){
                 last_capture_frame=id.frame;++capture_attempts;LARGE_INTEGER before{},after{};QueryPerformanceCounter(&before);
                 const auto result=capture_mesh(a.mesh,id,read,valid);
@@ -211,6 +220,8 @@ struct LiveScene {
         if(!read(manager+0x628,camera.data(),68)||!read(manager+0x55c,camera.data()+17,68)||!read(manager+0x75c,camera.data()+34,24)||
            !read(manager+0x628,check.data(),68)||!read(manager+0x55c,check.data()+17,68)||!read(manager+0x75c,check.data()+34,24)||camera!=check)return;
         LARGE_INTEGER started{};QueryPerformanceCounter(&started);
+        cohort.begin();
+        live_owner::Packet anchor{};bool anchorPrepared=false;
         for(auto& e:registry.entries)if(e.live){
             if(!registry.update(e,frame,read)){++persistentFailures;
                 if(directSource.store&&static_cast<DWORD>(InterlockedCompareExchange64(&directSource.store->header.selected,0,0))==e.id.owner)directSource.reject(frame);
@@ -224,12 +235,19 @@ struct LiveScene {
             const auto composed=sfc_scene::multiply(s,sfc_scene::multiply(p,sfc_scene::multiply(v,e.world)));memcpy(r.data()+25,composed.data(),64);r[41]=0;
             r[46]=e.lod[1]!=0xffffffffu?e.lod[1]:(e.lod[0]>1?e.lod[2]:0);r[47]=GetCurrentThreadId();r[48]=1;
             LARGE_INTEGER q{};if(!QueryPerformanceCounter(&q))continue;sfc_calibration::stamp(r,static_cast<ULONGLONG>(q.QuadPart));
-            directSource.offer(r);DWORD slot=0;for(;slot<owner_count;++slot)if(owners[slot].identity.owner==e.id.owner)break;
+            // Prepare identity/sequence now;the wake-up must follow the complete
+            // tracked-set publication,not expose half a producer iteration.
+            if(cohort.store){if(directSource.prepare(r,anchor))anchorPrepared=true;}
+            else directSource.offer(r);
+            DWORD slot=0;for(;slot<owner_count;++slot)if(owners[slot].identity.owner==e.id.owner)break;
             if(slot==owner_count||!sfc_calibration::offer(calibration,slot,r)){directSource.reject(frame);continue;}
+            cohort.offer(r);
             // Only low-volume diagnostic state is rate limited;frame publication above isn't.
             if(elapsed-owners[slot].last_ms>=34){owners[slot].last_ms=elapsed;offer(slot,r);}
             ++persistentPublications;
         }
+        if(cohort.store){const bool ready=cohort.publish(static_cast<uint64_t>(InterlockedCompareExchange64(&directSource.store->header.selected,0,0)));
+            if(ready&&anchorPrepared)directSource.commit(anchor);}
         LARGE_INTEGER finished{};QueryPerformanceCounter(&finished);const auto ticks=finished.QuadPart-started.QuadPart;
         ++persistentFrames;persistentTicks+=ticks;if(ticks>persistentMaxTicks)persistentMaxTicks=ticks;
     }
@@ -238,16 +256,17 @@ struct LiveScene {
         InterlockedExchange(reinterpret_cast<LONG*>(b.view+12),1);
         std::array<DWORD,32> last{},counts{},loggedMs{};std::array<DWORD,4> generations{};
         DWORD bytes=0,records=0,transfers=0;bool failed=false,saturated=false;
-        std::ofstream log(b.output+L"\\LIVE-SCENE-001-updates.jsonl",std::ios::binary|std::ios::trunc);
+        std::ofstream log;
+        if(!b.performance)log.open(b.output+L"\\LIVE-SCENE-001-updates.jsonl",std::ios::binary|std::ios::trunc);
         std::ofstream events;DWORD eventBytes=0,eventRecords=0,eventOmitted=0;
         if(b.lifecycleCapture){events.open(b.output+L"\\LIFECYCLE-001-events.jsonl",std::ios::binary|std::ios::trunc);if(!events)failed=true;}
 #ifdef SFC_NATIVE_LIGHT_DISCOVERY
         const bool lightRequested=InterlockedCompareExchange(&b.lights.active,0,0)!=0;
         std::ofstream lightFile;
-        if(lightRequested){lightFile.open(b.output+L"\\native-lights.bin",std::ios::binary|std::ios::trunc);
+        if(lightRequested&&!b.performance){lightFile.open(b.output+L"\\native-lights.bin",std::ios::binary|std::ios::trunc);
             if(!lightFile){b.lights.ioFailed=true;InterlockedExchange(&b.lights.active,0);}}
 #endif
-        if(!log)failed=true;
+        if(!b.performance&&!log)failed=true;
         auto drainLifecycle=[&](){
             if(b.lifecycleCapture){
                 for(DWORD n=0;n<256;++n){
@@ -273,6 +292,7 @@ struct LiveScene {
                     ULONGLONG captured=0;
                     for(unsigned n=0;n<8&&b.lights.take(snapshot,&captured);++n){
                         if(b.sharedLights)sfc_light_transport::publish(b.sharedLights->header,b.sharedLights->cells[snapshot.header[8]%sfc_light_transport::Owners],snapshot,captured);
+                        if(b.performance)continue; // Shared light transport remains;file mirror is evidence only.
                         const auto target=b.output+L"\\native-light-latest-"+std::to_wstring(snapshot.header[8])+L".bin";
                         const auto temp=target+L".pending";
                         {std::ofstream f(temp,std::ios::binary|std::ios::trunc);
@@ -309,6 +329,7 @@ struct LiveScene {
                 if(r[0]<=last[i])continue;last[i]=r[0];
                 auto* guard=reinterpret_cast<LONG*>(b.view+4096+i*512);
                 InterlockedIncrement(guard);std::memcpy(b.view+4100+i*512,r.data(),sizeof(r));MemoryBarrier();InterlockedIncrement(guard);
+                if(b.performance)continue; // Latest state is functional;JSONL is optional.
                 if(failed || counts[i]>=((b.lightTuning&&!b.lifecycleCapture)?100u:2700u))continue;
                 // 20Hz detail spans the full120s watchdog; event journal is independent.
                 if(b.lifecycleCapture && counts[i] && r[4]==1 && r[3]-loggedMs[i]<50)continue;
@@ -321,7 +342,7 @@ struct LiveScene {
         drainLifecycle(); // producer disabled and callbacks drained by caller before stop
         log.close();if(b.lifecycleCapture)events.close();
 #ifdef SFC_NATIVE_LIGHT_DISCOVERY
-        if(lightRequested){b.lights.drain(lightFile);lightFile.close();
+        if(lightRequested){if(!b.performance){b.lights.drain(lightFile);lightFile.close();}
             if(b.sharedLights)InterlockedExchange(&b.sharedLights->header.stopped,1);
             std::ofstream ls(b.output+L"\\native-lights-summary.json");
             ls<<"{\"written\":"<<b.lights.written<<",\"captured\":"<<b.lights.sequence

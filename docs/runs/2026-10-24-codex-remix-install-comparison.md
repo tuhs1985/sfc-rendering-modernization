@@ -1,0 +1,15 @@
+# Run141 — compare two Toolkit installs and scope cleanup
+
+User asks to compare the normal/portable Remix installs and work out cleanup. Inventory only; no deletion or code migration. Read current handoff and installation/preview records; Fuel Guard attached. No helper/agent, stage/commit/push. HEADd40f8f2/indexempty/prior dirty work preserved.
+
+Full findings, exact roots, rollback conditions and legacy-tool dependencies: [comparison](../reconnaissance/2026-10-24-remix-install-comparison.md). Managed1.6.1~9.38GB, old1.6.0-dev~4.91GB, original standalone ZIP2.12GB, saved SFC jobs131MB. Neither Toolkit is current in-game runtime. Managed install is larger/different, not a byte-identical duplicate; preserve vendor-managed components. Recommend retaining managed install + pinned runtime + SFC work, retiring old extraction only after preserving changes and explicitly migrating/retiring old preview/inspection tools.
+
+Read-only inventory walks no reparse points; old42,472files/new43,344files, no errors/shared file IDs. GetCompressedFileSize is compression-adjusted file bytes, not cluster-rounded allocation. Initial cached DirEntry stat omitted Windows file IDs; fixed one-off audit to use full os.stat and completed successfully in10.313s. Inventory JSON in ignored `artifacts/d3d9-proof/install-audit-20261024.json`; current SHA in comparison. No install data modified. Both Kit binaries valid NVIDIA signature/sameSHA; app VERSION differs, same model-ingestion schema hash. Two sampled same-sized managed runtime DLLs have DIFFERENT hashes, so do not manually dedup by filename/size.
+
+Original portable ZIP hash verified against acquisition record. Full CRC diff attempt hit180s bound before complete report; no assertion old portable has no modifications, no deletion, no extra backup created. Preserve old ZIP and actual source folder until verified recovery is established. No useful SFC USD/image projects found inside install-root mod/capture trees; preserve all separate RemixJobs and uninspected shared user profiles regardless.
+
+Explicit dependencies found: run_mesh_preview.py,run_remix_ingest.py pin old Toolkit/version/no-space root; inspect_intercept.py imports USD libraries there. Normal Program Files root cannot simply replace old root without qualifying those tools. Current game runtime/scene bridge unaffected. Existing shortcuts target managed Toolkit. No active Toolkit observed; no app launched for compatibility claims.
+
+Validation: version/manifests/schema/Kit signatures/file IDs/selected SHA references, installed registry and shortcuts inspected; linked files and JSON format checked, git diff --check. No source changes and no tests/builds/runtime capture rerun; prior488test result is historical, not a new pass.
+
+Exact next action: sponsor reviews cleanup recommendation; on cleanup authorization, preserve/verify old local changes and explicitly retire or migrate the three legacy paths, then remove only exact old extraction. Keep managed Toolkit/current runtime/jobs. Profiling work remains pending; do not let install cleanup substitute for the bounded Nsight timeline or change renderer baseline.

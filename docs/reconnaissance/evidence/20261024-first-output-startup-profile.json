@@ -1,0 +1,102 @@
+{
+  "run": "Run134",
+  "date_local": "2026-10-24",
+  "result": "INTERMITTENT_PRESENT_STALL_LOCALIZED_INTERNAL_CAUSE_UNRESOLVED",
+  "under_two_seconds_confirmed": false,
+  "game_launched": false,
+  "normal_render_behavior_changed": false,
+  "startup_profile_default": "OFF",
+  "profile_capacity": 128,
+  "profile_points_observed": 84,
+  "fixtures": [
+    {
+      "folder": "20261024-043250-612637-return-fixture",
+      "result_sha256": "abdc2722655040559a67cbb66febcdd9302d6f29024222cbd61e4eabf8de56bf",
+      "mode": "performance",
+      "menu_idle_seconds": 0,
+      "bootstrap_wall_seconds": 0.3907434,
+      "activation_to_bootstrap_output_seconds": 0.4658439,
+      "first_receiver_ack_seconds": 0.1617908,
+      "activation_to_first_matching_composition_seconds": 0.7766314,
+      "draws_per_owner": 791,
+      "scope": "Prototype instrumented source before experiment-watchdog/launcher additions"
+    },
+    {
+      "folder": "20261024-043424-734797-return-fixture",
+      "result_sha256": "8b716a911c5d49fe2f7f9e3a2f41a5b0574c32b3cba8b98626f9d7e284d2fc1f",
+      "mode": "test",
+      "menu_idle_seconds": 0,
+      "bootstrap_wall_seconds": 0.3711409,
+      "activation_to_bootstrap_output_seconds": 0.4199108,
+      "draws_per_owner": 785,
+      "scope": "Prototype instrumented source"
+    },
+    {
+      "folder": "20261024-043835-394679-return-fixture",
+      "result_sha256": "fc01a8d1f28083194e7b3ce8ac3b2a90b906588e9d0dca24ae173f7b6c7a2484",
+      "mode": "performance",
+      "menu_idle_seconds": 60,
+      "bootstrap_wall_seconds": 2.5430623,
+      "bootstrap_cpu_draw_seconds": 0.0050774,
+      "bootstrap_present_seconds": 2.292827,
+      "slowest_present_index": 3,
+      "slowest_present_seconds": 1.9929418,
+      "activation_to_bootstrap_output_seconds": 2.6044777,
+      "activation_to_first_matching_composition_seconds": 2.8765632,
+      "draws_per_owner": 840,
+      "scope": "Launcher opt-in forwarding changed during experiment;not final-source receipt"
+    },
+    {
+      "folder": "20261024-044102-656244-return-fixture",
+      "result_sha256": "3fd170f40a2211dbc98ed96412b77b1885dd3bb07ffe0a2c6b9306787771fb34",
+      "mode": "test",
+      "menu_idle_seconds": 60,
+      "bootstrap_wall_seconds": 0.3618089,
+      "slowest_present_seconds": 0.068447,
+      "activation_to_bootstrap_output_seconds": 0.4313509,
+      "activation_to_first_matching_composition_seconds": 0.7157988,
+      "draws_per_owner": 801,
+      "steady_matching_frames": 596,
+      "steady_frames": 600,
+      "scope": "Final-source qualification fixture"
+    },
+    {
+      "folder": "20261024-044404-661245-return-fixture",
+      "result_sha256": "c1808fe32ff854904b8c8f27ac2cbd5d72921a2933bb314e7ddd0ed604030c0a",
+      "mode": "performance",
+      "menu_idle_seconds": 0,
+      "startup_profile": false,
+      "profile_markers_absent": true,
+      "draws_per_owner": 798,
+      "steady_matching_frames": 593,
+      "steady_frames": 600,
+      "scope": "Final-source default-OFF regression"
+    }
+  ],
+  "failed_experiment": {
+    "folder": "20261024-043620-834543-return-fixture",
+    "reason": "60second fixture watchdog expired before menu-idle experiment completed",
+    "fixture_exit": 120,
+    "native_abort_exit": 3221225477,
+    "owned_processes_remaining": 0,
+    "disposition": "PARTIAL;explicit long-idle experiment watchdog corrected to100seconds,ordinaryfixture/game deadlines unchanged"
+  },
+  "native_private_memory_gib_approximate": {
+    "device_ready": 2.2,
+    "first_bootstrap_output": 4.3,
+    "scope": "Own host including vendor allocations;startup samples,not peak/leak proof"
+  },
+  "bootstrap_count_unchanged": 24,
+  "explicit_bootstrap_sleep_ms_each_unchanged": 10,
+  "python_tests_passed": 471,
+  "native_combined_gpu_checks_passed": 65,
+  "exact_source_qualification": "PASS",
+  "both_read_only_preflights": "PASS",
+  "clients_and_proxy_unchanged": true,
+  "artifact_inventory_bytes": 18088389968,
+  "artifact_allowance_bytes": 20000000000,
+  "head": "d40f8f230fc7504023e4a052c99a81b5a08ce6b4",
+  "index_empty": true,
+  "committed": false,
+  "next_action": "Separate deferred material ingestion from presenter/runtime initialization;use opt-in startup profile on next normal SFC run to attribute actual game gap."
+}
