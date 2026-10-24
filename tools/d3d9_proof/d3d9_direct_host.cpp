@@ -93,10 +93,11 @@ int wmain(int argc,wchar_t** argv){
    WorkerPoll renderPollWait;std::cout<<"WORKER_POLL microseconds="<<renderPollWait.microseconds<<" bounded_diagnostics="<<bufferedDiagnostics<<'\n';
    ComPtr<IDirect3DQuery9> fence;ok(device->CreateQuery(D3DQUERYTYPE_EVENT,&fence),"renderer completion query");ComPtr<ID3D11Query> consumerFence;D3D11_QUERY_DESC query{D3D11_QUERY_EVENT,0};ok(native->CreateQuery(&query,&consumerFence),"consumer completion query");
    remixapi_Float4D background{-1234,0,0,0},zero{};apiok(external.dxvk_SetDefaultOutput(types[1],&background),"depth background sentinel");apiok(external.dxvk_SetDefaultOutput(types[2],&zero),"picking background sentinel");
-   // First picking copy requests retention. It does not yet guarantee pixels.
-   apiok(external.dxvk_CopyRenderingOutput(outputs[2].surface.Get(),types[2]),"request picking image retention");
    DirectVisualControls visuals;visuals.start(external,native.Get(),outputs[0].image.Get());
    NormalCoverage coverage;coverage.start(native.Get(),outputs[1].image.Get(),outputs[2].image.Get());
+   // Additive mode supplies its own UNION coverage; it never consumes vendor
+   // picking. Only genuine picking consumers request vendor image retention.
+   if(!coverage.enabled)apiok(external.dxvk_CopyRenderingOutput(outputs[2].surface.Get(),types[2]),"request picking image retention");
    WorkerGpuFence postFence;if(coverage.enabled)postFence.start(native.Get(),context.Get());
    const auto postValues=visuals.image.post();
    const bool combinedPost=coverage.enabled&&visuals.enabled&&(postValues[0]!=1||postValues[1]!=1||postValues[2]!=1);
@@ -137,7 +138,9 @@ int wmain(int argc,wchar_t** argv){
     if(cohort.enabled){ownerInput.idleWork=[](void* p){static_cast<MultiSceneRuntime*>(p)->assets();};ownerInput.idleContext=&cohort;}
     bool measuredCohort=false;
     uint64_t outputSequence=0;unsigned lightOmitted=0;
-    for(size_t frame=0;frame<(liveMode?6001:paced?paced+(latest?1u:0u):scene.frames.size());++frame){
+    // Live input supplies source-stop and elapsed watchdogs in next(); skipped
+    // submissions must not consume a proof-era frame-count lifetime budget.
+    for(size_t frame=0;run_lifetime::iteration(liveMode,frame,paced?paced+(latest?1u:0u):scene.frames.size());++frame){
      if(frame<2)startup.mark("frame_begin",static_cast<unsigned>(frame));
      Frame state=scene.frames[frame%scene.frames.size()];frame_ingress::Packet input{};
      live_owner::Packet rawInput{};if(liveMode&&frame){if(!ownerInput.next(scene,state,rawInput))break;}
@@ -152,6 +155,11 @@ int wmain(int argc,wchar_t** argv){
      if(liveMode&&frame&&!ownerInput.admit(rawInput))continue;
      const bool measureCohort=cohort.enabled&&frame&&!measuredCohort;
      if(paced&&frame&&!latest){if(!scheduleStart)scheduleStart=outputTicks();const auto due=scheduleStart+static_cast<int64_t>(frame-1)*frequency.QuadPart/60;while(outputTicks()<due)Sleep(1);}
+     // TRANSITIONAL compatibility policy, NOT NVIDIA-required readiness.
+     // Run160 tested one startup Present: earlier pixels exposed incomplete
+     // initial appearance and later misses. Keep the accepted policy until a
+     // vendor-backed material lifecycle replacement is qualified. Ordinary
+     // live updates remain one Present; GPU/source checks are independent.
      const auto began=outputTicks();const unsigned presents=(singlePresent||liveMode)&&frame?1u:24u;
      if(measureCohort)startup.mark("cohort_draw_begin");
      bool submitted=false;

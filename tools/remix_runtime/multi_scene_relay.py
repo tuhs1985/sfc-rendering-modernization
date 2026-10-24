@@ -45,6 +45,7 @@ class Relay(SingleRelay):
         self.isolate_initial_material_library=False
         self.loading_policy='inherit'
         self.loading_receipt=None
+        self.candidate_release=None;self.candidate_asset_loading='inherit'
         self.material_library='layers'
         self.material_texture_loading='preload'
         self.native_log_level='inherit'
@@ -91,6 +92,13 @@ class Relay(SingleRelay):
             if self.overlap_texture_prefetch:env['SFC_D3D9_API_PREFETCH_OVERLAP']='1'
         from loading_policy import configure
         extra,self.loading_receipt=configure(self.loading_policy,env,offline=self.offline_fixture)
+        if self.candidate_asset_loading!='inherit':
+            if self.loading_policy!='inherit':raise ValueError('Candidate initialization excludes other loading overrides')
+            from runtime_candidate import configure_initialization
+            candidate_extra,candidate_policy=configure_initialization(
+                self.candidate_asset_loading,env,offline=self.offline_fixture,release=self.candidate_release)
+            extra+=candidate_extra
+            self.loading_receipt['candidate_initialization']=candidate_policy
         if self.native_log_level!='inherit':
             if not self.offline_fixture or self.native_log_level!='error':raise ValueError('Native logging experiment is offline only')
             env['DXVK_LOG_LEVEL']='error'
@@ -157,7 +165,10 @@ class Relay(SingleRelay):
         source=self.folder/'gate'/f'LIVE-SCENE-001-asset-{row[7]}.bin'
         if source.stat().st_size>2*1024*1024 or source.with_suffix('.json').stat().st_size>256*1024:raise ValueError('Fresh source bounds')
         packet=source.read_bytes();references=source.with_suffix('.json').read_bytes()
-        mesh=decode_mesh(packet,references)
+        if self.mode=='performance':
+            from mesh_checksum import calculate
+            mesh=decode_mesh(packet,references,checksum=calculate)
+        else:mesh=decode_mesh(packet,references)
         mesh['_capture_refs_sha256']=hashlib.sha256(references).hexdigest()
         if (mesh['header'][4],mesh['header'][10],mesh['header'][12])!=(row[1],row[5],row[6]):raise ValueError('Fresh source identity mismatch')
         content=Content(self.root);signature=content.signature(mesh)

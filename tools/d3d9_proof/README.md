@@ -1,5 +1,38 @@
 # Plain D3D9 offline proof
 
+## Isolated stock1.6.1 initialization qualification
+
+The normal gameplay runtime is still1.5.2. The standalone return fixture accepts
+`--runtime-candidate 1.6.1 --candidate-asset-loading synchronous` with
+`--multi-ship --prewarm`. This changes only NVIDIA's
+`rtx.initializer.asyncAssetLoading=False` (matching child environment0); it does
+not disable preparation workers, shader async or texture streaming, and is not a
+GPU-residency readiness signal. Defaults remain `inherit`; the switch is rejected
+without the candidate and cannot combine with `--loading-policy` overrides.
+
+Use the verified isolated candidate host built by `build_candidate_runtime.ps1`.
+For the standard larger offline fixture, run the project Python with:
+
+```
+tools/remix_runtime/run_return_fixture.py --multi-ship --multi-ship-resources
+--prewarm --startup-profile --pipeline-mode performance
+--runtime-candidate 1.6.1 --candidate-asset-loading synchronous
+```
+
+Add `--multi-ship-late-asset` for incremental publication. Omit both candidate
+options for the unchanged1.5.2 control. Keep lines on one invocation. Neither
+mode launches SFC. Result runtime_candidate.asset_loading plus
+gpu/loading-inputs.json and the runtime log record requested/effective policy.
+Candidate results cannot certify the normal gameplay pin. See
+[Run150](../../docs/runs/2026-10-24-codex-initial-loading-material-workaround.md)
+and current handoff for qualification outcome and packaged-source caveat.
+
+**Retired dependency (2026-10-24):** historical `inspect_intercept.py` uses USD
+libraries from the retired portable Toolkit. Restore the verified old Toolkit
+before replaying that inspection, or separately qualify a managed-library
+migration. The current D3D9 gameplay path does not use that parser or Toolkit.
+See [rollback record](../../docs/runs/2026-10-24-codex-toolkit-cleanup.md).
+
 **Current path:** the live in-game experiment now uses this D3D9 adapter with
 persistent FCA tracking and a synchronized GPU return buffer. See the
 [project pipeline overview](../../README.md#how-it-fits-together) and newest

@@ -3,6 +3,7 @@
 #include "output_channel.h"
 #include <sddl.h>
 #include <string>
+#include "pipeline_mode.h"
 struct OutputPeer {
  HANDLE mapping=nullptr,process=nullptr,readyEvent=nullptr,doneEvent=nullptr;output_wire::Channel* channel=nullptr;uint64_t session=0;bool disconnected=false;std::wstring mode;
  ~OutputPeer(){
@@ -36,7 +37,7 @@ struct OutputPeer {
   const auto deadline=GetTickCount64()+10000;const auto began=GetTickCount64();
   for(;;){const auto state=output_wire::state(channel);
    if(state==output_wire::acknowledged){if(!output_wire::valid_ack(*channel,p)){require(mode==L"stale-ack","ACK identity mismatch");std::cout<<"OUTPUT_STALE_ACK_REJECTED\n";disconnected=true;break;}
-    InterlockedExchange(&channel->state,output_wire::idle);std::cout<<"OUTPUT_ACK sequence="<<p.sequence<<" held_ms="<<GetTickCount64()-began<<'\n';return true;}
+    InterlockedExchange(&channel->state,output_wire::idle);if(!pipeline_mode::performance())std::cout<<"OUTPUT_ACK sequence="<<p.sequence<<" held_ms="<<GetTickCount64()-began<<'\n';return true;}
    if(state==output_wire::rejected){require(mode==L"invalid","receiver rejected valid output");std::cout<<"OUTPUT_INVALID_REJECTED\n";disconnected=true;break;}
    if(WaitForSingleObject(process,0)!=WAIT_TIMEOUT){require(mode==L"disconnect"||mode==L"exit-acquired","receiver exited unexpectedly");std::cout<<"OUTPUT_PEER_DISCONNECTED acquired="<<(state==output_wire::acquired)<<'\n';disconnected=true;break;}
    require(GetTickCount64()<deadline,"receiver ACK10s limit");const HANDLE waits[]={process,doneEvent};require(WaitForMultipleObjects(2,waits,FALSE,100)!=WAIT_FAILED,"receiver notification wait");

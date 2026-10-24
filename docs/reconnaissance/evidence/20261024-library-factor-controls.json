@@ -1,0 +1,42 @@
+{
+  "scope": "Run148 standalone full two-asset library controls; not gameplay or upgrade qualification",
+  "working_runtime": "1.5.2",
+  "candidate_runtime": "1.6.1",
+  "material_count": 61,
+  "generated_files_per_case": 272,
+  "generated_bytes_per_case": 102477040,
+  "image_hash_multisets_identical": true,
+  "comparison": "Late BMP RGB; union of non-background ship pixels; values in 0..255; no rescaling",
+  "comparisons": {
+    "candidate_vs_explicitly_disabled": {"pixels": 25919, "mean_abs_rgb": 24.614542742132542, "pixels_delta_gt3": 22467},
+    "candidate_vs_flat": {"pixels": 25919, "mean_abs_rgb": 0.08821070771763313, "pixels_delta_gt3": 54},
+    "candidate_vs_valid_root_declaration": {"pixels": 25919, "mean_abs_rgb": 0.4581066656378204, "pixels_delta_gt3": 559},
+    "candidate_vs_working_runtime": {"pixels": 25919, "mean_abs_rgb": 2.4944377998122356, "pixels_delta_gt3": 7665},
+    "flat_vs_emission_off": {"mean_abs_rgb": 4.493537559319418, "pixels_delta_gt3": 4316},
+    "flat_vs_roughness_smooth": {"mean_abs_rgb": 0.4654243347865787, "pixels_delta_gt3": 576},
+    "valid_root_declaration_vs_roughness_smooth": {"mean_abs_rgb": 0.07333101842920894, "pixels_delta_gt3": 39},
+    "absolute_paths_vs_disabled": {"mean_abs_rgb": 0.06738943117661432, "pixels_delta_gt3": 19},
+    "prior_known_root_vs_disabled": {"mean_abs_rgb": 0.06225806036755533, "pixels_delta_gt3": 15}
+  },
+  "runs": {
+    "baseline_candidate": "20261024-171212-319819-return-fixture",
+    "explicit_disabled": "20261024-171521-679139-return-fixture",
+    "prior_known_root": "20261024-172435-519182-return-fixture",
+    "invalid_root_excluded": "20261024-175809-323667-return-fixture",
+    "absolute_paths": "20261024-175854-436164-return-fixture",
+    "flat": "20261024-175950-136276-return-fixture",
+    "normal_control": "20261024-180049-258706-return-fixture",
+    "valid_root_declaration": "20261024-180207-758927-return-fixture",
+    "emission_off": "20261024-180335-481323-return-fixture",
+    "roughness_smooth": "20261024-180537-490349-return-fixture"
+  },
+  "adjudication": {
+    "confirmed": "Existing layered and flat full libraries apply replacements in this basic two-asset fixture; emission control changes pixels",
+    "corrected": "Earlier full/empty similarity in larger fixtures does not establish that candidate replacement mechanism is generally inactive",
+    "roughness": "No isolated reliable positive effect established; change is comparable to layout-only variation",
+    "root_and_paths": "No production fix justified; absolute-path and prior one-material-root derivatives match disabled output",
+    "remaining": "Larger three-content/four-owner incremental-publication behavior and remaining version-dependent appearance differences are unqualified"
+  },
+  "validation": {"targeted_python_passes": 24, "owned_processes_afterward": 0, "source_native_or_config_edits": false, "committed": false},
+  "storage": {"cap": 20000000000, "observed_bytes": 19148476109, "generated_sets_recoverably_archived": 11, "net_bytes_recovered_before_receipts": 1054946717}
+}

@@ -46,6 +46,9 @@ def main():
     parser.add_argument('--synchronized-buffer',action='store_true',help='Exercise complete-game-frame/ship one-frame pairing,standalone fixture only')
     parser.add_argument('--buffer-early-ready',action='store_true',help='Use normal16ms source lead to exercise queued output before the saved scene is presented')
     parser.add_argument('--multi-ship',action='store_true',help='Two different historical fresh packets through aligned retained scene;offline only')
+    parser.add_argument('--runtime-candidate',choices=('1.6.1',),help='Isolated pinned runtime/header/host experiment;never changes gameplay dependency')
+    parser.add_argument('--candidate-initial-replacements',action='store_true',help='Candidate diagnosis only: enable stock replacement policy before device creation')
+    parser.add_argument('--candidate-asset-loading',choices=('inherit','synchronous'),default='inherit',help='Candidate offline only: change just NVIDIA initial asset-loading policy;other async controls unchanged')
     parser.add_argument('--pipeline-mode',choices=('performance','test'),default='test')
     parser.add_argument('--prewarm',action='store_true',help='Start native renderer before discovering prepared fixture assets')
     parser.add_argument('--startup-profile',action='store_true',help='Offline only: bounded native startup phase/QPC/memory measurements')
@@ -65,6 +68,11 @@ def main():
     parser.add_argument('--with-depth',action='store_true',help='Bind known synthetic D24S8 descriptor, not actual scene depth')
     parser.add_argument('--observation-only',action='store_true',help='No Remix runtime/image; control channel and depth observations only')
     args=parser.parse_args()
+    if args.runtime_candidate and not(args.multi_ship and args.prewarm):parser.error('--runtime-candidate requires --multi-ship --prewarm')
+    if args.candidate_initial_replacements and not args.runtime_candidate:parser.error('--candidate-initial-replacements requires --runtime-candidate')
+    if args.candidate_asset_loading!='inherit':
+        if not args.runtime_candidate:parser.error('--candidate-asset-loading requires --runtime-candidate')
+        if args.loading_policy!='inherit':parser.error('--candidate-asset-loading excludes --loading-policy overrides')
     if args.startup_profile and not(args.multi_ship and args.prewarm):parser.error('--startup-profile requires --multi-ship --prewarm')
     if args.loading_policy!='inherit' and not args.startup_profile:parser.error('--loading-policy requires --startup-profile')
     if args.material_library!='layers' and not args.startup_profile:parser.error('--material-library requires --startup-profile')
@@ -106,11 +114,33 @@ def main():
         import sys
         sys.path.insert(0,str(ROOT/'tools/d3d9_proof'))
         from run_offline import storage,AGGREGATE_BYTES
-        if storage()+192*1024*1024>AGGREGATE_BYTES:raise RuntimeError('Additive fixture lacks192MiB reservation within20GB cap')
+        # Include concurrent image-converter reservations, not just the eventual
+        # compressed output. Otherwise a fixture can start but refuse an owner.
+        reserve_mib=1024 if args.multi_ship_resources else (768 if args.multi_ship else 192)
+        if storage()+reserve_mib*1024*1024>AGGREGATE_BYTES:
+            raise RuntimeError(f'Additive fixture lacks{reserve_mib}MiB reservation within20GB cap;archive completed evidence first')
     backend_locks=None
     if args.multi_ship:
         from qualify_multiship import locks
         backend_locks=locks()
+    candidate_receipt=None
+    if args.runtime_candidate:
+        from runtime_candidate import verify
+        import live_owner_timing
+        candidate=verify(require_host=True)
+        if not candidate['exe'].is_file():raise ValueError('Build isolated candidate host first')
+        # This standalone supervisor process only. No environment override or
+        # persistent gameplay pin can select an experimental dependency.
+        live_owner_timing.EXE=candidate['exe'];live_owner_timing.RUNTIME=candidate['runtime']
+        if args.candidate_initial_replacements:
+            import multi_scene_relay
+            old='rtx.enableReplacementAssets = False'
+            if multi_scene_relay.CONFIG.count(old)!=1:raise ValueError('Candidate startup policy no longer matches')
+            multi_scene_relay.CONFIG=multi_scene_relay.CONFIG.replace(old,'rtx.enableReplacementAssets = True')
+        candidate_receipt=dict(release=args.runtime_candidate,manifest=candidate['manifest'],
+                               host_sha256=digest(candidate['exe']),runtime_path=str(candidate['runtime']),
+                               initial_replacements_enabled=args.candidate_initial_replacements)
+        candidate_receipt['asset_loading']=args.candidate_asset_loading
     work=ROOT/'artifacts/remix-runtime/runs'/dt.datetime.now(dt.timezone.utc).strftime('%Y%m%d-%H%M%S-%f-return-fixture');work.mkdir()
     for source,name in [(broad_capture.qualified_full() if args.broad_capture or args.depth_snapshots or args.d3d9_additive else TEST/'dxgi.dll','dxgi.dll'),(BIN/'d3d11_return_fixture.exe','d3d11_return_fixture.exe'),(BIN/'SFCRemixReturn.dll','SFCRemixReturn.dll')]:shutil.copyfile(source,work/name)
     # No existing game config changed. Disable fixture menu/input capture only.
@@ -154,6 +184,9 @@ def main():
             if args.multi_ship:live_relay.isolate_late_material_reload=args.isolate_late_material_reload
             if args.multi_ship:live_relay.isolate_initial_material_library=args.isolate_initial_material_library
             if args.multi_ship:live_relay.loading_policy=args.loading_policy
+            if args.runtime_candidate:
+                live_relay.candidate_release=args.runtime_candidate
+                live_relay.candidate_asset_loading=args.candidate_asset_loading
             if args.multi_ship:live_relay.material_library=args.material_library
             if args.multi_ship:live_relay.material_texture_loading=args.material_texture_loading
             if args.multi_ship:live_relay.native_log_level=args.native_log_level
@@ -325,6 +358,7 @@ def main():
     receipt['multi_ship_fixture']=args.multi_ship
     receipt['pipeline_mode']=args.pipeline_mode
     receipt['prewarm']=args.prewarm
+    receipt['runtime_candidate']=candidate_receipt
     receipt['startup_profile']=args.startup_profile
     receipt['menu_idle_seconds']=args.menu_idle_seconds
     receipt['render_prewarm']=args.render_prewarm

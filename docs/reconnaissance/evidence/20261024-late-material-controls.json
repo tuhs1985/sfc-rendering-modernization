@@ -1,0 +1,1065 @@
+{
+  "cases": {
+    "candidate": {
+      "run": "20261024-182847-071751-return-fixture",
+      "initial_frame": 200238,
+      "snapshot_before_late_publication_seconds": 2.9477624,
+      "assets": [
+        {
+          "id": 1,
+          "owner": 3,
+          "path_id": 1,
+          "model": "assets/models/fca/fca.mod",
+          "geometry": "16981bd6f5b84f8d9f17f1395a92b34011387ddba5e1a64fbff4b21bd81e65a5",
+          "ack": 1
+        },
+        {
+          "id": 2,
+          "owner": 1,
+          "path_id": 2,
+          "model": "assets/models/rca/rca.mod",
+          "geometry": "cb6183f9e8e882a7d4783656d043c9fadb620a24fc74032a8c162a02d98bc088",
+          "ack": 1
+        },
+        {
+          "id": 3,
+          "owner": 31,
+          "path_id": 1,
+          "model": "assets/models/fca/fca.mod",
+          "geometry": "16981bd6f5b84f8d9f17f1395a92b34011387ddba5e1a64fbff4b21bd81e65a5",
+          "ack": 1
+        },
+        {
+          "id": 4,
+          "owner": 2,
+          "path_id": 4,
+          "model": "assets/models/fdd/fdd.mod",
+          "geometry": "b9040bcef9aa2b70365a54d4d3ab51088c46c872fc99da8888c95d5da768057a",
+          "ack": 1
+        }
+      ],
+      "draws": [
+        {
+          "owner": 1,
+          "revision": 1,
+          "draws": 1076
+        },
+        {
+          "owner": 2,
+          "revision": 2,
+          "draws": 841
+        },
+        {
+          "owner": 3,
+          "revision": 3,
+          "draws": 1076
+        },
+        {
+          "owner": 31,
+          "revision": 63,
+          "draws": 1076
+        }
+      ],
+      "partial": [],
+      "state": {
+        "pid": 16140,
+        "stopped": true,
+        "last_frame": 201253,
+        "published": 1078,
+        "dropped": 175,
+        "invalid": 0,
+        "asset_ready": 4,
+        "asset_rejected": 0,
+        "closed_frame": 201072
+      },
+      "job": {
+        "schema": "remix.job.v1",
+        "pid": 9740,
+        "exit_code": 0,
+        "stop_reason": 0,
+        "elapsed_ms": 22359,
+        "console_bytes": 86147,
+        "peak_scratch_bytes": 165135298,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      },
+      "delivery": [
+        "600",
+        "600"
+      ]
+    },
+    "disabled": {
+      "run": "20261024-182936-191641-return-fixture",
+      "initial_frame": 200230,
+      "snapshot_before_late_publication_seconds": 2.8955284,
+      "assets": [
+        {
+          "id": 1,
+          "owner": 3,
+          "path_id": 1,
+          "model": "assets/models/fca/fca.mod",
+          "geometry": "16981bd6f5b84f8d9f17f1395a92b34011387ddba5e1a64fbff4b21bd81e65a5",
+          "ack": 1
+        },
+        {
+          "id": 2,
+          "owner": 1,
+          "path_id": 2,
+          "model": "assets/models/rca/rca.mod",
+          "geometry": "cb6183f9e8e882a7d4783656d043c9fadb620a24fc74032a8c162a02d98bc088",
+          "ack": 1
+        },
+        {
+          "id": 3,
+          "owner": 31,
+          "path_id": 1,
+          "model": "assets/models/fca/fca.mod",
+          "geometry": "16981bd6f5b84f8d9f17f1395a92b34011387ddba5e1a64fbff4b21bd81e65a5",
+          "ack": 1
+        },
+        {
+          "id": 4,
+          "owner": 2,
+          "path_id": 4,
+          "model": "assets/models/fdd/fdd.mod",
+          "geometry": "b9040bcef9aa2b70365a54d4d3ab51088c46c872fc99da8888c95d5da768057a",
+          "ack": 1
+        }
+      ],
+      "draws": [
+        {
+          "owner": 1,
+          "revision": 1,
+          "draws": 1073
+        },
+        {
+          "owner": 2,
+          "revision": 2,
+          "draws": 840
+        },
+        {
+          "owner": 3,
+          "revision": 3,
+          "draws": 1073
+        },
+        {
+          "owner": 31,
+          "revision": 63,
+          "draws": 1073
+        }
+      ],
+      "partial": [],
+      "state": {
+        "pid": 36776,
+        "stopped": true,
+        "last_frame": 201243,
+        "published": 1077,
+        "dropped": 166,
+        "invalid": 0,
+        "asset_ready": 4,
+        "asset_rejected": 0,
+        "closed_frame": 201062
+      },
+      "job": {
+        "schema": "remix.job.v1",
+        "pid": 37760,
+        "exit_code": 0,
+        "stop_reason": 0,
+        "elapsed_ms": 22156,
+        "console_bytes": 86237,
+        "peak_scratch_bytes": 165135521,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      },
+      "delivery": [
+        "600",
+        "593"
+      ]
+    },
+    "emission-off": {
+      "run": "20261024-183041-571859-return-fixture",
+      "initial_frame": 200234,
+      "snapshot_before_late_publication_seconds": 2.70708,
+      "assets": [
+        {
+          "id": 1,
+          "owner": 3,
+          "path_id": 1,
+          "model": "assets/models/fca/fca.mod",
+          "geometry": "16981bd6f5b84f8d9f17f1395a92b34011387ddba5e1a64fbff4b21bd81e65a5",
+          "ack": 1
+        },
+        {
+          "id": 2,
+          "owner": 1,
+          "path_id": 2,
+          "model": "assets/models/rca/rca.mod",
+          "geometry": "cb6183f9e8e882a7d4783656d043c9fadb620a24fc74032a8c162a02d98bc088",
+          "ack": 1
+        },
+        {
+          "id": 3,
+          "owner": 31,
+          "path_id": 1,
+          "model": "assets/models/fca/fca.mod",
+          "geometry": "16981bd6f5b84f8d9f17f1395a92b34011387ddba5e1a64fbff4b21bd81e65a5",
+          "ack": 1
+        },
+        {
+          "id": 4,
+          "owner": 2,
+          "path_id": 4,
+          "model": "assets/models/fdd/fdd.mod",
+          "geometry": "b9040bcef9aa2b70365a54d4d3ab51088c46c872fc99da8888c95d5da768057a",
+          "ack": 1
+        }
+      ],
+      "draws": [
+        {
+          "owner": 1,
+          "revision": 1,
+          "draws": 1063
+        },
+        {
+          "owner": 2,
+          "revision": 2,
+          "draws": 841
+        },
+        {
+          "owner": 3,
+          "revision": 3,
+          "draws": 1063
+        },
+        {
+          "owner": 31,
+          "revision": 63,
+          "draws": 1063
+        }
+      ],
+      "partial": [],
+      "state": {
+        "pid": 7960,
+        "stopped": true,
+        "last_frame": 201236,
+        "published": 1065,
+        "dropped": 171,
+        "invalid": 0,
+        "asset_ready": 4,
+        "asset_rejected": 0,
+        "closed_frame": 201055
+      },
+      "job": {
+        "schema": "remix.job.v1",
+        "pid": 14048,
+        "exit_code": 0,
+        "stop_reason": 0,
+        "elapsed_ms": 21953,
+        "console_bytes": 85692,
+        "peak_scratch_bytes": 165134851,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      },
+      "delivery": [
+        "600",
+        "594"
+      ]
+    },
+    "normal": {
+      "run": "20261024-183135-464895-return-fixture",
+      "initial_frame": 200416,
+      "snapshot_before_late_publication_seconds": 2.6503446,
+      "assets": [
+        {
+          "id": 1,
+          "owner": 3,
+          "path_id": 1,
+          "model": "assets/models/fca/fca.mod",
+          "geometry": "16981bd6f5b84f8d9f17f1395a92b34011387ddba5e1a64fbff4b21bd81e65a5",
+          "ack": 1
+        },
+        {
+          "id": 2,
+          "owner": 1,
+          "path_id": 2,
+          "model": "assets/models/rca/rca.mod",
+          "geometry": "cb6183f9e8e882a7d4783656d043c9fadb620a24fc74032a8c162a02d98bc088",
+          "ack": 1
+        },
+        {
+          "id": 3,
+          "owner": 31,
+          "path_id": 1,
+          "model": "assets/models/fca/fca.mod",
+          "geometry": "16981bd6f5b84f8d9f17f1395a92b34011387ddba5e1a64fbff4b21bd81e65a5",
+          "ack": 1
+        },
+        {
+          "id": 4,
+          "owner": 2,
+          "path_id": 4,
+          "model": "assets/models/fdd/fdd.mod",
+          "geometry": "b9040bcef9aa2b70365a54d4d3ab51088c46c872fc99da8888c95d5da768057a",
+          "ack": 1
+        }
+      ],
+      "draws": [
+        {
+          "owner": 1,
+          "revision": 1,
+          "draws": 1032
+        },
+        {
+          "owner": 2,
+          "revision": 2,
+          "draws": 814
+        },
+        {
+          "owner": 3,
+          "revision": 3,
+          "draws": 1032
+        },
+        {
+          "owner": 31,
+          "revision": 63,
+          "draws": 1032
+        }
+      ],
+      "partial": [],
+      "state": {
+        "pid": 41604,
+        "stopped": true,
+        "last_frame": 201470,
+        "published": 1117,
+        "dropped": 353,
+        "invalid": 0,
+        "asset_ready": 4,
+        "asset_rejected": 0,
+        "closed_frame": 201289
+      },
+      "job": {
+        "schema": "remix.job.v1",
+        "pid": 42888,
+        "exit_code": 0,
+        "stop_reason": 0,
+        "elapsed_ms": 26078,
+        "console_bytes": 100196,
+        "peak_scratch_bytes": 165161885,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      },
+      "delivery": [
+        "600",
+        "595"
+      ]
+    },
+    "async-off": {
+      "run": "20261024-183512-727036-return-fixture",
+      "initial_frame": 200266,
+      "snapshot_before_late_publication_seconds": 2.7017822,
+      "assets": [
+        {
+          "id": 1,
+          "owner": 3,
+          "path_id": 1,
+          "model": "assets/models/fca/fca.mod",
+          "geometry": "16981bd6f5b84f8d9f17f1395a92b34011387ddba5e1a64fbff4b21bd81e65a5",
+          "ack": 1
+        },
+        {
+          "id": 2,
+          "owner": 1,
+          "path_id": 2,
+          "model": "assets/models/rca/rca.mod",
+          "geometry": "cb6183f9e8e882a7d4783656d043c9fadb620a24fc74032a8c162a02d98bc088",
+          "ack": 1
+        },
+        {
+          "id": 3,
+          "owner": 31,
+          "path_id": 1,
+          "model": "assets/models/fca/fca.mod",
+          "geometry": "16981bd6f5b84f8d9f17f1395a92b34011387ddba5e1a64fbff4b21bd81e65a5",
+          "ack": 1
+        },
+        {
+          "id": 4,
+          "owner": 2,
+          "path_id": 4,
+          "model": "assets/models/fdd/fdd.mod",
+          "geometry": "b9040bcef9aa2b70365a54d4d3ab51088c46c872fc99da8888c95d5da768057a",
+          "ack": 1
+        }
+      ],
+      "draws": [
+        {
+          "owner": 1,
+          "revision": 1,
+          "draws": 1038
+        },
+        {
+          "owner": 2,
+          "revision": 2,
+          "draws": 815
+        },
+        {
+          "owner": 3,
+          "revision": 3,
+          "draws": 1038
+        },
+        {
+          "owner": 31,
+          "revision": 63,
+          "draws": 1038
+        }
+      ],
+      "partial": [],
+      "state": {
+        "pid": 46060,
+        "stopped": true,
+        "last_frame": 201269,
+        "published": 1067,
+        "dropped": 202,
+        "invalid": 0,
+        "asset_ready": 4,
+        "asset_rejected": 0,
+        "closed_frame": 201088
+      },
+      "job": {
+        "schema": "remix.job.v1",
+        "pid": 24560,
+        "exit_code": 0,
+        "stop_reason": 0,
+        "elapsed_ms": 22578,
+        "console_bytes": 104648,
+        "peak_scratch_bytes": 165173913,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      },
+      "delivery": [
+        "600",
+        "596"
+      ]
+    },
+    "async-off-emission-off": {
+      "run": "20261024-183616-964790-return-fixture",
+      "initial_frame": 200263,
+      "snapshot_before_late_publication_seconds": 2.7743113,
+      "assets": [
+        {
+          "id": 1,
+          "owner": 3,
+          "path_id": 1,
+          "model": "assets/models/fca/fca.mod",
+          "geometry": "16981bd6f5b84f8d9f17f1395a92b34011387ddba5e1a64fbff4b21bd81e65a5",
+          "ack": 1
+        },
+        {
+          "id": 2,
+          "owner": 1,
+          "path_id": 2,
+          "model": "assets/models/rca/rca.mod",
+          "geometry": "cb6183f9e8e882a7d4783656d043c9fadb620a24fc74032a8c162a02d98bc088",
+          "ack": 1
+        },
+        {
+          "id": 3,
+          "owner": 31,
+          "path_id": 1,
+          "model": "assets/models/fca/fca.mod",
+          "geometry": "16981bd6f5b84f8d9f17f1395a92b34011387ddba5e1a64fbff4b21bd81e65a5",
+          "ack": 1
+        },
+        {
+          "id": 4,
+          "owner": 2,
+          "path_id": 4,
+          "model": "assets/models/fdd/fdd.mod",
+          "geometry": "b9040bcef9aa2b70365a54d4d3ab51088c46c872fc99da8888c95d5da768057a",
+          "ack": 1
+        }
+      ],
+      "draws": [
+        {
+          "owner": 1,
+          "revision": 1,
+          "draws": 1067
+        },
+        {
+          "owner": 2,
+          "revision": 2,
+          "draws": 842
+        },
+        {
+          "owner": 3,
+          "revision": 3,
+          "draws": 1067
+        },
+        {
+          "owner": 31,
+          "revision": 63,
+          "draws": 1067
+        }
+      ],
+      "partial": [],
+      "state": {
+        "pid": 37016,
+        "stopped": true,
+        "last_frame": 201294,
+        "published": 1094,
+        "dropped": 200,
+        "invalid": 0,
+        "asset_ready": 4,
+        "asset_rejected": 0,
+        "closed_frame": 201113
+      },
+      "job": {
+        "schema": "remix.job.v1",
+        "pid": 6848,
+        "exit_code": 0,
+        "stop_reason": 0,
+        "elapsed_ms": 23094,
+        "console_bytes": 105698,
+        "peak_scratch_bytes": 165174971,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      },
+      "delivery": [
+        "600",
+        "600"
+      ]
+    },
+    "async-off-repeat": {
+      "run": "20261024-183700-832747-return-fixture",
+      "initial_frame": 200260,
+      "snapshot_before_late_publication_seconds": 2.7077724,
+      "assets": [
+        {
+          "id": 1,
+          "owner": 3,
+          "path_id": 1,
+          "model": "assets/models/fca/fca.mod",
+          "geometry": "16981bd6f5b84f8d9f17f1395a92b34011387ddba5e1a64fbff4b21bd81e65a5",
+          "ack": 1
+        },
+        {
+          "id": 2,
+          "owner": 1,
+          "path_id": 2,
+          "model": "assets/models/rca/rca.mod",
+          "geometry": "cb6183f9e8e882a7d4783656d043c9fadb620a24fc74032a8c162a02d98bc088",
+          "ack": 1
+        },
+        {
+          "id": 3,
+          "owner": 31,
+          "path_id": 1,
+          "model": "assets/models/fca/fca.mod",
+          "geometry": "16981bd6f5b84f8d9f17f1395a92b34011387ddba5e1a64fbff4b21bd81e65a5",
+          "ack": 1
+        },
+        {
+          "id": 4,
+          "owner": 2,
+          "path_id": 4,
+          "model": "assets/models/fdd/fdd.mod",
+          "geometry": "b9040bcef9aa2b70365a54d4d3ab51088c46c872fc99da8888c95d5da768057a",
+          "ack": 1
+        }
+      ],
+      "draws": [
+        {
+          "owner": 1,
+          "revision": 1,
+          "draws": 1037
+        },
+        {
+          "owner": 2,
+          "revision": 2,
+          "draws": 815
+        },
+        {
+          "owner": 3,
+          "revision": 3,
+          "draws": 1037
+        },
+        {
+          "owner": 31,
+          "revision": 63,
+          "draws": 1037
+        }
+      ],
+      "partial": [],
+      "state": {
+        "pid": 10644,
+        "stopped": true,
+        "last_frame": 201262,
+        "published": 1066,
+        "dropped": 196,
+        "invalid": 0,
+        "asset_ready": 4,
+        "asset_rejected": 0,
+        "closed_frame": 201081
+      },
+      "job": {
+        "schema": "remix.job.v1",
+        "pid": 50936,
+        "exit_code": 0,
+        "stop_reason": 0,
+        "elapsed_ms": 22469,
+        "console_bytes": 104692,
+        "peak_scratch_bytes": 165173965,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      },
+      "delivery": [
+        "600",
+        "594"
+      ]
+    }
+  },
+  "pairs": {
+    "candidate__disabled": {
+      "phases": {
+        "initial": {
+          "pixels": 25917,
+          "mean_abs_rgb": 0.06075806098956927,
+          "pixels_delta_gt3": 13,
+          "regions": {
+            "fca": {
+              "pixels": 15008,
+              "mean_abs_rgb": 0.0695406894100924,
+              "pixels_delta_gt3": 6
+            },
+            "rca": {
+              "pixels": 10909,
+              "mean_abs_rgb": 0.048675405628380235,
+              "pixels_delta_gt3": 7
+            },
+            "new_fdd": {
+              "pixels": 0,
+              "mean_abs_rgb": 0,
+              "pixels_delta_gt3": 0
+            }
+          }
+        },
+        "post": {
+          "pixels": 31313,
+          "mean_abs_rgb": 1.0908781230372901,
+          "pixels_delta_gt3": 2569,
+          "regions": {
+            "fca": {
+              "pixels": 15008,
+              "mean_abs_rgb": 1.2096659559346126,
+              "pixels_delta_gt3": 1430
+            },
+            "rca": {
+              "pixels": 10909,
+              "mean_abs_rgb": 0.7626730222751856,
+              "pixels_delta_gt3": 482
+            },
+            "new_fdd": {
+              "pixels": 5396,
+              "mean_abs_rgb": 1.424017790956264,
+              "pixels_delta_gt3": 657
+            }
+          }
+        },
+        "settled": {
+          "pixels": 31313,
+          "mean_abs_rgb": 1.1068565771404848,
+          "pixels_delta_gt3": 2720,
+          "regions": {
+            "fca": {
+              "pixels": 15008,
+              "mean_abs_rgb": 1.3123001066098081,
+              "pixels_delta_gt3": 1701
+            },
+            "rca": {
+              "pixels": 10909,
+              "mean_abs_rgb": 0.7557674091728542,
+              "pixels_delta_gt3": 506
+            },
+            "new_fdd": {
+              "pixels": 5396,
+              "mean_abs_rgb": 1.2452433901655546,
+              "pixels_delta_gt3": 513
+            }
+          }
+        }
+      },
+      "images_identical": true
+    },
+    "candidate__normal": {
+      "phases": {
+        "initial": {
+          "pixels": 25917,
+          "mean_abs_rgb": 25.008642975653046,
+          "pixels_delta_gt3": 22678,
+          "regions": {
+            "fca": {
+              "pixels": 15008,
+              "mean_abs_rgb": 15.213108564321251,
+              "pixels_delta_gt3": 12167
+            },
+            "rca": {
+              "pixels": 10909,
+              "mean_abs_rgb": 38.48479848443181,
+              "pixels_delta_gt3": 10511
+            },
+            "new_fdd": {
+              "pixels": 0,
+              "mean_abs_rgb": 0,
+              "pixels_delta_gt3": 0
+            }
+          }
+        },
+        "post": {
+          "pixels": 31313,
+          "mean_abs_rgb": 23.047094391040996,
+          "pixels_delta_gt3": 27377,
+          "regions": {
+            "fca": {
+              "pixels": 15008,
+              "mean_abs_rgb": 16.241693319118692,
+              "pixels_delta_gt3": 12891
+            },
+            "rca": {
+              "pixels": 10909,
+              "mean_abs_rgb": 38.49106242552021,
+              "pixels_delta_gt3": 10585
+            },
+            "new_fdd": {
+              "pixels": 5396,
+              "mean_abs_rgb": 10.752285643686681,
+              "pixels_delta_gt3": 3901
+            }
+          }
+        },
+        "settled": {
+          "pixels": 31313,
+          "mean_abs_rgb": 22.723373678663815,
+          "pixels_delta_gt3": 27030,
+          "regions": {
+            "fca": {
+              "pixels": 15008,
+              "mean_abs_rgb": 15.153407071783937,
+              "pixels_delta_gt3": 12280
+            },
+            "rca": {
+              "pixels": 10909,
+              "mean_abs_rgb": 38.48733461667736,
+              "pixels_delta_gt3": 10501
+            },
+            "new_fdd": {
+              "pixels": 5396,
+              "mean_abs_rgb": 11.908141833456881,
+              "pixels_delta_gt3": 4249
+            }
+          }
+        }
+      },
+      "images_identical": true
+    },
+    "async-off__disabled": {
+      "phases": {
+        "initial": {
+          "pixels": 25917,
+          "mean_abs_rgb": 24.59136216897532,
+          "pixels_delta_gt3": 22328,
+          "regions": {
+            "fca": {
+              "pixels": 15008,
+              "mean_abs_rgb": 14.496424129353233,
+              "pixels_delta_gt3": 11836
+            },
+            "rca": {
+              "pixels": 10909,
+              "mean_abs_rgb": 38.47942066183885,
+              "pixels_delta_gt3": 10492
+            },
+            "new_fdd": {
+              "pixels": 0,
+              "mean_abs_rgb": 0,
+              "pixels_delta_gt3": 0
+            }
+          }
+        },
+        "post": {
+          "pixels": 31313,
+          "mean_abs_rgb": 22.752232831944134,
+          "pixels_delta_gt3": 27139,
+          "regions": {
+            "fca": {
+              "pixels": 15008,
+              "mean_abs_rgb": 15.540178571428571,
+              "pixels_delta_gt3": 12581
+            },
+            "rca": {
+              "pixels": 10909,
+              "mean_abs_rgb": 38.52360436336969,
+              "pixels_delta_gt3": 10511
+            },
+            "new_fdd": {
+              "pixels": 5396,
+              "mean_abs_rgb": 10.926550531257721,
+              "pixels_delta_gt3": 4047
+            }
+          }
+        },
+        "settled": {
+          "pixels": 31313,
+          "mean_abs_rgb": 22.51739958909505,
+          "pixels_delta_gt3": 26713,
+          "regions": {
+            "fca": {
+              "pixels": 15008,
+              "mean_abs_rgb": 14.783471037668798,
+              "pixels_delta_gt3": 12021
+            },
+            "rca": {
+              "pixels": 10909,
+              "mean_abs_rgb": 38.56237968649739,
+              "pixels_delta_gt3": 10487
+            },
+            "new_fdd": {
+              "pixels": 5396,
+              "mean_abs_rgb": 11.590066716085989,
+              "pixels_delta_gt3": 4205
+            }
+          }
+        }
+      },
+      "images_identical": true
+    },
+    "async-off__normal": {
+      "phases": {
+        "initial": {
+          "pixels": 25917,
+          "mean_abs_rgb": 2.3763552880348806,
+          "pixels_delta_gt3": 7102,
+          "regions": {
+            "fca": {
+              "pixels": 15008,
+              "mean_abs_rgb": 2.8971881663113006,
+              "pixels_delta_gt3": 5169
+            },
+            "rca": {
+              "pixels": 10909,
+              "mean_abs_rgb": 1.6598221651847098,
+              "pixels_delta_gt3": 1933
+            },
+            "new_fdd": {
+              "pixels": 0,
+              "mean_abs_rgb": 0,
+              "pixels_delta_gt3": 0
+            }
+          }
+        },
+        "post": {
+          "pixels": 31313,
+          "mean_abs_rgb": 3.0079200332130425,
+          "pixels_delta_gt3": 11109,
+          "regions": {
+            "fca": {
+              "pixels": 15008,
+              "mean_abs_rgb": 3.05079513148543,
+              "pixels_delta_gt3": 5823
+            },
+            "rca": {
+              "pixels": 10909,
+              "mean_abs_rgb": 2.3152442937024476,
+              "pixels_delta_gt3": 3130
+            },
+            "new_fdd": {
+              "pixels": 5396,
+              "mean_abs_rgb": 4.289041265134667,
+              "pixels_delta_gt3": 2156
+            }
+          }
+        },
+        "settled": {
+          "pixels": 31313,
+          "mean_abs_rgb": 2.3426691789352665,
+          "pixels_delta_gt3": 8345,
+          "regions": {
+            "fca": {
+              "pixels": 15008,
+              "mean_abs_rgb": 2.7273676261549396,
+              "pixels_delta_gt3": 4806
+            },
+            "rca": {
+              "pixels": 10909,
+              "mean_abs_rgb": 1.6788584349314022,
+              "pixels_delta_gt3": 1980
+            },
+            "new_fdd": {
+              "pixels": 5396,
+              "mean_abs_rgb": 2.6147146034099333,
+              "pixels_delta_gt3": 1559
+            }
+          }
+        }
+      },
+      "images_identical": true
+    },
+    "async-off__async-off-emission-off": {
+      "phases": {
+        "initial": {
+          "pixels": 25917,
+          "mean_abs_rgb": 4.541433550693882,
+          "pixels_delta_gt3": 4303,
+          "regions": {
+            "fca": {
+              "pixels": 15008,
+              "mean_abs_rgb": 4.267812722103767,
+              "pixels_delta_gt3": 2044
+            },
+            "rca": {
+              "pixels": 10909,
+              "mean_abs_rgb": 4.917865982216519,
+              "pixels_delta_gt3": 2259
+            },
+            "new_fdd": {
+              "pixels": 0,
+              "mean_abs_rgb": 0,
+              "pixels_delta_gt3": 0
+            }
+          }
+        },
+        "post": {
+          "pixels": 31313,
+          "mean_abs_rgb": 6.276775354219227,
+          "pixels_delta_gt3": 14351,
+          "regions": {
+            "fca": {
+              "pixels": 15008,
+              "mean_abs_rgb": 6.4387882018479035,
+              "pixels_delta_gt3": 7069
+            },
+            "rca": {
+              "pixels": 10909,
+              "mean_abs_rgb": 6.420600727228282,
+              "pixels_delta_gt3": 5041
+            },
+            "new_fdd": {
+              "pixels": 5396,
+              "mean_abs_rgb": 5.535396590066716,
+              "pixels_delta_gt3": 2241
+            }
+          }
+        },
+        "settled": {
+          "pixels": 31313,
+          "mean_abs_rgb": 5.581494374008665,
+          "pixels_delta_gt3": 11313,
+          "regions": {
+            "fca": {
+              "pixels": 15008,
+              "mean_abs_rgb": 6.076137171286425,
+              "pixels_delta_gt3": 5704
+            },
+            "rca": {
+              "pixels": 10909,
+              "mean_abs_rgb": 5.8495431906377,
+              "pixels_delta_gt3": 3804
+            },
+            "new_fdd": {
+              "pixels": 5396,
+              "mean_abs_rgb": 3.6638250555967384,
+              "pixels_delta_gt3": 1805
+            }
+          }
+        }
+      },
+      "images_identical": true
+    },
+    "async-off__async-off-repeat": {
+      "phases": {
+        "initial": {
+          "pixels": 25917,
+          "mean_abs_rgb": 0.05965196589111394,
+          "pixels_delta_gt3": 17,
+          "regions": {
+            "fca": {
+              "pixels": 15008,
+              "mean_abs_rgb": 0.07058457711442787,
+              "pixels_delta_gt3": 9
+            },
+            "rca": {
+              "pixels": 10909,
+              "mean_abs_rgb": 0.04461148287346839,
+              "pixels_delta_gt3": 8
+            },
+            "new_fdd": {
+              "pixels": 0,
+              "mean_abs_rgb": 0,
+              "pixels_delta_gt3": 0
+            }
+          }
+        },
+        "post": {
+          "pixels": 31313,
+          "mean_abs_rgb": 0.2001085811005014,
+          "pixels_delta_gt3": 251,
+          "regions": {
+            "fca": {
+              "pixels": 15008,
+              "mean_abs_rgb": 0.0921730632551528,
+              "pixels_delta_gt3": 12
+            },
+            "rca": {
+              "pixels": 10909,
+              "mean_abs_rgb": 0.053992116600971675,
+              "pixels_delta_gt3": 4
+            },
+            "new_fdd": {
+              "pixels": 5396,
+              "mean_abs_rgb": 0.7957128737336299,
+              "pixels_delta_gt3": 235
+            }
+          }
+        },
+        "settled": {
+          "pixels": 31313,
+          "mean_abs_rgb": 0.8941760078348716,
+          "pixels_delta_gt3": 1268,
+          "regions": {
+            "fca": {
+              "pixels": 15008,
+              "mean_abs_rgb": 0.9387659914712153,
+              "pixels_delta_gt3": 668
+            },
+            "rca": {
+              "pixels": 10909,
+              "mean_abs_rgb": 0.6803556696305803,
+              "pixels_delta_gt3": 193
+            },
+            "new_fdd": {
+              "pixels": 5396,
+              "mean_abs_rgb": 1.2024339016555474,
+              "pixels_delta_gt3": 407
+            }
+          }
+        }
+      },
+      "images_identical": true
+    }
+  },
+  "probe": "REMIX-LATE-MATERIAL-001",
+  "disposition": "Controlled workaround demonstrated twice: candidate initial-load async OFF restores materials before/after late publication; no production promotion",
+  "single_option": {
+    "config": "rtx.initializer.asyncAssetLoading = False",
+    "environment": "DXVK_ASYNC_ASSET_LOADING=0",
+    "all_other_loading_options": "unchanged"
+  },
+  "scope": "Standalone synthetic four-owner/three-content fixture using captured FCA/RCA/FDD packets; not SFC gameplay, timing or milestone PASS",
+  "normal_fixture_source_sha256": "703B42ADB3D463AAB845D238DE04640C021D7F16B1B9C76A0545AF944B42031D",
+  "diagnostic_fixture_source_sha256": "905FF07838F2A11EAB75F74B7D9E55AEF3DBC3426E160B8A997184BE28A22110",
+  "diagnostic_fixture_sha256": "2751ED5564BE9AFC0EDCEF2CC06C6A70DCE1EB92EC05AD0D75BD81A9AB8AD97A",
+  "excluded_partial": "20261024-182733-437991-return-fixture: extra BMP exceeded existing32MiB supervisory output cap; pixel data preserved, not clean fixture PASS; lossless supervisor PNG fixed bound without raising cap",
+  "confidence": {
+    "confirmed": "Flag changes output and emission response, repeated, same images/geometry; first material failure predates late arrival",
+    "strong_hypothesis": "Initial publication/async initialization ordering interaction",
+    "unproven": "Exact packaged vendor code defect, universal loading guarantee, material-ready API or complete roughness response"
+  }
+}

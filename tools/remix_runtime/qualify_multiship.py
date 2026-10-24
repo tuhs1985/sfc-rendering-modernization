@@ -14,6 +14,13 @@ RECEIPT=ROOT/'artifacts/d3d9-proof/multiship-tests/qualification.json'
 
 def locks():
     extra={}
+    for arch in ('32','64'):
+        for extension in ('exe','txt'):
+            p=ROOT/f'artifacts/d3d9-proof/resource-policy-tests/resource{arch}.{extension}'
+            extra[str(p.relative_to(ROOT)).replace('\\','/')]=digest(p)
+    for name in ('mesh_checksum.dll','build.json'):
+        p=ROOT/'artifacts/d3d9-proof/mesh-checksum'/name
+        extra[str(p.relative_to(ROOT)).replace('\\','/')]=digest(p)
     p=ROOT/'artifacts/remix-ingest/bin/bounded_job.exe'
     extra[str(p.relative_to(ROOT)).replace('\\','/')]=digest(p)
     p=ROOT/'artifacts/d3d9-proof/multiship-tests/asset_hash.exe'
@@ -38,10 +45,17 @@ def locks():
 
 
 def inspect(fixture):
+    for arch in ('32','64'):
+        proof=(ROOT/f'artifacts/d3d9-proof/resource-policy-tests/resource{arch}.txt').read_text(encoding='utf-8-sig')
+        if ('Native resource policy PASS' not in proof or 'classic_ex_pixels_exact=1 reset_exact=1 recreation_exact=1' not in proof
+                or 'remix_reshade_dxvk=absent' not in proof):
+            raise ValueError('Actual system D3D9/Ex resource/reset/recreation proof required')
     fixture=Path(fixture).resolve();fixture.relative_to(ROOT/'artifacts/remix-runtime/runs')
     result=json.loads((fixture/'result.json').read_text());live=result.get('live_owner_timing') or {}
     multi=live.get('multi_scene') or {};game=live.get('game_output') or {};state=multi.get('state') or {}
     assets=multi.get('assets') or [];draws=multi.get('draws') or [];sync=game.get('synchronized_buffer') or {}
+    if result.get('runtime_candidate'):
+        raise ValueError('Experimental runtime cannot qualify unchanged production dependency')
     if result.get('error') or not result.get('multi_ship_fixture') or result.get('fixture_exit') or result.get('host_exit'):
         raise ValueError('Actual multi-ship fixture incomplete')
     if result.get('render_prewarm','off')!='off':
@@ -135,7 +149,7 @@ def qualify(fixture):
             or len(census['context_choice_mismatches'])!=0 or census['first_ms']<9265):
         raise ValueError('Production full-window identity recorder test required')
     for arch in ('32','64'):
-        if 'Multi-scene PASS 50 checks' not in (ROOT/f'artifacts/d3d9-proof/multiship-tests/wire{arch}.txt').read_text(encoding='utf-8-sig'):
+        if 'Multi-scene PASS 93 checks' not in (ROOT/f'artifacts/d3d9-proof/multiship-tests/wire{arch}.txt').read_text(encoding='utf-8-sig'):
             raise ValueError('New wire tests required')
         if 'Synchronized buffer PASS 33 checks' not in (ROOT/f'artifacts/d3d9-proof/buffer-tests/buffer{arch}.txt').read_text(encoding='utf-8-sig'):
             raise ValueError('Scene/HUD/depth buffer GPU tests required')

@@ -1,5 +1,16 @@
 # Performance and test modes
 
+Run160 interface cleanup labels24bootstrap as transitional compatibility, not
+vendor-required readiness. The tested one-frame startup is NOT promoted: earlier
+output exposed initial appearance differences and later delivery gaps. Normal
+24startup/onePresent-live-update policy remains pending material-lifecycle
+qualification, independently of actual catalog/GPU/source checks.
+Performance suppresses OUTPUT_ACK formatting without suppressing protocol ACKs.
+Both modes use documented DEFAULT D3D9/Ex resource uploads; Test retains real
+upload readbacks through test render-target staging, Performance omits them.
+Early lighting convergence/material-ready semantics remain separate from output
+readiness. See the current retained-multiship contract and Run160.
+
 Current: Run130, 2026-10-23. Ordinary-D3D9 retained multi-ship path only. These are evidence policies, not different renderers or different appearance presets. No CDD change, ship suppression or TRL completion claim.
 
 Run134 opt-in diagnostic: append `-StartupProfile` to the public launcher to measure ONLYstartup(128fixedexternalworkerpoints;currently84),includingperbootstrapDraw/PresentQPCandselectedprocess/systemmemory. DefaultOFFinPerformanceANDTest;flagforwardedthroughmodernPowerShell,callerflagrestoredonexit. Nofulltracing,appearancechangeorrefreshcap. Standalonefixturealsoaccepts`--startup-profile`with`--prewarm`,optionally`--menu-idle-seconds 60`;onlythatexplicitexperimentuses100sinsteadof60sfixturewatchdog,gameboundsunchanged. [Run134 findings](../runs/2026-10-24-codex-first-output-startup-profile.md):intermittent~2sblockinsideRemixPresent,notgeometryDrawCPU;idlealoneNOTsufficientcause,exactvendorcauseunresolved. Sub2stargetOPEN;no performancefixclaimedfromnewinstrumentation.

@@ -1,0 +1,130 @@
+{
+  "20261024-211419-661828-in-game": {
+    "run": "20261024-211419-661828-in-game",
+    "clock": "QPC;seconds from first asset discovery",
+    "material_publications": [
+      {
+        "layers": 2,
+        "seconds": 1.434023099951446
+      },
+      {
+        "layers": 3,
+        "seconds": 39.66450690000784
+      }
+    ],
+    "buffer_callback_intervals_over30ms": [],
+    "output_omission_clusters": [
+      {
+        "first_s": 4.288088000030257,
+        "last_s": 4.503592900000513,
+        "missed_records": 11,
+        "span_ms": 215.5049,
+        "nearest_material_seconds": 2.8540649000788108
+      },
+      {
+        "first_s": 23.83548399992287,
+        "last_s": 23.83548399992287,
+        "missed_records": 1,
+        "span_ms": 0.0,
+        "nearest_material_seconds": 15.829022900084965
+      },
+      {
+        "first_s": 39.78428060002625,
+        "last_s": 41.06874939997215,
+        "missed_records": 71,
+        "span_ms": 1284.4688,
+        "nearest_material_seconds": 0.11977370001841336
+      },
+      {
+        "first_s": 69.31660050002392,
+        "last_s": 69.78468389995396,
+        "missed_records": 17,
+        "span_ms": 468.0834,
+        "nearest_material_seconds": 29.652093600016087
+      },
+      {
+        "first_s": 88.33239919994958,
+        "last_s": 88.8171228999272,
+        "missed_records": 24,
+        "span_ms": 484.7237,
+        "nearest_material_seconds": 48.66789229994174
+      }
+    ],
+    "caution": "Callback gaps are not physical scanout timings;missing Remix output is separate from callback pacing. No cause inferred from temporal proximity."
+  },
+  "20261024-211721-889006-in-game": {
+    "run": "20261024-211721-889006-in-game",
+    "clock": "QPC;seconds from first asset discovery",
+    "material_publications": [
+      {
+        "layers": 4,
+        "seconds": 2.169693800038658
+      },
+      {
+        "layers": 5,
+        "seconds": 11.723651699954644
+      },
+      {
+        "layers": 6,
+        "seconds": 11.740085200057365
+      },
+      {
+        "layers": 7,
+        "seconds": 91.5483569999924
+      }
+    ],
+    "buffer_callback_intervals_over30ms": [],
+    "output_omission_clusters": [
+      {
+        "first_s": 5.709826200036332,
+        "last_s": 5.79209170001559,
+        "missed_records": 5,
+        "span_ms": 82.2655,
+        "nearest_material_seconds": 3.540132399997674
+      },
+      {
+        "first_s": 11.641791600035504,
+        "last_s": 11.692660499946214,
+        "missed_records": 4,
+        "span_ms": 50.8689,
+        "nearest_material_seconds": 0.08186009991914034
+      },
+      {
+        "first_s": 12.191471799975261,
+        "last_s": 13.543117100023665,
+        "missed_records": 81,
+        "span_ms": 1351.6453,
+        "nearest_material_seconds": 0.4513865999178961
+      },
+      {
+        "first_s": 21.957233499968424,
+        "last_s": 21.975205600028858,
+        "missed_records": 2,
+        "span_ms": 17.9721,
+        "nearest_material_seconds": 10.21714829991106
+      },
+      {
+        "first_s": 30.673504999955185,
+        "last_s": 30.940809600055218,
+        "missed_records": 3,
+        "span_ms": 267.3046,
+        "nearest_material_seconds": 18.93341979989782
+      },
+      {
+        "first_s": 37.440688899951056,
+        "last_s": 37.49091639998369,
+        "missed_records": 4,
+        "span_ms": 50.2275,
+        "nearest_material_seconds": 25.70060369989369
+      },
+      {
+        "first_s": 92.43781739997212,
+        "last_s": 93.67282990005333,
+        "missed_records": 70,
+        "span_ms": 1235.0125,
+        "nearest_material_seconds": 0.8894603999797255
+      }
+    ],
+    "caution": "Callback gaps are not physical scanout timings;missing Remix output is separate from callback pacing. No cause inferred from temporal proximity."
+  }
+}

@@ -78,10 +78,12 @@ struct Renderer{
  explicit Renderer(IDirect3DDevice9* d,const Scene& s,const fs::path& root,const std::vector<std::vector<BYTE>>* prepared=nullptr):device(d),scene(s){
   constexpr DWORD fvf=D3DFVF_XYZ|D3DFVF_NORMAL|D3DFVF_TEX1;
   const auto nv=static_cast<UINT>(s.vertices.size()),ni=static_cast<UINT>(s.indices.size());
-  ok(d->CreateVertexBuffer(nv*sizeof(Vertex),0,fvf,D3DPOOL_MANAGED,&vb,nullptr),"vertex buffer");
+  // DEFAULT is valid on both D3D9 and D3D9Ex. Retained Scene is the rebuild
+  // source; release this Renderer before device reset/recreation.
+  ok(d->CreateVertexBuffer(nv*sizeof(Vertex),0,fvf,D3DPOOL_DEFAULT,&vb,nullptr),"vertex buffer");
   void* p=nullptr;ok(vb->Lock(0,0,&p,0),"VB upload lock");memcpy(p,s.vertices.data(),nv*sizeof(Vertex));ok(vb->Unlock(),"VB unlock");
   if(!pipeline_mode::performance()){ok(vb->Lock(0,0,&p,D3DLOCK_READONLY),"VB readback");require(memcmp(p,s.vertices.data(),nv*sizeof(Vertex))==0,"VB bytes differ");ok(vb->Unlock(),"VB read unlock");}
-  ok(d->CreateIndexBuffer(ni*4,0,D3DFMT_INDEX32,D3DPOOL_MANAGED,&ib,nullptr),"index buffer");
+  ok(d->CreateIndexBuffer(ni*4,0,D3DFMT_INDEX32,D3DPOOL_DEFAULT,&ib,nullptr),"index buffer");
   ok(ib->Lock(0,0,&p,0),"IB upload lock");memcpy(p,s.indices.data(),ni*4);ok(ib->Unlock(),"IB unlock");
   if(!pipeline_mode::performance()){ok(ib->Lock(0,0,&p,D3DLOCK_READONLY),"IB readback");require(memcmp(p,s.indices.data(),ni*4)==0,"IB bytes differ");ok(ib->Unlock(),"IB read unlock");}
   uint32_t count=0;for(auto g:s.groups)count=std::max(count,g.material+1);textures.resize(count);size_t total=0;
@@ -90,9 +92,22 @@ struct Renderer{
    const auto& b=prepared?(*prepared)[i]:disk;size_t at=0;const auto h=take<std::array<uint32_t,4>>(b,at);
    require(h[0]==0x31544653&&h[1]&&h[1]<=4096&&h[2]&&h[2]<=4096&&h[3]==uint64_t(h[1])*h[2]*4&&b.size()==16ull+h[3],"texture schema");
    total+=h[3];require(total<=128*1024*1024,"decoded texture cap");
-   ok(d->CreateTexture(h[1],h[2],1,0,D3DFMT_A8R8G8B8,D3DPOOL_MANAGED,&textures[i],nullptr),"texture create");D3DLOCKED_RECT lock{};
-   ok(textures[i]->LockRect(0,&lock,nullptr,0),"texture upload lock");require(lock.Pitch>=static_cast<INT>(h[1]*4),"texture pitch");for(uint32_t y=0;y<h[2];++y)memcpy(static_cast<BYTE*>(lock.pBits)+y*lock.Pitch,b.data()+16+size_t(y)*h[1]*4,h[1]*4);ok(textures[i]->UnlockRect(0),"texture unlock");
-   if(!pipeline_mode::performance()){ok(textures[i]->LockRect(0,&lock,nullptr,D3DLOCK_READONLY),"texture readback");for(uint32_t y=0;y<h[2];++y)require(memcmp(static_cast<BYTE*>(lock.pBits)+y*lock.Pitch,b.data()+16+size_t(y)*h[1]*4,h[1]*4)==0,"texture row differs");ok(textures[i]->UnlockRect(0),"texture read unlock");}
+   ok(d->CreateTexture(h[1],h[2],1,0,D3DFMT_A8R8G8B8,D3DPOOL_DEFAULT,&textures[i],nullptr),"texture create");
+   // Microsoft UpdateTexture contract: SYSTEMMEM source -> DEFAULT destination.
+   // Do not LockRect a non-dynamic DEFAULT texture (invalid on native D3D9Ex).
+   ComPtr<IDirect3DTexture9> upload;
+   ok(d->CreateTexture(h[1],h[2],1,0,D3DFMT_A8R8G8B8,D3DPOOL_SYSTEMMEM,&upload,nullptr),"texture upload staging");D3DLOCKED_RECT lock{};
+   ok(upload->LockRect(0,&lock,nullptr,0),"texture upload lock");require(lock.Pitch>=static_cast<INT>(h[1]*4),"texture pitch");for(uint32_t y=0;y<h[2];++y)memcpy(static_cast<BYTE*>(lock.pBits)+y*lock.Pitch,b.data()+16+size_t(y)*h[1]*4,h[1]*4);ok(upload->UnlockRect(0),"texture unlock");
+   ok(d->UpdateTexture(upload.Get(),textures[i].Get()),"texture staged upload");
+   if(!pipeline_mode::performance()){
+    ComPtr<IDirect3DSurface9> target,readback;ok(d->CreateRenderTarget(h[1],h[2],D3DFMT_A8R8G8B8,D3DMULTISAMPLE_NONE,0,FALSE,&target,nullptr),"texture test target");
+    ComPtr<IDirect3DSurface9> source;ok(textures[i]->GetSurfaceLevel(0,&source),"texture test source");
+    ok(d->StretchRect(source.Get(),nullptr,target.Get(),nullptr,D3DTEXF_NONE),"texture test copy");
+    ok(d->CreateOffscreenPlainSurface(h[1],h[2],D3DFMT_A8R8G8B8,D3DPOOL_SYSTEMMEM,&readback,nullptr),"texture test staging");
+    ok(d->GetRenderTargetData(target.Get(),readback.Get()),"texture test readback");
+    ok(readback->LockRect(&lock,nullptr,D3DLOCK_READONLY),"texture readback");require(lock.Pitch>=static_cast<INT>(h[1]*4),"texture readback pitch");
+    for(uint32_t y=0;y<h[2];++y)require(memcmp(static_cast<BYTE*>(lock.pBits)+y*lock.Pitch,b.data()+16+size_t(y)*h[1]*4,h[1]*4)==0,"texture row differs");ok(readback->UnlockRect(),"texture read unlock");
+   }
   }
  }
  void draw(const Frame& f,bool mask,uint32_t width,uint32_t height,bool clear=true){

@@ -1,5 +1,20 @@
 # Bounded standalone Remix ingestion
 
+## Historical workflow — retired 2026-10-24
+
+The Toolkit-based preview/ingestion workflow below is historical, not the current
+in-game renderer. The old portable `C:\Project\RTXRemix` installation is retired.
+`run_mesh_preview.py`, `run_remix_ingest.py` and the USD-library consumer
+`tools/d3d9_proof/inspect_intercept.py` require restoring that exact installation
+to replay their old experiments. Do not point them at the managed Toolkit by
+changing a path or bypassing version checks: that migration is not qualified.
+Their source and all `C:\Project\RemixJobs` jobs remain preserved.
+
+Current gameplay tests use `tools/d3d9_proof/start_d3d9_multiship_session.ps1`
+and the separate pinned Remix 1.5.2 runtime, not either Toolkit installation.
+See [cleanup and rollback record](../../docs/runs/2026-10-24-codex-toolkit-cleanup.md).
+Older statements below describe their original checkpoints, not current support.
+
 ## Current live entry: follow SFC camera (prepared, runtime unverified)
 
 Same start_live_bridge_session.ps1 now builds0.19/protocol2. Separate window uses

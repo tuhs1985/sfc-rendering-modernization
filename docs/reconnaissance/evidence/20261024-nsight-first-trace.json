@@ -1,0 +1,153 @@
+{
+  "probe": "REMIX-NSIGHT-STARTUP-001",
+  "trace": "artifacts\\d3d9-proof\\nsight-candidate-20261024-195309-6113982",
+  "fixture": "artifacts\\remix-runtime\\runs\\20261024-195312-767178-return-fixture",
+  "status": "USABLE_API_GPU_TRACE_WITH_INCOMPLETE_PROFILED_TEARDOWN_NOT_CLEAN_RUNTIME_PASS",
+  "files": {
+    "candidate-startup.nsys-rep": {
+      "bytes": 7273057,
+      "sha256": "3b95f96e8e085b05582800e3adfe153ca0aaa81043e8b3213dc072d26a07ce96"
+    },
+    "candidate-startup.sqlite": {
+      "bytes": 18927616,
+      "sha256": "25c56c7b16e0df9766b614de9ec3ed0740abee4dee0de5003f081abcc57abd3b"
+    }
+  },
+  "outer_job": {
+    "schema": "remix.job.v1",
+    "pid": 47260,
+    "exit_code": 1,
+    "stop_reason": 0,
+    "elapsed_ms": 36765,
+    "console_bytes": 6148,
+    "peak_scratch_bytes": 7281171,
+    "scratch_warning": false,
+    "remaining_owned_processes": 0
+  },
+  "fixture_error": "Live fixture: Owned live GPU workflow failed to retire normally",
+  "fixture_visual_log": "VERIFIED_CHILD pid=42580 suspended_path_match=1 disk_sha_match=1 startup_import_only=1\nKNOWN_FIXTURE_DEPTH width=1920 height=1080 resource_format=39 view_format=40 flags=72\nMULTISCENE_BOTH_READY frame=275 first_draws=0\nBUFFERED_SCENE_PIXELS frame=200334 native_HUD_and_scene_exact=1\nSHIP_SNAPSHOT once=1 late=0 source_frame=200334 width=1920 height=1080\nGAME_IMAGE_PIXELS changed=31315 border_untouched=1\nBUFFER_FIXTURE_DISABLED frame=535\nBUFFER_FIXTURE_REENABLED frame=540\nGAME_DELIVERY_WINDOW frames=600 draws=595\nBUFFERED_SCENE_PIXELS frame=200934 native_HUD_and_scene_exact=1\nSHIP_SNAPSHOT once=1 late=1 source_frame=200934 width=1920 height=1080\nGAME_IMAGE_PIXELS changed=31315 border_untouched=1\nKNOWN_FIXTURE_DEPTH width=1024 height=768 resource_format=39 view_format=40 flags=72\nKNOWN_FIXTURE_DEPTH width=1920 height=1080 resource_format=39 view_format=40 flags=72\nSOURCE_TIMING_END frames=1115 state_errors=0 resized=1 recreated=1\nCHILD_EXIT code=0\n",
+  "renderer_pid": 24076,
+  "renderer_ready_trace_relative_seconds": 3.6559315,
+  "traced_pids": [
+    24076
+  ],
+  "event_counts": {
+    "VULKAN_API": 357128,
+    "VULKAN_WORKLOAD": 4628,
+    "VULKAN_PIPELINE_CREATION_EVENTS": 113
+  },
+  "top_api": [
+    {
+      "name": "vkCreateComputePipelines",
+      "calls": 111,
+      "aggregate_thread_ms": 10996.843087,
+      "max_call_ms": 482.533517
+    },
+    {
+      "name": "vkWaitForFences",
+      "calls": 5818,
+      "aggregate_thread_ms": 6706.292191,
+      "max_call_ms": 39.125189
+    },
+    {
+      "name": "vkCreateRayTracingPipelinesKHR",
+      "calls": 2,
+      "aggregate_thread_ms": 543.049679,
+      "max_call_ms": 272.164497
+    },
+    {
+      "name": "vkCreateSwapchainKHR",
+      "calls": 4,
+      "aggregate_thread_ms": 189.120791,
+      "max_call_ms": 178.11113
+    },
+    {
+      "name": "vkCmdBindDescriptorSets",
+      "calls": 21091,
+      "aggregate_thread_ms": 125.060641,
+      "max_call_ms": 0.548318
+    },
+    {
+      "name": "vkQueueSubmit",
+      "calls": 5174,
+      "aggregate_thread_ms": 119.670048,
+      "max_call_ms": 1.159324
+    },
+    {
+      "name": "vkAllocateMemory",
+      "calls": 239,
+      "aggregate_thread_ms": 108.90163,
+      "max_call_ms": 25.410508
+    },
+    {
+      "name": "vkCreateDevice",
+      "calls": 1,
+      "aggregate_thread_ms": 83.54387,
+      "max_call_ms": 83.54387
+    },
+    {
+      "name": "vkQueuePresentKHR",
+      "calls": 1296,
+      "aggregate_thread_ms": 39.060156,
+      "max_call_ms": 0.335516
+    },
+    {
+      "name": "vkAllocateDescriptorSets",
+      "calls": 68115,
+      "aggregate_thread_ms": 29.638032,
+      "max_call_ms": 1.272461
+    },
+    {
+      "name": "vkUpdateDescriptorSetWithTemplate",
+      "calls": 43414,
+      "aggregate_thread_ms": 29.147384,
+      "max_call_ms": 0.018342
+    },
+    {
+      "name": "vkCmdBindPipeline",
+      "calls": 67449,
+      "aggregate_thread_ms": 25.173664,
+      "max_call_ms": 0.020883
+    },
+    {
+      "name": "vkBeginCommandBuffer",
+      "calls": 11641,
+      "aggregate_thread_ms": 21.851106,
+      "max_call_ms": 1.465467
+    },
+    {
+      "name": "vkCmdPipelineBarrier",
+      "calls": 82691,
+      "aggregate_thread_ms": 20.885337,
+      "max_call_ms": 0.040929
+    }
+  ],
+  "pipeline_windows": [
+    {
+      "name": "vkCreateComputePipelines",
+      "first_start_seconds": 1.747476801,
+      "last_end_seconds": 3.797302265,
+      "calls": 111
+    },
+    {
+      "name": "vkCreateGraphicsPipelines",
+      "first_start_seconds": 3.774106234,
+      "last_end_seconds": 3.856981551,
+      "calls": 2
+    },
+    {
+      "name": "vkCreateRayTracingPipelinesKHR",
+      "first_start_seconds": 2.672433303,
+      "last_end_seconds": 2.945208288,
+      "calls": 2
+    }
+  ],
+  "caveats": [
+    "Aggregate API times overlap across threads;11s compute pipeline total is NOT11s elapsed load",
+    "15s capture ended before source shutdown;deferred native stdout absent from report;no direct bootstrap QPC correlation",
+    "Batch GPU rows can share intervals;do not sum duplicated/overlapping batch times",
+    "Inner owned job result absent after10s generic supervisor teardown timeout;outer job owned0;not clean native unload proof",
+    "Exported367367events;Vulkan API/GPU counts actual;no CPU sampling or scheduling collection",
+    "Only renderer PID24076 appears in Vulkan API records;no SFC run"
+  ]
+}

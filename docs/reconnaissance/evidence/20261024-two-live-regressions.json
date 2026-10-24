@@ -1,0 +1,1560 @@
+{
+  "20261024-211419-661828-in-game": {
+    "run": "20261024-211419-661828-in-game",
+    "result_sha256": "f8ba70dc12ebbeb7cde10d7a264f1d4acacbd9e56ffe6c5a69f6c2490ab10fc1",
+    "error": null,
+    "normal_exit": true,
+    "gate_clean_unloaded": true,
+    "renderer_exit": 0,
+    "original_critical_unchanged": true,
+    "copied_critical_restored": true,
+    "launcher_unchanged": true,
+    "owned_job": {
+      "schema": "remix.job.v1",
+      "pid": 36784,
+      "exit_code": 0,
+      "stop_reason": 0,
+      "elapsed_ms": 135609,
+      "console_bytes": 264114,
+      "peak_scratch_bytes": 92997609,
+      "scratch_warning": false,
+      "remaining_owned_processes": 0
+    },
+    "multi_state": {
+      "pid": 49672,
+      "stopped": true,
+      "last_frame": 5677,
+      "published": 5407,
+      "dropped": 1792,
+      "invalid": 0,
+      "asset_ready": 3,
+      "asset_rejected": 0,
+      "closed_frame": 5675
+    },
+    "partial": [],
+    "delivery_stages": {
+      "lookup_header": 0,
+      "lookup_packet": 0,
+      "lookup_identity": 0,
+      "decode": 0,
+      "projection": 0
+    },
+    "assets": [
+      {
+        "id": 1,
+        "owner": 1,
+        "revision": 1,
+        "model": "assets/models/kff/kff.mod",
+        "path_id": 1,
+        "initial": true,
+        "discovery_after_first_s": 0.0,
+        "preparation_wall_s": 0.2722790000261739,
+        "published_after_discovery_s": 1.434052599943243,
+        "native_admission_after_discovery_s": 4.144681000034325,
+        "native_cpu_ms": 2.196,
+        "native_gpu_admit_ms": 0.006,
+        "acknowledged": 1,
+        "draws": 5296,
+        "geometry_sha256": "74cd4f327c589b7b6445123a640dae27e947df3ae9e649077795f78b0c0425e4",
+        "signature": "b59a14e1a1e5625065cdbef8c93f72fc9a050976ad97e9d00cf5cdb6ceb07bec"
+      },
+      {
+        "id": 2,
+        "owner": 2,
+        "revision": 2,
+        "model": "assets/models/fca/fca.mod",
+        "path_id": 2,
+        "initial": true,
+        "discovery_after_first_s": 0.005023599951528013,
+        "preparation_wall_s": 1.3516655000858009,
+        "published_after_discovery_s": 1.4291604000609368,
+        "native_admission_after_discovery_s": 4.175341400085017,
+        "native_cpu_ms": 31.606,
+        "native_gpu_admit_ms": 3.104,
+        "acknowledged": 1,
+        "draws": 5296,
+        "geometry_sha256": "16981bd6f5b84f8d9f17f1395a92b34011387ddba5e1a64fbff4b21bd81e65a5",
+        "signature": "60db5ad77a07374cf83a0997c09d889ffbd27740c306b31c382f5920f8342eda"
+      },
+      {
+        "id": 3,
+        "owner": 3,
+        "revision": 3,
+        "model": "assets/models/fms/fms.mod",
+        "path_id": 3,
+        "initial": false,
+        "discovery_after_first_s": 39.53518659994006,
+        "preparation_wall_s": 0.12734060001093894,
+        "published_after_discovery_s": 0.1293446000199765,
+        "native_admission_after_discovery_s": 0.13395739998668432,
+        "native_cpu_ms": 3.454,
+        "native_gpu_admit_ms": 0.423,
+        "acknowledged": 1,
+        "draws": 3172,
+        "geometry_sha256": "cdbf4b8417ad7a4f24ad0a880a5da9702672944dccdccb46b4d52baa805b5aec",
+        "signature": "015e185fd3038aaee86a242644a3eae9141c149335ae9418592dd9687969c8e4"
+      }
+    ],
+    "initial_owner_count": 2,
+    "initial_preparation_s": 1.356689100037329,
+    "discovery_to_first_cohort_gpu_output_s": 4.207848199992441,
+    "discovery_to_first_game_paired_output_s": 4.237104399944656,
+    "native_startup": {
+      "points": 88,
+      "frequency": 10000000,
+      "phases": [
+        {
+          "begin": "activated",
+          "end": "scene_loaded",
+          "seconds": 0.0003224
+        },
+        {
+          "begin": "scene_loaded",
+          "end": "materials_enabled",
+          "seconds": 0.0001374
+        },
+        {
+          "begin": "materials_enabled",
+          "end": "receiver_started",
+          "seconds": 0.0030194
+        },
+        {
+          "begin": "receiver_started",
+          "end": "renderer_assets_started",
+          "seconds": 0.0077999
+        },
+        {
+          "begin": "renderer_assets_started",
+          "end": "frame_begin",
+          "seconds": 0.0002081
+        }
+      ],
+      "bootstrap": [
+        {
+          "index": 0,
+          "draw_seconds": 0.0001793,
+          "present_seconds": 0.1051468
+        },
+        {
+          "index": 1,
+          "draw_seconds": 4.47e-05,
+          "present_seconds": 0.0850856
+        },
+        {
+          "index": 2,
+          "draw_seconds": 3.1e-05,
+          "present_seconds": 0.1223949
+        },
+        {
+          "index": 3,
+          "draw_seconds": 3.92e-05,
+          "present_seconds": 9.89e-05
+        },
+        {
+          "index": 4,
+          "draw_seconds": 2.87e-05,
+          "present_seconds": 0.0178691
+        },
+        {
+          "index": 5,
+          "draw_seconds": 3.88e-05,
+          "present_seconds": 0.0463239
+        },
+        {
+          "index": 6,
+          "draw_seconds": 3.16e-05,
+          "present_seconds": 0.0050574
+        },
+        {
+          "index": 7,
+          "draw_seconds": 3.63e-05,
+          "present_seconds": 0.0052625
+        },
+        {
+          "index": 8,
+          "draw_seconds": 3.32e-05,
+          "present_seconds": 0.0025899
+        },
+        {
+          "index": 9,
+          "draw_seconds": 3.88e-05,
+          "present_seconds": 0.0043447
+        },
+        {
+          "index": 10,
+          "draw_seconds": 3.61e-05,
+          "present_seconds": 0.0052223
+        },
+        {
+          "index": 11,
+          "draw_seconds": 3.39e-05,
+          "present_seconds": 0.0055
+        },
+        {
+          "index": 12,
+          "draw_seconds": 3.48e-05,
+          "present_seconds": 0.0047781
+        },
+        {
+          "index": 13,
+          "draw_seconds": 3.52e-05,
+          "present_seconds": 1.7539037
+        },
+        {
+          "index": 14,
+          "draw_seconds": 4.11e-05,
+          "present_seconds": 0.0002729
+        },
+        {
+          "index": 15,
+          "draw_seconds": 3.53e-05,
+          "present_seconds": 0.0085866
+        },
+        {
+          "index": 16,
+          "draw_seconds": 4.48e-05,
+          "present_seconds": 0.0129241
+        },
+        {
+          "index": 17,
+          "draw_seconds": 4.13e-05,
+          "present_seconds": 0.0175365
+        },
+        {
+          "index": 18,
+          "draw_seconds": 6.66e-05,
+          "present_seconds": 0.0125056
+        },
+        {
+          "index": 19,
+          "draw_seconds": 4.63e-05,
+          "present_seconds": 0.0133452
+        },
+        {
+          "index": 20,
+          "draw_seconds": 3.65e-05,
+          "present_seconds": 0.0072224
+        },
+        {
+          "index": 21,
+          "draw_seconds": 4.54e-05,
+          "present_seconds": 0.0074002
+        },
+        {
+          "index": 22,
+          "draw_seconds": 4.56e-05,
+          "present_seconds": 0.0073396
+        },
+        {
+          "index": 23,
+          "draw_seconds": 4.19e-05,
+          "present_seconds": 0.0072469
+        }
+      ],
+      "experimental_render_warm_seconds": null,
+      "first_cohort_draw_present_seconds": 0.002442,
+      "first_cohort_copy_seconds": 0.0167623,
+      "first_cohort_ack_seconds": 0.0016152,
+      "activation_to_bootstrap_output_seconds": 2.5516833,
+      "bootstrap_total_wall_seconds": 2.5025307,
+      "first_receiver_ack_seconds": 0.143056,
+      "memory_samples": [
+        {
+          "stage": "host_entry",
+          "index": 0,
+          "qpc": 6289265518382,
+          "frequency": 10000000,
+          "private_bytes": 2600960,
+          "working_set": 8654848,
+          "system_commit": 37495984128,
+          "commit_limit": 51369877504
+        },
+        {
+          "stage": "device_ready",
+          "index": 0,
+          "qpc": 6289288146710,
+          "frequency": 10000000,
+          "private_bytes": 2408665088,
+          "working_set": 997965824,
+          "system_commit": 40841334784,
+          "commit_limit": 51369877504
+        },
+        {
+          "stage": "idle_begin",
+          "index": 0,
+          "qpc": 6289288639832,
+          "frequency": 10000000,
+          "private_bytes": 2496573440,
+          "working_set": 1035948032,
+          "system_commit": 40974409728,
+          "commit_limit": 51369877504
+        },
+        {
+          "stage": "activated",
+          "index": 0,
+          "qpc": 6289690065368,
+          "frequency": 10000000,
+          "private_bytes": 2600300544,
+          "working_set": 1101369344,
+          "system_commit": 40994091008,
+          "commit_limit": 51369877504
+        },
+        {
+          "stage": "scene_loaded",
+          "index": 0,
+          "qpc": 6289690068592,
+          "frequency": 10000000,
+          "private_bytes": 2600300544,
+          "working_set": 1101389824,
+          "system_commit": 40994091008,
+          "commit_limit": 51369877504
+        },
+        {
+          "stage": "materials_enabled",
+          "index": 0,
+          "qpc": 6289690069966,
+          "frequency": 10000000,
+          "private_bytes": 2600300544,
+          "working_set": 1101389824,
+          "system_commit": 40994091008,
+          "commit_limit": 51369877504
+        },
+        {
+          "stage": "receiver_started",
+          "index": 0,
+          "qpc": 6289690100160,
+          "frequency": 10000000,
+          "private_bytes": 2600300544,
+          "working_set": 1101398016,
+          "system_commit": 40994091008,
+          "commit_limit": 51369877504
+        },
+        {
+          "stage": "renderer_assets_started",
+          "index": 0,
+          "qpc": 6289690178159,
+          "frequency": 10000000,
+          "private_bytes": 2869325824,
+          "working_set": 1260822528,
+          "system_commit": 41265762304,
+          "commit_limit": 51369877504
+        },
+        {
+          "stage": "frame_begin",
+          "index": 0,
+          "qpc": 6289690180240,
+          "frequency": 10000000,
+          "private_bytes": 2869325824,
+          "working_set": 1262919680,
+          "system_commit": 41265762304,
+          "commit_limit": 51369877504
+        },
+        {
+          "stage": "output_complete",
+          "index": 0,
+          "qpc": 6289715582201,
+          "frequency": 10000000,
+          "private_bytes": 4895997952,
+          "working_set": 1939906560,
+          "system_commit": 43287711744,
+          "commit_limit": 51369877504
+        },
+        {
+          "stage": "receiver_ack",
+          "index": 0,
+          "qpc": 6289717012761,
+          "frequency": 10000000,
+          "private_bytes": 4896071680,
+          "working_set": 1940180992,
+          "system_commit": 43400228864,
+          "commit_limit": 51369877504
+        },
+        {
+          "stage": "frame_begin",
+          "index": 1,
+          "qpc": 6289717015717,
+          "frequency": 10000000,
+          "private_bytes": 4896104448,
+          "working_set": 1940201472,
+          "system_commit": 43400228864,
+          "commit_limit": 51369877504
+        },
+        {
+          "stage": "cohort_draw_begin",
+          "index": 0,
+          "qpc": 6289717487769,
+          "frequency": 10000000,
+          "private_bytes": 4899155968,
+          "working_set": 1943461888,
+          "system_commit": 43402678272,
+          "commit_limit": 51369877504
+        },
+        {
+          "stage": "cohort_draw_end",
+          "index": 0,
+          "qpc": 6289717512189,
+          "frequency": 10000000,
+          "private_bytes": 4899155968,
+          "working_set": 1943486464,
+          "system_commit": 43402678272,
+          "commit_limit": 51369877504
+        },
+        {
+          "stage": "cohort_output_complete",
+          "index": 0,
+          "qpc": 6289717679812,
+          "frequency": 10000000,
+          "private_bytes": 4916621312,
+          "working_set": 1958944768,
+          "system_commit": 43421478912,
+          "commit_limit": 51369877504
+        },
+        {
+          "stage": "cohort_receiver_ack",
+          "index": 0,
+          "qpc": 6289717695964,
+          "frequency": 10000000,
+          "private_bytes": 4916621312,
+          "working_set": 1958944768,
+          "system_commit": 43421478912,
+          "commit_limit": 51369877504
+        }
+      ],
+      "scope": "External host startup only;not first matching game composition or physical display latency"
+    },
+    "delivery": {
+      "paired": 5278,
+      "total_records": 5407,
+      "before_first_pair": 5,
+      "unpaired_after_first": 124,
+      "post_first_records": 5402,
+      "paired_percentage": 97.70455386893742,
+      "gaps": [
+        {
+          "records": 5,
+          "first_frame": 278,
+          "last_frame": 282,
+          "statuses": [
+            2
+          ],
+          "after_discovery_s": 4.288088000030257,
+          "span_first_to_last_ms": 66.6174
+        },
+        {
+          "records": 2,
+          "first_frame": 284,
+          "last_frame": 285,
+          "statuses": [
+            2
+          ],
+          "after_discovery_s": 4.387646200018935,
+          "span_first_to_last_ms": 17.144
+        },
+        {
+          "records": 2,
+          "first_frame": 287,
+          "last_frame": 288,
+          "statuses": [
+            2
+          ],
+          "after_discovery_s": 4.437778600025922,
+          "span_first_to_last_ms": 16.8237
+        },
+        {
+          "records": 2,
+          "first_frame": 290,
+          "last_frame": 291,
+          "statuses": [
+            2
+          ],
+          "after_discovery_s": 4.486641300027259,
+          "span_first_to_last_ms": 16.9516
+        },
+        {
+          "records": 1,
+          "first_frame": 1451,
+          "last_frame": 1451,
+          "statuses": [
+            2
+          ],
+          "after_discovery_s": 23.83548399992287,
+          "span_first_to_last_ms": 0.0
+        },
+        {
+          "records": 65,
+          "first_frame": 2408,
+          "last_frame": 2472,
+          "statuses": [
+            2
+          ],
+          "after_discovery_s": 39.78428060002625,
+          "span_first_to_last_ms": 1068.6686
+        },
+        {
+          "records": 3,
+          "first_frame": 2474,
+          "last_frame": 2476,
+          "statuses": [
+            2
+          ],
+          "after_discovery_s": 40.88534139993135,
+          "span_first_to_last_ms": 34.1118
+        },
+        {
+          "records": 2,
+          "first_frame": 2480,
+          "last_frame": 2481,
+          "statuses": [
+            2
+          ],
+          "after_discovery_s": 40.98528789996635,
+          "span_first_to_last_ms": 17.457
+        },
+        {
+          "records": 1,
+          "first_frame": 2485,
+          "last_frame": 2485,
+          "statuses": [
+            2
+          ],
+          "after_discovery_s": 41.06874939997215,
+          "span_first_to_last_ms": 0.0
+        },
+        {
+          "records": 3,
+          "first_frame": 4180,
+          "last_frame": 4182,
+          "statuses": [
+            2
+          ],
+          "after_discovery_s": 69.31660050002392,
+          "span_first_to_last_ms": 34.0117
+        },
+        {
+          "records": 8,
+          "first_frame": 4186,
+          "last_frame": 4193,
+          "statuses": [
+            2
+          ],
+          "after_discovery_s": 69.41661930002738,
+          "span_first_to_last_ms": 118.184
+        },
+        {
+          "records": 4,
+          "first_frame": 4197,
+          "last_frame": 4200,
+          "statuses": [
+            2
+          ],
+          "after_discovery_s": 69.60104879993014,
+          "span_first_to_last_ms": 50.507
+        },
+        {
+          "records": 2,
+          "first_frame": 4207,
+          "last_frame": 4208,
+          "statuses": [
+            2
+          ],
+          "after_discovery_s": 69.76741640002001,
+          "span_first_to_last_ms": 17.2675
+        },
+        {
+          "records": 4,
+          "first_frame": 5321,
+          "last_frame": 5324,
+          "statuses": [
+            2
+          ],
+          "after_discovery_s": 88.33239919994958,
+          "span_first_to_last_ms": 50.3603
+        },
+        {
+          "records": 6,
+          "first_frame": 5326,
+          "last_frame": 5331,
+          "statuses": [
+            2
+          ],
+          "after_discovery_s": 88.41526099992916,
+          "span_first_to_last_ms": 85.1082
+        },
+        {
+          "records": 12,
+          "first_frame": 5333,
+          "last_frame": 5344,
+          "statuses": [
+            2
+          ],
+          "after_discovery_s": 88.53257449995726,
+          "span_first_to_last_ms": 184.4357
+        },
+        {
+          "records": 2,
+          "first_frame": 5349,
+          "last_frame": 5350,
+          "statuses": [
+            2
+          ],
+          "after_discovery_s": 88.80000489996746,
+          "span_first_to_last_ms": 17.118
+        }
+      ],
+      "longest_gap_records": 65,
+      "max_age_us": 24645
+    },
+    "game_output": {
+      "published": 5296,
+      "overwritten": 0,
+      "busy": 0,
+      "error": 0,
+      "drawn": 5278,
+      "stale": 14,
+      "invalid": 0,
+      "not_ready": 0,
+      "retired": 0,
+      "gpu_busy": 0,
+      "resource_failed": 0,
+      "depth_missing": 0,
+      "last_frame": 5675,
+      "asset_sha256": "1f9c0c627a1c0d204309c00e02c91a505a6cc2cd55b38888cd69e719a6465d93",
+      "camera_offset": [
+        -15.897722244262695,
+        0.0,
+        0.0
+      ],
+      "lights": {
+        "config_sha256": "01bb042a29ffe379bf40e5dbd95b11670d2fac927beb846375acff9be94240aa",
+        "packets": 771,
+        "busy": 0,
+        "invalid": 0,
+        "latest": {
+          "sequence": 879,
+          "frame": 5670,
+          "source_age_ms": 32,
+          "native_elapsed_ms": 94484,
+          "native_bank_owner": 2,
+          "native_bank_model": 432063108,
+          "target_owner": 1,
+          "normalization": "WORLD_DIRECTIONAL_BANK_TO_PERSISTENT_INSTANCE"
+        },
+        "policy": "Frozen config;fresh same-session/owner/model/source native lights only;no replay fallback"
+      },
+      "lease_worker_releases": 5278,
+      "retain_ready": true,
+      "synchronized_buffer": {
+        "probe": "D3D9-SYNC-BUFFER-001",
+        "records": 5407,
+        "dropped": 0,
+        "max_age_us": 24645,
+        "failed": 0,
+        "statuses": {
+          "1": 5278,
+          "2": 127,
+          "3": 1,
+          "4": 1
+        },
+        "paired": 5278,
+        "without_ship": 127,
+        "warmup": 1,
+        "reset": 1,
+        "owners": {
+          "1": 5278
+        },
+        "instances": {
+          "1:1": 5278
+        },
+        "sha256": "0ce2d6c53c4d373398724493103ce681be8237a9ccfd281c53ecad7a47e0d208",
+        "scope": "Complete pre-effects game frame including native HUD and matching ship/depth delayed together by one adjacent game frame;not physical input latency"
+      }
+    },
+    "material_events": [
+      {
+        "layers": 2,
+        "supervisor_monotonic_ns": 628968994156100,
+        "clock": "QueryPerformanceCounter",
+        "initial": true
+      },
+      {
+        "layers": 3,
+        "supervisor_monotonic_ns": 629007224639900,
+        "clock": "QueryPerformanceCounter",
+        "initial": false
+      }
+    ],
+    "source_timing_counters": {
+      "dropped": 0,
+      "callbacks": 11348,
+      "wrong_thread": 0,
+      "invalid": 2,
+      "snapshot_miss": 2,
+      "missing_stamp": 0,
+      "ambiguous": 0,
+      "owner_limit": 0
+    },
+    "source_timing_result": "SOURCE_TIMING_PARTIAL",
+    "late_material_gap_correlations": [
+      {
+        "layers": 3,
+        "publication_after_first_discovery_s": 39.66450690000784,
+        "nearby_gaps": [
+          {
+            "records": 65,
+            "first_frame": 2408,
+            "last_frame": 2472,
+            "statuses": [
+              2
+            ],
+            "after_discovery_s": 39.78428060002625,
+            "span_first_to_last_ms": 1068.6686
+          },
+          {
+            "records": 3,
+            "first_frame": 2474,
+            "last_frame": 2476,
+            "statuses": [
+              2
+            ],
+            "after_discovery_s": 40.88534139993135,
+            "span_first_to_last_ms": 34.1118
+          },
+          {
+            "records": 2,
+            "first_frame": 2480,
+            "last_frame": 2481,
+            "statuses": [
+              2
+            ],
+            "after_discovery_s": 40.98528789996635,
+            "span_first_to_last_ms": 17.457
+          },
+          {
+            "records": 1,
+            "first_frame": 2485,
+            "last_frame": 2485,
+            "statuses": [
+              2
+            ],
+            "after_discovery_s": 41.06874939997215,
+            "span_first_to_last_ms": 0.0
+          }
+        ]
+      }
+    ],
+    "capture_bytes": 102533324,
+    "caveats": [
+      "Native per-owner draw counts are submission,not proof each object reached game pixels",
+      "Unpaired adjacent-frame records mean no Remix layer;not proof original SFC flickered",
+      "No independent screenshot or sponsor visual assessment supplied yet",
+      "Discovery times do not prove initial offscreen assets did not exist earlier"
+    ]
+  },
+  "20261024-211721-889006-in-game": {
+    "run": "20261024-211721-889006-in-game",
+    "result_sha256": "b294b87c48454678e920d746557d8f54e2a1eedf86487f791785f65533084deb",
+    "error": null,
+    "normal_exit": true,
+    "gate_clean_unloaded": true,
+    "renderer_exit": 0,
+    "original_critical_unchanged": true,
+    "copied_critical_restored": true,
+    "launcher_unchanged": true,
+    "owned_job": {
+      "schema": "remix.job.v1",
+      "pid": 30576,
+      "exit_code": 0,
+      "stop_reason": 0,
+      "elapsed_ms": 124172,
+      "console_bytes": 301724,
+      "peak_scratch_bytes": 212401883,
+      "scratch_warning": false,
+      "remaining_owned_processes": 0
+    },
+    "multi_state": {
+      "pid": 22588,
+      "stopped": true,
+      "last_frame": 5755,
+      "published": 5417,
+      "dropped": 1782,
+      "invalid": 0,
+      "asset_ready": 7,
+      "asset_rejected": 0,
+      "closed_frame": 5754
+    },
+    "partial": [],
+    "delivery_stages": {
+      "lookup_header": 0,
+      "lookup_packet": 0,
+      "lookup_identity": 0,
+      "decode": 0,
+      "projection": 33
+    },
+    "assets": [
+      {
+        "id": 1,
+        "owner": 1,
+        "revision": 1,
+        "model": "assets/models/kff/kff.mod",
+        "path_id": 1,
+        "initial": true,
+        "discovery_after_first_s": 0.0,
+        "preparation_wall_s": 0.6271327000577003,
+        "published_after_discovery_s": 2.169730299967341,
+        "native_admission_after_discovery_s": 5.4328785999678075,
+        "native_cpu_ms": 2.497,
+        "native_gpu_admit_ms": 0.006,
+        "acknowledged": 1,
+        "draws": 5258,
+        "geometry_sha256": "74cd4f327c589b7b6445123a640dae27e947df3ae9e649077795f78b0c0425e4",
+        "signature": "b59a14e1a1e5625065cdbef8c93f72fc9a050976ad97e9d00cf5cdb6ceb07bec"
+      },
+      {
+        "id": 2,
+        "owner": 2,
+        "revision": 2,
+        "model": "assets/models/fdd/fdd.mod",
+        "path_id": 2,
+        "initial": true,
+        "discovery_after_first_s": 0.006188299972563982,
+        "preparation_wall_s": 1.9895294000161812,
+        "published_after_discovery_s": 2.1637412999989465,
+        "native_admission_after_discovery_s": 5.456145300064236,
+        "native_cpu_ms": 25.303,
+        "native_gpu_admit_ms": 3.133,
+        "acknowledged": 1,
+        "draws": 5257,
+        "geometry_sha256": "b9040bcef9aa2b70365a54d4d3ab51088c46c872fc99da8888c95d5da768057a",
+        "signature": "3898ebf9b956093f660d6334c8e685bc9c67332df0a149d1588f0df45d85520c"
+      },
+      {
+        "id": 3,
+        "owner": 4,
+        "revision": 3,
+        "model": "assets/models/fff/fff.mod",
+        "path_id": 3,
+        "initial": true,
+        "discovery_after_first_s": 0.0063192000379785895,
+        "preparation_wall_s": 1.2826540999813005,
+        "published_after_discovery_s": 2.1644221999449655,
+        "native_admission_after_discovery_s": 5.479843399953097,
+        "native_cpu_ms": 20.218,
+        "native_gpu_admit_ms": 2.342,
+        "acknowledged": 1,
+        "draws": 5233,
+        "geometry_sha256": "fb131b3c17cc0f93ed8fe23b96e17f57ab0090b226a52d1141e5eafb485f8a7d",
+        "signature": "a85aac1778e69fd13d29be726d22256280c211daaf250fc095cc93e336d633d7"
+      },
+      {
+        "id": 4,
+        "owner": 3,
+        "revision": 4,
+        "model": "assets/models/fca/fca.mod",
+        "path_id": 4,
+        "initial": true,
+        "discovery_after_first_s": 0.006409800029359758,
+        "preparation_wall_s": 2.07403409993276,
+        "published_after_discovery_s": 2.1644172000233084,
+        "native_admission_after_discovery_s": 5.518141799955629,
+        "native_cpu_ms": 33.238,
+        "native_gpu_admit_ms": 3.676,
+        "acknowledged": 1,
+        "draws": 5254,
+        "geometry_sha256": "16981bd6f5b84f8d9f17f1395a92b34011387ddba5e1a64fbff4b21bd81e65a5",
+        "signature": "60db5ad77a07374cf83a0997c09d889ffbd27740c306b31c382f5920f8342eda"
+      },
+      {
+        "id": 5,
+        "owner": 5,
+        "revision": 5,
+        "model": "assets/models/kdd/kdd.mod",
+        "path_id": 5,
+        "initial": false,
+        "discovery_after_first_s": 11.547109200037085,
+        "preparation_wall_s": 0.17457039991859347,
+        "published_after_discovery_s": 0.17657070001587272,
+        "native_admission_after_discovery_s": 0.2052333999890834,
+        "native_cpu_ms": 3.72,
+        "native_gpu_admit_ms": 0.437,
+        "acknowledged": 1,
+        "draws": 4888,
+        "geometry_sha256": "fbb46d824c0b30f6fc31f6fb5ec8ea5f46f2cc8e647d3d7125917c6d5d0bdbaa",
+        "signature": "642fd9db6b4196c3d69f126424334b7785606d23b73158735a5424743872343d"
+      },
+      {
+        "id": 6,
+        "owner": 6,
+        "revision": 6,
+        "model": "assets/models/rde/rde.mod",
+        "path_id": 6,
+        "initial": false,
+        "discovery_after_first_s": 11.58207600004971,
+        "preparation_wall_s": 0.15602679993025959,
+        "published_after_discovery_s": 0.15803359996061772,
+        "native_admission_after_discovery_s": 0.20334259991068393,
+        "native_cpu_ms": 1.511,
+        "native_gpu_admit_ms": 0.174,
+        "acknowledged": 1,
+        "draws": 4889,
+        "geometry_sha256": "ba1df318b2d85dba363360130f472de11df2c0e6e8c2a32d76ced8a402a65a8d",
+        "signature": "b85b97e3430a2e26c364e211a6075e10a8333e057217496f040658201bc291c0"
+      },
+      {
+        "id": 7,
+        "owner": 7,
+        "revision": 7,
+        "model": "assets/models/fms/fms.mod",
+        "path_id": 7,
+        "initial": false,
+        "discovery_after_first_s": 91.41348350001499,
+        "preparation_wall_s": 0.1328019000357017,
+        "published_after_discovery_s": 0.13489809993188828,
+        "native_admission_after_discovery_s": 0.15771709999535233,
+        "native_cpu_ms": 3.573,
+        "native_gpu_admit_ms": 0.601,
+        "acknowledged": 1,
+        "draws": 182,
+        "geometry_sha256": "cdbf4b8417ad7a4f24ad0a880a5da9702672944dccdccb46b4d52baa805b5aec",
+        "signature": "015e185fd3038aaee86a242644a3eae9141c149335ae9418592dd9687969c8e4"
+      }
+    ],
+    "initial_owner_count": 4,
+    "initial_preparation_s": 2.0804438999621198,
+    "discovery_to_first_cohort_gpu_output_s": 5.552575399982743,
+    "discovery_to_first_game_paired_output_s": 5.694238199968822,
+    "native_startup": {
+      "points": 88,
+      "frequency": 10000000,
+      "phases": [
+        {
+          "begin": "activated",
+          "end": "scene_loaded",
+          "seconds": 0.0003653
+        },
+        {
+          "begin": "scene_loaded",
+          "end": "materials_enabled",
+          "seconds": 0.0001504
+        },
+        {
+          "begin": "materials_enabled",
+          "end": "receiver_started",
+          "seconds": 0.0036423
+        },
+        {
+          "begin": "receiver_started",
+          "end": "renderer_assets_started",
+          "seconds": 0.0080713
+        },
+        {
+          "begin": "renderer_assets_started",
+          "end": "frame_begin",
+          "seconds": 0.000225
+        }
+      ],
+      "bootstrap": [
+        {
+          "index": 0,
+          "draw_seconds": 0.0001604,
+          "present_seconds": 0.0569825
+        },
+        {
+          "index": 1,
+          "draw_seconds": 5.29e-05,
+          "present_seconds": 0.1312358
+        },
+        {
+          "index": 2,
+          "draw_seconds": 6.51e-05,
+          "present_seconds": 0.1379901
+        },
+        {
+          "index": 3,
+          "draw_seconds": 7.05e-05,
+          "present_seconds": 0.0004742
+        },
+        {
+          "index": 4,
+          "draw_seconds": 4.9e-05,
+          "present_seconds": 0.0002385
+        },
+        {
+          "index": 5,
+          "draw_seconds": 5.87e-05,
+          "present_seconds": 0.0003302
+        },
+        {
+          "index": 6,
+          "draw_seconds": 5.7e-05,
+          "present_seconds": 0.0018648
+        },
+        {
+          "index": 7,
+          "draw_seconds": 8.17e-05,
+          "present_seconds": 0.0050254
+        },
+        {
+          "index": 8,
+          "draw_seconds": 0.000101,
+          "present_seconds": 0.0120761
+        },
+        {
+          "index": 9,
+          "draw_seconds": 7.24e-05,
+          "present_seconds": 0.0044724
+        },
+        {
+          "index": 10,
+          "draw_seconds": 5.72e-05,
+          "present_seconds": 0.0041381
+        },
+        {
+          "index": 11,
+          "draw_seconds": 5.31e-05,
+          "present_seconds": 0.0048054
+        },
+        {
+          "index": 12,
+          "draw_seconds": 4.29e-05,
+          "present_seconds": 0.0037384
+        },
+        {
+          "index": 13,
+          "draw_seconds": 3.1e-05,
+          "present_seconds": 0.0041962
+        },
+        {
+          "index": 14,
+          "draw_seconds": 2.92e-05,
+          "present_seconds": 0.0022819
+        },
+        {
+          "index": 15,
+          "draw_seconds": 3.25e-05,
+          "present_seconds": 0.0041336
+        },
+        {
+          "index": 16,
+          "draw_seconds": 3.02e-05,
+          "present_seconds": 0.0035646
+        },
+        {
+          "index": 17,
+          "draw_seconds": 5.68e-05,
+          "present_seconds": 0.0023328
+        },
+        {
+          "index": 18,
+          "draw_seconds": 2.15e-05,
+          "present_seconds": 0.0028537
+        },
+        {
+          "index": 19,
+          "draw_seconds": 2.74e-05,
+          "present_seconds": 0.0008748
+        },
+        {
+          "index": 20,
+          "draw_seconds": 3.1e-05,
+          "present_seconds": 0.0029102
+        },
+        {
+          "index": 21,
+          "draw_seconds": 5.02e-05,
+          "present_seconds": 0.0029148
+        },
+        {
+          "index": 22,
+          "draw_seconds": 3.99e-05,
+          "present_seconds": 0.0048999
+        },
+        {
+          "index": 23,
+          "draw_seconds": 2.52e-05,
+          "present_seconds": 2.3595367
+        }
+      ],
+      "experimental_render_warm_seconds": null,
+      "first_cohort_draw_present_seconds": 0.0050901,
+      "first_cohort_copy_seconds": 0.0194053,
+      "first_cohort_ack_seconds": 0.0017294,
+      "activation_to_bootstrap_output_seconds": 3.075424,
+      "bootstrap_total_wall_seconds": 2.9966924,
+      "first_receiver_ack_seconds": 0.1646167,
+      "memory_samples": [
+        {
+          "stage": "host_entry",
+          "index": 0,
+          "qpc": 6291085237772,
+          "frequency": 10000000,
+          "private_bytes": 2596864,
+          "working_set": 8654848,
+          "system_commit": 37357699072,
+          "commit_limit": 51369877504
+        },
+        {
+          "stage": "device_ready",
+          "index": 0,
+          "qpc": 6291106727109,
+          "frequency": 10000000,
+          "private_bytes": 2410467328,
+          "working_set": 998387712,
+          "system_commit": 40886366208,
+          "commit_limit": 51369877504
+        },
+        {
+          "stage": "idle_begin",
+          "index": 0,
+          "qpc": 6291107146089,
+          "frequency": 10000000,
+          "private_bytes": 2483507200,
+          "working_set": 1028018176,
+          "system_commit": 40985210880,
+          "commit_limit": 51369877504
+        },
+        {
+          "stage": "activated",
+          "index": 0,
+          "qpc": 6291388195726,
+          "frequency": 10000000,
+          "private_bytes": 2607783936,
+          "working_set": 1100148736,
+          "system_commit": 41145450496,
+          "commit_limit": 51369877504
+        },
+        {
+          "stage": "scene_loaded",
+          "index": 0,
+          "qpc": 6291388199379,
+          "frequency": 10000000,
+          "private_bytes": 2607783936,
+          "working_set": 1100201984,
+          "system_commit": 41145450496,
+          "commit_limit": 51369877504
+        },
+        {
+          "stage": "materials_enabled",
+          "index": 0,
+          "qpc": 6291388200883,
+          "frequency": 10000000,
+          "private_bytes": 2607783936,
+          "working_set": 1100201984,
+          "system_commit": 41145450496,
+          "commit_limit": 51369877504
+        },
+        {
+          "stage": "receiver_started",
+          "index": 0,
+          "qpc": 6291388237306,
+          "frequency": 10000000,
+          "private_bytes": 2607783936,
+          "working_set": 1100210176,
+          "system_commit": 41147564032,
+          "commit_limit": 51369877504
+        },
+        {
+          "stage": "renderer_assets_started",
+          "index": 0,
+          "qpc": 6291388318019,
+          "frequency": 10000000,
+          "private_bytes": 2877075456,
+          "working_set": 1265799168,
+          "system_commit": 41419247616,
+          "commit_limit": 51369877504
+        },
+        {
+          "stage": "frame_begin",
+          "index": 0,
+          "qpc": 6291388320269,
+          "frequency": 10000000,
+          "private_bytes": 2877075456,
+          "working_set": 1272090624,
+          "system_commit": 41453805568,
+          "commit_limit": 51369877504
+        },
+        {
+          "stage": "output_complete",
+          "index": 0,
+          "qpc": 6291418949966,
+          "frequency": 10000000,
+          "private_bytes": 5065850880,
+          "working_set": 2106843136,
+          "system_commit": 43594285056,
+          "commit_limit": 51369877504
+        },
+        {
+          "stage": "receiver_ack",
+          "index": 0,
+          "qpc": 6291420596133,
+          "frequency": 10000000,
+          "private_bytes": 5065879552,
+          "working_set": 2106949632,
+          "system_commit": 43710091264,
+          "commit_limit": 51369877504
+        },
+        {
+          "stage": "frame_begin",
+          "index": 1,
+          "qpc": 6291420599072,
+          "frequency": 10000000,
+          "private_bytes": 5065912320,
+          "working_set": 2106970112,
+          "system_commit": 43710091264,
+          "commit_limit": 51369877504
+        },
+        {
+          "stage": "cohort_draw_begin",
+          "index": 0,
+          "qpc": 6291421578954,
+          "frequency": 10000000,
+          "private_bytes": 5090365440,
+          "working_set": 2114347008,
+          "system_commit": 43733331968,
+          "commit_limit": 51369877504
+        },
+        {
+          "stage": "cohort_draw_end",
+          "index": 0,
+          "qpc": 6291421629855,
+          "frequency": 10000000,
+          "private_bytes": 5090562048,
+          "working_set": 2114519040,
+          "system_commit": 43733331968,
+          "commit_limit": 51369877504
+        },
+        {
+          "stage": "cohort_output_complete",
+          "index": 0,
+          "qpc": 6291421823908,
+          "frequency": 10000000,
+          "private_bytes": 5091282944,
+          "working_set": 2114674688,
+          "system_commit": 43734687744,
+          "commit_limit": 51369877504
+        },
+        {
+          "stage": "cohort_receiver_ack",
+          "index": 0,
+          "qpc": 6291421841202,
+          "frequency": 10000000,
+          "private_bytes": 5091282944,
+          "working_set": 2114674688,
+          "system_commit": 43734687744,
+          "commit_limit": 51369877504
+        }
+      ],
+      "scope": "External host startup only;not first matching game composition or physical display latency"
+    },
+    "delivery": {
+      "paired": 5233,
+      "total_records": 5418,
+      "before_first_pair": 16,
+      "unpaired_after_first": 169,
+      "post_first_records": 5402,
+      "paired_percentage": 96.87152906330988,
+      "gaps": [
+        {
+          "records": 4,
+          "first_frame": 355,
+          "last_frame": 358,
+          "statuses": [
+            2
+          ],
+          "after_discovery_s": 5.709826200036332,
+          "span_first_to_last_ms": 49.1046
+        },
+        {
+          "records": 1,
+          "first_frame": 360,
+          "last_frame": 360,
+          "statuses": [
+            2
+          ],
+          "after_discovery_s": 5.79209170001559,
+          "span_first_to_last_ms": 0.0
+        },
+        {
+          "records": 4,
+          "first_frame": 711,
+          "last_frame": 714,
+          "statuses": [
+            2
+          ],
+          "after_discovery_s": 11.641791600035504,
+          "span_first_to_last_ms": 50.8689
+        },
+        {
+          "records": 77,
+          "first_frame": 744,
+          "last_frame": 820,
+          "statuses": [
+            2
+          ],
+          "after_discovery_s": 12.191471799975261,
+          "span_first_to_last_ms": 1268.217
+        },
+        {
+          "records": 4,
+          "first_frame": 822,
+          "last_frame": 825,
+          "statuses": [
+            2
+          ],
+          "after_discovery_s": 13.492399199982174,
+          "span_first_to_last_ms": 50.7179
+        },
+        {
+          "records": 2,
+          "first_frame": 1330,
+          "last_frame": 1331,
+          "statuses": [
+            2
+          ],
+          "after_discovery_s": 21.957233499968424,
+          "span_first_to_last_ms": 17.9721
+        },
+        {
+          "records": 2,
+          "first_frame": 1853,
+          "last_frame": 1854,
+          "statuses": [
+            2
+          ],
+          "after_discovery_s": 30.673504999955185,
+          "span_first_to_last_ms": 17.9327
+        },
+        {
+          "records": 1,
+          "first_frame": 1869,
+          "last_frame": 1869,
+          "statuses": [
+            2
+          ],
+          "after_discovery_s": 30.940809600055218,
+          "span_first_to_last_ms": 0.0
+        },
+        {
+          "records": 4,
+          "first_frame": 2259,
+          "last_frame": 2262,
+          "statuses": [
+            2
+          ],
+          "after_discovery_s": 37.440688899951056,
+          "span_first_to_last_ms": 50.2275
+        },
+        {
+          "records": 65,
+          "first_frame": 5559,
+          "last_frame": 5623,
+          "statuses": [
+            2
+          ],
+          "after_discovery_s": 92.43781739997212,
+          "span_first_to_last_ms": 1068.0869
+        },
+        {
+          "records": 2,
+          "first_frame": 5626,
+          "last_frame": 5627,
+          "statuses": [
+            2
+          ],
+          "after_discovery_s": 93.55557329999283,
+          "span_first_to_last_ms": 16.8822
+        },
+        {
+          "records": 3,
+          "first_frame": 5631,
+          "last_frame": 5633,
+          "statuses": [
+            2
+          ],
+          "after_discovery_s": 93.63906349998433,
+          "span_first_to_last_ms": 33.7664
+        }
+      ],
+      "longest_gap_records": 77,
+      "max_age_us": 18108
+    },
+    "game_output": {
+      "published": 5258,
+      "overwritten": 0,
+      "busy": 0,
+      "error": 0,
+      "drawn": 5233,
+      "stale": 22,
+      "invalid": 0,
+      "not_ready": 0,
+      "retired": 0,
+      "gpu_busy": 0,
+      "resource_failed": 0,
+      "depth_missing": 0,
+      "last_frame": 5754,
+      "asset_sha256": "1f9c0c627a1c0d204309c00e02c91a505a6cc2cd55b38888cd69e719a6465d93",
+      "camera_offset": [
+        -15.897722244262695,
+        0.0,
+        0.0
+      ],
+      "lights": {
+        "config_sha256": "01bb042a29ffe379bf40e5dbd95b11670d2fac927beb846375acff9be94240aa",
+        "packets": 816,
+        "busy": 0,
+        "invalid": 0,
+        "latest": {
+          "sequence": 900,
+          "frame": 5749,
+          "source_age_ms": 31,
+          "native_elapsed_ms": 95828,
+          "native_bank_owner": 5,
+          "native_bank_model": 435422020,
+          "target_owner": 1,
+          "normalization": "WORLD_DIRECTIONAL_BANK_TO_PERSISTENT_INSTANCE"
+        },
+        "policy": "Frozen config;fresh same-session/owner/model/source native lights only;no replay fallback"
+      },
+      "lease_worker_releases": 5233,
+      "retain_ready": true,
+      "synchronized_buffer": {
+        "probe": "D3D9-SYNC-BUFFER-001",
+        "records": 5418,
+        "dropped": 0,
+        "max_age_us": 18108,
+        "failed": 0,
+        "statuses": {
+          "1": 5233,
+          "2": 183,
+          "3": 1,
+          "4": 1
+        },
+        "paired": 5233,
+        "without_ship": 183,
+        "warmup": 1,
+        "reset": 1,
+        "owners": {
+          "1": 5233
+        },
+        "instances": {
+          "1:1": 5233
+        },
+        "sha256": "d391f840471a3d6c35fcb7976e9b91c2c6686a09d2c599a6cbf52c1a17ad66de",
+        "scope": "Complete pre-effects game frame including native HUD and matching ship/depth delayed together by one adjacent game frame;not physical input latency"
+      }
+    },
+    "material_events": [
+      {
+        "layers": 4,
+        "supervisor_monotonic_ns": 629138799509200,
+        "clock": "QueryPerformanceCounter",
+        "initial": true
+      },
+      {
+        "layers": 5,
+        "supervisor_monotonic_ns": 629148353467100,
+        "clock": "QueryPerformanceCounter",
+        "initial": false
+      },
+      {
+        "layers": 6,
+        "supervisor_monotonic_ns": 629148369900600,
+        "clock": "QueryPerformanceCounter",
+        "initial": false
+      },
+      {
+        "layers": 7,
+        "supervisor_monotonic_ns": 629228178172400,
+        "clock": "QueryPerformanceCounter",
+        "initial": false
+      }
+    ],
+    "source_timing_counters": {
+      "dropped": 33892,
+      "callbacks": 11486,
+      "wrong_thread": 0,
+      "invalid": 2,
+      "snapshot_miss": 0,
+      "missing_stamp": 0,
+      "ambiguous": 0,
+      "owner_limit": 0
+    },
+    "source_timing_result": "SOURCE_TIMING_PARTIAL",
+    "late_material_gap_correlations": [
+      {
+        "layers": 5,
+        "publication_after_first_discovery_s": 11.723651699954644,
+        "nearby_gaps": [
+          {
+            "records": 77,
+            "first_frame": 744,
+            "last_frame": 820,
+            "statuses": [
+              2
+            ],
+            "after_discovery_s": 12.191471799975261,
+            "span_first_to_last_ms": 1268.217
+          },
+          {
+            "records": 4,
+            "first_frame": 822,
+            "last_frame": 825,
+            "statuses": [
+              2
+            ],
+            "after_discovery_s": 13.492399199982174,
+            "span_first_to_last_ms": 50.7179
+          }
+        ]
+      },
+      {
+        "layers": 6,
+        "publication_after_first_discovery_s": 11.740085200057365,
+        "nearby_gaps": [
+          {
+            "records": 77,
+            "first_frame": 744,
+            "last_frame": 820,
+            "statuses": [
+              2
+            ],
+            "after_discovery_s": 12.191471799975261,
+            "span_first_to_last_ms": 1268.217
+          },
+          {
+            "records": 4,
+            "first_frame": 822,
+            "last_frame": 825,
+            "statuses": [
+              2
+            ],
+            "after_discovery_s": 13.492399199982174,
+            "span_first_to_last_ms": 50.7179
+          }
+        ]
+      },
+      {
+        "layers": 7,
+        "publication_after_first_discovery_s": 91.5483569999924,
+        "nearby_gaps": [
+          {
+            "records": 65,
+            "first_frame": 5559,
+            "last_frame": 5623,
+            "statuses": [
+              2
+            ],
+            "after_discovery_s": 92.43781739997212,
+            "span_first_to_last_ms": 1068.0869
+          }
+        ]
+      }
+    ],
+    "capture_bytes": 223642119,
+    "caveats": [
+      "Native per-owner draw counts are submission,not proof each object reached game pixels",
+      "Unpaired adjacent-frame records mean no Remix layer;not proof original SFC flickered",
+      "No independent screenshot or sponsor visual assessment supplied yet",
+      "Discovery times do not prove initial offscreen assets did not exist earlier"
+    ]
+  }
+}

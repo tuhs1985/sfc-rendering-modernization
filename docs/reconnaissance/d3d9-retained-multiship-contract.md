@@ -1,5 +1,44 @@
 # D3D9 retained multi-ship increment — implementation contract
 
+## Live lifetime correction — Run162, 2026-10-24
+
+Live execution has no iteration-count cutoff. Source-stop and existing elapsed
+watchdogs govern lifetime (legacy input90s, game-output input110s, receiver130s;
+supervisor tactical capture90s). Rejected/skipped outputs do not spend a hidden
+frame-count budget. Offline replay retains its finite frame count. Production
+policy is tested natively on x86/x64 at simulated60–1000 attempts/s, including
+all-omitted output. This is not removal of capture bounds or refresh-rate pacing.
+See [Run162](../runs/2026-10-24-codex-live-lifetime-cutoff.md); no change to startup,
+material readiness, synchronization, original suppression or appearance policy.
+
+## CURRENT interface cleanup — Run160, 2026-10-24
+
+The24Present bootstrap is now explicitly marked TRANSITIONAL compatibility,
+NOT NVIDIA-required readiness. A one-Present replacement was tested and preserved
+as an ignored experimental binary, but NOT promoted: first output was earlier,
+with visibly different initial shading and subsequent delivery misses despite
+all assets already being in the initial catalog. The vendor synchronous-asset
+initialization option was also tested in isolation; it is not the normal policy.
+Standard settled sampling is not proof of the first displayed image. Keep the
+accepted24startup/onePresent-live-update behavior until initial material lifecycle
+has a qualified replacement. Initial catalog admission, explicit GPU completion
+and exact source/frame matching remain separate actual readiness conditions.
+
+Shared Renderer now uses DEFAULT VB/IB/textures on both native D3D9 and D3D9Ex;
+textures upload through SYSTEMMEM and UpdateTexture, never LockRect of a plain
+DEFAULT texture. Retained Scene is the rebuild source; unbind/release before
+reset/recreation. Actual native32/64classic-vs-Ex/reset/recreation pixels exact.
+Test-mode texture verification copies to a test render target then reads it back;
+Performance does not allocate those verification targets. Default resource
+creation/upload/ownership follows Microsoft, not tolerated MANAGED-on-Ex behavior.
+
+Performance no longer formats per-output ACK lines; protocol ACK/fences remain.
+Additive path does not request unused vendor picking-image retention. Its own
+union coverage plane remains required and is NOT a per-owner ID map. No image,
+lighting, material, UV or runtime pin changed. Larger relay topology and legacy
+single-owner gate remain open audit items, not silently removed or called clean.
+See Run160 and 2026-10-24-live-interface-audit.md for boundaries and limitations.
+
 ## CURRENT launch-time initialization / comparison policy — Run130,2026-10-23
 
 [Mode/activation contract](pipeline-modes.md) and [Run130](../runs/2026-10-23-codex-launch-time-renderer-baseline.md)

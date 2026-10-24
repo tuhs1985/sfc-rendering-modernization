@@ -1,0 +1,254 @@
+{
+  "20261024-211419-661828-in-game": {
+    "windows": [
+      {
+        "window_s": [
+          23.5,
+          24.2
+        ],
+        "audit_statuses": {
+          "1": 19,
+          "2": 23
+        },
+        "buffered_statuses": {
+          "1": 41,
+          "2": 1
+        },
+        "observer_returned_frame_lag_hist": {
+          "0": 19,
+          "1": 23
+        },
+        "observer_time_since_last_completion_ms_max": 18.3805,
+        "source_camera_rows": 42,
+        "camera_changed": 42,
+        "pose_changed": 42,
+        "missed_camera_counts": {
+          "True": 1
+        }
+      },
+      {
+        "window_s": [
+          68.8,
+          70.3
+        ],
+        "audit_statuses": {
+          "1": 58,
+          "2": 32
+        },
+        "buffered_statuses": {
+          "1": 73,
+          "2": 17
+        },
+        "observer_returned_frame_lag_hist": {
+          "0": 58,
+          "1": 16,
+          "2": 6,
+          "3": 3,
+          "4": 2,
+          "5": 1,
+          "6": 1,
+          "7": 1,
+          "8": 1,
+          "9": 1
+        },
+        "observer_time_since_last_completion_ms_max": 157.1964,
+        "source_camera_rows": 90,
+        "camera_changed": 90,
+        "pose_changed": 90,
+        "missed_camera_counts": {
+          "True": 17
+        }
+      },
+      {
+        "window_s": [
+          87.8,
+          89.3
+        ],
+        "audit_statuses": {
+          "1": 49,
+          "2": 41
+        },
+        "buffered_statuses": {
+          "1": 66,
+          "2": 24
+        },
+        "observer_returned_frame_lag_hist": {
+          "0": 49,
+          "1": 18,
+          "2": 5,
+          "3": 3,
+          "4": 3,
+          "5": 2,
+          "6": 2,
+          "7": 2,
+          "8": 1,
+          "9": 1,
+          "10": 1,
+          "11": 1,
+          "12": 1,
+          "13": 1
+        },
+        "observer_time_since_last_completion_ms_max": 215.0893,
+        "source_camera_rows": 90,
+        "camera_changed": 90,
+        "pose_changed": 90,
+        "missed_camera_counts": {
+          "True": 24
+        }
+      }
+    ],
+    "input_admission": {
+      "expired": 0,
+      "old_epoch": 0,
+      "maximum_age_us": 50000,
+      "stages": [
+        {
+          "stage": 0,
+          "accepted": 5334,
+          "clock": 0,
+          "frame": 0,
+          "bad_frame": 0,
+          "age": 0,
+          "closed": 0
+        },
+        {
+          "stage": 1,
+          "accepted": 5296,
+          "clock": 0,
+          "frame": 0,
+          "bad_frame": 0,
+          "age": 0,
+          "closed": 0
+        }
+      ],
+      "policy": "Actual compositor closed-scene watermark,current/adjacent frame,50ms age guard"
+    },
+    "native_unqualified": 36,
+    "delivery_stages": {
+      "lookup_header": 0,
+      "lookup_packet": 0,
+      "lookup_identity": 0,
+      "decode": 0,
+      "projection": 0
+    },
+    "last_source_audit_seconds": 94.24913020001259
+  },
+  "20261024-211721-889006-in-game": {
+    "windows": [
+      {
+        "window_s": [
+          21.5,
+          22.5
+        ],
+        "audit_statuses": {
+          "1": 51,
+          "2": 8,
+          "6": 1
+        },
+        "buffered_statuses": {
+          "1": 58,
+          "2": 2
+        },
+        "observer_returned_frame_lag_hist": {
+          "0": 52,
+          "1": 7,
+          "2": 1
+        },
+        "observer_time_since_last_completion_ms_max": 34.5884,
+        "source_camera_rows": 60,
+        "camera_changed": 60,
+        "pose_changed": 60,
+        "missed_camera_counts": {
+          "True": 2
+        }
+      },
+      {
+        "window_s": [
+          30.2,
+          31.5
+        ],
+        "audit_statuses": {
+          "1": 24,
+          "2": 54
+        },
+        "buffered_statuses": {
+          "1": 75,
+          "2": 3
+        },
+        "observer_returned_frame_lag_hist": {
+          "0": 24,
+          "1": 52,
+          "2": 2
+        },
+        "observer_time_since_last_completion_ms_max": 32.4876,
+        "source_camera_rows": 78,
+        "camera_changed": 78,
+        "pose_changed": 78,
+        "missed_camera_counts": {
+          "True": 3
+        }
+      },
+      {
+        "window_s": [
+          37,
+          38
+        ],
+        "audit_statuses": {
+          "1": 36,
+          "2": 24
+        },
+        "buffered_statuses": {
+          "1": 56,
+          "2": 4
+        },
+        "observer_returned_frame_lag_hist": {
+          "0": 36,
+          "1": 20,
+          "2": 4
+        },
+        "observer_time_since_last_completion_ms_max": 18.5254,
+        "source_camera_rows": 60,
+        "camera_changed": 60,
+        "pose_changed": 60,
+        "missed_camera_counts": {
+          "True": 4
+        }
+      }
+    ],
+    "input_admission": {
+      "expired": 0,
+      "old_epoch": 0,
+      "maximum_age_us": 50000,
+      "stages": [
+        {
+          "stage": 0,
+          "accepted": 5268,
+          "clock": 0,
+          "frame": 0,
+          "bad_frame": 0,
+          "age": 0,
+          "closed": 0
+        },
+        {
+          "stage": 1,
+          "accepted": 5258,
+          "clock": 0,
+          "frame": 0,
+          "bad_frame": 0,
+          "age": 0,
+          "closed": 0
+        }
+      ],
+      "policy": "Actual compositor closed-scene watermark,current/adjacent frame,50ms age guard"
+    },
+    "native_unqualified": 4,
+    "delivery_stages": {
+      "lookup_header": 0,
+      "lookup_packet": 0,
+      "lookup_identity": 0,
+      "decode": 0,
+      "projection": 33
+    },
+    "last_source_audit_seconds": 49.35725620004814
+  }
+}

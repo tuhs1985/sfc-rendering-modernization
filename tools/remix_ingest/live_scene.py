@@ -49,15 +49,17 @@ class SceneChannel(Channel):
         ctypes.c_uint32.from_address(self.view+260+index*64).value=generation
 
 
-def decode_mesh(packet,references):
+def decode_mesh(packet,references,*,checksum=None):
     if not 256<=len(packet)<=STRIDE or len(references)>256*1024:raise ValueError('Packet byte bound')
     h=struct.unpack_from('<64I',packet);nv,np,nc,ng=h[16:20]
     if h[:2]!=(0x314d4653,1) or h[2]!=len(packet):raise ValueError('Mesh header')
     if not h[4] or h[13]!=0x0042E55D or any(h[24:27]):raise ValueError('Unsupported semantic origin/math dispatch')
     if not(1<=nv<=65536 and 1<=np<=8192 and np*3==nc<=32768 and 1<=ng<=256):raise ValueError('Mesh count/triangles')
     if len(packet)!=256+nv*12+np*36+nc*28+ng*40:raise ValueError('Mesh length')
-    value=2166136261
-    for i,byte in enumerate(packet):value=((value^(0 if 12<=i<16 else byte))*16777619)&0xffffffff
+    if checksum is None:
+        value=2166136261
+        for i,byte in enumerate(packet):value=((value^(0 if 12<=i<16 else byte))*16777619)&0xffffffff
+    else:value=checksum(packet)
     if value!=h[3]:raise ValueError('Mesh checksum')
     points=[struct.unpack_from('<3f',packet,256+i*12) for i in range(nv)]
     if not all(math.isfinite(x) for p in points for x in p):raise ValueError('Nonfinite positions')

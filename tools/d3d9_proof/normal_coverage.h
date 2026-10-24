@@ -1,4 +1,5 @@
-// Backend-only coverage for an isolated ONE-owner ordinary D3D9 scene.
+// Backend-only UNION coverage for the ordinary D3D9 scene. The anchor label is
+// NOT a per-object picking ID when multiple retained ships are drawn.
 // Normal Remix picking0 can be real geometry. Use qualified depth sentinel,
 // never an RGB/background-colour cutout,rectangle or guessed material->owner ID.
 #pragma once
@@ -18,7 +19,7 @@ struct NormalCoverage {
   D3D11_BUFFER_DESC d{};d.ByteWidth=16;d.BindFlags=D3D11_BIND_CONSTANT_BUFFER;check(device->CreateBuffer(&d,nullptr,&constant),"coverage constants");
  }
  bool draw(ID3D11DeviceContext* context,uint32_t owner,uint32_t width,uint32_t height){
-  if(!enabled)return false;require(owner&&output_wire::qualified_extent(width,height),"coverage isolated owner/qualified output required");
+  if(!enabled)return false;require(owner&&output_wire::qualified_extent(width,height),"coverage anchor/qualified output required");
   const uint32_t data[4]={owner,0,0,0};context->ClearState();context->UpdateSubresource(constant.Get(),0,nullptr,data,0,0);
   auto* c=constant.Get();auto* s=depth.Get();auto* r=target.Get();context->VSSetShader(vertex.Get(),nullptr,0);context->PSSetShader(pixel.Get(),nullptr,0);
   context->PSSetShaderResources(0,1,&s);context->PSSetConstantBuffers(0,1,&c);context->OMSetRenderTargets(1,&r,nullptr);

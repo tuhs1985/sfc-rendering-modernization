@@ -6,6 +6,7 @@
 #include "owner_rebind.h"
 #include "input_admission.h"
 #include "multi_scene_wire.h"
+#include "run_lifetime.h"
 struct LiveOwnerInput {
  sfc_calibration::Reader source;live_owner::Store* store=nullptr;uint64_t last=0,started=0;DWORD invalid=0,replaced=0,received=0,unqualified=0;
  DWORD owner=0,revision=0,model=0,meshSource=0;uint64_t limit=90000;
@@ -52,7 +53,7 @@ struct LiveOwnerInput {
  }
  bool next(const Scene& scene,Frame& out,live_owner::Packet& packet){
   next_enter=ticks();validation_ticks=sleep_ticks=empty_polls=0;
-  while(store&&!frame_ingress::state(&store->header.stopped)&&GetTickCount64()-started<limit){
+  while(store&&!frame_ingress::state(&store->header.stopped)&&run_lifetime::within_window(GetTickCount64(),started,limit)){
    if(idleWork)idleWork(idleContext); // Admit new assets even if the old scheduling anchor retired.
    rebind();
    if(live_owner::take(store->input,store->header,packet,last,invalid)){

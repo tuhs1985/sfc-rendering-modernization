@@ -2,10 +2,42 @@
 #define NOMINMAX
 #include "../tools/d3d9_proof/multi_scene_wire.h"
 #include "../tools/d3d9_proof/input_admission.h"
+#include "../tools/d3d9_proof/run_lifetime.h"
 #include <memory>
 #include <iostream>
 int main(){
  unsigned checks=0;auto test=[&](bool okay){++checks;if(!okay){std::cerr<<"Multi-scene FAIL "<<checks<<'\n';ExitProcess(1);}};
+ // Fake elapsed time, not sleeps: exercise the production loop/window policy
+ // past 6,000 attempts even when every attempted output is omitted.
+ for(uint64_t rate:{60ull,120ull,240ull,1000ull}){
+  for(bool omitAll:{false,true}){
+   size_t attempts=0,outputs=0;
+   while(run_lifetime::iteration(true,attempts,1)&&
+         run_lifetime::within_window(1000+uint64_t(attempts)*1000/rate,1000,110000)){
+    if(!omitAll&&attempts%3)++outputs; // Other iterations skip, as rejected work does.
+    ++attempts;
+   }
+   test(attempts==rate*110);test(attempts>6001);
+   test(omitAll?outputs==0:outputs>0);
+  }
+ }
+ // Preserve the 90s legacy/110s game-output window and exact deadline edge.
+ for(uint64_t limit:{90000ull,110000ull}){
+  test(run_lifetime::within_window(1234,1234,limit));
+  test(run_lifetime::within_window(1234+limit-1,1234,limit));
+  test(!run_lifetime::within_window(1234+limit,1234,limit));
+  test(!run_lifetime::within_window(1234+limit+1,1234,limit));
+ }
+ // Source-stop remains independent of elapsed time and iteration count.
+ {size_t attempts=0;bool stopped=false;
+  while(run_lifetime::iteration(true,attempts,0)&&!stopped&&run_lifetime::within_window(attempts,0,110000)){
+   ++attempts;if(attempts==8000)stopped=true;
+  }test(stopped&&attempts==8000);
+ }
+ for(size_t replayFrames:{size_t(0),size_t(1),size_t(60),size_t(300),size_t(301)}){
+  size_t attempts=0;while(run_lifetime::iteration(false,attempts,replayFrames))++attempts;
+  test(attempts==replayFrames);test(!run_lifetime::iteration(false,attempts,replayFrames));
+ }
  const DWORD session[]{1,2,3,4};auto store=std::make_unique<multi_scene::Store>();auto& h=store->header;
  h.bytes=sizeof(*store);h.pid=GetCurrentProcessId();memcpy(h.session,session,16);
  test(sizeof(*store)==107072);test(sizeof(multi_scene::FrameSlot)==12352);test(sizeof(multi_scene::AssetSlot)==128);

@@ -1,0 +1,60 @@
+{
+  "scope": "Isolated offline stock runtime qualification; not SFC game or replacement PASS",
+  "decision": "PARTIAL: output/transport compatible; material-policy equivalence unresolved; not promoted",
+  "dependency": {
+    "release": "remix-1.6.1",
+    "archive": "rtx-remix-for-x64-games-release-remix-1.6.1.zip",
+    "url": "https://github.com/NVIDIAGameWorks/rtx-remix/releases/download/remix-1.6.1/rtx-remix-for-x64-games-release-remix-1.6.1.zip",
+    "archive_bytes": 557087446,
+    "archive_sha256": "7dd1d44492a609050e44b0e3581cec31135d1ed88b4a91123b4faae91955716a",
+    "release_source_gitlink": "0a6cd5b1ee814ec390c358e0c9c32ece8895ddc0",
+    "binary_reported_build": "remix-main+5a7eec84",
+    "source_binary_caveat": "Release submodule pins header/source authority, not an independent attestation of the packaged DLL build commit",
+    "header_api": "0.6.5",
+    "header_sha256": "26a5607a07e8718298c35519e53bbc71d526186a947e5a2a5b613a0d6db04f3a",
+    "runtime_file": "runtime/d3d9_x64.dll",
+    "runtime_sha256": "c05c552e3f44597960891eff6c8482efcbde8573b15c2b900d3dc360e6cc1ad9",
+    "expanded_files": 192,
+    "expanded_bytes": 1195949692,
+    "location": "artifacts/remix-runtime/deps/candidate-1.6.1",
+    "production_runtime_unchanged": "remix-1.5.2"
+  },
+  "environment": {"gpu": "RTX 4070 Ti", "driver": "621.01"},
+  "cases": [
+    {"folder": "20261024-162734-744847-return-fixture", "runtime": "1.6.1", "case": "initial", "discovery_to_first_matched_seconds": 19.4430073, "activation_to_first_matched_seconds": 16.7342369, "steady_draws_per_600": 594},
+    {"folder": "20261024-162844-899263-return-fixture", "runtime": "1.6.1", "case": "late asset", "discovery_to_first_matched_seconds": 3.0357646, "activation_to_first_matched_seconds": 1.0937632, "steady_draws_per_600": 596, "consecutive_without_ship_records_in_5s_after_late_publication": 1},
+    {"folder": "20261024-163311-033444-return-fixture", "runtime": "1.5.2", "case": "late asset control", "discovery_to_first_matched_seconds": 4.522715, "activation_to_first_matched_seconds": 2.6174484, "steady_draws_per_600": 595, "consecutive_without_ship_records_in_5s_after_late_publication": 82},
+    {"folder": "20261024-163513-020996-return-fixture", "runtime": "1.6.1", "case": "initial repeat", "discovery_to_first_matched_seconds": 3.1037394, "steady_draws_per_600": 594},
+    {"folder": "20261024-163849-680806-return-fixture", "runtime": "1.5.2", "case": "normal Test regression", "steady_draws_per_600": 594},
+    {"folder": "20261024-164252-930244-return-fixture", "runtime": "1.6.1", "case": "intentional empty material library", "steady_draws_per_600": 593},
+    {"folder": "20261024-164453-663570-return-fixture", "runtime": "1.6.1", "case": "replacement-enable at device startup", "steady_draws_per_600": 594},
+    {"folder": "20261024-164750-431954-return-fixture", "runtime": "1.6.1", "case": "equivalent flat material library", "steady_draws_per_600": 596},
+    {"folder": "20261024-164956-518231-return-fixture", "runtime": "1.5.2", "case": "final-source normal Test regression", "steady_draws_per_600": 592, "normal_qualification_refreshed": true}
+  ],
+  "comparison": {
+    "initial_and_matched_late_cases_generated_image_hash_multisets_equal": true,
+    "generated_files_per_completed_case": 432,
+    "frozen_image_quality_configs_equal": true,
+    "late_ship_region_pixels": 31314,
+    "rgb_mean_absolute_difference_0_to_255": {
+      "candidate_vs_152": 22.645504673096166,
+      "candidate_vs_intentionally_empty_library": 0.05778033254561325,
+      "candidate_vs_enabled_at_startup": 0.06290051308254029,
+      "candidate_vs_flat_library": 0.05904707159736859
+    },
+    "interpretation": "Strong evidence current candidate material library has no observable intended effect; exact binding failure not proven. Fast geometry/return is not equivalent-material speedup. First startup outlier unexplained; not a cold-cache benchmark."
+  },
+  "excluded_partial_cases": [
+    {"folder": "20261024-163008-484211-return-fixture", "reason": "20GB asset reservation refused owner; not performance evidence"},
+    {"folder": "20261024-163602-483214-return-fixture", "reason": "20GB asset reservation refused owner; not performance evidence"}
+  ],
+  "safeguards": {
+    "candidate_can_never_qualify_production": true,
+    "fixture_upfront_reservation_mib": {"multi_ship_resources": 1024, "multi_ship": 768, "other_additive": 192},
+    "aggregate_limit_bytes_unchanged": 20000000000,
+    "no_vendor_patch_or_appearance_tuning": true,
+    "final_governed_evidence_bytes": 18774010065,
+    "python_tests_passed": 495,
+    "normal_performance_and_test_preflights": "PASS"
+  }
+}
