@@ -1,0 +1,397 @@
+{
+  "run": 174,
+  "probe": "EARLY-MODEL-AVAILABILITY-001",
+  "result": "STATIC_EARLY_IDENTITY_AND_POST_LOAD_CANDIDATES_CONFIRMED_RUNTIME_TIMING_PARTIAL",
+  "client_sha256": "4D65761D7DD69EF1504070261B81E9C200C0AF18105033E1C4D2222C62320C29",
+  "disassembly_sha256": "7DA8983A07628A67BF475BC5A27B273FC7A2C4E6C7F9F96578DC13AC4DFF4115",
+  "full_report_path": "artifacts/render-survey/early-model-path-20261025-final.json",
+  "full_report_sha256": "7D56C358225860106DE7FE43F74DF79ABDE1737A11546704A2E78C82CA6643AD",
+  "instruction_count": 2196,
+  "checked_anchors": [
+    {
+      "address": "0x004097BE",
+      "opcode": "call",
+      "operand": "004146A7"
+    },
+    {
+      "address": "0x004097F5",
+      "opcode": "mov",
+      "operand": "esi,dword ptr [ebp+8]"
+    },
+    {
+      "address": "0x0040A54C",
+      "opcode": "cmp",
+      "operand": "byte ptr [ebp+10h],0"
+    },
+    {
+      "address": "0x0040A550",
+      "opcode": "je",
+      "operand": "0040A562"
+    },
+    {
+      "address": "0x0040A555",
+      "opcode": "lea",
+      "operand": "eax,[esi+38h]"
+    },
+    {
+      "address": "0x0040A55B",
+      "opcode": "call",
+      "operand": "004156F9"
+    },
+    {
+      "address": "0x0041574E",
+      "opcode": "call",
+      "operand": "0042F39A"
+    },
+    {
+      "address": "0x00415757",
+      "opcode": "call",
+      "operand": "00413A8D"
+    },
+    {
+      "address": "0x00413A96",
+      "opcode": "mov",
+      "operand": "dword ptr [esi+00000088h],ecx"
+    },
+    {
+      "address": "0x0041579D",
+      "opcode": "call",
+      "operand": "0042F39A"
+    },
+    {
+      "address": "0x0042F3D7",
+      "opcode": "call",
+      "operand": "004304E4"
+    },
+    {
+      "address": "0x004304E8",
+      "opcode": "call",
+      "operand": "0042F51A"
+    },
+    {
+      "address": "0x0042F543",
+      "opcode": "mov",
+      "operand": "esi,dword ptr ds:[008F5974h]"
+    },
+    {
+      "address": "0x0042F552",
+      "opcode": "call",
+      "operand": "dword ptr [eax+10h]"
+    },
+    {
+      "address": "0x00435632",
+      "opcode": "lea",
+      "operand": "eax,[ecx+14h]"
+    },
+    {
+      "address": "0x0042F556",
+      "opcode": "call",
+      "operand": "007383A0"
+    },
+    {
+      "address": "0x0042F56A",
+      "opcode": "call",
+      "operand": "dword ptr [eax+8]"
+    },
+    {
+      "address": "0x0042F56D",
+      "opcode": "mov",
+      "operand": "eax,esi"
+    },
+    {
+      "address": "0x0042F5C3",
+      "opcode": "call",
+      "operand": "0042F858"
+    },
+    {
+      "address": "0x0042F877",
+      "opcode": "mov",
+      "operand": "dword ptr ds:[008F5974h],eax"
+    },
+    {
+      "address": "0x0042F8CA",
+      "opcode": "mov",
+      "operand": "dword ptr [eax+00000154h],edx"
+    },
+    {
+      "address": "0x0042F8D0",
+      "opcode": "mov",
+      "operand": "dword ptr [eax+00000158h],edx"
+    },
+    {
+      "address": "0x0042F5D7",
+      "opcode": "call",
+      "operand": "0042FEF9"
+    },
+    {
+      "address": "0x0042F5DC",
+      "opcode": "test",
+      "operand": "al,al"
+    },
+    {
+      "address": "0x0042F5DE",
+      "opcode": "jne",
+      "operand": "0042F5F9"
+    },
+    {
+      "address": "0x0042F5E6",
+      "opcode": "call",
+      "operand": "dword ptr [eax]"
+    },
+    {
+      "address": "0x004300D7",
+      "opcode": "call",
+      "operand": "004301E9"
+    },
+    {
+      "address": "0x004300E7",
+      "opcode": "call",
+      "operand": "004301BD"
+    },
+    {
+      "address": "0x0043010E",
+      "opcode": "call",
+      "operand": "0042F121"
+    },
+    {
+      "address": "0x00430113",
+      "opcode": "mov",
+      "operand": "dword ptr [esi+ebx*4+00000160h],eax"
+    },
+    {
+      "address": "0x0042F165",
+      "opcode": "call",
+      "operand": "dword ptr [eax+4]"
+    },
+    {
+      "address": "0x0042E2B0",
+      "opcode": "mov",
+      "operand": "dword ptr [edi+0Ch],eax"
+    },
+    {
+      "address": "0x0042E2C6",
+      "opcode": "mov",
+      "operand": "dword ptr [edi+14h],eax"
+    },
+    {
+      "address": "0x0042E49E",
+      "opcode": "mov",
+      "operand": "al,1"
+    },
+    {
+      "address": "0x0043014D",
+      "opcode": "call",
+      "operand": "007364C0"
+    },
+    {
+      "address": "0x00430156",
+      "opcode": "call",
+      "operand": "00430367"
+    },
+    {
+      "address": "0x0043015B",
+      "opcode": "mov",
+      "operand": "al,1"
+    },
+    {
+      "address": "0x0042F62F",
+      "opcode": "call",
+      "operand": "0042F806"
+    },
+    {
+      "address": "0x0042F641",
+      "opcode": "call",
+      "operand": "0042F756"
+    },
+    {
+      "address": "0x0042F647",
+      "opcode": "mov",
+      "operand": "dword ptr [esi+14h],eax"
+    },
+    {
+      "address": "0x0042F65F",
+      "opcode": "test",
+      "operand": "byte ptr [esi],20h"
+    },
+    {
+      "address": "0x0042F685",
+      "opcode": "call",
+      "operand": "0042F756"
+    },
+    {
+      "address": "0x0042F68B",
+      "opcode": "mov",
+      "operand": "dword ptr [esi+1Ch],eax"
+    },
+    {
+      "address": "0x0042F7EE",
+      "opcode": "call",
+      "operand": "dword ptr [eax+8]"
+    },
+    {
+      "address": "0x0042F74C",
+      "opcode": "call",
+      "operand": "dword ptr [eax+38h]"
+    },
+    {
+      "address": "0x0042FC03",
+      "opcode": "call",
+      "operand": "dword ptr [eax+14h]"
+    },
+    {
+      "address": "0x0042E689",
+      "opcode": "mov",
+      "operand": "dword ptr [esi+0Ch],eax"
+    },
+    {
+      "address": "0x0042E68C",
+      "opcode": "mov",
+      "operand": "dword ptr [esi+20h],ecx"
+    },
+    {
+      "address": "0x0042F74F",
+      "opcode": "mov",
+      "operand": "eax,edi"
+    }
+  ],
+  "checked_vtable_targets": [
+    {
+      "address": "0x007985B4",
+      "target": "0x00435632"
+    },
+    {
+      "address": "0x007985AC",
+      "target": "0x0042F2E6"
+    },
+    {
+      "address": "0x007985DC",
+      "target": "0x0042FBD4"
+    },
+    {
+      "address": "0x007983EC",
+      "target": "0x0042E26B"
+    },
+    {
+      "address": "0x007983FC",
+      "target": "0x0042E650"
+    }
+  ],
+  "direct_factory_call_sites": [
+    "0x00410865",
+    "0x00410AA3",
+    "0x00410C7B",
+    "0x0041161F",
+    "0x0041293B",
+    "0x0041574E",
+    "0x0041579D",
+    "0x0041C840",
+    "0x004ABB30",
+    "0x004ABB48",
+    "0x004ABB60",
+    "0x004ABB78",
+    "0x004ABB90",
+    "0x004ABBA8",
+    "0x004ABBC0",
+    "0x004ABBD8",
+    "0x004ABBF0",
+    "0x004ABC08",
+    "0x004ABC20",
+    "0x004EF0E2",
+    "0x00509A53",
+    "0x0052E6E5",
+    "0x0052E6FD",
+    "0x0052E715",
+    "0x0052E72D",
+    "0x0052E745",
+    "0x0052E75D",
+    "0x0052E775",
+    "0x0052E78D",
+    "0x0052E7A9",
+    "0x0052E7C3",
+    "0x0052E7DB",
+    "0x0052E7F3",
+    "0x0052E80F",
+    "0x0052E829",
+    "0x0052E841",
+    "0x0052E859",
+    "0x0052E871",
+    "0x0052E88D",
+    "0x0052E8A7",
+    "0x0052E8BF",
+    "0x0052E8DB",
+    "0x0052E915",
+    "0x0052E92D",
+    "0x0052E945",
+    "0x0052E961",
+    "0x0052E97B",
+    "0x0052E993",
+    "0x0052E9AB",
+    "0x0052E9C5",
+    "0x0052E9DD",
+    "0x0052E9F5"
+  ],
+  "existing_traces": [
+    {
+      "path": "artifacts/pre-m0/runs/20260904-100033/M0-RT-001.csv",
+      "sha256": "84FB7E16BB05214306153527B6250A9C632611E441C5DA3959221E6816549A84",
+      "events": {
+        "model_parse": {
+          "count": 17,
+          "first_ms": 14828,
+          "last_ms": 15766
+        },
+        "draw_indexed_call": {
+          "count": 1000,
+          "first_ms": 15250,
+          "last_ms": 16328
+        }
+      },
+      "interpretation": "Parser ENTRY precedes some generic drawing; no named asset, parser completion, tactical gate or reliable free-preparation interval measured. Breakpoint instrumentation affects timing."
+    },
+    {
+      "path": "artifacts/pre-m0/runs/20260904-100901/M0-RT-001.csv",
+      "sha256": "90A805E18A0DC4C53C6175BC218D4BD7036D30EC1391F2DCF807C0DDE4CB79B1",
+      "events": {
+        "model_parse": {
+          "count": 16,
+          "first_ms": 11391,
+          "last_ms": 11735
+        },
+        "geometry_submit": {
+          "count": 1500,
+          "first_ms": 11563,
+          "last_ms": 12094
+        },
+        "draw_indexed_call": {
+          "count": 1000,
+          "first_ms": 11563,
+          "last_ms": 12547
+        }
+      },
+      "interpretation": "Parser ENTRY precedes some generic drawing; no named asset, parser completion, tactical gate or reliable free-preparation interval measured. Breakpoint instrumentation affects timing."
+    }
+  ],
+  "conclusions": {
+    "early_filename": "CONFIRMED: ship creation path passes definition+38 to004156F9, then0042F39A",
+    "parse_before_draw": "CONFIRMED code order; historical parser entry samples also precede generic draws",
+    "safe_candidate": "AFTER0042F51A returns nonzero, post texture acquisition and optional geometry scale; structurally qualify and join owner attachment",
+    "cache_warning": "0042F858 publishes into008F5974 BEFORE initialization/parser; presence is not completion",
+    "timing": "UNPROVED: no contemporary named-asset readiness-to-first-visible interval",
+    "roster": "UNPROVED: no complete mission roster/preselection notification recovered"
+  },
+  "limits": {
+    "output_bytes": 262144,
+    "selected_instructions": 4096,
+    "factory_calls": 128,
+    "trace_bytes": 8388608,
+    "trace_rows": 100000
+  },
+  "exclusions": [
+    "No runtime hook/ABI qualification",
+    "No game/renderer launch",
+    "No geometry/image payload or asset-file extraction",
+    "No changes to normal loading/capture/backend",
+    "No new performance claim"
+  ],
+  "next_action": "Implement/offline-qualify separately defined metadata-only pre-load timing observer; no geometry export/runtime launch yet."
+}

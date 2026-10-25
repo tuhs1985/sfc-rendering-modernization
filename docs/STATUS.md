@@ -1,7 +1,7 @@
 ---
 title: SFC Modernization — Status Tracker
 updated: 2026-10-25
-checkpoint: Run173 offline rendering inventory complete
+checkpoint: Run177 native model loading measured; downstream delay remains
 tags:
   - sfc-modernization
   - project-status
@@ -12,9 +12,9 @@ tags:
 > [!summary] Where we are
 > We can take live ships, textures, camera and lighting information from SFC, render through Remix, and put the result inside the game window. Original drawing remains intact. The API experiment is now parked. Current work surveys the game's other rendering behaviors without copying ship geometry or texture images.
 
-**Next action:** finish the exact texture-region and drawing rules for phasers/plasma, then propose the smallest effects-interface extension. The executable inventory is complete: no new game run needed yet. API remains parked.
+**Next action:** focus on our delivery and Remix preparation delay using existing captured assets and timing evidence. SFC prepared the FCA in about91ms and KFF in14ms; starting earlier provides only a small head start, not a solution to several seconds of delay. No further native discovery run needed. API remains parked.
 
-This is a readable project tracker, not execution authority. The repository handoff, approved decisions and run records control implementation. Updated through **Run173, October 25, 2026 (America/New_York)**. Status describes recorded evidence, not work currently running.
+This is a readable project tracker, not execution authority. The repository handoff, approved decisions and run records control implementation. Updated through **Run177, October 25, 2026 (America/New_York)**. Status describes recorded evidence, not work currently running.
 
 ## Status key
 
@@ -67,10 +67,16 @@ Evidence: [Run164](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-24-codex-a
 
 **OPEN — target not met.**
 
+- **Sponsor priority:** make the complete scene fast first. If necessary, show the correct normally textured ship promptly and apply enhanced materials afterward, rather than leave it absent. This is an allowed fallback, not the primary performance fix or a claim that complete loading meets the target. [Decision](<C:/Project/SFC-Modernize Engine/docs/decisions/2026-10-25-progressive-material-readiness-priority.md>).
+- **New earlier-data route:** traced ship creation to its model-name request, shared native cache, geometry/texture preparation and owner attachment. Native cache presence alone is unsafe: objects enter it before loading is complete. The best candidate is after the full loader returns, including optional scaling. We have not changed the rendering pipeline or measured a new speedup. Gameplay timing is next, before early capture. [Findings](<C:/Project/SFC-Modernize Engine/docs/reconnaissance/early-model-availability.md>).
+- **Observer ready:** 58 native checks and the actual startup-loaded standalone fixture passed; four complete named model-to-owner timing chains, zero lost records, clean restoration and unchanged files. Ready for one normal gameplay measurement, not proof of faster loading. [Instructions and limits](<C:/Project/SFC-Modernize Engine/tools/early_model_probe/README.md>).
+- **Launcher fix:** the first attempt stopped because our launcher read its status incorrectly—not because of SFC or its models. Fixed and requalified; the standalone test now exercises that same startup check. Retry the same command. [Run176](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-25-codex-early-model-launcher-fix.md>).
+- **Actual timing result:** clean90second capture,94records/about47KiB. FCA native preparation91ms, KFF14ms; complete data leads their first recorded drawing by117ms/14ms. Normal game behavior confirmed; hooks restored and files unchanged. This supports focusing on our downstream delivery/material-readiness work, not finding more native loading time. Earlier metadata is useful, but no speedup implemented. [Run177](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-25-codex-early-model-timing-result.md>).
+
 - Latest complete API ship set reached GPU output in **4.22–4.24 seconds** from first captured discovery. Earlier accepted D3D9 reference: **5.17 seconds**.
 - The faster D3D9 experiment (~2.58 seconds) was not accepted: enhanced materials were missing in its first image.
 - File-based material delivery and first-use work are confirmed concerns, but no single cause accounts for every millisecond. Moving to the API does not eliminate all startup costs.
-- **Next:** establish correct API camera/appearance before comparing quality-equivalent startup timings. Then address the measured remaining delay, using NVIDIA's supported mechanisms.
+- **API restart action (parked):** establish correct API camera/appearance before comparing quality-equivalent startup timings. Current investigation is the earlier native model-loading route above, independent of backend choice.
 - Do not mark complete merely because a model, material handle or texture upload was accepted.
 
 Evidence: [Run163](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-24-codex-initial-material-readiness.md>), [Run164](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-24-codex-api-scene-proof.md>).

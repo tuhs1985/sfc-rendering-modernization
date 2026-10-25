@@ -1,0 +1,90 @@
+{
+  "run": 175,
+  "probe": "EARLY-MODEL-AVAILABILITY-001",
+  "result": "READY_FOR_SPONSOR_RUNTIME_TEST",
+  "gameplay_executed": false,
+  "qualification": "ACTUAL_INJECTED_EARLY_MODEL_TIMING_AND_RESTORATION_PASS",
+  "qualification_path": "artifacts/render-survey/early-model-probe/qualification.json",
+  "qualification_sha256": "5AD9CB679854BF1495397C0D35E0B5FB952C90A4541D9142BAFA5A3B7852BBE7",
+  "source_and_binary_locks": {
+    "tools/early_model_probe/build.ps1": "302E7BAA956C5E6AADB44366FFCAF2314DDF5DEC50C8473CEF4E79ED2A8EFC19",
+    "tools/early_model_probe/capture.py": "B29BDEBCD8C543A200D239474D0E4BD0365FA212F91D368963C29DA20E33442D",
+    "tools/early_model_probe/early_component.cpp": "C12B8A69D7B50534E0C71421C9A88167B145CF9193C5EDF782CB6A397261BE2C",
+    "tools/early_model_probe/early_core.h": "03D64F8E96EEFD50668DAA9FFE2B8357DBC6BE5CAC8AF45574014FB392DDF542",
+    "tools/early_model_probe/early_native.h": "5C687987372DB7F609603DF1BD3F6EAD4430153AFFD7780407C52EF9D67E15F9",
+    "tools/early_model_probe/early_runtime.h": "80DCA180B4424F11176F116EF4D912C93AD8D19B1A7AAF42ADF28AD93670B86D",
+    "tools/early_model_probe/native_tests.cpp": "62F1C28F80A080E9BDD9340A26D9D901EB00BCE7E77A5247AED04F2432BDB8DE",
+    "tools/early_model_probe/run_probe.py": "081B6E7BAF3D844F9047694C5035D30195E76682A4FAB691E692696E7665FD79",
+    "tools/early_model_probe/start_early_model_session.ps1": "1E32F74B411BCD4F011EF5A408BFA9A30E0B8AA225C81D60424C50F6C204E72B",
+    "tools/early_model_probe/tests/test_capture.py": "43C64650C57448C290B9956BDEF8BF6124679000E3700AA54940BF6ADECFEBAF",
+    "artifacts/render-survey/early-model-probe/bin/early_component.dll": "54C9D3DA99ECE0FA8FBFD2A076C62B489C3C2DF5B8949E3AA8F6F8F50DDFC798",
+    "artifacts/render-survey/early-model-probe/bin/early_native_tests.exe": "D2C78F3A3065F06AED7CE3924A2822D0A2662F7952BFFBB2202E0E5FD40783FE",
+    "tools/remix_runtime/return_wire.h": "4BC91D1164886D9C4EA6F86116DED779F096707988938F8EDFAD28CF83B5A545",
+    "tools/remix_runtime/return_channel.py": "0402D362167DBB37070376F9B4DB17277923601BDF37035DB62D0347AB949A04",
+    "tools/remix_runtime/run_return_game.py": "A53F68EF13DE0F68BA4A357979AC6E69DE6CFB95DA91D97B0243A98F4C7D052D",
+    "artifacts/remix-runtime/return-bin/return_launcher.exe": "CA7439C915E0654954D6670564531C200836AC12AB6ABFCB6268AD1FD57271A1",
+    "artifacts/remix-runtime/return-bin/return_host.exe": "C8E0360CBB55699CAD67183DCF9024D9ED0E613198B7C1636AB977CB5801348F",
+    "artifacts/remix-runtime/deps/detours/Detours-e4bfd6b03e50de46b47abfbd1e46b384f0c5f833/include/detours.h": "7B498657D8DB4CFF2D488B1E65CFEEB5B1305DE7F32D23588B1FA86AAA46FCF7",
+    "artifacts/remix-runtime/deps/detours/Detours-e4bfd6b03e50de46b47abfbd1e46b384f0c5f833/lib.X86/detours.lib": "D8C69C654A82C06A2076539C5436E1673DEC0C42704168FE65E72C90274DA21C"
+  },
+  "native": {
+    "path": "artifacts\\render-survey\\early-model-probe\\offline-20261025-164255-763013",
+    "checks": 58,
+    "expected_drops": 2954,
+    "negative_control_issues": {
+      "flagged_metadata": 4,
+      "original_exception_observed": 3,
+      "unfinished_scope": 1,
+      "record_loss": 2954
+    },
+    "restoration_footer": [
+      {
+        "error": 0,
+        "active": 0,
+        "restored": 9,
+        "hooked": 0
+      }
+    ],
+    "log_sha256": "6A6A89F46933DD284791EB53AB4D938CF6B93B44328F871997C52E2E87293298",
+    "trace_sha256": "968CA79B0A974F4D3CC6813BC394839327C1A7D06D5AE11535B0A505DDA7301B"
+  },
+  "fixture": "artifacts\\remix-runtime\\runs\\early-20261025-164257-830193",
+  "fixture_result_sha256": "AFED28C00203C923C6BA16CD867514EB93EBFE6C5475965D23FED9488CAB249A",
+  "fixture_trace_sha256": "806078DA6C41324BE536E7EC178DC55DB9CF35F963BAA309A32FC59F9BAD7C03",
+  "records": 46,
+  "bytes": 23680,
+  "joins": 4,
+  "issues": {},
+  "stopped": [
+    {
+      "error": 0,
+      "active": 0,
+      "restored": 9,
+      "hooked": 0
+    }
+  ],
+  "native_statistics": [
+    {
+      "faults": 0,
+      "busy": 0,
+      "uncertain": 0,
+      "owner_epochs": 2,
+      "asset_epochs": 3,
+      "scoped_ticks_including_original_calls": 443
+    }
+  ],
+  "accepted_unchanged": true,
+  "copied_unchanged": true,
+  "launcher_unchanged": true,
+  "normal_exit": true,
+  "host_exit": 0,
+  "limitations": [
+    "Native readiness,not Remix/GPU readiness or speedup",
+    "First selected-child entry,not a proven visible pixel",
+    "Resource IDs are same-session metadata;only first8pairs sampled",
+    "No geometry or texture image payload",
+    "Startup worker coverage begins after ready,not guaranteed process-entry coverage",
+    "Scoped ticks include original calls and nested time;not observer overhead"
+  ],
+  "next_action": "Sponsor prepared metadata-only multi-ship run;no extra Remix ship expected;review actual native timing before early asset capture."
+}
