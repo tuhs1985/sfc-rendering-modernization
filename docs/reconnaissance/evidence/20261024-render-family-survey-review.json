@@ -1,0 +1,81 @@
+{
+  "run": 166,
+  "probe": "RENDER-FAMILY-SURVEY-001",
+  "date_local": "2026-10-24",
+  "disposition": "PARTIAL_CLASSIFICATION_USEFUL_EVIDENCE",
+  "sponsor_report": "two runs, second one i blew up the enemy before time ran out",
+  "sponsor_destruction_timestamp": null,
+  "sponsor_visible_regression_assessment": "not supplied in latest report",
+  "api_experiment": "PARKED",
+  "captures": [
+    {
+      "path": "artifacts/remix-runtime/runs/20261025-031353-637016-in-game",
+      "sha256": "6B342AA7A05BB51195E5C7F62B9795FD7AA94960B2F77FC3882CBEBEE7CE5548",
+      "bytes": 268435456,
+      "records": 2097151,
+      "dropped": 195,
+      "retained_tactical_seconds": 85.3618155,
+      "raw_reassembled_sfc_stacks": 9868,
+      "sfc_call_chains": 20,
+      "coarse_state_families": 15,
+      "fine_grained_first_pass_families": 243,
+      "late_additive_depth_tested_nonwriting_lines": {"draws": 61, "first_seconds": 72.92, "last_seconds": 73.91},
+      "derived": "render-families.review.json",
+      "derived_bytes": 503336
+    },
+    {
+      "path": "artifacts/remix-runtime/runs/20261025-031610-737979-in-game",
+      "sha256": "A99A68EA6D82C04EDB653916A796775A98A11C439F2ADAEC5776646010EA218C",
+      "bytes": 268435456,
+      "records": 2097151,
+      "dropped": 323,
+      "retained_tactical_seconds": 85.2026629,
+      "raw_reassembled_sfc_stacks": 9839,
+      "completed_interval_origin_stats": 9838,
+      "sfc_call_chains": 21,
+      "coarse_state_families": 12,
+      "fine_grained_first_pass_families": 267,
+      "late_additive_depth_tested_nonwriting_lines": {"draws": 817, "first_seconds": 73.79, "last_seconds": 85.19},
+      "derived": "render-families.review.json",
+      "derived_bytes": 503493
+    }
+  ],
+  "both_captures": {
+    "normal_game_exit": true,
+    "gate_clean_unloaded": true,
+    "controller_exit": 0,
+    "observer_host_exit": 0,
+    "original_critical_unchanged": true,
+    "launcher_settings_unchanged": true,
+    "copied_proxy_restored": true,
+    "copied_critical_matches_baseline": true,
+    "final_report_complete": true,
+    "reason": "hard byte cap",
+    "incomplete_origins": 0,
+    "geometry_image_shader_constant_payloads": false,
+    "normal_rendering_suppressed": false
+  },
+  "confirmed": [
+    "Opaque and modulation-compatible triangles use separate blend/depth states",
+    "Additive triangles, points and lines have distinct observed depth-write/test variants",
+    "All five captured static blend descriptors per run use add operation",
+    "Native texture/state call stacks often identify queued draw flush contexts, not original producers",
+    "Some four-vertex no-depth strips are observed during native Surface Lock/Flip contexts",
+    "Second-run late line activity has a distinct child-list dispatch chain",
+    "Nearby child-list special-case string is tETrait_DoomsdayMouth, not an explosion class"
+  ],
+  "strong_hypothesis": ["Second-run late line/resource changes include combat/destruction-related transient activity"],
+  "unknown": [
+    "Exact destruction timestamp and whether all destruction activity preceded the byte cap",
+    "Typed effect owners, original producer-to-resource join, filenames and image/frame roles",
+    "Beam endpoints, shield ownership, damage revision and tactical UI construction",
+    "Semantic object lifetime versus cached graphics-resource lifetime"
+  ],
+  "validation": {"new_helper_tests": 4, "survey_parser_tests": 8, "existing_python_tests": 504, "all_pass": true, "survey_preflight": "PASS_READ_ONLY", "normal_performance_preflight": "PASS_READ_ONLY"},
+  "governed_bytes_before_final_docs": 18958021189,
+  "cap_bytes": 20000000000,
+  "next_action": "Offline inspect producer/vtable callers feeding 0x0041043B and 0x004ED080; join one transient producer and resource selection before queue flush. No duplicate broad run or interface implementation yet.",
+  "head": "fd79ce5",
+  "index": "empty",
+  "changes": "unstaged and uncommitted; prior work preserved; no push"
+}

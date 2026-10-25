@@ -1,0 +1,48 @@
+{
+  "probe": "REMIX-API-SCENE-001",
+  "run": 164,
+  "result": "ISOLATED_API_SCENE_DELIVERY_DEMONSTRATED_STARTUP_PARITY_PARTIAL",
+  "runtime": "Remix1.5.2/API0.6.4",
+  "source_commit": "b81a7b566b1eeb9edb4dc2b3c9d3972e0f253ad4",
+  "experimental_host_sha256": "BF8E0118D50DFCA948739C181485E8680C836E933E855CFADE5B0C63CFC52A82",
+  "normal_host_unchanged": true,
+  "sdk_meshes": 3,
+  "sdk_materials": 110,
+  "ordinary_geometry_draws": 0,
+  "usd_publication": false,
+  "owners": 4,
+  "unique_contents": 3,
+  "image_files": 432,
+  "image_hash_multiset_matches_run163": true,
+  "settings_unchanged": true,
+  "controls": [
+    {"run": "20261025-001516-802029-return-fixture", "control": "device_present", "initial_cohort_gpu_s": 4.2172089, "draws_of_600": 594, "owned_exit": 0},
+    {"run": "20261025-001836-570929-return-fixture", "control": "emission_off", "initial_cohort_gpu_s": 4.2281786, "draws_of_600": 594, "owned_exit": 0},
+    {"run": "20261025-002105-217957-return-fixture", "control": "device_present_repeat", "initial_cohort_gpu_s": 4.2435754, "draws_of_600": 592, "owned_exit": 0},
+    {"run": "20261025-002148-667336-return-fixture", "control": "late_asset", "initial_subset_gpu_s": 3.2274712, "draws_of_600": 564, "owned_exit": 0}
+  ],
+  "failed_experiments": [
+    {"run": "20261025-000946-406742-return-fixture", "error": "Live fixture: Owned live GPU workflow failed to retire normally"},
+    {"run": "20261025-001325-195259-return-fixture", "error": "Live fixture: Live GPU cleanup failed", "renderer_exit_hex": "0xC000041D"}
+  ],
+  "first_image_emission_response": {
+    "classification": "CONFIRMED_DIAGNOSTIC_RESPONSE_NOT_ALL_MATERIAL_PARITY",
+    "posthoc_roi": [405, 780, 610, 855],
+    "blue_pixel_predicate": "B>R+35 and B>G+20 and B>80",
+    "first_normal": [422, 429],
+    "first_emission_off": 234,
+    "settled_normal": [441, 440],
+    "settled_emission_off": 322
+  },
+  "validation": {"native_mock_checks": 354747, "python_existing": 504, "python_new": 5, "normal_readonly_preflight": "PASS", "actual_gpu_clean_controls": 4},
+  "limitations": [
+    "API camera placement/scale differs from ordinary intercepted path;projection parity unresolved",
+    "Not sub-two-second startup or physical display timing",
+    "First-image convergence noise;not every map/scalar fully settled",
+    "Late admission omissions remain",
+    "Clean process exit does not resolve existing vendor common-device-object warning",
+    "No SFC/API gameplay launch, replacement suppression or milestone completion"
+  ],
+  "next_action": "Qualify SDK camera/viewport against existing captured projection oracle offline",
+  "repository": {"head": "fd79ce5", "staged": false, "committed": false, "pushed": false}
+}

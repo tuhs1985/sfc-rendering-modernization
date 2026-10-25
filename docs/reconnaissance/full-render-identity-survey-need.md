@@ -1,5 +1,18 @@
 # Full render-identity survey — recorded need
 
+## Current bounded implementation — 2026-10-24 Run165
+
+Sponsor now authorizes broader rendering-family characterization with bulk ship
+geometry/images excluded. [RENDER-FAMILY-SURVEY-001](probes/RENDER-FAMILY-SURVEY-001.md)
+and the [current family map](rendering-family-map.md) define the prepared90second
+metadata-only survey. This addresses initial breadth, not a complete long-mission
+survey or universal family coverage. API experiment parked; normal rendering path
+unchanged. Existing20GB sponsor aggregate supersedes the historical10GB below.
+Do not infer approval to remove the90second/five-minute safeguards or collect
+model/image payloads. Broader/longer mission evidence remains separately bounded.
+
+## Historical backlog definition
+
 2026-10-20: sponsor requested a durable note for a future longer-mission survey.
 Status: backlog / not implemented or scheduled. This does not replace the current
 90-second shadow-timing test or authorize increasing its limits. No CDD change.

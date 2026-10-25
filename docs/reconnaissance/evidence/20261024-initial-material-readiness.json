@@ -1,0 +1,49 @@
+{
+  "probe": "REMIX-INITIAL-READINESS-001",
+  "baseline_commit": "fd79ce5",
+  "normal_runtime": "1.5.2 / API0.6.4",
+  "result": "PARTIAL_NO_FAST_FIRST_MATERIAL_READY_PATH_QUALIFIED",
+  "normal_implementation_changed": false,
+  "normal_host_sha256": "5e59d67ece5c34101c98c7326062c6099dfb4bbe32f6877647347b10ef2b1314",
+  "isolated_host_sha256": "b92e24ceb31843486b79a819f7309ba8c42546b58e01df5a087f97e2cec2f5cd",
+  "isolated_host_source_sha256": "44b66d865798d74f47a5f688d4cba5be047717f0ada2d0d94e39837ef1a804f3",
+  "first_frame_fixture_sha256": "5652986dab618dfb04809fbb63cf6f5a43fec5a7fd96256b3be4ee69639a03f7",
+  "analysis": "artifacts/initial-readiness/analysis.json",
+  "analysis_sha256": "e31e81cba4ecf4a1d9df97e99e6be6291040e1bb6588804c38c804594f12804f",
+  "roi": [150, 700, 1900, 1000],
+  "cases": [
+    {"mode": "reference", "run": "20261024-222711-351784-return-fixture", "discovery_to_first_cohort_gpu_seconds": 5.1703892, "early_window": [600, 595]},
+    {"mode": "single", "run": "20261024-223011-587482-return-fixture", "discovery_to_first_cohort_gpu_seconds": 2.5776, "early_window": [600, 446], "first_mean_rgb_delta_from_reference": 25.7732464685},
+    {"mode": "texture-wait", "run": "20261024-222746-361314-return-fixture", "discovery_to_first_cohort_gpu_seconds": 6.3546278, "early_window": [600, 595], "first_mean_rgb_delta_from_reference": 13.7238633581, "effective_vendor_option": "rtx.alwaysWaitForAsyncTextures=True"},
+    {"mode": "shader-wait", "run": "20261024-222840-243099-return-fixture", "discovery_to_first_cohort_gpu_seconds": 5.1822688, "early_window": [600, 593], "first_mean_rgb_delta_from_reference": 6.7159646153, "effective_vendor_option": "rtx.initializer.asyncShaderFinalizing=False"},
+    {"mode": "single-disabled", "run": "20261024-223041-611477-return-fixture", "discovery_to_first_cohort_gpu_seconds": 2.661, "early_window": [600, 460], "effective_vendor_option": "DXVK_DISABLE_ASSET_REPLACEMENT=1"},
+    {"mode": "initial-library", "run": "20261024-223136-631957-return-fixture", "discovery_to_first_cohort_gpu_seconds": 5.8568, "early_window": [600, 595], "first_mean_rgb_delta_from_reference": 10.4978337006, "effective_vendor_option": "DXVK_ASYNC_ASSET_LOADING=0", "ordering": "Existing deferred-device launch,complete library before initialization;not promoted"}
+  ],
+  "negative_control": {
+    "single_vs_explicit_disabled_first_mean_abs_rgb": 0.2173857503,
+    "single_vs_explicit_disabled_first_pixels_delta_gt3": 16,
+    "single_vs_explicit_disabled_settled_mean_abs_rgb": 22.393744877,
+    "interpretation": "Fast first image effectively matches replacements disabled;later material response is strong. Not merely first-frame lighting noise."
+  },
+  "common_checks": {
+    "owners": 4,
+    "distinct_assets": 3,
+    "acknowledgements": [1, 1, 1, 1],
+    "asset_partials": [],
+    "material_publications": 1,
+    "generated_images_per_run": 432,
+    "generated_image_sha_multisets_equal": true,
+    "visual_settings_hashes_equal": true,
+    "owned_job_exit": 0,
+    "remaining_owned_processes": 0
+  },
+  "limits": {
+    "aggregate_bytes": 20000000000,
+    "final_observed_storage_bytes_before_documentation": 17159051086,
+    "continuous_image_dumps": false,
+    "game_launched": false,
+    "normal_runtime_or_settings_promoted": false
+  },
+  "uncertainty": "GPU-output timing is not physical display latency or a public vendor material-readiness receipt. First-image differences alone do not identify each control's missing stage. No claim the whole delay is the one-second file-watch interval.",
+  "next_decision": "Need a supported dynamic material-consumption/readiness boundary for ordinary D3D9,or explicit approval for an isolated backend material-delivery change. Do not silently switch geometry to SDK submission."
+}

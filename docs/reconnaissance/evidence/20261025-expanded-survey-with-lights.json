@@ -1,0 +1,63 @@
+{
+  "run": 171,
+  "result": "READY_FOR_SPONSOR_RUNTIME_TEST",
+  "scope": "Expanded metadata-only graphics survey, native light setters and global effects list census; no SFC gameplay this preparation",
+  "wire_version": 2,
+  "raw_hard_bytes": 2113929216,
+  "ancillary_bytes": 33554432,
+  "combined_hard_bytes": 2147483648,
+  "aggregate_hard_bytes": 20000000000,
+  "tactical_seconds": 90,
+  "geometry_payload": false,
+  "image_payload": false,
+  "diagnostic_geometry_hook": false,
+  "origin_stride": 8,
+  "origin_budget_per_present": 64,
+  "native_entries": ["0x006A9AB0", "0x006A9C40", "0x006A9C20", "0x004ECFB3"],
+  "native_checks": 119,
+  "ring_checks": 21,
+  "parser_tests": 13,
+  "existing_python_tests": 504,
+  "qualification": "OFFLINE_SURVEY_EVENTS_STATE_CLEANUP_PASS",
+  "component_sha256": "FAF0FC56194F60DD43714C3C90795C7B2B3FDC1EBB74BEAE61E1B871E31AC509",
+  "fixtures": [
+    {
+      "path": "artifacts/remix-runtime/runs/20261025-050635-693778-return-fixture",
+      "seconds": 10, "frames": 588, "records": 21995, "bytes": 2815488,
+      "trace_sha256": "201478242176E67BB5A29F79B6BA633027F26D425D4BB190132B53865EE273F7",
+      "complete_light_records": 1238, "initial_light_slots": 64, "effect_types": 2,
+      "complete_origin_samples": 147, "drops": 0, "native_error": 0,
+      "native_faults": 0, "native_busy": 0, "census_overflow": 0,
+      "hooks_restored": true, "normal_exit": true
+    },
+    {
+      "path": "artifacts/remix-runtime/runs/20261025-050717-941853-return-fixture",
+      "seconds": 90, "frames": 5341, "records": 194291, "bytes": 24869376,
+      "trace_sha256": "B7E2846016DDBED31D96AC0BEFAD2F3A626C4EBA25DE63ABEB23349F3C637E64",
+      "complete_light_records": 10744, "initial_light_slots": 64, "effect_types": 2,
+      "complete_origin_samples": 1335, "drops": 0, "native_error": 0,
+      "native_faults": 0, "native_busy": 0, "census_overflow": 0,
+      "hooks_restored": true, "normal_exit": true
+    }
+  ],
+  "archival": {
+    "completed_runs": 85, "source_bytes": 4039649856,
+    "zip_bytes": 195901086, "net_saved_bytes": 3843748770,
+    "decompressed_sha256_verified": true, "recoverable": true,
+    "receipt_per_run": "survey-admission-images-archive.json",
+    "original_game_assets_removed": false, "capture_traces_removed": false
+  },
+  "governed_bytes_before_final_docs": 15213970424,
+  "source_and_archive_reservation": 4311744512,
+  "limitations": [
+    "Standalone qualification is not SFC gameplay coverage",
+    "Only supported enumerated graphics events are full-rate; origins remain sampled",
+    "Global list membership is not proof of drawing or a stable owner epoch",
+    "Attached effect families may use other dispatchers",
+    "Native light types/unknown tail words are not assigned guessed physical meanings",
+    "Setter timing does not independently prove per-effect or per-pixel light ownership",
+    "Post-baseline direct light-bank writes bypassing the known setters are not independently observed"
+  ],
+  "staged": false, "committed": false,
+  "next_action": "One sponsor-operated expanded metadata/light survey; review evidence before any rendering interface extension"
+}

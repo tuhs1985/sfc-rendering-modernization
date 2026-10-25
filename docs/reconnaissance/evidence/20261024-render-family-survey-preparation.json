@@ -1,0 +1,35 @@
+{
+  "probe": "RENDER-FAMILY-SURVEY-001",
+  "run": 165,
+  "result": "OFFLINE_QUALIFIED_READY_FOR_SPONSOR_METADATA_CAPTURE",
+  "sfc_launched": false,
+  "api_experiment": "PARKED_SPONSOR_DIRECTION",
+  "normal_renderer_implementation_changed": false,
+  "observer_sha256": "71538710B8CEA0586A5DBB42CA43F076ED487CE8D7875A23798211846C7522B4",
+  "bulk_geometry_payload": false,
+  "texture_image_payload": false,
+  "known_ship_draw_metadata_excluded": false,
+  "capture_seconds": 90,
+  "trace_hard_bytes": 268435456,
+  "trace_warning_bytes": 134217728,
+  "ring_bytes": 16777216,
+  "ancillary_limit_bytes": 33554432,
+  "module_sidecar_limit_bytes": 4194304,
+  "aggregate_bytes": 20000000000,
+  "origins": {"draw_stride": 64, "max_per_present_interval": 8, "max_addresses": 32, "semantic_owner_inferred": false},
+  "fixtures": [
+    {"run": "20261025-012827-509941-return-fixture", "seconds": 10, "records": 15829, "bytes": 2026240, "dropped": 0, "origin_captured": 19, "origin_empty": 0, "exit": 0},
+    {"run": "20261025-012115-831179-return-fixture", "seconds": 90, "records": 139531, "bytes": 17860096, "dropped": 0, "origin_captured": 167, "origin_empty": 0, "exit": 0}
+  ],
+  "validation": {"native_ring_checks": 14, "existing_python_tests": 504, "new_parser_tests": 8, "survey_readonly_preflight": "PASS", "normal_multiship_readonly_preflight": "PASS", "graphics_state_resize_recreation": "PASS"},
+  "failed_or_partial_test_evidence": [
+    {"run": "20261025-011400-074254-return-fixture", "issue": "19 empty call stacks;corrected observer frame-pointer omission"},
+    {"run": "20261025-011711-515332-return-fixture", "issue": "Inherited standalone native25second ceiling"},
+    {"run": "20261025-011856-190739-return-fixture", "issue": "Inherited standalone fixture launcher60second ceiling"}
+  ],
+  "classification": "PRE_GAMEPLAY_BASELINE_WITH_EXPLICIT_UNKNOWNS",
+  "map": "docs/reconnaissance/rendering-family-map.md",
+  "limitations": ["No actual SFC survey yet", "Origin samples may stop inside translator", "Module snapshots not exact unload events", "No gameplay owner inferred from draw state", "No indirect/deferred replay or descriptor-table reconstruction", "No constant/shader/image/geometry contents", "No replacement or milestone completion"],
+  "next_action": "Sponsor runs prepared metadata-only survey;then classify actual SFC effects before interface extensions",
+  "repository": {"head": "fd79ce5", "staged": false, "committed": false, "pushed": false}
+}

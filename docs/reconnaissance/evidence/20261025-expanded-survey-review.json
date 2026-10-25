@@ -1,0 +1,54 @@
+{
+  "run": 172,
+  "date_local": "2026-10-25",
+  "result": "TWO_COMPLETE_METADATA_CAPTURES_TEN_CONCRETE_CLASSES_IDENTIFIED",
+  "sponsor_visible_behavior": "BOTH_NORMAL_RENDERING_HUD_TARGETING_CONTROLS",
+  "captures": [
+    {
+      "path": "artifacts/remix-runtime/runs/20261025-141338-349874-in-game",
+      "sponsor_race": "Federation",
+      "trace_sha256": "05B44A3801BC90A030C727F2043B2D95EF4E7CD4E45C104C849A558A9480A75C",
+      "tactical_seconds": 90.0029316, "bytes": 342556800, "records": 2676224,
+      "drops": 0, "stop": "TIME", "classes": 7, "object_addresses": 20,
+      "complete_light_records": 84211, "enabled_slots_observed": [0,1,2,3,4,5],
+      "enabled_native_light_types": [0,1,5], "coarse_graphics_states": 15,
+      "call_chains": 25, "complete_origin_samples": 83353,
+      "origin_samples_after_final_present_stats": 16, "incomplete_origins": 0,
+      "native_restored": true, "normal_exit": true, "proxy_restored": true,
+      "gate_unloaded": true, "critical_hashes_unchanged": true
+    },
+    {
+      "path": "artifacts/remix-runtime/runs/20261025-141645-535316-in-game",
+      "sponsor_race": "Romulan",
+      "trace_sha256": "881982CE5E5333B25A6F9CC6548481E91D27926D915F4A3B56B8FD91DF6CB1F4",
+      "tactical_seconds": 90.0013947, "bytes": 216971136, "records": 1695086,
+      "drops": 0, "stop": "TIME", "classes": 8, "object_addresses": 15,
+      "complete_light_records": 78351, "enabled_slots_observed": [0,1,2,3,4,5,6],
+      "enabled_native_light_types": [0,1,5], "coarse_graphics_states": 15,
+      "call_chains": 24, "complete_origin_samples": 34035,
+      "origin_samples_after_final_present_stats": 7, "incomplete_origins": 0,
+      "native_restored": true, "normal_exit": true, "proxy_restored": true,
+      "gate_unloaded": true, "critical_hashes_unchanged": true
+    }
+  ],
+  "confirmed_native_rtti_classes": ["tFx_Phaser","tFx_Drone","tFx_Photon","tFx_Plasma","tFx_Explosion","tFx_DisruptorMuzzleFlash","tFx_HeavyDisruptor","tFx_MineBlast","tFx_Tractor","tFx_Transporter"],
+  "third_launch": {
+    "artifact_created": false,
+    "reproduced_blocker": "ValueError: Survey source/archive reservation exceeds20GB output cap",
+    "original_console_error_supplied": false,
+    "cleanup_failure_reproduced": false,
+    "archived_old_fixture_runs": 3,
+    "generated_source_bytes": 313754112, "verified_zip_bytes": 17866056,
+    "recoverable_bytes_freed": 295888056,
+    "current_raw_captures_removed": false,
+    "unchanged_launcher_preflight_after": "PASS"
+  },
+  "governed_bytes_before_final_docs": 15502586452,
+  "reservation_bytes": 4311744512,
+  "aggregate_cap_bytes": 20000000000,
+  "runtime_implementation_changed": false,
+  "recon_tests": 12,
+  "staged": false, "committed": false,
+  "next_action": "Offline join named phaser/plasma resource and primitive/state paths; qualify per-pass versus scene light use before requesting another run",
+  "limitations": ["RTTI class membership is not pixel ownership or proof of visibility","Raw pointer counts are not lifetime epochs or shots","Native type-specific light field use must be preserved","Exact weapon-light association remains unproved","No universal rendering-family coverage or new renderer support claimed"]
+}

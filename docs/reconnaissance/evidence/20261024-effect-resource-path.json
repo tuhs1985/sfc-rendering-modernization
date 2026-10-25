@@ -1,0 +1,72 @@
+{
+  "run": 167,
+  "probe": "EFFECT-RESOURCE-JOIN-001",
+  "mode": "STATIC_ONLY_NO_RUNTIME_HOOK_OR_GAME_RUN",
+  "disposition": "STATIC_RESOURCE_PATH_CONFIRMED_RUNTIME_INSTANCE_JOIN_PENDING",
+  "client_sha256": "4D65761D7DD69EF1504070261B81E9C200C0AF18105033E1C4D2222C62320C29",
+  "verification_tool": "tools/recon/verify_effect_resource_path.py",
+  "static_anchor_checks": 38,
+  "static_anchor_result": "PASS",
+  "runtime_evidence_reused": [
+    "artifacts/remix-runtime/runs/20261025-031353-637016-in-game/render-families.review.json",
+    "artifacts/remix-runtime/runs/20261025-031610-737979-in-game/render-families.review.json"
+  ],
+  "global_list": {
+    "head": "0x0092F470",
+    "insert": "0x004ECD72",
+    "unlink": "0x004ECDD6",
+    "dispatch_call": "0x004ED07D",
+    "dispatch_return": "0x004ED080",
+    "concrete_vtable": "0x007AA050",
+    "draw_slot": 4,
+    "draw": "0x004EFA4A",
+    "constructor": "0x004EF0BD",
+    "constructor_model_name": "assets/models/missile/missile.mod",
+    "model_reference_offset": "0x350"
+  },
+  "resource": {
+    "initializer": "0x004ECE2A",
+    "table": "0x007A9818",
+    "names": ["fx0", "fx1", "fx2", "fx3", "fx4", "fx5", "fx6"],
+    "selected_name": "fx0",
+    "lookup": "0x004ECE80",
+    "path_pattern": "assets/textures/%s.%s",
+    "attempted_extensions": ["bmp", "pcx"],
+    "actual_runtime_filename": null,
+    "live_selected_id_slot": "0x0092F5FC",
+    "registry": "0x008CC620",
+    "resource_selection_method": "0x006AD3E0",
+    "manager_selected_id_offset": "0x1F24",
+    "primitive_finalizer": "0x006AC900",
+    "native_primitive_mode": 7,
+    "mode_dispatch": "0x006ACE58",
+    "corner_count": 4,
+    "owner_uv_variant_offset": "0x44",
+    "uv_table": "0x009339F8",
+    "uv_animation_proved": false
+  },
+  "attached_trait_caution": {
+    "dispatch": "0x004103E2",
+    "observed_return": "0x0041043B",
+    "virtual_slot": 8,
+    "explosion_related_vtable": "0x007978FC",
+    "slot_8": "0x0041F5F5",
+    "slot_12": "0x00413AC3",
+    "observed_trait_type_proved": false,
+    "dedicated_explosion_draw_boundary": false
+  },
+  "unknowns": [
+    "Runtime producer epoch to acquired resource and original graphics draw association",
+    "Exact weapon identity and owning ship",
+    "Full effects transform/coordinate convention and dynamic parameters",
+    "Whether late second-run lines were the reported destruction",
+    "Broader sprite, beam, shield, damage, background and tactical UI coverage"
+  ],
+  "interface_extensions": "Recommended ordered draw-state plus qualified transient batch; not implemented",
+  "api_work": "PARKED",
+  "new_runtime_capture": false,
+  "game_assets_modified": false,
+  "index": "empty",
+  "commit_push": false,
+  "next_action": "Implement and offline-qualify only the defined default-off concrete producer/resource observation before preparing gameplay. No broad rerun or new effects renderer."
+}

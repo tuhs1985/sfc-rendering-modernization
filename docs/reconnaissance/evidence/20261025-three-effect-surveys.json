@@ -1,0 +1,23 @@
+{
+  "run": 169,
+  "probe": "EFFECT-RESOURCE-JOIN-001",
+  "date_local": "2026-10-25",
+  "disposition": "ONE_NATIVE_PRODUCER_RESOURCE_JOIN_CONFIRMED_BROADER_CLASSIFICATION_PARTIAL",
+  "sponsor": {"runs": 3, "first_ended_early": true, "increased_game_speed_runs": [2, 3], "rendering_hud_controls_normal": true},
+  "captures": [
+    {"path": "artifacts/remix-runtime/runs/effect-20261025-041038-445910", "sha256": "59601576EE62145409AE751C1F354C1B00C2B567B23A9EE5D5736F753CF5AB93", "seconds": 35.2042674, "bytes": 16777216, "records": 131071, "dropped": 111, "reason": "BYTE_CAP", "concrete_scopes": 544, "native_quads_full_stream": 122820, "unmatched_quad_contexts": 0, "resource_snapshots": 2488, "resolved_filename": "assets/textures/fx0.bmp", "owner": 273528712, "owner_epoch": 5, "uv_variant": 3, "caller": "0x004ED080", "quad_first_seconds": 26.1020451, "quad_last_seconds": 35.1458789, "parser_example_limit": 32768, "parser_summary_omissions": 90052, "durable_cleanup_footer": false},
+    {"path": "artifacts/remix-runtime/runs/effect-20261025-041203-910238", "sha256": "63E0565D7C0BFFA4AD6ABB480B92DD454223F1DF791947D590895C1937C8BB32", "seconds": 90.0551437, "bytes": 5888, "records": 45, "dropped": 0, "reason": "TIME", "births": 24, "retirements": 19, "concrete_scopes": 0, "unscoped_native_finalizers": 980239, "detach_error": 0, "active_callbacks_after_detach": 0},
+    {"path": "artifacts/remix-runtime/runs/effect-20261025-041407-812374", "sha256": "19FDEBD3CC5B944D56375C11119309A39246A552D1DC99A6F0E40784849CAABC", "seconds": 90.0502077, "bytes": 10112, "records": 78, "dropped": 0, "reason": "TIME", "births": 42, "retirements": 34, "concrete_scopes": 0, "unscoped_native_finalizers": 124792, "detach_error": 0, "active_callbacks_after_detach": 0}
+  ],
+  "all_runs": {"normal_game_exit": true, "gate_clean_unloaded": true, "accepted_critical_unchanged": true, "copied_critical_unchanged": true, "launcher_settings_unchanged": true, "control_host_exit": 0, "worker_file_closed_handshake": "required by successful runner", "proxy_changed": false},
+  "confirmed": ["First run stopped at byte cap, not inactivity or no weapons", "One fresh native owner/resource/four-corner primitive association", "Actual fx0.bmp filename and UV variant3", "Later runs exercised other native rendering activity without the selected concrete routine"],
+  "unproved": ["Exact weapon/visual role", "Effect retirement after first capture cap", "One-to-one translated draw/pixel identity", "Concrete class identities in runs2/3", "Game speed caused the different path mix"],
+  "runtime_implementation_changed": false,
+  "api_work": "PARKED",
+  "governed_bytes_before_final_docs": 19001892446,
+  "aggregate_cap_bytes": 20000000000,
+  "next_action": "Offline-qualify sampled/counter native polygon evidence and bounded concrete-type dispatch census before another gameplay request",
+  "head": "fd79ce5",
+  "index": "empty",
+  "commit_push": false
+}

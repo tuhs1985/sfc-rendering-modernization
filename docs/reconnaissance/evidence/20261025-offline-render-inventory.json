@@ -1,0 +1,2271 @@
+{
+  "run": 173,
+  "probe": "OFFLINE-RENDER-INVENTORY-001",
+  "result": "OFFLINE_TARGETED_RENDERING_INVENTORY_CONFIRMED_RUNTIME_BEHAVIOR_PARTIAL",
+  "client_sha256": "4D65761D7DD69EF1504070261B81E9C200C0AF18105033E1C4D2222C62320C29",
+  "disassembly_sha256": "7DA8983A07628A67BF475BC5A27B273FC7A2C4E6C7F9F96578DC13AC4DFF4115",
+  "full_inventory_path": "artifacts/render-survey/offline-render-inventory-20261025-final.json",
+  "full_inventory_sha256": "7DCF78AC5F59962EFD43E93A1B0435E1B8BE20C8B2A1C325F3AFDFD11E5286A3",
+  "class_count": 64,
+  "category_counts": {
+    "attached_effect": 4,
+    "effects": 38,
+    "environment": 1,
+    "light_creator": 2,
+    "semantic_model": 5,
+    "sprite_or_ui": 6,
+    "tactical_camera": 8
+  },
+  "vtable_count": 65,
+  "virtual_method_entries": 908,
+  "effects_draw_candidates": 37,
+  "indexed_effects_instructions": 40486,
+  "runtime_evidence": [
+    {
+      "run": "20261025-141338-349874-in-game",
+      "trace_sha256": "05B44A3801BC90A030C727F2043B2D95EF4E7CD4E45C104C849A558A9480A75C",
+      "records": 2676224
+    },
+    {
+      "run": "20261025-141645-535316-in-game",
+      "trace_sha256": "881982CE5E5333B25A6F9CC6548481E91D27926D915F4A3B56B8FD91DF6CB1F4",
+      "records": 1695086
+    }
+  ],
+  "classes": [
+    {
+      "native_name": "tETrait_Creator_Explosion",
+      "category": "attached_effect",
+      "type_descriptor": "0x0085AE18",
+      "vtables": [
+        {
+          "address": "0x007B0600",
+          "object_offset": 0,
+          "base_types": [
+            "tETrait_Creator_Explosion",
+            "tETrait_Creator"
+          ],
+          "method_count": 3,
+          "draw_candidate": null,
+          "slot_role": "UNCLASSIFIED_NON_EFFECT_OR_BASE",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x005370AF"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tETrait_Creator_Explosion_Debris",
+      "category": "attached_effect",
+      "type_descriptor": "0x0085AE90",
+      "vtables": [
+        {
+          "address": "0x007B0640",
+          "object_offset": 0,
+          "base_types": [
+            "tETrait_Creator_Explosion_Debris",
+            "tETrait_Creator"
+          ],
+          "method_count": 3,
+          "draw_candidate": null,
+          "slot_role": "UNCLASSIFIED_NON_EFFECT_OR_BASE",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x005372E1"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tETrait_Explosion",
+      "category": "attached_effect",
+      "type_descriptor": "0x0085ADF8",
+      "vtables": [
+        {
+          "address": "0x007B05DC",
+          "object_offset": 0,
+          "base_types": [
+            "tETrait_Explosion",
+            "tETrait"
+          ],
+          "method_count": 8,
+          "draw_candidate": null,
+          "slot_role": "UNCLASSIFIED_NON_EFFECT_OR_BASE",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x00536F31",
+            "0x00536FA6"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tETrait_Explosion_Debris",
+      "category": "attached_effect",
+      "type_descriptor": "0x0085AE68",
+      "vtables": [
+        {
+          "address": "0x007B061C",
+          "object_offset": 0,
+          "base_types": [
+            "tETrait_Explosion_Debris",
+            "tETrait"
+          ],
+          "method_count": 8,
+          "draw_candidate": null,
+          "slot_role": "UNCLASSIFIED_NON_EFFECT_OR_BASE",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x00537145",
+            "0x005371BA"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_ADDBlast",
+      "category": "effects",
+      "type_descriptor": "0x00857710",
+      "vtables": [
+        {
+          "address": "0x007A97C0",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_ADDBlast",
+            "tFx_Base"
+          ],
+          "method_count": 15,
+          "draw_candidate": "0x004EC5F0",
+          "slot_role": "STATIC_BASE_FAMILY_DISPATCH_CANDIDATE_NOT_OBSERVED",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x004EC35F"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_Base",
+      "category": "effects",
+      "type_descriptor": "0x008576F8",
+      "vtables": [
+        {
+          "address": "0x007A9870",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_Base"
+          ],
+          "method_count": 15,
+          "draw_candidate": null,
+          "slot_role": "UNCLASSIFIED_NON_EFFECT_OR_BASE",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x004ECD78",
+            "0x004ECDD9"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_Corpses",
+      "category": "effects",
+      "type_descriptor": "0x008577E0",
+      "vtables": [
+        {
+          "address": "0x007A98CC",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_Corpses",
+            "tFx_Base"
+          ],
+          "method_count": 15,
+          "draw_candidate": "0x004ED999",
+          "slot_role": "STATIC_BASE_FAMILY_DISPATCH_CANDIDATE_NOT_OBSERVED",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x004ED8D3"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_Disruptor",
+      "category": "effects",
+      "type_descriptor": "0x00857800",
+      "vtables": [
+        {
+          "address": "0x007A9930",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_Disruptor",
+            "tFx_Base"
+          ],
+          "method_count": 15,
+          "draw_candidate": "0x004EE864",
+          "slot_role": "STATIC_BASE_FAMILY_DISPATCH_CANDIDATE_NOT_OBSERVED",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x004EE05E",
+            "0x004EE0C6"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_DisruptorMuzzleFlash",
+      "category": "effects",
+      "type_descriptor": "0x00857858",
+      "vtables": [
+        {
+          "address": "0x007A9974",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_DisruptorMuzzleFlash",
+            "tFx_Base"
+          ],
+          "method_count": 15,
+          "draw_candidate": "0x004EEA2D",
+          "slot_role": "CONFIRMED_OBSERVED_DISPATCH",
+          "observed_in": [
+            "20261025-141645-535316-in-game"
+          ],
+          "byte_verified_stores": [
+            "0x004EE9A2",
+            "0x004EEA22"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_Drone",
+      "category": "effects",
+      "type_descriptor": "0x008578A8",
+      "vtables": [
+        {
+          "address": "0x007AA050",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_Drone",
+            "tFx_Base"
+          ],
+          "method_count": 16,
+          "draw_candidate": "0x004EFA4A",
+          "slot_role": "CONFIRMED_OBSERVED_DISPATCH",
+          "observed_in": [
+            "20261025-141338-349874-in-game",
+            "20261025-141645-535316-in-game"
+          ],
+          "byte_verified_stores": [
+            "0x004EF0DC",
+            "0x004EF18D"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_ESG",
+      "category": "effects",
+      "type_descriptor": "0x008578F8",
+      "vtables": [
+        {
+          "address": "0x007AA128",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_ESG",
+            "tFx_Base"
+          ],
+          "method_count": 15,
+          "draw_candidate": "0x004F0F3D",
+          "slot_role": "STATIC_BASE_FAMILY_DISPATCH_CANDIDATE_NOT_OBSERVED",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x004F097B"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_ESGImpact",
+      "category": "effects",
+      "type_descriptor": "0x00857970",
+      "vtables": [
+        {
+          "address": "0x007AA174",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_ESGImpact",
+            "tFx_Base"
+          ],
+          "method_count": 15,
+          "draw_candidate": "0x004F1E81",
+          "slot_role": "STATIC_BASE_FAMILY_DISPATCH_CANDIDATE_NOT_OBSERVED",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x004F1D80"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_ESGLance",
+      "category": "effects",
+      "type_descriptor": "0x008579A0",
+      "vtables": [
+        {
+          "address": "0x007AA1C4",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_ESGLance",
+            "tFx_Base"
+          ],
+          "method_count": 15,
+          "draw_candidate": "0x004F28E3",
+          "slot_role": "STATIC_BASE_FAMILY_DISPATCH_CANDIDATE_NOT_OBSERVED",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x004F2444"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_Explosion",
+      "category": "effects",
+      "type_descriptor": "0x008579E0",
+      "vtables": [
+        {
+          "address": "0x007AA218",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_Explosion",
+            "tFx_Base"
+          ],
+          "method_count": 15,
+          "draw_candidate": "0x004F2C50",
+          "slot_role": "CONFIRMED_OBSERVED_DISPATCH",
+          "observed_in": [
+            "20261025-141338-349874-in-game"
+          ],
+          "byte_verified_stores": [
+            "0x004F29EB"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_Explosion_Debris",
+      "category": "effects",
+      "type_descriptor": "0x00857A00",
+      "vtables": [
+        {
+          "address": "0x007AA274",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_Explosion_Debris",
+            "tFx_Base"
+          ],
+          "method_count": 15,
+          "draw_candidate": "0x004F3066",
+          "slot_role": "STATIC_BASE_FAMILY_DISPATCH_CANDIDATE_NOT_OBSERVED",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x004F2D5A"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_Fissure",
+      "category": "effects",
+      "type_descriptor": "0x00857A68",
+      "vtables": [
+        {
+          "address": "0x007AA2E0",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_Fissure",
+            "tFx_Base"
+          ],
+          "method_count": 15,
+          "draw_candidate": "0x004F3C84",
+          "slot_role": "STATIC_BASE_FAMILY_DISPATCH_CANDIDATE_NOT_OBSERVED",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x004F3C25"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_FusionCannon",
+      "category": "effects",
+      "type_descriptor": "0x00857A88",
+      "vtables": [
+        {
+          "address": "0x007AA33C",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_FusionCannon",
+            "tFx_Base"
+          ],
+          "method_count": 15,
+          "draw_candidate": "0x004F4719",
+          "slot_role": "STATIC_BASE_FAMILY_DISPATCH_CANDIDATE_NOT_OBSERVED",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x004F46BC"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_HeavyDisruptor",
+      "category": "effects",
+      "type_descriptor": "0x00857AC0",
+      "vtables": [
+        {
+          "address": "0x007AA388",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_HeavyDisruptor",
+            "tFx_Base"
+          ],
+          "method_count": 15,
+          "draw_candidate": "0x004F5427",
+          "slot_role": "CONFIRMED_OBSERVED_DISPATCH",
+          "observed_in": [
+            "20261025-141645-535316-in-game"
+          ],
+          "byte_verified_stores": [
+            "0x004F4D74"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_HeavyPhaser",
+      "category": "effects",
+      "type_descriptor": "0x00857B30",
+      "vtables": [
+        {
+          "address": "0x007AA3F0",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_HeavyPhaser",
+            "tFx_Base"
+          ],
+          "method_count": 15,
+          "draw_candidate": "0x004F5BAA",
+          "slot_role": "STATIC_BASE_FAMILY_DISPATCH_CANDIDATE_NOT_OBSERVED",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x004F5531"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_HeavyPhoton",
+      "category": "effects",
+      "type_descriptor": "0x00857B90",
+      "vtables": [
+        {
+          "address": "0x007AA45C",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_HeavyPhoton",
+            "tFx_Base"
+          ],
+          "method_count": 15,
+          "draw_candidate": "0x004F63E3",
+          "slot_role": "STATIC_BASE_FAMILY_DISPATCH_CANDIDATE_NOT_OBSERVED",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x004F613E",
+            "0x004F6186"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_Hellbore",
+      "category": "effects",
+      "type_descriptor": "0x00857BC0",
+      "vtables": [
+        {
+          "address": "0x007AA4C4",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_Hellbore",
+            "tFx_Base"
+          ],
+          "method_count": 15,
+          "draw_candidate": "0x004F6F1D",
+          "slot_role": "STATIC_BASE_FAMILY_DISPATCH_CANDIDATE_NOT_OBSERVED",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x004F6E95",
+            "0x004F6F12"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_HellboreBlast",
+      "category": "effects",
+      "type_descriptor": "0x00857BE0",
+      "vtables": [
+        {
+          "address": "0x007AA504",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_HellboreBlast",
+            "tFx_Base"
+          ],
+          "method_count": 15,
+          "draw_candidate": "0x004F7D32",
+          "slot_role": "STATIC_BASE_FAMILY_DISPATCH_CANDIDATE_NOT_OBSERVED",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x004F7833"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_Hypermass",
+      "category": "effects",
+      "type_descriptor": "0x00857C38",
+      "vtables": [
+        {
+          "address": "0x007AA568",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_Hypermass",
+            "tFx_Base"
+          ],
+          "method_count": 15,
+          "draw_candidate": "0x004F82C6",
+          "slot_role": "STATIC_BASE_FAMILY_DISPATCH_CANDIDATE_NOT_OBSERVED",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x004F81FC"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_IonStorm",
+      "category": "effects",
+      "type_descriptor": "0x00857D88",
+      "vtables": [
+        {
+          "address": "0x007AA65C",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_IonStorm",
+            "tFx_Base"
+          ],
+          "method_count": 15,
+          "draw_candidate": "0x004FC806",
+          "slot_role": "STATIC_BASE_FAMILY_DISPATCH_CANDIDATE_NOT_OBSERVED",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x004FC76D"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_Mauler",
+      "category": "effects",
+      "type_descriptor": "0x00857DC8",
+      "vtables": [
+        {
+          "address": "0x007AA6B4",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_Mauler",
+            "tFx_Base"
+          ],
+          "method_count": 15,
+          "draw_candidate": "0x004FD2D0",
+          "slot_role": "STATIC_BASE_FAMILY_DISPATCH_CANDIDATE_NOT_OBSERVED",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x004FCC4D"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_MaulerMuzzleFlash",
+      "category": "effects",
+      "type_descriptor": "0x00857E20",
+      "vtables": [
+        {
+          "address": "0x007AA700",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_MaulerMuzzleFlash",
+            "tFx_Base"
+          ],
+          "method_count": 15,
+          "draw_candidate": "0x004FD90E",
+          "slot_role": "STATIC_BASE_FAMILY_DISPATCH_CANDIDATE_NOT_OBSERVED",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x004FD884",
+            "0x004FD903"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_MineBlast",
+      "category": "effects",
+      "type_descriptor": "0x00857EA8",
+      "vtables": [
+        {
+          "address": "0x007AA758",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_MineBlast",
+            "tFx_Base"
+          ],
+          "method_count": 16,
+          "draw_candidate": "0x004FE513",
+          "slot_role": "CONFIRMED_OBSERVED_DISPATCH",
+          "observed_in": [
+            "20261025-141338-349874-in-game",
+            "20261025-141645-535316-in-game"
+          ],
+          "byte_verified_stores": [
+            "0x004FE2AF"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_NatExplosion",
+      "category": "effects",
+      "type_descriptor": "0x00857F10",
+      "vtables": [
+        {
+          "address": "0x007AA7AC",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_NatExplosion",
+            "tFx_Base"
+          ],
+          "method_count": 15,
+          "draw_candidate": "0x004FEF80",
+          "slot_role": "STATIC_BASE_FAMILY_DISPATCH_CANDIDATE_NOT_OBSERVED",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x004FED68"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_Organian",
+      "category": "effects",
+      "type_descriptor": "0x00857F68",
+      "vtables": [
+        {
+          "address": "0x007AA834",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_Organian",
+            "tFx_Base"
+          ],
+          "method_count": 15,
+          "draw_candidate": "0x004FFB42",
+          "slot_role": "STATIC_BASE_FAMILY_DISPATCH_CANDIDATE_NOT_OBSERVED",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x004FFB0B"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_PPDPulse",
+      "category": "effects",
+      "type_descriptor": "0x008581B0",
+      "vtables": [
+        {
+          "address": "0x007AA9FC",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_PPDPulse",
+            "tFx_Base"
+          ],
+          "method_count": 17,
+          "draw_candidate": "0x00503570",
+          "slot_role": "STATIC_BASE_FAMILY_DISPATCH_CANDIDATE_NOT_OBSERVED",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x0050348E"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_PPDWave",
+      "category": "effects",
+      "type_descriptor": "0x00858140",
+      "vtables": [
+        {
+          "address": "0x007AA9B4",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_PPDWave",
+            "tFx_Base"
+          ],
+          "method_count": 16,
+          "draw_candidate": "0x00502C54",
+          "slot_role": "STATIC_BASE_FAMILY_DISPATCH_CANDIDATE_NOT_OBSERVED",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x00502B4F"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_Phaser",
+      "category": "effects",
+      "type_descriptor": "0x00857F88",
+      "vtables": [
+        {
+          "address": "0x007AA880",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_Phaser",
+            "tFx_Base"
+          ],
+          "method_count": 15,
+          "draw_candidate": "0x00500312",
+          "slot_role": "CONFIRMED_OBSERVED_DISPATCH",
+          "observed_in": [
+            "20261025-141338-349874-in-game",
+            "20261025-141645-535316-in-game"
+          ],
+          "byte_verified_stores": [
+            "0x004FFE12"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_Photon",
+      "category": "effects",
+      "type_descriptor": "0x00857FE8",
+      "vtables": [
+        {
+          "address": "0x007AA8DC",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_Photon",
+            "tFx_Base"
+          ],
+          "method_count": 15,
+          "draw_candidate": "0x00500C30",
+          "slot_role": "CONFIRMED_OBSERVED_DISPATCH",
+          "observed_in": [
+            "20261025-141338-349874-in-game"
+          ],
+          "byte_verified_stores": [
+            "0x005008A1",
+            "0x005008E9"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_Plasma",
+      "category": "effects",
+      "type_descriptor": "0x008580F8",
+      "vtables": [
+        {
+          "address": "0x007AA944",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_Plasma",
+            "tFx_Base"
+          ],
+          "method_count": 16,
+          "draw_candidate": "0x00501FED",
+          "slot_role": "CONFIRMED_OBSERVED_DISPATCH",
+          "observed_in": [
+            "20261025-141645-535316-in-game"
+          ],
+          "byte_verified_stores": [
+            "0x00501C0A",
+            "0x00501C53"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_Probe",
+      "category": "effects",
+      "type_descriptor": "0x00858240",
+      "vtables": [
+        {
+          "address": "0x007AAAA4",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_Probe",
+            "tFx_Base"
+          ],
+          "method_count": 15,
+          "draw_candidate": "0x0050413E",
+          "slot_role": "STATIC_BASE_FAMILY_DISPATCH_CANDIDATE_NOT_OBSERVED",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x005040A5",
+            "0x00504119"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_ProximityDetonation",
+      "category": "effects",
+      "type_descriptor": "0x00858260",
+      "vtables": [
+        {
+          "address": "0x007AAAF0",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_ProximityDetonation",
+            "tFx_Base"
+          ],
+          "method_count": 15,
+          "draw_candidate": "0x00504AF2",
+          "slot_role": "STATIC_BASE_FAMILY_DISPATCH_CANDIDATE_NOT_OBSERVED",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x005044E4"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_Pulsar",
+      "category": "effects",
+      "type_descriptor": "0x008582E8",
+      "vtables": [
+        {
+          "address": "0x007AAB40",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_Pulsar",
+            "tFx_Base"
+          ],
+          "method_count": 15,
+          "draw_candidate": "0x00505182",
+          "slot_role": "STATIC_BASE_FAMILY_DISPATCH_CANDIDATE_NOT_OBSERVED",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x0050514B"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_Shockwave",
+      "category": "effects",
+      "type_descriptor": "0x00858308",
+      "vtables": [
+        {
+          "address": "0x007AAB8C",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_Shockwave",
+            "tFx_Base"
+          ],
+          "method_count": 15,
+          "draw_candidate": "0x00505C97",
+          "slot_role": "STATIC_BASE_FAMILY_DISPATCH_CANDIDATE_NOT_OBSERVED",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x00505564"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_Shockwave2",
+      "category": "effects",
+      "type_descriptor": "0x00858390",
+      "vtables": [
+        {
+          "address": "0x007AABE0",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_Shockwave2",
+            "tFx_Base"
+          ],
+          "method_count": 15,
+          "draw_candidate": "0x00506E94",
+          "slot_role": "STATIC_BASE_FAMILY_DISPATCH_CANDIDATE_NOT_OBSERVED",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x00506806"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_TRBeam",
+      "category": "effects",
+      "type_descriptor": "0x00858418",
+      "vtables": [
+        {
+          "address": "0x007AACF8",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_TRBeam",
+            "tFx_Base"
+          ],
+          "method_count": 15,
+          "draw_candidate": "0x0050878D",
+          "slot_role": "STATIC_BASE_FAMILY_DISPATCH_CANDIDATE_NOT_OBSERVED",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x0050811F"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_Tractor",
+      "category": "effects",
+      "type_descriptor": "0x008583B8",
+      "vtables": [
+        {
+          "address": "0x007AAC38",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_Tractor",
+            "tFx_Base"
+          ],
+          "method_count": 15,
+          "draw_candidate": "0x005070FE",
+          "slot_role": "CONFIRMED_OBSERVED_DISPATCH",
+          "observed_in": [
+            "20261025-141338-349874-in-game",
+            "20261025-141645-535316-in-game"
+          ],
+          "byte_verified_stores": [
+            "0x00507028"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tFx_Transporter",
+      "category": "effects",
+      "type_descriptor": "0x008583D8",
+      "vtables": [
+        {
+          "address": "0x007AAC9C",
+          "object_offset": 0,
+          "base_types": [
+            "tFx_Transporter",
+            "tFx_Base"
+          ],
+          "method_count": 16,
+          "draw_candidate": "0x00507FAB",
+          "slot_role": "CONFIRMED_OBSERVED_DISPATCH",
+          "observed_in": [
+            "20261025-141338-349874-in-game",
+            "20261025-141645-535316-in-game"
+          ],
+          "byte_verified_stores": [
+            "0x00507927"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tEntity_DustCloud",
+      "category": "environment",
+      "type_descriptor": "0x0083C318",
+      "vtables": [
+        {
+          "address": "0x007969CC",
+          "object_offset": 0,
+          "base_types": [
+            "tEntity_DustCloud",
+            "tEntity"
+          ],
+          "method_count": 22,
+          "draw_candidate": null,
+          "slot_role": "UNCLASSIFIED_NON_EFFECT_OR_BASE",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x00412243",
+            "0x00412304"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tLightPhaser_Creator",
+      "category": "light_creator",
+      "type_descriptor": "0x00856CA8",
+      "vtables": [
+        {
+          "address": "0x007A8240",
+          "object_offset": 0,
+          "base_types": [
+            "tLightPhaser_Creator",
+            "tWeaponCreator@tWeaponMgr"
+          ],
+          "method_count": 3,
+          "draw_candidate": null,
+          "slot_role": "UNCLASSIFIED_NON_EFFECT_OR_BASE",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x004E3F7E"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tTRBeamLight_Creator",
+      "category": "light_creator",
+      "type_descriptor": "0x00857640",
+      "vtables": [
+        {
+          "address": "0x007A9744",
+          "object_offset": 0,
+          "base_types": [
+            "tTRBeamLight_Creator",
+            "tWeaponCreator@tWeaponMgr"
+          ],
+          "method_count": 3,
+          "draw_candidate": null,
+          "slot_role": "UNCLASSIFIED_NON_EFFECT_OR_BASE",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x004EBA02"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "t3DVisual",
+      "category": "semantic_model",
+      "type_descriptor": "0x0083EAF0",
+      "vtables": [
+        {
+          "address": "0x00798528",
+          "object_offset": 0,
+          "base_types": [
+            "t3DVisual"
+          ],
+          "method_count": 27,
+          "draw_candidate": null,
+          "slot_role": "UNCLASSIFIED_NON_EFFECT_OR_BASE",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x0042F319",
+            "0x0042F34A",
+            "0x0042FA63"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "t3DVisual_Model",
+      "category": "semantic_model",
+      "type_descriptor": "0x0083EB98",
+      "vtables": [
+        {
+          "address": "0x007985A4",
+          "object_offset": 0,
+          "base_types": [
+            "t3DVisual_Model",
+            "t3DVisual"
+          ],
+          "method_count": 29,
+          "draw_candidate": null,
+          "slot_role": "UNCLASSIFIED_NON_EFFECT_OR_BASE",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x0042F862",
+            "0x0042F92D"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "t3DVisual_Sun",
+      "category": "semantic_model",
+      "type_descriptor": "0x0083EB08",
+      "vtables": [
+        {
+          "address": "0x007984B8",
+          "object_offset": 0,
+          "base_types": [
+            "t3DVisual_Sun",
+            "t3DVisual"
+          ],
+          "method_count": 27,
+          "draw_candidate": null,
+          "slot_role": "UNCLASSIFIED_NON_EFFECT_OR_BASE",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x0042F24E"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tModel0",
+      "category": "semantic_model",
+      "type_descriptor": "0x0083E7B0",
+      "vtables": [
+        {
+          "address": "0x007983E8",
+          "object_offset": 0,
+          "base_types": [
+            "tModel0",
+            "t3DModel"
+          ],
+          "method_count": 16,
+          "draw_candidate": null,
+          "slot_role": "UNCLASSIFIED_NON_EFFECT_OR_BASE",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x0042DF1D",
+            "0x0042E196"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tModelMgr",
+      "category": "semantic_model",
+      "type_descriptor": "0x0083E750",
+      "vtables": [
+        {
+          "address": "0x007983CC",
+          "object_offset": 0,
+          "base_types": [
+            "tModelMgr",
+            "tCRC32"
+          ],
+          "method_count": 1,
+          "draw_candidate": null,
+          "slot_role": "UNCLASSIFIED_NON_EFFECT_OR_BASE",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x0042D575",
+            "0x0042D5C0"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tAmbientLightBar",
+      "category": "sprite_or_ui",
+      "type_descriptor": "0x00853BF0",
+      "vtables": [
+        {
+          "address": "0x007A2598",
+          "object_offset": 228,
+          "base_types": [
+            "tAmbientLightBar",
+            "tDragBar",
+            "tControl",
+            "tVisStateObject",
+            "tVisObject",
+            "tObjBase",
+            "tVisNotifiee",
+            "tNotifiee"
+          ],
+          "method_count": 2,
+          "draw_candidate": null,
+          "slot_role": "UNCLASSIFIED_NON_EFFECT_OR_BASE",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x004C0A97",
+            "0x004C0B38"
+          ]
+        },
+        {
+          "address": "0x007A25A4",
+          "object_offset": 0,
+          "base_types": [
+            "tAmbientLightBar",
+            "tDragBar",
+            "tControl",
+            "tVisStateObject",
+            "tVisObject",
+            "tObjBase",
+            "tVisNotifiee",
+            "tNotifiee"
+          ],
+          "method_count": 57,
+          "draw_candidate": null,
+          "slot_role": "UNCLASSIFIED_NON_EFFECT_OR_BASE",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x004C0A91",
+            "0x004C0B32"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tAnimatingSprite",
+      "category": "sprite_or_ui",
+      "type_descriptor": "0x00876008",
+      "vtables": [
+        {
+          "address": "0x007B4FA8",
+          "object_offset": 0,
+          "base_types": [
+            "tAnimatingSprite"
+          ],
+          "method_count": 1,
+          "draw_candidate": null,
+          "slot_role": "UNCLASSIFIED_NON_EFFECT_OR_BASE",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x005E1C28",
+            "0x005E1C68",
+            "0x005E1CDF"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tGLSprite",
+      "category": "sprite_or_ui",
+      "type_descriptor": "0x00853400",
+      "vtables": [
+        {
+          "address": "0x007A1690",
+          "object_offset": 0,
+          "base_types": [
+            "tGLSprite"
+          ],
+          "method_count": 9,
+          "draw_candidate": null,
+          "slot_role": "UNCLASSIFIED_NON_EFFECT_OR_BASE",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x004B63E3",
+            "0x004B6424",
+            "0x004B648C"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tMetaMapSprite",
+      "category": "sprite_or_ui",
+      "type_descriptor": "0x008762C0",
+      "vtables": [
+        {
+          "address": "0x007B517C",
+          "object_offset": 0,
+          "base_types": [
+            "tMetaMapSprite"
+          ],
+          "method_count": 1,
+          "draw_candidate": null,
+          "slot_role": "UNCLASSIFIED_NON_EFFECT_OR_BASE",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x005E46D4",
+            "0x005E474F",
+            "0x005E4DA4"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tSpriteCntl",
+      "category": "sprite_or_ui",
+      "type_descriptor": "0x00853DB0",
+      "vtables": [
+        {
+          "address": "0x007A3084",
+          "object_offset": 0,
+          "base_types": [
+            "tSpriteCntl"
+          ],
+          "method_count": 1,
+          "draw_candidate": null,
+          "slot_role": "UNCLASSIFIED_NON_EFFECT_OR_BASE",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x004C192A",
+            "0x00679917",
+            "0x0067A357",
+            "0x00684BE8"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tVisSprite",
+      "category": "sprite_or_ui",
+      "type_descriptor": "0x00883448",
+      "vtables": [
+        {
+          "address": "0x007B8314",
+          "object_offset": 0,
+          "base_types": [
+            "tVisSprite",
+            "tVisObject",
+            "tObjBase"
+          ],
+          "method_count": 40,
+          "draw_candidate": null,
+          "slot_role": "UNCLASSIFIED_NON_EFFECT_OR_BASE",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x006853A1"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tCamera@tState_Namespace_Tactical",
+      "category": "tactical_camera",
+      "type_descriptor": "0x00850E28",
+      "vtables": [
+        {
+          "address": "0x007A13FC",
+          "object_offset": 0,
+          "base_types": [
+            "tCamera@tState_Namespace_Tactical"
+          ],
+          "method_count": 6,
+          "draw_candidate": null,
+          "slot_role": "UNCLASSIFIED_NON_EFFECT_OR_BASE",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x004ADD8A",
+            "0x004AF2CD"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tCameraMgr@tState_Namespace_Tactical",
+      "category": "tactical_camera",
+      "type_descriptor": "0x00850DF0",
+      "vtables": [
+        {
+          "address": "0x007A13B4",
+          "object_offset": 0,
+          "base_types": [
+            "tCameraMgr@tState_Namespace_Tactical"
+          ],
+          "method_count": 17,
+          "draw_candidate": null,
+          "slot_role": "UNCLASSIFIED_NON_EFFECT_OR_BASE",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x004ADD5E",
+            "0x004ADD6D",
+            "0x004AEFE9",
+            "0x004AF1BC"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tCameraMgrEx@tState_Namespace_Tactical",
+      "category": "tactical_camera",
+      "type_descriptor": "0x00850F68",
+      "vtables": [
+        {
+          "address": "0x007A144C",
+          "object_offset": 0,
+          "base_types": [
+            "tCameraMgrEx@tState_Namespace_Tactical",
+            "tCameraMgr@tState_Namespace_Tactical"
+          ],
+          "method_count": 17,
+          "draw_candidate": null,
+          "slot_role": "UNCLASSIFIED_NON_EFFECT_OR_BASE",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x004AF0BA"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tCamera_CenteredShip@tState_Namespace_Tactical",
+      "category": "tactical_camera",
+      "type_descriptor": "0x00850FA0",
+      "vtables": [
+        {
+          "address": "0x007A1514",
+          "object_offset": 0,
+          "base_types": [
+            "tCamera_CenteredShip@tState_Namespace_Tactical",
+            "tCamera@tState_Namespace_Tactical"
+          ],
+          "method_count": 6,
+          "draw_candidate": null,
+          "slot_role": "UNCLASSIFIED_NON_EFFECT_OR_BASE",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x004AF247"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tCamera_OverTheShoulder@tState_Namespace_Tactical",
+      "category": "tactical_camera",
+      "type_descriptor": "0x00850EA0",
+      "vtables": [
+        {
+          "address": "0x007A14CC",
+          "object_offset": 0,
+          "base_types": [
+            "tCamera_OverTheShoulder@tState_Namespace_Tactical",
+            "tCamera@tState_Namespace_Tactical"
+          ],
+          "method_count": 6,
+          "draw_candidate": null,
+          "slot_role": "UNCLASSIFIED_NON_EFFECT_OR_BASE",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x004AF046"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tCamera_ReverseOverTheShoulder@tState_Namespace_Tactical",
+      "category": "tactical_camera",
+      "type_descriptor": "0x00850E58",
+      "vtables": [
+        {
+          "address": "0x007A1494",
+          "object_offset": 0,
+          "base_types": [
+            "tCamera_ReverseOverTheShoulder@tState_Namespace_Tactical",
+            "tCamera@tState_Namespace_Tactical"
+          ],
+          "method_count": 6,
+          "draw_candidate": null,
+          "slot_role": "UNCLASSIFIED_NON_EFFECT_OR_BASE",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x004AF070"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tCamera_TopDownAutoZoom@tState_Namespace_Tactical",
+      "category": "tactical_camera",
+      "type_descriptor": "0x00850F28",
+      "vtables": [
+        {
+          "address": "0x007A14E8",
+          "object_offset": 0,
+          "base_types": [
+            "tCamera_TopDownAutoZoom@tState_Namespace_Tactical",
+            "tCamera@tState_Namespace_Tactical"
+          ],
+          "method_count": 6,
+          "draw_candidate": null,
+          "slot_role": "UNCLASSIFIED_NON_EFFECT_OR_BASE",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x004AF035",
+            "0x004AF059"
+          ]
+        }
+      ]
+    },
+    {
+      "native_name": "tCamera_TopDownOrthographic@tState_Namespace_Tactical",
+      "category": "tactical_camera",
+      "type_descriptor": "0x00850EE0",
+      "vtables": [
+        {
+          "address": "0x007A14B0",
+          "object_offset": 0,
+          "base_types": [
+            "tCamera_TopDownOrthographic@tState_Namespace_Tactical",
+            "tCamera_TopDownAutoZoom@tState_Namespace_Tactical",
+            "tCamera@tState_Namespace_Tactical"
+          ],
+          "method_count": 6,
+          "draw_candidate": null,
+          "slot_role": "UNCLASSIFIED_NON_EFFECT_OR_BASE",
+          "observed_in": [],
+          "byte_verified_stores": [
+            "0x004AF064"
+          ]
+        }
+      ]
+    }
+  ],
+  "fx_global_reference_map": {
+    "fx0": [
+      "tFx_Drone",
+      "tFx_Probe",
+      "tFx_Shockwave"
+    ],
+    "fx2": [
+      "tFx_ESG"
+    ],
+    "fx3": [
+      "tFx_Explosion",
+      "tFx_Explosion_Debris"
+    ],
+    "fx6": [
+      "tFx_FusionCannon"
+    ],
+    "fx1": [
+      "tFx_HeavyPhaser",
+      "tFx_Phaser",
+      "tFx_ProximityDetonation",
+      "tFx_Shockwave",
+      "tFx_TRBeam",
+      "tFx_Tractor"
+    ],
+    "fx4": [
+      "tFx_Hellbore",
+      "tFx_HellboreBlast"
+    ]
+  },
+  "static_asset_acquisitions": [
+    {
+      "call_site": 5161734,
+      "literal_push": 5161729,
+      "literal_address": 8746712,
+      "filename": "assets/textures/fireplasma.bmp",
+      "format_template": false,
+      "result_slot": null,
+      "result_store": null,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_NO_QUALIFIED_STORE"
+    },
+    {
+      "call_site": 5161779,
+      "literal_push": 5161774,
+      "literal_address": 8746680,
+      "filename": "assets/textures/anti-drone.bmp",
+      "format_template": false,
+      "result_slot": 9630816,
+      "result_store": 5161782,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_RESULT_STORE"
+    },
+    {
+      "call_site": 5167271,
+      "literal_push": 5167266,
+      "literal_address": 8746940,
+      "filename": "assets/textures/Klingon-Splat.bmp",
+      "format_template": false,
+      "result_slot": 8746936,
+      "result_store": 5167274,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_RESULT_STORE"
+    },
+    {
+      "call_site": 5169292,
+      "literal_push": 5169287,
+      "literal_address": 8747036,
+      "filename": "assets/textures/disruptor-burst.bmp",
+      "format_template": false,
+      "result_slot": 9631684,
+      "result_store": 5169295,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_RESULT_STORE"
+    },
+    {
+      "call_site": 5171681,
+      "literal_push": 5171676,
+      "literal_address": 8747036,
+      "filename": "assets/textures/disruptor-burst.bmp",
+      "format_template": false,
+      "result_slot": 9631676,
+      "result_store": 5171684,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_RESULT_STORE"
+    },
+    {
+      "call_site": 5184700,
+      "literal_push": 5184695,
+      "literal_address": 8747332,
+      "filename": "assets/textures/esg-impact-long-1.bmp",
+      "format_template": false,
+      "result_slot": 8747284,
+      "result_store": 5184710,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_RESULT_STORE"
+    },
+    {
+      "call_site": 5184725,
+      "literal_push": 5184720,
+      "literal_address": 8747292,
+      "filename": "assets/textures/esg-impact-long-2.bmp",
+      "format_template": false,
+      "result_slot": 8747288,
+      "result_store": 5184728,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_RESULT_STORE"
+    },
+    {
+      "call_site": 5186668,
+      "literal_push": 5186663,
+      "literal_address": 8747452,
+      "filename": "assets/textures/lance3.bmp",
+      "format_template": false,
+      "result_slot": 9650280,
+      "result_store": 5186671,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_RESULT_STORE"
+    },
+    {
+      "call_site": 5190175,
+      "literal_push": 5190170,
+      "literal_address": 8747556,
+      "filename": "assets/textures/debris1.bmp",
+      "format_template": false,
+      "result_slot": 9650472,
+      "result_store": 5190178,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_RESULT_STORE"
+    },
+    {
+      "call_site": 5192701,
+      "literal_push": 5192696,
+      "literal_address": 8747592,
+      "filename": "assets/textures/space-rift.bmp",
+      "format_template": false,
+      "result_slot": 8747588,
+      "result_store": 5192704,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_RESULT_STORE"
+    },
+    {
+      "call_site": 5197209,
+      "literal_push": 5197204,
+      "literal_address": 8747748,
+      "filename": "assets/textures/fx_Mauler_beam.bmp",
+      "format_template": false,
+      "result_slot": 9651400,
+      "result_store": 5197212,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_RESULT_STORE"
+    },
+    {
+      "call_site": 5202175,
+      "literal_push": 5202170,
+      "literal_address": 8747880,
+      "filename": "assets/textures/heavy-photon.bmp",
+      "format_template": false,
+      "result_slot": 8747876,
+      "result_store": 5202178,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_RESULT_STORE"
+    },
+    {
+      "call_site": 5210552,
+      "literal_push": 5210547,
+      "literal_address": 8642192,
+      "filename": "assets/textures/skybgnd-mono.BMP",
+      "format_template": false,
+      "result_slot": 8748052,
+      "result_store": 5210562,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_RESULT_STORE"
+    },
+    {
+      "call_site": 5210577,
+      "literal_push": 5210572,
+      "literal_address": 8748060,
+      "filename": "assets/textures/SkyBgnd.bmp",
+      "format_template": false,
+      "result_slot": 8748056,
+      "result_store": 5210580,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_RESULT_STORE"
+    },
+    {
+      "call_site": 5228518,
+      "literal_push": 5228513,
+      "literal_address": 8748452,
+      "filename": "assets/textures/ion_storm.bmp",
+      "format_template": false,
+      "result_slot": 8748416,
+      "result_store": 5228521,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_RESULT_STORE"
+    },
+    {
+      "call_site": 5229682,
+      "literal_push": 5229677,
+      "literal_address": 8748516,
+      "filename": "assets/textures/fx_mauler_beam.bmp",
+      "format_template": false,
+      "result_slot": 9724488,
+      "result_store": 5229685,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_RESULT_STORE"
+    },
+    {
+      "call_site": 5232835,
+      "literal_push": 5232830,
+      "literal_address": 8748612,
+      "filename": "assets/textures/mauler-flash_2.bmp",
+      "format_template": false,
+      "result_slot": 9724460,
+      "result_store": 5232838,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_RESULT_STORE"
+    },
+    {
+      "call_site": 5235278,
+      "literal_push": 5235273,
+      "literal_address": 8746712,
+      "filename": "assets/textures/fireplasma.bmp",
+      "format_template": false,
+      "result_slot": null,
+      "result_store": null,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_NO_QUALIFIED_STORE"
+    },
+    {
+      "call_site": 5235323,
+      "literal_push": 5235318,
+      "literal_address": 8748680,
+      "filename": "assets/textures/mine-boom2.bmp",
+      "format_template": false,
+      "result_slot": 9725224,
+      "result_store": 5235326,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_RESULT_STORE"
+    },
+    {
+      "call_site": 5238054,
+      "literal_push": 5238049,
+      "literal_address": 8748780,
+      "filename": "assets/textures/natesplosion1.bmp",
+      "format_template": false,
+      "result_slot": 9725236,
+      "result_store": 5238064,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_RESULT_STORE"
+    },
+    {
+      "call_site": 5238079,
+      "literal_push": 5238074,
+      "literal_address": 8748744,
+      "filename": "assets/textures/natesplosion2.bmp",
+      "format_template": false,
+      "result_slot": 9725240,
+      "result_store": 5238082,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_RESULT_STORE"
+    },
+    {
+      "call_site": 5241571,
+      "literal_push": 5241566,
+      "literal_address": 8748868,
+      "filename": "assets/textures/Organian.bmp",
+      "format_template": false,
+      "result_slot": 8748864,
+      "result_store": 5241574,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_RESULT_STORE"
+    },
+    {
+      "call_site": 5245026,
+      "literal_push": 5245021,
+      "literal_address": 8749000,
+      "filename": "assets/textures/photons-2.bmp",
+      "format_template": false,
+      "result_slot": 8748996,
+      "result_store": 5245029,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_RESULT_STORE"
+    },
+    {
+      "call_site": 5249841,
+      "literal_push": 5249836,
+      "literal_address": 8749272,
+      "filename": "assets/textures/red-plasma.bmp",
+      "format_template": false,
+      "result_slot": 9857740,
+      "result_store": 5249851,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_RESULT_STORE"
+    },
+    {
+      "call_site": 5249865,
+      "literal_push": 5249860,
+      "literal_address": 8749236,
+      "filename": "assets/textures/orange-plasma.bmp",
+      "format_template": false,
+      "result_slot": 9857744,
+      "result_store": 5249875,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_RESULT_STORE"
+    },
+    {
+      "call_site": 5249889,
+      "literal_push": 5249884,
+      "literal_address": 8749200,
+      "filename": "assets/textures/yellow-plasma.bmp",
+      "format_template": false,
+      "result_slot": 9857748,
+      "result_store": 5249899,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_RESULT_STORE"
+    },
+    {
+      "call_site": 5249913,
+      "literal_push": 5249908,
+      "literal_address": 8749164,
+      "filename": "assets/textures/green-plasma.bmp",
+      "format_template": false,
+      "result_slot": 9857752,
+      "result_store": 5249923,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_RESULT_STORE"
+    },
+    {
+      "call_site": 5249937,
+      "literal_push": 5249932,
+      "literal_address": 8749128,
+      "filename": "assets/textures/violet-plasma.bmp",
+      "format_template": false,
+      "result_slot": 9857756,
+      "result_store": 5249947,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_RESULT_STORE"
+    },
+    {
+      "call_site": 5249961,
+      "literal_push": 5249956,
+      "literal_address": 8749096,
+      "filename": "assets/textures/FastPlasma.bmp",
+      "format_template": false,
+      "result_slot": 9857760,
+      "result_store": 5249971,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_RESULT_STORE"
+    },
+    {
+      "call_site": 5249985,
+      "literal_push": 5249980,
+      "literal_address": 8749064,
+      "filename": "assets/textures/PlasmaSnare.bmp",
+      "format_template": false,
+      "result_slot": 9857764,
+      "result_store": 5249988,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_RESULT_STORE"
+    },
+    {
+      "call_site": 5253925,
+      "literal_push": 5253920,
+      "literal_address": 8749340,
+      "filename": "assets/textures/ppd-beam.bmp",
+      "format_template": false,
+      "result_slot": 9859804,
+      "result_store": 5253928,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_RESULT_STORE"
+    },
+    {
+      "call_site": 5256060,
+      "literal_push": 5256055,
+      "literal_address": 8749456,
+      "filename": "assets/textures/ppd-wave.bmp",
+      "format_template": false,
+      "result_slot": 9859792,
+      "result_store": 5256070,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_RESULT_STORE"
+    },
+    {
+      "call_site": 5256085,
+      "literal_push": 5256080,
+      "literal_address": 8749420,
+      "filename": "assets/textures/ppd-wave-hit.bmp",
+      "format_template": false,
+      "result_slot": 9859796,
+      "result_store": 5256093,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_RESULT_STORE"
+    },
+    {
+      "call_site": 5263625,
+      "literal_push": 5263620,
+      "literal_address": 8749764,
+      "filename": "assets/textures/pulsar_1.bmp",
+      "format_template": false,
+      "result_slot": 8749724,
+      "result_store": 5263635,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_RESULT_STORE"
+    },
+    {
+      "call_site": 5263650,
+      "literal_push": 5263645,
+      "literal_address": 8749732,
+      "filename": "assets/textures/pulsar_2.bmp",
+      "format_template": false,
+      "result_slot": 8749728,
+      "result_store": 5263653,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_RESULT_STORE"
+    },
+    {
+      "call_site": 5269419,
+      "literal_push": 5269414,
+      "literal_address": 8749932,
+      "filename": "assets/textures/expl_00-15.bmp",
+      "format_template": false,
+      "result_slot": 9860900,
+      "result_store": 5269429,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_RESULT_STORE"
+    },
+    {
+      "call_site": 5269444,
+      "literal_push": 5269439,
+      "literal_address": 8749900,
+      "filename": "assets/textures/expl_16-31.bmp",
+      "format_template": false,
+      "result_slot": 9860904,
+      "result_store": 5269454,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_RESULT_STORE"
+    },
+    {
+      "call_site": 5269469,
+      "literal_push": 5269464,
+      "literal_address": 8749864,
+      "filename": "assets/textures/expl_ring16f.bmp",
+      "format_template": false,
+      "result_slot": 9860908,
+      "result_store": 5269472,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_RESULT_STORE"
+    },
+    {
+      "call_site": 5278377,
+      "literal_push": 5278372,
+      "literal_address": 8642192,
+      "filename": "assets/textures/skybgnd-mono.BMP",
+      "format_template": false,
+      "result_slot": null,
+      "result_store": null,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_NO_QUALIFIED_STORE"
+    },
+    {
+      "call_site": 5282690,
+      "literal_push": 5282685,
+      "literal_address": 8750336,
+      "filename": "assets/textures/spacedustlight.BMP",
+      "format_template": false,
+      "result_slot": null,
+      "result_store": null,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_NO_QUALIFIED_STORE"
+    },
+    {
+      "call_site": 5282713,
+      "literal_push": 5282708,
+      "literal_address": 8750300,
+      "filename": "assets/textures/spacedustheavy.BMP",
+      "format_template": false,
+      "result_slot": null,
+      "result_store": null,
+      "confidence": "CONFIRMED_STATIC_REGISTRY_ACQUIRE_LITERAL_NO_QUALIFIED_STORE"
+    }
+  ],
+  "observed_light_call_sites": [
+    {
+      "return_address": 4955325,
+      "counts_by_kind": {
+        "1": 10731
+      },
+      "instruction": {
+        "site": 4955319,
+        "opcode": "call",
+        "operand": "dword ptr [eax+00000080h]"
+      },
+      "manager_slot": 128,
+      "match": "CONFIRMED_OBSERVED_KIND_AND_BYTE_VERIFIED_CALL"
+    },
+    {
+      "return_address": 4955338,
+      "counts_by_kind": {
+        "2": 10731
+      },
+      "instruction": {
+        "site": 4955332,
+        "opcode": "call",
+        "operand": "dword ptr [eax+00000098h]"
+      },
+      "manager_slot": 152,
+      "match": "CONFIRMED_OBSERVED_KIND_AND_BYTE_VERIFIED_CALL"
+    },
+    {
+      "return_address": 4955363,
+      "counts_by_kind": {
+        "2": 10731
+      },
+      "instruction": {
+        "site": 4955357,
+        "opcode": "call",
+        "operand": "dword ptr [eax+00000098h]"
+      },
+      "manager_slot": 152,
+      "match": "CONFIRMED_OBSERVED_KIND_AND_BYTE_VERIFIED_CALL"
+    },
+    {
+      "return_address": 4955377,
+      "counts_by_kind": {
+        "4": 128
+      },
+      "instruction": {
+        "site": 4955372,
+        "opcode": "call",
+        "operand": "004ECFB3"
+      },
+      "manager_slot": null,
+      "match": "CONFIRMED_OBSERVED_KIND_AND_BYTE_VERIFIED_CALL"
+    },
+    {
+      "return_address": 4957369,
+      "counts_by_kind": {
+        "1": 8655
+      },
+      "instruction": {
+        "site": 4957363,
+        "opcode": "call",
+        "operand": "dword ptr [eax+00000080h]"
+      },
+      "manager_slot": 128,
+      "match": "CONFIRMED_OBSERVED_KIND_AND_BYTE_VERIFIED_CALL"
+    },
+    {
+      "return_address": 4957388,
+      "counts_by_kind": {
+        "2": 8655
+      },
+      "instruction": {
+        "site": 4957382,
+        "opcode": "call",
+        "operand": "dword ptr [edx+00000098h]"
+      },
+      "manager_slot": 152,
+      "match": "CONFIRMED_OBSERVED_KIND_AND_BYTE_VERIFIED_CALL"
+    },
+    {
+      "return_address": 4957437,
+      "counts_by_kind": {
+        "2": 70007
+      },
+      "instruction": {
+        "site": 4957431,
+        "opcode": "call",
+        "operand": "dword ptr [eax+00000098h]"
+      },
+      "manager_slot": 152,
+      "match": "CONFIRMED_OBSERVED_KIND_AND_BYTE_VERIFIED_CALL"
+    },
+    {
+      "return_address": 4957784,
+      "counts_by_kind": {
+        "1": 10731
+      },
+      "instruction": {
+        "site": 4957778,
+        "opcode": "call",
+        "operand": "dword ptr [eax+00000080h]"
+      },
+      "manager_slot": 128,
+      "match": "CONFIRMED_OBSERVED_KIND_AND_BYTE_VERIFIED_CALL"
+    },
+    {
+      "return_address": 4957800,
+      "counts_by_kind": {
+        "2": 10731
+      },
+      "instruction": {
+        "site": 4957794,
+        "opcode": "call",
+        "operand": "dword ptr [eax+00000098h]"
+      },
+      "manager_slot": 152,
+      "match": "CONFIRMED_OBSERVED_KIND_AND_BYTE_VERIFIED_CALL"
+    },
+    {
+      "return_address": 4957852,
+      "counts_by_kind": {
+        "1": 10731
+      },
+      "instruction": {
+        "site": 4957846,
+        "opcode": "call",
+        "operand": "dword ptr [eax+00000080h]"
+      },
+      "manager_slot": 128,
+      "match": "CONFIRMED_OBSERVED_KIND_AND_BYTE_VERIFIED_CALL"
+    },
+    {
+      "return_address": 4957864,
+      "counts_by_kind": {
+        "2": 10731
+      },
+      "instruction": {
+        "site": 4957858,
+        "opcode": "call",
+        "operand": "dword ptr [eax+00000098h]"
+      },
+      "manager_slot": 152,
+      "match": "CONFIRMED_OBSERVED_KIND_AND_BYTE_VERIFIED_CALL"
+    },
+    {
+      "return_address": 5176017,
+      "counts_by_kind": {
+        "3": 2516
+      },
+      "instruction": {
+        "site": 5176011,
+        "opcode": "call",
+        "operand": "dword ptr [eax+00000090h]"
+      },
+      "manager_slot": 144,
+      "match": "CONFIRMED_OBSERVED_KIND_AND_BYTE_VERIFIED_CALL"
+    },
+    {
+      "return_address": 5176951,
+      "counts_by_kind": {
+        "3": 2516
+      },
+      "instruction": {
+        "site": 5176945,
+        "opcode": "call",
+        "operand": "dword ptr [eax+00000090h]"
+      },
+      "manager_slot": 144,
+      "match": "CONFIRMED_OBSERVED_KIND_AND_BYTE_VERIFIED_CALL"
+    },
+    {
+      "return_address": 5236064,
+      "counts_by_kind": {
+        "3": 239
+      },
+      "instruction": {
+        "site": 5236058,
+        "opcode": "call",
+        "operand": "dword ptr [eax+00000090h]"
+      },
+      "manager_slot": 144,
+      "match": "CONFIRMED_OBSERVED_KIND_AND_BYTE_VERIFIED_CALL"
+    },
+    {
+      "return_address": 5236561,
+      "counts_by_kind": {
+        "3": 239
+      },
+      "instruction": {
+        "site": 5236555,
+        "opcode": "call",
+        "operand": "dword ptr [eax+00000090h]"
+      },
+      "manager_slot": 144,
+      "match": "CONFIRMED_OBSERVED_KIND_AND_BYTE_VERIFIED_CALL"
+    },
+    {
+      "return_address": 5272283,
+      "counts_by_kind": {
+        "3": 1012
+      },
+      "instruction": {
+        "site": 5272277,
+        "opcode": "call",
+        "operand": "dword ptr [eax+00000090h]"
+      },
+      "manager_slot": 144,
+      "match": "CONFIRMED_OBSERVED_KIND_AND_BYTE_VERIFIED_CALL"
+    },
+    {
+      "return_address": 5273652,
+      "counts_by_kind": {
+        "3": 1012
+      },
+      "instruction": {
+        "site": 5273646,
+        "opcode": "call",
+        "operand": "dword ptr [eax+00000090h]"
+      },
+      "manager_slot": 144,
+      "match": "CONFIRMED_OBSERVED_KIND_AND_BYTE_VERIFIED_CALL"
+    },
+    {
+      "return_address": 5275669,
+      "counts_by_kind": {
+        "3": 453
+      },
+      "instruction": {
+        "site": 5275663,
+        "opcode": "call",
+        "operand": "dword ptr [eax+00000090h]"
+      },
+      "manager_slot": 144,
+      "match": "CONFIRMED_OBSERVED_KIND_AND_BYTE_VERIFIED_CALL"
+    },
+    {
+      "return_address": 5275711,
+      "counts_by_kind": {
+        "3": 453
+      },
+      "instruction": {
+        "site": 5275705,
+        "opcode": "call",
+        "operand": "dword ptr [eax+00000090h]"
+      },
+      "manager_slot": 144,
+      "match": "CONFIRMED_OBSERVED_KIND_AND_BYTE_VERIFIED_CALL"
+    },
+    {
+      "return_address": 6997730,
+      "counts_by_kind": {
+        "3": 40994
+      },
+      "instruction": {
+        "site": 6997724,
+        "opcode": "call",
+        "operand": "dword ptr [edx+00000090h]"
+      },
+      "manager_slot": 144,
+      "match": "CONFIRMED_OBSERVED_KIND_AND_BYTE_VERIFIED_CALL"
+    },
+    {
+      "return_address": 6997823,
+      "counts_by_kind": {
+        "3": 40994
+      },
+      "instruction": {
+        "site": 6997817,
+        "opcode": "call",
+        "operand": "dword ptr [edx+00000090h]"
+      },
+      "manager_slot": 144,
+      "match": "CONFIRMED_OBSERVED_KIND_AND_BYTE_VERIFIED_CALL"
+    }
+  ],
+  "limits": {
+    "classes": 128,
+    "vtable_methods": 128,
+    "direct_call_depth": 2,
+    "functions_per_graph": 32,
+    "instructions_per_function": 4096,
+    "function_span_bytes": 65536,
+    "output_bytes": 8388608
+  },
+  "exclusions": [
+    "No game/runtime launch",
+    "No assets opened or copied",
+    "No proprietary binary/disassembly export",
+    "No new render implementation",
+    "Static references do not prove runtime branch or physical light meaning",
+    "Non-effects virtual slot roles remain unresolved",
+    "Indirect calls and jump tables are not guessed",
+    "Class inventory is not complete engine or rendering coverage"
+  ],
+  "unresolved_boundaries": [
+    "Virtual receiver types/branch selection outside manually qualified paths",
+    "Indexed texture variant range and exact active variant",
+    "Native image vertical sampling and atlas animation placement",
+    "Object lifetime epochs beyond observed list membership",
+    "Light attachment and physical conversion",
+    "Generic UI/background calls without RTTI are not inventoried"
+  ],
+  "runtime_changed": false,
+  "staged": false,
+  "committed": false
+}
