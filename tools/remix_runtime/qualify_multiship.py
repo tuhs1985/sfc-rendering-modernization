@@ -48,7 +48,7 @@ def inspect(fixture):
     for arch in ('32','64'):
         proof=(ROOT/f'artifacts/d3d9-proof/resource-policy-tests/resource{arch}.txt').read_text(encoding='utf-8-sig')
         if ('Native resource policy PASS' not in proof or 'classic_ex_pixels_exact=1 reset_exact=1 recreation_exact=1' not in proof
-                or 'remix_reshade_dxvk=absent' not in proof):
+                or 'remix_reshade_dxvk=absent' not in proof or 'initial_data_pixels_exact=1 source_memory_owned=1' not in proof):
             raise ValueError('Actual system D3D9/Ex resource/reset/recreation proof required')
     fixture=Path(fixture).resolve();fixture.relative_to(ROOT/'artifacts/remix-runtime/runs')
     result=json.loads((fixture/'result.json').read_text());live=result.get('live_owner_timing') or {}

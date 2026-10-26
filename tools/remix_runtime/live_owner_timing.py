@@ -193,6 +193,8 @@ class Relay:
         env['SFC_D3D9_SYNC_BUFFER']='1' if self.buffered else '0'
         env['SFC_D3D9_MULTISCENE']='1' if self.multi_scene else '0'
         env['SFC_PIPELINE_MODE']=getattr(self,'mode','test')
+        env['SFC_D3D9_ADMISSION_SERVICE']='1' if getattr(self,'admission_service',False) else '0'
+        env['SFC_D3D9_INITIAL_TEXTURE_DATA']='1' if getattr(self,'initial_texture_data',False) else '0'
         env.pop('SFC_D3D9_INITIAL_ASSET_MASK',None)
         if self.multi_scene:
             mask=sum(1<<(a['id']-1) for a in self.catalog if a.get('initial'))

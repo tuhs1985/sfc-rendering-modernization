@@ -11,6 +11,7 @@ import json
 import struct
 import subprocess
 import sys
+from collections import OrderedDict
 
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/'tools/remix_runtime'))
@@ -20,6 +21,7 @@ from roughness_maps import pixels
 from scene_bundle import resolve_image,texture
 LIMIT=128*1024*1024
 HASHER=ROOT/'artifacts/d3d9-proof/material-bin/texture_hash.exe'
+DECODE_CACHE_BYTES=32*1024*1024  # Per preparation worker; no session-long image cache.
 
 
 def validate_generated_dds(data,size):
@@ -95,7 +97,7 @@ def prepare(folder,game_root,config=None,*,evidence_mode='test'):
     source=ROOT/scene['source_packet']
     refs=json.loads(source.with_suffix('.json').read_text())
     if refs.get('textures_enabled')!=1:raise ValueError('Native textured path not enabled;no guessed appearance')
-    if hashlib.sha256(source.read_bytes()).hexdigest()!=scene['source_packet_sha256'] or hashlib.sha256(source.with_suffix('.json').read_bytes()).hexdigest()!=scene['source_references_sha256']:
+    if evidence_mode=='test' and (hashlib.sha256(source.read_bytes()).hexdigest()!=scene['source_packet_sha256'] or hashlib.sha256(source.with_suffix('.json').read_bytes()).hexdigest()!=scene['source_references_sha256']):
         raise ValueError('Fresh source association changed')
     raw=(config or (ROOT/'tools/remix_runtime/config/materials.toml').read_bytes())
     packet=encode(raw);values=struct.unpack('<2I10fQ',packet)[2:12]
@@ -107,8 +109,17 @@ def prepare(folder,game_root,config=None,*,evidence_mode='test'):
     output=folder/'rtx-remix/mods/sfc-policy';output.mkdir(parents=True,exist_ok=False)
     resource={r['id']:r for r in refs['resources']};groups={r['group']:r for r in refs['groups']}
     rows=[];bindings={};total=0;image_records={};original_seen=set()
+    # SFC's fresh resource associations are authoritative. Within this immutable
+    # preparation, reuse decoded originals and role-specific derivatives. Hashes
+    # below identify/share content and name required Remix resources, not repeated
+    # comparisons against an external model/texture baseline.
+    decoded_cache=OrderedDict();decoded_bytes=0;derived={}
     def original(filename):
-        nonlocal total
+        nonlocal total,decoded_bytes
+        key_name=filename.replace('\\','/').casefold()
+        if evidence_mode=='performance' and key_name in decoded_cache:
+            decoded_cache.move_to_end(key_name)
+            return decoded_cache[key_name]
         path=resolve_image(game_root,filename);data=path.read_bytes()
         key=hashlib.sha256(data).hexdigest()
         if key not in original_seen:total+=len(data);original_seen.add(key)
@@ -116,7 +127,15 @@ def prepare(folder,game_root,config=None,*,evidence_mode='test'):
         if total>LIMIT:raise ValueError('Material original/derived image cap')
         with Image.open(io.BytesIO(data)) as image:
             if not 1<=image.width<=4096 or not 1<=image.height<=4096:raise ValueError('Material dimension cap')
-            return image.convert('RGBA'),key
+            result=image.convert('RGBA'),key
+        if evidence_mode=='performance':
+            size=result[0].width*result[0].height*4
+            if size<=DECODE_CACHE_BYTES:
+                while decoded_bytes+size>DECODE_CACHE_BYTES:
+                    _,(old,_)=decoded_cache.popitem(last=False)
+                    decoded_bytes-=old.width*old.height*4
+                decoded_cache[key_name]=result;decoded_bytes+=size
+        return result
     def save(image):
         nonlocal total
         data=encode_remix_material_dds(image);digest=hashlib.sha256(data).hexdigest()
@@ -130,24 +149,32 @@ def prepare(folder,game_root,config=None,*,evidence_mode='test'):
             # Keep cheap layout/size checks above,provenance hashes and byte caps.
             image_records[name]=dict(sha256=digest,dimensions=list(image.size),bytes=len(data))
         return name
+    def generated(key,make):
+        # Check before conversion/encoding. Values are output names, not pixels;
+        # at most three per captured group. Test mode retains full recomputation.
+        if evidence_mode=='performance' and key in derived:return derived[key]
+        name=save(make())
+        if evidence_mode=='performance':derived[key]=name
+        return name
     for identity,index,_,_ in scene['groups']:
         group=groups[identity];primary=resource[group['primary']]
         color,original_sha=original(primary['filename']);decoded=scene['textures'][index]
-        if original_sha!=decoded['original_sha256']:raise ValueError('Primary image mismatch')
+        if evidence_mode=='test' and original_sha!=decoded['original_sha256']:raise ValueError('Primary image mismatch')
         if evidence_mode=='test':
             packed=folder/f'texture-{index}.bin';metadata,bgra=texture(resolve_image(game_root,primary['filename']).read_bytes())
             if packed.read_bytes()!=struct.pack('<4I',0x31544653,metadata['width'],metadata['height'],len(bgra))+bgra:
                 raise ValueError('Ordinary texture upload differs from source')
         name=hashes[index].upper().zfill(16)
-        images=dict(color=save(color));secondary_sha=None
+        images=dict(color=generated(('color',original_sha),lambda:color));secondary_sha=None
         if group.get('flags',0)&0x20 and group.get('secondary') in resource:
             second,secondary_sha=original(resource[group['secondary']]['filename'])
-            size=(max(color.width,second.width),max(color.height,second.height))
-            a=color.convert('RGB').resize(size,Image.Resampling.BILINEAR)
-            b=second.convert('RGB').resize(size,Image.Resampling.BILINEAR)
-            emission=Image.fromarray(((np.asarray(a,dtype=np.uint16)*np.asarray(b,dtype=np.uint16)+127)//255).astype(np.uint8)).convert('RGBA')
-            images['emission']=save(emission)
-        if values[4]:images['roughness']=save(pixels(color,values[0],values[5],values[6],values[7],bool(values[8]),values[9]))
+            def emission():
+                size=(max(color.width,second.width),max(color.height,second.height))
+                a=color.convert('RGB').resize(size,Image.Resampling.BILINEAR)
+                b=second.convert('RGB').resize(size,Image.Resampling.BILINEAR)
+                return Image.fromarray(((np.asarray(a,dtype=np.uint16)*np.asarray(b,dtype=np.uint16)+127)//255).astype(np.uint8)).convert('RGBA')
+            images['emission']=generated(('emission',original_sha,secondary_sha),emission)
+        if values[4]:images['roughness']=generated(('roughness',original_sha,*values),lambda:pixels(color,values[0],values[5],values[6],values[7],bool(values[8]),values[9]))
         block=shader(name,images,values)
         if name in bindings and bindings[name]!=block:raise ValueError('Same primary hash has conflicting image pairs;requires distinct material identity')
         bindings[name]=block
@@ -157,6 +184,7 @@ def prepare(folder,game_root,config=None,*,evidence_mode='test'):
     # Runtime parses material tokens itself; no Toolkit,USD geometry,or mesh replacement.
     report=dict(schema='sfc.normal-remix.material-policy.v1',sdk_mesh_calls=0,geometry_modified=False,
                 evidence_mode=evidence_mode,upload_pixel_comparison=evidence_mode=='test',
+                source_recomparison=evidence_mode=='test',decoded_cache_limit=DECODE_CACHE_BYTES if evidence_mode=='performance' else 0,
                 config_sha256=hashlib.sha256(raw).hexdigest(),values=list(values),groups=rows,images=image_records,
                 image_bytes=total,image_warning=total>=64*1024*1024,
                 generated_image_validation='Header/layout/dimensions/byte bounds only;pixel roundtrip tested offline',

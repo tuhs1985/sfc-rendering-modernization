@@ -1,0 +1,155 @@
+{
+  "run": 190,
+  "decision": "Material consumption/reload strongly implicated;deferral moves stall into live delivery and is not accepted",
+  "sfc_launched": false,
+  "production_modified": false,
+  "confidence": {
+    "confirmed": "Ordinary Present-side wait;master-file reload/source scene reset;byte-identical final assets",
+    "strong_hypothesis": "Material consumption/reloads account for substantial queued startup work",
+    "unknown": "Exact internal cost distribution and separate native control crash"
+  },
+  "baseline": "20261025-220919-119346-return-fixture",
+  "deferred": "20261025-224552-119514-return-fixture",
+  "failed_control": "20261025-224644-859442-return-fixture",
+  "comparison": {
+    "base": "20261025-220919-119346-return-fixture",
+    "alternative": "20261025-224552-119514-return-fixture",
+    "asset_files": 381,
+    "all_final_geometry_images_materials_exact": true,
+    "differences": [],
+    "late_pixel_roi": [
+      200,
+      730,
+      1340,
+      970
+    ],
+    "late_pixel_mean_abs_error": [
+      0.2581578947368421,
+      0.25300804093567253,
+      0.24966739766081872
+    ],
+    "late_pixel_bit_exact": false,
+    "interpretation": "Same final bytes does not establish when runtime consumed them;late view is only one bounded sample"
+  },
+  "timings": [
+    {
+      "run": "20261025-220919-119346-return-fixture",
+      "error": null,
+      "bootstrap_wall_s": 3.3741778,
+      "draw_issue_s": 0.0017876,
+      "present_plus_service_s": 3.1303901,
+      "largest_present_plus_service": {
+        "index": 17,
+        "draw_seconds": 9.35e-05,
+        "present_seconds": 2.3976172
+      },
+      "first_matching_s": 6.107465199998842,
+      "post_start_omissions": 79,
+      "max_gap_records": 78,
+      "max_gap_span_s": 1.3094961,
+      "material_master_publications": 43,
+      "settled_window": {
+        "frames": 600,
+        "draws": 594
+      },
+      "native_job": {
+        "schema": "remix.job.v1",
+        "pid": 35276,
+        "exit_code": 0,
+        "stop_reason": 0,
+        "elapsed_ms": 22719,
+        "console_bytes": 63618,
+        "peak_scratch_bytes": 166453012,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      }
+    },
+    {
+      "run": "20261025-224552-119514-return-fixture",
+      "error": null,
+      "bootstrap_wall_s": 0.8882165,
+      "draw_issue_s": 0.0020223,
+      "present_plus_service_s": 0.6455652000000001,
+      "largest_present_plus_service": {
+        "index": 0,
+        "draw_seconds": 0.0001072,
+        "present_seconds": 0.2809202
+      },
+      "first_matching_s": 3.81558330000189,
+      "post_start_omissions": 238,
+      "max_gap_records": 164,
+      "max_gap_span_s": 2.8044306,
+      "material_master_publications": 28,
+      "settled_window": {
+        "frames": 600,
+        "draws": 520
+      },
+      "native_job": {
+        "schema": "remix.job.v1",
+        "pid": 39160,
+        "exit_code": 0,
+        "stop_reason": 0,
+        "elapsed_ms": 21625,
+        "console_bytes": 63079,
+        "peak_scratch_bytes": 166452285,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      }
+    },
+    {
+      "run": "20261025-224644-859442-return-fixture",
+      "error": "Renderer exited before source stopped; Live fixture: Additive pool session/process/layout",
+      "native_job": {
+        "schema": "remix.job.v1",
+        "pid": 35924,
+        "exit_code": 3221225477,
+        "stop_reason": 0,
+        "elapsed_ms": 17016,
+        "console_bytes": 31451,
+        "peak_scratch_bytes": 166411634,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      }
+    }
+  ],
+  "analysis": "artifacts/present-stall/analysis.json",
+  "probes": [
+    "docs/reconnaissance/probes/20261025_present_publication_probe.py",
+    "docs/reconnaissance/probes/20261025_present_publication_analysis.py"
+  ],
+  "run_record": "docs/runs/2026-10-25-codex-present-material-attribution.md",
+  "storage": {
+    "base_ledger": 18725945193,
+    "extras": {
+      "artifacts\\resource-stall": 5792388,
+      "artifacts\\staging-integration": 999153,
+      "artifacts\\present-stall": 233374
+    },
+    "combined": 18732970108,
+    "cap": 20000000000
+  },
+  "validation": {
+    "actual_standalone_attempts": 2,
+    "deferred_native_normal_exit": true,
+    "control_native_access_violation": "0xC0000005",
+    "geometry_images_materials_exact": true,
+    "visual_configs_equal": true,
+    "production_hashes_unchanged": true,
+    "archive_per_file_sha256_verified": true,
+    "ast_parse": true,
+    "prior_615_tests": "Previous evidence;not rerun",
+    "no_owned_processes": true
+  },
+  "next_action": "Offline completed enhancement revision publication once per asset,immediate base display,full-interval delivery and final-pixel comparison",
+  "repository": {
+    "head": "9ff2d3d",
+    "staged": false,
+    "committed": false,
+    "pushed": false
+  },
+  "profiler": {
+    "current_os_admin": false,
+    "existing_process_only_nsight_requires_admin": true,
+    "next_offline_control_does_not_require_sponsor": true
+  }
+}

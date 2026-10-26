@@ -75,6 +75,19 @@ def file_packet(identity,path_id,row,signature,folder,image_count):
     return raw[:-8]+struct.pack('<Q',fnv(raw[:-8]))
 
 
+def prepared_packet(identity,path_id,row,signature,fields):
+    """Same catalog bytes as file_packet, from finalized producer byte identities."""
+    if not 1<=identity<=ASSETS or not 1<=path_id<=ASSETS or any(not row[i] for i in (1,5,6,7)):
+        raise ValueError('Multi-scene catalog identity')
+    content=bytes.fromhex(signature)
+    if len(content)!=32 or not any(content) or len(fields)!=4:raise ValueError('Prepared catalog identity')
+    geometry,images,replay_hash,image_hash=fields
+    if not all(type(v)is int and 0<v<=0xffffffffffffffff for v in fields) or geometry>2*1024*1024 or images>128*1024*1024:
+        raise ValueError('Prepared catalog byte bounds')
+    raw=ASSET.pack(identity,path_id,row[1],row[7],row[5],row[6],geometry,images,content,replay_hash,image_hash,0)
+    return raw[:-8]+struct.pack('<Q',fnv(raw[:-8]))
+
+
 def acknowledgement(channel,identity):
     return struct.unpack('<i',channel.read(OFFSET+ASSET_BASE+(identity-1)*ASSET_SLOT+4,4))[0]
 

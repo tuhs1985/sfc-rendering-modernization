@@ -1,0 +1,65 @@
+{
+  "run": 184,
+  "result": "BASE_ENHANCEMENT_SPLIT_IMPLEMENTED_STREAMING_GAPS_UNRESOLVED",
+  "head": "9ff2d3d",
+  "staged": false,
+  "committed": false,
+  "sfc_launched": false,
+  "python_checks_passed": 611,
+  "cpu_evidence": "artifacts/initial-readiness/parallel-cpu-20261025-194725-550969/analysis.json",
+  "cpu_milestones_ms": {
+    "base_ready": 514.3727,
+    "first_enhanced_stage": 550.1958,
+    "all_enhanced_pieces_ready": 1139.2819,
+    "bundle_assembly_and_write": 230.1645,
+    "catalog_from_written_bytes": 0.0294
+  },
+  "exact_final_geometry_and_images_and_material_stage": true,
+  "identity_algorithms": {
+    "catalog": "Existing FNV1a64;producer bytes in memory;consumer file verification unchanged",
+    "remix_material": "Existing pinned XXH3 over BGRA8;Remix-specific",
+    "captured_packet": "Existing FNV1a32 unchanged",
+    "independent_legacy_helper_parity": true,
+    "worker_dll_sha256": "0b23d34fb61cb5ac46c40bd171fb5db3c2cb16480ba7966e3c86c52b01657298"
+  },
+  "gpu_controls": [
+    {
+      "run": "20261025-194803-242751-return-fixture",
+      "condition": "new asset arrives after existing output",
+      "steady_delivered": 598,
+      "steady_frames": 600,
+      "full_post_start_omissions": 159,
+      "longest_omitted_run_records": 79,
+      "seamless_streaming_pass": false
+    },
+    {
+      "run": "20261025-194859-535640-return-fixture",
+      "condition": "one group delayed 5000ms",
+      "steady_delivered": 599,
+      "steady_frames": 600,
+      "full_post_start_omissions": 63,
+      "longest_omitted_run_records": 62,
+      "first_cohort_output_seconds": 7.5174253,
+      "last_enhanced_publication_seconds": 6.8180026,
+      "seamless_streaming_pass": false
+    },
+    {
+      "run": "20261025-195237-468848-return-fixture",
+      "condition": "final-source stable mode control",
+      "steady_delivered": 595,
+      "steady_frames": 600,
+      "shared_qualification_renewed": true
+    }
+  ],
+  "all_three_final_asset_material_stages_and_images_match_reference": true,
+  "experimental_readonly_preflight": "PASS",
+  "archive": {
+    "path": "artifacts/initial-readiness/run184-cpu-generated.zip",
+    "sha256": "6b5d762f3ca51cf17724f6e068503b306d2f765478abd304d02a04f08e8532db",
+    "original_bytes": 387655204,
+    "archive_bytes": 28749053,
+    "verified_files": 1005,
+    "raw_gate_and_analyses_retained": true
+  },
+  "next_action": "Qualify non-disruptive supported material consumption across the entire streaming interval;stable default unchanged"
+}

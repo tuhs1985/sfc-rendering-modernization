@@ -46,6 +46,10 @@ def main():
     parser.add_argument('--synchronized-buffer',action='store_true',help='Exercise complete-game-frame/ship one-frame pairing,standalone fixture only')
     parser.add_argument('--buffer-early-ready',action='store_true',help='Use normal16ms source lead to exercise queued output before the saved scene is presented')
     parser.add_argument('--multi-ship',action='store_true',help='Two different historical fresh packets through aligned retained scene;offline only')
+    parser.add_argument('--parallel-assets',action='store_true',help='Offline qualification: intra-asset tasks and per-group progressive materials')
+    parser.add_argument('--texture-upload',choices=('inherit','staged-lock','initial-data'),default='inherit',help='Offline comparison: documented SYSTEMMEM initial pixels;unchanged runtime/texture content')
+    parser.add_argument('--asset-admission-service',choices=('inherit','on','off'),default='inherit',help='Offline A/B: service ready assets on the renderer thread during output waits')
+    parser.add_argument('--parallel-material-delay-ms',type=int,choices=(0,3000,5000),default=0,help='Offline parallel control: delay one group per asset without occupying a worker')
     parser.add_argument('--runtime-candidate',choices=('1.6.1',),help='Isolated pinned runtime/header/host experiment;never changes gameplay dependency')
     parser.add_argument('--candidate-initial-replacements',action='store_true',help='Candidate diagnosis only: enable stock replacement policy before device creation')
     parser.add_argument('--candidate-asset-loading',choices=('inherit','synchronous'),default='inherit',help='Candidate offline only: change just NVIDIA initial asset-loading policy;other async controls unchanged')
@@ -68,6 +72,12 @@ def main():
     parser.add_argument('--with-depth',action='store_true',help='Bind known synthetic D24S8 descriptor, not actual scene depth')
     parser.add_argument('--observation-only',action='store_true',help='No Remix runtime/image; control channel and depth observations only')
     args=parser.parse_args()
+    if args.parallel_assets and not args.multi_ship:parser.error('--parallel-assets requires --multi-ship')
+    if args.texture_upload!='inherit' and not(args.multi_ship and args.pipeline_mode=='performance'):parser.error('Texture upload comparison requires performance multi-ship')
+    if args.asset_admission_service!='inherit' and not args.parallel_assets:parser.error('Admission service comparison requires --parallel-assets')
+    if args.parallel_material_delay_ms and not args.parallel_assets:parser.error('Material delay requires --parallel-assets')
+    if args.parallel_assets and (args.pipeline_mode!='performance' or args.runtime_candidate or args.api_texture_prefetch or args.material_library!='layers' or args.material_texture_loading!='preload' or args.loading_policy!='inherit' or args.isolate_initial_material_library or args.isolate_late_material_reload or args.render_prewarm!='off'):
+        parser.error('Parallel qualification uses performance and the unchanged pinned D3D9/material policy;do not mix other experiments')
     if args.runtime_candidate and not(args.multi_ship and args.prewarm):parser.error('--runtime-candidate requires --multi-ship --prewarm')
     if args.candidate_initial_replacements and not args.runtime_candidate:parser.error('--candidate-initial-replacements requires --runtime-candidate')
     if args.candidate_asset_loading!='inherit':
@@ -174,13 +184,17 @@ def main():
             from present_calibration import Receiver
             semantic=Receiver();env.update(SFC_D3D9_SOURCE_TIMING='1',SFC_REMIX_CALIBRATION_SCENE=semantic.name)
         if args.live_owner_timing:
-            if args.multi_ship:from multi_scene_relay import Relay
+            if args.multi_ship and args.parallel_assets:from progressive_scene_relay import Relay
+            elif args.multi_ship:from multi_scene_relay import Relay
             else:from live_owner_timing import Relay
             from run_offline import CAPTURE
             from scene_bundle import snapshots
             from live_scene import decode_mesh
             mode_args={'pipeline_mode':args.pipeline_mode} if args.multi_ship else {}
             live_relay=Relay(work,semantic,TEST,additive=args.d3d9_additive,offline_fixture=args.d3d9_additive,persistent=args.persistent_scene,buffered=args.synchronized_buffer,**mode_args)
+            if args.parallel_assets:live_relay.parallel_material_delay_ms=args.parallel_material_delay_ms
+            if args.parallel_assets and args.asset_admission_service!='inherit':live_relay.admission_service=args.asset_admission_service=='on'
+            if args.texture_upload!='inherit':live_relay.initial_texture_data=args.texture_upload=='initial-data'
             if args.multi_ship:live_relay.isolate_late_material_reload=args.isolate_late_material_reload
             if args.multi_ship:live_relay.isolate_initial_material_library=args.isolate_initial_material_library
             if args.multi_ship:live_relay.loading_policy=args.loading_policy
@@ -274,7 +288,7 @@ def main():
                     host.kill();host.wait(timeout=5) # Explicit owned-renderer crash test.
                 killed=True
             if elapsed-last>.25:history.append({'seconds':elapsed,**state});last=elapsed
-            time.sleep(.05)
+            time.sleep(.002 if args.parallel_assets else .05)
         fixture.wait(timeout=5)
         if fixture.returncode:raise RuntimeError('Native fixture failed: '+str(fixture.returncode))
         text=(work/'fixture.log').read_text(errors='replace')
@@ -360,6 +374,7 @@ def main():
     receipt['prewarm']=args.prewarm
     receipt['runtime_candidate']=candidate_receipt
     receipt['startup_profile']=args.startup_profile
+    receipt['texture_upload']=args.texture_upload
     receipt['menu_idle_seconds']=args.menu_idle_seconds
     receipt['render_prewarm']=args.render_prewarm
     receipt['loading_policy']=args.loading_policy

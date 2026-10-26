@@ -1,7 +1,7 @@
 ---
 title: SFC Modernization — Status Tracker
 updated: 2026-10-25
-checkpoint: Run177 native model loading measured; downstream delay remains
+checkpoint: Run193 asynchronous single-file material route works in isolation; startup target remains open
 tags:
   - sfc-modernization
   - project-status
@@ -10,11 +10,11 @@ tags:
 # SFC Modernization — Status Tracker
 
 > [!summary] Where we are
-> We can take live ships, textures, camera and lighting information from SFC, render through Remix, and put the result inside the game window. Original drawing remains intact. The API experiment is now parked. Current work surveys the game's other rendering behaviors without copying ship geometry or texture images.
+> We can take live ships, textures, camera and lighting information from SFC, render through Remix, and put the result inside the game window. Original drawing remains intact. The API experiment is parked. Current work reduces loading pauses while preserving the fresh-asset pipeline and accepted appearance.
 
-**Next action:** focus on our delivery and Remix preparation delay using existing captured assets and timing evidence. SFC prepared the FCA in about91ms and KFF in14ms; starting earlier provides only a small head start, not a solution to several seconds of delay. No further native discovery run needed. API remains parked.
+**Next action:** carry the successful isolated material handoff into a guarded checkout and run its regression checks before gameplay. Fourteen standalone attempts narrowed the problem: the layered handoff lost material settings, while the existing single-file handoff kept them and avoided the long update gap, including a ship arriving later. Startup still misses the two-second target: first returned ship about3.2s, last initial asset admitted about4.0s. Normal gameplay/runtime unchanged; no new launcher yet. [Run193](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-25-codex-candidate-hot-reload-qualification.md>). Checkpoint committed from parent`9ff2d3d`; no runtime promotion or push. Fresh533-test Python regression passed.
 
-This is a readable project tracker, not execution authority. The repository handoff, approved decisions and run records control implementation. Updated through **Run177, October 25, 2026 (America/New_York)**. Status describes recorded evidence, not work currently running.
+This is a readable project tracker, not execution authority. The repository handoff, approved decisions and run records control implementation. Updated through **Run193, October 25, 2026 (America/New_York)**. Status describes recorded evidence, not work currently running.
 
 ## Status key
 
@@ -64,6 +64,32 @@ Map: [rendering families](<C:/Project/SFC-Modernize Engine/docs/reconnaissance/r
 Evidence: [Run164](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-24-codex-api-scene-proof.md>).
 
 ### SFC-02 — Initial loading below two seconds
+
+- **Supported route tested (Run193):** fourteen offline attempts, twelve completed/two partial. The newer runtime can load and update materials asynchronously, but our layered library handoff did not preserve their appearance. The existing single-file publisher fixed that in isolation. Material controls and a later-arriving ship passed; final tests had only1/1/3 isolated returned-image misses, with no long gap. First output3.2–3.5s is not all ships loaded; last initial asset admitted about4.0s. Two-second startup still OPEN. A separate alias-preparation bug was corrected only in the diagnostic; integrate it before checkout. Normal runtime/settings unchanged. [Details](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-25-codex-candidate-hot-reload-qualification.md>).
+- **Upstream fix identified (Run192):** NVIDIA's REMIX-5883 addresses freezing USD updates with background rebuilds and selective scene changes. Missing from our normal1.5.2source; included in release-linked1.6.1source. Earlier candidate workaround turns that route off; it also solved a real missing-material problem, so changing it needs an isolated regression test. This supported fix is now the next priority before more custom loader/profiling work. Exact SFC result unproven; normal baseline unchanged.
+- **Completed-stage test (Run191):** three material-library writes instead of43; base assets still publish independently, final381assetfiles exact. Startup presentation0.70s but later2.78s gap remains. The diagnostic repeat caught3.42s waiting for queued rendering after a fast Present; it failed to finish resize checks and is partial. This is not a promoted fix. Next: prepare a bounded pinned-runtime NVIDIA trace, not another gameplay run.
+- **Presentation investigation (Run190):** issuing draws is fast; material consumption is a strong remaining suspect. Pinned Remix source reloads its library and resets the scene when our master material file changes. A deferred-publication replay shortened bootstrap3.37→0.89s but shifted trouble later:2.8s returned-layer gap and520/600delivery. All381final asset files matched. A new normal-publication control crashed externally with0xC0000005; evidence retained, cause unassigned. Next offline test: one completed enhancement revision publication per asset, retaining immediate base textures. No launcher/default changes or startup target achieved.
+- **Live checkout reviewed (Run189):** all61textures use initial pixels,0fallback, matching prior KFF/FCA content/settings. Sponsor sees no appearance-time improvement; measured first matching return3.68s versus3.89s. The specific upload fix works;2.84s startup draw/present remains. Existing standalone marks show individual Present-side waits over2.2s. Next attribution is offline; no more gameplay needed to verify activation.
+
+- **Integrated for explicit checkout (Run188):** initial-pixel staging uses renderer-owned moved buffers; native D3D9/Ex exact-pixel/lifetime/reset tests pass in both architectures, and Remix confirms107fast/0fallback uploads. Normal default retained. Standalone first matching output6.27→6.11s is not a meaningful whole-pipeline speedup; late delivery gaps remain. The known lock is avoided; the larger startup target stays open.
+
+- **Stall located (Run187):** more than99% of one1.48–1.85s resource admission was a16KiB staging texture lock. A documented initial-pixel creation route avoids it in isolated tests (~4ms construction) with accepted asset content. Normal adapter integration/native lifetime checks are next; other queue waits and late-material interruptions remain. One control's491/600 delivery fails qualification, so no overall startup/seamless claim or default change.
+
+- **Latest live result:** faster asset production confirmed, no faster screen arrival. The renderer services new asset admission between render/output cycles, so it cannot admit while blocked in those output waits. That dependency is the next investigation; it does not yet explain every second. Client cleanup/hash checks passed. [Run185](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-25-codex-live-two-phase-result.md>).
+
+- **Base-first split implemented:** no bundle wait for enhancement generation or secondary images; base submission precedes enhancement writes. Existing identity algorithms now run in memory, removing repeated helper launches/rereads. Captured FCA base0.51s; final images/materials unchanged.611checks passed.
+- **Renderer limitation remains:** new-model test598/600 and delayed-material test599/600 looked good after settling, but full traces show roughly1–1.3second gaps during updates. No clean streaming claim/default promotion. Same experimental option remains explicit; no extra gameplay needed to diagnose this known issue. [Run184](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-25-codex-base-enhancement-split.md>).
+
+- **Live parallel checkout worked:** correct new-path flags recorded; same ship content as prior stable run. First matching output4.49s→3.49s, both ships admitted by3.37s; sponsor reports~3s and no flicker or other issues. Five post-start omitted outputs versus22previously, with no invalid associations. Clean exit/hashes/settings passed. Materials prepared before first matching output, so the delayed-update stress gate remains open. [Run183](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-25-codex-live-parallel-checkout-result.md>).
+
+- **Explicit experimental checkout ready:** normal launcher plus `-ExperimentalParallelAssets` now enables the new within-ship preparation and progressive materials for your requested live comparison. Known interruptions remain unresolved; default unchanged.521main checks and source/native qualifications passed. The preceding4–5s live run used stable mode with trims enabled, not this new route. [Run182 command and limits](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-25-codex-experimental-parallel-checkout.md>).
+
+- **Parallel preparation implemented:** geometry and image work overlap within a ship as well as across ships. Ready ships no longer wait for the initial batch in the isolated path; completed materials publish by group. Exact final assets retained.600Python tests passed. Single captured-ship preparation2.58s→1.47s; full multi-ship visible loading still exceeds target.
+- **Current blocker:** no-delay renderer delivered596/600 checked frames; delaying a material until ships were visible reduced delivery to538/600, below the existing540 minimum. New publication behavior stays offline-only. Stable gameplay path requalified at595/600; no SFC test needed yet. [Run180](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-25-codex-parallel-progressive-assets.md>).
+
+- **Baseline implemented:** SFC's resource associations are authoritative. Performance default is consistent, repeated material source comparisons are Test-only, and bounded input/derivative reuse is in place.508main tests and standalone4-owner rendering check passed; gameplay qualification refreshed. Exact accepted material/image output retained. No overall startup improvement demonstrated yet; remaining rendering wait still needs attribution. [Run179](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-25-codex-performance-baseline.md>).
+
+- **New investigation:** retained accepted run spends about2seconds preparing assets before activation, then another2.16seconds after submitting the first complete scene before its output is ready. The old startup warm-up accounts for only0.55seconds. A captured-FCA CPU replay reproduced the exact accepted materials/images and identified repeated file lookup, image decoding and duplicate encoding. No production optimization implemented yet. [Run178](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-25-codex-downstream-startup-profile.md>).
 
 **OPEN — target not met.**
 

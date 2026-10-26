@@ -4,6 +4,7 @@
 #include <sddl.h>
 #include <string>
 #include "pipeline_mode.h"
+#include "asset_service.h"
 struct OutputPeer {
  HANDLE mapping=nullptr,process=nullptr,readyEvent=nullptr,doneEvent=nullptr;output_wire::Channel* channel=nullptr;uint64_t session=0;bool disconnected=false;std::wstring mode;
  ~OutputPeer(){
@@ -27,7 +28,7 @@ struct OutputPeer {
   STARTUPINFOW si{};si.cb=sizeof(si);PROCESS_INFORMATION pi{};require(CreateProcessW(exe.c_str(),command.data(),nullptr,nullptr,FALSE,CREATE_NO_WINDOW,nullptr,root.c_str(),&si,&pi)!=0,"launch x86 receiver");process=pi.hProcess;CloseHandle(pi.hThread);
   std::cout<<"OUTPUT_PEER_STARTED pid="<<pi.dwProcessId<<" mapping_bytes="<<sizeof(output_wire::Channel)<<" current_user_only=1\n";
  }
- bool publish(output_wire::Packet p){
+ bool publish(output_wire::Packet p,AssetService* service=nullptr){
   if(disconnected)return false;
   require(output_wire::state(channel)==output_wire::idle,"surface is still owned by receiver");
   if(WaitForSingleObject(process,0)!=WAIT_TIMEOUT){disconnected=true;std::cout<<"OUTPUT_PEER_DISCONNECTED before_publish=1\n";return false;}
@@ -40,7 +41,9 @@ struct OutputPeer {
     InterlockedExchange(&channel->state,output_wire::idle);if(!pipeline_mode::performance())std::cout<<"OUTPUT_ACK sequence="<<p.sequence<<" held_ms="<<GetTickCount64()-began<<'\n';return true;}
    if(state==output_wire::rejected){require(mode==L"invalid","receiver rejected valid output");std::cout<<"OUTPUT_INVALID_REJECTED\n";disconnected=true;break;}
    if(WaitForSingleObject(process,0)!=WAIT_TIMEOUT){require(mode==L"disconnect"||mode==L"exit-acquired","receiver exited unexpectedly");std::cout<<"OUTPUT_PEER_DISCONNECTED acquired="<<(state==output_wire::acquired)<<'\n';disconnected=true;break;}
-   require(GetTickCount64()<deadline,"receiver ACK10s limit");const HANDLE waits[]={process,doneEvent};require(WaitForMultipleObjects(2,waits,FALSE,100)!=WAIT_FAILED,"receiver notification wait");
+   require(GetTickCount64()<deadline,"receiver ACK10s limit");
+   if(service)service->tick(AssetService::Peer);
+   const HANDLE waits[]={process,doneEvent};require(WaitForMultipleObjects(2,waits,FALSE,service&&service->enabled?1:100)!=WAIT_FAILED,"receiver notification wait");
   }
   // Receiver death/rejection:retire this generation;never re-use its textures.
   InterlockedExchange(&channel->state,output_wire::stopped);SetEvent(readyEvent);require(WaitForSingleObject(process,5000)==WAIT_OBJECT_0,"receiver must retire before surface release");return false;

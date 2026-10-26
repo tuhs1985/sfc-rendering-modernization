@@ -5,6 +5,9 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import json
+import hashlib
+from types import SimpleNamespace
 from unittest.mock import patch
 from PIL import Image
 
@@ -15,6 +18,61 @@ import material_binding as binding
 
 class NormalMaterialBinding(unittest.TestCase):
     values=[.4,5,.2,.5,1,.9,0,1,0,.4]
+
+    def fixture(self,root,folder,*,secondary_change=False):
+        root.mkdir(exist_ok=True);folder.mkdir()
+        for name,color in [('primary',(80,120,200,255)),('secondary',(200,80,20,255)),('other',(20,40,60,255))]:
+            Image.new('RGBA',(3,2),color).convert('RGB').save(root/f'{name}.bmp')
+        packet=root/'capture.bin';packet.write_bytes(b'validated upstream geometry')
+        refs={'textures_enabled':1,'resources':[{'id':i,'filename':f'{name}.bmp'} for i,name in enumerate(('primary','secondary','other'),1)],
+              'groups':[{'group':i,'primary':1,'secondary':3 if secondary_change and i else 2,'flags':0x21} for i in range(2)]}
+        packet.with_suffix('.json').write_text(json.dumps(refs))
+        meta,bgra=binding.texture((root/'primary.bmp').read_bytes())
+        (folder/'texture-0.bin').write_bytes(struct.pack('<4I',0x31544653,3,2,len(bgra))+bgra)
+        sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+        scene={'source_packet':'capture.bin','source_packet_sha256':sha(packet),'source_references_sha256':sha(packet.with_suffix('.json')),
+               'textures':[{'original_sha256':sha(root/'primary.bmp')}],'groups':[[0,0,0,3],[1,0,3,3]]}
+        (folder/'scene.json').write_text(json.dumps(scene))
+
+    def test_performance_reuses_inputs_and_derivatives_with_exact_test_mode_output(self):
+        config=(ROOT/'tools/remix_runtime/config/materials.toml').read_bytes()
+        with tempfile.TemporaryDirectory() as temp:
+            root=pathlib.Path(temp);a=root/'a';b=root/'b'
+            self.fixture(root,a);self.fixture(root,b)
+            with patch.object(binding,'ROOT',root),patch.object(binding.subprocess,'run',return_value=SimpleNamespace(stdout='1\n')):
+                with patch.object(binding,'encode_remix_material_dds',wraps=binding.encode_remix_material_dds) as encode:
+                    fast=binding.prepare(a,root,config,evidence_mode='performance')
+                    self.assertEqual(encode.call_count,3)
+                with patch.object(binding,'encode_remix_material_dds',wraps=binding.encode_remix_material_dds) as encode:
+                    checked=binding.prepare(b,root,config,evidence_mode='test')
+                    self.assertEqual(encode.call_count,6)
+            for key in ('mod_sha256','images','groups','image_bytes'):self.assertEqual(fast[key],checked[key])
+            self.assertFalse(fast['source_recomparison']);self.assertTrue(checked['source_recomparison'])
+
+    def test_test_mode_detects_changed_source_but_performance_trusts_upstream(self):
+        config=(ROOT/'tools/remix_runtime/config/materials.toml').read_bytes()
+        with tempfile.TemporaryDirectory() as temp:
+            root=pathlib.Path(temp);a=root/'a';b=root/'b';self.fixture(root,a);self.fixture(root,b)
+            (root/'capture.bin').write_bytes(b'changed after upstream preparation')
+            with patch.object(binding,'ROOT',root),patch.object(binding.subprocess,'run',return_value=SimpleNamespace(stdout='1\n')):
+                with self.assertRaisesRegex(ValueError,'association changed'):binding.prepare(b,root,config,evidence_mode='test')
+                binding.prepare(a,root,config,evidence_mode='performance')
+
+    def test_performance_preserves_conflicting_secondary_identity_rejection(self):
+        config=(ROOT/'tools/remix_runtime/config/materials.toml').read_bytes()
+        with tempfile.TemporaryDirectory() as temp:
+            root=pathlib.Path(temp);folder=root/'a';self.fixture(root,folder,secondary_change=True)
+            with patch.object(binding,'ROOT',root),patch.object(binding.subprocess,'run',return_value=SimpleNamespace(stdout='1\n')):
+                with self.assertRaisesRegex(ValueError,'conflicting image pairs'):binding.prepare(folder,root,config,evidence_mode='performance')
+
+    def test_small_decode_cache_eviction_preserves_output(self):
+        config=(ROOT/'tools/remix_runtime/config/materials.toml').read_bytes()
+        with tempfile.TemporaryDirectory() as temp:
+            root=pathlib.Path(temp);a=root/'a';b=root/'b';self.fixture(root,a);self.fixture(root,b)
+            with patch.object(binding,'ROOT',root),patch.object(binding.subprocess,'run',return_value=SimpleNamespace(stdout='1\n')):
+                normal=binding.prepare(a,root,config,evidence_mode='performance')
+                with patch.object(binding,'DECODE_CACHE_BYTES',24):small=binding.prepare(b,root,config,evidence_mode='performance')
+            self.assertEqual(normal['images'],small['images']);self.assertEqual(normal['mod_sha256'],small['mod_sha256'])
 
     def test_generated_dds_roundtrip_and_unchanged_encoding_offline(self):
         # Full decode deliberately lives only in this small offline regression.

@@ -115,7 +115,8 @@ def main():
     parser.add_argument('--persistent-scene',action='store_true',help='Simulation-driven retained native instances;player-ship display first')
     parser.add_argument('--synchronized-buffer',action='store_true',help='One complete game-frame delay paired with same-frame ship/depth;default off')
     parser.add_argument('--multi-ship',action='store_true',help='Fresh retained different models,configured camera-left diagnostic;originals remain')
-    parser.add_argument('--pipeline-mode',choices=('performance','test'),default='test',help='Multi-ship evidence policy;essential safeguards remain in both')
+    parser.add_argument('--experimental-parallel-assets',action='store_true',help='Sponsor-authorized experimental checkout: parallel parts/progressive materials;late-update delivery gate remains unresolved')
+    parser.add_argument('--pipeline-mode',choices=('performance','test'),default='performance',help='Performance baseline;test adds diagnostic comparisons. Essential safeguards remain in both')
     inspect.add_argument('--private-ship',action='store_true',help='Fresh semantic SDK ship return into private game-side target;no visible change')
     inspect.add_argument('--visible-ship',action='store_true',help='Fresh matching magenta ship at world-offset position in original camera viewport;original ships unchanged')
     inspect.add_argument('--textured-ship',action='store_true',help='Original textures,screen-resolution output,bounded delayed additive display;no suppression')
@@ -127,6 +128,10 @@ def main():
     parser.add_argument('--light-tuning',action='store_true',help='Low-recording live controls until normal game exit;30minute tactical ceiling')
     parser.add_argument('--scene-depth',action='store_true',help='Default-off depth-filtered additive ship;original drawing/UI path unchanged')
     args=parser.parse_args()
+    if args.experimental_parallel_assets and (not args.multi_ship or args.pipeline_mode!='performance'):
+        parser.error('--experimental-parallel-assets requires --multi-ship --pipeline-mode performance')
+    if args.experimental_parallel_assets:
+        print('EXPERIMENTAL PARALLEL ASSETS ENABLED: within-ship tasks and progressive materials. Late material updates may interrupt the extra ships;original SFC drawing stays enabled.',flush=True)
     if args.multi_ship:args.d3d9_additive=True;args.synchronized_buffer=True
     if args.synchronized_buffer:
         if not args.d3d9_additive:parser.error('--synchronized-buffer requires --d3d9-additive')
@@ -246,6 +251,7 @@ def main():
     metadata['light_tuning']=args.light_tuning
     from pipeline_mode import policy as mode_policy
     metadata['pipeline_policy']=mode_policy(args.pipeline_mode)
+    metadata['experimental_parallel_assets']=args.experimental_parallel_assets
     if args.light_tuning:metadata.update(capture_seconds=1800,workflow_seconds=1980,detail_policy='100 scene rows per owner;latest-only native bank;5second presentation samples')
     if args.private_ship:
         metadata.update(probe='REMIX-LIVE-RETURN-001',scene='Fresh selected ship rendered by SDK to PRIVATE game-side target;no backbuffer changes',output_resources_bytes=4*256*256*4)
@@ -394,9 +400,11 @@ def main():
             from present_calibration import Receiver
             if receiver is None:receiver=Receiver()
             if args.live_owner_timing:
-                if args.multi_ship:from multi_scene_relay import Relay
+                if args.experimental_parallel_assets:from progressive_scene_relay import Relay
+                elif args.multi_ship:from multi_scene_relay import Relay
                 else:from live_owner_timing import Relay
                 mode_args={'pipeline_mode':args.pipeline_mode} if args.multi_ship else {}
+                if args.experimental_parallel_assets:mode_args['experimental_live_checkout']=True
                 timing_relay=Relay(work,receiver,TEST,additive=args.d3d9_additive,persistent=args.persistent_scene,buffered=args.synchronized_buffer,**mode_args)
             env['SFC_REMIX_CALIBRATION_SCENE']=receiver.name
             env.pop('SFC_REMIX_VISIBLE_SHIP',None)
@@ -753,6 +761,7 @@ def main():
         if args.multi_ship and args.pipeline_mode=='performance':
             result['identity_census']={'enabled':False,'reason':'Performance mode;identity safeguards remain active'}
         result['pipeline_policy']=mode_policy(args.pipeline_mode)
+        result['experimental_parallel_assets']=args.experimental_parallel_assets
         result['final_report_complete']=True
         run_report.save(work,result)
     print('Evidence: '+str(work),flush=True)

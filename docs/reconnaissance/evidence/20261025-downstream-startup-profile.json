@@ -1,0 +1,38 @@
+{
+  "run": 178,
+  "checkpoint_commit": "9ff2d3d",
+  "pushed": false,
+  "source_reference": "artifacts/remix-runtime/runs/20261024-222711-351784-return-fixture",
+  "cpu_evidence": "artifacts/initial-readiness/cpu-20261025-173730-049878/analysis.json",
+  "cpu_probe_definition": "artifacts/initial-readiness/profile_cpu_prepare.py",
+  "reference_seconds": {
+    "discovery_to_parent_activation": 2.077316,
+    "discovery_to_complete_cohort_output": 5.1703892,
+    "initial_24_present_span": 0.5464606,
+    "cohort_draw_end_to_output_complete": 2.1634363
+  },
+  "cpu_profile_seconds": {
+    "identify": 0.3836397,
+    "scene_bundle": 0.2124269,
+    "extent": 0.0484259,
+    "material_binding": 1.1596745
+  },
+  "cpu_generated_bytes": 77671185,
+  "parity": {
+    "geometry_hash": true,
+    "original_image_hashes": true,
+    "material_stage_hash": true,
+    "all_derived_image_metadata_and_hashes": true,
+    "checked_source_hashes_unchanged": true
+  },
+  "limitations": [
+    "CPU profile is one asset with cProfile overhead and different cache/concurrency; not new gameplay timing",
+    "Native device startup overlaps CPU preparation",
+    "Final complete-output interval not yet split across copy, readiness and postprocessing",
+    "Historical single-Present control lacks enhanced material response and has poorer early delivery"
+  ],
+  "validation_checkpoint_python_tests_passed": 586,
+  "production_changes": false,
+  "game_or_gpu_renderer_launched": false,
+  "next_action": "Isolated bounded image/derivative reuse with exact output parity, followed by low-volume first-output interval timing"
+}

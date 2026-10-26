@@ -27,11 +27,13 @@ struct SharedOutput{
  ComPtr<ID3D11Texture2D> image,staging;ComPtr<IDirect3DTexture9> imported;ComPtr<IDirect3DSurface9> surface;
 };
 struct PollTiming {uint64_t polls=0,sleeps=0,sleep_ticks=0,last_pending=0,ready=0;};
-static PollTiming wait9(IDirect3DQuery9* query,WorkerPoll& poll){
+static PollTiming wait9(IDirect3DQuery9* query,WorkerPoll& poll,AssetService* service=nullptr){
  PollTiming timing{};
  ok(query->Issue(D3DISSUE_END),"output completion issue");const auto deadline=GetTickCount64()+5000;HRESULT status;
  for(;;){++timing.polls;status=query->GetData(nullptr,0,D3DGETDATA_FLUSH);const auto observed=outputTicks();if(status!=S_FALSE){timing.ready=observed;break;}
-  timing.last_pending=observed;require(GetTickCount64()<deadline,"offline GPU completion5s limit");++timing.sleeps;poll.pause();timing.sleep_ticks+=outputTicks()-observed;}
+  timing.last_pending=observed;require(GetTickCount64()<deadline,"offline GPU completion5s limit");
+  if(service)service->tick(AssetService::RenderQuery);
+  ++timing.sleeps;poll.pause();timing.sleep_ticks+=outputTicks()-observed;}
  ok(status,"output completion");return timing;
 }
 #include "render_prewarm.h"
@@ -133,7 +135,13 @@ int wmain(int argc,wchar_t** argv){
    std::ofstream timing;if(detailed)timing.open(root/L"frame-timing.csv");
    DeferredDiagnostics deferredLive(liveTiming,liveMode&&detailed),deferredTiming(timing,liveMode&&detailed,2*1024*1024);
    if(detailed)timing<<"sequence,source_frame,presents,draw_present_us,output_gpu_us,local_readback_us,peer_us,scheduled_us,completed_us,copy_submit_us,render_ready_wait_us,postprocess_us,query_polls,query_sleeps,query_sleep_us,query_last_pending_qpc,query_ready_qpc,input_empty_polls,input_sleep_us,input_validation_us\n";int64_t scheduleStart=0;
-   {Renderer renderer(device.Get(),scene,root);DirectLights lights;lights.start();MultiSceneRuntime cohort;cohort.start(root,device.Get(),scene,renderer);
+   wchar_t textureFlag[2]{};const auto texturePolicy=GetEnvironmentVariableW(L"SFC_D3D9_INITIAL_TEXTURE_DATA",textureFlag,2)==1&&textureFlag[0]==L'1'?TextureUpload::InitialData:TextureUpload::StagedLock;
+   std::cout<<"TEXTURE_UPLOAD initial_data="<<(texturePolicy==TextureUpload::InitialData)<<" source_lifetime="<<(texturePolicy==TextureUpload::InitialData?"renderer":"staging_scope")<<'\n';
+   {Renderer renderer(device.Get(),scene,root,nullptr,texturePolicy);DirectLights lights;lights.start();MultiSceneRuntime cohort;cohort.start(root,device.Get(),scene,renderer,texturePolicy);
+    AssetService admission;wchar_t admissionFlag[2]{};
+    admission.start(cohort.enabled&&GetEnvironmentVariableW(L"SFC_D3D9_ADMISSION_SERVICE",admissionFlag,2)==1&&admissionFlag[0]==L'1',
+      [](void* p){static_cast<MultiSceneRuntime*>(p)->assets();},&cohort);
+    std::cout<<"ASSET_SERVICE enabled="<<admission.enabled<<" renderer_thread="<<GetCurrentThreadId()<<'\n';
     startup.mark("renderer_assets_started");
     if(cohort.enabled){ownerInput.idleWork=[](void* p){static_cast<MultiSceneRuntime*>(p)->assets();};ownerInput.idleContext=&cohort;}
     bool measuredCohort=false;
@@ -142,6 +150,7 @@ int wmain(int argc,wchar_t** argv){
     // submissions must not consume a proof-era frame-count lifetime budget.
     for(size_t frame=0;run_lifetime::iteration(liveMode,frame,paced?paced+(latest?1u:0u):scene.frames.size());++frame){
      if(frame<2)startup.mark("frame_begin",static_cast<unsigned>(frame));
+     admission.tick(AssetService::Boundary);
      Frame state=scene.frames[frame%scene.frames.size()];frame_ingress::Packet input{};
      live_owner::Packet rawInput{};if(liveMode&&frame){if(!ownerInput.next(scene,state,rawInput))break;}
      if(cohort.enabled&&frame&&!cohort.next(rawInput))continue;
@@ -164,6 +173,7 @@ int wmain(int argc,wchar_t** argv){
      if(measureCohort)startup.mark("cohort_draw_begin");
      bool submitted=false;
      for(unsigned warm=0;warm<presents;++warm){if(!frame)startup.mark("bootstrap_begin",warm,false);lights.draw(external);if(cohort.enabled&&frame){if(!cohort.draw(scene.width,scene.height,displacement))break;}else renderer.draw(state,false,scene.width,scene.height);if(!frame)startup.mark("bootstrap_drawn",warm,false);submitted=true;ok(device->PresentEx(nullptr,nullptr,nullptr,nullptr,0),"normal D3D9 PresentEx");
+      admission.tick(frame?AssetService::Boundary:AssetService::Bootstrap);
       if(!frame)startup.mark("bootstrap_presented",warm,false);
       MSG message{};while(PeekMessageW(&message,nullptr,0,0,PM_REMOVE)){TranslateMessage(&message);DispatchMessageW(&message);}if(presents>1)Sleep(10);
      }
@@ -180,12 +190,12 @@ int wmain(int argc,wchar_t** argv){
      // Do not copy an unused vendor picking image every frame.
      for(unsigned i=0;i<(coverage.enabled?2u:3u);++i)apiok(external.dxvk_CopyRenderingOutput(outputs[i].surface.Get(),types[i]),"copy normal rendered output");
      const auto copiesQueued=outputTicks();
-     const auto renderPoll=wait9(fence.Get(),renderPollWait);
+     const auto renderPoll=wait9(fence.Get(),renderPollWait,&admission);
      const auto renderReady=outputTicks();
      const bool graded=combinedPost?visuals.grade.drawCoverage(context.Get(),outputs[0].image.Get(),visuals.image.post(),state.owner):visuals.apply(context.Get(),outputs[0].image.Get());
      const bool covered=combinedPost||coverage.draw(context.Get(),state.owner,scene.width,scene.height);
      if(graded||covered){
-      if(coverage.enabled)postFence.wait();else{
+      if(coverage.enabled)postFence.wait(&admission);else{
       context->End(consumerFence.Get());context->Flush();const auto limit=GetTickCount64()+5000;BOOL done=FALSE;HRESULT status;
       do{status=context->GetData(consumerFence.Get(),&done,sizeof(done),0);ok(status,"coverage GPU completion");require(GetTickCount64()<limit,"coverage GPU5s limit");if(status==S_FALSE||!done)Sleep(1);}while(status==S_FALSE||!done);
       }
@@ -200,10 +210,14 @@ int wmain(int argc,wchar_t** argv){
      if(argc==5){output_wire::Packet p{};p.sequence=outputSequence;p.source_frame=state.frame;p.owner=state.owner;p.revision=state.revision;p.source_state_hash=liveMode&&frame?rawInput.state_hash:output_wire::hash(&state,sizeof(Frame));p.scene_hash=sceneHash;p.width=scene.width;p.height=scene.height;p.luid_low=adapterLuid.LowPart;p.luid_high=adapterLuid.HighPart;memcpy(p.handles,sharedHandles.data(),sizeof(p.handles));
       if(liveMode&&frame){game_output::Metadata meta{};meta.source_sequence=rawInput.sequence;memcpy(meta.source_session,rawInput.session,16);meta.checksum=game_output::checksum(meta);game_output::metadata(*peer.channel,meta);}
       if(cohort.enabled&&frame)p.source_state_hash=cohort.packet.checksum;
-      peer.publish(p);}
+      peer.publish(p,&admission);}
      if(frame<2)startup.mark("receiver_ack",static_cast<unsigned>(frame));
      if(measureCohort){startup.mark("cohort_receiver_ack");measuredCohort=true;}
      const auto peerDone=outputTicks();const auto us=[&](int64_t a,int64_t b){return (b-a)*1000000/frequency.QuadPart;};
+     if((admission.enabled||startup.enabled)&&(frame==0||measureCohort))std::cout<<"OUTPUT_STAGE_TIMING index="<<frame<<" source_frame="<<state.frame<<" frequency="<<frequency.QuadPart
+       <<" began_qpc="<<began<<" peer_done_qpc="<<peerDone<<" draw_present_us="<<us(began,drawn)<<" copy_submit_us="<<us(drawn,copiesQueued)
+       <<" query_wait_us="<<us(copiesQueued,renderReady)<<" postprocess_us="<<us(renderReady,outputDone)<<" peer_us="<<us(localDone,peerDone)
+       <<" admission_service_total_us="<<us(0,static_cast<int64_t>(admission.ticks))<<'\n';
      if(liveMode){if(!frame)ownerInput.start(scene);
       else{if(!coverage.enabled||!peer.channel->reserved){ownerInput.complete(rawInput,static_cast<uint64_t>(peerDone));if(detailed){liveTiming<<rawInput.sequence<<','<<state.frame<<','<<state.owner<<','<<state.revision<<','<<rawInput.offered<<','<<peerDone<<','<<frequency.QuadPart<<','<<rawInput.state_hash<<','<<outputSequence<<','<<takenAt<<','<<began<<'\n';require(bool(liveTiming),"live timing output");}}else if(detailed)std::cout<<"GAME_POOL_OMITTED source_sequence="<<rawInput.sequence<<'\n';}}
      if(detailed){timing<<frame+1<<','<<state.frame<<','<<presents<<','<<us(began,drawn)<<','<<us(drawn,outputDone)<<','<<us(outputDone,localDone)<<','<<us(localDone,peerDone)<<','<<(paced&&frame&&!latest?static_cast<int64_t>(frame-1)*1000000/60:-1)<<','<<(paced&&frame&&!latest?us(scheduleStart,peerDone):-1)<<','<<us(drawn,copiesQueued)<<','<<us(copiesQueued,renderReady)<<','<<us(renderReady,outputDone)<<','<<renderPoll.polls<<','<<renderPoll.sleeps<<','<<us(0,renderPoll.sleep_ticks)<<','<<renderPoll.last_pending<<','<<renderPoll.ready<<','<<ownerInput.empty_polls<<','<<us(0,ownerInput.sleep_ticks)<<','<<us(0,ownerInput.validation_ticks)<<'\n';require(bool(timing),"timing output");}
@@ -219,6 +233,9 @@ int wmain(int argc,wchar_t** argv){
     if(liveMode){std::cout<<"LIVE_ADMISSION expired="<<ownerInput.expired<<" old_epoch="<<ownerInput.oldPackets<<" maximum_age_us="<<(ownerInput.closedFrame?50000:2000)<<'\n';
      for(unsigned stage=0;stage<2;++stage){std::cout<<"LIVE_ADMISSION_STAGE stage="<<stage;
       for(unsigned reason=0;reason<static_cast<unsigned>(live_owner::Admission::Count);++reason)std::cout<<" reason"<<reason<<'='<<ownerInput.admissionCounts[stage][reason];std::cout<<'\n';}}
+    if(admission.enabled)std::cout<<"ASSET_SERVICE_SUMMARY bootstrap="<<admission.calls[AssetService::Bootstrap]<<" query="<<admission.calls[AssetService::RenderQuery]
+      <<" post="<<admission.calls[AssetService::Postprocess]<<" peer="<<admission.calls[AssetService::Peer]<<" boundary="<<admission.calls[AssetService::Boundary]
+      <<" ticks="<<admission.ticks<<" frequency="<<frequency.QuadPart<<'\n';
     lights.close(external);
    }
    if(argc==5)peer.finish();

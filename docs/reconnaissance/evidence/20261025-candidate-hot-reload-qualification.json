@@ -1,0 +1,2684 @@
+{
+  "run": 193,
+  "decision": "Isolated async single-file material publication preserves response and avoids long update gaps;normal path unchanged,sub2s target open",
+  "sfc_launched": false,
+  "production_changed": false,
+  "head": "9ff2d3d",
+  "runtime_source_parity": "Packaged5a7eec84 banner/public release-linked0a6cd5b not instruction-level verified",
+  "normal_host_sha256": "954c2c631c11fffd05f6d40334d06f1f16059bf02b25b2957112fb3dffbf582a",
+  "runs": [
+    {
+      "run": "20261026-005109-470034-return-fixture",
+      "mode": "async",
+      "emission_off": false,
+      "retouch": false,
+      "disable_preserve": false,
+      "complete_before_device": false,
+      "late_emission_off": false,
+      "flat_library": false,
+      "late_asset": false,
+      "error": null,
+      "first_matching_s": 3.438031300000148,
+      "post_start_omissions": 3,
+      "max_gap_records": 1,
+      "max_gap_span_s": 0.0,
+      "settled_window": {
+        "frames": 600,
+        "draws": 593
+      },
+      "native_job": {
+        "schema": "remix.job.v1",
+        "pid": 37864,
+        "exit_code": 0,
+        "stop_reason": 0,
+        "elapsed_ms": 20281,
+        "console_bytes": 48170,
+        "peak_scratch_bytes": 166425518,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      },
+      "state": {
+        "pid": 39436,
+        "stopped": true,
+        "last_frame": 201074,
+        "published": 885,
+        "dropped": 189,
+        "invalid": 0,
+        "asset_ready": 4,
+        "asset_rejected": 0,
+        "closed_frame": 200893
+      },
+      "partial": [],
+      "material_master_publications": 3,
+      "asset_timings": [
+        {
+          "id": 1,
+          "cpu_us": 765896,
+          "gpu_admit_us": 9211,
+          "at_us": 27785270238
+        },
+        {
+          "id": 2,
+          "cpu_us": 2510,
+          "gpu_admit_us": 7,
+          "at_us": 27785273536
+        },
+        {
+          "id": 3,
+          "cpu_us": 789707,
+          "gpu_admit_us": 6142,
+          "at_us": 27786070781
+        }
+      ]
+    },
+    {
+      "run": "20261026-005345-379946-return-fixture",
+      "mode": "async",
+      "emission_off": true,
+      "retouch": false,
+      "disable_preserve": false,
+      "complete_before_device": false,
+      "late_emission_off": false,
+      "flat_library": false,
+      "late_asset": false,
+      "error": "('derived', 'ea578b6cbb28fe7a6fcd11d9bda6647f5da55ff381c2cde771f20b57b8fc4836'); Live fixture: Owned live GPU workflow failed to retire normally",
+      "first_matching_s": null,
+      "post_start_omissions": null,
+      "max_gap_records": null,
+      "max_gap_span_s": null,
+      "settled_window": null,
+      "native_job": null,
+      "state": null,
+      "partial": null,
+      "material_master_publications": null,
+      "asset_timings": null
+    },
+    {
+      "run": "20261026-005717-886433-return-fixture",
+      "mode": "async",
+      "emission_off": true,
+      "retouch": false,
+      "disable_preserve": false,
+      "complete_before_device": false,
+      "late_emission_off": false,
+      "flat_library": false,
+      "late_asset": false,
+      "error": null,
+      "first_matching_s": 3.3659927000007883,
+      "post_start_omissions": 2,
+      "max_gap_records": 1,
+      "max_gap_span_s": 0.0,
+      "settled_window": {
+        "frames": 600,
+        "draws": 593
+      },
+      "native_job": {
+        "schema": "remix.job.v1",
+        "pid": 3796,
+        "exit_code": 0,
+        "stop_reason": 0,
+        "elapsed_ms": 20250,
+        "console_bytes": 48367,
+        "peak_scratch_bytes": 166426106,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      },
+      "state": {
+        "pid": 16344,
+        "stopped": true,
+        "last_frame": 201072,
+        "published": 883,
+        "dropped": 189,
+        "invalid": 0,
+        "asset_ready": 4,
+        "asset_rejected": 0,
+        "closed_frame": 200891
+      },
+      "partial": [],
+      "material_master_publications": 3,
+      "asset_timings": [
+        {
+          "id": 1,
+          "cpu_us": 759442,
+          "gpu_admit_us": 7671,
+          "at_us": 28152596695
+        },
+        {
+          "id": 2,
+          "cpu_us": 2765,
+          "gpu_admit_us": 9,
+          "at_us": 28152602370
+        },
+        {
+          "id": 3,
+          "cpu_us": 789625,
+          "gpu_admit_us": 3574,
+          "at_us": 28153397860
+        }
+      ]
+    },
+    {
+      "run": "20261026-005852-224913-return-fixture",
+      "mode": "sync",
+      "emission_off": false,
+      "retouch": false,
+      "disable_preserve": false,
+      "complete_before_device": false,
+      "late_emission_off": false,
+      "flat_library": false,
+      "late_asset": false,
+      "error": null,
+      "first_matching_s": 3.226018400000612,
+      "post_start_omissions": 82,
+      "max_gap_records": 49,
+      "max_gap_span_s": 0.8106891,
+      "settled_window": {
+        "frames": 600,
+        "draws": 563
+      },
+      "native_job": {
+        "schema": "remix.job.v1",
+        "pid": 35304,
+        "exit_code": 0,
+        "stop_reason": 0,
+        "elapsed_ms": 19829,
+        "console_bytes": 67419,
+        "peak_scratch_bytes": 166464493,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      },
+      "state": {
+        "pid": 16344,
+        "stopped": true,
+        "last_frame": 201093,
+        "published": 913,
+        "dropped": 180,
+        "invalid": 0,
+        "asset_ready": 4,
+        "asset_rejected": 0,
+        "closed_frame": 200912
+      },
+      "partial": [],
+      "material_master_publications": 3,
+      "asset_timings": [
+        {
+          "id": 1,
+          "cpu_us": 738923,
+          "gpu_admit_us": 10379,
+          "at_us": 28246865676
+        },
+        {
+          "id": 2,
+          "cpu_us": 2443,
+          "gpu_admit_us": 6,
+          "at_us": 28246869819
+        },
+        {
+          "id": 3,
+          "cpu_us": 786013,
+          "gpu_admit_us": 4588,
+          "at_us": 28247661720
+        }
+      ]
+    },
+    {
+      "run": "20261026-010038-016869-return-fixture",
+      "mode": "async",
+      "emission_off": false,
+      "retouch": true,
+      "disable_preserve": false,
+      "complete_before_device": false,
+      "late_emission_off": false,
+      "flat_library": false,
+      "late_asset": false,
+      "error": null,
+      "first_matching_s": 3.2181710000004387,
+      "post_start_omissions": 3,
+      "max_gap_records": 1,
+      "max_gap_span_s": 0.0,
+      "settled_window": {
+        "frames": 600,
+        "draws": 593
+      },
+      "native_job": {
+        "schema": "remix.job.v1",
+        "pid": 3808,
+        "exit_code": 0,
+        "stop_reason": 0,
+        "elapsed_ms": 20015,
+        "console_bytes": 48502,
+        "peak_scratch_bytes": 166426221,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      },
+      "state": {
+        "pid": 45264,
+        "stopped": true,
+        "last_frame": 201065,
+        "published": 885,
+        "dropped": 180,
+        "invalid": 0,
+        "asset_ready": 4,
+        "asset_rejected": 0,
+        "closed_frame": 200884
+      },
+      "partial": [],
+      "material_master_publications": 3,
+      "asset_timings": [
+        {
+          "id": 1,
+          "cpu_us": 753097,
+          "gpu_admit_us": 6616,
+          "at_us": 28353032979
+        },
+        {
+          "id": 2,
+          "cpu_us": 4509,
+          "gpu_admit_us": 2,
+          "at_us": 28353038792
+        },
+        {
+          "id": 3,
+          "cpu_us": 759002,
+          "gpu_admit_us": 2801,
+          "at_us": 28353801000
+        }
+      ]
+    },
+    {
+      "run": "20261026-010339-774851-return-fixture",
+      "mode": "handoff",
+      "emission_off": false,
+      "retouch": false,
+      "disable_preserve": false,
+      "complete_before_device": false,
+      "late_emission_off": false,
+      "flat_library": false,
+      "late_asset": false,
+      "error": "Native fixture failed: 1",
+      "first_matching_s": null,
+      "post_start_omissions": null,
+      "max_gap_records": null,
+      "max_gap_span_s": null,
+      "settled_window": null,
+      "native_job": {
+        "schema": "remix.job.v1",
+        "pid": 38464,
+        "exit_code": 0,
+        "stop_reason": 0,
+        "elapsed_ms": 46047,
+        "console_bytes": 59051,
+        "peak_scratch_bytes": 166450075,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      },
+      "state": {
+        "pid": 40016,
+        "stopped": true,
+        "last_frame": 202565,
+        "published": 353,
+        "dropped": 2212,
+        "invalid": 0,
+        "asset_ready": 4,
+        "asset_rejected": 0,
+        "closed_frame": 202564
+      },
+      "partial": [],
+      "material_master_publications": 3,
+      "asset_timings": [
+        {
+          "id": 1,
+          "cpu_us": 781156,
+          "gpu_admit_us": 91521,
+          "at_us": 28565326471
+        },
+        {
+          "id": 2,
+          "cpu_us": 3440,
+          "gpu_admit_us": 10,
+          "at_us": 28569638336
+        },
+        {
+          "id": 3,
+          "cpu_us": 836817,
+          "gpu_admit_us": 8520,
+          "at_us": 28570497036
+        }
+      ]
+    },
+    {
+      "run": "20261026-010538-056057-return-fixture",
+      "mode": "handoff",
+      "emission_off": false,
+      "retouch": false,
+      "disable_preserve": false,
+      "complete_before_device": false,
+      "late_emission_off": false,
+      "flat_library": false,
+      "late_asset": false,
+      "error": null,
+      "first_matching_s": 4.025714700001117,
+      "post_start_omissions": 6,
+      "max_gap_records": 1,
+      "max_gap_span_s": 0.0,
+      "settled_window": {
+        "frames": 600,
+        "draws": 595
+      },
+      "native_job": {
+        "schema": "remix.job.v1",
+        "pid": 45848,
+        "exit_code": 0,
+        "stop_reason": 0,
+        "elapsed_ms": 19985,
+        "console_bytes": 48718,
+        "peak_scratch_bytes": 166426448,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      },
+      "state": {
+        "pid": 44940,
+        "stopped": true,
+        "last_frame": 201097,
+        "published": 871,
+        "dropped": 226,
+        "invalid": 0,
+        "asset_ready": 4,
+        "asset_rejected": 0,
+        "closed_frame": 200916
+      },
+      "partial": [],
+      "material_master_publications": 3,
+      "asset_timings": [
+        {
+          "id": 1,
+          "cpu_us": 747917,
+          "gpu_admit_us": 5913,
+          "at_us": 28653894030
+        },
+        {
+          "id": 2,
+          "cpu_us": 3165,
+          "gpu_admit_us": 9,
+          "at_us": 28653927616
+        },
+        {
+          "id": 3,
+          "cpu_us": 821285,
+          "gpu_admit_us": 5713,
+          "at_us": 28654765490
+        }
+      ]
+    },
+    {
+      "run": "20261026-010841-367818-return-fixture",
+      "mode": "async",
+      "emission_off": false,
+      "retouch": false,
+      "disable_preserve": true,
+      "complete_before_device": false,
+      "late_emission_off": false,
+      "flat_library": false,
+      "late_asset": false,
+      "error": null,
+      "first_matching_s": 3.540678500001377,
+      "post_start_omissions": 2,
+      "max_gap_records": 1,
+      "max_gap_span_s": 0.0,
+      "settled_window": {
+        "frames": 600,
+        "draws": 594
+      },
+      "native_job": {
+        "schema": "remix.job.v1",
+        "pid": 39488,
+        "exit_code": 0,
+        "stop_reason": 0,
+        "elapsed_ms": 20172,
+        "console_bytes": 48082,
+        "peak_scratch_bytes": 186358989,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      },
+      "state": {
+        "pid": 34684,
+        "stopped": true,
+        "last_frame": 201063,
+        "published": 865,
+        "dropped": 198,
+        "invalid": 0,
+        "asset_ready": 4,
+        "asset_rejected": 0,
+        "closed_frame": 200882
+      },
+      "partial": [],
+      "material_master_publications": 3,
+      "asset_timings": [
+        {
+          "id": 1,
+          "cpu_us": 66077,
+          "gpu_admit_us": 10,
+          "at_us": 28836539669
+        },
+        {
+          "id": 2,
+          "cpu_us": 36502,
+          "gpu_admit_us": 583,
+          "at_us": 28836608807
+        },
+        {
+          "id": 3,
+          "cpu_us": 807602,
+          "gpu_admit_us": 7079,
+          "at_us": 28837434928
+        }
+      ]
+    },
+    {
+      "run": "20261026-011212-992730-return-fixture",
+      "mode": "async",
+      "emission_off": false,
+      "retouch": false,
+      "disable_preserve": false,
+      "complete_before_device": true,
+      "late_emission_off": false,
+      "flat_library": false,
+      "late_asset": false,
+      "error": null,
+      "first_matching_s": 8.405576300003304,
+      "post_start_omissions": 2,
+      "max_gap_records": 1,
+      "max_gap_span_s": 0.0,
+      "settled_window": {
+        "frames": 600,
+        "draws": 598
+      },
+      "native_job": {
+        "schema": "remix.job.v1",
+        "pid": 36716,
+        "exit_code": 0,
+        "stop_reason": 0,
+        "elapsed_ms": 19985,
+        "console_bytes": 57173,
+        "peak_scratch_bytes": 166443713,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      },
+      "state": {
+        "pid": 36032,
+        "stopped": true,
+        "last_frame": 201353,
+        "published": 878,
+        "dropped": 475,
+        "invalid": 0,
+        "asset_ready": 4,
+        "asset_rejected": 0,
+        "closed_frame": 201172
+      },
+      "partial": [],
+      "material_master_publications": 3,
+      "asset_timings": [
+        {
+          "id": 1,
+          "cpu_us": 696659,
+          "gpu_admit_us": 7755,
+          "at_us": 29052952869
+        },
+        {
+          "id": 2,
+          "cpu_us": 2722,
+          "gpu_admit_us": 8,
+          "at_us": 29052956650
+        },
+        {
+          "id": 3,
+          "cpu_us": 766791,
+          "gpu_admit_us": 3373,
+          "at_us": 29053728073
+        }
+      ]
+    },
+    {
+      "run": "20261026-011354-044126-return-fixture",
+      "mode": "async",
+      "emission_off": true,
+      "retouch": false,
+      "disable_preserve": false,
+      "complete_before_device": true,
+      "late_emission_off": false,
+      "flat_library": false,
+      "late_asset": false,
+      "error": null,
+      "first_matching_s": 8.535722600001463,
+      "post_start_omissions": 3,
+      "max_gap_records": 1,
+      "max_gap_span_s": 0.0,
+      "settled_window": {
+        "frames": 600,
+        "draws": 594
+      },
+      "native_job": {
+        "schema": "remix.job.v1",
+        "pid": 25604,
+        "exit_code": 0,
+        "stop_reason": 0,
+        "elapsed_ms": 20015,
+        "console_bytes": 57173,
+        "peak_scratch_bytes": 166443713,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      },
+      "state": {
+        "pid": 13448,
+        "stopped": true,
+        "last_frame": 201361,
+        "published": 879,
+        "dropped": 482,
+        "invalid": 0,
+        "asset_ready": 4,
+        "asset_rejected": 0,
+        "closed_frame": 201180
+      },
+      "partial": [],
+      "material_master_publications": 3,
+      "asset_timings": [
+        {
+          "id": 1,
+          "cpu_us": 699787,
+          "gpu_admit_us": 5513,
+          "at_us": 29154626383
+        },
+        {
+          "id": 2,
+          "cpu_us": 2877,
+          "gpu_admit_us": 8,
+          "at_us": 29154630389
+        },
+        {
+          "id": 3,
+          "cpu_us": 743902,
+          "gpu_admit_us": 3503,
+          "at_us": 29155379439
+        }
+      ]
+    },
+    {
+      "run": "20261026-011956-871319-return-fixture",
+      "mode": "async",
+      "emission_off": false,
+      "retouch": false,
+      "disable_preserve": false,
+      "complete_before_device": true,
+      "late_emission_off": true,
+      "flat_library": false,
+      "late_asset": false,
+      "error": null,
+      "first_matching_s": 8.333098800001608,
+      "post_start_omissions": 5,
+      "max_gap_records": 1,
+      "max_gap_span_s": 0.0,
+      "settled_window": {
+        "frames": 600,
+        "draws": 592
+      },
+      "native_job": {
+        "schema": "remix.job.v1",
+        "pid": 38160,
+        "exit_code": 0,
+        "stop_reason": 0,
+        "elapsed_ms": 20078,
+        "console_bytes": 57364,
+        "peak_scratch_bytes": 166443996,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      },
+      "state": {
+        "pid": 10252,
+        "stopped": true,
+        "last_frame": 201347,
+        "published": 877,
+        "dropped": 470,
+        "invalid": 0,
+        "asset_ready": 4,
+        "asset_rejected": 0,
+        "closed_frame": 201166
+      },
+      "partial": [],
+      "material_master_publications": 3,
+      "asset_timings": [
+        {
+          "id": 1,
+          "cpu_us": 719878,
+          "gpu_admit_us": 7176,
+          "at_us": 29517026832
+        },
+        {
+          "id": 2,
+          "cpu_us": 3288,
+          "gpu_admit_us": 8,
+          "at_us": 29517032667
+        },
+        {
+          "id": 3,
+          "cpu_us": 752633,
+          "gpu_admit_us": 4211,
+          "at_us": 29517791559
+        }
+      ]
+    },
+    {
+      "run": "20261026-012445-679174-return-fixture",
+      "mode": "async",
+      "emission_off": false,
+      "retouch": false,
+      "disable_preserve": false,
+      "complete_before_device": false,
+      "late_emission_off": false,
+      "flat_library": true,
+      "late_asset": false,
+      "error": null,
+      "first_matching_s": 3.207955000001675,
+      "post_start_omissions": 1,
+      "max_gap_records": 1,
+      "max_gap_span_s": 0.0,
+      "settled_window": {
+        "frames": 600,
+        "draws": 596
+      },
+      "native_job": {
+        "schema": "remix.job.v1",
+        "pid": 8112,
+        "exit_code": 0,
+        "stop_reason": 0,
+        "elapsed_ms": 19922,
+        "console_bytes": 60948,
+        "peak_scratch_bytes": 166583570,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      },
+      "state": {
+        "pid": 13484,
+        "stopped": true,
+        "last_frame": 201077,
+        "published": 898,
+        "dropped": 179,
+        "invalid": 0,
+        "asset_ready": 4,
+        "asset_rejected": 0,
+        "closed_frame": 200896
+      },
+      "partial": [],
+      "material_master_publications": 3,
+      "asset_timings": [
+        {
+          "id": 1,
+          "cpu_us": 728567,
+          "gpu_admit_us": 7782,
+          "at_us": 29801123227
+        },
+        {
+          "id": 2,
+          "cpu_us": 2508,
+          "gpu_admit_us": 5,
+          "at_us": 29801126297
+        },
+        {
+          "id": 3,
+          "cpu_us": 787773,
+          "gpu_admit_us": 5246,
+          "at_us": 29801920248
+        }
+      ]
+    },
+    {
+      "run": "20261026-012653-054882-return-fixture",
+      "mode": "async",
+      "emission_off": true,
+      "retouch": false,
+      "disable_preserve": false,
+      "complete_before_device": false,
+      "late_emission_off": false,
+      "flat_library": true,
+      "late_asset": false,
+      "error": null,
+      "first_matching_s": 3.236581199998909,
+      "post_start_omissions": 1,
+      "max_gap_records": 1,
+      "max_gap_span_s": 0.0,
+      "settled_window": {
+        "frames": 600,
+        "draws": 595
+      },
+      "native_job": {
+        "schema": "remix.job.v1",
+        "pid": 38748,
+        "exit_code": 0,
+        "stop_reason": 0,
+        "elapsed_ms": 20141,
+        "console_bytes": 61041,
+        "peak_scratch_bytes": 166583663,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      },
+      "state": {
+        "pid": 43068,
+        "stopped": true,
+        "last_frame": 201067,
+        "published": 886,
+        "dropped": 181,
+        "invalid": 0,
+        "asset_ready": 4,
+        "asset_rejected": 0,
+        "closed_frame": 200886
+      },
+      "partial": [],
+      "material_master_publications": 3,
+      "asset_timings": [
+        {
+          "id": 1,
+          "cpu_us": 740176,
+          "gpu_admit_us": 4219,
+          "at_us": 29928116167
+        },
+        {
+          "id": 2,
+          "cpu_us": 2471,
+          "gpu_admit_us": 8,
+          "at_us": 29928121948
+        },
+        {
+          "id": 3,
+          "cpu_us": 781842,
+          "gpu_admit_us": 4259,
+          "at_us": 29928910227
+        }
+      ]
+    },
+    {
+      "run": "20261026-012743-548152-return-fixture",
+      "mode": "async",
+      "emission_off": false,
+      "retouch": false,
+      "disable_preserve": false,
+      "complete_before_device": false,
+      "late_emission_off": false,
+      "flat_library": true,
+      "late_asset": true,
+      "error": null,
+      "first_matching_s": 3.465704000002006,
+      "post_start_omissions": 3,
+      "max_gap_records": 1,
+      "max_gap_span_s": 0.0,
+      "settled_window": {
+        "frames": 600,
+        "draws": 595
+      },
+      "native_job": {
+        "schema": "remix.job.v1",
+        "pid": 16296,
+        "exit_code": 0,
+        "stop_reason": 0,
+        "elapsed_ms": 22954,
+        "console_bytes": 58591,
+        "peak_scratch_bytes": 166576690,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      },
+      "state": {
+        "pid": 16984,
+        "stopped": true,
+        "last_frame": 201285,
+        "published": 1091,
+        "dropped": 194,
+        "invalid": 0,
+        "asset_ready": 4,
+        "asset_rejected": 0,
+        "closed_frame": 201104
+      },
+      "partial": [],
+      "material_master_publications": 3,
+      "asset_timings": [
+        {
+          "id": 1,
+          "cpu_us": 745611,
+          "gpu_admit_us": 7474,
+          "at_us": 29979074796
+        },
+        {
+          "id": 2,
+          "cpu_us": 2834,
+          "gpu_admit_us": 13,
+          "at_us": 29979079132
+        },
+        {
+          "id": 4,
+          "cpu_us": 758121,
+          "gpu_admit_us": 3443,
+          "at_us": 29983482518
+        }
+      ]
+    }
+  ],
+  "image_comparisons": [
+    {
+      "a": "20261026-005109-470034-return-fixture",
+      "b": "20261026-005717-886433-return-fixture",
+      "first_to_late": false,
+      "per_model": {
+        "FCA": {
+          "roi": [
+            200,
+            730,
+            570,
+            970
+          ],
+          "ship_pixels": 15008,
+          "rgb_mean_abs_error": 0.9996224045753479,
+          "over10": 46
+        },
+        "RCA": {
+          "roi": [
+            780,
+            730,
+            1110,
+            970
+          ],
+          "ship_pixels": 10909,
+          "rgb_mean_abs_error": 0.6326274871826172,
+          "over10": 5
+        },
+        "FDD": {
+          "roi": [
+            1140,
+            730,
+            1330,
+            970
+          ],
+          "ship_pixels": 5396,
+          "rgb_mean_abs_error": 1.0569558143615723,
+          "over10": 17
+        }
+      },
+      "scope": "Same fixed synthetic poses;union ship-pixel mask;not a complete material correctness proof"
+    },
+    {
+      "a": "20261026-005109-470034-return-fixture",
+      "b": "20261026-005852-224913-return-fixture",
+      "first_to_late": false,
+      "per_model": {
+        "FCA": {
+          "roi": [
+            200,
+            730,
+            570,
+            970
+          ],
+          "ship_pixels": 15008,
+          "rgb_mean_abs_error": 14.791356086730957,
+          "over10": 5729
+        },
+        "RCA": {
+          "roi": [
+            780,
+            730,
+            1110,
+            970
+          ],
+          "ship_pixels": 10909,
+          "rgb_mean_abs_error": 38.4620361328125,
+          "over10": 9250
+        },
+        "FDD": {
+          "roi": [
+            1140,
+            730,
+            1330,
+            970
+          ],
+          "ship_pixels": 5396,
+          "rgb_mean_abs_error": 11.457622528076172,
+          "over10": 1529
+        }
+      },
+      "scope": "Same fixed synthetic poses;union ship-pixel mask;not a complete material correctness proof"
+    },
+    {
+      "a": "20261026-005717-886433-return-fixture",
+      "b": "20261026-005852-224913-return-fixture",
+      "first_to_late": false,
+      "per_model": {
+        "FCA": {
+          "roi": [
+            200,
+            730,
+            570,
+            970
+          ],
+          "ship_pixels": 15008,
+          "rgb_mean_abs_error": 14.762327194213867,
+          "over10": 5701
+        },
+        "RCA": {
+          "roi": [
+            780,
+            730,
+            1110,
+            970
+          ],
+          "ship_pixels": 10909,
+          "rgb_mean_abs_error": 38.47602844238281,
+          "over10": 9252
+        },
+        "FDD": {
+          "roi": [
+            1140,
+            730,
+            1330,
+            970
+          ],
+          "ship_pixels": 5396,
+          "rgb_mean_abs_error": 11.513960838317871,
+          "over10": 1526
+        }
+      },
+      "scope": "Same fixed synthetic poses;union ship-pixel mask;not a complete material correctness proof"
+    },
+    {
+      "a": "20261026-005109-470034-return-fixture",
+      "b": "20261026-010038-016869-return-fixture",
+      "first_to_late": false,
+      "per_model": {
+        "FCA": {
+          "roi": [
+            200,
+            730,
+            570,
+            970
+          ],
+          "ship_pixels": 15008,
+          "rgb_mean_abs_error": 0.07349413633346558,
+          "over10": 0
+        },
+        "RCA": {
+          "roi": [
+            780,
+            730,
+            1110,
+            970
+          ],
+          "ship_pixels": 10909,
+          "rgb_mean_abs_error": 0.04668927937746048,
+          "over10": 0
+        },
+        "FDD": {
+          "roi": [
+            1140,
+            730,
+            1330,
+            970
+          ],
+          "ship_pixels": 5396,
+          "rgb_mean_abs_error": 0.07153446972370148,
+          "over10": 0
+        }
+      },
+      "scope": "Same fixed synthetic poses;union ship-pixel mask;not a complete material correctness proof"
+    },
+    {
+      "a": "20261026-005852-224913-return-fixture",
+      "b": "20261026-010538-056057-return-fixture",
+      "first_to_late": false,
+      "per_model": {
+        "FCA": {
+          "roi": [
+            200,
+            730,
+            570,
+            970
+          ],
+          "ship_pixels": 15008,
+          "rgb_mean_abs_error": 14.704002380371094,
+          "over10": 5709
+        },
+        "RCA": {
+          "roi": [
+            780,
+            730,
+            1110,
+            970
+          ],
+          "ship_pixels": 10909,
+          "rgb_mean_abs_error": 38.39951705932617,
+          "over10": 9252
+        },
+        "FDD": {
+          "roi": [
+            1140,
+            730,
+            1330,
+            970
+          ],
+          "ship_pixels": 5396,
+          "rgb_mean_abs_error": 11.661972045898438,
+          "over10": 1552
+        }
+      },
+      "scope": "Same fixed synthetic poses;union ship-pixel mask;not a complete material correctness proof"
+    },
+    {
+      "a": "20261026-005852-224913-return-fixture",
+      "b": "20261026-010841-367818-return-fixture",
+      "first_to_late": false,
+      "per_model": {
+        "FCA": {
+          "roi": [
+            200,
+            730,
+            570,
+            970
+          ],
+          "ship_pixels": 15008,
+          "rgb_mean_abs_error": 14.664778709411621,
+          "over10": 5659
+        },
+        "RCA": {
+          "roi": [
+            780,
+            730,
+            1110,
+            970
+          ],
+          "ship_pixels": 10909,
+          "rgb_mean_abs_error": 38.42582702636719,
+          "over10": 9273
+        },
+        "FDD": {
+          "roi": [
+            1140,
+            730,
+            1330,
+            970
+          ],
+          "ship_pixels": 5396,
+          "rgb_mean_abs_error": 11.646713256835938,
+          "over10": 1537
+        }
+      },
+      "scope": "Same fixed synthetic poses;union ship-pixel mask;not a complete material correctness proof"
+    },
+    {
+      "a": "20261026-005852-224913-return-fixture",
+      "b": "20261026-011212-992730-return-fixture",
+      "first_to_late": false,
+      "per_model": {
+        "FCA": {
+          "roi": [
+            200,
+            730,
+            570,
+            970
+          ],
+          "ship_pixels": 15008,
+          "rgb_mean_abs_error": 2.53491473197937,
+          "over10": 486
+        },
+        "RCA": {
+          "roi": [
+            780,
+            730,
+            1110,
+            970
+          ],
+          "ship_pixels": 10909,
+          "rgb_mean_abs_error": 1.4410120248794556,
+          "over10": 143
+        },
+        "FDD": {
+          "roi": [
+            1140,
+            730,
+            1330,
+            970
+          ],
+          "ship_pixels": 5396,
+          "rgb_mean_abs_error": 2.577155828475952,
+          "over10": 169
+        }
+      },
+      "scope": "Same fixed synthetic poses;union ship-pixel mask;not a complete material correctness proof"
+    },
+    {
+      "a": "20261026-005852-224913-return-fixture",
+      "b": "20261026-011354-044126-return-fixture",
+      "first_to_late": false,
+      "per_model": {
+        "FCA": {
+          "roi": [
+            200,
+            730,
+            570,
+            970
+          ],
+          "ship_pixels": 15008,
+          "rgb_mean_abs_error": 6.141813278198242,
+          "over10": 1636
+        },
+        "RCA": {
+          "roi": [
+            780,
+            730,
+            1110,
+            970
+          ],
+          "ship_pixels": 10909,
+          "rgb_mean_abs_error": 5.827726364135742,
+          "over10": 1695
+        },
+        "FDD": {
+          "roi": [
+            1140,
+            730,
+            1330,
+            970
+          ],
+          "ship_pixels": 5396,
+          "rgb_mean_abs_error": 3.749444007873535,
+          "over10": 401
+        }
+      },
+      "scope": "Same fixed synthetic poses;union ship-pixel mask;not a complete material correctness proof"
+    },
+    {
+      "a": "20261026-005852-224913-return-fixture",
+      "b": "20261026-011956-871319-return-fixture",
+      "first_to_late": false,
+      "per_model": {
+        "FCA": {
+          "roi": [
+            200,
+            730,
+            570,
+            970
+          ],
+          "ship_pixels": 15008,
+          "rgb_mean_abs_error": 6.081711769104004,
+          "over10": 1627
+        },
+        "RCA": {
+          "roi": [
+            780,
+            730,
+            1110,
+            970
+          ],
+          "ship_pixels": 10909,
+          "rgb_mean_abs_error": 5.842759609222412,
+          "over10": 1726
+        },
+        "FDD": {
+          "roi": [
+            1140,
+            730,
+            1330,
+            970
+          ],
+          "ship_pixels": 5396,
+          "rgb_mean_abs_error": 3.7779836654663086,
+          "over10": 388
+        }
+      },
+      "scope": "Same fixed synthetic poses;union ship-pixel mask;not a complete material correctness proof"
+    },
+    {
+      "a": "20261026-011212-992730-return-fixture",
+      "b": "20261026-011354-044126-return-fixture",
+      "first_to_late": false,
+      "per_model": {
+        "FCA": {
+          "roi": [
+            200,
+            730,
+            570,
+            970
+          ],
+          "ship_pixels": 15008,
+          "rgb_mean_abs_error": 4.696406364440918,
+          "over10": 1164
+        },
+        "RCA": {
+          "roi": [
+            780,
+            730,
+            1110,
+            970
+          ],
+          "ship_pixels": 10909,
+          "rgb_mean_abs_error": 5.221682548522949,
+          "over10": 1557
+        },
+        "FDD": {
+          "roi": [
+            1140,
+            730,
+            1330,
+            970
+          ],
+          "ship_pixels": 5396,
+          "rgb_mean_abs_error": 2.3982579708099365,
+          "over10": 250
+        }
+      },
+      "scope": "Same fixed synthetic poses;union ship-pixel mask;not a complete material correctness proof"
+    },
+    {
+      "a": "20261026-005852-224913-return-fixture",
+      "b": "20261026-012445-679174-return-fixture",
+      "first_to_late": false,
+      "per_model": {
+        "FCA": {
+          "roi": [
+            200,
+            730,
+            570,
+            970
+          ],
+          "ship_pixels": 15008,
+          "rgb_mean_abs_error": 2.588108539581299,
+          "over10": 580
+        },
+        "RCA": {
+          "roi": [
+            780,
+            730,
+            1110,
+            970
+          ],
+          "ship_pixels": 10909,
+          "rgb_mean_abs_error": 1.4541510343551636,
+          "over10": 134
+        },
+        "FDD": {
+          "roi": [
+            1140,
+            730,
+            1330,
+            970
+          ],
+          "ship_pixels": 5396,
+          "rgb_mean_abs_error": 2.463676691055298,
+          "over10": 171
+        }
+      },
+      "scope": "Same fixed synthetic poses;union ship-pixel mask;not a complete material correctness proof"
+    },
+    {
+      "a": "20261026-005852-224913-return-fixture",
+      "b": "20261026-012653-054882-return-fixture",
+      "first_to_late": false,
+      "per_model": {
+        "FCA": {
+          "roi": [
+            200,
+            730,
+            570,
+            970
+          ],
+          "ship_pixels": 15008,
+          "rgb_mean_abs_error": 6.198449611663818,
+          "over10": 1684
+        },
+        "RCA": {
+          "roi": [
+            780,
+            730,
+            1110,
+            970
+          ],
+          "ship_pixels": 10909,
+          "rgb_mean_abs_error": 5.874843597412109,
+          "over10": 1703
+        },
+        "FDD": {
+          "roi": [
+            1140,
+            730,
+            1330,
+            970
+          ],
+          "ship_pixels": 5396,
+          "rgb_mean_abs_error": 3.7149741649627686,
+          "over10": 405
+        }
+      },
+      "scope": "Same fixed synthetic poses;union ship-pixel mask;not a complete material correctness proof"
+    },
+    {
+      "a": "20261026-005852-224913-return-fixture",
+      "b": "20261026-012743-548152-return-fixture",
+      "first_to_late": false,
+      "per_model": {
+        "FCA": {
+          "roi": [
+            200,
+            730,
+            570,
+            970
+          ],
+          "ship_pixels": 15008,
+          "rgb_mean_abs_error": 2.6789045333862305,
+          "over10": 581
+        },
+        "RCA": {
+          "roi": [
+            780,
+            730,
+            1110,
+            970
+          ],
+          "ship_pixels": 10909,
+          "rgb_mean_abs_error": 1.4018394947052002,
+          "over10": 142
+        },
+        "FDD": {
+          "roi": [
+            1140,
+            730,
+            1330,
+            970
+          ],
+          "ship_pixels": 5396,
+          "rgb_mean_abs_error": 2.5446627140045166,
+          "over10": 191
+        }
+      },
+      "scope": "Same fixed synthetic poses;union ship-pixel mask;not a complete material correctness proof"
+    },
+    {
+      "a": "20261026-012445-679174-return-fixture",
+      "b": "20261026-012653-054882-return-fixture",
+      "first_to_late": false,
+      "per_model": {
+        "FCA": {
+          "roi": [
+            200,
+            730,
+            570,
+            970
+          ],
+          "ship_pixels": 15008,
+          "rgb_mean_abs_error": 5.765280723571777,
+          "over10": 1464
+        },
+        "RCA": {
+          "roi": [
+            780,
+            730,
+            1110,
+            970
+          ],
+          "ship_pixels": 10909,
+          "rgb_mean_abs_error": 5.656186103820801,
+          "over10": 1643
+        },
+        "FDD": {
+          "roi": [
+            1140,
+            730,
+            1330,
+            970
+          ],
+          "ship_pixels": 5396,
+          "rgb_mean_abs_error": 3.2352359294891357,
+          "over10": 326
+        }
+      },
+      "scope": "Same fixed synthetic poses;union ship-pixel mask;not a complete material correctness proof"
+    },
+    {
+      "a": "20261026-011956-871319-return-fixture",
+      "b": "20261026-011956-871319-return-fixture",
+      "first_to_late": true,
+      "per_model": {
+        "FCA": {
+          "roi": [
+            200,
+            730,
+            570,
+            970
+          ],
+          "ship_pixels": 15008,
+          "rgb_mean_abs_error": 6.279917240142822,
+          "over10": 1714
+        },
+        "RCA": {
+          "roi": [
+            780,
+            730,
+            1110,
+            970
+          ],
+          "ship_pixels": 10909,
+          "rgb_mean_abs_error": 5.976013660430908,
+          "over10": 1746
+        },
+        "FDD": {
+          "roi": [
+            1140,
+            730,
+            1330,
+            970
+          ],
+          "ship_pixels": 5396,
+          "rgb_mean_abs_error": 3.8446998596191406,
+          "over10": 411
+        }
+      },
+      "scope": "Same fixed synthetic poses;union ship-pixel mask;not a complete material correctness proof"
+    }
+  ],
+  "final_asset_content": [
+    {
+      "run": "20261026-005109-470034-return-fixture",
+      "selected_files": 381,
+      "all_exact": true,
+      "differences": [],
+      "only_stage_differences": false
+    },
+    {
+      "run": "20261026-005345-379946-return-fixture",
+      "selected_files": 356,
+      "all_exact": false,
+      "differences": [
+        "assets/1/rtx-remix/mods/sfc-policy/mod.usda",
+        "assets/2/rtx-remix/mods/sfc-policy/mod.usda",
+        "assets/3/rtx-remix/mods/sfc-policy/mod.usda",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/0e8161b8ee595c3bc513c3d0a955543a7a97d9e2a9619221f3bbec463881ed46.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/0eed9ec63f81c9279456d30a12a59885b068e96be7024f01814e350ceb28eba6.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/0fc756000cbb4fe5209b1605e42dd2a5fbbb93ee64a2b3fada431fa92042fdea.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/1c407ce814e9cf58df03e3647a2bd87019a32bde1aea35461f403976e1f10ae4.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/1cc0fba550fffca850fdd0ad6af3606c9f0e2ba96e2bbeaa1ee78c14ef7a7d66.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/3ca7fc8522892db0fda699ee6d07265f289bba442a20c312b6436f9d74d1a11d.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/542556036dd76e6b9ab4a41e9d6037d70095fe15f1a6ead80779993c00eda941.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/65fbccac6dd7cdfa643964b8e3fb560989c057e089ea02b3c80dfdcf9195093b.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/71c131111789d045eb8545468f0bfc6a4d14ced18d091c93b7a79811e98633c3.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/7af41975fa99df4fb8adf44bda8530de6c72bd8a73e5469d8e21af06b377bba7.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/7bee0e51ace53709b58a99a8dbc5c71c7106663769009099a379c38d7844a91c.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/86a283507370f1116faf57221716136e072b37aa5df29f01bf12a96c768ac8c6.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/88d67a04a60be95ca4ccc00a240ea3e692379213f7732c1d84520b86578d9e55.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/964829ffeb48f48cf2150dd2ddd7ab1a704e8d104f8c3971cc5cfd432bdee294.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/a051708cc2f8405b5bd3bb931bb1c3eb193fa49659c8042a54989c8d87f23ba4.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/a0f8cd4e79d34c14f1ef447771ef2eefff8b6bba8e37e3122f3fc276f140c074.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/a69d4b69197875fa59720d0faaa6021d534f977f3fa6644114e32fa8dfb967ea.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/aaaac73c1876d13617713ee83079da2baf3e83d81255f9a24aed70ab8613082d.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/b4adc7db851661f90b3f203b0656c62a5f5a47da125fbb86056f116d43e9a0e5.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/b7b3a3bd5c8585602f265d1462e9874c7b2766a7a7631d79fc5a70b4000ae75e.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/ba2e9cbdbe450da2a7d6fcbeefe13c360ae71972bc99ca33c8f4634d35a8c8ba.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/cdcfd832ea2ad0a7b74bca90266be055ead3a17ac24cc518d9ba98e374af9494.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/ef900bca90d07444c5b3279d2c4ae37bbf8e0967ff66c26f9d5011128b5dc98a.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/fc80486671897f0b8b7ac5a73b03ca70d87cc01a09d19db0e81d3121e9386ab7.dds"
+      ],
+      "only_stage_differences": false
+    },
+    {
+      "run": "20261026-005717-886433-return-fixture",
+      "selected_files": 381,
+      "all_exact": false,
+      "differences": [
+        "assets/1/rtx-remix/mods/sfc-policy/mod.usda",
+        "assets/2/rtx-remix/mods/sfc-policy/mod.usda",
+        "assets/3/rtx-remix/mods/sfc-policy/mod.usda"
+      ],
+      "only_stage_differences": true
+    },
+    {
+      "run": "20261026-005852-224913-return-fixture",
+      "selected_files": 381,
+      "all_exact": true,
+      "differences": [],
+      "only_stage_differences": false
+    },
+    {
+      "run": "20261026-010038-016869-return-fixture",
+      "selected_files": 381,
+      "all_exact": true,
+      "differences": [],
+      "only_stage_differences": false
+    },
+    {
+      "run": "20261026-010339-774851-return-fixture",
+      "selected_files": 381,
+      "all_exact": false,
+      "differences": [
+        "assets/2/rtx-remix/mods/sfc-policy/mod.usda",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/00961744bfc0c423836bca23500ad74269d9e4156b4ce8d239fb5dfbd48db7c7.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/0283daaf0e21f66444beeae6a02639adffc086dc3c4390c346395bbec2cb35da.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/0446c6a7a3ba871252d633a883440e1e6ad0d223f8bc1ac0ff35138898cd8e78.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/05536dc1fd9a59bc397c68ab334745ea71783bc2e11f708bf1e1b93c6b87fd6c.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/06e502eb3ae7ed25ce628d7e9f65903980cc05cb24ebdc35f4f06086b3aa7ef6.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/09286d188c05ed5226be7b351bafaacacc761421c05ac190ec63490f522e1a90.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/0bf9278eae8e8c9a9b1dd2eff2b20afac1f989be04bef577ccfa7fd38a2fa07e.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/0e8161b8ee595c3bc513c3d0a955543a7a97d9e2a9619221f3bbec463881ed46.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/0eed9ec63f81c9279456d30a12a59885b068e96be7024f01814e350ceb28eba6.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/0f6c24a3412af11141029200c39bad84de3e50c5f8674d858c5f06b0e2f7058f.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/0fc756000cbb4fe5209b1605e42dd2a5fbbb93ee64a2b3fada431fa92042fdea.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/122618d0ec6eabd2e4af9b3a0ab0fa541a7cd28aeb45866c179f8f15409af448.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/14d39d04d14acb5312473143bf828325067fa7d20719b3236d17a822cff8b0b4.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/158273a668e6f3cc1592ccfe2e59cdc7022d750ab0d0127d9d0890e92b6cf85e.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/173415419ead50e3af0e3d2ce9eeea5e294d9002d3f10c3638fc9df4441ce9b5.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/189cd0218c2f6b939cb9a201b8f97f9d44312089b632c9b29daf994c7ea55884.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/18c19ff610a958904ca4b716b19b8eaabb0c256d25475d30e8a5fb83ff2ca1fa.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/1c407ce814e9cf58df03e3647a2bd87019a32bde1aea35461f403976e1f10ae4.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/1cc0fba550fffca850fdd0ad6af3606c9f0e2ba96e2bbeaa1ee78c14ef7a7d66.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/1eef0e51fbc96933d0cd5b76673f256deb2a513491d5996704fa7900d2009e65.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/201a22870213ca2fc73c03e2bf22d66aed27d874c2ced35ede411e088ac92c35.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/21a399447bd5fb2b8e4a28ed4db1034f908a9e2092c2ef2c935b0ee8546cb081.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/21d57ff593f7b3cdf51e9344ac03973bb6950e73a01c283ecad322b724891c66.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/22a24f7d6d244839cb5434fa1b69a44d6a374374f0d84443a53f167ce0919238.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/22e8fc953916dc72e268c5012e73fc78eac063084fc7aaf1005fb3d88c240d67.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/25e3a6e171b2d2312ac05ad8ac1433e25a17c69e472c845b545f884552f35c12.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/261a054242c46b6f0d6e583ca83dc9cbc91ae7c42635d7fdad723123e9146de9.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/2630ab6482500b1f8df87f0cbb4ce198785616f6b574f85ca935b50e05ef0c9a.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/28443fb18f7c452a371cc3849bc905ed9eb82a6c6cc1814e73dc450a0defe8f3.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/2937a10ec09d0ceca3bbb5fadab611ad1f0d435cccd864d32e9a1d03a61e8f7c.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/29a4b068a09bd6e8b356694f73dcf41578b6e4d3d998d41a7837d2054c183e62.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/2c0d52f2c51eb7dd55cd6df6921f3673eff986834f87b8862c6b173678cd6069.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/2c828a3f13c1432fc946cff08c8c29accd103dc4cd784f2c192daf8bf9d5349c.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/2c8be2a5a0e4ca60b58e63bae5e19edb974f886979d902a37613db22d5851b00.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/2d5f687fe7e141074beeb5862f9e8efb4724daf0de6fe52fdfd0b7e3e511615a.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/2f6c6cd155a871c5afe0d3dfc89ca90f8766f8eb1528275c81f0615f7ee234df.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/307b23fa452df8fa1aac852878d5ab013195c8df149ef9c2e156c7098e0b132c.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/3183c516c546300dfa3217431dd59b840122b6024500656ed7a2f35b1be093df.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/32290f9c871f2dc162ca2fa9306797f50eb2990e34528ca07ea648edaf18c838.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/337a65d2a8ac2674b560ae9c46699685b88a627596b8dc0b0fb6b1dea863a311.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/34024ccc459f8bd3abcb88ae6a6001a9bafcde99c0543bd4133462f482ca4906.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/367ecda6fac8a9096627e46488e8ce101726f504667a1e51472aed295e095252.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/36c3f770ec72df647a29c534a3aa975cddfb16277434ecab8ed8375115a6538d.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/398112bcd8cf0f587ff81ebc6c773eefaad03a43f5e1a0676b6461931afc6056.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/3ae6478c5387b38ab9ca46a637c474e56989d18a89f3a61ac5f189bf6d628845.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/3ca7fc8522892db0fda699ee6d07265f289bba442a20c312b6436f9d74d1a11d.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/40dbef72913d7974156d2e15562213b9c44dbbb65f49601c692045473530325e.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/40e96de069d4ebb7db0d3cd31df8bbde4f2768b4087118b5b2267edf4e28c08a.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/417c9b0af48953554fbb1b41712609b490d26ffeb31fb583768190dd014f4920.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/4211df7ad132804716f2c6c2451f77a46860e81a8866b663dfd7a16c59f85600.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/43e09a5594211d7fc0733e3dd5844fa8d8a4a02a48f6c618bf22baaca1e41ddc.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/44a2c2879a6aa88d7bef0fb868cd2fec2e7817dd11003baba4ceeda13b13d5ef.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/467a8fcf1d4dcb7eb99caac0df5a056acab6113e415d62d0eb2b41a2cffdc680.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/482bd71ba41ec5159e6e8705b8d1999d16b3ec12e59bfa75d89be69cd93a013e.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/48576d2a6aff7784b649aedd3a67851b1efb48d003b43edda903b5fc557a9acb.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/4df4a1deb99a4d2243c6448d29cbdcf3e131a1954a6f534db102cd44ceaa84aa.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/509ca34b46c4ed3932aeb8d13ca866ec9d31acc243ea4488a3d0d16d3d653afd.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/54ddde2b4d2ed74c80a537d3902c6c335bafde3ee588282fa1b56df2f59ab0eb.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/55842e60969ad60c18da08823673c1570dd016f5cced82da5aa919bb8da205db.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/56e094c9a31fd5a1a13251d5226253c21c9e6fb27a331d50cd9c64484e4ffa9c.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/5780986c5ec0c04917e890d3048514b292651a555ed86963c16402e7969758f2.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/586ec1c7d45136aa4c343d5673552f66473d242f7f5c09223be76f35c0764318.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/5aa4257d16cc6a81a53bcd8242863d66309a8fc05d344d9a135130f69b21f29e.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/5b8d328143a83fe836c673c502be53e73dbe85950afa7618832dc07c08f0c8cf.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/5dd550cbf66f2617e26c14a328389fa463de21eed42ac9c62ac8ccff59be8b2f.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/5e9c3fdd528e82be68deec0b23e1cf186164cce84b9e2b71bda8d2e9457cdfea.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/60e29f90d5e4a19658bcebde289be01ce936de2059560a631519d9427d76d0b3.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/65fbccac6dd7cdfa643964b8e3fb560989c057e089ea02b3c80dfdcf9195093b.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/69aa5e04d27e8b36df806284b383cbbba5f7fe267fe17f2a7ca3d5b2f20ca2cc.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/6c9571bd4e1480b736514a81a44343fd6b8804e833410338b8eb20ecf9d77223.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/6d830626eda758b02ed83ae75ea1494a1ff34486a58d42b6700d3af388c5decc.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/71c131111789d045eb8545468f0bfc6a4d14ced18d091c93b7a79811e98633c3.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/72228972087a6a9b8d8f4aff7583652337bede429c6ab88a425a0804ab5a1254.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/7374a20c4f35ba1f1b2416040128d5368f3542678ac256eaf5aa559eecf25411.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/75ce7f48374767d6e288f56e99c37a22ec68ecaf405488d56a50bb28a35543be.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/7acd733b406be34ed17369fba2e789bb458e724b5c80b18297b85f9a9ef64682.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/7af41975fa99df4fb8adf44bda8530de6c72bd8a73e5469d8e21af06b377bba7.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/7bee0e51ace53709b58a99a8dbc5c71c7106663769009099a379c38d7844a91c.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/7ca0a19dda92daf0b9f759769210d722d6f3e53622efcadde9b74a2c478fbfaa.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/7cd79db555dbfbe20029070736e390684510e0a68a7a13469991b689726f4376.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/7e07404e9daf887eb3b9a3325727565e49db5fd3da996bde994e8ca2ec514934.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/7f91210d12e81d4a35876807ed41a53bc470e2abf44ab1701e667d485b477a7c.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/7fe01ede66b4bd1df3131fccc9e4563a64dd7f6d4ac2934992c54b7526a8680e.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/8229154e1c85e526e9508dcddc4a18e2242cd227badd51a6f41ed28d10423617.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/86a283507370f1116faf57221716136e072b37aa5df29f01bf12a96c768ac8c6.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/872fae4e1fb30bfec22047a05cb0bed37181a1199e15c4da0cb10f3afc7dc5af.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/879148b2f19ee99e4186754ae7b3f6bd2639842420dc84af27c9cc431696b521.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/894c95f097e9d19a0569c3c5f02d5a914bbcd72bcf631a4cad78afe71217cde9.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/8c94987953089f75be39a2ad606a12b19a06f1d3355ff378773dbea626df3d46.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/8e993f7f8b8b845ba768390e048641e9bd9e6ed7f79ef871b9dba07aecca68fc.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/8ed82602d51495c06eb07b4b92508b21a35740ff009f570bf3b13996473dbfeb.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/8eed0df3afd5ac0bc5b845ca8e7fef042936381c9188298bac2057e243cb5683.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/91785f7b762592e22110f809c79c5287885de6870157b8287668bcf69caff429.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/9188f74a9f765ce01fbbf8848c1f2e38425bdb30ff83544e0efa78395100e443.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/91f5ac2ad9db4f18a224fbe24d302ea505a27c48bb1e84d79e23865fea3104dd.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/945506d16ad64d7139fd2322f2e129ffeca4107552a7de138dfad845349601f3.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/94d2f1e1d6c15a7c4588eaf699765dd2d06cf39747431924512b6c5050e5c751.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/964829ffeb48f48cf2150dd2ddd7ab1a704e8d104f8c3971cc5cfd432bdee294.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/967445f9d2ccbf8429705c749a1647192f65fb01cbaad3a3ae66b069ffedc27b.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/9fb1822f3af79e5d41859eaa8b02eaa7bc58c3915bad5a115a42f86da5ddfbc2.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/a051708cc2f8405b5bd3bb931bb1c3eb193fa49659c8042a54989c8d87f23ba4.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/a0d085510cef304bb7b6edff6304ea37d9eb099c3232c20b52ccd38c8d7ed63c.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/a0f1c472553f9527e5f65838a7f8c1979341704a39a01a635d073354e2352908.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/a0f8cd4e79d34c14f1ef447771ef2eefff8b6bba8e37e3122f3fc276f140c074.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/a172afee0f40c3fbce44008e699e38b194aed8e425f2e550b58214a599291ad2.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/a39aba13c5011cfa22d26dc791ec96c902049d2c2a6d4af9ab70cc4b18a9071a.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/a3a4c91283ff88240d3ada6533e73c0eb87891ffc244b67754569e5cc5fac9e4.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/a6397fb71cfe38ed5899d28a04a641712630ce612c55ebbabca0354436972890.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/a666c0e3d44f3b639c23cb3fe1f5f47e1cbf9e29060a444d0979dcb0c22fd661.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/a69d4b69197875fa59720d0faaa6021d534f977f3fa6644114e32fa8dfb967ea.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/a6e34579a547a65851d2078960a89f8d77d219b007c00a8d9e97112f67dd6362.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/a9578f8354d0268f82accb8fa1ffd2f4ce1a0551e9c3086fbe687251ce3d5cb6.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/a9e960fcb0d1ac07434deb000cfab2e859f3dce971a20f6fdd418a2883346ab3.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/aaaac73c1876d13617713ee83079da2baf3e83d81255f9a24aed70ab8613082d.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/ad45edf3f79fd040f209b5918c92e45e88766765162dacf5a47ce20d459448e9.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/ad72f4a5ab8127153d36b3080d8702cb7c894f51860a9aab7b1d220cf82bd903.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/ae39a5181d7c7f0aeff23f2b9f0421c95e4c42b3675d99756429b0f070f4cc1c.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/aedb4a3a66f5d842a22d201970b31343063d6342262e1cbdd4c4f009147323c6.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/b33480916d97df1fa11afa0c655f04c5a1f6a25c9472d404a161a21f5cd89b3d.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/b7b3a3bd5c8585602f265d1462e9874c7b2766a7a7631d79fc5a70b4000ae75e.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/b8adc7100a7c346957a8fee9940c0edd2303272f2a9788e70624b27809431257.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/ba2e9cbdbe450da2a7d6fcbeefe13c360ae71972bc99ca33c8f4634d35a8c8ba.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/ba51263b227b9031c282cb994bc00ea2913ad8a0ae85807d26af5f9217b01ac1.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/bbdc18470db14e8c87404ecad5b30fc8d44258dcaf555722c518d7c228c1d84c.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/bd01c39a383e6927f68930af4626f6dbb1a5fa55d695e19adb9e1a4a060e432a.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/bd07092105150b168831ef27e6024d795e975db210efe822080541b7abc5f696.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/bdd12b343919f01c0472bee31f27d68ac631808f74363cc7f36c7c08b8518fc7.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/bea4dffb1d16e1393ab4ffa0233f162c43aee80a015675bab6c2a567fd118659.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/c08c0f63b24a294cceb3081da3ee3f94eb2ffa10813cf77b17fd4bcae43ce13b.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/c6668fefdb129a9e1db428495b6f53d8c3b2b332f11f690c598d0e311864ff70.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/c6c7be208f7cb754f91a18903d12a080f399b124d2094830190f0dce5efde4b3.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/c7ced032f9ebff7bd60b784dfd26798488ffa83d215749d0d178a93d3c2f446d.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/c8832132e289e1ad8e7fd52632dc214d70a5d026a3b9c4b05ff6ebd3e007c4d8.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/c9bebb18613fd0146270d5b4521f70c89c20b1a92e0f79e185bf2fbab00b1740.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/caa8850b428e2a401874f25a386a1a4f1dd84d0d66045e6b077870d094817ed4.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/cc66959cfef3d8e3106b22aee11ef251630626629703321848fdcc075c7c58c3.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/cdcfd832ea2ad0a7b74bca90266be055ead3a17ac24cc518d9ba98e374af9494.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/d0027b57a592019b293cc880f9cdaaf5a79fd8e0c08ce12b5f0f76b98ceea4f5.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/d09c42a75d878524dae09c4b50f59d44ff19ecfc40d2109afc90e691f4fd7038.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/d0a313aeebaa7b9e56ee8fb74c142f67e98e914d11e92387e8fc4b25a1cba422.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/d395112c6deb7455d09f1683aa7ef8a877d2c3fe86dd05a5a199499971b2a3ed.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/dcc3a948ef9bf445ec891175338a2fb68d7427f90200da41811fc1c6d5277fb2.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/deb183d02047dc6df98c3c63df8f1cafbf941fdf28b620775906a2d0f23bc5de.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/e1f77167cedc36099257cad73ac1c5868e577e40d50cb038c9e1b2d149f6cbca.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/e348f55fb71c7c086a67739c0406d140fb75d5a9960ccc10d7ed54e37cbfb885.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/e496f58e15e8daa6736996ebc7e34657f04b0584b72348a684961e149dca965d.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/e65d40196d0d3b16233a56f5e8c14a48ea6431ccb766fed9135e790829f14d5d.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/e664684b7fbff7000f09b2e5e8e08e5d63ab67d93b1057d3d36b5cbea241862c.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/e7639f6a7a84fb5162c1a965a70ddfd8207f883be436dbdfb2a74533c890170d.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/e7decf1452e4444f78ffab746b9ee54e4e7d33dada6553481a8ce29f1b6d684e.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/e85afdceb6a750e83d9a3b50998f7917cdbde6ace16f3a64395d796ee45f4de7.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/edec10baef9908407735ee37013574f1d7b6aa466025d0ad2024a277c75f3c4c.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/ee4e64f25fd256f3832a13555380df69ceda69d25ed5609e75ae24c4459d4eeb.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/eea9d2d5bb8ee69d777e0d8fb059c64204874ffec708f7853d50c3f6265a4d0c.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/ef900bca90d07444c5b3279d2c4ae37bbf8e0967ff66c26f9d5011128b5dc98a.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/f3781b368f1c95b6e35498bd6d4fc193d3331992310d695a399c2871e691d545.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/f46be364942439898f5d07bda3a615540c333b0aa1b5f9c9c23b39a56474f847.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/f4c1899c5f3b39cf896ee062585f9d714677110e101ffb8e0e7215a6461f17dd.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/f610dab44c6828f202390f897dcd59f98e86b531e7a8c192e6907ded39a7c401.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/f9a9a5d80c52299462471c7d7ce311f6dd31fa8c40081935b33883f9f8a04f24.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/fb9275fac95516abbcf49d8e76d447d7a6013bb857a9d24c589af31b15c8910f.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/fc07b19bb58bdc77a0832a2b04c5b929273028229c5c5907defd02a74ec690af.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/fc80486671897f0b8b7ac5a73b03ca70d87cc01a09d19db0e81d3121e9386ab7.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/fd9cf2df5d73748d1279fd7f4a41cef89fe022fa28d91ae4ceab62a059737cc4.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/fdd0733810c9d6fc2f720bf8011cdd69e5a5f44a8c51e888a0c37f43de45a047.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/fedfe3ddce944299f425e1a83a2db65e59332af641e930eb54073ab3e3c38fec.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/ff1bf1b3a8a4c2036d665971c8b5c216d04a9e8c5991fb8b6c5fdc53e547d193.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/ff37feaff55cb4595924e340e10451ee05dcfc3d7fc2a1737c3cb957d81d8832.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/ff48ee40b4f074093c0b29fd217a0bf624d1f4dc19ae0ec1abecada49e9c8606.dds",
+        "assets/2/scene.bin",
+        "assets/2/texture-0.bin",
+        "assets/2/texture-1.bin",
+        "assets/2/texture-10.bin",
+        "assets/2/texture-11.bin",
+        "assets/2/texture-12.bin",
+        "assets/2/texture-13.bin",
+        "assets/2/texture-14.bin",
+        "assets/2/texture-15.bin",
+        "assets/2/texture-16.bin",
+        "assets/2/texture-18.bin",
+        "assets/2/texture-19.bin",
+        "assets/2/texture-2.bin",
+        "assets/2/texture-20.bin",
+        "assets/2/texture-21.bin",
+        "assets/2/texture-22.bin",
+        "assets/2/texture-23.bin",
+        "assets/2/texture-24.bin",
+        "assets/2/texture-25.bin",
+        "assets/2/texture-26.bin",
+        "assets/2/texture-27.bin",
+        "assets/2/texture-28.bin",
+        "assets/2/texture-29.bin",
+        "assets/2/texture-3.bin",
+        "assets/2/texture-30.bin",
+        "assets/2/texture-31.bin",
+        "assets/2/texture-32.bin",
+        "assets/2/texture-33.bin",
+        "assets/2/texture-34.bin",
+        "assets/2/texture-35.bin",
+        "assets/2/texture-36.bin",
+        "assets/2/texture-37.bin",
+        "assets/2/texture-38.bin",
+        "assets/2/texture-39.bin",
+        "assets/2/texture-4.bin",
+        "assets/2/texture-40.bin",
+        "assets/2/texture-41.bin",
+        "assets/2/texture-42.bin",
+        "assets/2/texture-43.bin",
+        "assets/2/texture-44.bin",
+        "assets/2/texture-45.bin",
+        "assets/2/texture-46.bin",
+        "assets/2/texture-47.bin",
+        "assets/2/texture-48.bin",
+        "assets/2/texture-49.bin",
+        "assets/2/texture-5.bin",
+        "assets/2/texture-50.bin",
+        "assets/2/texture-51.bin",
+        "assets/2/texture-52.bin",
+        "assets/2/texture-53.bin",
+        "assets/2/texture-54.bin",
+        "assets/2/texture-55.bin",
+        "assets/2/texture-6.bin",
+        "assets/2/texture-7.bin",
+        "assets/2/texture-8.bin",
+        "assets/2/texture-9.bin",
+        "assets/3/rtx-remix/mods/sfc-policy/mod.usda",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/00961744bfc0c423836bca23500ad74269d9e4156b4ce8d239fb5dfbd48db7c7.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/0283daaf0e21f66444beeae6a02639adffc086dc3c4390c346395bbec2cb35da.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/0446c6a7a3ba871252d633a883440e1e6ad0d223f8bc1ac0ff35138898cd8e78.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/05536dc1fd9a59bc397c68ab334745ea71783bc2e11f708bf1e1b93c6b87fd6c.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/06e502eb3ae7ed25ce628d7e9f65903980cc05cb24ebdc35f4f06086b3aa7ef6.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/09286d188c05ed5226be7b351bafaacacc761421c05ac190ec63490f522e1a90.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/0bf9278eae8e8c9a9b1dd2eff2b20afac1f989be04bef577ccfa7fd38a2fa07e.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/0e8161b8ee595c3bc513c3d0a955543a7a97d9e2a9619221f3bbec463881ed46.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/0eed9ec63f81c9279456d30a12a59885b068e96be7024f01814e350ceb28eba6.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/0f6c24a3412af11141029200c39bad84de3e50c5f8674d858c5f06b0e2f7058f.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/0fc756000cbb4fe5209b1605e42dd2a5fbbb93ee64a2b3fada431fa92042fdea.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/122618d0ec6eabd2e4af9b3a0ab0fa541a7cd28aeb45866c179f8f15409af448.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/14d39d04d14acb5312473143bf828325067fa7d20719b3236d17a822cff8b0b4.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/158273a668e6f3cc1592ccfe2e59cdc7022d750ab0d0127d9d0890e92b6cf85e.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/173415419ead50e3af0e3d2ce9eeea5e294d9002d3f10c3638fc9df4441ce9b5.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/189cd0218c2f6b939cb9a201b8f97f9d44312089b632c9b29daf994c7ea55884.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/18c19ff610a958904ca4b716b19b8eaabb0c256d25475d30e8a5fb83ff2ca1fa.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/1c407ce814e9cf58df03e3647a2bd87019a32bde1aea35461f403976e1f10ae4.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/1cc0fba550fffca850fdd0ad6af3606c9f0e2ba96e2bbeaa1ee78c14ef7a7d66.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/1eef0e51fbc96933d0cd5b76673f256deb2a513491d5996704fa7900d2009e65.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/201a22870213ca2fc73c03e2bf22d66aed27d874c2ced35ede411e088ac92c35.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/21a399447bd5fb2b8e4a28ed4db1034f908a9e2092c2ef2c935b0ee8546cb081.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/21d57ff593f7b3cdf51e9344ac03973bb6950e73a01c283ecad322b724891c66.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/22a24f7d6d244839cb5434fa1b69a44d6a374374f0d84443a53f167ce0919238.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/22e8fc953916dc72e268c5012e73fc78eac063084fc7aaf1005fb3d88c240d67.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/25e3a6e171b2d2312ac05ad8ac1433e25a17c69e472c845b545f884552f35c12.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/261a054242c46b6f0d6e583ca83dc9cbc91ae7c42635d7fdad723123e9146de9.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/2630ab6482500b1f8df87f0cbb4ce198785616f6b574f85ca935b50e05ef0c9a.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/28443fb18f7c452a371cc3849bc905ed9eb82a6c6cc1814e73dc450a0defe8f3.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/2937a10ec09d0ceca3bbb5fadab611ad1f0d435cccd864d32e9a1d03a61e8f7c.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/29a4b068a09bd6e8b356694f73dcf41578b6e4d3d998d41a7837d2054c183e62.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/2c0d52f2c51eb7dd55cd6df6921f3673eff986834f87b8862c6b173678cd6069.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/2c828a3f13c1432fc946cff08c8c29accd103dc4cd784f2c192daf8bf9d5349c.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/2c8be2a5a0e4ca60b58e63bae5e19edb974f886979d902a37613db22d5851b00.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/2d5f687fe7e141074beeb5862f9e8efb4724daf0de6fe52fdfd0b7e3e511615a.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/2f6c6cd155a871c5afe0d3dfc89ca90f8766f8eb1528275c81f0615f7ee234df.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/307b23fa452df8fa1aac852878d5ab013195c8df149ef9c2e156c7098e0b132c.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/3183c516c546300dfa3217431dd59b840122b6024500656ed7a2f35b1be093df.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/32290f9c871f2dc162ca2fa9306797f50eb2990e34528ca07ea648edaf18c838.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/337a65d2a8ac2674b560ae9c46699685b88a627596b8dc0b0fb6b1dea863a311.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/34024ccc459f8bd3abcb88ae6a6001a9bafcde99c0543bd4133462f482ca4906.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/367ecda6fac8a9096627e46488e8ce101726f504667a1e51472aed295e095252.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/36c3f770ec72df647a29c534a3aa975cddfb16277434ecab8ed8375115a6538d.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/398112bcd8cf0f587ff81ebc6c773eefaad03a43f5e1a0676b6461931afc6056.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/3ae6478c5387b38ab9ca46a637c474e56989d18a89f3a61ac5f189bf6d628845.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/3ca7fc8522892db0fda699ee6d07265f289bba442a20c312b6436f9d74d1a11d.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/40dbef72913d7974156d2e15562213b9c44dbbb65f49601c692045473530325e.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/40e96de069d4ebb7db0d3cd31df8bbde4f2768b4087118b5b2267edf4e28c08a.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/417c9b0af48953554fbb1b41712609b490d26ffeb31fb583768190dd014f4920.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/4211df7ad132804716f2c6c2451f77a46860e81a8866b663dfd7a16c59f85600.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/43e09a5594211d7fc0733e3dd5844fa8d8a4a02a48f6c618bf22baaca1e41ddc.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/44a2c2879a6aa88d7bef0fb868cd2fec2e7817dd11003baba4ceeda13b13d5ef.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/467a8fcf1d4dcb7eb99caac0df5a056acab6113e415d62d0eb2b41a2cffdc680.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/482bd71ba41ec5159e6e8705b8d1999d16b3ec12e59bfa75d89be69cd93a013e.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/48576d2a6aff7784b649aedd3a67851b1efb48d003b43edda903b5fc557a9acb.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/4df4a1deb99a4d2243c6448d29cbdcf3e131a1954a6f534db102cd44ceaa84aa.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/509ca34b46c4ed3932aeb8d13ca866ec9d31acc243ea4488a3d0d16d3d653afd.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/54ddde2b4d2ed74c80a537d3902c6c335bafde3ee588282fa1b56df2f59ab0eb.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/55842e60969ad60c18da08823673c1570dd016f5cced82da5aa919bb8da205db.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/56e094c9a31fd5a1a13251d5226253c21c9e6fb27a331d50cd9c64484e4ffa9c.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/5780986c5ec0c04917e890d3048514b292651a555ed86963c16402e7969758f2.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/586ec1c7d45136aa4c343d5673552f66473d242f7f5c09223be76f35c0764318.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/5aa4257d16cc6a81a53bcd8242863d66309a8fc05d344d9a135130f69b21f29e.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/5b8d328143a83fe836c673c502be53e73dbe85950afa7618832dc07c08f0c8cf.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/5dd550cbf66f2617e26c14a328389fa463de21eed42ac9c62ac8ccff59be8b2f.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/5e9c3fdd528e82be68deec0b23e1cf186164cce84b9e2b71bda8d2e9457cdfea.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/60e29f90d5e4a19658bcebde289be01ce936de2059560a631519d9427d76d0b3.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/65fbccac6dd7cdfa643964b8e3fb560989c057e089ea02b3c80dfdcf9195093b.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/69aa5e04d27e8b36df806284b383cbbba5f7fe267fe17f2a7ca3d5b2f20ca2cc.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/6c9571bd4e1480b736514a81a44343fd6b8804e833410338b8eb20ecf9d77223.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/6d830626eda758b02ed83ae75ea1494a1ff34486a58d42b6700d3af388c5decc.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/71c131111789d045eb8545468f0bfc6a4d14ced18d091c93b7a79811e98633c3.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/72228972087a6a9b8d8f4aff7583652337bede429c6ab88a425a0804ab5a1254.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/7374a20c4f35ba1f1b2416040128d5368f3542678ac256eaf5aa559eecf25411.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/75ce7f48374767d6e288f56e99c37a22ec68ecaf405488d56a50bb28a35543be.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/7acd733b406be34ed17369fba2e789bb458e724b5c80b18297b85f9a9ef64682.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/7af41975fa99df4fb8adf44bda8530de6c72bd8a73e5469d8e21af06b377bba7.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/7bee0e51ace53709b58a99a8dbc5c71c7106663769009099a379c38d7844a91c.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/7ca0a19dda92daf0b9f759769210d722d6f3e53622efcadde9b74a2c478fbfaa.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/7cd79db555dbfbe20029070736e390684510e0a68a7a13469991b689726f4376.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/7e07404e9daf887eb3b9a3325727565e49db5fd3da996bde994e8ca2ec514934.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/7f91210d12e81d4a35876807ed41a53bc470e2abf44ab1701e667d485b477a7c.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/7fe01ede66b4bd1df3131fccc9e4563a64dd7f6d4ac2934992c54b7526a8680e.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/8229154e1c85e526e9508dcddc4a18e2242cd227badd51a6f41ed28d10423617.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/86a283507370f1116faf57221716136e072b37aa5df29f01bf12a96c768ac8c6.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/872fae4e1fb30bfec22047a05cb0bed37181a1199e15c4da0cb10f3afc7dc5af.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/879148b2f19ee99e4186754ae7b3f6bd2639842420dc84af27c9cc431696b521.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/894c95f097e9d19a0569c3c5f02d5a914bbcd72bcf631a4cad78afe71217cde9.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/8c94987953089f75be39a2ad606a12b19a06f1d3355ff378773dbea626df3d46.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/8e993f7f8b8b845ba768390e048641e9bd9e6ed7f79ef871b9dba07aecca68fc.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/8ed82602d51495c06eb07b4b92508b21a35740ff009f570bf3b13996473dbfeb.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/8eed0df3afd5ac0bc5b845ca8e7fef042936381c9188298bac2057e243cb5683.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/91785f7b762592e22110f809c79c5287885de6870157b8287668bcf69caff429.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/9188f74a9f765ce01fbbf8848c1f2e38425bdb30ff83544e0efa78395100e443.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/91f5ac2ad9db4f18a224fbe24d302ea505a27c48bb1e84d79e23865fea3104dd.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/945506d16ad64d7139fd2322f2e129ffeca4107552a7de138dfad845349601f3.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/94d2f1e1d6c15a7c4588eaf699765dd2d06cf39747431924512b6c5050e5c751.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/964829ffeb48f48cf2150dd2ddd7ab1a704e8d104f8c3971cc5cfd432bdee294.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/967445f9d2ccbf8429705c749a1647192f65fb01cbaad3a3ae66b069ffedc27b.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/9fb1822f3af79e5d41859eaa8b02eaa7bc58c3915bad5a115a42f86da5ddfbc2.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/a051708cc2f8405b5bd3bb931bb1c3eb193fa49659c8042a54989c8d87f23ba4.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/a0d085510cef304bb7b6edff6304ea37d9eb099c3232c20b52ccd38c8d7ed63c.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/a0f1c472553f9527e5f65838a7f8c1979341704a39a01a635d073354e2352908.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/a0f8cd4e79d34c14f1ef447771ef2eefff8b6bba8e37e3122f3fc276f140c074.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/a172afee0f40c3fbce44008e699e38b194aed8e425f2e550b58214a599291ad2.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/a39aba13c5011cfa22d26dc791ec96c902049d2c2a6d4af9ab70cc4b18a9071a.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/a3a4c91283ff88240d3ada6533e73c0eb87891ffc244b67754569e5cc5fac9e4.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/a6397fb71cfe38ed5899d28a04a641712630ce612c55ebbabca0354436972890.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/a666c0e3d44f3b639c23cb3fe1f5f47e1cbf9e29060a444d0979dcb0c22fd661.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/a69d4b69197875fa59720d0faaa6021d534f977f3fa6644114e32fa8dfb967ea.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/a6e34579a547a65851d2078960a89f8d77d219b007c00a8d9e97112f67dd6362.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/a9578f8354d0268f82accb8fa1ffd2f4ce1a0551e9c3086fbe687251ce3d5cb6.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/a9e960fcb0d1ac07434deb000cfab2e859f3dce971a20f6fdd418a2883346ab3.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/aaaac73c1876d13617713ee83079da2baf3e83d81255f9a24aed70ab8613082d.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/ad45edf3f79fd040f209b5918c92e45e88766765162dacf5a47ce20d459448e9.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/ad72f4a5ab8127153d36b3080d8702cb7c894f51860a9aab7b1d220cf82bd903.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/ae39a5181d7c7f0aeff23f2b9f0421c95e4c42b3675d99756429b0f070f4cc1c.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/aedb4a3a66f5d842a22d201970b31343063d6342262e1cbdd4c4f009147323c6.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/b33480916d97df1fa11afa0c655f04c5a1f6a25c9472d404a161a21f5cd89b3d.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/b7b3a3bd5c8585602f265d1462e9874c7b2766a7a7631d79fc5a70b4000ae75e.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/b8adc7100a7c346957a8fee9940c0edd2303272f2a9788e70624b27809431257.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/ba2e9cbdbe450da2a7d6fcbeefe13c360ae71972bc99ca33c8f4634d35a8c8ba.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/ba51263b227b9031c282cb994bc00ea2913ad8a0ae85807d26af5f9217b01ac1.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/bbdc18470db14e8c87404ecad5b30fc8d44258dcaf555722c518d7c228c1d84c.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/bd01c39a383e6927f68930af4626f6dbb1a5fa55d695e19adb9e1a4a060e432a.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/bd07092105150b168831ef27e6024d795e975db210efe822080541b7abc5f696.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/bdd12b343919f01c0472bee31f27d68ac631808f74363cc7f36c7c08b8518fc7.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/bea4dffb1d16e1393ab4ffa0233f162c43aee80a015675bab6c2a567fd118659.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/c08c0f63b24a294cceb3081da3ee3f94eb2ffa10813cf77b17fd4bcae43ce13b.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/c6668fefdb129a9e1db428495b6f53d8c3b2b332f11f690c598d0e311864ff70.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/c6c7be208f7cb754f91a18903d12a080f399b124d2094830190f0dce5efde4b3.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/c7ced032f9ebff7bd60b784dfd26798488ffa83d215749d0d178a93d3c2f446d.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/c8832132e289e1ad8e7fd52632dc214d70a5d026a3b9c4b05ff6ebd3e007c4d8.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/c9bebb18613fd0146270d5b4521f70c89c20b1a92e0f79e185bf2fbab00b1740.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/caa8850b428e2a401874f25a386a1a4f1dd84d0d66045e6b077870d094817ed4.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/cc66959cfef3d8e3106b22aee11ef251630626629703321848fdcc075c7c58c3.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/cdcfd832ea2ad0a7b74bca90266be055ead3a17ac24cc518d9ba98e374af9494.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/d0027b57a592019b293cc880f9cdaaf5a79fd8e0c08ce12b5f0f76b98ceea4f5.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/d09c42a75d878524dae09c4b50f59d44ff19ecfc40d2109afc90e691f4fd7038.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/d0a313aeebaa7b9e56ee8fb74c142f67e98e914d11e92387e8fc4b25a1cba422.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/d395112c6deb7455d09f1683aa7ef8a877d2c3fe86dd05a5a199499971b2a3ed.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/dcc3a948ef9bf445ec891175338a2fb68d7427f90200da41811fc1c6d5277fb2.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/deb183d02047dc6df98c3c63df8f1cafbf941fdf28b620775906a2d0f23bc5de.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/e1f77167cedc36099257cad73ac1c5868e577e40d50cb038c9e1b2d149f6cbca.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/e348f55fb71c7c086a67739c0406d140fb75d5a9960ccc10d7ed54e37cbfb885.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/e496f58e15e8daa6736996ebc7e34657f04b0584b72348a684961e149dca965d.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/e65d40196d0d3b16233a56f5e8c14a48ea6431ccb766fed9135e790829f14d5d.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/e664684b7fbff7000f09b2e5e8e08e5d63ab67d93b1057d3d36b5cbea241862c.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/e7639f6a7a84fb5162c1a965a70ddfd8207f883be436dbdfb2a74533c890170d.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/e7decf1452e4444f78ffab746b9ee54e4e7d33dada6553481a8ce29f1b6d684e.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/e85afdceb6a750e83d9a3b50998f7917cdbde6ace16f3a64395d796ee45f4de7.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/edec10baef9908407735ee37013574f1d7b6aa466025d0ad2024a277c75f3c4c.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/ee4e64f25fd256f3832a13555380df69ceda69d25ed5609e75ae24c4459d4eeb.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/eea9d2d5bb8ee69d777e0d8fb059c64204874ffec708f7853d50c3f6265a4d0c.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/ef900bca90d07444c5b3279d2c4ae37bbf8e0967ff66c26f9d5011128b5dc98a.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/f3781b368f1c95b6e35498bd6d4fc193d3331992310d695a399c2871e691d545.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/f46be364942439898f5d07bda3a615540c333b0aa1b5f9c9c23b39a56474f847.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/f4c1899c5f3b39cf896ee062585f9d714677110e101ffb8e0e7215a6461f17dd.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/f610dab44c6828f202390f897dcd59f98e86b531e7a8c192e6907ded39a7c401.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/f9a9a5d80c52299462471c7d7ce311f6dd31fa8c40081935b33883f9f8a04f24.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/fb9275fac95516abbcf49d8e76d447d7a6013bb857a9d24c589af31b15c8910f.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/fc07b19bb58bdc77a0832a2b04c5b929273028229c5c5907defd02a74ec690af.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/fc80486671897f0b8b7ac5a73b03ca70d87cc01a09d19db0e81d3121e9386ab7.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/fd9cf2df5d73748d1279fd7f4a41cef89fe022fa28d91ae4ceab62a059737cc4.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/fdd0733810c9d6fc2f720bf8011cdd69e5a5f44a8c51e888a0c37f43de45a047.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/fedfe3ddce944299f425e1a83a2db65e59332af641e930eb54073ab3e3c38fec.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/ff1bf1b3a8a4c2036d665971c8b5c216d04a9e8c5991fb8b6c5fdc53e547d193.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/ff37feaff55cb4595924e340e10451ee05dcfc3d7fc2a1737c3cb957d81d8832.dds",
+        "assets/3/rtx-remix/mods/sfc-policy/textures/ff48ee40b4f074093c0b29fd217a0bf624d1f4dc19ae0ec1abecada49e9c8606.dds",
+        "assets/3/scene.bin",
+        "assets/3/texture-0.bin",
+        "assets/3/texture-1.bin",
+        "assets/3/texture-10.bin",
+        "assets/3/texture-11.bin",
+        "assets/3/texture-12.bin",
+        "assets/3/texture-13.bin",
+        "assets/3/texture-14.bin",
+        "assets/3/texture-15.bin",
+        "assets/3/texture-16.bin",
+        "assets/3/texture-18.bin",
+        "assets/3/texture-19.bin",
+        "assets/3/texture-2.bin",
+        "assets/3/texture-20.bin",
+        "assets/3/texture-21.bin",
+        "assets/3/texture-22.bin",
+        "assets/3/texture-23.bin",
+        "assets/3/texture-24.bin",
+        "assets/3/texture-25.bin",
+        "assets/3/texture-26.bin",
+        "assets/3/texture-27.bin",
+        "assets/3/texture-28.bin",
+        "assets/3/texture-29.bin",
+        "assets/3/texture-3.bin",
+        "assets/3/texture-30.bin",
+        "assets/3/texture-31.bin",
+        "assets/3/texture-32.bin",
+        "assets/3/texture-33.bin",
+        "assets/3/texture-34.bin",
+        "assets/3/texture-35.bin",
+        "assets/3/texture-36.bin",
+        "assets/3/texture-37.bin",
+        "assets/3/texture-38.bin",
+        "assets/3/texture-39.bin",
+        "assets/3/texture-4.bin",
+        "assets/3/texture-40.bin",
+        "assets/3/texture-41.bin",
+        "assets/3/texture-42.bin",
+        "assets/3/texture-43.bin",
+        "assets/3/texture-44.bin",
+        "assets/3/texture-45.bin",
+        "assets/3/texture-46.bin",
+        "assets/3/texture-47.bin",
+        "assets/3/texture-48.bin",
+        "assets/3/texture-49.bin",
+        "assets/3/texture-5.bin",
+        "assets/3/texture-50.bin",
+        "assets/3/texture-51.bin",
+        "assets/3/texture-52.bin",
+        "assets/3/texture-53.bin",
+        "assets/3/texture-54.bin",
+        "assets/3/texture-55.bin",
+        "assets/3/texture-6.bin",
+        "assets/3/texture-7.bin",
+        "assets/3/texture-8.bin",
+        "assets/3/texture-9.bin"
+      ],
+      "only_stage_differences": false
+    },
+    {
+      "run": "20261026-010538-056057-return-fixture",
+      "selected_files": 381,
+      "all_exact": true,
+      "differences": [],
+      "only_stage_differences": false
+    },
+    {
+      "run": "20261026-010841-367818-return-fixture",
+      "selected_files": 381,
+      "all_exact": false,
+      "differences": [
+        "assets/1/rtx-remix/mods/sfc-policy/mod.usda",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/007c684d71d3613267fd083c00dd514213f9be50825fb666c8c03018c84b18ab.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/0283daaf0e21f66444beeae6a02639adffc086dc3c4390c346395bbec2cb35da.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/0323ef85ac37c4ef3176fa75f52ad1dc60f0d128d17d07285c0de1a924159048.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/0369493887503f6c38a83ccc4c173aacd4ebd016b4e7ab4bc908511a16781951.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/03fad8c609d3ca36328d4fa269aed04ff14611dccdf50dcea78eee4e649a7054.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/0446c6a7a3ba871252d633a883440e1e6ad0d223f8bc1ac0ff35138898cd8e78.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/09286d188c05ed5226be7b351bafaacacc761421c05ac190ec63490f522e1a90.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/0a3b602c251eb145e1d8bf98bc1d802517aed5ba6063da894cba5dc40e722a22.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/0bf9278eae8e8c9a9b1dd2eff2b20afac1f989be04bef577ccfa7fd38a2fa07e.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/0c1f417ead969cf777b1856fe3e91e0c197b5da4c2f02d449f5676f3f66a5122.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/0f8ca1d06cef1c32b4150f5fdce72081342179f9072a8b694f673ce88cc17dfd.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/1213d9141a3157ba40dac7f42e29507d16acabb133cb9c116fd8eee776b6900e.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/122618d0ec6eabd2e4af9b3a0ab0fa541a7cd28aeb45866c179f8f15409af448.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/148c6a0e3cb0eb09294fc8ab4d86f5e8090e4825352b24d3af2c044ac4fe435f.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/1eef0e51fbc96933d0cd5b76673f256deb2a513491d5996704fa7900d2009e65.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/2000a7f34207c8ef338694523d97a8ad11bbe950998af6fd6be52368deab021c.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/2189329632494b80fb6c127953315bc6bafb57099ad82001b93681f41a984dd9.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/21a399447bd5fb2b8e4a28ed4db1034f908a9e2092c2ef2c935b0ee8546cb081.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/21d57ff593f7b3cdf51e9344ac03973bb6950e73a01c283ecad322b724891c66.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/25e3a6e171b2d2312ac05ad8ac1433e25a17c69e472c845b545f884552f35c12.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/2630ab6482500b1f8df87f0cbb4ce198785616f6b574f85ca935b50e05ef0c9a.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/28443fb18f7c452a371cc3849bc905ed9eb82a6c6cc1814e73dc450a0defe8f3.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/2937a10ec09d0ceca3bbb5fadab611ad1f0d435cccd864d32e9a1d03a61e8f7c.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/29a4b068a09bd6e8b356694f73dcf41578b6e4d3d998d41a7837d2054c183e62.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/2c8be2a5a0e4ca60b58e63bae5e19edb974f886979d902a37613db22d5851b00.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/307b23fa452df8fa1aac852878d5ab013195c8df149ef9c2e156c7098e0b132c.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/3183c516c546300dfa3217431dd59b840122b6024500656ed7a2f35b1be093df.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/32290f9c871f2dc162ca2fa9306797f50eb2990e34528ca07ea648edaf18c838.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/337a65d2a8ac2674b560ae9c46699685b88a627596b8dc0b0fb6b1dea863a311.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/34024ccc459f8bd3abcb88ae6a6001a9bafcde99c0543bd4133462f482ca4906.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/3483684babb105ed1a929d27d8c217fbb8c5cc0f581fad781f1a4f7974a99786.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/36c3f770ec72df647a29c534a3aa975cddfb16277434ecab8ed8375115a6538d.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/387b1adb2fad7f1c5f8d02abf9b4ee4ff9832ea7be3bb570240954177bf91efd.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/398112bcd8cf0f587ff81ebc6c773eefaad03a43f5e1a0676b6461931afc6056.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/3ae6478c5387b38ab9ca46a637c474e56989d18a89f3a61ac5f189bf6d628845.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/40dbef72913d7974156d2e15562213b9c44dbbb65f49601c692045473530325e.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/40e96de069d4ebb7db0d3cd31df8bbde4f2768b4087118b5b2267edf4e28c08a.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/417c9b0af48953554fbb1b41712609b490d26ffeb31fb583768190dd014f4920.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/4211df7ad132804716f2c6c2451f77a46860e81a8866b663dfd7a16c59f85600.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/42f9981079f2f4234c9216800a272635ad23611002cb051f6f1beadd2285f887.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/44a2c2879a6aa88d7bef0fb868cd2fec2e7817dd11003baba4ceeda13b13d5ef.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/45612eadc990047ae8f824c2b57f95026bcd99c7eac94060f08c5e8d03b02cd2.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/46c4ab5044be131f61f2120254ce820cab184dabd8cfb8fc2ef8961505ada126.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/482bd71ba41ec5159e6e8705b8d1999d16b3ec12e59bfa75d89be69cd93a013e.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/48576d2a6aff7784b649aedd3a67851b1efb48d003b43edda903b5fc557a9acb.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/4a4c96f4e4cb8db21fcd7a9b2669d249703b2fa1bbb22b70a197940bfdc68e38.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/4bc18d8ffe849cad03c4ca1eadd9966c0e1b80434390680e1776f34a8d2bdfaf.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/4df4a1deb99a4d2243c6448d29cbdcf3e131a1954a6f534db102cd44ceaa84aa.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/529f5f28b462d14a8b9dd25b6792e7ccbb4a2373acbf166615432efd4f26bd76.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/542556036dd76e6b9ab4a41e9d6037d70095fe15f1a6ead80779993c00eda941.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/54ddde2b4d2ed74c80a537d3902c6c335bafde3ee588282fa1b56df2f59ab0eb.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/5648d3a49e96efe73ae28a0210ef84e773d66db76ca950a0df50e72002fd36a9.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/56e094c9a31fd5a1a13251d5226253c21c9e6fb27a331d50cd9c64484e4ffa9c.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/5751cb782f19d5d7a1b8c0ce4b943dfb9cab054ec978579effa0cf7612617225.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/5780986c5ec0c04917e890d3048514b292651a555ed86963c16402e7969758f2.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/586ec1c7d45136aa4c343d5673552f66473d242f7f5c09223be76f35c0764318.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/5aa4257d16cc6a81a53bcd8242863d66309a8fc05d344d9a135130f69b21f29e.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/5b8d328143a83fe836c673c502be53e73dbe85950afa7618832dc07c08f0c8cf.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/5e9c3fdd528e82be68deec0b23e1cf186164cce84b9e2b71bda8d2e9457cdfea.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/63580b61173b4fa5f4cc39f87446d641009faf4ba1576d4a7f65a07557418f81.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/69aa5e04d27e8b36df806284b383cbbba5f7fe267fe17f2a7ca3d5b2f20ca2cc.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/72584e0e72d5635771b5b684c344f3bfb4eed4d0a0550a3d1c888bc88303e593.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/7374a20c4f35ba1f1b2416040128d5368f3542678ac256eaf5aa559eecf25411.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/746f415b8d54440613615cf1640630dcf747c7d55b852c90ee070efd1c993a6c.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/75ce7f48374767d6e288f56e99c37a22ec68ecaf405488d56a50bb28a35543be.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/7a2d4f215da0dbcc1f2088978c37d45de012b559004350f7994a3c83b1b06796.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/7acd733b406be34ed17369fba2e789bb458e724b5c80b18297b85f9a9ef64682.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/7ca0a19dda92daf0b9f759769210d722d6f3e53622efcadde9b74a2c478fbfaa.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/7cd79db555dbfbe20029070736e390684510e0a68a7a13469991b689726f4376.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/7e07404e9daf887eb3b9a3325727565e49db5fd3da996bde994e8ca2ec514934.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/7fe01ede66b4bd1df3131fccc9e4563a64dd7f6d4ac2934992c54b7526a8680e.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/840521b5110631a64f84ece4e70875c4a723a5eb34f0e0d01d1e8fd96d88dbe5.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/86e698364fe173a7240a6b118a9370e60985bab0ae1eff73e7ce0f70c4b79a3c.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/872fae4e1fb30bfec22047a05cb0bed37181a1199e15c4da0cb10f3afc7dc5af.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/88d67a04a60be95ca4ccc00a240ea3e692379213f7732c1d84520b86578d9e55.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/8e993f7f8b8b845ba768390e048641e9bd9e6ed7f79ef871b9dba07aecca68fc.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/91785f7b762592e22110f809c79c5287885de6870157b8287668bcf69caff429.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/91f5ac2ad9db4f18a224fbe24d302ea505a27c48bb1e84d79e23865fea3104dd.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/93d08df6ea342614536d2905f2caa2737c0b16a5799b6bbc6a1abbff91d6e16b.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/945506d16ad64d7139fd2322f2e129ffeca4107552a7de138dfad845349601f3.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/94d2f1e1d6c15a7c4588eaf699765dd2d06cf39747431924512b6c5050e5c751.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/9562a61f3426fc99a390b9a77d09e662cd01551969f646d954a926ae9efb50aa.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/95debe617436e494a7951e790123d014129d26202ec4981026731f26a0a1e02e.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/967445f9d2ccbf8429705c749a1647192f65fb01cbaad3a3ae66b069ffedc27b.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/9d3654bf595c2f5cabe30e2add397f7848e9276d9235519195f192e226c475af.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/a083c8ba763e48b6529e92dc941b6302057387686d917004e0c64176997bcabd.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/a0d085510cef304bb7b6edff6304ea37d9eb099c3232c20b52ccd38c8d7ed63c.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/a0f1c472553f9527e5f65838a7f8c1979341704a39a01a635d073354e2352908.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/a39aba13c5011cfa22d26dc791ec96c902049d2c2a6d4af9ab70cc4b18a9071a.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/a3a4c91283ff88240d3ada6533e73c0eb87891ffc244b67754569e5cc5fac9e4.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/a46d9fa4df1429404a9f8a80375b513143682101ba6e305ab736e3c99ec9d0c6.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/a4f0fb985a1c55617f3f9bb7cd6d13f6cfac035a5db9aea68628caf5a7eecc43.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/a6397fb71cfe38ed5899d28a04a641712630ce612c55ebbabca0354436972890.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/a6e34579a547a65851d2078960a89f8d77d219b007c00a8d9e97112f67dd6362.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/a9578f8354d0268f82accb8fa1ffd2f4ce1a0551e9c3086fbe687251ce3d5cb6.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/aaaa2a35f2df09ae70134c7021b52950041cb6ff1c93b4aaf496cc39b1bfa4e0.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/ab27203a1b658852c5d7c8b941bce97ec2194b2af15ca76ab6b77e5d3d806a3b.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/ad72f4a5ab8127153d36b3080d8702cb7c894f51860a9aab7b1d220cf82bd903.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/ae39a5181d7c7f0aeff23f2b9f0421c95e4c42b3675d99756429b0f070f4cc1c.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/b33480916d97df1fa11afa0c655f04c5a1f6a25c9472d404a161a21f5cd89b3d.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/b36cfad2c2912f3caea74b719e44e7be18824b99342aa39b39b89a156a3d80f2.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/b455ac01bff51b43621ba0e21baf05ec22d184f18507fd0550f6966232aa4b71.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/b4adc7db851661f90b3f203b0656c62a5f5a47da125fbb86056f116d43e9a0e5.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/b5e12743be5c8b6d69b1bf6de679c39dbfe3e9b3b92fc4eff555a1bd11b2c793.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/ba51263b227b9031c282cb994bc00ea2913ad8a0ae85807d26af5f9217b01ac1.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/bbdc18470db14e8c87404ecad5b30fc8d44258dcaf555722c518d7c228c1d84c.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/bd01c39a383e6927f68930af4626f6dbb1a5fa55d695e19adb9e1a4a060e432a.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/bd07092105150b168831ef27e6024d795e975db210efe822080541b7abc5f696.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/bdaf198a76e776040388606ebc7f5cad64baa3e56a26612d03a3505cdbe137c7.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/bdde163c4d3a348355e18a4a5edebd21f39d8f9238760d95a63ca4c8f4b4e1c8.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/bea4dffb1d16e1393ab4ffa0233f162c43aee80a015675bab6c2a567fd118659.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/bee147da8d164ecb1bfe885d7daf4ee8119234d86c021d3205fa55ea0ff845a5.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/c08c0f63b24a294cceb3081da3ee3f94eb2ffa10813cf77b17fd4bcae43ce13b.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/c6668fefdb129a9e1db428495b6f53d8c3b2b332f11f690c598d0e311864ff70.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/c6b9395dfc1a7a66dce8e0f320c0ce7cba728de65ac6791fa8ab9be22e04ce1b.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/c7ced032f9ebff7bd60b784dfd26798488ffa83d215749d0d178a93d3c2f446d.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/c8832132e289e1ad8e7fd52632dc214d70a5d026a3b9c4b05ff6ebd3e007c4d8.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/c906e13f264542abfda553538482292e3cea092d17bee749a7c38756de47b8cd.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/c969baefa130eb6121109e38b2937cfa20f85175780532409902b1defa8bd611.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/c9bebb18613fd0146270d5b4521f70c89c20b1a92e0f79e185bf2fbab00b1740.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/ca2cc98ebde8094a3be23378c88b2a9f7f263b778dc7d730f62b329ad585c5f2.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/caa8850b428e2a401874f25a386a1a4f1dd84d0d66045e6b077870d094817ed4.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/cc66959cfef3d8e3106b22aee11ef251630626629703321848fdcc075c7c58c3.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/d0027b57a592019b293cc880f9cdaaf5a79fd8e0c08ce12b5f0f76b98ceea4f5.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/d09c42a75d878524dae09c4b50f59d44ff19ecfc40d2109afc90e691f4fd7038.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/d0a313aeebaa7b9e56ee8fb74c142f67e98e914d11e92387e8fc4b25a1cba422.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/d395112c6deb7455d09f1683aa7ef8a877d2c3fe86dd05a5a199499971b2a3ed.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/da42259c5c7a1dbd48eaf1e6809afd101d7447b9348311128a25baadd161b7b2.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/daf694976a0dc47765140f088c3c4e4aef836c0622c686ebdef167bb6cfb0892.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/dbb6972985625a4399816861514cb51a48f8e4379403d98be3c5d712661a187f.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/dcc3a948ef9bf445ec891175338a2fb68d7427f90200da41811fc1c6d5277fb2.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/deb183d02047dc6df98c3c63df8f1cafbf941fdf28b620775906a2d0f23bc5de.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/dfd2f0854ad5fc304c452aa96813c2361f096863f999ee3399985fa22b6a9ba7.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/e1f77167cedc36099257cad73ac1c5868e577e40d50cb038c9e1b2d149f6cbca.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/e65d40196d0d3b16233a56f5e8c14a48ea6431ccb766fed9135e790829f14d5d.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/e664684b7fbff7000f09b2e5e8e08e5d63ab67d93b1057d3d36b5cbea241862c.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/e691ed0f4ed45c28d5b2baafbe1f0a59b00e119e4d71df1d723fe7e0b562f1d5.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/e7decf1452e4444f78ffab746b9ee54e4e7d33dada6553481a8ce29f1b6d684e.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/e85afdceb6a750e83d9a3b50998f7917cdbde6ace16f3a64395d796ee45f4de7.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/ee4e64f25fd256f3832a13555380df69ceda69d25ed5609e75ae24c4459d4eeb.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/eea9d2d5bb8ee69d777e0d8fb059c64204874ffec708f7853d50c3f6265a4d0c.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/ef52de0b96cc595aebc14c9dff8d09f288e146ae9b1515820d8ca61d925d96ac.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/f0a6765a12e35f4fab20e298d8bad229013f31281e0985f2cf4669f3afc223af.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/f46be364942439898f5d07bda3a615540c333b0aa1b5f9c9c23b39a56474f847.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/f4c1899c5f3b39cf896ee062585f9d714677110e101ffb8e0e7215a6461f17dd.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/f8567b01c54446fa524e44a591aefc5607d577ddc6ddcf73ad0c78124a36dac1.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/f9a9a5d80c52299462471c7d7ce311f6dd31fa8c40081935b33883f9f8a04f24.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/fc07b19bb58bdc77a0832a2b04c5b929273028229c5c5907defd02a74ec690af.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/fd9cf2df5d73748d1279fd7f4a41cef89fe022fa28d91ae4ceab62a059737cc4.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/fdd0733810c9d6fc2f720bf8011cdd69e5a5f44a8c51e888a0c37f43de45a047.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/fedfe3ddce944299f425e1a83a2db65e59332af641e930eb54073ab3e3c38fec.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/ff1bf1b3a8a4c2036d665971c8b5c216d04a9e8c5991fb8b6c5fdc53e547d193.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/ff37feaff55cb4595924e340e10451ee05dcfc3d7fc2a1737c3cb957d81d8832.dds",
+        "assets/1/rtx-remix/mods/sfc-policy/textures/ff48ee40b4f074093c0b29fd217a0bf624d1f4dc19ae0ec1abecada49e9c8606.dds",
+        "assets/1/scene.bin",
+        "assets/1/texture-0.bin",
+        "assets/1/texture-1.bin",
+        "assets/1/texture-10.bin",
+        "assets/1/texture-11.bin",
+        "assets/1/texture-12.bin",
+        "assets/1/texture-13.bin",
+        "assets/1/texture-14.bin",
+        "assets/1/texture-15.bin",
+        "assets/1/texture-16.bin",
+        "assets/1/texture-17.bin",
+        "assets/1/texture-18.bin",
+        "assets/1/texture-19.bin",
+        "assets/1/texture-2.bin",
+        "assets/1/texture-20.bin",
+        "assets/1/texture-21.bin",
+        "assets/1/texture-22.bin",
+        "assets/1/texture-23.bin",
+        "assets/1/texture-24.bin",
+        "assets/1/texture-25.bin",
+        "assets/1/texture-26.bin",
+        "assets/1/texture-27.bin",
+        "assets/1/texture-28.bin",
+        "assets/1/texture-29.bin",
+        "assets/1/texture-3.bin",
+        "assets/1/texture-30.bin",
+        "assets/1/texture-31.bin",
+        "assets/1/texture-32.bin",
+        "assets/1/texture-33.bin",
+        "assets/1/texture-34.bin",
+        "assets/1/texture-35.bin",
+        "assets/1/texture-36.bin",
+        "assets/1/texture-37.bin",
+        "assets/1/texture-38.bin",
+        "assets/1/texture-39.bin",
+        "assets/1/texture-4.bin",
+        "assets/1/texture-40.bin",
+        "assets/1/texture-41.bin",
+        "assets/1/texture-42.bin",
+        "assets/1/texture-43.bin",
+        "assets/1/texture-44.bin",
+        "assets/1/texture-45.bin",
+        "assets/1/texture-46.bin",
+        "assets/1/texture-47.bin",
+        "assets/1/texture-48.bin",
+        "assets/1/texture-49.bin",
+        "assets/1/texture-5.bin",
+        "assets/1/texture-50.bin",
+        "assets/1/texture-51.bin",
+        "assets/1/texture-52.bin",
+        "assets/1/texture-53.bin",
+        "assets/1/texture-54.bin",
+        "assets/1/texture-55.bin",
+        "assets/1/texture-6.bin",
+        "assets/1/texture-7.bin",
+        "assets/1/texture-8.bin",
+        "assets/1/texture-9.bin",
+        "assets/2/rtx-remix/mods/sfc-policy/mod.usda",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/007c684d71d3613267fd083c00dd514213f9be50825fb666c8c03018c84b18ab.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/0283daaf0e21f66444beeae6a02639adffc086dc3c4390c346395bbec2cb35da.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/0323ef85ac37c4ef3176fa75f52ad1dc60f0d128d17d07285c0de1a924159048.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/0369493887503f6c38a83ccc4c173aacd4ebd016b4e7ab4bc908511a16781951.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/03fad8c609d3ca36328d4fa269aed04ff14611dccdf50dcea78eee4e649a7054.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/0446c6a7a3ba871252d633a883440e1e6ad0d223f8bc1ac0ff35138898cd8e78.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/09286d188c05ed5226be7b351bafaacacc761421c05ac190ec63490f522e1a90.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/0a3b602c251eb145e1d8bf98bc1d802517aed5ba6063da894cba5dc40e722a22.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/0bf9278eae8e8c9a9b1dd2eff2b20afac1f989be04bef577ccfa7fd38a2fa07e.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/0c1f417ead969cf777b1856fe3e91e0c197b5da4c2f02d449f5676f3f66a5122.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/0f8ca1d06cef1c32b4150f5fdce72081342179f9072a8b694f673ce88cc17dfd.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/1213d9141a3157ba40dac7f42e29507d16acabb133cb9c116fd8eee776b6900e.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/122618d0ec6eabd2e4af9b3a0ab0fa541a7cd28aeb45866c179f8f15409af448.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/148c6a0e3cb0eb09294fc8ab4d86f5e8090e4825352b24d3af2c044ac4fe435f.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/1eef0e51fbc96933d0cd5b76673f256deb2a513491d5996704fa7900d2009e65.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/2000a7f34207c8ef338694523d97a8ad11bbe950998af6fd6be52368deab021c.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/2189329632494b80fb6c127953315bc6bafb57099ad82001b93681f41a984dd9.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/21a399447bd5fb2b8e4a28ed4db1034f908a9e2092c2ef2c935b0ee8546cb081.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/21d57ff593f7b3cdf51e9344ac03973bb6950e73a01c283ecad322b724891c66.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/25e3a6e171b2d2312ac05ad8ac1433e25a17c69e472c845b545f884552f35c12.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/2630ab6482500b1f8df87f0cbb4ce198785616f6b574f85ca935b50e05ef0c9a.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/28443fb18f7c452a371cc3849bc905ed9eb82a6c6cc1814e73dc450a0defe8f3.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/2937a10ec09d0ceca3bbb5fadab611ad1f0d435cccd864d32e9a1d03a61e8f7c.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/29a4b068a09bd6e8b356694f73dcf41578b6e4d3d998d41a7837d2054c183e62.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/2c8be2a5a0e4ca60b58e63bae5e19edb974f886979d902a37613db22d5851b00.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/307b23fa452df8fa1aac852878d5ab013195c8df149ef9c2e156c7098e0b132c.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/3183c516c546300dfa3217431dd59b840122b6024500656ed7a2f35b1be093df.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/32290f9c871f2dc162ca2fa9306797f50eb2990e34528ca07ea648edaf18c838.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/337a65d2a8ac2674b560ae9c46699685b88a627596b8dc0b0fb6b1dea863a311.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/34024ccc459f8bd3abcb88ae6a6001a9bafcde99c0543bd4133462f482ca4906.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/3483684babb105ed1a929d27d8c217fbb8c5cc0f581fad781f1a4f7974a99786.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/36c3f770ec72df647a29c534a3aa975cddfb16277434ecab8ed8375115a6538d.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/387b1adb2fad7f1c5f8d02abf9b4ee4ff9832ea7be3bb570240954177bf91efd.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/398112bcd8cf0f587ff81ebc6c773eefaad03a43f5e1a0676b6461931afc6056.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/3ae6478c5387b38ab9ca46a637c474e56989d18a89f3a61ac5f189bf6d628845.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/40dbef72913d7974156d2e15562213b9c44dbbb65f49601c692045473530325e.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/40e96de069d4ebb7db0d3cd31df8bbde4f2768b4087118b5b2267edf4e28c08a.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/417c9b0af48953554fbb1b41712609b490d26ffeb31fb583768190dd014f4920.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/4211df7ad132804716f2c6c2451f77a46860e81a8866b663dfd7a16c59f85600.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/42f9981079f2f4234c9216800a272635ad23611002cb051f6f1beadd2285f887.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/44a2c2879a6aa88d7bef0fb868cd2fec2e7817dd11003baba4ceeda13b13d5ef.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/45612eadc990047ae8f824c2b57f95026bcd99c7eac94060f08c5e8d03b02cd2.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/46c4ab5044be131f61f2120254ce820cab184dabd8cfb8fc2ef8961505ada126.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/482bd71ba41ec5159e6e8705b8d1999d16b3ec12e59bfa75d89be69cd93a013e.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/48576d2a6aff7784b649aedd3a67851b1efb48d003b43edda903b5fc557a9acb.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/4a4c96f4e4cb8db21fcd7a9b2669d249703b2fa1bbb22b70a197940bfdc68e38.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/4bc18d8ffe849cad03c4ca1eadd9966c0e1b80434390680e1776f34a8d2bdfaf.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/4df4a1deb99a4d2243c6448d29cbdcf3e131a1954a6f534db102cd44ceaa84aa.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/529f5f28b462d14a8b9dd25b6792e7ccbb4a2373acbf166615432efd4f26bd76.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/542556036dd76e6b9ab4a41e9d6037d70095fe15f1a6ead80779993c00eda941.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/54ddde2b4d2ed74c80a537d3902c6c335bafde3ee588282fa1b56df2f59ab0eb.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/5648d3a49e96efe73ae28a0210ef84e773d66db76ca950a0df50e72002fd36a9.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/56e094c9a31fd5a1a13251d5226253c21c9e6fb27a331d50cd9c64484e4ffa9c.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/5751cb782f19d5d7a1b8c0ce4b943dfb9cab054ec978579effa0cf7612617225.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/5780986c5ec0c04917e890d3048514b292651a555ed86963c16402e7969758f2.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/586ec1c7d45136aa4c343d5673552f66473d242f7f5c09223be76f35c0764318.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/5aa4257d16cc6a81a53bcd8242863d66309a8fc05d344d9a135130f69b21f29e.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/5b8d328143a83fe836c673c502be53e73dbe85950afa7618832dc07c08f0c8cf.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/5e9c3fdd528e82be68deec0b23e1cf186164cce84b9e2b71bda8d2e9457cdfea.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/63580b61173b4fa5f4cc39f87446d641009faf4ba1576d4a7f65a07557418f81.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/69aa5e04d27e8b36df806284b383cbbba5f7fe267fe17f2a7ca3d5b2f20ca2cc.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/72584e0e72d5635771b5b684c344f3bfb4eed4d0a0550a3d1c888bc88303e593.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/7374a20c4f35ba1f1b2416040128d5368f3542678ac256eaf5aa559eecf25411.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/746f415b8d54440613615cf1640630dcf747c7d55b852c90ee070efd1c993a6c.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/75ce7f48374767d6e288f56e99c37a22ec68ecaf405488d56a50bb28a35543be.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/7a2d4f215da0dbcc1f2088978c37d45de012b559004350f7994a3c83b1b06796.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/7acd733b406be34ed17369fba2e789bb458e724b5c80b18297b85f9a9ef64682.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/7ca0a19dda92daf0b9f759769210d722d6f3e53622efcadde9b74a2c478fbfaa.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/7cd79db555dbfbe20029070736e390684510e0a68a7a13469991b689726f4376.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/7e07404e9daf887eb3b9a3325727565e49db5fd3da996bde994e8ca2ec514934.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/7fe01ede66b4bd1df3131fccc9e4563a64dd7f6d4ac2934992c54b7526a8680e.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/840521b5110631a64f84ece4e70875c4a723a5eb34f0e0d01d1e8fd96d88dbe5.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/86e698364fe173a7240a6b118a9370e60985bab0ae1eff73e7ce0f70c4b79a3c.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/872fae4e1fb30bfec22047a05cb0bed37181a1199e15c4da0cb10f3afc7dc5af.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/88d67a04a60be95ca4ccc00a240ea3e692379213f7732c1d84520b86578d9e55.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/8e993f7f8b8b845ba768390e048641e9bd9e6ed7f79ef871b9dba07aecca68fc.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/91785f7b762592e22110f809c79c5287885de6870157b8287668bcf69caff429.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/91f5ac2ad9db4f18a224fbe24d302ea505a27c48bb1e84d79e23865fea3104dd.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/93d08df6ea342614536d2905f2caa2737c0b16a5799b6bbc6a1abbff91d6e16b.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/945506d16ad64d7139fd2322f2e129ffeca4107552a7de138dfad845349601f3.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/94d2f1e1d6c15a7c4588eaf699765dd2d06cf39747431924512b6c5050e5c751.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/9562a61f3426fc99a390b9a77d09e662cd01551969f646d954a926ae9efb50aa.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/95debe617436e494a7951e790123d014129d26202ec4981026731f26a0a1e02e.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/967445f9d2ccbf8429705c749a1647192f65fb01cbaad3a3ae66b069ffedc27b.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/9d3654bf595c2f5cabe30e2add397f7848e9276d9235519195f192e226c475af.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/a083c8ba763e48b6529e92dc941b6302057387686d917004e0c64176997bcabd.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/a0d085510cef304bb7b6edff6304ea37d9eb099c3232c20b52ccd38c8d7ed63c.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/a0f1c472553f9527e5f65838a7f8c1979341704a39a01a635d073354e2352908.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/a39aba13c5011cfa22d26dc791ec96c902049d2c2a6d4af9ab70cc4b18a9071a.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/a3a4c91283ff88240d3ada6533e73c0eb87891ffc244b67754569e5cc5fac9e4.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/a46d9fa4df1429404a9f8a80375b513143682101ba6e305ab736e3c99ec9d0c6.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/a4f0fb985a1c55617f3f9bb7cd6d13f6cfac035a5db9aea68628caf5a7eecc43.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/a6397fb71cfe38ed5899d28a04a641712630ce612c55ebbabca0354436972890.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/a6e34579a547a65851d2078960a89f8d77d219b007c00a8d9e97112f67dd6362.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/a9578f8354d0268f82accb8fa1ffd2f4ce1a0551e9c3086fbe687251ce3d5cb6.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/aaaa2a35f2df09ae70134c7021b52950041cb6ff1c93b4aaf496cc39b1bfa4e0.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/ab27203a1b658852c5d7c8b941bce97ec2194b2af15ca76ab6b77e5d3d806a3b.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/ad72f4a5ab8127153d36b3080d8702cb7c894f51860a9aab7b1d220cf82bd903.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/ae39a5181d7c7f0aeff23f2b9f0421c95e4c42b3675d99756429b0f070f4cc1c.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/b33480916d97df1fa11afa0c655f04c5a1f6a25c9472d404a161a21f5cd89b3d.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/b36cfad2c2912f3caea74b719e44e7be18824b99342aa39b39b89a156a3d80f2.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/b455ac01bff51b43621ba0e21baf05ec22d184f18507fd0550f6966232aa4b71.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/b4adc7db851661f90b3f203b0656c62a5f5a47da125fbb86056f116d43e9a0e5.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/b5e12743be5c8b6d69b1bf6de679c39dbfe3e9b3b92fc4eff555a1bd11b2c793.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/ba51263b227b9031c282cb994bc00ea2913ad8a0ae85807d26af5f9217b01ac1.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/bbdc18470db14e8c87404ecad5b30fc8d44258dcaf555722c518d7c228c1d84c.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/bd01c39a383e6927f68930af4626f6dbb1a5fa55d695e19adb9e1a4a060e432a.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/bd07092105150b168831ef27e6024d795e975db210efe822080541b7abc5f696.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/bdaf198a76e776040388606ebc7f5cad64baa3e56a26612d03a3505cdbe137c7.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/bdde163c4d3a348355e18a4a5edebd21f39d8f9238760d95a63ca4c8f4b4e1c8.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/bea4dffb1d16e1393ab4ffa0233f162c43aee80a015675bab6c2a567fd118659.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/bee147da8d164ecb1bfe885d7daf4ee8119234d86c021d3205fa55ea0ff845a5.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/c08c0f63b24a294cceb3081da3ee3f94eb2ffa10813cf77b17fd4bcae43ce13b.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/c6668fefdb129a9e1db428495b6f53d8c3b2b332f11f690c598d0e311864ff70.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/c6b9395dfc1a7a66dce8e0f320c0ce7cba728de65ac6791fa8ab9be22e04ce1b.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/c7ced032f9ebff7bd60b784dfd26798488ffa83d215749d0d178a93d3c2f446d.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/c8832132e289e1ad8e7fd52632dc214d70a5d026a3b9c4b05ff6ebd3e007c4d8.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/c906e13f264542abfda553538482292e3cea092d17bee749a7c38756de47b8cd.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/c969baefa130eb6121109e38b2937cfa20f85175780532409902b1defa8bd611.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/c9bebb18613fd0146270d5b4521f70c89c20b1a92e0f79e185bf2fbab00b1740.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/ca2cc98ebde8094a3be23378c88b2a9f7f263b778dc7d730f62b329ad585c5f2.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/caa8850b428e2a401874f25a386a1a4f1dd84d0d66045e6b077870d094817ed4.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/cc66959cfef3d8e3106b22aee11ef251630626629703321848fdcc075c7c58c3.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/d0027b57a592019b293cc880f9cdaaf5a79fd8e0c08ce12b5f0f76b98ceea4f5.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/d09c42a75d878524dae09c4b50f59d44ff19ecfc40d2109afc90e691f4fd7038.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/d0a313aeebaa7b9e56ee8fb74c142f67e98e914d11e92387e8fc4b25a1cba422.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/d395112c6deb7455d09f1683aa7ef8a877d2c3fe86dd05a5a199499971b2a3ed.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/da42259c5c7a1dbd48eaf1e6809afd101d7447b9348311128a25baadd161b7b2.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/daf694976a0dc47765140f088c3c4e4aef836c0622c686ebdef167bb6cfb0892.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/dbb6972985625a4399816861514cb51a48f8e4379403d98be3c5d712661a187f.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/dcc3a948ef9bf445ec891175338a2fb68d7427f90200da41811fc1c6d5277fb2.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/deb183d02047dc6df98c3c63df8f1cafbf941fdf28b620775906a2d0f23bc5de.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/dfd2f0854ad5fc304c452aa96813c2361f096863f999ee3399985fa22b6a9ba7.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/e1f77167cedc36099257cad73ac1c5868e577e40d50cb038c9e1b2d149f6cbca.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/e65d40196d0d3b16233a56f5e8c14a48ea6431ccb766fed9135e790829f14d5d.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/e664684b7fbff7000f09b2e5e8e08e5d63ab67d93b1057d3d36b5cbea241862c.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/e691ed0f4ed45c28d5b2baafbe1f0a59b00e119e4d71df1d723fe7e0b562f1d5.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/e7decf1452e4444f78ffab746b9ee54e4e7d33dada6553481a8ce29f1b6d684e.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/e85afdceb6a750e83d9a3b50998f7917cdbde6ace16f3a64395d796ee45f4de7.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/ee4e64f25fd256f3832a13555380df69ceda69d25ed5609e75ae24c4459d4eeb.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/eea9d2d5bb8ee69d777e0d8fb059c64204874ffec708f7853d50c3f6265a4d0c.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/ef52de0b96cc595aebc14c9dff8d09f288e146ae9b1515820d8ca61d925d96ac.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/f0a6765a12e35f4fab20e298d8bad229013f31281e0985f2cf4669f3afc223af.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/f46be364942439898f5d07bda3a615540c333b0aa1b5f9c9c23b39a56474f847.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/f4c1899c5f3b39cf896ee062585f9d714677110e101ffb8e0e7215a6461f17dd.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/f8567b01c54446fa524e44a591aefc5607d577ddc6ddcf73ad0c78124a36dac1.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/f9a9a5d80c52299462471c7d7ce311f6dd31fa8c40081935b33883f9f8a04f24.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/fc07b19bb58bdc77a0832a2b04c5b929273028229c5c5907defd02a74ec690af.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/fd9cf2df5d73748d1279fd7f4a41cef89fe022fa28d91ae4ceab62a059737cc4.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/fdd0733810c9d6fc2f720bf8011cdd69e5a5f44a8c51e888a0c37f43de45a047.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/fedfe3ddce944299f425e1a83a2db65e59332af641e930eb54073ab3e3c38fec.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/ff1bf1b3a8a4c2036d665971c8b5c216d04a9e8c5991fb8b6c5fdc53e547d193.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/ff37feaff55cb4595924e340e10451ee05dcfc3d7fc2a1737c3cb957d81d8832.dds",
+        "assets/2/rtx-remix/mods/sfc-policy/textures/ff48ee40b4f074093c0b29fd217a0bf624d1f4dc19ae0ec1abecada49e9c8606.dds",
+        "assets/2/scene.bin",
+        "assets/2/texture-0.bin",
+        "assets/2/texture-1.bin",
+        "assets/2/texture-10.bin",
+        "assets/2/texture-11.bin",
+        "assets/2/texture-12.bin",
+        "assets/2/texture-13.bin",
+        "assets/2/texture-14.bin",
+        "assets/2/texture-15.bin",
+        "assets/2/texture-16.bin",
+        "assets/2/texture-17.bin",
+        "assets/2/texture-18.bin",
+        "assets/2/texture-19.bin",
+        "assets/2/texture-2.bin",
+        "assets/2/texture-20.bin",
+        "assets/2/texture-21.bin",
+        "assets/2/texture-22.bin",
+        "assets/2/texture-23.bin",
+        "assets/2/texture-24.bin",
+        "assets/2/texture-25.bin",
+        "assets/2/texture-26.bin",
+        "assets/2/texture-27.bin",
+        "assets/2/texture-28.bin",
+        "assets/2/texture-29.bin",
+        "assets/2/texture-3.bin",
+        "assets/2/texture-30.bin",
+        "assets/2/texture-31.bin",
+        "assets/2/texture-32.bin",
+        "assets/2/texture-33.bin",
+        "assets/2/texture-34.bin",
+        "assets/2/texture-35.bin",
+        "assets/2/texture-36.bin",
+        "assets/2/texture-37.bin",
+        "assets/2/texture-38.bin",
+        "assets/2/texture-39.bin",
+        "assets/2/texture-4.bin",
+        "assets/2/texture-40.bin",
+        "assets/2/texture-41.bin",
+        "assets/2/texture-42.bin",
+        "assets/2/texture-43.bin",
+        "assets/2/texture-44.bin",
+        "assets/2/texture-45.bin",
+        "assets/2/texture-46.bin",
+        "assets/2/texture-47.bin",
+        "assets/2/texture-48.bin",
+        "assets/2/texture-49.bin",
+        "assets/2/texture-5.bin",
+        "assets/2/texture-50.bin",
+        "assets/2/texture-51.bin",
+        "assets/2/texture-52.bin",
+        "assets/2/texture-53.bin",
+        "assets/2/texture-54.bin",
+        "assets/2/texture-55.bin",
+        "assets/2/texture-6.bin",
+        "assets/2/texture-7.bin",
+        "assets/2/texture-8.bin",
+        "assets/2/texture-9.bin"
+      ],
+      "only_stage_differences": false
+    },
+    {
+      "run": "20261026-011212-992730-return-fixture",
+      "selected_files": 381,
+      "all_exact": true,
+      "differences": [],
+      "only_stage_differences": false
+    },
+    {
+      "run": "20261026-011354-044126-return-fixture",
+      "selected_files": 381,
+      "all_exact": false,
+      "differences": [
+        "assets/1/rtx-remix/mods/sfc-policy/mod.usda",
+        "assets/2/rtx-remix/mods/sfc-policy/mod.usda",
+        "assets/3/rtx-remix/mods/sfc-policy/mod.usda"
+      ],
+      "only_stage_differences": true
+    },
+    {
+      "run": "20261026-011956-871319-return-fixture",
+      "selected_files": 381,
+      "all_exact": false,
+      "differences": [
+        "assets/1/rtx-remix/mods/sfc-policy/mod.usda",
+        "assets/2/rtx-remix/mods/sfc-policy/mod.usda",
+        "assets/3/rtx-remix/mods/sfc-policy/mod.usda"
+      ],
+      "only_stage_differences": true
+    },
+    {
+      "run": "20261026-012445-679174-return-fixture",
+      "selected_files": 381,
+      "all_exact": true,
+      "differences": [],
+      "only_stage_differences": false
+    },
+    {
+      "run": "20261026-012653-054882-return-fixture",
+      "selected_files": 381,
+      "all_exact": false,
+      "differences": [
+        "assets/1/rtx-remix/mods/sfc-policy/mod.usda",
+        "assets/2/rtx-remix/mods/sfc-policy/mod.usda",
+        "assets/3/rtx-remix/mods/sfc-policy/mod.usda"
+      ],
+      "only_stage_differences": true
+    },
+    {
+      "run": "20261026-012743-548152-return-fixture",
+      "selected_files": 381,
+      "all_exact": false,
+      "differences": [
+        "assets/3/scene.bin"
+      ],
+      "only_stage_differences": false
+    }
+  ],
+  "analysis": "artifacts/candidate-hot-reload/analysis.json",
+  "probe_files": [
+    "docs/reconnaissance/probes/20261025_candidate_hot_reload_probe.py",
+    "docs/reconnaissance/probes/20261025_candidate_hot_reload_analysis.py"
+  ],
+  "run_record": "docs/runs/2026-10-25-codex-candidate-hot-reload-qualification.md",
+  "tests": {
+    "parallel_assets": 22,
+    "runtime_candidate": 11,
+    "material_library": 5,
+    "alias_lifetime_cases": 3,
+    "transaction_self_check": "PASS",
+    "candidate_native_build": "x64 O2 fp:precise W4 WX PASS",
+    "handoff_native_build": "x64 O2 fp:precise W4 WX PASS"
+  },
+  "production_alias_defect": "Confirmed queued per-owner material consumer can outlive released shared dependency after alias;probe-only correction,not production-fixed",
+  "archives": [
+    {
+      "archive": "artifacts/remix-runtime/archives/run193-20261025-184629-703184-return-fixture-assets.zip",
+      "archive_sha256": "58054ee5e7042e512b59ca9da2648322db26ea4d31461bb4030007deb75044e9",
+      "files": 390,
+      "raw_bytes": 143656318,
+      "archive_bytes": 8909485
+    },
+    {
+      "archive": "artifacts/remix-runtime/archives/run193-20261025-184840-854857-return-fixture-assets.zip",
+      "archive_sha256": "f1b16d1aad1517fc390440a04d8f55ac5235fdc8dbc0f1497a3aece0802b1794",
+      "files": 390,
+      "raw_bytes": 143656312,
+      "archive_bytes": 8909491
+    },
+    {
+      "archive": "artifacts/remix-runtime/archives/run193-20261025-185029-286186-return-fixture-assets.zip",
+      "archive_sha256": "eddc0dce5c767a293f58e118028b0b41a08b88fd12b374db4334e474f352c66f",
+      "files": 390,
+      "raw_bytes": 143656315,
+      "archive_bytes": 8909654
+    },
+    {
+      "archive": "artifacts/remix-runtime/archives/run193-20261025-185405-546280-return-fixture-assets.zip",
+      "archive_sha256": "7a8a4696b2cfbac2c32783eb88bd7be2d9cb1a36d809a4dbee59a6ab2657550b",
+      "files": 390,
+      "raw_bytes": 143633467,
+      "archive_bytes": 8906870
+    },
+    {
+      "archive": "artifacts/remix-runtime/archives/run193-20261025-194803-242751-return-fixture-assets.zip",
+      "archive_sha256": "df8315e542a2eb2330c84bb8a9d9e813997e8133fc9bfe6ab7b715a53a47958e",
+      "files": 390,
+      "raw_bytes": 143656646,
+      "archive_bytes": 8908007
+    },
+    {
+      "archive": "artifacts/remix-runtime/archives/run193-20261025-194859-535640-return-fixture-assets.zip",
+      "archive_sha256": "075a77b550fc9d1dca1895e55023742576cff566793db9f228595b899b08ae4d",
+      "files": 390,
+      "raw_bytes": 143656648,
+      "archive_bytes": 8908009
+    },
+    {
+      "archive": "artifacts/remix-runtime/archives/run193-20261026-005109-470034-return-fixture-assets.zip",
+      "archive_sha256": "652744bb1b90bee7b44cbebe77f1ef5c1cd40527ed8309acb350c248eca64c16",
+      "files": 390,
+      "raw_bytes": 143656648,
+      "archive_bytes": 8908012
+    },
+    {
+      "archive": "artifacts/remix-runtime/archives/run193-20261026-005345-379946-return-fixture-assets.zip",
+      "archive_sha256": "2bd5c0254247d2943ec55690d47117491f24e7cc452c5337d2cf5e9987027af9",
+      "files": 364,
+      "raw_bytes": 132712013,
+      "archive_bytes": 8666453
+    },
+    {
+      "archive": "artifacts/remix-runtime/archives/run193-20261026-005717-886433-return-fixture-assets.zip",
+      "archive_sha256": "73ea916759119787d27cea0e56fd219c1de6d4cd7c8dac03d61e630ba52ec2bb",
+      "files": 390,
+      "raw_bytes": 143656648,
+      "archive_bytes": 8908004
+    },
+    {
+      "archive": "artifacts/remix-runtime/archives/run193-20261026-005852-224913-return-fixture-assets.zip",
+      "archive_sha256": "505c9258de3444b33fd7d1c6e3736e91162404210d0ae20c4fb676b95190800f",
+      "files": 390,
+      "raw_bytes": 143656648,
+      "archive_bytes": 8908007
+    },
+    {
+      "archive": "artifacts/remix-runtime/archives/run193-20261026-010038-016869-return-fixture-assets.zip",
+      "archive_sha256": "cf2e3dd0405225c27ecfd3894974bbd41203528506df93d3767a480f1870d11e",
+      "files": 390,
+      "raw_bytes": 143656636,
+      "archive_bytes": 8907938
+    },
+    {
+      "archive": "artifacts/remix-runtime/archives/run193-20261026-010339-774851-return-fixture-assets.zip",
+      "archive_sha256": "cd47ffaed5422e4ef49bcd799ca6b3ca6d9404ead49eb2803bbab57e03fcb721",
+      "files": 390,
+      "raw_bytes": 143656648,
+      "archive_bytes": 8907998
+    },
+    {
+      "archive": "artifacts/remix-runtime/archives/run193-20261026-010538-056057-return-fixture-assets.zip",
+      "archive_sha256": "0b43132904f0e8e017c0f9f6498860fc15b789ac935ab71e1ac9044ab5df8805",
+      "files": 390,
+      "raw_bytes": 143656648,
+      "archive_bytes": 8908032
+    },
+    {
+      "archive": "artifacts/remix-runtime/archives/run193-20261026-010841-367818-return-fixture-assets.zip",
+      "archive_sha256": "6df440399bed272309801dadbd5f1622429c5fcf7761d0eb1009567bf4a15289",
+      "files": 390,
+      "raw_bytes": 143656642,
+      "archive_bytes": 8907946
+    },
+    {
+      "archive": "artifacts/remix-runtime/archives/run193-20261026-011212-992730-return-fixture-assets.zip",
+      "archive_sha256": "9a7df115c100706748a9ef94210c13b2feadd1d8187f8a42e41682edc4c0376c",
+      "files": 390,
+      "raw_bytes": 143656648,
+      "archive_bytes": 8908020
+    },
+    {
+      "archive": "artifacts/remix-runtime/archives/run193-20261026-011354-044126-return-fixture-assets.zip",
+      "archive_sha256": "a2758cb9781a28558b171e1df71d64929bc3f83644b721658e2cc9378a4e23f1",
+      "files": 390,
+      "raw_bytes": 143656648,
+      "archive_bytes": 8907936
+    },
+    {
+      "archive": "artifacts/remix-runtime/archives/run193-20261026-011956-871319-return-fixture-assets.zip",
+      "archive_sha256": "b1e3eb836b4804a9597882b30f206f7fb64c315d19635d80688ddffe7d347659",
+      "files": 390,
+      "raw_bytes": 143656648,
+      "archive_bytes": 8908012
+    },
+    {
+      "archive": "artifacts/remix-runtime/archives/run193-20261026-012445-679174-return-fixture-assets.zip",
+      "archive_sha256": "ab1976f71425f2b85fdcf485d233a427dc6c601e5da4b190bdb3790bb34350bc",
+      "files": 390,
+      "raw_bytes": 143656648,
+      "archive_bytes": 8907936
+    },
+    {
+      "archive": "artifacts/remix-runtime/archives/run193-20261026-012653-054882-return-fixture-assets.zip",
+      "archive_sha256": "38e005ea5d06bd95d8aad2b93b6972dc408230179e452116d539e795e72e44bb",
+      "files": 390,
+      "raw_bytes": 143656648,
+      "archive_bytes": 8908005
+    },
+    {
+      "archive": "artifacts/remix-runtime/archives/run193-20261026-012743-548152-return-fixture-assets.zip",
+      "archive_sha256": "71c0616476391165d2b764637c9a7cefe3b540693c5ea616aee71f3af9558637",
+      "files": 390,
+      "raw_bytes": 143656648,
+      "archive_bytes": 8908010
+    }
+  ],
+  "aggregate_bytes": 18826181177,
+  "aggregate_limit": 20000000000,
+  "next_action": "Integrate and qualify an explicitly isolated candidate+flat+parallel workflow with alias lifetime fix,full-interval delivery and material controls;retain normal1.5.2 baseline until gates pass",
+  "probe_sha256": {
+    "docs/reconnaissance/probes/20261025_candidate_hot_reload_probe.py": "9fc65ac0d9d39755897318a00e3f82ae8a3919961fbbe6363cc2992e45e844dd",
+    "docs/reconnaissance/probes/20261025_candidate_hot_reload_analysis.py": "85f928682beb9b01828475ad5920ef092c82887516ab86c35b11f50061921fdd"
+  },
+  "late_asset_content_exception": {
+    "path": "assets/3/scene.bin",
+    "bytes": 498672,
+    "field": "first frame.frame,thirduint32",
+    "offset": 498456,
+    "old": 200001,
+    "new": 200318,
+    "all_other_bytes_exact": true
+  },
+  "final_validation": {
+    "ast": "PASS two probes",
+    "json": "PASS evidence and14 result receipts",
+    "referenced_paths": "PASS",
+    "references_checked": 537,
+    "staged_files": 0
+  }
+}

@@ -18,7 +18,9 @@
 #include <vector>
 using Microsoft::WRL::ComPtr;
 namespace fs=std::filesystem;
-static unsigned checks=0;
+// Diagnostic totals belong to the calling thread. Asset preparation also uses
+// require(); sharing this counter with the renderer was an unnecessary race.
+static thread_local unsigned checks=0;
 static void require(bool b,const char* why){if(!b)throw std::runtime_error(why);++checks;}
 static void ok(HRESULT h,const char* why){if(FAILED(h)){std::cerr<<"HRESULT "<<std::hex<<static_cast<unsigned long>(h)<<std::dec<<' ';throw std::runtime_error(why);}}
 static std::vector<unsigned char> read(const fs::path& path,size_t cap){
@@ -72,10 +74,15 @@ static void auditModules(){
 #endif
 }
 #include "pipeline_mode.h"
+enum class TextureUpload {StagedLock,InitialData};
 struct Renderer{
+ // Declared first, destroyed last: pixels outlive all texture/device references.
+ // InitialData takes the prepared vectors rather than making another copy.
+ std::vector<std::vector<BYTE>> uploadBacking;
  ComPtr<IDirect3DDevice9> device;ComPtr<IDirect3DVertexBuffer9> vb;ComPtr<IDirect3DIndexBuffer9> ib;
  std::vector<ComPtr<IDirect3DTexture9>> textures;const Scene& scene;
- explicit Renderer(IDirect3DDevice9* d,const Scene& s,const fs::path& root,const std::vector<std::vector<BYTE>>* prepared=nullptr):device(d),scene(s){
+ unsigned initialDataUploads=0,stagedUploads=0,initialDataUnsupported=0;
+ explicit Renderer(IDirect3DDevice9* d,const Scene& s,const fs::path& root,std::vector<std::vector<BYTE>>* prepared=nullptr,TextureUpload policy=TextureUpload::StagedLock):device(d),scene(s){
   constexpr DWORD fvf=D3DFVF_XYZ|D3DFVF_NORMAL|D3DFVF_TEX1;
   const auto nv=static_cast<UINT>(s.vertices.size()),ni=static_cast<UINT>(s.indices.size());
   // DEFAULT is valid on both D3D9 and D3D9Ex. Retained Scene is the rebuild
@@ -88,16 +95,29 @@ struct Renderer{
   if(!pipeline_mode::performance()){ok(ib->Lock(0,0,&p,D3DLOCK_READONLY),"IB readback");require(memcmp(p,s.indices.data(),ni*4)==0,"IB bytes differ");ok(ib->Unlock(),"IB read unlock");}
   uint32_t count=0;for(auto g:s.groups)count=std::max(count,g.material+1);textures.resize(count);size_t total=0;
   require(!prepared||prepared->size()==count,"prepared texture count");
+  if(policy==TextureUpload::InitialData)uploadBacking.resize(count);
   for(uint32_t i=0;i<count;++i){std::vector<BYTE> disk;if(!prepared)disk=read(root/(L"texture-"+std::to_wstring(i)+L".bin"),64*1024*1024+16);
-   const auto& b=prepared?(*prepared)[i]:disk;size_t at=0;const auto h=take<std::array<uint32_t,4>>(b,at);
+   if(policy==TextureUpload::InitialData)uploadBacking[i]=prepared?std::move((*prepared)[i]):std::move(disk);
+   const auto& b=policy==TextureUpload::InitialData?uploadBacking[i]:(prepared?(*prepared)[i]:disk);size_t at=0;const auto h=take<std::array<uint32_t,4>>(b,at);
    require(h[0]==0x31544653&&h[1]&&h[1]<=4096&&h[2]&&h[2]<=4096&&h[3]==uint64_t(h[1])*h[2]*4&&b.size()==16ull+h[3],"texture schema");
    total+=h[3];require(total<=128*1024*1024,"decoded texture cap");
    ok(d->CreateTexture(h[1],h[2],1,0,D3DFMT_A8R8G8B8,D3DPOOL_DEFAULT,&textures[i],nullptr),"texture create");
    // Microsoft UpdateTexture contract: SYSTEMMEM source -> DEFAULT destination.
    // Do not LockRect a non-dynamic DEFAULT texture (invalid on native D3D9Ex).
-   ComPtr<IDirect3DTexture9> upload;
-   ok(d->CreateTexture(h[1],h[2],1,0,D3DFMT_A8R8G8B8,D3DPOOL_SYSTEMMEM,&upload,nullptr),"texture upload staging");D3DLOCKED_RECT lock{};
-   ok(upload->LockRect(0,&lock,nullptr,0),"texture upload lock");require(lock.Pitch>=static_cast<INT>(h[1]*4),"texture pitch");for(uint32_t y=0;y<h[2];++y)memcpy(static_cast<BYTE*>(lock.pBits)+y*lock.Pitch,b.data()+16+size_t(y)*h[1]*4,h[1]*4);ok(upload->UnlockRect(0),"texture unlock");
+   ComPtr<IDirect3DTexture9> upload;D3DLOCKED_RECT lock{};
+   if(policy==TextureUpload::InitialData&&!initialDataUnsupported){
+    // Microsoft CreateTexture remarks: one mip, tightly packed SYSTEMMEM pixels.
+    // This is a CPU pointer, NOT an exported GPU resource handle. Owned above.
+    HANDLE pixels=reinterpret_cast<HANDLE>(const_cast<BYTE*>(b.data()+16));
+    const auto status=d->CreateTexture(h[1],h[2],1,0,D3DFMT_A8R8G8B8,D3DPOOL_SYSTEMMEM,&upload,&pixels);
+    if(status==D3DERR_INVALIDCALL){upload.Reset();++initialDataUnsupported;} // Classic D3D9 may not expose this contract.
+    else{ok(status,"texture staging initial pixels");++initialDataUploads;}
+   }
+   if(!upload){
+    ++stagedUploads;
+    ok(d->CreateTexture(h[1],h[2],1,0,D3DFMT_A8R8G8B8,D3DPOOL_SYSTEMMEM,&upload,nullptr),"texture upload staging");
+    ok(upload->LockRect(0,&lock,nullptr,0),"texture upload lock");require(lock.Pitch>=static_cast<INT>(h[1]*4),"texture pitch");for(uint32_t y=0;y<h[2];++y)memcpy(static_cast<BYTE*>(lock.pBits)+y*lock.Pitch,b.data()+16+size_t(y)*h[1]*4,h[1]*4);ok(upload->UnlockRect(0),"texture unlock");
+   }
    ok(d->UpdateTexture(upload.Get(),textures[i].Get()),"texture staged upload");
    if(!pipeline_mode::performance()){
     ComPtr<IDirect3DSurface9> target,readback;ok(d->CreateRenderTarget(h[1],h[2],D3DFMT_A8R8G8B8,D3DMULTISAMPLE_NONE,0,FALSE,&target,nullptr),"texture test target");

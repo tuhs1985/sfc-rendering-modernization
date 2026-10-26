@@ -27,6 +27,13 @@ try{
  if($LASTEXITCODE -ne 0){throw 'Worker poll tests build failed'}
  & .\worker_poll_tests.exe
  if($LASTEXITCODE -ne 0){throw 'Worker poll tests failed'}
+ $cmd='"{0}" && set "CL=" && set "_CL_=" && cl /nologo /std:c++20 /EHsc /W4 /WX {2} /fp:precise "{1}\tests\d3d9_asset_service_tests.cpp" /Fe:asset_service_tests.exe /link /Brepro user32.lib' -f $vc,$root,$opt
+ & $env:ComSpec /d /s /c $cmd
+ if($LASTEXITCODE -ne 0){throw 'Asset service native test build failed'}
+ $serviceResult=& .\asset_service_tests.exe
+ if($LASTEXITCODE -ne 0){throw 'Asset service native test failed'}
+ $serviceResult | Set-Content -Encoding UTF8 asset-service-tests.txt
+ $serviceResult | Write-Output
  $cmd='"{0}" && set "CL=" && set "_CL_=" && cl /nologo /std:c++20 /EHsc /W4 /WX {2} /fp:precise "{1}\tests\d3d9_combined_post_tests.cpp" /Fe:combined_post_tests.exe /link /Brepro d3d11.lib dxgi.lib d3dcompiler.lib' -f $vc,$root,$opt
  & $env:ComSpec /d /s /c $cmd
  if($LASTEXITCODE -ne 0){throw 'Combined post test build failed'}

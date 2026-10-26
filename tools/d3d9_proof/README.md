@@ -1,5 +1,98 @@
 # Plain D3D9 offline proof
 
+## Owned initial-pixel upload (Run188)
+
+The shared Renderer can create documented single-mip SYSTEMMEM staging textures
+from prepared BGRA pixels. InitialData moves the source vectors into renderer
+ownership, destroyed after its COM references. UpdateTexture/geometry/material
+identities are unchanged. A classic-device D3DERR_INVALIDCALL uses the old staging
+method once per Renderer; other errors propagate. Native x86/x64 classic/Ex,
+reset/recreation, exact pixels and source ownership are tested.
+
+Normal policy stays old staging. The existing explicit
+`-ExperimentalParallelAssets` checkout selects initial data for bootstrap and later
+assets. Native console/report counters prove actual acceptance/fallback. Offline
+`--texture-upload staged-lock|initial-data` supports a matched comparison; there is
+no new gameplay switch. Run188 Remix controls report107fast uploads,0fallback.
+Startup and late-material returned-image gaps remain; do not claim seamless/sub2s.
+See [Run188](../../docs/runs/2026-10-25-codex-owned-initial-textures.md).
+
+## Renderer-thread admission during waits (Run186)
+
+The experimental parallel relay services ready assets on the existing renderer
+thread between bootstrap Presents and during query/fence/output-ACK waits. Real
+completion, ownership and deadlines remain. Normal policy explicitly disables it.
+Offline controls can select `--asset-admission-service on|off` with
+`--parallel-assets`; actual activation and two bounded startup timing records are
+retained. Native23state/pixel/thread checks pass. Material-file sharing conflicts
+retry on a later coordinator cycle with a five-second bound.
+
+This removes an admission dependency, but first matching output did **not** improve
+in the measured pair:5.33s off/5.67s on. Late-material returned-image gaps remain.
+An admission can still block in resource creation/upload: one closing run measured
+1.48s there. First matching output does not imply every pending ship is ready.
+The pre-existing shared diagnostic validation counter is now thread-local.
+No new sponsor run is required merely to verify this change. See
+[Run186](../../docs/runs/2026-10-25-codex-renderer-admission-service.md).
+
+## Base/enhancement phases (Run184)
+
+The explicit experimental parallel path now admits the original-textured base
+without waiting for enhanced images; enhanced pixel generation starts independently
+of bundle completion. Ready bases publish before enhancement filesystem work.
+Missing secondary inputs report an enhancement partial while base remains eligible.
+Same existing worker checksum DLL now supplies the exact catalog FNV64 and pinned
+Remix XXH3 in memory; rebuild with `build_mesh_checksum.ps1` after preparing the
+existing pinned xxhash.h dependency. No producer helper launch/repeated file hash,
+and consumer integrity checks/wire format unchanged. This adds no DLL to SFC.
+
+Full streaming tests still show returned-layer gaps during late updates, even when
+the subsequent600frame window passes. Normal default is unchanged. Sponsor's
+`-ExperimentalParallelAssets` opt-in remains available; it is not a seamless
+enhancement-streaming qualification. See Run184 in the newest handoff.
+
+## Isolated parallel preparation / progressive materials
+
+Run180 adds dependency-driven geometry/image tasks and individual material-group
+publication to the existing ordinary-D3D9 standalone fixture. Append
+`--parallel-assets` to the performance multi-ship/prewarm/startup-profile fixture.
+Add `--parallel-material-delay-ms 5000` to qualify delayed consumption. This mode
+rejects other candidate/API/loading-policy experiments. Actual gameplay requires
+the separate explicit sponsor-checkout option described below.
+Geometry/image inputs are prepared once; final texture/material bytes match the
+accepted reference. CPU publication does not establish GPU consumption.
+
+**Not gameplay-promoted:** delayed material application yielded538/600 delivery,
+below the existing540 minimum. The existing gameplay path remains qualified.
+Sponsor subsequently authorized an experimental checkout: use the normal
+`start_d3d9_multiship_session.ps1` with `-ExperimentalParallelAssets`. It must print
+`EXPERIMENTAL PARALLEL ASSETS ENABLED`. Manifest/result record the option; absence
+of the switch keeps stable behavior. This opt-in is not default promotion or a
+claim that the known late-update delivery gate passed. See Run182 for test actions.
+See [Run180](../../docs/runs/2026-10-25-codex-parallel-progressive-assets.md)
+for implementation, bounds, timings, archive recovery and exact next action.
+
+## Performance baseline
+
+SFC's freshly captured mesh/resource associations are the source of truth. The
+normal multi-ship launcher, direct gameplay CLI and live relay default to
+performance mode. Use launcher `-Mode Test` for diagnostic source/pixel comparisons.
+Offline exporter/material helper defaults remain test mode for deliberate evidence
+work; the live relay passes performance explicitly.
+
+Performance material preparation does not rehash/recompare the already consumed
+mesh packet and references or compare primary images against the intermediate
+manifest. Test mode retains these checks and upload-pixel comparisons. Required
+Remix texture hashes and content-addressed output names are identities, not checks
+against a prepared ship; they remain. Bounds, packet/owner identity, paths, output
+synchronization, material-identity conflicts and cleanup checks remain in both.
+
+Decoded original images are reused within one performance preparation with a
+32MiB LRU per worker (four workers,128MiB total cache allowance). Derivative keys
+include image content, role and applicable settings; reuse occurs before encoding.
+Caches expire at preparation completion. No persistent cross-run trust/cache.
+This is not a sub-two-second startup claim; see Run179 in the handoff.
+
 ## Isolated stock1.6.1 initialization qualification
 
 The normal gameplay runtime is still1.5.2. The standalone return fixture accepts

@@ -1,0 +1,36 @@
+{
+  "run": 180,
+  "result": "PARTIAL_PROGRESSIVE_CONSUMPTION_NOT_PROMOTED",
+  "head": "9ff2d3d",
+  "staged": false,
+  "committed": false,
+  "sfc_launched": false,
+  "python_tests_passed": 600,
+  "cpu_controls": {
+    "baseline": "artifacts/initial-readiness/parallel-cpu-20261025-185742-112115",
+    "parallel": "artifacts/initial-readiness/parallel-cpu-20261025-185748-297302",
+    "baseline_seconds": 2.5793763,
+    "parallel_seconds": 1.4719835,
+    "geometry_original_images_derived_images_material_stage_exact": true,
+    "caveat": "One serial unprofiled pair;cache/startup variation;not pixels or universal timing"
+  },
+  "gpu_controls": [
+    {"run": "20261025-184629-703184-return-fixture", "condition": "initial delayed-material implementation", "delivered": 431, "frames": 600},
+    {"run": "20261025-184840-854857-return-fixture", "condition": "corrected scheduler without deliberate delay", "delivered": 596, "frames": 600},
+    {"run": "20261025-185029-286186-return-fixture", "condition": "corrected scheduler with delayed group", "delivered": 538, "frames": 600},
+    {"run": "20261025-185841-390784-return-fixture", "condition": "final-source stable gameplay-mode control", "delivered": 595, "frames": 600}
+  ],
+  "gpu_final_asset_parity": {"fca": true, "rca": true, "fdd": true, "scope": "Generated material stage and all image metadata/hashes;not final visual or per-group GPU-consumption proof"},
+  "steady_delivery_minimum": 540,
+  "normal_qualification_renewed": true,
+  "normal_readonly_preflight": "PASS",
+  "archive": {
+    "path": "artifacts/initial-readiness/run180-cpu-generated.zip",
+    "sha256": "81a666eb1bde0772f853764c2bfb090f4d24cc0a5c7023989401bb3ad34e5021",
+    "original_bytes": 542678747,
+    "archive_bytes": 40237508,
+    "files_sha_verified": 1404,
+    "raw_packets_analyses_profiles_preserved": true
+  },
+  "next_action": "Qualify non-disruptive supported pinned-runtime material consumption before progressive gameplay"
+}

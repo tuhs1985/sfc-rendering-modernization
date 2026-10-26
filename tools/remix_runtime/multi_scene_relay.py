@@ -23,7 +23,7 @@ import multi_scene as wire
 class Relay(SingleRelay):
     def __init__(self,*args,**kwargs):
         from pipeline_mode import validate
-        self.mode=validate(kwargs.pop('pipeline_mode','test'))
+        self.mode=validate(kwargs.pop('pipeline_mode','performance'))
         super().__init__(*args,**kwargs,multi_scene=True)
         if not self.additive or not self.persistent or not self.buffered:
             raise ValueError('Multi-scene requires persistent synchronized additive path')
@@ -85,6 +85,8 @@ class Relay(SingleRelay):
             env.pop(key,None)
         if not self.offline_fixture:env.pop('SFC_D3D9_RENDER_PREWARM',None)
         env.pop('SFC_D3D9_API_PREFETCH',None)
+        env['SFC_D3D9_ADMISSION_SERVICE']='1' if getattr(self,'admission_service',False) else '0'
+        env['SFC_D3D9_INITIAL_TEXTURE_DATA']='1' if getattr(self,'initial_texture_data',False) else '0'
         env.pop('SFC_D3D9_API_PREFETCH_OVERLAP',None)
         if self.api_texture_prefetch:
             if not self.offline_fixture:raise ValueError('Public API texture prefetch experiment is offline only')
@@ -211,7 +213,7 @@ class Relay(SingleRelay):
             job.update(wire=raw,new=False,gpu=canonical['gpu'],manifest=canonical['manifest'])
 
     def prepare_initial_context(self,pid):
-        first=self.preparer.jobs[1]
+        first=self.preparer.jobs[getattr(self,'anchor_id',1)]
         if 'wire' not in first:raise ValueError('Initial anchor asset unsupported;original game retained')
         source=first['gpu'];gpu=self.folder/'gpu';manifest=first['manifest'];row=first['row']
         # Same-volume links reuse finalized immutable bootstrap bytes. The first

@@ -36,7 +36,8 @@ class Reservations:
             # finalized bytes replace them atomically in the ledger.
             used=0
             if folder is not None:
-                for p in Path(folder).rglob('*'):
+                actual=folder() if callable(folder) else folder
+                for p in Path(actual).rglob('*'):
                     if p.is_file():used+=p.stat().st_size
             with self.lock:
                 self.bytes-=amount;self.committed+=used

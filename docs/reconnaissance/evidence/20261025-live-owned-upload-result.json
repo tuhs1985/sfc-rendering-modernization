@@ -1,0 +1,69 @@
+{
+  "run": 189,
+  "actual_run": "20261025-222203-640797-in-game",
+  "sponsor_report": "ran, didn't see a change in appearance time",
+  "full_gameplay_behavior_report": "Not explicitly supplied in this feedback",
+  "decision": "Owned upload path verified active; no meaningful startup speedup demonstrated",
+  "activation": {
+    "experimental_parallel_assets": true,
+    "native_initial_texture_data": true,
+    "initial_uploads": 61,
+    "staged_uploads": 0,
+    "unsupported": 0,
+    "owners_acknowledged": 2,
+    "models": ["kff", "fca"],
+    "same_initial_signatures_as_run185": true,
+    "same_visual_config_bytes_as_run185": true
+  },
+  "timing": {
+    "origin": "First fresh asset discovery, not physical display",
+    "first_matching_output_s": 3.6838265,
+    "run185_first_matching_output_s": 3.8902268,
+    "fca_base_from_own_discovery_s": 0.3991811,
+    "fca_enhanced_from_own_discovery_s": 1.0102499,
+    "fca_native_cpu_preparation_us": 828820,
+    "fca_native_resource_admission_us": 8965,
+    "bootstrap_draw_present_us": 2838088,
+    "bootstrap_query_us": 24407,
+    "bootstrap_postprocess_us": 1488,
+    "bootstrap_peer_us": 215771,
+    "service_cumulative_through_bootstrap_us": 9470
+  },
+  "existing_standalone_detail": {
+    "staged_control": "20261025-220718-726135-return-fixture",
+    "largest_present_plus_service_ms": 2238.987,
+    "initial_control": "20261025-220919-119346-return-fixture",
+    "initial_largest_present_plus_service_ms": 2397.6172,
+    "internal_wait_cause": "Unassigned; source/profiling investigation required"
+  },
+  "delivery": {
+    "paired_outputs": 5393,
+    "post_start_omissions": 12,
+    "longest_omission_records": 4,
+    "longest_omission_qpc_span_s": 0.0510101,
+    "unqualified_inputs": 1,
+    "unqualified_subreason_recorded": false,
+    "invalid_inputs": 0,
+    "source_rejected": 0,
+    "completion_invalid": 0,
+    "provenance_failures": 0,
+    "audit_drops": 0,
+    "rejected_assets": 0,
+    "partial_assets": 0,
+    "late_assets_present": false
+  },
+  "cleanup": {
+    "normal_game_exit": true,
+    "gate_clean_unloaded": true,
+    "controller_exit": 0,
+    "renderer_exit": 0,
+    "original_critical_unchanged": true,
+    "launcher_settings_unchanged": true,
+    "proxy_restored": true,
+    "final_report_complete": true
+  },
+  "run_bytes": 93447824,
+  "text_log_bytes": 122010,
+  "analysis": "artifacts/staging-integration/live-checkout-analysis.json",
+  "next_action": "Attribute long startup Present using pinned-runtime profiling/source and retained standalone controls; no new gameplay needed yet"
+}

@@ -1,0 +1,216 @@
+{
+  "run": 191,
+  "decision": "Completed-stage transaction reduces refreshes but does not resolve long queued-work stalls;not promoted",
+  "sfc_launched": false,
+  "production_changed": false,
+  "probe_files": [
+    "docs/reconnaissance/probes/20261025_material_transaction_probe.py",
+    "docs/reconnaissance/probes/20261025_material_transaction_analysis.py"
+  ],
+  "run_record": "docs/runs/2026-10-25-codex-complete-material-transactions.md",
+  "analysis": "artifacts/material-transaction/analysis.json",
+  "normal_host_exe_sha256": "954c2c631c11fffd05f6d40334d06f1f16059bf02b25b2957112fb3dffbf582a",
+  "runtime": "Pinned1.5.2ordinaryD3D9Ex;no API mesh submission",
+  "runs": [
+    {
+      "run": "20261025-220919-119346-return-fixture",
+      "error": null,
+      "bootstrap_wall_s": 3.3741778,
+      "first_matching_s": 6.107465199998842,
+      "post_start_omissions": 79,
+      "max_gap_records": 78,
+      "max_gap_span_s": 1.3094961,
+      "material_master_publications": 43,
+      "settled_window": {
+        "frames": 600,
+        "draws": 594
+      },
+      "native_job": {
+        "schema": "remix.job.v1",
+        "pid": 35276,
+        "exit_code": 0,
+        "stop_reason": 0,
+        "elapsed_ms": 22719,
+        "console_bytes": 63618,
+        "peak_scratch_bytes": 166453012,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      }
+    },
+    {
+      "run": "20261025-233122-789525-return-fixture",
+      "error": null,
+      "bootstrap_wall_s": 0.6976492,
+      "first_matching_s": 3.7163688000000548,
+      "post_start_omissions": 167,
+      "max_gap_records": 165,
+      "max_gap_span_s": 2.7794675,
+      "material_master_publications": 3,
+      "settled_window": {
+        "frames": 600,
+        "draws": 598
+      },
+      "native_job": {
+        "schema": "remix.job.v1",
+        "pid": 30088,
+        "exit_code": 0,
+        "stop_reason": 0,
+        "elapsed_ms": 22843,
+        "console_bytes": 58927,
+        "peak_scratch_bytes": 166442876,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      }
+    },
+    {
+      "run": "20261025-233420-738803-return-fixture",
+      "error": "Native fixture failed: 1",
+      "bootstrap_wall_s": 25.6308182,
+      "first_matching_s": 36.57293760000175,
+      "post_start_omissions": 5,
+      "max_gap_records": 1,
+      "max_gap_span_s": 0.0,
+      "material_master_publications": 3,
+      "settled_window": null,
+      "native_job": {
+        "schema": "remix.job.v1",
+        "pid": 43388,
+        "exit_code": 0,
+        "stop_reason": 0,
+        "elapsed_ms": 45921,
+        "console_bytes": 59783,
+        "peak_scratch_bytes": 166443927,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      }
+    }
+  ],
+  "final_content": {
+    "base": "20261025-220919-119346-return-fixture",
+    "alternative": "20261025-233122-789525-return-fixture",
+    "asset_files": 381,
+    "all_final_geometry_images_materials_exact": true,
+    "differences": [],
+    "late_pixel_roi": [
+      200,
+      730,
+      1340,
+      970
+    ],
+    "late_pixel_mean_abs_error": [
+      0.2582894736842105,
+      0.2536330409356725,
+      0.24917397660818713
+    ],
+    "late_pixel_bit_exact": false,
+    "interpretation": "Same final bytes does not establish when runtime consumed them;late view is only one bounded sample"
+  },
+  "slow_frame_attribution": {
+    "stages": [
+      {
+        "index": 0,
+        "source_frame": 200001,
+        "frequency": 10000000,
+        "began_qpc": 231757396112,
+        "peer_done_qpc": 232016916753,
+        "draw_present_us": 25641345,
+        "copy_submit_us": 7,
+        "query_wait_us": 90523,
+        "postprocess_us": 2030,
+        "peer_us": 217880,
+        "admission_service_total_us": 10557
+      },
+      {
+        "index": 1,
+        "source_frame": 201630,
+        "frequency": 10000000,
+        "began_qpc": 232016980552,
+        "peer_done_qpc": 232017376967,
+        "draw_present_us": 1668,
+        "copy_submit_us": 161,
+        "query_wait_us": 35748,
+        "postprocess_us": 510,
+        "peer_us": 1235,
+        "admission_service_total_us": 10617
+      },
+      {
+        "index": 117,
+        "source_frame": 201874,
+        "frequency": 10000000,
+        "began_qpc": 232058195874,
+        "peer_done_qpc": 232092402740,
+        "draw_present_us": 886,
+        "copy_submit_us": 1,
+        "query_wait_us": 3416894,
+        "postprocess_us": 1754,
+        "peer_us": 1149,
+        "admission_service_total_us": 21742
+      },
+      {
+        "index": 118,
+        "source_frame": 202077,
+        "frequency": 10000000,
+        "began_qpc": 232092403065,
+        "peer_done_qpc": 232093223409,
+        "draw_present_us": 42856,
+        "copy_submit_us": 3,
+        "query_wait_us": 37114,
+        "postprocess_us": 1017,
+        "peer_us": 1042,
+        "admission_service_total_us": 21797
+      },
+      {
+        "index": 119,
+        "source_frame": 202082,
+        "frequency": 10000000,
+        "began_qpc": 232093223731,
+        "peer_done_qpc": 232094015074,
+        "draw_present_us": 790,
+        "copy_submit_us": 1,
+        "query_wait_us": 75054,
+        "postprocess_us": 1528,
+        "peer_us": 1759,
+        "admission_service_total_us": 21930
+      }
+    ],
+    "late_query_wait_us": 3416894,
+    "late_draw_present_us": 886,
+    "late_copy_submit_us": 1,
+    "derivative": "One condition emits existing deferred timing for total output frames over50ms;no synchronization/resource-policy change",
+    "fixture_result": "PARTIAL:resize/recreation incomplete;native exit0,fixture exit1",
+    "startup_outlier_cause": "Unassigned;different diagnostic executable/cache/scheduling not controlled"
+  },
+  "slow_final_content": {
+    "selected_files": 381,
+    "hashes_exact": true
+  },
+  "validation": {
+    "focused_python_tests": 22,
+    "probe_selfcheck_cases": 5,
+    "native_diagnostic_build": "x64/O2/fp:precise/W4/WX PASS",
+    "standalone_attempts": 2,
+    "ordinary_transaction": "Completed,normalexit/state/HUD/resize/recreate PASS;full-interval delivery unacceptable",
+    "slow_frame": "PARTIAL: nativeexit0/fixtureexit1,resize/recreation incomplete",
+    "ast_parse": true,
+    "archive_sha256_verified": true,
+    "production_hashes_unchanged": true
+  },
+  "storage": {
+    "base_ledger": 18831657688,
+    "extras": {
+      "artifacts\\resource-stall": 5792388,
+      "artifacts\\staging-integration": 999153,
+      "artifacts\\present-stall": 234991,
+      "artifacts\\material-transaction": 3766086
+    },
+    "combined": 18842450306,
+    "cap": 20000000000
+  },
+  "next_action": "Prepare process-only pinned1.5.2NVIDIA trace of completed-stage control;reserve output and check elevation before launch",
+  "repository": {
+    "head": "9ff2d3d",
+    "staged": false,
+    "committed": false,
+    "pushed": false
+  }
+}

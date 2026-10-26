@@ -84,7 +84,16 @@ def texture(raw):
         return dict(width=image.width,height=image.height,format=image.format),pixels
 
 
-def prepare(source,output,game_root,*,live_record=None,evidence_mode='test',qualified_mesh=None):
+def geometry_parts(mesh):
+    """Independent geometry task: no texture access, hashes or file writes."""
+    vertices=[(*mesh['points'][i],*normal,*uv) for i,normal,uv in mesh['corners']]
+    by_group={}
+    for identity,start in mesh['polygons']:by_group.setdefault(identity,[]).append(start)
+    return vertices,b''.join(struct.pack('<8f',*v) for v in vertices),by_group
+
+
+def prepare(source,output,game_root,*,live_record=None,evidence_mode='test',qualified_mesh=None,
+            prepared_capture=None,prepared_images=None,prepared_geometry=None,output_extent=(960,540),identity_calculator=None):
     """Read original runtime mesh;resolve original IMAGE files only,never MOD geometry."""
     if evidence_mode not in ('performance','test'):raise ValueError('Scene evidence mode')
     if evidence_mode=='performance' and live_record is None:raise ValueError('Performance preparation requires fresh live row')
@@ -92,12 +101,12 @@ def prepare(source,output,game_root,*,live_record=None,evidence_mode='test',qual
     output=Path(output).resolve();output.relative_to(ROOT/'artifacts')
     if output.exists():raise ValueError('Refuse to overwrite replay evidence')
     if source.stat().st_size>2*1024*1024 or source.with_suffix('.json').stat().st_size>256*1024:raise ValueError('Source packet/reference cap')
-    raw=source.read_bytes();refs=source.with_suffix('.json').read_bytes()
+    raw,refs=prepared_capture if prepared_capture is not None else (source.read_bytes(),source.with_suffix('.json').read_bytes())
     if qualified_mesh is None:mesh=decode_mesh(raw,refs)
     else:
         # Reuse this worker's fully validated immutable decode. Cheap byte hashes
         # still bind it to the current packet AND associations;never trust IDs.
-        if (sha(raw)!=qualified_mesh.get('packet_sha256') or
+        if prepared_capture is None and (sha(raw)!=qualified_mesh.get('packet_sha256') or
                 sha(refs)!=qualified_mesh.get('_capture_refs_sha256')):
             raise ValueError('Qualified mesh packet/reference changed')
         mesh=qualified_mesh
@@ -117,30 +126,39 @@ def prepare(source,output,game_root,*,live_record=None,evidence_mode='test',qual
         state=camera_state(r,[0,0,0],mesh['used_points'])
         frames=[dict(line=None,owner=r[1],revision=r[7],frame=r[2],active=1,model=native_matrix(r[8:25]),view=native_matrix(r[49:66]),projection=native_matrix(r[66:83]),viewport=state['viewport'],native_composed=native_matrix(r[25:42]),composition_error_pixels=state['native_composition_pixel_error'])]
     resources={r['id']:r for r in mesh['refs']['resources']}
-    textures=[];lookup={};groups=[];indices=[];total=0
+    textures=[];lookup={};groups=[];indices=[];total=0;catalog_images=0;catalog_hash=14695981039346656037
     output.mkdir(parents=True)
     for group in mesh['groups']:
         if not group['flags']&1 or group['primary'] not in resources:raise ValueError('Unqualified primary association')
-        resource=resources[group['primary']];path=resolve_image(game_root,resource['filename'])
-        original=path.read_bytes();digest=sha(original)
+        resource=resources[group['primary']]
+        ready=prepared_images.get(resource['filename']) if prepared_images is not None else None
+        if ready is None:
+            original=resolve_image(game_root,resource['filename']).read_bytes();digest=sha(original)
+        else:original=ready['raw'];digest=ready['sha256']
         if digest not in lookup:
             if len(textures)>=256:raise ValueError('Unique image cap')
-            metadata,bgra=texture(original);total+=len(original)+len(bgra)+16
+            metadata,bgra=(ready['metadata'],ready['bgra']) if ready is not None else texture(original)
+            total+=len(original)+len(bgra)+16
             if total>MAX_BYTES:raise ValueError('Combined image cap')
             index=len(textures);lookup[digest]=index
             payload=struct.pack('<4I',TEXTURE_MAGIC,metadata['width'],metadata['height'],len(bgra))+bgra
             (output/f'texture-{index}.bin').write_bytes(payload)
+            if identity_calculator is not None:
+                catalog_images+=len(payload)
+                catalog_hash=((catalog_hash^identity_calculator(payload))*1099511628211)&0xffffffffffffffff
             textures.append(dict(**metadata,filename=resource['filename'],original_sha256=digest,
                 decoded_bgra_sha256=sha(bgra),replay_sha256=sha(payload),bytes=len(payload)))
-        selected=[start for identity,start in mesh['polygons'] if identity==group['group']]
+        selected=prepared_geometry[2].get(group['group'],[]) if prepared_geometry is not None else [start for identity,start in mesh['polygons'] if identity==group['group']]
         if not selected:continue
         first=len(indices)
         for start in selected:indices.extend((start,start+1,start+2))
         groups.append((group['group'],lookup[digest],first,len(indices)-first))
     if sorted(indices)!=list(range(len(mesh['corners']))):raise ValueError('Group coverage')
-    vertices=[(*mesh['points'][i],*normal,*uv) for i,normal,uv in mesh['corners']]
-    payload=struct.pack('<8I',MAGIC,1,len(vertices),len(indices),len(groups),len(frames),960,540)
-    payload+=b''.join(struct.pack('<8f',*v) for v in vertices)
+    vertices,vertex_bytes,_=prepared_geometry if prepared_geometry is not None else geometry_parts(mesh)
+    width,height=output_extent
+    if not 1<=width<=1920 or not 1<=height<=1080:raise ValueError('Output extent bound')
+    payload=struct.pack('<8I',MAGIC,1,len(vertices),len(indices),len(groups),len(frames),width,height)
+    payload+=vertex_bytes
     payload+=struct.pack('<%dI'%len(indices),*indices)
     payload+=b''.join(struct.pack('<4I',*g) for g in groups)
     for f in frames:
@@ -167,6 +185,8 @@ def prepare(source,output,game_root,*,live_record=None,evidence_mode='test',qual
         lights=dict(available=False,reason='not joined in this first replay;unlit primary-image qualification only'))
     if live_record is not None:
         result.update(preparation='fresh contemporaneous owner table;no saved ship template',fresh_preparation_row=list(live_record),fresh_preparation_row_sha256=sha(struct.pack('<96I',*live_record)))
+    if identity_calculator is not None:
+        result['catalog_identity']=[len(payload),catalog_images,identity_calculator(payload),catalog_hash]
     (output/'scene.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
     return result
 

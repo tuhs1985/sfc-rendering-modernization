@@ -16,6 +16,7 @@ struct MultiSceneRuntime {
  std::future<Prepared> preparing;multi_scene::Asset pendingAsset{};
  uint64_t lookup_header=0,lookup_packet=0,lookup_identity=0,decode_rejected=0,projection_rejected=0;
  uint64_t initialMask=0,initialWaits=0;bool initialReady=false;
+ TextureUpload uploadPolicy=TextureUpload::StagedLock;
  static uint64_t clock(){LARGE_INTEGER q{},f{};QueryPerformanceCounter(&q);QueryPerformanceFrequency(&f);const auto n=uint64_t(q.QuadPart),d=uint64_t(f.QuadPart);return n/d*1000000+n%d*1000000/d;}
  static Prepared prepare(const fs::path& folder,const multi_scene::Asset& a,uint64_t residentBytes){
   const auto began=clock();Prepared p{};
@@ -30,7 +31,8 @@ struct MultiSceneRuntime {
   require(imageBytes==a.image_bytes&&hash==a.textures_hash,"multi-scene texture bytes/provenance");
   p.backing=2*(p.scene.vertices.size()*sizeof(Vertex)+p.scene.indices.size()*4+imageBytes);p.cpu_us=clock()-began;return p;
  }
- void start(const fs::path& directory,IDirect3DDevice9* d,const Scene& initial,Renderer& initialRenderer){
+ void start(const fs::path& directory,IDirect3DDevice9* d,const Scene& initial,Renderer& initialRenderer,TextureUpload policy=TextureUpload::StagedLock){
+  uploadPolicy=policy;
   wchar_t flag[2]{};enabled=GetEnvironmentVariableW(L"SFC_D3D9_MULTISCENE",flag,2)==1&&flag[0]==L'1';if(!enabled)return;
   root=directory;device=d;bootstrapScene=&initial;bootstrapRenderer=&initialRenderer;require(source.prepare()&&source.requested,"multi-scene explicit mapping");
   auto* base=reinterpret_cast<BYTE*>(source.mailbox)-sfc_calibration::Offset;store=reinterpret_cast<multi_scene::Store*>(base+multi_scene::Offset);
@@ -61,8 +63,10 @@ struct MultiSceneRuntime {
      const auto gpuBegan=clock();item=std::make_shared<Resident>();item->scene=std::move(prepared.scene);item->bytes=prepared.backing;
      require(bytes+item->bytes<=256ull*1024*1024,"multi-scene retained256MiB cap");
      if(a.path_id==1){require(item->scene.vertices.size()==bootstrapScene->vertices.size(),"multi-scene bootstrap identity");item->drawRenderer=bootstrapRenderer;}
-     else{item->renderer=std::make_unique<Renderer>(device,item->scene,folder,&prepared.textures);item->drawRenderer=item->renderer.get();}
+     else{item->renderer=std::make_unique<Renderer>(device,item->scene,folder,&prepared.textures,uploadPolicy);item->drawRenderer=item->renderer.get();}
      std::cout<<"MULTISCENE_ASSET_TIMING id="<<a.id<<" cpu_us="<<prepared.cpu_us<<" gpu_admit_us="<<clock()-gpuBegan<<" at_us="<<clock()<<'\n';
+     const auto* uploader=item->drawRenderer;
+     std::cout<<"MULTISCENE_UPLOAD id="<<a.id<<" initial="<<uploader->initialDataUploads<<" staged="<<uploader->stagedUploads<<" unsupported="<<uploader->initialDataUnsupported<<'\n';
      item->provenance=a;bytes+=item->bytes;content.emplace(key,item);++loads;
     }
     entries[i]=a;bound[i]=item;InterlockedIncrement(&store->header.asset_ready);InterlockedExchange(&slot.ack,1);
