@@ -8,7 +8,7 @@ constexpr uint32_t magic=0x314f4653,version=1;
 constexpr unsigned verification_stride=59; // prime to 3/4snapshot cycles
 // Live source runs up to90s; receiver includes startup/shutdown margin without
 // extending that source or its enclosing bounded-job deadline. Offline stays60s.
-constexpr uint64_t receiver_lifetime_ms(bool live,bool game=false){return game?130000ull:live?110000ull:60000ull;}
+constexpr uint64_t receiver_lifetime_ms(bool live,bool game=false,bool tuning=false){return tuning?1980000ull:game?130000ull:live?110000ull:60000ull;}
 // Adapter qualification,not a neutral scene-format restriction. 1280x360 has
 // confirmed scrambled returned layout;other extents need explicit offline proof.
 inline bool qualified_extent(uint32_t w,uint32_t h){return (w==960&&h==540)||(w==640&&h==960)||(w==1920&&h==1080);}

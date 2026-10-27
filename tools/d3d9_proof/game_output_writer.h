@@ -1,5 +1,6 @@
 // Standalone receiver worker ONLY. No game callback allocation,waits or file IO.
 #pragma once
+#include "replacement_transaction.h"
 #include "game_output_wire.h"
 #include "live_owner_wire.h"
 #include <cmath>
@@ -7,9 +8,9 @@
 struct GameOutputWriter {
  sfc_calibration::Reader source;game_output::Pool* pool=nullptr;
  Microsoft::WRL::ComPtr<ID3D11Texture2D> textures[2][3];uint64_t handles[2][3]{};
- bool enabled=false,retainReady=false;uint64_t session=0;
+ bool enabled=false,retainReady=false,replacementMode=false;uint64_t session=0;
  ~GameOutputWriter(){if(pool){InterlockedExchange(&pool->header.stopped,1);InterlockedExchange(&pool->header.ready,0);}source.close();}
- void start(){wchar_t mode[2]{};enabled=GetEnvironmentVariableW(L"SFC_D3D9_GAME_OUTPUT",mode,2)==1&&mode[0]==L'1';
+ void start(){wchar_t mode[2]{};enabled=GetEnvironmentVariableW(L"SFC_D3D9_GAME_OUTPUT",mode,2)==1&&mode[0]==L'1';replacementMode=replacement::requested();
   retainReady=GetEnvironmentVariableW(L"SFC_D3D9_SYNC_BUFFER",mode,2)==1&&mode[0]==L'1';}
  void prepare(ID3D11Device* device,const output_wire::Packet& input){
   if(!enabled||pool)return;
@@ -35,6 +36,10 @@ struct GameOutputWriter {
   pool->diagnostic_mode=pool->camera_offset[0]==0?0u:1u;pool->reserved[2]=cohort?1u:0u; // Union coverage,not a native per-owner picking map.
   pool->reserved[3]=retainReady?1u:0u;
   memcpy(h.session,source.session,16);h.receiver_pid=GetCurrentProcessId();h.host_pid=input.producer_pid;session=input.session;
+  if(replacementMode){
+   auto* r=reinterpret_cast<replacement::Store*>(base+replacement::Offset);
+   check(replacement::valid(r,source.session,game),"replacement ledger capability");InterlockedExchange(&r->renderer_capable,1);
+  }
   check(game_output::valid(h,source.session,game),"game pool header");InterlockedExchange(&h.ready,1);
  }
  int copy(ID3D11Device* device,ID3D11DeviceContext* context,const output_wire::Packet& input,const game_output::Metadata& metadata,ID3D11Texture2D* const (&images)[3]){
@@ -51,6 +56,16 @@ struct GameOutputWriter {
   if(slot<0)return;
   auto& out=pool->slots[slot];packet.producer_pid=GetCurrentProcessId();packet.resource_epoch=static_cast<uint64_t>(slot+1);
   memcpy(packet.handles,handles[slot],sizeof(packet.handles));packet.checksum=output_wire::checksum(packet);
+  if(replacementMode){
+   auto* base=reinterpret_cast<BYTE*>(source.mailbox)-sfc_calibration::Offset;
+   auto* r=reinterpret_cast<replacement::Store*>(base+replacement::Offset);replacement::Receipt receipt{};replacement::Control control{};
+   if(!replacement::valid(r,source.session,pool->header.game_pid)||!replacement::sample(*r,static_cast<DWORD>(packet.source_frame),receipt)||!replacement::read(r->control,control)){
+    InterlockedExchange(&out.state,output_wire::idle);return;
+   }
+   replacement::Binding binding{};binding.output=packet.sequence;binding.sourceSequence=metadata.source_sequence;binding.stateHash=packet.source_state_hash;
+   binding.frame=static_cast<DWORD>(packet.source_frame);binding.generation=receipt.generation;binding.owner=packet.owner;binding.revision=packet.revision;binding.epoch=control.epoch;
+   replacement::write(r->output[slot],binding);
+  }
   out.packet=packet;game_output::metadata(out,metadata);InterlockedIncrement(&pool->header.published);InterlockedExchange(&out.state,output_wire::ready);
  }
 };

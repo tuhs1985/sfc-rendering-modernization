@@ -102,7 +102,7 @@ int wmain(int argc,wchar_t** argv){
    if(!coverage.enabled)apiok(external.dxvk_CopyRenderingOutput(outputs[2].surface.Get(),types[2]),"request picking image retention");
    WorkerGpuFence postFence;if(coverage.enabled)postFence.start(native.Get(),context.Get());
    const auto postValues=visuals.image.post();
-   const bool combinedPost=coverage.enabled&&visuals.enabled&&(postValues[0]!=1||postValues[1]!=1||postValues[2]!=1);
+   const bool combinedPost=coverage.enabled&&visuals.enabled&&(visuals.tuning||postValues[0]!=1||postValues[1]!=1||postValues[2]!=1);
    if(combinedPost){visuals.grade.prepareCoverage(native.Get(),outputs[1].image.Get(),outputs[2].image.Get());std::cout<<"COMBINED_POST grade_coverage=1 draws_per_frame=1\n";}
    wchar_t multiFlag[2]{};const bool multiMode=GetEnvironmentVariableW(L"SFC_D3D9_MULTISCENE",multiFlag,2)==1&&multiFlag[0]==L'1';
    float offsetX=0;if(coverage.enabled){wchar_t text[64]{};require(GetEnvironmentVariableW(L"SFC_D3D9_OFFSET_X",text,64)>0,"Additive offset required");offsetX=static_cast<float>(_wtof(text));require(std::isfinite(offsetX)&&(multiMode?(offsetX<=0&&offsetX>=-1e6f):(std::abs(offsetX)>1e-5f&&std::abs(offsetX)<=1e6f)),"explicit aligned-cohort or diagnostic offset bounds");}
@@ -149,6 +149,7 @@ int wmain(int argc,wchar_t** argv){
     // Live input supplies source-stop and elapsed watchdogs in next(); skipped
     // submissions must not consume a proof-era frame-count lifetime budget.
     for(size_t frame=0;run_lifetime::iteration(liveMode,frame,paced?paced+(latest?1u:0u):scene.frames.size());++frame){
+     visuals.poll(external);
      if(frame<2)startup.mark("frame_begin",static_cast<unsigned>(frame));
      admission.tick(AssetService::Boundary);
      Frame state=scene.frames[frame%scene.frames.size()];frame_ingress::Packet input{};

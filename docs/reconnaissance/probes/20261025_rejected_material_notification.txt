@@ -1,0 +1,112 @@
+"""Opt-in candidate1.6.1 checkout; normal runtime selection is untouched.
+
+Uses supported USD materials, existing flat publisher, and ordinary D3D9 meshes.
+No renderer SDK geometry submission or new asset loader.
+"""
+import time
+import json
+import struct
+from collections import deque
+
+from progressive_scene_relay import Relay as Progressive
+
+
+def configure_child(backend,environment):
+    if not backend or backend.get('release')!='1.6.1':
+        raise ValueError('Verified async material checkout backend required')
+    before=environment.get('DXVK_ASYNC_ASSET_LOADING')
+    environment['DXVK_ASYNC_ASSET_LOADING']='1'
+    return 'rtx.initializer.asyncAssetLoading = True\n',dict(
+        release='1.6.1',material_library='flat',complete_asset_stages=True,
+        supplied_async_asset_loading='1',inherited_async_asset_loading=before,
+        host_sha256=backend['host_sha256'],runtime_sha256=backend['runtime_sha256'],
+        header_sha256=backend['header_sha256'],scope='Explicit checkout child only;normal1.5.2 unchanged')
+
+
+def backend_inputs():
+    from runtime_candidate import verify,digest
+    candidate=verify(require_host=True)
+    return dict(release='1.6.1',exe=candidate['exe'],runtime=candidate['runtime'],
+        host_sha256=digest(candidate['exe']),runtime_sha256=digest(candidate['runtime']),
+        header_sha256=candidate['manifest']['header_sha256'],
+        source_commit=candidate['manifest']['source_commit'],
+        source_parity='Packaged5a7eec84/public0a6cd5b not instruction-level verified')
+
+
+def receipt(backend):
+    return {k:str(v) if k in ('exe','runtime') else v for k,v in backend.items()}
+
+
+class Relay(Progressive):
+    def __init__(self,*args,**kwargs):
+        backend=kwargs.pop('checkout_backend',None)
+        if not backend or backend.get('release')!='1.6.1':raise ValueError('Explicit verified checkout backend required')
+        kwargs['experimental_live_checkout']=True
+        super().__init__(*args,**kwargs)
+        self.async_material_checkout=True;self.renderer_backend=backend
+        self.material_library='flat'
+        self.material_notifications=[]
+        self.pending_material_notices=deque();self.material_notice_busy_since=None
+
+    def returned_images(self):
+        return struct.unpack('<I',self.receiver.channel.read(11*1024*1024+128*1024+512,4))[0]
+
+    def commit_layers(self,initial):
+        super().commit_layers(initial)
+        # Coalesce completed revisions,then notify after a subsequent returned
+        # frame. This is a file-notification boundary,NOT a material/GPU ACK.
+        if len(self.pending_material_notices)>=64:raise ValueError('Material notification capacity64')
+        self.pending_material_notices.append(dict(after_drawn=self.returned_images(),publication=len(self.material_events)))
+
+    def notify_materials(self):
+        if not self.pending_material_notices:return
+        drawn=self.returned_images()
+        eligible=[]
+        for notice in self.pending_material_notices:
+            if drawn<=notice['after_drawn']:break
+            eligible.append(notice)
+        if not eligible:return
+        try:(self.folder/'gpu/rtx-remix/mods/sfc-policy/mod.usda').touch()
+        except PermissionError:
+            if self.material_notice_busy_since is None:self.material_notice_busy_since=time.monotonic()
+            if time.monotonic()-self.material_notice_busy_since>5:raise RuntimeError('Final material notification sharing-busy for5s;retain original drawing')
+            return
+        if len(self.material_notifications)<64:
+            self.material_notifications.append(dict(at_ns=time.perf_counter_ns(),
+                **eligible[-1],notified_drawn=drawn,coalesced=len(eligible),signal='post_publication_return_boundary'))
+        for _ in eligible:self.pending_material_notices.popleft()
+        self.material_notice_busy_since=None
+
+    def flush_enhancements(self):
+        # Base packets publish independently. Bound image IO to four groups per
+        # cycle, but publish one complete enhanced stage per finished asset.
+        processed=0
+        while self.pending_enhancements and processed<4:
+            kind,value=self.pending_enhancements[0]
+            job=value if kind=='complete' else value[0]
+            if not job.get('published'):break
+            self.pending_enhancements.popleft()
+            if job['phase']=='failed':continue
+            if kind=='complete':
+                expected={g[0] for g in job['manifest']['groups']}
+                if set(self.material_pieces.get(job['id'],{}))!=expected:
+                    raise ValueError('Completed material revision missing groups;retain base')
+                self.pending_stage_ids.add(job['id']);self.pending_complete_ids.add(job['id'])
+                continue
+            _,piece=value
+            try:self.accept_piece(job,piece)
+            except (ValueError,OSError) as exc:self.fail_job(job,exc)
+            processed+=1
+        self.retry_publication()
+        self.notify_materials()
+
+    def finish(self,pid):
+        if self.pending_material_notices:self.partial.append(dict(reason='Stopped before final material notification boundary',count=len(self.pending_material_notices)))
+        result=super().finish(pid)
+        result['multi_scene']['async_material_checkout']=dict(
+            backend=receipt(self.renderer_backend),material_library='flat',
+            complete_asset_stages=True,finished_ns=time.perf_counter_ns(),
+            material_notification_policy='post_publication_return_boundary',
+            material_notifications=self.material_notifications,pending_material_notices=list(self.pending_material_notices))
+        (self.folder/'live-owner.analysis.json').write_text(json.dumps(result,indent=2))
+        return result

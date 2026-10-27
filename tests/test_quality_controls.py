@@ -12,7 +12,7 @@ class QualityTests(unittest.TestCase):
     def test_wire_and_restoration(self):
         p=encode(b'[quality]\n');self.assertEqual(len(p),48);self.assertEqual(struct.unpack('<8I2fQ',p)[:10],(0x31544c51,1,0,1,8,0,1,0,0.,1.))
         self.assertEqual(struct.unpack_from('<Q',p,40)[0],fnv(p[:40]))
-        self.assertEqual(p,encode(DEFAULT.with_name('quality.example.toml').read_bytes()))
+        self.assertEqual(p,encode(DEFAULT.with_name('rendering.example.toml').read_bytes()))
     def test_options_and_limits(self):
         p=encode(b'[quality]\nenabled=true\nmax_anisotropy=16\nanti_aliasing="temporal"\ndenoising=false\nmip_bias=-0.5\n')
         self.assertEqual(struct.unpack('<8I2fQ',p)[2:10],(1,1,16,3,0,0,-.5,1.))

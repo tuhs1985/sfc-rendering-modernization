@@ -180,16 +180,23 @@ class Pipeline:
             [g['group'],g['flags'],images[resources[g['primary']]['filename']]['sha256'],
              resources.get(g['secondary'],{}).get('filename','').replace('\\','/').casefold() if g['flags']&0x20 else None]
             for g in mesh['groups']]]
-        signature=hashlib.sha256(json.dumps(['sfc.base-asset.v1',identity],sort_keys=True,separators=(',',':')).encode()).hexdigest()
+        signature=hashlib.sha256(json.dumps(['sfc.base-asset.v2.remix-image-origin-v1',identity],sort_keys=True,separators=(',',':')).encode()).hexdigest()
         steps.append(dict(stage='base_identity',seconds=(time.perf_counter_ns()-started)/1e9));begin=time.perf_counter_ns()
+        from remix_coordinates import base_image,POLICY
+        if sum(len(i['raw'])+2*len(i['bgra']) for i in images.values())+sum(len(images[n]['bgra']) for n in job['primary'])>IMAGE_BYTES:
+            raise ValueError('Remix base adaptation256MiB working cap')
+        upload_images={name:base_image(images[name]) for name in job['primary']}
         folder=job['output']
         manifest=prepare(source,folder,self.relay.root,live_record=job['row'],evidence_mode='performance',
-            qualified_mesh=mesh,prepared_capture=(raw,refs),prepared_images=images,
+            qualified_mesh=mesh,prepared_capture=(raw,refs),prepared_images=upload_images,
             prepared_geometry=self.graph.tasks[job['geometry_key']]['value'],output_extent=(1920,1080),identity_calculator=asset_identity)
         steps.append(dict(stage='bundle_assembly_and_write',seconds=(time.perf_counter_ns()-begin)/1e9));begin=time.perf_counter_ns()
         packet=wire.prepared_packet(job['id'],job['id'],job['row'],signature,manifest['catalog_identity'])
         steps.append(dict(stage='catalog_from_written_bytes',seconds=(time.perf_counter_ns()-begin)/1e9))
-        manifest['base_identity_schema']='sfc.base-asset.v1;primary content plus declared enhancement associations;not enhanced readiness'
+        manifest['conventions']['image']='Remix-only bottom-row-first BGRA8;original images/captured UV unchanged'
+        manifest['remix_texture_origin']=POLICY
+        (folder/'scene.json').write_text(json.dumps(manifest,indent=2))
+        manifest['base_identity_schema']='sfc.base-asset.v2.remix-image-origin-v1;primary content plus declared enhancement associations;not enhanced readiness'
         return folder,manifest,signature,packet,steps
 
     def _queue_derivatives(self,job):
@@ -226,7 +233,9 @@ class Pipeline:
         hashes=[]
         for t in scene['textures']:
             image=job['images'][t['filename']]
-            hashes.append(format(texture_identity(image['bgra'],t['width'],t['height']),'x'))
+            from remix_coordinates import bgra as remix_bgra
+            upload=remix_bgra(image['bgra'],t['width'],t['height'])
+            hashes.append(format(texture_identity(upload,t['width'],t['height']),'x'))
         if len(hashes)!=len(scene['textures']) or any(not 1<=len(h)<=16 or any(c not in '0123456789abcdef' for c in h) for h in hashes):raise ValueError('Material hash format/count')
         return values,hashes,resources,groups
 
@@ -318,6 +327,13 @@ class Pipeline:
         return completed
 
     def _release(self,job):
+        if job['phase']=='alias':
+            # Canonical content owns the result. Cancel queued alias consumers
+            # before their shared dependency entries can be removed. Running
+            # tasks already hold their submitted argument references.
+            for key,t in self.graph.tasks.items():
+                if len(key)>1 and key[1]==job['id'] and t['state']=='queued':
+                    t.update(state='failed',error='Alias uses canonical prepared content',fn=None)
         reservation=job.pop('reservation',None)
         if reservation:reservation.__exit__(None,None,None)
         job.pop('capture',None);job.pop('images',None);job.pop('source_images',None)

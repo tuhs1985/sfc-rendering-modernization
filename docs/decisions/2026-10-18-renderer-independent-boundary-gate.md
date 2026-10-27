@@ -8,6 +8,17 @@ authority: Sponsor / Owner
 
 # Technical gate — renderer-independent scene boundary
 
+## Current review — 2026-10-27
+
+[Read-only boundary audit](../reconnaissance/2026-10-27-renderer-boundary-audit.md)
+confirms reusable capture/scene/transaction meanings, while live asset preparation,
+Remix material publication/startup and D3D11 image sharing still need explicit
+adapter boundaries. Union coverage is not a per-owner picking map. Gate remains
+**OPEN**. No renderer refactor or new backend was implemented by this audit.
+Finish the prepared player-replacement checkout before the recommended small
+renderer/completed-picture interface extraction. Older findings below retain
+their dates and should not override the current handoff.
+
 ## Sponsor intent and authority
 
 Sponsor directs:"make note of this a tech gate we need to cross. I want us to

@@ -8,6 +8,8 @@ int main(){
  test(output_wire::receiver_lifetime_ms(true)==110000);
  test(output_wire::receiver_lifetime_ms(true)>90000&&output_wire::receiver_lifetime_ms(true)<285000);
  test(output_wire::receiver_lifetime_ms(true,true)==130000);
+ test(output_wire::receiver_lifetime_ms(true,true,true)==1980000);
+ test(output_wire::receiver_lifetime_ms(true,true,true)>10ull*60*1000);
  test(output_wire::receiver_lifetime_ms(true,true)>120000&&output_wire::receiver_lifetime_ms(true,true)<285000);
  output_wire::Packet p{};p.magic_value=output_wire::magic;p.version_value=1;p.bytes=sizeof(p);p.producer_pid=7;p.session=9;p.resource_epoch=1;p.sequence=1;p.source_frame=100;p.owner=4;p.revision=4;p.width=960;p.height=540;p.handles[0]=1;p.handles[1]=2;p.handles[2]=3;p.source_state_hash=p.scene_hash=p.published_qpc=1;p.checksum=output_wire::checksum(p);
  test(output_wire::valid(p,9,7));test(!output_wire::valid(p,8,7));test(!output_wire::valid(p,9,8));

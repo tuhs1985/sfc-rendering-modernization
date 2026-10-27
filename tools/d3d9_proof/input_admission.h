@@ -3,10 +3,10 @@
 #include "live_owner_wire.h"
 namespace live_owner {
 enum class Admission:unsigned {Accepted,Clock,Frame,BadFrame,Age,Closed,Count};
-inline Admission admission(const Packet& p,Header& h,uint64_t now,uint64_t frequency,const volatile LONG* closed=nullptr){
+inline Admission admission(const Packet& p,Header& h,uint64_t now,uint64_t frequency,const volatile LONG* closed=nullptr,bool replacement=false){
  if(!frequency||now<p.offered)return Admission::Clock;
  const auto current=static_cast<DWORD>(frame_ingress::state(&h.frame));
- if(p.row[2]!=current&&(!closed||p.row[2]==UINT32_MAX||p.row[2]+1!=current))return Admission::Frame;
+ if(p.row[2]!=current&&(!closed||p.row[2]==UINT32_MAX||current<p.row[2]||current-p.row[2]>(replacement?2u:1u)))return Admission::Frame;
  if(p.row[2]==static_cast<DWORD>(frame_ingress::state(&h.bad_frame)))return Admission::BadFrame;
  // Buffered mode uses the ACTUAL compositor consumption watermark,not a guessed
  // fixed-Hz deadline.50ms is only the existing history's maximum wall-age guard.

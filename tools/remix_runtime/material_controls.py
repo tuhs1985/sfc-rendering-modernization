@@ -4,12 +4,12 @@ import hashlib
 import math
 import struct
 import tomllib
+from rendering_config import DEFAULT,section,scoped
 def fnv(raw):
     value=14695981039346656037
     for byte in raw:value=((value^byte)*1099511628211)&0xffffffffffffffff
     return value
 
-DEFAULT=Path(__file__).parent/'config/materials.toml'
 DEFAULTS=dict(roughness=1.0,illumination_strength=1.0,metallic=0.0,anisotropy=0.0)
 MAP_DEFAULTS=dict(roughness_map_enabled=False,roughness_map_strength=0.5,
     roughness_map_black=0.0,roughness_map_white=1.0,
@@ -17,9 +17,10 @@ MAP_DEFAULTS=dict(roughness_map_enabled=False,roughness_map_strength=0.5,
 
 def encode(raw):
     if len(raw)>16384:raise ValueError('Material config16KiB limit')
-    data=tomllib.loads(raw.decode('utf-8'))
-    if set(data)-{'material'}:raise ValueError('Unknown material section')
-    row=data.get('material',{})
+    row=section(raw,'material')
+    if isinstance(row,dict) and 'emissive_intensity' in row:
+        if 'illumination_strength' in row:raise ValueError('Use emissive_intensity only;duplicate legacy illumination_strength')
+        row=dict(row);row['illumination_strength']=row.pop('emissive_intensity')
     if not isinstance(row,dict) or set(row)-(set(DEFAULTS)|set(MAP_DEFAULTS)):raise ValueError('Unknown material setting')
     values=DEFAULTS|MAP_DEFAULTS|row
     def number(value,low,high):
@@ -68,7 +69,7 @@ class Relay:
         self.reclaimed_bytes+=collect(self.folder,{self.active_revision})
         try:
             if self.path.stat().st_size>16384:raise ValueError('Material config16KiB limit')
-            raw=self.path.read_bytes();digest=hashlib.sha256(raw).hexdigest()
+            raw=scoped(self.path.read_bytes(),'material');digest=hashlib.sha256(raw).hexdigest()
             if digest==self.digest:return
             if self.accepted>=256:raise ValueError('Material revision256/session limit;restart to continue')
             packet=encode(raw)

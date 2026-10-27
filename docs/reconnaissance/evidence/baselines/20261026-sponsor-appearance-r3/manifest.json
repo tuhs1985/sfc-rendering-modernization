@@ -1,0 +1,26 @@
+{
+  "utc": "2026-10-27T00:06:08.026621+00:00",
+  "authority": "Sponsor requested current settings be the new preserved baseline before D3D9 tuning migration",
+  "files": {
+    "tools/remix_runtime/config/rendering.toml": {
+      "snapshot": "rendering.toml",
+      "sha256": "982360db5bd97cd6988120a54ea59e401486ac6331f0f4677a18aa21794e4113",
+      "bytes": 5869
+    },
+    "tools/remix_runtime/config/lights.toml": {
+      "snapshot": "lights.toml",
+      "sha256": "9015edf237517657cc4cafc3d2ff2898e7504b789f41012f6d5ba5fd1b933161",
+      "bytes": 2263
+    },
+    "tools/d3d9_proof/multi_ship.toml": {
+      "snapshot": "multi_ship.toml",
+      "sha256": "c0d868c4e65334d1a06de33f1eaf73e7323286d69c07f60449f5dda154ed23f9",
+      "bytes": 351
+    },
+    "tools/d3d9_proof/offset_ship.toml": {
+      "snapshot": "offset_ship.toml",
+      "sha256": "63602870efb5be8fccd61edc7c802303b6ca22fd307b7a81a1358fabd78d5645",
+      "bytes": 279
+    }
+  }
+}

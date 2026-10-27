@@ -1,18 +1,62 @@
 # Remix appearance controls
 
-## Current temporary appearance baseline
+## Current tuning baseline — revision3
+
+Your October26 tuning values are preserved in the
+[revision3 snapshot](../../../docs/reconnaissance/evidence/baselines/20261026-sponsor-appearance-r3/README.md),
+with exact hashes and an independently verified backup outside Git. This is the
+current saved appearance baseline; factory examples and older snapshots are not.
+
+The familiar `start_light_tuning_session.ps1` now uses the current fast
+ordinary-D3D9/Remix1.6.1 checkout, including persistent multiple ships and live
+image/bloom, quality, material and light controls. It does not use the older
+SDK/ImGui preview path. Save the active profiles to update; exit SFC normally.
+There is no90second cutoff: the existing30minute tactical safety ceiling remains.
+Material map generation may take longer than a scalar edit. Invalid edits retain
+last good controls. Source assets and the saved baseline are not overwritten.
+
+## One file to edit
+
+Use **[rendering.toml](rendering.toml)** for all material, illumination, texture
+quality, image and bloom settings. Its numbered sections explain the scope and
+range of each control, with space between settings. Light sources remain in
+[lights.toml](lights.toml).
+
+The former `materials.toml`, `image.toml` and `quality.toml` have been consolidated;
+their tuned values are preserved. Old run snapshots are historical evidence,
+not additional files to edit. Copies of the previous profiles are retained in
+`artifacts/config-consolidation/run203`.
+
+Save during a light-tuning session for live updates. Short D3D9 tests freeze the
+profile during preparation, so restart those tests after editing. Each subsystem
+reads its own section: changing image or bloom controls does not regenerate
+material maps. Invalid values retain the last accepted settings for that subsystem.
+
+**Restore:** copy [rendering.example.toml](rendering.example.toml) over
+`rendering.toml` for factory defaults. To reset only one category, copy its section
+instead. The example is not your current tuned baseline.
+
+**Scope:** `[material]` controls surfaces and emission. `[quality]` controls
+filtering and rendering quality. `[image]` adjusts the completed Remix picture.
+`[remix]` exposes exact native bloom names. Bloom is whole-image processing and
+can affect reflections or other bright surfaces; it cannot isolate illumination.
+Per-layer brightness, contrast and saturation are not offered as native controls.
+No texture-processing math or source image is changed by this reorganization.
+
+## Historical appearance baseline
 
 Sponsor approved the current four tuning files on2026-10-19. Exact copies,hashes
 and restoration instructions:
 [temporary appearance baseline revision2](../../../docs/reconnaissance/evidence/baselines/20261019-sponsor-temporary-appearance-r2/README.md).
-Use this checkpoint for future comparisons;older tentative snapshots and factory
-examples are not the current sponsor baseline. No physical/native-SFC parity claim.
+This is a historical comparison checkpoint. The current tuned values are in
+`rendering.toml`; the consolidation preserves those newer values rather than
+resetting them to this older snapshot. No physical/native-SFC parity claim.
 
-## Separate quality controls and suggested comparison profile
+## Quality section and comparison profile
 
-Use [quality.toml](quality.toml), independently of image/lights/materials. The
+Use [rendering.toml](rendering.toml), in the `[quality]` section, independently of other controls. The
 suggested starting file is enabled:anisotropic16x,mip bias0,temporal AA OFF,
-denoising ON,native1x resolution. Your existing three tuning files are preserved.
+denoising ON,native1x resolution. The other sections keep their existing values.
 This is a conservative comparison profile,**not a verified match to SFC**.
 The accepted Community Edition's DirectX wrapper already forcesFiltering=16 and
 Antialiasing=8x. Remix temporal AA is a different method,not an8x MSAA switch.
@@ -27,13 +71,13 @@ No compilation needed. Bad values keep the last accepted profile.
 | --- | --- |
 | enabled | true uses this profile;false restores pre-quality Remix defaults:anisotropic8x,mip0,AAoff,denoisingon,native1x. |
 | texture_filtering | "anisotropic" for angled surfaces;"trilinear" disables anisotropic filtering. No unverified nearest/bilinear selector is offered. |
-| max_anisotropy | 1,2,4,8,16. This is texture filtering,NOT the materials.toml stretched-highlight control. |
+| max_anisotropy | 1,2,4,8,16. This is texture filtering,NOT the rendering.toml stretched-highlight control. |
 | mip_bias | -1..1;0neutral. Negative requests sharper mip selection but may shimmer;positive requests softer mips. Native option acceptance confirmed;visible effect on our SDK meshes is still weak/unresolved. |
 | anti_aliasing | "off" or "temporal". Temporal AA can smooth jaggies but soften detail or leave motion trails. Native-resolution TAA,no DLSS/NIS/Ray Reconstruction enabled. |
 | denoising | true keeps ray-tracing noise under control. false is a diagnostic view of noisy samples,not what the old SFC renderer did. |
 | supersampling | Currently1.0ONLY. Larger values are rejected and leave settings unchanged. Correct larger-than-screen rendering/downsampling remains separate work. |
 
-Restore with [quality.example.toml](quality.example.toml) or enabled=false. The
+Restore only the `[quality]` section from [rendering.example.toml](rendering.example.toml), or set its enabled=false. The
 example restores previous Remix behavior,not the suggested16x comparison profile.
 It never resets your image exposure,gamma,lighting or material settings.
 
@@ -60,14 +104,14 @@ resource-budget checks and new spatial proof are required before enabling it.
 No game-camera/transport redesign is needed merely to test the controls above.
 Bounds and evidence:[quality probe](../../../docs/reconnaissance/probes/REMIX-QUALITY-CONTROLS-001.md).
 
-## Separate image controls
+## Image section
 
-Use [image.toml](image.toml) for the returned Remix image, independently of
-lights.toml and materials.toml. This does **not** adjust original SFC drawing,
+Use [rendering.toml](rendering.toml) for the returned Remix image, in the `[image]` section, independently of
+light and material settings. This does **not** adjust original SFC drawing,
 HUD, menus or the whole combined screen. Current output is still an added ship.
 
-Start the existing `start_light_tuning_session.ps1` launcher. In image.toml set
-`enabled=true`, change one value and SAVE. Reload is about half a second plus the
+Start the existing `start_light_tuning_session.ps1` launcher. In its `[image]`
+section set `enabled=true`, change one value and SAVE. Reload is about half a second plus the
 next completed render; initial asset/shader setup can take longer. Invalid edits
 keep the last accepted settings. IMAGE CONFIG_ACCEPTED means validation/relay;
 IMAGE_APPLIED in host.log confirms the native host applied it. No recompile needed.
@@ -83,9 +127,9 @@ IMAGE_APPLIED in host.log confirms the native host applied it. No recompile need
 | gamma=1.0 | 0.25..4; above1 brightens displayed midtones, below1 darkens. Black/white endpoints stay fixed. Not a monitor calibration or a replacement for correct colour-space conversion. |
 | saturation=1.0 | 0..2; 0 grey, 1 unchanged, above1 stronger colour. |
 
-To restore the entire image configuration, copy [image.example.toml](image.example.toml)
-over image.toml and SAVE, or simply set enabled=false. Lighting/material files are
-not reset. Turning automatic exposure off or switching tone mapper is an intentional
+To restore just the image configuration, copy the `[image]` section from [rendering.example.toml](rendering.example.toml)
+into its `[image]` section and SAVE, or set `[image].enabled=false`.
+Copying the entire factory file resets all rendering categories; lights remain independent. Turning automatic exposure off or switching tone mapper is an intentional
 appearance change; neither happens by default. Returned output is already8bit:
 gamma/grade cannot recover clipped highlights or missing texture detail.
 
@@ -125,12 +169,12 @@ storage, no extra shared surface or CPU screenshot loop. Existing session/output
 caps and normal-exit cleanup remain in force. For proof and source references see
 [image-control probe](../../../docs/reconnaissance/probes/REMIX-IMAGE-CONTROLS-001.md).
 
-## Separate material controls
+## Material and illumination section
 
 ### Optional texture-derived roughness
 
 New `roughness_map_enabled=false` preserves your current uniform surface.
-Enable it in materials.toml to derive an artistic roughness map from the original
+Enable it in rendering.toml to derive an artistic roughness map from the original
 colour image. This is NOT recovered SFC surface data and does not alter that image.
 `roughness_map_strength`0..1 blends uniform roughness with the derived result;
 start0.25. `roughness_map_black`/`white`0..1 set input levels (white>black).
@@ -152,14 +196,14 @@ No normal/clearcoat/specular maps are invented in this increment. Current colour
 light and emission tuning remain independent. See
 [roughness probe](../../../docs/reconnaissance/probes/REMIX-ROUGHNESS-MAP-001.md).
 
-Use [materials.toml](materials.toml) for the extra ship's surface and illuminated
+Use [rendering.toml](rendering.toml) for the extra ship's surface and illuminated
 markings. Keep lights.toml for light sources. Save while the **light-tuning** runner
 is active;reload is about half a second plus the next completed render. Invalid
 edits retain last good values. Restart after256 accepted material changes.
 Ordinary non-tuning textured runs read settings only at preparation.
 
 Baseline: `roughness=1.0` is matte;lower toward0 for sharper reflections.
-`illumination_strength=1.0` enables the provisional recovered illumination;
+`emissive_intensity=1.0` enables the provisional recovered illumination;
 0turns it off,2doubles it. Start small;this is not an SFC-calibrated physical unit.
 The map is primary colour multiplied by the associated secondary image,NOT all
 the diffuse texture emitting light. Original images remain untouched.
@@ -304,3 +348,49 @@ between runs. Both lights are directional; weapon/effect lights are not wired ye
 Bounds:config64KiB;intensity0..1000,master0..16,RGB0..16,conversion0..1000,
 angular size0..180. Invalid edits apply nothing. Initial source dimensions and
 radiance mapping are Remix-only policy,not a future-backend requirement.
+
+## Directional light angles (Run206 — corrected world axes)
+
+Edit an existing directional light in `lights.toml`, then save:
+
+```toml
+angle_mode = "offset"
+azimuth_degrees = 0.0
+elevation_degrees = 25.0
+```
+
+This raises the light source by 25 degrees from its captured SFC direction.
+Positive azimuth turns horizontally around SFC world Z. Angles describe the source,
+not the opposite direction in which its rays travel. Elevation clamps at the poles.
+Zero offsets preserve the current direction exactly. `angle_mode = "absolute"`
+sets a fixed source bearing/elevation instead of following captured direction.
+Absolute azimuth 0 points toward +X; 90 toward +Y; elevation 90 is world +Z overhead.
+These are adapter controls converted to Remix direction vectors, not native
+`rtx.*` settings. They use world axes, not camera or ship-relative axes.
+Existing position/focus settings remain unchanged. Directional lights have no
+finite distance from the ship; changing these angles changes where light comes from.
+
+Restart the tuning launcher once to load this updated control reader. Afterward
+angle edits apply live. Nonzero angles are currently supported for `directional`
+lights only; a dome uses `environment_rotation_degrees` instead. Invalid edits
+retain the last valid configuration.
+
+For a three-directional-light experiment, change the existing `project_fill`
+from `type = "dome"` to `type = "directional"`, then select absolute angles and
+strength for it. Do not add another entry with the same ID. Nothing automatically
+disables the existing dome or changes your lighting baseline. Removing a dome
+removes that environment source, not all indirect illumination.
+
+Two Remix instances can shadow each other when one blocks a shadow-casting light.
+Original SFC drawing cannot receive those Remix shadows. Screen-space "below"
+is insufficient; light direction, object placement and other fill lighting matter.
+Cross-ship shadow behavior has not yet received a controlled runtime test.
+
+Run206 correction: Run205 used mesh-local Y as if it were world up. Captured
+supplied transforms map local Y to world Z. Run205 angle/sign descriptions are
+superseded. Positive elevation now raises the source toward +Z; azimuth stays
+in the tactical XY plane. Existing -10/0 and +10/0 tuned offsets were translated
+to 0/+10 and 0/+10 using the qualified native light bank. Those vectors match
+the old look for that bank; the latest performance run deliberately saved no raw
+bank, so confirmation with your current scenario remains pending. Exact old TOML
+is backed up at artifacts/light-angles/run206/lights-before.toml. Restart once.

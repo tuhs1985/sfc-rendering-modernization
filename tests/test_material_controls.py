@@ -12,6 +12,9 @@ from test_live_scene import packet_fixture
 from PIL import Image
 
 class MaterialTests(unittest.TestCase):
+    def test_native_emissive_intensity_name_preserves_old_values(self):
+        self.assertEqual(encode(b'[material]\nemissive_intensity=5\n'),encode(b'[material]\nillumination_strength=5\n'))
+        with self.assertRaisesRegex(ValueError,'duplicate'):encode(b'[material]\nemissive_intensity=5\nillumination_strength=5\n')
     def test_defaults_and_wire(self):
         # Factory defaults must not depend on the sponsor's mutable tuning file.
         raw=encode(b'[material]\n');self.assertEqual(len(raw),56)

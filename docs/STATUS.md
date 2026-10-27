@@ -1,7 +1,7 @@
 ---
 title: SFC Modernization — Status Tracker
-updated: 2026-10-25
-checkpoint: Run193 asynchronous single-file material route works in isolation; startup target remains open
+updated: 2026-10-27
+checkpoint: Run210 interface audit documented; player-replacement checkout remains ready
 tags:
   - sfc-modernization
   - project-status
@@ -12,9 +12,17 @@ tags:
 > [!summary] Where we are
 > We can take live ships, textures, camera and lighting information from SFC, render through Remix, and put the result inside the game window. Original drawing remains intact. The API experiment is parked. Current work reduces loading pauses while preserving the fresh-asset pipeline and accepted appearance.
 
-**Next action:** carry the successful isolated material handoff into a guarded checkout and run its regression checks before gameplay. Fourteen standalone attempts narrowed the problem: the layered handoff lost material settings, while the existing single-file handoff kept them and avoided the long update gap, including a ship arriving later. Startup still misses the two-second target: first returned ship about3.2s, last initial asset admitted about4.0s. Normal gameplay/runtime unchanged; no new launcher yet. [Run193](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-25-codex-candidate-hot-reload-qualification.md>). Checkpoint committed from parent`9ff2d3d`; no runtime promotion or push. Fresh533-test Python regression passed.
+**Current checkpoint:** ready for your first player-ship replacement test. The background and Remix ship are finished together before display. The final standalone replacement run delivered600of600frames, and intentional late-output tests recovered safely. This is not yet a successful in-game replacement claim.
 
-This is a readable project tracker, not execution authority. The repository handoff, approved decisions and run records control implementation. Updated through **Run193, October 25, 2026 (America/New_York)**. Status describes recorded evidence, not work currently running.
+**Your settings:** current lighting/rendering values are unchanged. The existing tuning launcher stays available. R3 remains a historical rollback reference.
+
+**Validation:** final replacement qualification, normal/material/tuning regressions and both launcher preflights pass. One material-loading control had a brief startup interruption; its identical repeat passed, and the limitation is recorded. No game launched. Sponsor authorized committing and pushing this reviewed checkpoint.
+
+**Interface audit:** capture/identity foundations are reusable, but asset preparation still assumes Remix and output sharing assumes D3D11. Renderer interchangeability stays open; no refactor was made. [Findings](<C:/Project/SFC-Modernize Engine/docs/reconnaissance/2026-10-27-renderer-boundary-audit.md>).
+
+**Next action:** run start_d3d9_player_replacement_session.ps1 using your F-CA against a different model. Expect one player ship at its original position, no offset copy. Move, turn, rotate/switch cameras and play briefly with weapons/shields; exit normally when requested. Review the captured result before expanding replacement.
+
+This is a readable tracker, not execution authority. Updated through **Run210, October27,2026 (America/New_York)**. Repository handoff and run records control resumption.
 
 ## Status key
 
@@ -25,6 +33,17 @@ This is a readable project tracker, not execution authority. The repository hand
 - **FIXED:** the specific defect was corrected and tested; broader issues may remain.
 
 ## Current work
+
+### SFC-18 — Player-ship replacement
+
+**READY FOR SPONSOR CHECKOUT — in-game result pending.**
+
+- Background/HUD and replacement ship commit together as one completed picture.
+- Unique configured F-CA, zero offset; use a different enemy model. An engine player flag is not proved.
+- Capture precedes selected mesh suppression. Other ships/effects/UI stay native.
+- Standalone600/600delivery, bounded missed-output recovery, final qualifications and launcher preflights pass.
+- Current appearance preserved; tuning workflow retained. No gameplay or milestone PASS claimed.
+- [Run209](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-27-codex-player-replacement-qualified.md>), [contract](<C:/Project/SFC-Modernize Engine/docs/reconnaissance/player-replacement-transaction.md>).
 
 ### SFC-15 — Remaining rendering families
 
@@ -50,6 +69,15 @@ This is a readable project tracker, not execution authority. The repository hand
 
 Map: [rendering families](<C:/Project/SFC-Modernize Engine/docs/reconnaissance/rendering-family-map.md>). Latest: [Run173](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-25-codex-offline-render-inventory.md>).
 
+### SFC-16 — Renderer waiting in the menus
+
+**OPEN — baseline CPU use; separate from the priming experiment.**
+
+- The external renderer used about two CPU cores while waiting,both before and after material priming. The matched controls showed essentially identical CPU use. Its two busiest threads have not been attributed to a module or function.
+- During a minute of primed waiting,private allocated memory and handle counts did not grow. Resident memory did rise by about154MiB. Priming reserves about1.9GBmore process memory earlier;that is a measured fixed preparation cost,not an indefinite stability guarantee.
+- Primed idle and early cancellation exited normally. The unprimed control lacks a normal shutdown receipt;keep that limitation visible.
+- Next investigation:attribute the existing busy threads with supported profiling. Do not add thread suspension or silently disable unrelated features. The current test remains bounded;this is not approval for an unattended infinite session. [Measurements](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-26-codex-material-startup-priming.md>).
+
 ### SFC-01 — Direct Remix API route
 
 **PARKED — sponsor direction; isolated experiment, not selected for gameplay.**
@@ -65,6 +93,10 @@ Evidence: [Run164](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-24-codex-a
 
 ### SFC-02 — Initial loading below two seconds
 
+- **Live material updates demonstrated (Run201):** enhanced materials now arrive without a shuttle/new-model trigger. Initial absence is difficult to notice except illumination. FCA enhanced files ready0.786s/library0.850s from discovery; not exact installed-pixel timing. Original glow currently shares the generated-roughness publication boundary. [Result and remaining work](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-26-codex-live-material-revision-result.md>).
+- **Live confirmation (Run198):** first appearance correctly mapped/~1s; the enhancement is still delayed until later library activity. Ready CPU materials and installed renderer materials are separate states. Normal exit/cleanup/client checks pass; no reported visible frame loss, but small returned-image gaps are recorded. [Live result](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-26-codex-live-initial-mapping-result.md>).
+- **Current result (Run196–197):** fast base-first display demonstrated in SFC; complete enhanced readiness still open. Initial mapping is now corrected in the Remix adapter and separately tested. Original settings/source data stay canonical. Initial GPU600/600; late595/600, only isolated misses. Shared-owner checker corrected without accepting arbitrary transforms. Failed notification and invalid emission-control experiments are recorded, not promoted. [Current evidence](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-26-codex-remix-initial-mapping.md>).
+- **Optional checkout ready (Run194):** the supported single-file/asynchronous route is integrated behind `-AsyncMaterialCheckout`, with the shared-asset task lifetime bug fixed and a separate qualification gate.542Python tests, actual initial/shared/late graphics checks and both read-only preflights pass. Normal runtime remains available. First matching ship3.206s; last initial distinct asset admitted3.956s—target still OPEN. Next is one actual skirmish to confirm behavior before promotion. [Instructions and evidence](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-25-codex-async-material-checkout.md>).
 - **Supported route tested (Run193):** fourteen offline attempts, twelve completed/two partial. The newer runtime can load and update materials asynchronously, but our layered library handoff did not preserve their appearance. The existing single-file publisher fixed that in isolation. Material controls and a later-arriving ship passed; final tests had only1/1/3 isolated returned-image misses, with no long gap. First output3.2–3.5s is not all ships loaded; last initial asset admitted about4.0s. Two-second startup still OPEN. A separate alias-preparation bug was corrected only in the diagnostic; integrate it before checkout. Normal runtime/settings unchanged. [Details](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-25-codex-candidate-hot-reload-qualification.md>).
 - **Upstream fix identified (Run192):** NVIDIA's REMIX-5883 addresses freezing USD updates with background rebuilds and selective scene changes. Missing from our normal1.5.2source; included in release-linked1.6.1source. Earlier candidate workaround turns that route off; it also solved a real missing-material problem, so changing it needs an isolated regression test. This supported fix is now the next priority before more custom loader/profiling work. Exact SFC result unproven; normal baseline unchanged.
 - **Completed-stage test (Run191):** three material-library writes instead of43; base assets still publish independently, final381assetfiles exact. Startup presentation0.70s but later2.78s gap remains. The diagnostic repeat caught3.42s waiting for queued rendering after a fast Present; it failed to finish resize checks and is partial. This is not a promoted fix. Next: prepare a bounded pinned-runtime NVIDIA trace, not another gameplay run.
@@ -123,11 +155,12 @@ Evidence: [hiccup review](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-24-
 
 | ID | Item / status | Why it is parked | What brings it back |
 | --- | --- | --- | --- |
+| SFC-17 | **Current D3D9 live tuning — READY FOR SPONSOR CHECKOUT** | Live controls now use the fast1.6.1 ordinary-D3D9 return path; latest appearance R3 preserved with an external ZIP. Original ships remain. | Run5–10minutes, save edits and exit normally; inspect behavior and cleanup. ReShade preset contribution/extended gameplay not newly proved; do not silently change the saved baseline. |
 | SFC-04 | **Original-ship replacement — PARKED** | Current proof adds a returned ship; disabling original drawing needs reliable matching output and correct depth/coverage. | Delivery and camera alignment qualified; prove one stationary replacement, safe fallback, then motion. |
 | SFC-05 | **Grid, shields, weapons and overlapping objects — OPEN** | A ship image alone does not prove correct visibility against every retained game effect. | Before replacement acceptance: verify depth, grid crossing and effects layering, not just the ship's silhouette. |
 | SFC-06 | **Simpler image-return connection — PARKED** | Current ReShade compositor and owned receiver work, but serial copy/acknowledgment may add overhead. Their ownership safeguards cannot simply be deleted. | Measured transport bottleneck or next interface increment; qualify any replacement with synchronization and state-preservation tests. |
-| SFC-07 | **Renderer-independent interface / D3D12 — OPEN TECH GATE** | D3D9 is the current standard input route. API submission is a Remix-specific alternative, not the portable interface itself. | Stabilize the chosen current backend; preserve neutral scene data, then qualify another adapter. D3D12 is future work, not an automatic Remix input format. |
-| SFC-08 | **Supersampling — PARKED** | You prefer a higher-resolution render reduced to the display size; tested AA looked too soft. | After stable replacement/delivery: qualify resolution, memory and performance. Keep quality settings separate from lighting/material controls. |
+| SFC-07 | **Renderer-independent interface / D3D12 — OPEN TECH GATE** | Run210 audit: reusable scene/identity foundations; live preparation/material/startup still assumes Remix, sharing assumes D3D11, coverage is a union mask. No refactor implemented. | Complete player-replacement checkout, then isolate renderer operations and explicit completed-picture semantics around existing code. D3D12 needs its own qualified transfer adapter. |
+| SFC-08 | **Supersampling — PARKED** | You prefer a higher-resolution render reduced to the display size; tested AA looked too soft. | After stable replacement/delivery: qualify resolution, memory and performance. Keep quality controls independent within the shared rendering profile; lighting remains separate. |
 | SFC-09 | **Appearance tuning — PARKED for engineering** | Your latest accepted temporary settings remain the comparison baseline. More tweaking must not hide transport, camera or texture faults. | Once delivery/replacement is stable, resume lighting/material/image tuning against a fixed reference. |
 | SFC-10 | **Longer identity survey / larger stress mission — PARKED; initial survey now SFC-15** | The prepared90second metadata survey begins broader coverage, but does not establish a whole-mission or universal survey. | Review SFC-15 results, then justify a longer/broader bounded mission if needed. |
 | SFC-11 | **Remix1.6.1 candidate — ISOLATED** | Installed Toolkit updates do not automatically upgrade the pinned rendering runtime. Candidate binaries need qualification against current source. | A documented benefit justifies a separately pinned upgrade; rebuild and compare before promotion. Normal path remains1.5.2/API0.6.4. |

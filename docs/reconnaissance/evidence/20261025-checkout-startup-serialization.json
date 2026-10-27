@@ -1,0 +1,121 @@
+{
+  "run": 195,
+  "result": "STARTUP_SERIALIZATION_FIXED_READY_FOR_SPONSOR_RETRY",
+  "sfc_launched_by_codex": false,
+  "failure": {
+    "path": "artifacts\\remix-runtime\\runs\\20261026-021701-097349-in-game\\result.json",
+    "sha256": "c578e5c2491580a4fcb2645f2e6529cce692e5b6f57b254a91f5d28f3184d62a",
+    "error": "Object of type WindowsPath is not JSON serializable",
+    "target_pid": null,
+    "renderer_exit": 0,
+    "original_critical_unchanged": true,
+    "launcher_settings_unchanged": true,
+    "broad_proxy_restored": true
+  },
+  "fix": "Serialized public backend receipt;preflight now checks qualification JSON boundary before side effects",
+  "qualification": [
+    {
+      "folder": "artifacts\\remix-runtime\\runs\\20261026-022127-888583-return-fixture",
+      "result_sha256": "BB15878C65D00487EE5AA53B0F5F5F0053CBC51BAC266798264CE91CCD17D361",
+      "late_asset": false,
+      "content": {
+        "files": 381,
+        "exceptions": [],
+        "reference_to_received_paths": {
+          "1": "1",
+          "2": "2",
+          "3": "3"
+        }
+      },
+      "delivery": {
+        "post_start_omissions": 2,
+        "max_consecutive_omissions": 1,
+        "records": 709
+      },
+      "steady_frames": 600,
+      "steady_draws": 598
+    },
+    {
+      "folder": "artifacts\\remix-runtime\\runs\\20261026-022221-868658-return-fixture",
+      "result_sha256": "54C8CA371EBDB4CE92964A0D371479009FDF9CBA7F003C24BC2E1CA561E0E9F5",
+      "late_asset": true,
+      "content": {
+        "files": 381,
+        "exceptions": [
+          "assets/3/scene.bin: captured frame ID only"
+        ],
+        "reference_to_received_paths": {
+          "1": "1",
+          "2": "2",
+          "3": "3"
+        }
+      },
+      "delivery": {
+        "post_start_omissions": 2,
+        "max_consecutive_omissions": 1,
+        "records": 881
+      },
+      "steady_frames": 600,
+      "steady_draws": 596
+    }
+  ],
+  "normal_fixture": "artifacts/remix-runtime/runs/20261026-022038-032829-return-fixture",
+  "backend": {
+    "release": "1.6.1",
+    "exe": "C:\\Project\\SFC-Modernize Engine\\artifacts\\remix-runtime\\candidate-1.6.1-bin\\d3d9_direct_host.exe",
+    "runtime": "C:\\Project\\SFC-Modernize Engine\\artifacts\\remix-runtime\\deps\\candidate-1.6.1\\runtime\\d3d9_x64.dll",
+    "host_sha256": "cda23a9e6bce90eed53186198bd74536a92332946ab934830d51bfe0b9919f59",
+    "runtime_sha256": "c05c552e3f44597960891eff6c8482efcbde8573b15c2b900d3dc360e6cc1ad9",
+    "header_sha256": "26a5607a07e8718298c35519e53bbc71d526186a947e5a2a5b613a0d6db04f3a",
+    "source_commit": "0a6cd5b1ee814ec390c358e0c9c32ece8895ddc0",
+    "source_parity": "Packaged5a7eec84/public0a6cd5b not instruction-level verified"
+  },
+  "tests": {
+    "main_python": 543,
+    "checkout_cases": 10,
+    "actual_qualification_failed_manifest_roundtrip": "PASS",
+    "normal_graphics_native_gate": "PASS",
+    "candidate_initial_late_gate": "PASS",
+    "native_light_workers": "PASS",
+    "candidate_x64_build": "PASS",
+    "normal_readonly_preflight": "PASS",
+    "checkout_readonly_preflight_with_serialization": "PASS"
+  },
+  "archives": [
+    {
+      "archive": "artifacts/remix-runtime/archives/run193-20261025-001836-570929-return-fixture-assets.zip",
+      "archive_sha256": "2ff752486f3e5b3b13b5ccddcdc1c7d4c4fc7a1f2bc4f2e75a8569a2d48188e1",
+      "raw_bytes": 143663029,
+      "archive_bytes": 8921649
+    },
+    {
+      "archive": "artifacts/remix-runtime/archives/run193-20261025-002105-217957-return-fixture-assets.zip",
+      "archive_sha256": "ef37eabd5db35ae214df05acc8b4508dcf996bb047fd96335ab488355e519d55",
+      "raw_bytes": 143663044,
+      "archive_bytes": 8921685
+    },
+    {
+      "archive": "artifacts/remix-runtime/archives/run193-20261026-022127-888583-return-fixture-assets.zip",
+      "archive_sha256": "a90b54b5d723762e8715dd09ada87fbcd90a47f98b14fdc7e138e9be4adef0c2",
+      "raw_bytes": 143656648,
+      "archive_bytes": 8908018
+    },
+    {
+      "archive": "artifacts/remix-runtime/archives/run193-20261026-022221-868658-return-fixture-assets.zip",
+      "archive_sha256": "da7f7ae6782bf57700fcb3ea8bae00989f4d9d7281d562845b714deee9cd7fca",
+      "raw_bytes": 143656649,
+      "archive_bytes": 8908013
+    }
+  ],
+  "run_record": "docs/runs/2026-10-25-codex-checkout-startup-serialization.md",
+  "next_action": "Retry existing multiship launcher with -AsyncMaterialCheckout;actual gameplay acceptance pending",
+  "staged": false,
+  "committed": false,
+  "aggregate_bytes": 18793401105,
+  "aggregate_limit": 20000000000,
+  "final_checks": {
+    "ast": "PASS",
+    "json": "PASS",
+    "qualification_after_archival": "PASS"
+  }
+}

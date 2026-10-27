@@ -1,6 +1,11 @@
 # Run only when ready to play, from the established elevated testing parent.
 param([switch]$InspectVisibility,[switch]$InspectEarlyDepth,[switch]$ObservationOnly,[switch]$SearchDepth,[switch]$BroadCapture,[switch]$DepthSnapshots,[switch]$Calibration,[switch]$PrivateShip,[switch]$VisibleShip,[switch]$TexturedShip,[switch]$CaptureShipImage,[switch]$CaptureNativeLights,[switch]$LightWiring,[switch]$LightTuning,[switch]$SceneDepth,[switch]$SourceTiming,[switch]$LiveOwnerTiming,[switch]$D3D9Additive,[switch]$LifecycleCapture,[switch]$CameraRecovery,[switch]$OffscreenPosition,[switch]$PersistentScene,[switch]$SynchronizedBuffer)
 $ErrorActionPreference='Stop'
+if($LightTuning){
+ if(@($PSBoundParameters.Keys | Where-Object {$_ -ne 'LightTuning'}).Count){throw 'Use the dedicated current D3D9 tuning launcher without diagnostic flags'}
+ & (Join-Path $PSScriptRoot '../d3d9_proof/start_d3d9_multiship_session.ps1') -Tuning
+ return
+}
 if($SynchronizedBuffer){if(-not $D3D9Additive){throw 'SynchronizedBuffer requires D3D9Additive'};$PersistentScene=$true}
 if($PersistentScene){if(-not $D3D9Additive){throw 'PersistentScene requires D3D9Additive'};$CameraRecovery=$true}
 if($OffscreenPosition){if(-not $D3D9Additive){throw 'OffscreenPosition requires D3D9Additive'};$CameraRecovery=$true}

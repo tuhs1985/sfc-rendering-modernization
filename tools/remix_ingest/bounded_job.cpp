@@ -33,7 +33,8 @@ int wmain(int argc,wchar_t** argv){
         const auto seconds=std::stoul(argv[2]);const auto max_bytes=std::stoull(argv[3]);
         const auto log_limit=std::stoull(argv[4]);
         // Offline entry still requests180; approved live workflow requests<=300.
-        if(seconds<1 || seconds>300 || max_bytes<65536 || max_bytes>20000000000ull ||
+        wchar_t tuning[2]{};const bool longTuning=GetEnvironmentVariableW(L"SFC_D3D9_LIVE_TUNING",tuning,2)==1&&tuning[0]==L'1';
+        if(seconds<1 || seconds>(longTuning?1980u:300u) || max_bytes<65536 || max_bytes>20000000000ull ||
            log_limit<1024 || log_limit>8ull*1024*1024 || !fs::is_directory(work) || !fs::is_regular_file(argv[5]))return 2;
         const auto log_path=work/L"job-console.log",result_path=work/L"job-result.json";
         if(fs::exists(log_path) || fs::exists(result_path))return 2;

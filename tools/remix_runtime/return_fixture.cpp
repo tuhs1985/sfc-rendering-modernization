@@ -145,7 +145,7 @@ struct Scene {
     DWORD markers[]{0xff000000u|(frame&0xffffffu),0xff000000u|((frame^0x55aa55u)&0xffffffu)};
     const unsigned y[]{4,height-5};for(unsigned i=0;i<2;++i){D3D11_BOX box{100,y[i],0,101,y[i]+1,1};context->UpdateSubresource(back.Get(),0,&box,&markers[i],4,4);}
   }
-  void shipSample(DWORD expectedScene=0,bool late=false){
+  void shipSample(DWORD expectedScene=0,bool late=false,bool requireShip=true){
     ComPtr<ID3D11Texture2D> back;check(swap->GetBuffer(0,IID_PPV_ARGS(&back)),"game fixture backbuffer");D3D11_TEXTURE2D_DESC desc{};back->GetDesc(&desc);
     desc.Usage=D3D11_USAGE_STAGING;desc.BindFlags=desc.MiscFlags=0;desc.CPUAccessFlags=D3D11_CPU_ACCESS_READ;
     ComPtr<ID3D11Texture2D> staging;check(device->CreateTexture2D(&desc,nullptr,&staging),"game fixture one-shot staging");context->CopyResource(staging.Get(),back.Get());
@@ -167,7 +167,7 @@ struct Scene {
       std::cout<<"SHIP_SNAPSHOT once=1 late="<<late<<" source_frame="<<expectedScene<<" width="<<width<<" height="<<height<<'\n';
     }
     context->Unmap(staging.Get(),0);std::cout<<"GAME_IMAGE_PIXELS changed="<<changed<<" border_untouched="<<border<<'\n';
-    if(changed<8||!border)throw std::runtime_error("No actual additive ship pixels or original border damaged");
+    if((requireShip&&changed<8)||!border)throw std::runtime_error("No actual additive ship pixels or original border damaged");
   }
   unsigned sample(const char* phase,bool save){
     ComPtr<ID3D11Texture2D> back;check(swap->GetBuffer(0,IID_PPV_ARGS(&back)),"fixture sampled backbuffer");D3D11_TEXTURE2D_DESC desc{};back->GetDesc(&desc);
@@ -206,6 +206,8 @@ int wmain(){
     {
       const bool gameOutput=GetEnvironmentVariableW(L"SFC_D3D9_GAME_OUTPUT",nullptr,0)!=0;bool imageSample=false;unsigned resizedFrame=0,imageStartFrame=0,multiReadyAt=0;LONG imageStartDraws=0;
       SourceTimingFixture sourceTiming;Scene scene;if(gameOutput){scene.width=1920;scene.height=1080;}scene.init(window);const auto start=GetTickCount64();bool enabled=false,disabled=false,resized=false,recreated=false,afterResize=false,afterRecreate=false,disconnected=false;unsigned frames=0,stateErrors=0;
+      LONG withheld[2]{-1,-1};unsigned withholdPresents=0;bool singleFaultDone=false;
+      const bool replacementFaults=replacement::requested()&&GetEnvironmentVariableW(L"SFC_REPLACEMENT_FIXTURE_FAULTS",nullptr,0)!=0;
       const bool observationOnly=GetEnvironmentVariableW(L"SFC_RETURN_OBSERVATION_ONLY",nullptr,0)!=0;
       const bool expanded=GetEnvironmentVariableW(L"SFC_RETURN_EXPANDED_SEARCH",nullptr,0)!=0;
       const bool broad=GetEnvironmentVariableW(L"SFC_REMIX_BROAD_OUTPUT",nullptr,0)!=0;
@@ -238,13 +240,36 @@ int wmain(){
         if(!gameOutput)sourceTiming.publish(frames+1);check(scene.swap->Present(0,0),"fixture present");++frames;if(!scene.statePreserved(broad||snapshot||gameOutput))++stateErrors;
         if(gameOutput){
           auto* base=reinterpret_cast<BYTE*>(sourceTiming.source.mailbox)-sfc_calibration::Offset;auto& pool=*reinterpret_cast<game_output::Pool*>(base+game_output::Offset);
+          if(replacementFaults){
+            auto& ledger=*reinterpret_cast<replacement::Store*>(base+replacement::Offset);
+            if(withholdPresents&&!--withholdPresents){for(unsigned slot=0;slot<2;++slot)if(withheld[slot]>=0){InterlockedExchange(&pool.slots[slot].state,withheld[slot]);withheld[slot]=-1;}}
+            if(imageSample&&(frames==imageStartFrame+100||frames==imageStartFrame+200)){
+              Sleep(8); // STANDALONE fixture only: let producer finish before taking test leases.
+              unsigned taken=0;for(unsigned slot=0;slot<2;++slot){auto& state=pool.slots[slot].state;
+                for(LONG prior:{LONG(output_wire::ready),LONG(output_wire::idle)})if(InterlockedCompareExchange(&state,output_wire::acquired,prior)==prior){withheld[slot]=prior;++taken;break;}}
+              if(!taken)throw std::runtime_error("No output leases available for deterministic fault");
+              withholdPresents=frames==imageStartFrame+100?1u:2u;
+              std::cout<<"REPLACEMENT_OUTPUT_WITHHELD presents="<<withholdPresents<<" leases="<<taken<<'\n';
+            }
+            if(imageSample&&frames==imageStartFrame+110){replacement::Control c{};replacement::read(ledger.control,c);
+              if(c.mode!=replacement::Active||!ledger.repeated||ledger.recovered)throw std::runtime_error("Single missed output did not resume replacement");singleFaultDone=true;
+              std::cout<<"REPLACEMENT_SINGLE_MISS_RECOVERED repeated="<<ledger.repeated<<'\n';}
+            if(imageSample&&frames==imageStartFrame+210){replacement::Control c{};replacement::read(ledger.control,c);
+              if(!singleFaultDone||c.mode!=replacement::LatchedOriginal||!ledger.recovered||ledger.repeat_max>2)throw std::runtime_error("Sustained missed output failed safe native recovery");
+              std::cout<<"REPLACEMENT_SUSTAINED_MISS_NATIVE repeat_max="<<ledger.repeat_max<<" recovered="<<ledger.recovered<<'\n';}
+          }
           if(sourceTiming.cohort.store&&!multiReadyAt&&sourceTiming.cohort.store->header.asset_ready==static_cast<LONG>(sourceTiming.rows.size())){multiReadyAt=frames;std::cout<<"MULTISCENE_BOTH_READY frame="<<frames<<" first_draws="<<pool.stats.drawn<<'\n';}
-          const bool cohortSettled=!sourceTiming.cohort.store||(multiReadyAt&&frames>=multiReadyAt+60);
-          if(!imageSample&&cohortSettled&&pool.stats.drawn&&pool.stats.frame+(synchronized?1u:0u)==200000+frames){scene.shipSample(synchronized?pool.stats.frame:0);imageSample=true;imageStartFrame=frames;imageStartDraws=pool.stats.drawn;}
-          if(synchronized&&imageSample&&frames==imageStartFrame+200){return_path::write(s.enabled,0);std::cout<<"BUFFER_FIXTURE_DISABLED frame="<<frames<<'\n';}
-          if(synchronized&&imageSample&&frames==imageStartFrame+205){return_path::write(s.enabled,1);std::cout<<"BUFFER_FIXTURE_REENABLED frame="<<frames<<'\n';}
+          const bool cohortSettled=replacement::requested()||!sourceTiming.cohort.store||(multiReadyAt&&frames>=multiReadyAt+60);
+          // A synchronous test-only GPU readback can exceed the live 50ms
+          // authorization lease. Measure continuous delivery BEFORE readback;
+          // never renew production authorization to conceal a diagnostic stall.
+          if(!imageSample&&cohortSettled&&pool.stats.drawn&&pool.stats.frame+(synchronized?1u:0u)==200000+frames){if(!replacement::requested())scene.shipSample(synchronized?pool.stats.frame:0);imageSample=true;imageStartFrame=frames;imageStartDraws=pool.stats.drawn;}
+          if(!replacement::requested()&&synchronized&&imageSample&&frames==imageStartFrame+200){return_path::write(s.enabled,0);std::cout<<"BUFFER_FIXTURE_DISABLED frame="<<frames<<'\n';}
+          if(!replacement::requested()&&synchronized&&imageSample&&frames==imageStartFrame+205){return_path::write(s.enabled,1);std::cout<<"BUFFER_FIXTURE_REENABLED frame="<<frames<<'\n';}
           if(!resized&&imageSample&&frames>=imageStartFrame+600){std::cout<<"GAME_DELIVERY_WINDOW frames="<<frames-imageStartFrame<<" draws="<<pool.stats.drawn-imageStartDraws<<'\n';
-            if(GetEnvironmentVariableW(L"SFC_FIXTURE_SHIP_SNAPSHOT",nullptr,0)&&pool.stats.frame+(synchronized?1u:0u)==200000+frames)scene.shipSample(synchronized?pool.stats.frame:0,true);
+            if(replacementFaults)scene.shipSample(200000+frames,false,false); // Verify the recovered native frame,not stale ship pixels.
+            else if(replacement::requested())scene.shipSample(pool.stats.frame); // A held complete frame must retain its own HUD stamp too.
+            else if(!replacement::requested()&&GetEnvironmentVariableW(L"SFC_FIXTURE_SHIP_SNAPSHOT",nullptr,0)&&pool.stats.frame+(synchronized?1u:0u)==200000+frames)scene.shipSample(synchronized?pool.stats.frame:0,true);
             scene.resize();resized=true;resizedFrame=frames;}
           if(resized&&!recreated&&frames>=resizedFrame+90){scene.reset();scene.width=1920;scene.height=1080;scene.init(window);recreated=true;}
           if(recreated&&frames>=resizedFrame+180)break;

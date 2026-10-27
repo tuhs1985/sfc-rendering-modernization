@@ -35,7 +35,7 @@ class NormalMaterialBinding(unittest.TestCase):
         (folder/'scene.json').write_text(json.dumps(scene))
 
     def test_performance_reuses_inputs_and_derivatives_with_exact_test_mode_output(self):
-        config=(ROOT/'tools/remix_runtime/config/materials.toml').read_bytes()
+        config=(ROOT/'tools/remix_runtime/config/rendering.toml').read_bytes()
         with tempfile.TemporaryDirectory() as temp:
             root=pathlib.Path(temp);a=root/'a';b=root/'b'
             self.fixture(root,a);self.fixture(root,b)
@@ -50,7 +50,7 @@ class NormalMaterialBinding(unittest.TestCase):
             self.assertFalse(fast['source_recomparison']);self.assertTrue(checked['source_recomparison'])
 
     def test_test_mode_detects_changed_source_but_performance_trusts_upstream(self):
-        config=(ROOT/'tools/remix_runtime/config/materials.toml').read_bytes()
+        config=(ROOT/'tools/remix_runtime/config/rendering.toml').read_bytes()
         with tempfile.TemporaryDirectory() as temp:
             root=pathlib.Path(temp);a=root/'a';b=root/'b';self.fixture(root,a);self.fixture(root,b)
             (root/'capture.bin').write_bytes(b'changed after upstream preparation')
@@ -59,14 +59,14 @@ class NormalMaterialBinding(unittest.TestCase):
                 binding.prepare(a,root,config,evidence_mode='performance')
 
     def test_performance_preserves_conflicting_secondary_identity_rejection(self):
-        config=(ROOT/'tools/remix_runtime/config/materials.toml').read_bytes()
+        config=(ROOT/'tools/remix_runtime/config/rendering.toml').read_bytes()
         with tempfile.TemporaryDirectory() as temp:
             root=pathlib.Path(temp);folder=root/'a';self.fixture(root,folder,secondary_change=True)
             with patch.object(binding,'ROOT',root),patch.object(binding.subprocess,'run',return_value=SimpleNamespace(stdout='1\n')):
                 with self.assertRaisesRegex(ValueError,'conflicting image pairs'):binding.prepare(folder,root,config,evidence_mode='performance')
 
     def test_small_decode_cache_eviction_preserves_output(self):
-        config=(ROOT/'tools/remix_runtime/config/materials.toml').read_bytes()
+        config=(ROOT/'tools/remix_runtime/config/rendering.toml').read_bytes()
         with tempfile.TemporaryDirectory() as temp:
             root=pathlib.Path(temp);a=root/'a';b=root/'b';self.fixture(root,a);self.fixture(root,b)
             with patch.object(binding,'ROOT',root),patch.object(binding.subprocess,'run',return_value=SimpleNamespace(stdout='1\n')):

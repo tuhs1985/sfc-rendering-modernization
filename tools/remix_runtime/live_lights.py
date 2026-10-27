@@ -58,6 +58,8 @@ def packet(snapshot,selected,session,controls,scale,master,generation,observed,r
         scalar=v['type_dependent_scalar']
         if length<1e-8 or not 0<=scalar<=1000:raise ValueError('Invalid directional light')
         direction=[x/length for x in direction]
+        from light_controls import angled_direction
+        direction=angled_direction(direction,control)
         multiplier=scale*master*control['intensity_multiplier']
         radiance=[v['contribution_channels'][j]*control['color_multiplier'][j]*scalar*multiplier for j in range(3)]
         if not all(math.isfinite(x) and 0<=x<=1e6 for x in radiance):raise ValueError('Mapped radiance bound')

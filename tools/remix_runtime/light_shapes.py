@@ -65,11 +65,14 @@ def build(controls,revision,folder,base):
                 shape['environment_rotation_degrees']]+[0]*13
         if i==2:
             values[15:18]=[row['intensity_multiplier']*c for c in row['color_multiplier']]
-            values[18:21]=row.get('direction_override',[0,-1,0])
+            from light_controls import angled_direction
+            values[18:21]=angled_direction(row.get('direction_override',[0,-1,0]),row)
             values[21]=row.get('angular_diameter_degrees',.53);values[22]=row['volumetric_multiplier']
         rows.append(struct.pack('<4I28f128s',i,TYPES[shape['type']],int(shape['space']=='ship'),int(row['enabled']) if i==2 else 0,
                     *values,texture.encode('ascii')))
         manifest.append(dict(id=row['id'],origin='project' if i==2 else 'native',
+            angle_mode=row.get('angle_mode','offset'),azimuth_degrees=row.get('azimuth_degrees',0),
+            elevation_degrees=row.get('elevation_degrees',0),
             intensity_multiplier=row['intensity_multiplier'],color_multiplier=row['color_multiplier'],
             strength_basis='direct project radiance;not SFC conversion/master' if i==2 else 'captured native strength times conversion/master',
             **shape,prepared_environment=texture,environment_provenance=provenance,

@@ -23,6 +23,7 @@
 #include "m1_texture_references.h"
 #include "m1_live_bridge.h"
 #include "m1_live_scene.h"
+#include "../d3d9_proof/replacement_transaction.h"
 
 namespace {
 
@@ -42,6 +43,7 @@ constexpr DWORD kKnownExceptionReturn = 0x00509843;
 constexpr std::size_t kEventCapacity = 100000;
 constexpr std::size_t kOwnerCapacity = 32;
 constexpr std::size_t kThreadCapacity = 8;
+replacement::Store* g_replacement=nullptr;
 
 enum EventKind : DWORD {
     kScene = 0,
@@ -1029,6 +1031,24 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
         observe_mesh_export(state,event,outcome,safe_copy);
         if(outcome==1&&g_live_scene_mode&&g_live_scene.persistent)
             g_live_scene.updatePersistent(event.ecx,static_cast<DWORD>(g_frame),static_cast<DWORD>(GetTickCount64()-g_gate_tick),safe_copy);
+        if(g_replacement&&state){
+            replacement::Control c{};
+            if(replacement::read(g_replacement->control,c)&&c.owner==state->owner_id&&c.mode==replacement::Active){
+                DWORD revision=0;for(const auto& o:g_live_scene.owners)if(o.identity.owner==state->owner_id&&!o.retired)revision=o.revision;
+                // Capture above sees original arguments. Validate BOTH lists before
+                // suppressing either; no model/source/batch memory is changed.
+                DWORD count=0,primary=0,secondary=0;
+                const bool qualified=(outcome==1||outcome==2)&&state->copy_depth==1&&validated_copy_owner(*state)&&
+                    safe_read32(state->model0+0x10,count)&&safe_read32(state->model0+0x14,primary)&&
+                    safe_read32(state->model0+0x18,secondary)&&count&&count<=65536&&primary&&
+                    event.arg1==count&&event.arg2==(outcome==1?primary:secondary);
+                if(!qualified)replacement::invalidate(*g_replacement,static_cast<DWORD>(g_frame));
+                else if(replacement::suppress(*g_replacement,static_cast<DWORD>(g_frame),state->owner_id,revision,
+                        state->model0,state->source,thread_id,outcome==1,replacement::now())){
+                    if(!safe_write32(snapshot_entry_esp(saved)+4,0))replacement::invalidate(*g_replacement,static_cast<DWORD>(g_frame));
+                }
+            }
+        }
         const auto index=g_wrapper_total<=32?g_wrapper_total-1:32+(g_wrapper_total-33)%32;
         auto& s=g_wrapper_samples[static_cast<std::size_t>(index)];
         s.data={static_cast<DWORD>(g_gate?GetTickCount64()-g_gate_tick:0),
@@ -1099,6 +1119,7 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
         event.origin = 0x0069E300;
         if (g_gate) {
             DWORD frame = static_cast<DWORD>(InterlockedIncrement(&g_frame));
+            if(g_replacement)replacement::begin(*g_replacement,frame,thread_id);
             if(g_live_scene_mode){g_live_scene.directSource.begin(frame);sfc_calibration::begin(g_live_scene.calibration,frame);}
             if (frame > 2) {
                 if(g_live_scene.persistent)for(const auto& entry:g_live_scene.registry.entries)
@@ -1236,6 +1257,7 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
         const bool mainline = event.return_address == kVisualMainlineReturn &&
             event.model0_vtable == kModel0Vtable &&
             event.visual_vtable == kVisualVtable && event.owner_id;
+        if(g_replacement&&!mainline){replacement::Control c{};if(replacement::read(g_replacement->control,c)&&c.mode==replacement::Active&&c.owner==event.owner_id)replacement::invalidate(*g_replacement,static_cast<DWORD>(g_frame));}
         if (event.return_address == kKnownExceptionReturn) {
             InterlockedIncrement(&g_exception_509843);
         }
@@ -1967,6 +1989,14 @@ extern "C" DWORD WINAPI M1StartW(void* parameter) {
         g_live_scene_mode=g_live_scene.start(g_config.live_channel,g_config.output_dir);
         if(!g_live_scene_mode && !g_live_bridge.start(g_config.live_channel,g_config.output_dir))return 3;
     }
+#ifndef M1_GATE_ONLY
+    if(replacement::requested()){
+        if(!g_live_scene_mode||!g_live_scene.persistent||!g_config.enable_wrapper_observation)return 3;
+        auto* candidate=reinterpret_cast<replacement::Store*>(g_live_scene.view+replacement::Offset);
+        if(!replacement::valid(candidate,reinterpret_cast<DWORD*>(g_live_scene.view)+4,GetCurrentProcessId()))return 3;
+        g_replacement=candidate;InterlockedExchange(&g_replacement->native_capable,1);
+    }
+#endif
 
     bool suspend_ok = false;
     auto suspended = suspend_other_threads(suspend_ok);
@@ -1992,6 +2022,14 @@ extern "C" DWORD WINAPI M1StartW(void* parameter) {
 }
 
 extern "C" DWORD WINAPI M1Stop(void*) {
+    if(g_replacement){
+        InterlockedExchange(&g_replacement->native_stop,1);replacement::Control c{};replacement::read(g_replacement->control,c);
+        if(c.mode==replacement::Active||c.mode==replacement::Recovering){
+            const auto frame=static_cast<DWORD>(g_frame);const auto until=GetTickCount64()+2000;
+            while(static_cast<DWORD>(InterlockedCompareExchange(&g_replacement->native_restored_frame,0,0))<=frame&&GetTickCount64()<until)Sleep(1);
+            if(static_cast<DWORD>(InterlockedCompareExchange(&g_replacement->native_restored_frame,0,0))<=frame)return 12; // Retain hooks/storage, originals enabled, never unload an unacknowledged frame.
+        }
+    }
     if (!InterlockedExchange(&g_running, 0)) return 11;
     if(g_live_scene.calibration)InterlockedExchange(&g_live_scene.calibration->active,0);
     const ULONGLONG deadline = GetTickCount64() + 5000;
@@ -2004,6 +2042,7 @@ extern "C" DWORD WINAPI M1Stop(void*) {
     if (!suspend_ok) { write_thread_failure("stop"); return 13; }
     const bool restored = restore_hooks(module_base);
     resume_threads(suspended);
+    if(g_replacement){InterlockedExchange(&g_replacement->native_capable,0);g_replacement=nullptr;}
     if(!stop_live())return 12; // Never unload storage while worker remains live.
     const bool wrote = write_outputs(restored);
     if (g_burst_event) SetEvent(g_burst_event);

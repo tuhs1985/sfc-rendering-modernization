@@ -1,5 +1,43 @@
 # One-ship return integration — readiness at 2026-10-17
 
+## Current — 2026-10-27 Run209: READY for sponsor player-replacement test
+
+Final-source replacement, existing overlay/material/tuning qualifications and
+both read-only launcher preflights pass. Current sponsor settings preserved.
+[Run209](../runs/2026-10-27-codex-player-replacement-qualified.md) records results,
+including one rejected late-loading control and its accepted identical repeat.
+The [version1 transaction](player-replacement-transaction.md) is implemented;
+SFC gameplay suppression/unload/visible replacement are still pending. Use the
+separate player-replacement launcher with F-CA versus a different model.
+
+
+## Historical — 2026-10-27 Run208 PAUSED; transaction implemented, final qualification pending
+
+The [whole-picture transaction](player-replacement-transaction.md) now stages
+native source and matching Remix output offscreen before committing. Final-source
+standalone steady600/600and bounded miss/recovery tests pass. Capture-first
+player-fixture suppression is default OFF; no SFC replacement test or final
+launcher qualification yet. Sponsor paused overnight; [Run208](../runs/2026-10-27-codex-player-replacement-transaction.md)
+and newest handoff control resumption. Current user settings preserved.
+
+
+
+## Historical — 2026-10-27 Run207: suppression candidate tested; presentation recovery BLOCKED
+
+Sponsor accepts current depth and previous successful model alignment; do not
+repeat those discovery proofs. [Run207](../runs/2026-10-27-codex-player-replacement-boundary.md)
+verifies zero-count wrapper candidate offline (225x86checks) but reproduces a
+missing-output hole with the actual existing GPU History in32/64bit (10checks each).
+Current receiver restores source BEFORE confirming composition. Additive safety
+relies on the original mesh still being in that source; readiness alone cannot
+justify suppressing it. Original drawing stays enabled. No new runtime launcher.
+Next: qualify replacement presentation commit/rollback, including first frame,
+miss/reset/disconnect; only then wire capture-first player suppression. Depth and
+alignment remain the accepted baseline. Older exact-current/SDK/late-ImGui and
+30Hz descriptions below are historical, not current pipeline authority.
+
+## Historical design and evidence
+
 ## Current — 2026-10-19 depth runtime PARTIAL
 
 [Run67](../runs/2026-10-19-codex-scene-depth-runtime-review.md):native depth access

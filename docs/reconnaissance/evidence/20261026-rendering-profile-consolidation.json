@@ -1,0 +1,40 @@
+{
+  "run": 203,
+  "result": "OFFLINE_RENDERING_PROFILE_CONSOLIDATED",
+  "profile": "tools/remix_runtime/config/rendering.toml",
+  "factory": "tools/remix_runtime/config/rendering.example.toml",
+  "same_effective_packets": true,
+  "python_tests": 564,
+  "fixtures": {
+    "normal": "C:\\Project\\SFC-Modernize Engine\\artifacts\\remix-runtime\\runs\\20261026-222812-134889-return-fixture",
+    "initial": "C:\\Project\\SFC-Modernize Engine\\artifacts\\remix-runtime\\runs\\20261026-222951-301259-return-fixture",
+    "late": "C:\\Project\\SFC-Modernize Engine\\artifacts\\remix-runtime\\runs\\20261026-223020-267557-return-fixture"
+  },
+  "qualification_results": {
+    "sdk": "OFFLINE_PRIVATE_RETURN_QUALIFIED",
+    "normal": "OFFLINE_MULTISHIP_OVERLAY_PREPARED_NOT_SFC_PASS",
+    "async": "ASYNC_MATERIAL_CHECKOUT_PREPARED_NOT_SFC_PASS"
+  },
+  "sdk_fixture_count": 14,
+  "sdk_pixel_probes": 2,
+  "sdk_evidence_entries": 16,
+  "archive_inventories": [
+    "artifacts/config-consolidation/run203/texture-archives.json",
+    "artifacts/config-consolidation/run203/superseded-image-archives.json",
+    "artifacts/config-consolidation/run203/reviewed-bmp-archive.json"
+  ],
+  "native_bloom_probe": "artifacts/remix-runtime/runs/20261026-220346-759856-image-controls",
+  "sfc_launched": false,
+  "gameplay_result": "No new gameplay claim;Run201 retained",
+  "original_images_geometry_uv_math_changed": false,
+  "staged": false,
+  "committed": false,
+  "pushed": false,
+  "limits_changed": false,
+  "notes": [
+    "Native bloom is whole-image,not emission-only",
+    "Global rtx.emissiveIntensity not exposed;visible primary-emission effect unproved",
+    "Initial GPU timeout and fixture seed timeouts retained as partial;private factory ordering corrected;intermittent legacy preparation deadlines still occurred and passed on bounded retry",
+    "Old generated texture evidence recoverably archived with per-file SHA checks"
+  ]
+}

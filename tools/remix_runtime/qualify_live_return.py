@@ -127,6 +127,15 @@ def main():
         light_relay.materials=MaterialRelay(work,work/'material-factory.toml')
         light_relay.images=ImageRelay(work,work/'image-factory.toml')
         light_relay.quality=QualityRelay(work,work/'quality-factory.toml')
+        # Freeze the private material profile before FreshReceiver prepares its
+        # first asset; otherwise it can read the sponsor's tuned default first.
+        light_relay.materials.poll()
+    if args.textured and not args.material_controls and not args.light_wiring:
+        # The other textured fixtures also need a private initial profile. They
+        # test delivery/image/quality, not the sponsor's mutable map generation.
+        from material_controls import Relay as MaterialRelay
+        factory=work/'material-factory.toml';factory.write_text('[material]\n')
+        MaterialRelay(work,factory).poll()
     def output(name):f=(work/name).open('wb');streams.append(f);return f
     warned=False
     def check():

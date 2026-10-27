@@ -8,6 +8,7 @@
 #include "ship_scene_depth.h"
 #include "scene_frame_buffer.h"
 #include "game_gpu_read_lease.h"
+#include "replacement_presentation.h"
 #include "../d3d9_proof/multi_scene_wire.h"
 #include <thread>
 #include <atomic>
@@ -24,6 +25,106 @@ class Receiver {
  bool buffered=false;std::unique_ptr<scene_frame_buffer::History> history;synchronized_frame::Store* bufferAudit=nullptr;
  Microsoft::WRL::ComPtr<ID3D11DeviceContext4> fencedContext;
  multi_scene::Store* cohort=nullptr;multi_scene::Frame cohortFrame{};
+ bool replacementMode=false;replacement::Store* replacementLedger=nullptr;std::unique_ptr<replacement::Presentation> presentation;
+ DWORD replacementEpoch=0;
+ void replacementControl(replacement::Mode mode,const live_owner::Row* row=nullptr,DWORD frame=0){
+  if(!replacementLedger)return;replacement::Control c{};replacement::read(replacementLedger->control,c);
+  c.mode=mode;c.epoch=replacementEpoch;c.permit=mode==replacement::Active?frame+1:0;
+  if(row){c.owner=(*row)[1];c.revision=(*row)[7];c.model=(*row)[5];c.source=(*row)[6];c.thread=thread;}
+  c.expires=replacement::now()+mapping.state->qpcFrequency/20;replacement::write(replacementLedger->control,c);
+ }
+ void replacementStep(ID3D11RenderTargetView* target){
+  if(!replacementLedger||!presentation||!target||GetCurrentThreadId()!=thread){replacementControl(replacement::Recovering);return;}
+  if(!replacement::valid(replacementLedger,source.session,GetCurrentProcessId()))throw std::runtime_error("Replacement ledger changed");
+  auto& tx=*presentation;Microsoft::WRL::ComPtr<ID3D11Resource> resource;target->GetResource(&resource);
+  Microsoft::WRL::ComPtr<ID3D11Texture2D> back;if(FAILED(resource.As(&back))){replacementControl(replacement::Recovering);return;}
+  const auto time=replacement::now();replacement::Control control{};
+  if(!replacement::read(replacementLedger->control,control)||control.mode>replacement::LatchedOriginal){replacementControl(replacement::Recovering);control.mode=replacement::Recovering;}
+  sfc_calibration::Snapshot current{};const live_owner::Row* row=nullptr;uint64_t hash=0;
+  bool sourceGood=sfc_calibration::read(source.mailbox,current);
+  auto* base=reinterpret_cast<BYTE*>(source.mailbox)-sfc_calibration::Offset;
+  auto* live=reinterpret_cast<live_owner::Store*>(base+live_owner::Offset);
+  const auto chosen=static_cast<uint64_t>(InterlockedCompareExchange64(&live->header.selected,0,0));
+  if(sourceGood)for(const auto& r:current.owner)if(r[1]==DWORD(chosen)&&r[7]==DWORD(chosen>>32)&&r[2]==current.frame&&r[4]==1&&r[48]==1&&r[47]==thread&&!r[42]&&!r[43]&&!r[44]){row=&r;break;}
+  sourceGood=row&&live_owner::header_valid(live->header,source.session)&&live->header.pid==GetCurrentProcessId()&&
+    !frame_ingress::state(&live->header.stopped)&&static_cast<DWORD>(frame_ingress::state(&live->header.bad_frame))!=current.frame;
+  if(sourceGood&&cohort&&multi_scene::read(*cohort,current.frame,live_owner::sequence(*row),cohortFrame))hash=cohortFrame.checksum;else sourceGood=false;
+  replacement::Receipt receipt{};const auto nativeFrame=static_cast<DWORD>(InterlockedCompareExchange(&replacementLedger->native_frame,0,0));
+  const bool hasReceipt=replacement::sample(*replacementLedger,nativeFrame,receipt)&&receipt.thread==thread;
+  const bool intact=hasReceipt&&!(receipt.flags&replacement::Suppressed);
+  const bool healthy=!replacementLedger->native_stop&&game_output::valid(pool->header,source.session,GetCurrentProcessId())&&pool->header.ready&&!pool->header.error&&!pool->header.stopped&&
+    return_path::read(mapping.state->armed)&&return_path::read(mapping.state->enabled)&&!return_path::read(mapping.state->stop);
+  // Menus/initial source discovery are entirely native. Missing bootstrap data
+  // must not latch recovery before replacement has ever been armed.
+  if(control.mode==replacement::Priming&&(!healthy||!hasReceipt||!sourceGood)){
+   if(!replacementLedger->suppressed)tx.native(back.Get(),nativeFrame,time);depth.discardFrame();return;
+  }
+  if(control.mode==replacement::LatchedOriginal){depth.discardFrame();return;}
+  if(control.mode==replacement::Recovering||!healthy||!hasReceipt||!sourceGood||
+     (control.mode==replacement::Active&&(!row||control.owner!=(*row)[1]||control.revision!=(*row)[7]||control.model!=(*row)[5]||control.source!=(*row)[6]||
+       receipt.flags&replacement::Invalid||((receipt.flags&replacement::Seen)&&!(receipt.flags&replacement::Suppressed))))){
+   if(control.mode==replacement::Priming&&intact){tx.native(back.Get(),current.frame,time);depth.discardFrame();return;}
+   replacementControl(replacement::Recovering);tx.policy.mode=replacement::Recovering;tx.discard();
+   if(intact){tx.native(back.Get(),nativeFrame,time);tx.policy.nativeRecovery();replacementControl(replacement::LatchedOriginal);InterlockedIncrement(&replacementLedger->recovered);InterlockedExchange(&replacementLedger->native_restored_frame,static_cast<LONG>(nativeFrame));}
+   else if(tx.policy.complete)tx.show(back.Get());
+   depth.discardFrame();return;
+  }
+  bool committed=false,canary=false,hadPrevious=false;
+  // Newest eligible source first. Composition changes ONLY that pending texture.
+  const unsigned first=tx.history.slot(0).row[2]>=tx.history.slot(1).row[2]?0u:1u;
+  for(unsigned pass=0;pass<2&&!committed;++pass){const unsigned index=first^pass;auto& f=tx.history.slot(index);auto& r=tx.receipts[index];
+   if(!f.valid||f.row[2]>=current.frame)continue;hadPrevious=true;
+   if(time<f.captured||time-f.captured>mapping.state->qpcFrequency/20||r.flags&replacement::Invalid){f.valid=false;continue;}
+   if(control.mode==replacement::Active&&f.row[2]>tx.committedFrame&&r.generation==control.generation&&!(r.flags&(replacement::Seen|replacement::Suppressed))){tx.commit(index,time);committed=true;break;}
+   for(unsigned slot=0;slot<2;++slot){auto& item=imported[slot];auto& wire=pool->slots[slot];
+    if(!item.ready.load(std::memory_order_acquire)||item.pending||item.lease.pending()||
+      InterlockedCompareExchange(&wire.state,output_wire::acquired,output_wire::ready)!=output_wire::ready)continue;
+    const auto packet=wire.packet;const auto metadata=game_output::metadata(wire);const auto& expected=item.identity;
+    const bool resourceGood=output_wire::valid(packet,expected.session,pool->header.receiver_pid)&&packet.scene_hash==expected.scene_hash&&packet.resource_epoch==expected.resource_epoch&&
+      packet.width==1920&&packet.height==1080&&memcmp(packet.handles,expected.handles,sizeof(packet.handles))==0;
+    if(!resourceGood){InterlockedIncrement(&pool->stats.invalid);InterlockedExchange(&wire.state,output_wire::idle);continue;}
+    if(!game_output::matches(packet,metadata,f.row.data(),source.session,f.stateHash,live_owner::sequence(f.row))){
+     InterlockedExchange(&wire.state,packet.source_frame>tx.committedFrame?output_wire::ready:output_wire::idle);continue;
+    }
+    if(control.mode==replacement::Priming){canary=true;InterlockedExchange(&wire.state,output_wire::idle);break;}
+    replacement::Binding binding{};
+    if(f.row[2]<=tx.committedFrame||!replacement::read(replacementLedger->output[slot],binding)||
+       !replacement::bindingMatches(binding,r,packet.sequence,metadata.source_sequence,f.stateHash,replacementEpoch)){
+      InterlockedIncrement(&pool->stats.invalid);InterlockedExchange(&wire.state,output_wire::idle);continue;
+    }
+    ship_triplet::Key key{};memcpy(key.session,source.session,16);memcpy(key.sourceSession,source.session,16);memcpy(key.asset,pool->asset,32);
+    key.owner=packet.owner;key.objectId=packet.owner;key.revision=packet.revision;key.frame=DWORD(packet.source_frame);key.pose=key.camera=packet.source_state_hash;
+    key.width=1920;key.height=1080;key.resourceEpoch=DWORD(packet.resource_epoch);key.depthConvention=1;key.sourcePid=GetCurrentProcessId();
+    float viewport[4]{};memcpy(viewport,f.row.data()+83,16);bool good=true;
+    for(unsigned i=0;i<4;++i){good&=std::isfinite(viewport[i])&&viewport[i]>=0&&viewport[i]<=1920&&fabs(viewport[i]-round(viewport[i]))<.001f;if(good)key.viewport[i]=static_cast<DWORD>(viewport[i]);}
+    ID3D11ShaderResourceView* views[]={item.views[0].Get(),item.views[1].Get(),item.views[2].Get()};const D3D11_VIEWPORT full{0,0,1920,1080,0,1};
+    if(!good||!compositor.draw(f.colorTarget.Get(),views,key,full,f.depthView.Get())){
+      f.valid=false;replacementControl(replacement::Recovering);InterlockedExchange(&wire.state,output_wire::idle);break;
+    }
+    try{item.lease.signal(fencedContext.Get());}catch(...){f.valid=false;replacementControl(replacement::Recovering);InterlockedExchange(&pool->header.error,1);break;}
+    tx.commit(index,time);committed=true;pool->stats.frame=key.frame;InterlockedIncrement(&replacementLedger->committed);InterlockedIncrement(&pool->stats.drawn);InterlockedIncrement(&mapping.state->drawCount);break;
+   }
+  }
+  auto* nativeDepth=depth.finish(current.frame,1920,1080);
+  if(control.mode==replacement::Priming){
+   tx.native(back.Get(),current.frame,time);
+   if(canary&&replacementLedger->native_capable&&replacementLedger->renderer_capable&&nativeDepth){
+    ++control.generation;control.mode=replacement::Active;replacement::write(replacementLedger->control,control);tx.policy.mode=replacement::Active;tx.discard();
+   }
+  }else if(!committed&&hadPrevious){
+   // 50ms qualifies a PENDING input above. An already complete whole picture
+   // has the separately approved two-presentation hold; it is never composited
+   // onto newer native pixels. Do not turn a slow presentation into two misses.
+   if(tx.policy.miss()){InterlockedIncrement(&replacementLedger->repeated);replacementLedger->repeat_max=(std::max)(static_cast<LONG>(replacementLedger->repeat_max),static_cast<LONG>(tx.policy.repeats));if(tx.policy.mode==replacement::Recovering)replacementControl(replacement::Recovering);}
+  }
+  replacement::Control latest{};replacement::read(replacementLedger->control,latest);
+  if(latest.mode!=replacement::Recovering&&nativeDepth){
+   if(receipt.generation==latest.generation){const unsigned index=tx.freeSlot();tx.history.captureAt(index,back.Get(),nativeDepth,*row,time,hash);tx.receipts[index]=receipt;}
+   replacementControl(static_cast<replacement::Mode>(latest.mode),row,current.frame);
+  }else if(!nativeDepth)replacementControl(replacement::Recovering);
+  const DWORD oldest=tx.oldest();if(cohort)InterlockedExchange(&cohort->header.closed_frame,static_cast<LONG>(oldest?oldest-1:current.frame));
+  if(tx.policy.complete)tx.show(back.Get());
+ }
  void resetHistory(){if(history)history->reset();}
  void audit(synchronized_frame::Audit a){if(bufferAudit)synchronized_frame::append(*bufferAudit,a);}
  void imports(){
@@ -61,7 +162,7 @@ public:
   if(d->GetCreationFlags()&D3D11_CREATE_DEVICE_SINGLETHREADED)throw std::runtime_error("Game device disallows worker imports");
   if(!source.prepare()||!source.requested)throw std::runtime_error("Explicit semantic source required for D3D9 insertion");
   pool=reinterpret_cast<game_output::Pool*>(reinterpret_cast<BYTE*>(source.mailbox)-sfc_calibration::Offset+game_output::Offset);d->GetImmediateContext(&context);
-  buffered=wantsBuffer();if(buffered){
+  replacementMode=replacement::requested();buffered=wantsBuffer();if(buffered){
    ship_triplet::checked(context.As(&fencedContext),"Buffered game context fence support");
    if(!back)throw std::runtime_error("Buffered scene requires explicit game target");
    auto* base=reinterpret_cast<BYTE*>(source.mailbox)-sfc_calibration::Offset;bufferAudit=reinterpret_cast<synchronized_frame::Store*>(base+synchronized_frame::Offset);
@@ -69,7 +170,7 @@ public:
    if(!h.magic){memset(bufferAudit,0,sizeof(*bufferAudit));h.magic=synchronized_frame::Magic;h.version=1;h.bytes=sizeof(*bufferAudit);h.pid=GetCurrentProcessId();memcpy(h.session,source.session,16);}
    else if(h.magic!=synchronized_frame::Magic||h.version!=1||h.bytes!=sizeof(*bufferAudit)||h.pid!=GetCurrentProcessId()||memcmp(h.session,source.session,16))throw std::runtime_error("Buffered scene audit identity");
    D3D11_TEXTURE2D_DESC shape{};back->GetDesc(&shape);
-   if(shape.Width==1920&&shape.Height==1080)history=std::make_unique<scene_frame_buffer::History>(d,back);
+   if(!replacementMode&&shape.Width==1920&&shape.Height==1080)history=std::make_unique<scene_frame_buffer::History>(d,back);
    // Unsupported resize remains original drawing only,until a fresh runtime.
   }
   wchar_t multi[2]{};if(GetEnvironmentVariableW(L"SFC_D3D9_MULTISCENE",multi,2)==1&&multi[0]==L'1'){
@@ -81,10 +182,20 @@ public:
    if(h.magic!=multi_scene::Magic||h.version!=1||h.bytes!=sizeof(*cohort)||memcmp(h.session,source.session,16)||
       (h.pid&&h.pid!=GetCurrentProcessId()))throw std::runtime_error("Multi-scene game mapping identity");
   }
+  if(replacementMode){
+   if(!buffered||!cohort||!back)throw std::runtime_error("Replacement requires qualified buffered cohort");
+   auto* base=reinterpret_cast<BYTE*>(source.mailbox)-sfc_calibration::Offset;replacementLedger=reinterpret_cast<replacement::Store*>(base+replacement::Offset);
+   const bool fresh=replacementLedger->magic==0;
+   if(fresh)replacement::initialize(*replacementLedger,source.session,GetCurrentProcessId());
+   if(!replacement::valid(replacementLedger,source.session,GetCurrentProcessId()))throw std::runtime_error("Replacement ledger identity");
+   replacement::Control c{};replacement::read(replacementLedger->control,c);replacementEpoch=c.epoch+1;
+   replacementControl(fresh?replacement::Priming:replacement::LatchedOriginal);
+   presentation=std::make_unique<replacement::Presentation>(d,back);
+  }
   worker=std::thread([this]{imports();});
  }
  ~Receiver(){stop();source.close();if(receiver)CloseHandle(receiver);}
- void stop(){stopping.store(true);if(worker.joinable())worker.join();if(pool)InterlockedExchange(&pool->header.stopped,1);}
+ void stop(){replacementControl(replacement::Recovering);stopping.store(true);if(worker.joinable())worker.join();if(pool)InterlockedExchange(&pool->header.stopped,1);}
  void observe(uint64_t native){if(!stopping.load())depth.observe(native,source.mailbox);}
  void cleared(uint64_t native){if(!stopping.load())depth.cleared(native);}
  void retire(){
@@ -96,6 +207,11 @@ public:
   }
  }
  void step(ID3D11RenderTargetView* target){
+  if(replacementMode){try{replacementStep(target);}catch(...){
+    replacementControl(replacement::Recovering);InterlockedIncrement(&pool->stats.resource_failed);
+    if(presentation&&presentation->policy.complete&&target){Microsoft::WRL::ComPtr<ID3D11Resource> r;target->GetResource(&r);Microsoft::WRL::ComPtr<ID3D11Texture2D> back;
+     if(SUCCEEDED(r.As(&back))){D3D11_TEXTURE2D_DESC d{};back->GetDesc(&d);if(d.Width==1920&&d.Height==1080&&d.SampleDesc.Count==1)presentation->show(back.Get());}}
+   }return;}
   retire();if(stopping.load()||GetCurrentThreadId()!=thread||!target||!return_path::read(mapping.state->armed)||!return_path::read(mapping.state->enabled)||return_path::read(mapping.state->stop)){resetHistory();return;}
   if(!InterlockedCompareExchange(&pool->header.ready,0,0)){InterlockedIncrement(&pool->stats.not_ready);depth.discardFrame();resetHistory();return;}
   if(!game_output::valid(pool->header,source.session,GetCurrentProcessId())||pool->header.stopped||pool->header.error){depth.discardFrame();resetHistory();return;}

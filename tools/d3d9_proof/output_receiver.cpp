@@ -38,7 +38,7 @@ int wmain(int argc,wchar_t** argv){
   ComPtr<ID3D11Device> device;ComPtr<ID3D11DeviceContext> context;ComPtr<ID3D11Query> query;WorkerGpuFence copyFence;
   ComPtr<ID3D11Texture2D> textures[3],cache[3],staging[3];uint64_t last=0,epoch=0;output_wire::Packet previous{};unsigned received=0;
   wchar_t live[2]{};const bool liveMode=GetEnvironmentVariableW(L"SFC_D3D9_LIVE_TIMING",live,2)==1&&live[0]==L'1';
-  const auto deadline=GetTickCount64()+output_wire::receiver_lifetime_ms(liveMode,game.enabled);
+  const auto deadline=GetTickCount64()+output_wire::receiver_lifetime_ms(liveMode,game.enabled,GetEnvironmentVariableW(L"SFC_D3D9_LIVE_TUNING",nullptr,0)!=0);
   for(;;){
    check(GetTickCount64()<deadline,game.enabled?"receiver130s additive timeout":liveMode?"receiver110s live timeout":"receiver60s timeout");check(WaitForSingleObject(parent,0)==WAIT_TIMEOUT,"producer disconnected");
    const auto state=output_wire::state(channel);if(state==output_wire::stopped){check(received>0,"no images received");result=0;break;}

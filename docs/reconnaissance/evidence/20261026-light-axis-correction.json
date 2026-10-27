@@ -1,0 +1,87 @@
+{
+  "run": 206,
+  "date": "2026-10-26",
+  "result": "READY_FOR_CORRECTED_ANGLE_SPONSOR_CHECK",
+  "python_tests": 575,
+  "candidate_build": "PASS",
+  "normal_gpu": "PASS",
+  "initial_gpu": "PASS",
+  "late_gpu": "PASS",
+  "async_qualification": "PASS",
+  "live_tuning_gpu": "PASS",
+  "tuning_qualification": "PASS",
+  "launcher_preflight": "PASS",
+  "fixtures": {
+    "normal": "C:\\Project\\SFC-Modernize Engine\\artifacts\\remix-runtime\\runs\\20261027-034329-277759-return-fixture",
+    "initial": "C:\\Project\\SFC-Modernize Engine\\artifacts\\remix-runtime\\runs\\20261027-034358-513916-return-fixture",
+    "late": "C:\\Project\\SFC-Modernize Engine\\artifacts\\remix-runtime\\runs\\20261027-034426-764121-return-fixture",
+    "tuning": "C:\\Project\\SFC-Modernize Engine\\artifacts\\remix-runtime\\runs\\20261027-034502-308007-return-fixture"
+  },
+  "angle_axes": "SFC_WORLD_Z_UP",
+  "migration": {
+    "reference": "artifacts\\remix-runtime\\runs\\20261019-211853-736917-in-game\\gate\\native-light-latest-1.bin",
+    "limitation": "Direction preserved for the qualified reference bank; current live run omitted raw bank. Other captured directions can produce different offsets; visual confirmation pending.",
+    "lights": [
+      {
+        "id": "native_directional_0",
+        "old_angles": [
+          -10.0,
+          0.0
+        ],
+        "new_angles": [
+          0.0,
+          10.0
+        ],
+        "reference_direction": [
+          0.9889363515567038,
+          0.0,
+          -0.14834046167420217
+        ],
+        "output_before": [
+          0.9481531354046523,
+          -0.0,
+          -0.3178138320185687
+        ],
+        "output_after": [
+          0.9481531354046522,
+          1.1611527023748344e-16,
+          -0.317813832018569
+        ],
+        "maximum_vector_error": 2.7755575615628914e-16
+      },
+      {
+        "id": "native_directional_1",
+        "old_angles": [
+          10.0,
+          0.0
+        ],
+        "new_angles": [
+          0.0,
+          10.0
+        ],
+        "reference_direction": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "output_before": [
+          -0.17364817766693041,
+          -0.0,
+          0.984807753012208
+        ],
+        "output_after": [
+          -0.17364817766693041,
+          -0.0,
+          0.984807753012208
+        ],
+        "maximum_vector_error": 0.0
+      }
+    ]
+  },
+  "rendering_settings_restored_byte_exact": true,
+  "unchanged_non_angle_light_settings": true,
+  "staged": false,
+  "committed": false,
+  "visual_confirmation": "PENDING",
+  "next_action": "Restart current tuner; verify saved appearance and positive elevation raises source."
+}

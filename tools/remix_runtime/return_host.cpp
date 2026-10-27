@@ -24,7 +24,7 @@ int wmain(int argc,wchar_t** argv){
       std::string name;for(const auto c:channel.name)name.push_back(static_cast<char>(c));
       std::cout<<"MODE OBSERVATION_ONLY no_runtime_loaded=1\nSESSION "<<name<<"\n";
       const auto begin=GetTickCount64();
-      while(!return_path::read(s.stop)&&GetTickCount64()-begin<290000){
+      while(!return_path::read(s.stop)&&GetTickCount64()-begin<(GetEnvironmentVariableW(L"SFC_LIGHT_TUNING",nullptr,0)?1980000ull:290000ull)){
         if(!return_path::valid(s))throw std::runtime_error("observation channel invalid");Sleep(50);
       }
       const bool stopped=return_path::read(s.stop)!=0;

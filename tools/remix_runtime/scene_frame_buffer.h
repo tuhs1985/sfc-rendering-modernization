@@ -5,20 +5,21 @@
 #include "../d3d9_proof/synchronized_frame.h"
 namespace scene_frame_buffer {
 using Microsoft::WRL::ComPtr;
-struct Frame {ComPtr<ID3D11Texture2D> color,depth;ComPtr<ID3D11RenderTargetView> depthTarget;ComPtr<ID3D11ShaderResourceView> depthView;
+struct Frame {ComPtr<ID3D11Texture2D> color,depth;ComPtr<ID3D11RenderTargetView> colorTarget,depthTarget;ComPtr<ID3D11ShaderResourceView> depthView;
  live_owner::Row row{};uint64_t captured=0,stateHash=0;bool valid=false;};
 class History {
  ComPtr<ID3D11DeviceContext> context,deferred;ComPtr<ID3D11VertexShader> vertex;ComPtr<ID3D11PixelShader> pixel;
  Frame frames[2];unsigned next=0;D3D11_TEXTURE2D_DESC descriptor{};
 public:
- History(ID3D11Device* device,ID3D11Texture2D* target){
+ History(ID3D11Device* device,ID3D11Texture2D* target,bool transaction=false){
   target->GetDesc(&descriptor);if(descriptor.Width!=1920||descriptor.Height!=1080||descriptor.SampleDesc.Count!=1||descriptor.MipLevels!=1||descriptor.ArraySize!=1||
     (descriptor.Format!=DXGI_FORMAT_B8G8R8A8_UNORM&&descriptor.Format!=DXGI_FORMAT_R8G8B8A8_UNORM))throw std::runtime_error("Buffered scene target unsupported");
   // Existing3source+6pool+1grade+4historytextures remain below128MiB.
-  if(uint64_t(descriptor.Width)*descriptor.Height*4*14>128ull*1024*1024)throw std::runtime_error("Buffered output resource128MiB cap");
+  if(uint64_t(descriptor.Width)*descriptor.Height*4*(transaction?15:14)>128ull*1024*1024)throw std::runtime_error("Buffered output resource128MiB cap");
   device->GetImmediateContext(&context);ship_triplet::checked(device->CreateDeferredContext(0,&deferred),"buffer deferred");
   auto d=descriptor;d.Usage=D3D11_USAGE_DEFAULT;d.CPUAccessFlags=d.MiscFlags=d.BindFlags=0;
-  for(auto& f:frames){ship_triplet::checked(device->CreateTexture2D(&d,nullptr,&f.color),"buffer color");auto z=d;z.Format=DXGI_FORMAT_R32_FLOAT;z.BindFlags=D3D11_BIND_RENDER_TARGET|D3D11_BIND_SHADER_RESOURCE;
+  if(transaction)d.BindFlags=D3D11_BIND_RENDER_TARGET;
+  for(auto& f:frames){ship_triplet::checked(device->CreateTexture2D(&d,nullptr,&f.color),"buffer color");if(transaction)ship_triplet::checked(device->CreateRenderTargetView(f.color.Get(),nullptr,&f.colorTarget),"pending color target");auto z=d;z.Format=DXGI_FORMAT_R32_FLOAT;z.BindFlags=D3D11_BIND_RENDER_TARGET|D3D11_BIND_SHADER_RESOURCE;
    ship_triplet::checked(device->CreateTexture2D(&z,nullptr,&f.depth),"buffer depth");ship_triplet::checked(device->CreateRenderTargetView(f.depth.Get(),nullptr,&f.depthTarget),"buffer depth target");ship_triplet::checked(device->CreateShaderResourceView(f.depth.Get(),nullptr,&f.depthView),"buffer depth view");}
   const char* vs="float4 main(uint i:SV_VertexID):SV_Position{float2 p[3]={float2(-1,-1),float2(-1,3),float2(3,-1)};return float4(p[i],0,1);}";
   const char* ps="Texture2DMS<float,8> source:register(t0);float main(float4 p:SV_Position):SV_Target{float closest=1;[unroll]for(int s=0;s<8;++s){float d=source.Load(int2(p.xy),s);if(!isfinite(d)||d<0||d>1)return asfloat(0x7fc00000u);closest=min(closest,d);}return closest;}";
@@ -27,6 +28,8 @@ public:
  }
  void reset(){for(auto& f:frames)f.valid=false;next=0;}
  Frame* prior(){auto& p=frames[next^1];return p.valid?&p:nullptr;}
+ Frame& slot(unsigned i){if(i>=2)throw std::runtime_error("History slot");return frames[i];}
+ void captureAt(unsigned i,ID3D11Texture2D* target,ID3D11ShaderResourceView* depth,const live_owner::Row& row,uint64_t time,uint64_t hash){if(i>=2)throw std::runtime_error("History slot");next=i;capture(target,depth,row,time,hash);}
  void capture(ID3D11Texture2D* target,ID3D11ShaderResourceView* depth,const live_owner::Row& row,uint64_t now,uint64_t stateHash=0){
   if(!target||!depth||!row[2])throw std::runtime_error("Buffered scene inputs missing");
   D3D11_SHADER_RESOURCE_VIEW_DESC view{};depth->GetDesc(&view);ComPtr<ID3D11Resource> resource;depth->GetResource(&resource);ComPtr<ID3D11Texture2D> source;

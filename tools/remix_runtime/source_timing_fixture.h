@@ -4,6 +4,7 @@
 #include "../d3d9_proof/live_owner_wire.h"
 #include "../d3d9_proof/owner_rebind.h"
 #include "../d3d9_proof/multi_scene_wire.h"
+#include "../d3d9_proof/replacement_transaction.h"
 #include <vector>
 #include <fstream>
 struct SourceTimingFixture {
@@ -35,9 +36,12 @@ struct SourceTimingFixture {
   if(!enabled)return;
   if(liveEnabled){frame+=200000;sfc_calibration::begin(source.mailbox,frame);live.begin(frame);
    if(cohort.store){cohort.begin();live_owner::Packet anchor{};bool prepared=false;auto* base=reinterpret_cast<BYTE*>(source.mailbox)-sfc_calibration::Offset;
+    auto* replacementStore=reinterpret_cast<replacement::Store*>(base+replacement::Offset);
+    if(replacement::requested()&&replacement::valid(replacementStore,source.session,GetCurrentProcessId())){InterlockedExchange(&replacementStore->native_capable,1);replacement::begin(*replacementStore,frame,GetCurrentThreadId());}
     for(DWORD i=0;i<rows.size();++i){
      if(lateAssetFixture&&i==2&&InterlockedCompareExchange(reinterpret_cast<LONG*>(base+11*1024*1024+128*1024+512),0,0)<120)continue;
      auto row=rows[i];row[2]=frame;row[45]=i;row[47]=GetCurrentThreadId();row[94]=row[95]=0;
+     if(replacement::requested()&&replacement::valid(replacementStore,source.session,GetCurrentProcessId()))replacement::suppress(*replacementStore,frame,row[1],row[7],row[5],row[6],GetCurrentThreadId(),true,replacement::now()); // SYNTHETIC source only; not an installed engine hook.
      LARGE_INTEGER q{};QueryPerformanceCounter(&q);sfc_calibration::stamp(row,static_cast<ULONGLONG>(q.QuadPart));if(live.prepare(row,anchor))prepared=true;
      if(!sfc_calibration::offer(source.mailbox,i,row))live.reject(frame);cohort.offer(row);
      auto* guard=reinterpret_cast<LONG*>(base+4096+i*512);InterlockedIncrement(guard);memcpy(base+4100+i*512,row.data(),sizeof(row));InterlockedIncrement(guard);}

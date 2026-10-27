@@ -1,0 +1,36 @@
+{
+  "run": 205,
+  "date": "2026-10-26",
+  "result": "READY_FOR_DIRECTIONAL_ANGLE_TUNING",
+  "python_tests": 572,
+  "candidate_build": "PASS",
+  "normal_gpu": "PASS",
+  "initial_gpu": "PASS",
+  "late_gpu": "PASS",
+  "async_qualification": "PASS",
+  "live_tuning_gpu": "PASS",
+  "tuning_qualification": "PASS",
+  "launcher_preflight": "PASS",
+  "fixtures": {
+    "normal": "C:\\Project\\SFC-Modernize Engine\\artifacts\\remix-runtime\\runs\\20261027-015615-277570-return-fixture",
+    "initial": "C:\\Project\\SFC-Modernize Engine\\artifacts\\remix-runtime\\runs\\20261027-015643-768858-return-fixture",
+    "late": "C:\\Project\\SFC-Modernize Engine\\artifacts\\remix-runtime\\runs\\20261027-015711-998517-return-fixture",
+    "tuning": "C:\\Project\\SFC-Modernize Engine\\artifacts\\remix-runtime\\runs\\20261027-015746-821247-return-fixture"
+  },
+  "config_preservation": {
+    "existing_settings_identical": true,
+    "before_sha256": "9015edf237517657cc4cafc3d2ff2898e7504b789f41012f6d5ba5fd1b933161",
+    "after_sha256": "9d8ed679b7f4373fda4fa70b258c44d0b86e8b4e3b543d7a53d8a706a13dc237",
+    "added_defaults": {
+      "angle_mode": "offset",
+      "azimuth_degrees": 0,
+      "elevation_degrees": 0
+    }
+  },
+  "limits_unchanged": true,
+  "controlled_cross_ship_shadows": "NOT_TESTED",
+  "directional_only": true,
+  "angles_world_y_up": true,
+  "commit": "NOT_REQUESTED",
+  "next_action": "Restart current tuning launcher; set existing directional elevation_degrees=25.0 and save."
+}

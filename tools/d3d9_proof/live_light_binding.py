@@ -24,9 +24,11 @@ class Binding:
         self.folder=Path(folder);self.gpu=Path(gpu);self.receiver=receiver;self.row=list(row)
         self.last=0;self.ready=False;self.generation=0;self.busy=0;self.invalid=0;self.latest=None
         config=Path(__file__).resolve().parents[1]/'remix_runtime/config/lights.toml'
+        self.config=config;self.tuning=False;self.config_polled=0;self.config_revision=1;self.messages=0
         raw=config.read_bytes()
         if len(raw)>65536:raise ValueError('Light config64KiB cap')
         data=tomllib.loads(raw.decode());self.controls={r['id']:r for r in validate(data,REGISTRY)}
+        if not {'native_directional_0','native_directional_1'}<=self.controls.keys():raise ValueError('Both qualified native directional controls required')
         self.scale,self.master=scales(data)
         self.session=[int(receiver.name[-32:][i:i+8],16) for i in range(0,32,8)]
         shapes,manifest=build(self.controls,1,self.gpu,config.parent)
@@ -38,6 +40,25 @@ class Binding:
         self.persistent=persistent;self.native_cache={};self.bank_publication=None
 
     def poll(self):
+        if self.tuning and time.monotonic()-self.config_polled>=.5:
+            self.config_polled=time.monotonic()
+            try:
+                raw=self.config.read_bytes()
+                if len(raw)>65536:raise ValueError('Light config64KiB cap')
+                digest=hashlib.sha256(raw).hexdigest()
+                if digest!=self.config_hash:
+                    data=tomllib.loads(raw.decode());controls={r['id']:r for r in validate(data,REGISTRY)}
+                    if not {'native_directional_0','native_directional_1'}<=controls.keys():raise ValueError('Both qualified native directional controls required')
+                    scale,master=scales(data);revision=self.config_revision+1
+                    shapes,manifest=build(controls,revision,self.gpu,self.config.parent)
+                    pending=self.gpu/'light-shapes.pending';pending.write_bytes(shapes);pending.replace(self.gpu/'light-shapes.bin')
+                    self.controls=controls;self.scale=scale;self.master=master;self.shapes=shapes;self.config_revision=revision;self.config_hash=digest
+                    self.last_native=None;self.bank_publication=None
+                    (self.gpu/'lights-config-accepted.toml').write_bytes(raw)
+                    (self.gpu/'light-shapes-manifest.json').write_text(json.dumps(manifest,indent=2))
+                    if self.messages<100:print('D3D9 LIGHT CONFIG_ACCEPTED revision='+str(revision),flush=True);self.messages+=1
+            except (OSError,ValueError) as exc:
+                if self.messages<100:print('D3D9 LIGHT CONFIG_REJECTED last_good=1 '+str(exc),flush=True);self.messages+=1
         self.ready=False
         row=next((r for i in range(32) if (r:=self.receiver.channel.sample_owner(i)) and r[1]==self.row[1] and r[7]==self.row[7] and r[4]==1),None)
         if not row:return False
@@ -74,7 +95,7 @@ class Binding:
             if identity==self.last_native:self.ready=True;return True
             self.generation+=1
             normalized=world_light_context(native,row) if self.persistent else native
-            raw=packet(normalized,dict(owner_epoch=row[1]),self.session,self.controls,self.scale,self.master,self.generation,captured,1,shapes=True)
+            raw=packet(normalized,dict(owner_epoch=row[1]),self.session,self.controls,self.scale,self.master,self.generation,captured,self.config_revision,shapes=True)
             publish_encoded(self.receiver.channel,pid,raw,self.shapes,captured)
             self.last_native=identity
             self.bank_publication=publication

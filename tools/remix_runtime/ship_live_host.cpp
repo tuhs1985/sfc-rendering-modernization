@@ -144,9 +144,9 @@ int wmain(int argc,wchar_t** argv){
      if(next.read()){
       // Initial disabled file is a genuine no-op. Disabling after edits restores
       // this isolated host's tested pinned defaults, not any SFC settings.
-      if(next.enabled||imageTouched){
+      if(next.enabled||imageTouched||next.nativeConfigured){
        auto set=[&](const char* name,const char* value){return api.SetConfigVariable(name,value)==REMIXAPI_ERROR_CODE_SUCCESS;};
-       if(!next.apply(set)){if(!imageSettings.apply(set))throw std::runtime_error("image native rollback failed");throw std::runtime_error("image native option unsupported");}
+       if(!next.apply(set)){auto previous=imageSettings;previous.nativeConfigured=previous.nativeConfigured||next.nativeConfigured;if(!previous.apply(set))throw std::runtime_error("image native rollback failed");throw std::runtime_error("image native option unsupported");}
        imageTouched=true;
       }
       imageSettings=next;++imageRevisions;

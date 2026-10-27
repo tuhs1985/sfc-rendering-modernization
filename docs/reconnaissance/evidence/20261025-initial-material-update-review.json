@@ -1,0 +1,255 @@
+{
+  "checkpoint": 196,
+  "actual_run": "artifacts/remix-runtime/runs/20261026-022855-157867-in-game",
+  "actual_result_sha256": "6e01a75e732ceca66079fa85f6a17d1e2ff4d28a463d184b2d9d73e596a88d0e",
+  "actual_checks": {
+    "error": null,
+    "normal_game_exit": true,
+    "gate_clean_unloaded": true,
+    "original_critical_unchanged": true,
+    "launcher_settings_unchanged": true,
+    "broad_proxy_restored": true,
+    "renderer_exit": 0
+  },
+  "sponsor": "About2s initial appearance;no hiccup on new models;initial flipped textures corrected when a new model arrived",
+  "initial_first_matched_seconds": 0.9749403,
+  "initial_fca_native_admission_seconds": 1.2984104,
+  "enhanced_master_publications_seconds": [
+    0.6325,
+    0.9516,
+    39.4255,
+    43.531
+  ],
+  "late_fms_native_admission_us": 4828328,
+  "findings": {
+    "confirmed": "CPU completed initial enhancements before1s;first native FCA DDS consumption appears around39s with next model",
+    "hypothesis": "Missed initial USD reload/readiness handoff;first returned frame is not a material readiness acknowledgement",
+    "unresolved": "Cannot yet reliably reproduce the actual missed update in standalone controls"
+  },
+  "notification_experiments": "Immediate touch and next-returned-frame touch withdrawn;not reliable fixes. Rejected source preserved in probe text.",
+  "probes": [
+    {
+      "folder": "artifacts/remix-runtime/runs/20261026-023853-096103-return-fixture",
+      "error": null,
+      "host_exit": 0,
+      "fixture_exit": 0,
+      "control": {
+        "diagnostic_only": true,
+        "notice": "none",
+        "events": [],
+        "probe_sha256": "e9a2f35030c1e23c5e76ced20cbdd9c7d6bb1ddbe9e90a7ad821aa3c50168ceb",
+        "production_qualification_eligible": false,
+        "scope": "Live KFF/FCA geometry in synthetic standalone camera;early publication/notification diagnosis only"
+      },
+      "result_sha256": "4bc9bffdfc8e46f16628e1365e09eeebea6636ae6b755193b6f92e29f8768e01"
+    },
+    {
+      "folder": "artifacts/remix-runtime/runs/20261026-024138-975516-return-fixture",
+      "error": null,
+      "host_exit": 0,
+      "fixture_exit": 0,
+      "control": {
+        "diagnostic_only": true,
+        "notice": "none",
+        "ready_first": true,
+        "events": [],
+        "probe_sha256": "8152456385ba5d93954e38da733782731436e8fe32b0610813d067a83b10c3ff",
+        "production_qualification_eligible": false,
+        "scope": "Live KFF/FCA geometry in synthetic standalone camera;early publication/notification diagnosis only"
+      },
+      "result_sha256": "82d3922a767485898e26da1c4f479630be68c010d1e52ca046fcb4de00743729"
+    },
+    {
+      "folder": "artifacts/remix-runtime/runs/20261026-024350-236942-return-fixture",
+      "error": null,
+      "host_exit": 0,
+      "fixture_exit": 0,
+      "control": {
+        "diagnostic_only": true,
+        "notice": "first-return",
+        "ready_first": true,
+        "events": [
+          {
+            "at_ns": 34543622667000,
+            "drawn": 63,
+            "sha256": "b956b2246311b7585f9cdb41bf94a02f4968f443cfa6993c73bc8978c84bbd99",
+            "meaning": "One metadata-only notification;not GPU/material ACK or a proposed120-frame delay"
+          }
+        ],
+        "probe_sha256": "8152456385ba5d93954e38da733782731436e8fe32b0610813d067a83b10c3ff",
+        "production_qualification_eligible": false,
+        "scope": "Live KFF/FCA geometry in synthetic standalone camera;early publication/notification diagnosis only"
+      },
+      "result_sha256": "c618ea37fcfb064fecabecf9d602aeb22e17d94cd160b2b6148f5732811082f3"
+    },
+    {
+      "folder": "artifacts/remix-runtime/runs/20261026-025158-767633-return-fixture",
+      "error": null,
+      "host_exit": 0,
+      "fixture_exit": 0,
+      "control": {
+        "diagnostic_only": true,
+        "notice": "none",
+        "ready_first": true,
+        "cached_materials": true,
+        "events": [],
+        "probe_sha256": "c6e60c2d6b8548d0ca1152201a835007a4525fe294c34b2b09e552a56877bc93",
+        "production_qualification_eligible": false,
+        "scope": "Live KFF/FCA geometry in synthetic standalone camera;early publication/notification diagnosis only"
+      },
+      "result_sha256": "7f10d8205451e91c2feffbea62921d8b0e90e439ad1fccbbaa9824f65e1423d5"
+    },
+    {
+      "folder": "artifacts/remix-runtime/runs/20261026-025341-883325-return-fixture",
+      "error": null,
+      "host_exit": 0,
+      "fixture_exit": 0,
+      "control": {
+        "diagnostic_only": true,
+        "notice": "first-return",
+        "ready_first": true,
+        "cached_materials": true,
+        "events": [
+          {
+            "at_ns": 35138466604700,
+            "drawn": 85,
+            "sha256": "b956b2246311b7585f9cdb41bf94a02f4968f443cfa6993c73bc8978c84bbd99",
+            "meaning": "One metadata-only notification;not GPU/material ACK or a proposed120-frame delay"
+          }
+        ],
+        "probe_sha256": "c6e60c2d6b8548d0ca1152201a835007a4525fe294c34b2b09e552a56877bc93",
+        "production_qualification_eligible": false,
+        "scope": "Live KFF/FCA geometry in synthetic standalone camera;early publication/notification diagnosis only"
+      },
+      "result_sha256": "65cb91fc976ebb30c209c3bc4a2cd861ccc5928252e5b8dae6db2909ccfaf9c9"
+    },
+    {
+      "folder": "artifacts/remix-runtime/runs/20261026-025756-595398-return-fixture",
+      "error": null,
+      "host_exit": 0,
+      "fixture_exit": 0,
+      "control": {
+        "diagnostic_only": true,
+        "notice": "post-publish",
+        "ready_first": true,
+        "cached_materials": true,
+        "events": [
+          {
+            "at_ns": 35392821249200,
+            "sha256": "f261e128fe8c4d844b2d76a62876b1b73416e499ade401b72e67ce993d55a4f5",
+            "meaning": "Explicit last-write notification immediately after finalized atomic publication;no timer/frame wait"
+          },
+          {
+            "at_ns": 35393566725300,
+            "sha256": "b956b2246311b7585f9cdb41bf94a02f4968f443cfa6993c73bc8978c84bbd99",
+            "meaning": "Explicit last-write notification immediately after finalized atomic publication;no timer/frame wait"
+          }
+        ],
+        "probe_sha256": "5090983012f6e227147e76d9af996b923f2a51ce3aa3ec542c3252b89bde37f6",
+        "production_qualification_eligible": false,
+        "scope": "Live KFF/FCA geometry in synthetic standalone camera;early publication/notification diagnosis only"
+      },
+      "result_sha256": "5f3d3e2aa64727d873132bc5c35497cb58abc76a033a67b340611cb5699bfc39"
+    },
+    {
+      "folder": "artifacts/remix-runtime/runs/20261026-031319-190816-return-fixture",
+      "error": null,
+      "host_exit": 0,
+      "fixture_exit": 0,
+      "control": {
+        "diagnostic_only": true,
+        "notice": "none",
+        "ready_first": true,
+        "cached_materials": false,
+        "events": [],
+        "probe_sha256": "5090983012f6e227147e76d9af996b923f2a51ce3aa3ec542c3252b89bde37f6",
+        "production_qualification_eligible": false,
+        "scope": "Live KFF/FCA geometry in synthetic standalone camera;early publication/notification diagnosis only"
+      },
+      "result_sha256": "f1dea1505915f988548920d2247b5464e7d20df154d1b0fb5a372b6d87f52090"
+    },
+    {
+      "folder": "artifacts/remix-runtime/runs/20261026-032309-951790-return-fixture",
+      "error": null,
+      "host_exit": 0,
+      "fixture_exit": 0,
+      "control": {
+        "diagnostic_only": true,
+        "notice": "none",
+        "ready_first": true,
+        "cached_materials": false,
+        "events": [],
+        "probe_sha256": "5090983012f6e227147e76d9af996b923f2a51ce3aa3ec542c3252b89bde37f6",
+        "production_qualification_eligible": false,
+        "scope": "Live KFF/FCA geometry in synthetic standalone camera;early publication/notification diagnosis only"
+      },
+      "result_sha256": "4eac39d7039ff606e6c125236eff45d9b21fd1ee684ee8fce77503fcc3443891"
+    },
+    {
+      "folder": "artifacts/remix-runtime/runs/20261026-032753-608246-return-fixture",
+      "error": null,
+      "host_exit": 0,
+      "fixture_exit": 0,
+      "control": {
+        "diagnostic_only": true,
+        "notice": "none",
+        "ready_first": true,
+        "cached_materials": false,
+        "synchronous": true,
+        "events": [],
+        "probe_sha256": "eb9f3663d2c8125d8ca7d40e666550151562ffd0875923072910b643dd66f5af",
+        "production_qualification_eligible": false,
+        "scope": "Live KFF/FCA geometry in synthetic standalone camera;early publication/notification diagnosis only"
+      },
+      "result_sha256": "d3378f2303f31302091ced58cf0921fa0f4d7885ef52f218f6d0f08eaa96c9ad"
+    },
+    {
+      "folder": "artifacts/remix-runtime/runs/20261026-034555-119454-return-fixture",
+      "error": null,
+      "host_exit": 0,
+      "fixture_exit": 0,
+      "control": null,
+      "result_sha256": "f610569cba009ce8245f1798abc2d8a5e198819f12c4f2fed155a746ad1c7424"
+    },
+    {
+      "folder": "artifacts/remix-runtime/runs/20261026-034737-054838-return-fixture",
+      "error": null,
+      "host_exit": 0,
+      "fixture_exit": 0,
+      "control": {
+        "diagnostic_only": true,
+        "notice": "none",
+        "ready_first": true,
+        "cached_materials": false,
+        "synchronous": false,
+        "private_prewarm": true,
+        "zero_emission": false,
+        "events": [],
+        "probe_sha256": "ef37cfff14909ad08a1a6154bbd7b781cce18ac35e1ce6d9e7189509250c1ba7",
+        "production_qualification_eligible": false,
+        "scope": "Live KFF/FCA geometry in synthetic standalone camera;early publication/notification diagnosis only"
+      },
+      "result_sha256": "b42cc0631813de6d62ed6bf029c3a3e843c311a453f7090fbcf1af8e9d1daa0c"
+    },
+    {
+      "folder": "artifacts/remix-runtime/runs/20261026-035008-763889-return-fixture",
+      "error": null,
+      "host_exit": 0,
+      "fixture_exit": 0,
+      "control": {
+        "diagnostic_only": true,
+        "notice": "none",
+        "ready_first": true,
+        "cached_materials": false,
+        "synchronous": false,
+        "private_prewarm": true,
+        "zero_emission": true,
+        "events": [],
+        "probe_sha256": "ef37cfff14909ad08a1a6154bbd7b781cce18ac35e1ce6d9e7189509250c1ba7",
+        "production_qualification_eligible": false,
+        "scope": "Live KFF/FCA geometry in synthetic standalone camera;early publication/notification diagnosis only"
+      },
+      "result_sha256": "00f19c791c4c3f986708673adbd217b12e3489423f685aaea227c7c15400faca"
+    }
+  ]
+}

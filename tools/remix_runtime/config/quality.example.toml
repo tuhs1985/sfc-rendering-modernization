@@ -1,9 +1,0 @@
-# Restore pre-quality-control runtime defaults. Does not reset other TOML files.
-[quality]
-enabled = false
-texture_filtering = "anisotropic"
-max_anisotropy = 8
-mip_bias = 0.0
-anti_aliasing = "off"
-denoising = true
-supersampling = 1.0

@@ -1,0 +1,110 @@
+{
+  "schema": "sfc.live-material-revision-result.v1",
+  "run": 201,
+  "folder": "artifacts/remix-runtime/runs/20261026-205704-225333-in-game",
+  "result_sha256": "7c66d12e911ab166fda7361b898160195bf7d48fd021a50d066f0df4fb7945df",
+  "parent": "93e8dba",
+  "adjudication": "LIVE_ENHANCEMENT_UPDATE_DEMONSTRATED_FOR_TWO_SHIP_FIXTURE",
+  "sponsor": "Enhanced materials arrive quickly enough that absence is difficult to notice unless deliberately watching;illumination remains a visible distinction",
+  "models": [
+    {
+      "model": "assets/models/kff/kff.mod",
+      "owner": 1,
+      "ack": 1,
+      "base_ready_seconds": 0.2448706,
+      "enhanced_files_ready_seconds": 0.6062377,
+      "library_published_seconds": 0.6691887,
+      "groups": 5,
+      "emission_groups": 5
+    },
+    {
+      "model": "assets/models/fca/fca.mod",
+      "owner": 2,
+      "ack": 1,
+      "base_ready_seconds": 0.4048121,
+      "enhanced_files_ready_seconds": 0.7861668,
+      "library_published_seconds": 0.8503141,
+      "groups": 58,
+      "emission_groups": 31
+    }
+  ],
+  "material_events": [
+    {
+      "layers": 1,
+      "supervisor_monotonic_ns": 100190695026100,
+      "clock": "QueryPerformanceCounter",
+      "initial": false,
+      "usd_revision": {
+        "policy": "remix-openusd-windows-second-revision-v1",
+        "previous_mtime_ns": 1793048226641222700,
+        "natural_mtime_ns": 1793048289873599700,
+        "published_mtime_ns": 1793048289873599700,
+        "meaning": "Distinct file revision;not runtime material installation ACK"
+      }
+    },
+    {
+      "layers": 2,
+      "supervisor_monotonic_ns": 100190999601900,
+      "clock": "QueryPerformanceCounter",
+      "initial": false,
+      "usd_revision": {
+        "policy": "remix-openusd-windows-second-revision-v1",
+        "previous_mtime_ns": 1793048289873599700,
+        "natural_mtime_ns": 1793048290179473600,
+        "published_mtime_ns": 1793048290179473600,
+        "meaning": "Distinct file revision;not runtime material installation ACK"
+      }
+    }
+  ],
+  "cleanup": {
+    "error": null,
+    "normal_game_exit": true,
+    "gate_clean_unloaded": true,
+    "gate_controller_exit": 0,
+    "gate_controller_left_running": false,
+    "renderer_exit": 0,
+    "original_critical_unchanged": true,
+    "launcher_settings_unchanged": true,
+    "broad_proxy_restored": true,
+    "final_report_complete": true
+  },
+  "state": {
+    "pid": 40040,
+    "stopped": true,
+    "last_frame": 5474,
+    "published": 5407,
+    "dropped": 1791,
+    "invalid": 0,
+    "asset_ready": 2,
+    "asset_rejected": 0,
+    "closed_frame": 5472
+  },
+  "partial": [],
+  "normal_owned_exit": true,
+  "bounds": {
+    "workflow_seconds": 199.32799999999406,
+    "run_bytes": 93488643
+  },
+  "delivery": {
+    "paired": 5397,
+    "without_ship": 8,
+    "post_first_return_omissions": 7,
+    "longest_consecutive": 3,
+    "provenance_failures": 0,
+    "meaning": "Separate renderer omitted returns;not proven SFC frame drops"
+  },
+  "illumination": {
+    "confirmed": "parallel_assets.material_piece combines primary RGB and secondary RGB,rounds to8bit RGBA,adapts Remix row origin and encodes DDS;shader strength separate",
+    "current_barrier": "Whole-asset complete-stage publication groups emission with generated roughness",
+    "unmeasured": "Separate emission preparation cost and exact installed-pixel transition",
+    "next_candidate": "Evaluate colour+existing-glow readiness independently of optional generated roughness;no implementation in this review"
+  },
+  "validation": "Existing result/raw wire and material manifests reviewed;no new build/GPU/SFC run",
+  "repository": {
+    "implementation_changed": false,
+    "staged": false,
+    "committed": false,
+    "pushed": false
+  },
+  "next_action": "Retain this accepted live notification fix;next preparation increment should measure texture conversion/publication and consider earlier original-glow delivery without blocking first ship"
+}

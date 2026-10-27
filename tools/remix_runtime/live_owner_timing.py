@@ -163,10 +163,10 @@ class Relay:
                 from material_binding import prepare as bind_materials
                 bind_materials(gpu,self.root)
                 (gpu/'rtx.conf').write_text(CONFIG.replace('rtx.enableReplacementAssets = False','rtx.enableReplacementAssets = True')+'rtx.enableReplacementMaterials = True\nrtx.enableReplacementMeshes = False\n')
-                from image_controls import encode as encode_image
+                from image_controls import encode_current as encode_image
                 from quality_controls import encode as encode_quality
                 for name,encoder in [('image',encode_image),('quality',encode_quality)]:
-                    raw=(ROOT/f'tools/remix_runtime/config/{name}.toml').read_bytes();(gpu/f'{name}-controls.bin').write_bytes(encoder(raw));(gpu/f'{name}-config-accepted.toml').write_bytes(raw)
+                    raw=(ROOT/'tools/remix_runtime/config/rendering.toml').read_bytes();(gpu/f'{name}-controls.bin').write_bytes(encoder(raw));(gpu/f'{name}-config-accepted.toml').write_bytes(raw)
                 if self.offline_fixture:
                     from light_fixture import Replay
                     self.light_replay=Replay(gpu,manifest,self.receiver)
@@ -180,6 +180,7 @@ class Relay:
         if self.process:raise ValueError('Live renderer already started')
         self.selected=dict(owner=row[1],revision=row[7],model=manifest['model_name'],asset_sha256=manifest['asset_sha256'],preparation_seconds=time.monotonic()-self.started)
         if self.additive:self.selected.update(selection='First qualified fresh asset,cohort scheduling anchor;not player flag' if self.multi_scene else 'Explicit known player-fixture model;not engine player flag',selected_model=self.selected_model)
+        if getattr(self,'player_replacement',False):self.selected.update(selection='Unique configured player-fixture model;not an engine player flag',selected_model=self.replacement_model)
         env={**os.environ,'DXVK_CONFIG_FILE':str(gpu/'rtx.conf'),'RTX_AUTOMATION_DISABLE_BLOCKING_DIALOG_BOXES':'1','RTX_CAPTURE_REMIX_CONFIGS':'0',
                  'DXVK_ENABLE_RAYTRACING':'1','DXVK_GRAPHICS_PRESET_TYPE':'4','RTX_INTEGRATE_INDIRECT_MODE':'0','DXVK_DLSS_PRESET':'0',
                  'SFC_D3D9_LIVE_TIMING':'1','SFC_D3D9_GAME_PID':str(pid),'SFC_REMIX_CALIBRATION_SCENE':self.receiver.name,
@@ -214,10 +215,13 @@ class Relay:
             if self.multi_scene:
                 from multi_scene import camera_offset,CONFIG as placement_config
                 self.selected['camera_offset']=camera_offset()
+                if getattr(self,'player_replacement',False):self.selected['camera_offset']=[0,0,0]
                 self.selected['placement']='common camera-left diagnostic translation;no original suppression'
+                if getattr(self,'player_replacement',False):self.selected['placement']='Zero-offset player replacement with complete-frame transaction'
                 (self.folder/'multi-ship-config-accepted.toml').write_bytes(placement_config.read_bytes())
             else:self.selected['camera_offset']=camera_left_offset(span)
             env.update(SFC_D3D9_ASSET_SHA256=manifest['asset_sha256'],SFC_D3D9_OFFSET_X=str(self.selected['camera_offset'][0]))
+            env['SFC_D3D9_PLAYER_REPLACEMENT']='1' if getattr(self,'player_replacement',False) else '0'
             from owner_rebind import initialize as init_binding,request
             self.binding_generation=1;self.bound_row=list(row)
             # Stable residency token covers fresh geometry/group/original-image content.
@@ -227,14 +231,17 @@ class Relay:
             env['SFC_D3D9_REBIND_COOKIE']=f'{cookie:x}'
         from evidence_budget import AGGREGATE_BYTES
         scratch_limit=AGGREGATE_BYTES if self.multi_scene else 128*1024*1024
-        command=[str(GUARD),str(gpu),'120' if self.additive else '90',str(scratch_limit),str(2*1024*1024),str(EXE),str(gpu),str(RUNTIME),str(RECEIVER),'normal']
+        backend=getattr(self,'renderer_backend',None)
+        renderer_exe,renderer_runtime=(backend['exe'],backend['runtime']) if backend else (EXE,RUNTIME)
+        if backend and not getattr(self,'prewarm_process',None):raise ValueError('Async material checkout requires its prepared renderer')
+        command=[str(GUARD),str(gpu),'120' if self.additive else '90',str(scratch_limit),str(2*1024*1024),str(renderer_exe),str(gpu),str(renderer_runtime),str(RECEIVER),'normal']
         if getattr(self,'prewarm_process',None):
             if self.prewarm_process.poll() is not None:raise ValueError('Prepared renderer exited before activation')
             from warm_start import activate
             activate(gpu,env,self.receiver.name)
             self.process=self.prewarm_process
         else:self.process=sp.Popen(command,env=env,creationflags=sp.CREATE_NO_WINDOW)
-        print(('Multi-ship ordinary-D3D9 diagnostic: ' if self.multi_scene else 'Offset ordinary-D3D9 ship: ' if self.additive else 'Separate D3D9 renderer timing: ')+manifest['model_name']+('. Original ship stays visible;existing visual baseline.' if self.additive else '. No new picture will be displayed.'),flush=True)
+        print(('Transactional player replacement: ' if getattr(self,'player_replacement',False) else 'Multi-ship ordinary-D3D9 diagnostic: ' if self.multi_scene else 'Offset ordinary-D3D9 ship: ' if self.additive else 'Separate D3D9 renderer timing: ')+manifest['model_name']+('. Original drawing remains until paired output authorizes replacement.' if getattr(self,'player_replacement',False) else '. Original ship stays visible;existing visual baseline.' if self.additive else '. No new picture will be displayed.'),flush=True)
         if self.additive and not self.offline_fixture:self.start_service(pid)
 
     def recover(self,pid):
@@ -306,6 +313,10 @@ class Relay:
         if self.light_replay:self.light_replay.close();self.light_replay=None
 
     def finish(self,pid):
+        if getattr(self,'player_replacement',False):
+            self.stop()
+            from player_replacement import finish
+            return finish(self,pid)
         self.stop();head=self.receiver.channel.read(OFFSET,HEADER.size);h=HEADER.unpack(head)
         if h[16]>CAPACITY:raise ValueError('Live audit count cap')
         raw=self.receiver.channel.read(OFFSET,2688+h[16]*AUDIT.size)

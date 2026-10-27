@@ -139,7 +139,7 @@ def compare(folder):
 
 def storage():
     total=0
-    for sub in ('remix-runtime/runs','remix-runtime/archives','d3d9-proof','d3d9-intercept/runs','d3d9-intercept/reference','d3d9-intercept/capabilities','d3d9-intercept/direct64-runs'):
+    for sub in ('remix-runtime/runs','remix-runtime/archives','d3d9-proof','d3d9-intercept/runs','d3d9-intercept/reference','d3d9-intercept/capabilities','d3d9-intercept/direct64-runs','player-replacement'):
         for p in (ROOT/'artifacts'/sub).rglob('*'):
             try:
                 if p.is_file():total+=p.stat().st_size

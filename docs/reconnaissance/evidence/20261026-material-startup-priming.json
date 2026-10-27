@@ -1,0 +1,577 @@
+{
+  "run": 199,
+  "date": "2026-10-26",
+  "parent": "93e8dba",
+  "scope": "One-time material startup priming only;no manual reload/retry/wait window",
+  "status": "READY_FOR_SPONSOR_RUNTIME_TEST;not live material-update PASS",
+  "changed_sources": {
+    "tools/remix_runtime/async_material_checkout.py": "a10d177072fcb576935d66e8ec0a0c54a5c94aaccc50ab1bd5b56483fc2524ff",
+    "tools/remix_runtime/qualify_async_material.py": "d758d75b6260cdef655c0851415c80af5c7b3eebccacbbbe7ff7719a9883b2c8",
+    "tests/test_async_material_checkout.py": "97534df9e385e6621f2d08b5bd6f7b4ca154f50989bd8a660da410aeadec56d8"
+  },
+  "python_tests": 552,
+  "native_build": "artifacts/candidate-hot-reload/run199-build.txt",
+  "light_qualification": "artifacts/candidate-hot-reload/run199-lights.txt",
+  "normal_fixture": "artifacts/remix-runtime/runs/20261026-045947-486323-return-fixture",
+  "candidate_proofs": [
+    {
+      "folder": "artifacts\\remix-runtime\\runs\\20261026-050347-632999-return-fixture",
+      "result_sha256": "96C45554D3E7522FD59B5881D8057AC8CC6C12FA69F279EACD435727E1C18F34",
+      "late_asset": false,
+      "content": {
+        "files": 381,
+        "exceptions": [
+          "assets/1/texture-0.bin: Remix-only base row-origin conversion",
+          "assets/1/texture-1.bin: Remix-only base row-origin conversion",
+          "assets/1/texture-2.bin: Remix-only base row-origin conversion",
+          "assets/1/texture-3.bin: Remix-only base row-origin conversion",
+          "assets/1/texture-4.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-0.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-1.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-10.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-11.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-12.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-13.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-14.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-15.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-16.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-17.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-18.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-19.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-2.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-20.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-21.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-22.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-23.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-24.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-25.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-26.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-27.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-28.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-29.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-3.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-30.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-31.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-32.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-33.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-34.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-35.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-36.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-37.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-38.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-39.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-4.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-40.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-41.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-42.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-43.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-44.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-45.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-46.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-47.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-48.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-49.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-5.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-50.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-51.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-52.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-53.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-54.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-55.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-6.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-7.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-8.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-9.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-0.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-1.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-10.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-11.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-12.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-13.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-14.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-15.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-16.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-17.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-18.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-19.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-2.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-20.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-21.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-22.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-23.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-24.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-25.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-26.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-27.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-28.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-29.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-3.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-30.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-31.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-32.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-33.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-34.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-35.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-36.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-37.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-38.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-39.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-4.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-40.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-41.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-42.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-43.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-44.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-45.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-5.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-6.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-7.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-8.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-9.bin: Remix-only base row-origin conversion"
+        ],
+        "reference_to_received_paths": {
+          "1": "1",
+          "2": "2",
+          "3": "3"
+        }
+      },
+      "delivery": {
+        "post_start_omissions": 1,
+        "max_consecutive_omissions": 1,
+        "records": 728
+      },
+      "steady_frames": 600,
+      "steady_draws": 596
+    },
+    {
+      "folder": "artifacts\\remix-runtime\\runs\\20261026-050531-325053-return-fixture",
+      "result_sha256": "0AF001A2FBA1A17B4FA07AD0A9E13853BECA1D94D1C3305E9C0B35BCD7E84797",
+      "late_asset": true,
+      "content": {
+        "files": 381,
+        "exceptions": [
+          "assets/1/texture-0.bin: Remix-only base row-origin conversion",
+          "assets/1/texture-1.bin: Remix-only base row-origin conversion",
+          "assets/1/texture-2.bin: Remix-only base row-origin conversion",
+          "assets/1/texture-3.bin: Remix-only base row-origin conversion",
+          "assets/1/texture-4.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-0.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-1.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-10.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-11.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-12.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-13.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-14.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-15.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-16.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-17.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-18.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-19.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-2.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-20.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-21.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-22.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-23.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-24.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-25.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-26.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-27.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-28.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-29.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-3.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-30.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-31.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-32.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-33.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-34.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-35.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-36.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-37.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-38.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-39.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-4.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-40.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-41.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-42.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-43.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-44.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-45.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-46.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-47.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-48.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-49.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-5.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-50.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-51.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-52.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-53.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-54.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-55.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-6.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-7.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-8.bin: Remix-only base row-origin conversion",
+          "assets/2/texture-9.bin: Remix-only base row-origin conversion",
+          "assets/3/scene.bin: exact declared shared-owner fixture pose/frame;geometry unchanged",
+          "assets/3/texture-0.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-1.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-10.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-11.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-12.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-13.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-14.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-15.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-16.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-17.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-18.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-19.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-2.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-20.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-21.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-22.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-23.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-24.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-25.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-26.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-27.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-28.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-29.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-3.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-30.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-31.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-32.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-33.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-34.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-35.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-36.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-37.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-38.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-39.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-4.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-40.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-41.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-42.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-43.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-44.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-45.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-5.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-6.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-7.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-8.bin: Remix-only base row-origin conversion",
+          "assets/3/texture-9.bin: Remix-only base row-origin conversion"
+        ],
+        "reference_to_received_paths": {
+          "1": "1",
+          "2": "2",
+          "3": "3"
+        }
+      },
+      "delivery": {
+        "post_start_omissions": 1,
+        "max_consecutive_omissions": 1,
+        "records": 900
+      },
+      "steady_frames": 600,
+      "steady_draws": 599
+    }
+  ],
+  "idle": [
+    {
+      "scope": "Actual primed renderer;synthetic liveness only;no SFC/scene submitted",
+      "production_qualification_eligible": false,
+      "cancel_early": false,
+      "native_pid": 40076,
+      "ready_qpc": 421636370130,
+      "settled_cpu_percent_one_core": 194.52834253029974,
+      "settled_private_growth_bytes": 0,
+      "settled_handle_growth": 0,
+      "output_published": false,
+      "idle_seconds": 60.04699999999866,
+      "native_job": {
+        "schema": "remix.job.v1",
+        "pid": 40076,
+        "exit_code": 0,
+        "stop_reason": 0,
+        "elapsed_ms": 63375,
+        "console_bytes": 25224,
+        "peak_scratch_bytes": 55780,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      },
+      "private_warm_passes": 1,
+      "error": "Idle CPU/memory/handles exceeded diagnostic bounds",
+      "folder": "artifacts/remix-runtime/runs/prime-idle-20261026-045051-981716",
+      "result_sha256": "4e4cc757a7f417fc8690158b2aa87170be1dfaaa65a5b97eb007afbfa5a070d1",
+      "first_sample": {
+        "at": 42163.656,
+        "cpu_seconds": 4.859375,
+        "private_bytes": 4678672384,
+        "working_set_bytes": 1647480832,
+        "handles": 1560
+      },
+      "last_sample": {
+        "at": 42223.203,
+        "cpu_seconds": 120.859375,
+        "private_bytes": 4662439936,
+        "working_set_bytes": 1808556032,
+        "handles": 1554
+      }
+    },
+    {
+      "scope": "Actual primed renderer;synthetic liveness only;no SFC/scene submitted",
+      "production_qualification_eligible": false,
+      "cancel_early": false,
+      "unprimed_control": true,
+      "native_pid": 43800,
+      "ready_qpc": 423704590300,
+      "busy_threads": [
+        {
+          "tid": 42644,
+          "name": "",
+          "cpu_percent_one_core": 96.73285557879262
+        },
+        {
+          "tid": 34496,
+          "name": "",
+          "cpu_percent_one_core": 96.26629839754443
+        },
+        {
+          "tid": 34676,
+          "name": "",
+          "cpu_percent_one_core": 0.46655718124819595
+        },
+        {
+          "tid": 44832,
+          "name": "",
+          "cpu_percent_one_core": 0.0
+        },
+        {
+          "tid": 35944,
+          "name": "",
+          "cpu_percent_one_core": 0.0
+        },
+        {
+          "tid": 14268,
+          "name": "",
+          "cpu_percent_one_core": 0.0
+        },
+        {
+          "tid": 9356,
+          "name": "",
+          "cpu_percent_one_core": 0.0
+        },
+        {
+          "tid": 38468,
+          "name": "",
+          "cpu_percent_one_core": 0.0
+        },
+        {
+          "tid": 37656,
+          "name": "",
+          "cpu_percent_one_core": 0.0
+        },
+        {
+          "tid": 37532,
+          "name": "",
+          "cpu_percent_one_core": 0.0
+        }
+      ],
+      "settled_cpu_percent_one_core": 193.2871582696406,
+      "settled_private_growth_bytes": 0,
+      "settled_handle_growth": 0,
+      "output_published": false,
+      "idle_seconds": 15.093999999997322,
+      "private_warm_passes": 0,
+      "error": "Idle CPU/memory/handles exceeded diagnostic bounds",
+      "folder": "artifacts/remix-runtime/runs/prime-idle-20261026-045419-409480",
+      "result_sha256": "63772b7fbe6a0663756ea45d62d6c271a964bfa43eacdbfabbc1cc845eec9ae3",
+      "first_sample": {
+        "at": 42370.468,
+        "cpu_seconds": 3.4375,
+        "private_bytes": 2646450176,
+        "working_set_bytes": 1055019008,
+        "handles": 1309
+      },
+      "last_sample": {
+        "at": 42385.015,
+        "cpu_seconds": 31.828125,
+        "private_bytes": 2739773440,
+        "working_set_bytes": 1109958656,
+        "handles": 1337
+      }
+    },
+    {
+      "scope": "Actual primed renderer;synthetic liveness only;no SFC/scene submitted",
+      "production_qualification_eligible": false,
+      "cancel_early": true,
+      "unprimed_control": false,
+      "native_job": {
+        "schema": "remix.job.v1",
+        "pid": 7804,
+        "exit_code": 0,
+        "stop_reason": 0,
+        "elapsed_ms": 19734,
+        "console_bytes": 25224,
+        "peak_scratch_bytes": 55780,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      },
+      "private_warm_passes": 1,
+      "error": null,
+      "folder": "artifacts/remix-runtime/runs/prime-idle-20261026-045734-079105",
+      "result_sha256": "a8b819ab885d11cbf78ca6352e84ea525dbfaeedaaa369a10d82e72e86e5dc36"
+    },
+    {
+      "scope": "Actual primed renderer;synthetic liveness only;no SFC/scene submitted",
+      "production_qualification_eligible": false,
+      "cancel_early": false,
+      "unprimed_control": false,
+      "native_pid": 34940,
+      "ready_qpc": 431937303730,
+      "busy_threads": [
+        {
+          "tid": 36164,
+          "name": "",
+          "cpu_percent_one_core": 96.88959554802881
+        },
+        {
+          "tid": 38528,
+          "name": "",
+          "cpu_percent_one_core": 96.42378018481713
+        },
+        {
+          "tid": 39520,
+          "name": "",
+          "cpu_percent_one_core": 0.15527178773722566
+        },
+        {
+          "tid": 36524,
+          "name": "",
+          "cpu_percent_one_core": 0.0
+        },
+        {
+          "tid": 37692,
+          "name": "",
+          "cpu_percent_one_core": 0.0
+        },
+        {
+          "tid": 39368,
+          "name": "",
+          "cpu_percent_one_core": 0.0
+        },
+        {
+          "tid": 25288,
+          "name": "",
+          "cpu_percent_one_core": 0.0
+        },
+        {
+          "tid": 43524,
+          "name": "",
+          "cpu_percent_one_core": 0.0
+        },
+        {
+          "tid": 38732,
+          "name": "",
+          "cpu_percent_one_core": 0.0
+        },
+        {
+          "tid": 9384,
+          "name": "",
+          "cpu_percent_one_core": 0.0
+        }
+      ],
+      "settled_cpu_percent_one_core": 193.2905468994697,
+      "settled_private_growth_bytes": 0,
+      "settled_handle_growth": 0,
+      "output_published": false,
+      "idle_seconds": 15.110000000000582,
+      "native_job": {
+        "schema": "remix.job.v1",
+        "pid": 34940,
+        "exit_code": 0,
+        "stop_reason": 0,
+        "elapsed_ms": 19375,
+        "console_bytes": 25224,
+        "peak_scratch_bytes": 55780,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      },
+      "private_warm_passes": 1,
+      "error": "Idle CPU/memory/handles exceeded diagnostic bounds",
+      "folder": "artifacts/remix-runtime/runs/prime-idle-20261026-050802-052077",
+      "result_sha256": "0d49371c4d0d0579a9dd65edcf0e27d1be037a21299adffa8379a823900652d6",
+      "first_sample": {
+        "at": 43193.718,
+        "cpu_seconds": 4.828125,
+        "private_bytes": 4657475584,
+        "working_set_bytes": 1636962304,
+        "handles": 1552
+      },
+      "last_sample": {
+        "at": 43208.281,
+        "cpu_seconds": 33.21875,
+        "private_bytes": 4643262464,
+        "working_set_bytes": 1643520000,
+        "handles": 1552
+      }
+    }
+  ],
+  "idle_adjudication": {
+    "absolute_quiet_cpu_target": "FAIL in primed and unprimed controls;not silently relaxed",
+    "matched_unprimed_cpu_percent": 193.2871582696406,
+    "matched_primed_cpu_percent": 193.2905468994697,
+    "normal_shutdown": "Primed60s,primed15s,andearlycancel native job0/no remaining processes;unprimed control has no job receipt,normal shutdown not proved",
+    "memory": "No positive settled private-allocation or handle growth;resident working set increased during60s;not an indefinite leak-free proof",
+    "separate_open_issue": "Pre-existing renderer idle CPU use,roughly2cores;avoid attributing it to priming"
+  },
+  "late_material_observation": {
+    "model": "FCA",
+    "first_logged_enhanced_image_processing_seconds_approx": 3.19184,
+    "later_distinct_asset_discovery_seconds": 5.9429751,
+    "method": "Native log wallclock correlated via master mtime and recorded publication QPC;approximate,notGPUinstallationACK"
+  },
+  "preflights": [
+    "artifacts/candidate-hot-reload/run199-checkout-preflight.txt",
+    "artifacts/candidate-hot-reload/run199-normal-preflight.txt"
+  ],
+  "broad_archive": {
+    "original": "artifacts/remix-runtime/runs/20261025-141338-349874-in-game/broad.bin",
+    "original_sha256": "05b44a3801bc90a030c727f2043b2d95ef4e7cd4e45c104c849a558a9480a75c",
+    "raw_bytes": 342556800,
+    "archive": "artifacts/remix-runtime/archives/run199-20261025-141338-349874-broad.zip",
+    "archive_bytes": 31632157,
+    "archive_sha256": "0f7f20ecf3525a4e8df6a66468503d9fe3af0b1389a3de59dc9512cbc86e0464",
+    "reason": "Completed stopped survey compressed byte-exactly to preserve20GBtest reservation;restore before raw reanalysis"
+  },
+  "repository": {
+    "staged": false,
+    "committed": false,
+    "pushed": false
+  },
+  "verified_asset_archives": [
+    {
+      "archive": "artifacts/remix-runtime/archives/run193-20261026-050347-632999-return-fixture-assets.zip",
+      "archive_sha256": "8ab0b1bf765de3df13b149a47a7a16f4d43dee882467abc2880302ac13619541",
+      "raw_bytes": 143656820,
+      "archive_bytes": 8910362,
+      "receipt": "artifacts/candidate-hot-reload/20261026-050347-632999-return-fixture-archive.json",
+      "files": 390
+    },
+    {
+      "archive": "artifacts/remix-runtime/archives/run193-20261026-050531-325053-return-fixture-assets.zip",
+      "archive_sha256": "87a51542827373fc3ad7c8d31fe88d5ca401a767071a6d41a407822f73531ed1",
+      "raw_bytes": 143656820,
+      "archive_bytes": 8910392,
+      "receipt": "artifacts/candidate-hot-reload/20261026-050531-325053-return-fixture-archive.json",
+      "files": 390
+    },
+    {
+      "archive": "artifacts/remix-runtime/archives/run193-20261026-040602-867571-return-fixture-assets.zip",
+      "archive_sha256": "26ff905614b59f79076aa9681cc40ccf7af75bed39be6b2b2477dea0a58ef11a",
+      "raw_bytes": 82843191,
+      "archive_bytes": 5333711,
+      "receipt": "artifacts/candidate-hot-reload/20261026-040602-867571-return-fixture-archive.json",
+      "files": 225
+    }
+  ],
+  "aggregate_bytes_final": 18739151526
+}

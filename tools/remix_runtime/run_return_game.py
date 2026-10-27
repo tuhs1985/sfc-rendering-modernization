@@ -109,6 +109,7 @@ def main():
     inspect.add_argument('--source-timing',action='store_true',help='Read-only semantic-offer to presentation timing;no Remix runtime/image')
     parser.add_argument('--live-owner-timing',action='store_true',help='Fresh raw semantic owner to separate ordinary-D3D9 renderer;no game drawing')
     parser.add_argument('--d3d9-additive',action='store_true',help='Qualified ordinary-D3D9 extra ship;original rendering untouched')
+    parser.add_argument('--player-replacement',action='store_true',help='Default-off unique player-fixture mesh suppression with complete-frame presentation')
     parser.add_argument('--lifecycle-capture',action='store_true',help='Separate bounded camera-gap/destruction observations;no native death inference')
     parser.add_argument('--camera-recovery',action='store_true',help='Two alive camera-away/back checks;no destruction requested')
     parser.add_argument('--offscreen-position',action='store_true',help='Default-off external read-only ship position across camera gaps;not renderer input')
@@ -116,6 +117,7 @@ def main():
     parser.add_argument('--synchronized-buffer',action='store_true',help='One complete game-frame delay paired with same-frame ship/depth;default off')
     parser.add_argument('--multi-ship',action='store_true',help='Fresh retained different models,configured camera-left diagnostic;originals remain')
     parser.add_argument('--experimental-parallel-assets',action='store_true',help='Sponsor-authorized experimental checkout: parallel parts/progressive materials;late-update delivery gate remains unresolved')
+    parser.add_argument('--async-material-checkout',action='store_true',help='Opt-in qualified1.6.1 single-file material checkout;normal runtime unchanged')
     parser.add_argument('--pipeline-mode',choices=('performance','test'),default='performance',help='Performance baseline;test adds diagnostic comparisons. Essential safeguards remain in both')
     inspect.add_argument('--private-ship',action='store_true',help='Fresh semantic SDK ship return into private game-side target;no visible change')
     inspect.add_argument('--visible-ship',action='store_true',help='Fresh matching magenta ship at world-offset position in original camera viewport;original ships unchanged')
@@ -128,6 +130,11 @@ def main():
     parser.add_argument('--light-tuning',action='store_true',help='Low-recording live controls until normal game exit;30minute tactical ceiling')
     parser.add_argument('--scene-depth',action='store_true',help='Default-off depth-filtered additive ship;original drawing/UI path unchanged')
     args=parser.parse_args()
+    if args.player_replacement and (not args.multi_ship or not args.async_material_checkout or args.light_tuning):parser.error('Player replacement requires current multi-ship async baseline and excludes tuning')
+    d3d9_tuning=args.light_tuning and args.multi_ship
+    if d3d9_tuning and not args.async_material_checkout:parser.error('D3D9 tuning requires the current --async-material-checkout baseline')
+    if args.async_material_checkout and (not args.multi_ship or args.pipeline_mode!='performance' or args.experimental_parallel_assets):
+        parser.error('--async-material-checkout requires performance multi-ship and excludes the older experimental checkout')
     if args.experimental_parallel_assets and (not args.multi_ship or args.pipeline_mode!='performance'):
         parser.error('--experimental-parallel-assets requires --multi-ship --pipeline-mode performance')
     if args.experimental_parallel_assets:
@@ -146,7 +153,7 @@ def main():
     if args.scene_depth:
         if args.light_tuning or args.capture_ship_image:parser.error('--scene-depth is a bounded standalone test,not tuning/image capture')
         args.light_wiring=True
-    if args.light_tuning:args.light_wiring=True
+    if args.light_tuning and not d3d9_tuning:args.light_wiring=True
     if args.light_wiring:args.capture_native_lights=True
     if args.capture_native_lights:args.textured_ship=True
     if args.capture_ship_image:args.textured_ship=True
@@ -166,7 +173,7 @@ def main():
         from qualify_lifecycle_capture import require_qualification as lifecycle_qualified
         if not args.multi_ship:lifecycle_qualified()
     if args.d3d9_additive:
-        if args.private_ship or args.calibration or args.light_tuning or args.broad_capture or args.depth_snapshots or args.search_depth:parser.error('--d3d9-additive is separate from SDK/private/capture modes')
+        if args.private_ship or args.calibration or (args.light_tuning and not d3d9_tuning) or args.broad_capture or args.depth_snapshots or args.search_depth:parser.error('--d3d9-additive is separate from SDK/private/capture modes')
         args.source_timing=True;args.live_owner_timing=True;args.observation_only=True;args.capture_native_lights=True
     if args.private_ship and (args.calibration or args.observation_only):parser.error('--private-ship is separate from calibration/observation-only')
     semantic_enabled=args.calibration or args.private_ship or args.source_timing
@@ -187,12 +194,20 @@ def main():
             recovered=recover_pending(game_running)
             if recovered:print('Recovered prior interrupted test: '+recovered,flush=True)
     preflight()
+    checkout_backend=None
     if args.source_timing:
-        if args.multi_ship:from qualify_multiship import require_qualification
+        if args.player_replacement:from player_replacement import require_qualification
+        elif d3d9_tuning:from qualify_d3d9_tuning import require_qualification_tuning as require_qualification
+        elif args.async_material_checkout:from qualify_async_material import require_qualification
+        elif args.multi_ship:from qualify_multiship import require_qualification
         elif args.d3d9_additive:from additive_qualification import require_qualification
         elif args.live_owner_timing:from live_owner_timing import require_qualification
         else:from source_timing import require_qualification
         q=require_qualification()
+        if args.async_material_checkout:checkout_backend=q['backend_inputs']
+        # Exercise the same audit-data boundary even in read-only preflight,
+        # before any proxy installation, host process or copied-game launch.
+        json.dumps(q)
         import sys
         sys.path.insert(0,str(ROOT/'tools/d3d9_proof'))
         from run_offline import storage,AGGREGATE_BYTES
@@ -252,6 +267,9 @@ def main():
     from pipeline_mode import policy as mode_policy
     metadata['pipeline_policy']=mode_policy(args.pipeline_mode)
     metadata['experimental_parallel_assets']=args.experimental_parallel_assets
+    if args.async_material_checkout:
+        from async_material_checkout import receipt
+        metadata['async_material_checkout']=receipt(checkout_backend)
     if args.light_tuning:metadata.update(capture_seconds=1800,workflow_seconds=1980,detail_policy='100 scene rows per owner;latest-only native bank;5second presentation samples')
     if args.private_ship:
         metadata.update(probe='REMIX-LIVE-RETURN-001',scene='Fresh selected ship rendered by SDK to PRIVATE game-side target;no backbuffer changes',output_resources_bytes=4*256*256*4)
@@ -389,6 +407,8 @@ def main():
         env.pop('SFC_D3D9_SYNC_BUFFER',None)
         env.pop('SFC_D3D9_MULTISCENE',None)
         if args.multi_ship:env['SFC_D3D9_MULTISCENE']='1'
+        env['SFC_D3D9_PLAYER_REPLACEMENT']='1' if args.player_replacement else '0'
+        env.pop('SFC_REPLACEMENT_FIXTURE_FAULTS',None) # Test executable owns this diagnostic; never send it to SFC.
         env['SFC_PIPELINE_MODE']=args.pipeline_mode if args.multi_ship else 'test'
         if args.synchronized_buffer:env['SFC_D3D9_SYNC_BUFFER']='1'
         if args.persistent_scene:env['SFC_PERSISTENT_SCENE']='1'
@@ -400,12 +420,16 @@ def main():
             from present_calibration import Receiver
             if receiver is None:receiver=Receiver()
             if args.live_owner_timing:
-                if args.experimental_parallel_assets:from progressive_scene_relay import Relay
+                if args.async_material_checkout:from async_material_checkout import Relay
+                elif args.experimental_parallel_assets:from progressive_scene_relay import Relay
                 elif args.multi_ship:from multi_scene_relay import Relay
                 else:from live_owner_timing import Relay
                 mode_args={'pipeline_mode':args.pipeline_mode} if args.multi_ship else {}
+                if args.player_replacement:mode_args['player_replacement']=True
                 if args.experimental_parallel_assets:mode_args['experimental_live_checkout']=True
+                if args.async_material_checkout:mode_args['checkout_backend']=checkout_backend
                 timing_relay=Relay(work,receiver,TEST,additive=args.d3d9_additive,persistent=args.persistent_scene,buffered=args.synchronized_buffer,**mode_args)
+                timing_relay.live_tuning=d3d9_tuning
             env['SFC_REMIX_CALIBRATION_SCENE']=receiver.name
             env.pop('SFC_REMIX_VISIBLE_SHIP',None)
             env.pop('SFC_REMIX_TEXTURED_SHIP',None)
@@ -418,6 +442,7 @@ def main():
                 from multi_scene_resources import policy
                 metadata.update(probe='D3D9-MULTISHIP-001',scene='Fresh retained multi-model diagnostic;placement recorded in live-owner analysis',original_suppressed=False,tracked_set_capacity=32,asset_revisions=64,
                                 image_limit_bytes=broad_capture.OVERALL,image_policy=policy())
+                if args.player_replacement:metadata.update(probe='PLAYER-REPLACEMENT-001',scene='Capture-first player-fixture suppression;transactional whole-frame presentation',replacement_requested=True,original_suppressed='See final native receipts',fallback='Two additional complete-picture presentations,then latched native rendering')
             (work/'manifest.json').write_text(json.dumps(metadata,indent=2))
         if args.depth_snapshots:env['SFC_REMIX_DEPTH_OUTPUT']=str(work)
         env.pop('SFC_REMIX_SCENE_DEPTH',None)
@@ -455,8 +480,9 @@ def main():
         if args.capture_native_lights and not args.light_tuning and not args.scene_depth and not args.d3d9_additive:print('Light discovery:play normally,move the camera and ship briefly,and fire when convenient. We record the game lights without changing them. Exit only at the two-beep request.',flush=True)
         if args.scene_depth:print('Depth test: originals remain ON. The extra textured ship is visible only when pose/camera match;it may disappear while moving. Hold still between small camera changes. Grid behavior is being observed,not changed by a guessed rule.',flush=True)
         if args.light_wiring and not args.light_tuning:print('LIGHT WIRING:extra ship uses two observed native directional lights with ratio controls. Native game unchanged. Normal90s test,not extended tuning;exit at two-beep cue.',flush=True)
-        if args.capture_ship_image:print('One prepared-image snapshot will be saved automatically. Focus the extra ship and hold the camera briefly once it appears;no manual screenshot or timestamp needed.',flush=True)
-        elif args.d3d9_additive:print('Look for a fully textured extra ship beside one original. Original ships stay visible. Your existing light/material/image settings are frozen for this short test;no magenta or on/off cycle.',flush=True)
+        if args.player_replacement:print('PLAYER REPLACEMENT: use your usual F-CA and a different enemy model. Expect one player ship at its original position,not an extra copy. Original drawing stays during preparation. Start still,then rotate camera,move/turn and switch away/back. Exit normally when requested.',flush=True)
+        elif args.capture_ship_image:print('One prepared-image snapshot will be saved automatically. Focus the extra ship and hold the camera briefly once it appears;no manual screenshot or timestamp needed.',flush=True)
+        elif args.d3d9_additive:print('Live D3D9 tuning: textured copies use your current settings. Save rendering.toml or lights.toml to update them. Exit SFC normally when finished.' if d3d9_tuning else 'Look for a fully textured extra ship beside one original. Original ships stay visible. Your existing light/material/image settings are frozen for this short test;no magenta or on/off cycle.',flush=True)
         elif not args.textured_ship:print('Look for a MAGENTA ship copy BESIDE the selected original ship,usually to its left at the starting view;it may flash. This is NOT a corner window. Original ships stay normal.' if args.visible_ship else ('No visible change expected;fresh ship output is tested privately,originals stay normal.' if args.private_ship else ('No triangle or ship changes expected; this is a read-only check.' if args.observation_only else 'A small green animated triangle will appear in a black square at upper right. It turns off/on/off automatically.')),flush=True)
         print('Tune the textured extra ship;exit SFC normally whenever finished.' if args.light_tuning else 'Play normally. Please exit only after the two-beep exit request.',flush=True)
         controller_exe=ROOT/'artifacts/m1/bin/m1_controller.exe';gate=ROOT/'artifacts/m1/bin/m1_gate.dll'
@@ -473,7 +499,7 @@ def main():
                 '\nEnableGeometryHook=0\nEnableWrapperObservation=1\nEnableMeshExport=1\nEnableTextureReferences=1\nEnablePrivateCopy=0\nLiveChannel='+receiver.name+'\n',encoding='ascii')
         controller_args=[str(controller_exe),'--pid',str(pid),'--dll',str(gate),'--config',str(config),'--max-seconds','24' if args.calibration else '90','--stop-on-burst','0' if semantic_enabled else '1','--already-loaded','0','--unload-after-stop','1']
         if args.light_tuning:controller_args[controller_args.index('--max-seconds')+1]='1800'
-        if args.d3d9_additive:controller_args[controller_args.index('--max-seconds')+1]='120'
+        if args.d3d9_additive and not d3d9_tuning:controller_args[controller_args.index('--max-seconds')+1]='120'
         gate_timeout=tactical_gate_timeout(args.multi_ship)
         if semantic_enabled:
             controller_args+=['--gate-timeout-seconds',str(gate_timeout)]
@@ -502,7 +528,7 @@ def main():
         if state['gamePid']!=pid or not state['startupRestored'] or not state['startupVerified'] or not state['ready']:raise RuntimeError('Image component startup/device not qualified; original game remains normal')
         channel.set('armed',1);channel.set('enabled',int(args.d3d9_additive or not args.observation_only));winsound.Beep(880,200);active=time.monotonic();phase=-1
         if args.d3d9_additive:
-            print('Preparing the extra textured ship;original game stays normal. Keep both ships visible and alive. Timed instructions start when the first matching ship image is ready.',flush=True)
+            print('Preparing current D3D9 tuning;edit settings after the copies appear. No timed motion instructions.' if d3d9_tuning else 'Preparing the extra textured ship;original game stays normal. Keep both ships visible and alive. Timed instructions start when the first matching ship image is ready.',flush=True)
             preparing=active
             while time.monotonic()-preparing<30:
                 enforce()
@@ -510,21 +536,25 @@ def main():
                 if launcher.poll() is not None:raise RuntimeError('Game exited during additive preparation')
                 time.sleep(.05)
             else:raise RuntimeError('No qualified offset image within30s preparation;preserve evidence')
-            metadata.update(additive_preparation_seconds=time.monotonic()-preparing,formal_capture_seconds=90,semantic_watchdog_seconds=120)
+            metadata.update(additive_preparation_seconds=time.monotonic()-preparing,formal_capture_seconds=1800 if d3d9_tuning else 90,semantic_watchdog_seconds=1800 if d3d9_tuning else 120)
             (work/'manifest.json').write_text(json.dumps(metadata,indent=2));active=time.monotonic()
         if args.capture_ship_image:image_reader=sp.Popen([str(live_bin/'ship_image_reader.exe'),session,str(work)],cwd=work,stdout=out('ship-image-reader.log'),stderr=sp.STDOUT,creationflags=sp.CREATE_NO_WINDOW)
         camera_cued=False;motion_cued=False
         source_cues=set()
-        if args.multi_ship:print('MULTI-SHIP OFFSET TEST:use different ship models. Returned copies sit to CAMERA LEFT of the originals at the previous test distance. Original ships stay visible. Keep both alive and briefly visible together,then move/turn and switch cameras normally. Watch the copies for flicker,missing/wrong models or placement problems. TWO LOW beeps=exit normally after restoration.',flush=True)
+        if args.light_tuning:pass
+        elif args.player_replacement:print('PLAYER REPLACEMENT:one player ship at the normal position. Briefly hold still,then move/turn,rotate camera and switch away/back. No timed movement cues. Two low beeps=request normal exit.',flush=True)
+        elif args.multi_ship:print('MULTI-SHIP OFFSET TEST:use different ship models. Returned copies sit to CAMERA LEFT of the originals at the previous test distance. Original ships stay visible. Keep both alive and briefly visible together,then move/turn and switch cameras normally. Watch the copies for flicker,missing/wrong models or placement problems. TWO LOW beeps=exit normally after restoration.',flush=True)
         elif args.synchronized_buffer:print('BUFFERED SHIP TEST:one complete game frame and matching extra ship are displayed together. Play normally and swap cameras freely;keep both ships alive. Check return flicker and whether controls/HUD feel normal. No movement cues;TWO LOW beeps=exit normally after restoration.',flush=True)
         elif args.persistent_scene:print('PERSISTENT SHIP TEST:keep both ships alive. At the timed single cue accelerate your ship and leave it moving. TWO HIGH=enemy camera;THREE HIGH=return to your ship. The extra ship should follow current motion without reloading. Follow the gentle-turn cue for the second pass. TWO LOW=exit only after restoration.',flush=True)
         elif args.offscreen_position:print('OFFSCREEN POSITION TEST:keep both ships alive. At the first single cue accelerate your ship and LEAVE IT MOVING. TWO HIGH=look at the enemy,leaving your own ship out of view. THREE HIGH=return to your ship. Follow the turn/setup cue for the second pass. TWO LOW=exit only after restoration. No new visual effect is expected.',flush=True)
         elif args.camera_recovery:print('CAMERA RETURN TEST:keep both ships alive;do NOT destroy your ship. ONE beep=hold;TWO HIGH=enemy camera;THREE HIGH=return to own ship. This repeats twice. The extra ship should return beside your own. TWO LOW=exit normally;restoration may take a short wait after recording.',flush=True)
         elif args.lifecycle_capture:print('LIFECYCLE TEST:First15seconds settle the view. ONE beep=hold alive;TWO HIGH=enemy camera;THREE HIGH=return to own ship;FOUR HIGH=destroy OWN ship. Stay in mission after destruction. TWO LOW=exit normally.',flush=True)
         elif args.source_timing:print(('OFFSET SHIP TEST:extra textured ship,original stays visible. Keep both ships alive. ' if args.d3d9_additive else 'TIMING CHECK:no visual change. ')+ 'Do not pause;keep both ships visible. First15seconds:find a comfortable view. LOW single beep=hold. TWO HIGH beeps=small camera moves. THREE HIGH=accelerate/turn your ship. TWO LOW=exit normally.',flush=True)
-        if args.light_tuning:print('TUNING:edit tools/remix_runtime/config/lights.toml, materials.toml or image.toml and SAVE. Image adjustments need enabled=true. Changes apply live. Exit SFC normally when finished;30minute safety ceiling. No timed motion instructions.',flush=True)
+        if args.light_tuning:print('TUNING:edit tools/remix_runtime/config/rendering.toml (materials,image,quality,bloom) or lights.toml and SAVE. Image adjustments need enabled=true. Changes apply live. Exit SFC normally when finished;30minute safety ceiling. No timed motion instructions.',flush=True)
         tuning_exited=False
         while time.monotonic()-active<(1800 if args.light_tuning else 10.1 if args.broad_capture else (20 if args.depth_snapshots else 90)):
+            if args.light_tuning and launcher.poll() is not None:
+                tuning_exited=True;break
             enforce();elapsed=time.monotonic()-active;state=channel.snapshot()
             if args.light_tuning and launcher.poll() is not None:
                 tuning_exited=True;break
@@ -546,7 +576,7 @@ def main():
             next_phase=observation_phase(elapsed,continuous=args.textured_ship or args.source_timing)
             if phase!=next_phase:
                 phase=next_phase;phase_results[str(phase)]={'seconds':elapsed,'start':state};channel.set('enabled',int(args.d3d9_additive or (not args.observation_only and phase in (0,2))))
-                print('Offset ship remains enabled;keep playing until the exit request.' if args.d3d9_additive else ('Private receiver ON','Private receiver OFF','Private receiver ON again','Private renderer disconnect;original game unchanged')[phase] if args.private_ship else ('Read-only check; keep playing normally.' if args.observation_only else ('Image ON','Image OFF; keep playing','Image ON again','Renderer disconnect; image OFF; keep playing')[phase]),flush=True)
+                print('Player replacement remains enabled;keep playing until the exit request.' if args.player_replacement else 'Offset ship remains enabled;keep playing until the exit request.' if args.d3d9_additive else ('Private receiver ON','Private receiver OFF','Private receiver ON again','Private renderer disconnect;original game unchanged')[phase] if args.private_ship else ('Read-only check; keep playing normally.' if args.observation_only else ('Image ON','Image OFF; keep playing','Image ON again','Renderer disconnect; image OFF; keep playing')[phase]),flush=True)
                 if phase==3 and not args.search_depth:channel.set('stop',1);host_shutdown_expected=True
             if state['error']:raise RuntimeError('Image component reported an error; original rendering retained')
             if launcher.poll() is not None:raise RuntimeError('Game exited before the requested tactical observation completed')
@@ -612,7 +642,7 @@ def main():
             image_result=convert(work)
     except Exception as exc:
         error=str(exc);print('Test stopped safely: '+error,flush=True)
-        if pid and not normal:print('Please exit the copied SFC game normally. No original drawing is suppressed.',flush=True)
+        if pid and not normal:print('Please exit the copied SFC game normally. '+('Replacement is being revoked; recovery evidence will be checked.' if args.player_replacement else 'No original drawing is suppressed.'),flush=True)
     finally:
         if offscreen:
             try:offscreen.close()
@@ -694,6 +724,10 @@ def main():
         if args.multi_ship:
             result.update(probe='D3D9-MULTISHIP-001',aligned_overlay=bool(live_timing_result and live_timing_result.get('selected',{}).get('camera_offset')==[0,0,0]),original_ship_suppressed=False)
             result['result']='MULTISHIP_OVERLAY_SPONSOR_REVIEW_REQUIRED' if not error and live_timing_result and live_timing_result['result']=='MULTISHIP_OVERLAY_REVIEW_REQUIRED' else 'PARTIAL'
+        if args.player_replacement:
+            replacement=(live_timing_result or {}).get('replacement',{})
+            result.update(probe='PLAYER-REPLACEMENT-001',original_ship_suppressed=bool(replacement.get('suppressed')),replacement=replacement,
+                          result='PLAYER_REPLACEMENT_SPONSOR_REVIEW_REQUIRED' if not error and replacement.get('committed') else 'PARTIAL')
         if args.lifecycle_capture:
             from lifecycle_capture import analyze as analyze_lifecycle
             try:result['lifecycle_capture']=analyze_lifecycle(work/'gate')
@@ -762,6 +796,7 @@ def main():
             result['identity_census']={'enabled':False,'reason':'Performance mode;identity safeguards remain active'}
         result['pipeline_policy']=mode_policy(args.pipeline_mode)
         result['experimental_parallel_assets']=args.experimental_parallel_assets
+        result['async_material_checkout']=metadata.get('async_material_checkout')
         result['final_report_complete']=True
         run_report.save(work,result)
     print('Evidence: '+str(work),flush=True)

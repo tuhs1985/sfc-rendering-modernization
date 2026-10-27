@@ -9,6 +9,29 @@ from pathlib import Path
 from material_binding import shader
 
 
+def publish_remix_revision(root,text):
+    """Atomic Remix USD publication, distinguishable by packaged Windows USD.
+
+    OpenUSD25.11 ArchGetModificationTime uses whole-second _wstat64 mtime on
+    Windows. A normal atomic rename can therefore be noticed by FileWatch yet
+    skipped by SdfLayer::Reload when two revisions share that second. Assign a
+    distinct logical timestamp BEFORE exchange; never wait, touch/retry a loaded
+    file, or change any material/image content. Explicit async checkout only.
+    """
+    root=Path(root);target=root/'mod.usda';pending=root/'mod.usda.pending'
+    if target.is_symlink() or pending.is_symlink():raise ValueError('Material publication symlink')
+    if len(text.encode('utf-8'))>16*1024*1024:raise ValueError('Material library metadata cap')
+    previous=target.stat().st_mtime_ns if target.exists() else None
+    pending.write_text(text,encoding='utf-8')
+    info=pending.stat();natural=info.st_mtime_ns
+    published=natural if previous is None else max(natural,(previous//1_000_000_000+1)*1_000_000_000)
+    if published!=natural:os.utime(pending,ns=(info.st_atime_ns,published))
+    pending.replace(target)  # Existing caller handles transient sharing-busy.
+    return dict(policy='remix-openusd-windows-second-revision-v1',
+        previous_mtime_ns=previous,natural_mtime_ns=natural,published_mtime_ns=published,
+        meaning='Distinct file revision;not runtime material installation ACK')
+
+
 def streamed_layers(root,layers):
     """Offline-only derivative selecting Remix's existing texture-streaming path.
 
@@ -42,7 +65,7 @@ def streamed_layers(root,layers):
     return outputs,count
 
 
-def flat(root,layers):
+def flat(root,layers,overrides=None):
     root=Path(root).resolve();gpu=root.parents[2]
     if not 1<=len(layers)<=64:raise ValueError('Material library layer bound')
     blocks={};identities={}
@@ -73,6 +96,9 @@ def flat(root,layers):
                 if '@' in path or '\n' in path or '\r' in path:raise ValueError('Unsafe rebased image path')
                 block=block.replace('@'+image+'@','@'+path+'@')
             identities[name]=canonical;blocks[name]=block
+    if overrides:
+        for name,block in overrides.items():
+            if name in blocks:blocks[name]=block
     text='#usda 1.0\n(defaultPrim = "RootNode")\ndef Xform "RootNode"\n{\n def Scope "Looks"\n {\n'+''.join(blocks.values())+' }\n}\n'
     if len(text.encode())>16*1024*1024:raise ValueError('Material library metadata cap')
     return text,len(blocks)

@@ -1,0 +1,72 @@
+# FACTORY RESTORE PROFILE — not your tuned baseline.
+# Copy to rendering.toml to restore all material, image, quality and bloom controls.
+# Lights are independent. Native bloom affects the whole Remix image.
+
+[material]
+
+roughness = 1.0
+
+metallic = 0.0
+
+anisotropy = 0.0
+
+emissive_intensity = 1.0
+
+roughness_map_enabled = false
+
+roughness_map_strength = 0.5
+
+roughness_map_black = 0.0
+
+roughness_map_white = 1.0
+
+roughness_map_invert = false
+
+roughness_map_gamma = 1.0
+
+
+[quality]
+
+enabled = false
+
+texture_filtering = "anisotropic"
+
+max_anisotropy = 8
+
+mip_bias = 0.0
+
+anti_aliasing = "off"
+
+denoising = true
+
+supersampling = 1.0
+
+
+[image]
+
+enabled = false
+
+tone_mapping = "local"
+
+automatic_exposure = true
+
+brightness = 50
+
+exposure_ev = 0.0
+
+contrast = 1.0
+
+gamma = 1.0
+
+saturation = 1.0
+
+
+[remix]
+
+"rtx.bloom.enable" = true
+
+"rtx.bloom.burnIntensity" = 1.0
+
+"rtx.bloom.luminanceThreshold" = 0.25
+
+"rtx.bloom.steps" = 5

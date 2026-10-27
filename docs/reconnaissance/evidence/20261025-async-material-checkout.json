@@ -1,0 +1,308 @@
+{
+  "run": 194,
+  "result": "READY_FOR_SPONSOR_RUNTIME_TEST",
+  "parent": "93e8dba",
+  "sfc_launched": false,
+  "normal_runtime_changed": false,
+  "backend": {
+    "release": "1.6.1",
+    "exe": "C:\\Project\\SFC-Modernize Engine\\artifacts\\remix-runtime\\candidate-1.6.1-bin\\d3d9_direct_host.exe",
+    "runtime": "C:\\Project\\SFC-Modernize Engine\\artifacts\\remix-runtime\\deps\\candidate-1.6.1\\runtime\\d3d9_x64.dll",
+    "host_sha256": "cda23a9e6bce90eed53186198bd74536a92332946ab934830d51bfe0b9919f59",
+    "runtime_sha256": "c05c552e3f44597960891eff6c8482efcbde8573b15c2b900d3dc360e6cc1ad9",
+    "header_sha256": "26a5607a07e8718298c35519e53bbc71d526186a947e5a2a5b613a0d6db04f3a",
+    "source_commit": "0a6cd5b1ee814ec390c358e0c9c32ece8895ddc0",
+    "source_parity": "Packaged5a7eec84/public0a6cd5b not instruction-level verified"
+  },
+  "qualification": [
+    {
+      "folder": "artifacts\\remix-runtime\\runs\\20261026-020046-223248-return-fixture",
+      "result_sha256": "FD93CCF904E5C0910E9C6728A8B5C82D283CE98D89F4092F628FF0B6D976EAC1",
+      "late_asset": false,
+      "content": {
+        "files": 381,
+        "exceptions": [],
+        "reference_to_received_paths": {
+          "1": "1",
+          "2": "2",
+          "3": "3"
+        }
+      },
+      "delivery": {
+        "post_start_omissions": 0,
+        "max_consecutive_omissions": 0,
+        "records": 709
+      },
+      "steady_frames": 600,
+      "steady_draws": 600
+    },
+    {
+      "folder": "artifacts\\remix-runtime\\runs\\20261026-020227-512666-return-fixture",
+      "result_sha256": "CF098951E89E5FE7EE5B1E264F506DAD0FE4BB9C5FD30872B73A06A629917BFD",
+      "late_asset": true,
+      "content": {
+        "files": 381,
+        "exceptions": [
+          "assets/3/scene.bin: captured frame ID only"
+        ],
+        "reference_to_received_paths": {
+          "1": "1",
+          "2": "2",
+          "3": "3"
+        }
+      },
+      "delivery": {
+        "post_start_omissions": 1,
+        "max_consecutive_omissions": 1,
+        "records": 874
+      },
+      "steady_frames": 600,
+      "steady_draws": 596
+    }
+  ],
+  "qualification_receipt": "artifacts\\d3d9-proof\\async-material\\qualification.json",
+  "qualification_sha256": "e3cf6fb0b4efe3e67e73f8f14be430272d59e34bb857664168177776b4857098",
+  "runs": [
+    {
+      "run": "20261026-015529-935115-return-fixture",
+      "error": null,
+      "first_matching_s": 3.1147932000021683,
+      "admissions": [
+        {
+          "id": 1,
+          "seconds": 3.0583985000012035
+        },
+        {
+          "id": 2,
+          "seconds": 3.0617445000025327
+        },
+        {
+          "id": 3,
+          "seconds": 3.8528765000010026
+        }
+      ],
+      "post_start_omissions": 9,
+      "max_consecutive": 1,
+      "material_publications": 3,
+      "state": {
+        "pid": 4788,
+        "stopped": true,
+        "last_frame": 201059,
+        "published": 888,
+        "dropped": 171,
+        "invalid": 0,
+        "asset_ready": 4,
+        "asset_rejected": 0,
+        "closed_frame": 200878
+      },
+      "partial": [],
+      "native_job": {
+        "schema": "remix.job.v1",
+        "pid": 18640,
+        "exit_code": 0,
+        "stop_reason": 0,
+        "elapsed_ms": 19641,
+        "console_bytes": 61273,
+        "peak_scratch_bytes": 166583412,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      }
+    },
+    {
+      "run": "20261026-015852-091719-return-fixture",
+      "error": null,
+      "first_matching_s": 9.454606700001023,
+      "admissions": [
+        {
+          "id": 1,
+          "seconds": 9.365760600001522
+        },
+        {
+          "id": 2,
+          "seconds": 9.370258599999943
+        },
+        {
+          "id": 3,
+          "seconds": 9.402503599998454
+        }
+      ],
+      "post_start_omissions": 22,
+      "max_consecutive": 8,
+      "material_publications": 1,
+      "state": {
+        "pid": 41088,
+        "stopped": true,
+        "last_frame": 201367,
+        "published": 845,
+        "dropped": 522,
+        "invalid": 0,
+        "asset_ready": 4,
+        "asset_rejected": 0,
+        "closed_frame": 201186
+      },
+      "partial": [],
+      "native_job": {
+        "schema": "remix.job.v1",
+        "pid": 43276,
+        "exit_code": 0,
+        "stop_reason": 0,
+        "elapsed_ms": 35422,
+        "console_bytes": 46122,
+        "peak_scratch_bytes": 165103083,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      }
+    },
+    {
+      "run": "20261026-020046-223248-return-fixture",
+      "error": null,
+      "first_matching_s": 3.2063966000023356,
+      "admissions": [
+        {
+          "id": 1,
+          "seconds": 3.1536277000013797
+        },
+        {
+          "id": 2,
+          "seconds": 3.1576846999996633
+        },
+        {
+          "id": 3,
+          "seconds": 3.9563807000013185
+        }
+      ],
+      "post_start_omissions": 0,
+      "max_consecutive": 0,
+      "material_publications": 3,
+      "state": {
+        "pid": 43172,
+        "stopped": true,
+        "last_frame": 201062,
+        "published": 888,
+        "dropped": 174,
+        "invalid": 0,
+        "asset_ready": 4,
+        "asset_rejected": 0,
+        "closed_frame": 200881
+      },
+      "partial": [],
+      "native_job": {
+        "schema": "remix.job.v1",
+        "pid": 43192,
+        "exit_code": 0,
+        "stop_reason": 0,
+        "elapsed_ms": 19922,
+        "console_bytes": 60607,
+        "peak_scratch_bytes": 166582833,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      }
+    },
+    {
+      "run": "20261026-020227-512666-return-fixture",
+      "error": null,
+      "first_matching_s": 3.556083100000251,
+      "admissions": [
+        {
+          "id": 1,
+          "seconds": 3.2480013000022154
+        },
+        {
+          "id": 2,
+          "seconds": 3.2702172999997856
+        },
+        {
+          "id": 4,
+          "seconds": 7.206670300001861
+        }
+      ],
+      "post_start_omissions": 1,
+      "max_consecutive": 1,
+      "material_publications": 3,
+      "state": {
+        "pid": 39484,
+        "stopped": true,
+        "last_frame": 201253,
+        "published": 1055,
+        "dropped": 198,
+        "invalid": 0,
+        "asset_ready": 4,
+        "asset_rejected": 0,
+        "closed_frame": 201072
+      },
+      "partial": [],
+      "native_job": {
+        "schema": "remix.job.v1",
+        "pid": 19664,
+        "exit_code": 0,
+        "stop_reason": 0,
+        "elapsed_ms": 22516,
+        "console_bytes": 58153,
+        "peak_scratch_bytes": 166575861,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      }
+    }
+  ],
+  "tests": {
+    "main_python": 542,
+    "new_checkout_tests": 9,
+    "launcher_syntax": "PASS",
+    "native_light_worker": "PASS",
+    "normal_qualification": "PASS",
+    "candidate_qualification": "PASS",
+    "normal_readonly_preflight": "PASS",
+    "checkout_readonly_preflight": "PASS"
+  },
+  "first_attempt_adjudication": "Actual GPU passed;fixed-order content checker falsely rejected swapped concurrent asset paths. All381files matched after content-based mapping. Final-source fixtures repeated;not a renderer failure.",
+  "archives": [
+    {
+      "archive": "artifacts/remix-runtime/archives/run193-20261025-181033-525694-return-fixture-assets.zip",
+      "archive_sha256": "de4065c12f26fdb7eb9eb216f671e56ee13416356a025fab31286df199e72f00",
+      "raw_bytes": 143633461,
+      "archive_bytes": 8906869
+    },
+    {
+      "archive": "artifacts/remix-runtime/archives/run193-20261025-185841-390784-return-fixture-assets.zip",
+      "archive_sha256": "9c662bc5960bd118c82429f6844663c1487a463b964ced3b5cbce66e2670b5b7",
+      "raw_bytes": 143633467,
+      "archive_bytes": 8906862
+    },
+    {
+      "archive": "artifacts/remix-runtime/archives/run193-20261025-001516-802029-return-fixture-assets.zip",
+      "archive_sha256": "495d0b15fa1ebac973af06601e4971b30200c2d5d7ce3a7e39fb73259dc3b76d",
+      "raw_bytes": 143662360,
+      "archive_bytes": 8921394
+    },
+    {
+      "archive": "artifacts/remix-runtime/archives/run193-20261026-015529-935115-return-fixture-assets.zip",
+      "archive_sha256": "1b1e4b4d8e4e04de506bcf6092c8d7a6644ef0f868cfae966c642ba5df5d384e",
+      "raw_bytes": 143656648,
+      "archive_bytes": 8908003
+    },
+    {
+      "archive": "artifacts/remix-runtime/archives/run193-20261026-020046-223248-return-fixture-assets.zip",
+      "archive_sha256": "807ad9af36df26f851b835163246d1e4c022dc075fa49efb2a8d512de7e2cfaf",
+      "raw_bytes": 143656645,
+      "archive_bytes": 8908004
+    },
+    {
+      "archive": "artifacts/remix-runtime/archives/run193-20261026-020227-512666-return-fixture-assets.zip",
+      "archive_sha256": "71de486cc2530dd6b7665623a88073798dd4176e272335c4a0861cf62b2876bf",
+      "raw_bytes": 143656648,
+      "archive_bytes": 8908016
+    }
+  ],
+  "limits": "Existing90second tactical/285second workflow/20GB aggregate unchanged",
+  "next_action": "Sponsor runs existing multiship launcher with -AsyncMaterialCheckout,then review actual game appearance/delivery/cleanup/hashes before promotion",
+  "run_record": "docs/runs/2026-10-25-codex-async-material-checkout.md",
+  "probe": "docs/reconnaissance/probes/D3D9-ASYNC-MATERIAL-001.md",
+  "aggregate_bytes": 18768736830,
+  "aggregate_limit": 20000000000,
+  "final_checks": {
+    "ast": "PASS",
+    "json": "PASS",
+    "normal_and_checkout_qualification_after_archive": "PASS",
+    "staged_files": 0
+  }
+}

@@ -5,16 +5,14 @@ import struct
 import tomllib
 from image_controls import Relay as ImageRelay
 from material_controls import fnv
+from rendering_config import DEFAULT,section,scoped
 
-DEFAULT=Path(__file__).parent/'config/quality.toml'
 DEFAULTS=dict(enabled=False,texture_filtering='anisotropic',max_anisotropy=8,
               mip_bias=0.,anti_aliasing='off',denoising=True,supersampling=1.)
 
 def encode(raw):
     if len(raw)>16384:raise ValueError('Quality config16KiB limit')
-    data=tomllib.loads(raw.decode('utf-8'))
-    if set(data)-{'quality'}:raise ValueError('Unknown quality section')
-    row=data.get('quality',{})
+    row=section(raw,'quality')
     if not isinstance(row,dict) or set(row)-set(DEFAULTS):raise ValueError('Unknown quality setting')
     v=DEFAULTS|row
     if type(v['enabled']) is not bool or type(v['denoising']) is not bool:raise ValueError('Quality boolean required')
@@ -38,7 +36,7 @@ class Relay(ImageRelay):
         self.last_poll=now
         try:
             if self.path.stat().st_size>16384:raise ValueError('Quality config16KiB limit')
-            raw=self.path.read_bytes();digest=hashlib.sha256(raw).hexdigest()
+            raw=scoped(self.path.read_bytes(),'quality');digest=hashlib.sha256(raw).hexdigest()
             if digest==self.digest:return
             if self.accepted>=256:raise ValueError('Quality revision256/session limit')
             packet=encode(raw);pending=self.folder/'quality-controls.pending';pending.write_bytes(packet);pending.replace(self.folder/'quality-controls.bin')

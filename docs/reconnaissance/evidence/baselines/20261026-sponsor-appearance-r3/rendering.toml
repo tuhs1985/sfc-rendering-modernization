@@ -1,0 +1,151 @@
+# SFC MODERNIZE — RENDERING SETTINGS
+#
+# This is the ONE editable file for materials, illumination, image and quality.
+# Your current values are preserved. No source game images are edited.
+#
+# Save during a light-tuning session to apply supported changes live.
+# Short ordinary-D3D9 tests freeze this profile at startup; restart after editing.
+# Invalid edits keep the last accepted settings. Restart after 256 accepted edits.
+#
+# Scope matters: material controls affect surfaces; image/bloom affect the complete
+# Remix picture. Putting them in this file does not make bloom emission-only.
+# Lights remain independently configured in lights.toml.
+#
+# Factory reset: copy rendering.example.toml over this file.
+# Your pre-consolidation values are backed up under artifacts/config-consolidation/run203.
+
+
+# ============================================================================
+# 1. SURFACE MATERIAL AND ILLUMINATION
+# ============================================================================
+
+[material]
+
+# Roughness: 0=polished/sharp reflections; 1=rough/matte. Does not add surface detail.
+roughness = 0.4
+
+# Metallic: 0=painted/nonmetal response; 1=metal response. Intermediate values blend.
+# Changes reflected colour and diffuse response; not a recovered SFC material value.
+metallic = 0.2
+
+# Anisotropy: -1..1; 0=round highlights; nonzero stretches the highlight direction.
+# No recovered tangent map: experimental control, not an SFC fidelity guarantee.
+anisotropy = 0.5
+
+# Native USD material input: emission strength, 0..100; 0=off; 1=provisional baseline.
+# Scales the current primary-colour x illumination-image emission contribution.
+# Strength is separate from bloom. It does not change the diffuse image.
+# Legacy spelling illumination_strength is accepted, but never specify both names.
+emissive_intensity = 1.2
+
+
+# --- OPTIONAL GENERATED ROUGHNESS MAP -----------------------------------------
+# Artistic material generation; not recovered SFC surface properties.
+
+# false uses the uniform roughness above; true derives a map from texture brightness.
+roughness_map_enabled = true
+
+# 0=uniform roughness; 1=entirely driven by the generated map.
+roughness_map_strength = 0.9
+
+# Input luminance levels. White must exceed black. White means rough/matte.
+roughness_map_black = 0.0
+
+roughness_map_white = 1.0
+
+# true makes bright paint smoother. Does not flip the image or alter its colour.
+roughness_map_invert = false
+
+# >1 makes generated midtones rougher; <1 makes them smoother.
+roughness_map_gamma = 0.4
+
+
+# ============================================================================
+# 2. TEXTURE FILTERING AND RENDER QUALITY
+# ============================================================================
+
+[quality]
+
+# false restores the pre-quality-control baseline.
+enabled = true
+
+# "trilinear" or "anisotropic". Existing comparison profile uses anisotropic.
+texture_filtering = "anisotropic"
+
+# 1, 2, 4, 8, 16; used when anisotropic filtering is selected.
+max_anisotropy = 16
+
+# -1..1; 0=neutral. Negative values can sharpen but may shimmer.
+mip_bias = 0.0
+
+# "off" or "temporal". Temporal AA is not SFC's MSAA and can soften the image.
+anti_aliasing = "off"
+
+# false exposes noisy ray-tracing output; this is not an SFC shading switch.
+denoising = true
+
+# Only 1.0 is qualified. Larger values are rejected until a proper resolve exists.
+supersampling = 1.0
+
+
+# ============================================================================
+# 3. WHOLE-IMAGE ADJUSTMENTS
+# ============================================================================
+# These affect the completed Remix image, not diffuse or illumination separately.
+# Existing adapter setting names are preserved. Native bloom names are in section 4.
+
+[image]
+
+# false restores the tested image-adjustment baseline. Does not disable bloom.
+enabled = true
+
+# "local" or "global" tone mapping. Existing baseline uses local.
+tone_mapping = "local"
+
+# true adapts exposure automatically; false keeps exposure under manual control.
+automatic_exposure = false
+
+# 0..100; 50=neutral. Existing adapter brightness control uses an exposure adjustment.
+brightness = 70
+
+# -4..4 exposure stops; +1 doubles exposure factor; -1 halves it.
+exposure_ev = -0.5
+
+# 0..2; 1=neutral; lower=flatter; higher=stronger contrast.
+contrast = 1.3
+
+# 0.25..4; 1=neutral; >1 brightens midtones; <1 darkens them.
+gamma = 0.7
+
+# 0..2; 0=grey; 1=neutral; >1 strengthens colour across the complete image.
+saturation = 0.9
+
+
+# ============================================================================
+# 4. NATIVE REMIX BLOOM — WHOLE-IMAGE POST-PROCESSING
+# ============================================================================
+# Exact native option names and individual values; no renamed/combined sliders.
+# Bloom can affect ANY bright pixel, including reflections and surface lighting.
+# These controls cannot isolate illumination maps. Independent of [image].enabled.
+# Stock runtime values below preserve the prior bloom baseline.
+
+[remix]
+
+# Enable/disable bright-area halos.
+"rtx.bloom.enable" = true
+
+# Amount of bloom added to the final image; 0=none. Not material emission strength.
+"rtx.bloom.burnIntensity" = 10.0
+
+# Higher values suppress bloom more strongly in dim areas.
+"rtx.bloom.luminanceThreshold" = 0.95
+
+# Integer 1..8 downsampling steps; higher values produce a wider halo.
+"rtx.bloom.steps" = 2
+
+
+# NOT EXPOSED
+# No native emission-only saturation or per-layer brightness/contrast was found
+# in the pinned material path. No custom controls are invented here.
+# rtx.emissiveIntensity is omitted: API acceptance did not establish meaningful
+# visible control of textured emission in our test. Use emissive_intensity above.

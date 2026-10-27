@@ -22,9 +22,15 @@ import multi_scene as wire
 
 class Relay(SingleRelay):
     def __init__(self,*args,**kwargs):
+        self.player_replacement=kwargs.pop('player_replacement',False)
         from pipeline_mode import validate
         self.mode=validate(kwargs.pop('pipeline_mode','performance'))
         super().__init__(*args,**kwargs,multi_scene=True)
+        self.replacement_names={}
+        if self.player_replacement:
+            from owner_selection import selected_model,CONFIG
+            self.replacement_model=selected_model()
+            (self.folder/'player-target-config-accepted.toml').write_bytes(CONFIG.read_bytes())
         if not self.additive or not self.persistent or not self.buffered:
             raise ValueError('Multi-scene requires persistent synchronized additive path')
         wire.initialize(self.receiver.channel)
@@ -36,7 +42,8 @@ class Relay(SingleRelay):
         self.initial_ids=None;self.first_discovery=None;self.last_discovery=None
         self.initial_context=None;self.renderer_started_ns=None;self.initial_published_ns=None
         self.published_paths=set();self.stopping=False
-        self.material_config=(ROOT/'tools/remix_runtime/config/materials.toml').read_bytes()
+        from rendering_config import scoped
+        self.material_config=scoped((ROOT/'tools/remix_runtime/config/rendering.toml').read_bytes(),'material')
         self.material_keys={};self.layers=[];self.image_bytes=0;self.original_images=set();self.partial=[];self.anchor_missing=0
         self.frame_log=(self.folder/'D3D9-MULTISCENE-001.frames.bin').open('wb') if self.mode=='test' else None
         self.frame_samples=0;self.frame_sample_dropped=0;self.last_sample=0;self.sample_identity=None
@@ -57,16 +64,18 @@ class Relay(SingleRelay):
         """Start the real renderer/device, without a ship or dummy scene template."""
         if self.prewarm_process or self.process:return
         from live_owner_timing import EXE,RUNTIME,RECEIVER,GUARD
+        backend=getattr(self,'renderer_backend',None)
+        if backend:EXE,RUNTIME=backend['exe'],backend['runtime']
         from evidence_budget import AGGREGATE_BYTES
         from multi_scene import camera_offset
         gpu=self.folder/'gpu';gpu.mkdir(exist_ok=True)
         # Do not ingest an empty library and immediately reload it. The native
         # host enables replacement assets only after the complete activation.
         (gpu/'rtx.conf').write_text(CONFIG+'rtx.enableReplacementMaterials = True\nrtx.enableReplacementMeshes = False\n')
-        from image_controls import encode as image
+        from image_controls import encode_current as image
         from quality_controls import encode as quality
         for name,encoder in (('image',image),('quality',quality)):
-            raw=(ROOT/f'tools/remix_runtime/config/{name}.toml').read_bytes()
+            raw=(ROOT/'tools/remix_runtime/config/rendering.toml').read_bytes()
             (gpu/f'{name}-controls.bin').write_bytes(encoder(raw));(gpu/f'{name}-config-accepted.toml').write_bytes(raw)
         library=gpu/'rtx-remix/mods/sfc-policy/mod.usda';library.parent.mkdir(parents=True,exist_ok=True)
         library.write_text('#usda 1.0\n(defaultPrim = "RootNode")\ndef Xform "RootNode" {}\n')
@@ -79,6 +88,8 @@ class Relay(SingleRelay):
              'SFC_D3D9_GAME_OUTPUT':'1','SFC_D3D9_VISUAL_SETTINGS':'1','SFC_D3D9_LIGHT_SETTINGS':'1',
              'SFC_D3D9_SHARED_LIGHTS':'1','SFC_D3D9_SYNC_BUFFER':'1','SFC_D3D9_MULTISCENE':'1',
              'SFC_PIPELINE_MODE':self.mode,'SFC_D3D9_OFFSET_X':str(camera_offset()[0])}
+        env['SFC_D3D9_PLAYER_REPLACEMENT']='1' if self.player_replacement else '0'
+        if self.player_replacement:env['SFC_D3D9_OFFSET_X']='0'
         for key in ('SFC_D3D9_INITIAL_ASSET_MASK','SFC_D3D9_REBIND_COOKIE','SFC_D3D9_EXPECTED_MODEL',
                     'SFC_D3D9_EXPECTED_SOURCE','SFC_D3D9_ASSET_SHA256','DXVK_RTX_CAPTURE_ENABLE_ON_FRAME',
                     'DXVK_DUMP_SCREENSHOT_FRAME','DXVK_TERMINATE_APP_FRAME','SFC_DIRECT64_BACKBUFFER_DIAGNOSTIC'):
@@ -94,6 +105,10 @@ class Relay(SingleRelay):
             if self.overlap_texture_prefetch:env['SFC_D3D9_API_PREFETCH_OVERLAP']='1'
         from loading_policy import configure
         extra,self.loading_receipt=configure(self.loading_policy,env,offline=self.offline_fixture)
+        if getattr(self,'async_material_checkout',False):
+            from async_material_checkout import configure_child
+            selected,receipt=configure_child(backend,env)
+            extra+=selected;self.loading_receipt['async_material_checkout']=receipt
         if self.candidate_asset_loading!='inherit':
             if self.loading_policy!='inherit':raise ValueError('Candidate initialization excludes other loading overrides')
             from runtime_candidate import configure_initialization
@@ -109,7 +124,9 @@ class Relay(SingleRelay):
             with (gpu/'rtx.conf').open('a') as config:config.write(extra)
         (gpu/'loading-inputs.json').write_text(json.dumps(self.loading_receipt,indent=2))
         self.prewarm_started_ns=time.perf_counter_ns();self.renderer_started_ns=self.prewarm_started_ns
-        self.prewarm_process=subprocess.Popen([str(GUARD),str(gpu),'285',str(AGGREGATE_BYTES),str(2*1024*1024),str(EXE),str(gpu),str(RUNTIME),str(RECEIVER),'normal'],env=env,creationflags=subprocess.CREATE_NO_WINDOW)
+        env.pop('SFC_D3D9_LIVE_TUNING',None)
+        if getattr(self,'live_tuning',False):env['SFC_D3D9_LIVE_TUNING']='1'
+        self.prewarm_process=subprocess.Popen([str(GUARD),str(gpu),'1980' if getattr(self,'live_tuning',False) else '285',str(AGGREGATE_BYTES),str(2*1024*1024),str(EXE),str(gpu),str(RUNTIME),str(RECEIVER),'normal'],env=env,creationflags=subprocess.CREATE_NO_WINDOW)
 
     def poll(self,pid,from_service=False):
         if self.service and not from_service:self.service.check();return
@@ -147,6 +164,18 @@ class Relay(SingleRelay):
         return [r for i in range(32) if (r:=self.receiver.channel.sample_owner(i)) and r[1] and r[2] and r[7] and r[4]==1 and r[48]==1]
 
     def discover(self,rows):
+        if self.player_replacement:
+            target=self.replacement_model;matching=[]
+            for row in rows:
+                refs=self.folder/'gate'/f'LIVE-SCENE-001-asset-{row[7]}.json'
+                key=(row[1],row[7])
+                if key not in self.replacement_names and refs.is_file():
+                    if refs.stat().st_size>256*1024 or len(self.replacement_names)>=64:raise ValueError('Replacement association bounds')
+                    self.replacement_names[key]=json.loads(refs.read_text()).get('model_filename','').lower().replace('\\','/')
+                if self.replacement_names.get(key)==target:
+                    matching.append(row)
+            if len({r[1] for r in matching})>1:raise ValueError('Ambiguous player-fixture model;replacement remains unarmed')
+            rows=matching
         for row in rows:
             key=row[1],row[7]
             if key in self.attempts or len(self.attempts)>=64:continue
@@ -224,11 +253,11 @@ class Relay(SingleRelay):
             if origin.is_file():os.link(origin,gpu/name)
         if not self.prewarm_process:
             (gpu/'rtx.conf').write_text(CONFIG.replace('rtx.enableReplacementAssets = False','rtx.enableReplacementAssets = True')+'rtx.enableReplacementMaterials = True\nrtx.enableReplacementMeshes = False\n')
-        from image_controls import encode as encode_image
+        from image_controls import encode_current as encode_image
         from quality_controls import encode as encode_quality
         for name,encoder in [('image',encode_image),('quality',encode_quality)]:
-            raw=(ROOT/f'tools/remix_runtime/config/{name}.toml').read_bytes()
-            if self.prewarm_process and (gpu/f'{name}-config-accepted.toml').read_bytes()!=raw:
+            raw=(ROOT/'tools/remix_runtime/config/rendering.toml').read_bytes()
+            if self.prewarm_process and not getattr(self,'live_tuning',False) and (gpu/f'{name}-config-accepted.toml').read_bytes()!=raw:
                 raise ValueError('Image/quality baseline changed during early startup;restart with one baseline')
             (gpu/f'{name}-controls.bin').write_bytes(encoder(raw));(gpu/f'{name}-config-accepted.toml').write_bytes(raw)
         if self.offline_fixture:
@@ -237,6 +266,7 @@ class Relay(SingleRelay):
         else:
             from live_light_binding import Binding
             self.lights=Binding(self.folder,gpu,self.receiver,row,persistent=self.persistent)
+            self.lights.tuning=getattr(self,'live_tuning',False)
         self.initial_context=(gpu,manifest,row)
 
     def publish_prepared(self,initial=False):
@@ -314,7 +344,7 @@ class Relay(SingleRelay):
             layers,_=streamed_layers(root,layers)
         text='#usda 1.0\n(\n defaultPrim = "RootNode"\n subLayers = [\n'+',\n'.join('  @'+p+'@' for p in layers)+'\n ]\n)\n'
         if getattr(self,'material_library','layers')=='flat':
-            if not self.offline_fixture:raise ValueError('Flat material experiment is offline only')
+            if not self.offline_fixture and not getattr(self,'async_material_checkout',False):raise ValueError('Flat material experiment is offline only')
             from material_library import flat
             text,_=flat(root,self.layers)
         pending=root/'mod.usda.pending';pending.write_text(text,encoding='utf-8');pending.replace(root/'mod.usda')
@@ -421,5 +451,8 @@ class Relay(SingleRelay):
                                   coverage='Union of qualified submitted set;not native per-pixel owner identity',original_suppressed=False)
         report['scope']='Retained multi-ship diagnostic with recorded common camera-left offset;originals remain;not replacement or universal coverage'
         report['result']='MULTISHIP_OVERLAY_REVIEW_REQUIRED' if len(draws)>=2 and len(self.resident)>=2 and not self.partial and not state['asset_rejected'] and report['game_output']['drawn'] else 'PARTIAL'
+        if self.player_replacement:
+            report['scope']='Unique configured player-fixture model;fresh capture,zero offset,transactional presentation'
+            report['result']='PLAYER_REPLACEMENT_SPONSOR_REVIEW_REQUIRED' if report['replacement']['committed'] and report['replacement']['suppressed'] and not self.partial and not state['asset_rejected'] else 'PARTIAL'
         (self.folder/'live-owner.analysis.json').write_text(json.dumps(report,indent=2))
         return report

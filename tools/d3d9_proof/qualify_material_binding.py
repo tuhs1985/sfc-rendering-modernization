@@ -26,8 +26,8 @@ def main():
     if hashlib.sha256(runtime.read_bytes()).hexdigest().upper()!='F7C310821AA98BCDFDEC120330B0A89457B7C5EBA58D21464AF32639611C809F':
         raise ValueError('Pinned runtime changed')
     # Explicit,isolated A/B changes only emission;baseline config remains untouched.
-    config=(ROOT/'tools/remix_runtime/config/materials.toml').read_bytes()
-    off=config.replace(b'illumination_strength = 5.0',b'illumination_strength = 0.0')
+    config=(ROOT/'tools/remix_runtime/config/rendering.toml').read_bytes()
+    off=config.replace(b'emissive_intensity = 5.0',b'emissive_intensity = 0.0')
     if off==config:raise ValueError('Fixture requires explicit current illumination5 baseline;do not guess TOML edit')
     try:
         for name,raw in [('off',off),('baseline',config),('tuned',config),('lit',config)]:
@@ -56,7 +56,7 @@ rtx.resolutionScale = 1.0
                 from image_controls import encode as image_encode
                 from quality_controls import encode as quality_encode
                 for kind,encoder in [('image',image_encode),('quality',quality_encode)]:
-                    raw_controls=(ROOT/f'tools/remix_runtime/config/{kind}.toml').read_bytes()
+                    raw_controls=(ROOT/'tools/remix_runtime/config/rendering.toml').read_bytes()
                     (case/f'{kind}-controls.bin').write_bytes(encoder(raw_controls))
                     (case/f'{kind}-config-accepted.toml').write_bytes(raw_controls)
             env={**os.environ,'DXVK_CONFIG_FILE':str(case/'rtx.conf'),'RTX_AUTOMATION_DISABLE_BLOCKING_DIALOG_BOXES':'1',

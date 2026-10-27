@@ -1,0 +1,1015 @@
+{
+  "schema": "sfc.material-revision-clock.v1",
+  "run": 200,
+  "parent": "93e8dba",
+  "status": "OFFLINE_FIX_VALIDATED_GAMEPLAY_CONFIRMATION_PENDING",
+  "milestone": "M1 integration/performance continues;API parked;no formal milestone claim",
+  "latest_live": {
+    "folder": "artifacts/remix-runtime/runs/20261026-052012-553947-in-game",
+    "sponsor": "Roughness still appeared only on shuttle launch;startup priming did not fix it",
+    "private_ready_to_first_publication_seconds": 10.2441349,
+    "initial_materials": 61,
+    "final_materials": 63,
+    "existing_material_definitions_unchanged": true,
+    "fca_roughness_groups": 58
+  },
+  "causal_controls": {
+    "schema": "sfc.material-refresh-isolation.v1",
+    "diagnostic_only": true,
+    "game_launched": false,
+    "roughness_view": {
+      "index": 89,
+      "meaning": "NVIDIA primary perceptual roughness;final grading still applies"
+    },
+    "region": [
+      815,
+      740,
+      1050,
+      915
+    ],
+    "cases": [
+      {
+        "case": "natural_failure",
+        "folder": "artifacts\\remix-runtime\\runs\\20261026-104508-124830-return-fixture",
+        "error": null,
+        "fixture_exit": 0,
+        "host_exit": 0,
+        "snapshots": [
+          {
+            "path": "artifacts\\remix-runtime\\runs\\20261026-104508-124830-return-fixture\\fixture-ship.bmp",
+            "sha256": "fecaea095ce374b1a16a8aab3383d73ba07c3f67e6e77dc6f3715abf5ff12de8",
+            "fca_region_unique_colors": 2
+          },
+          {
+            "path": "artifacts\\remix-runtime\\runs\\20261026-104508-124830-return-fixture\\fixture-ship-late.bmp",
+            "sha256": "acff82e7906c0c91ebb81b551e4c473be290d5116b899622c877ad556bb78563",
+            "fca_region_unique_colors": 2
+          }
+        ],
+        "probe": {
+          "mode": "control",
+          "debug_view": 89,
+          "events": [],
+          "diagnostic_only": true,
+          "production_qualification_eligible": false,
+          "source": "artifacts\\remix-runtime\\runs\\20261026-052012-553947-in-game\\gate",
+          "probe_sha256": "cd7b72a882da8c08c668da462efe4609a430729d83f65415e94c3b66933c8293",
+          "meaning": "Two saved ships in synthetic fixed poses;not gameplay or material-ready ACK"
+        },
+        "material_events": [
+          {
+            "layers": 1,
+            "supervisor_monotonic_ns": 63421764544000,
+            "clock": "QueryPerformanceCounter",
+            "initial": false
+          },
+          {
+            "layers": 2,
+            "supervisor_monotonic_ns": 63422376080300,
+            "clock": "QueryPerformanceCounter",
+            "initial": false
+          }
+        ]
+      },
+      {
+        "case": "unused_material_only",
+        "folder": "artifacts\\remix-runtime\\runs\\20261026-104559-209587-return-fixture",
+        "error": null,
+        "fixture_exit": 0,
+        "host_exit": 0,
+        "snapshots": [
+          {
+            "path": "artifacts\\remix-runtime\\runs\\20261026-104559-209587-return-fixture\\fixture-ship.bmp",
+            "sha256": "9a0355ab74b9843b148b76a310fa2b739b8f956823f6fe79d09d63a7fcac0caf",
+            "fca_region_unique_colors": 2
+          },
+          {
+            "path": "artifacts\\remix-runtime\\runs\\20261026-104559-209587-return-fixture\\fixture-ship-late.bmp",
+            "sha256": "bdf30d0fe8e981e9fd13515b9da98c4dd853856e864633b8386ceb005c99449b",
+            "fca_region_unique_colors": 197
+          }
+        ],
+        "probe": {
+          "mode": "unused-material",
+          "debug_view": 89,
+          "events": [
+            {
+              "at_ns": 63473831977000,
+              "event": "unused-material-added",
+              "before_sha256": "eb3f9f89ca2d32448be5dfc214961716f1fab2597b132a0029bb2653d8a683be",
+              "after_sha256": "c40f9c1415c8b627f0e5f17f8748ed7920f54dd4d6a94418360ad2903d34b69b",
+              "previous_materials_unchanged": true,
+              "new_image_files": 0,
+              "new_geometry": 0
+            }
+          ],
+          "diagnostic_only": true,
+          "production_qualification_eligible": false,
+          "source": "artifacts\\remix-runtime\\runs\\20261026-052012-553947-in-game\\gate",
+          "probe_sha256": "cd7b72a882da8c08c668da462efe4609a430729d83f65415e94c3b66933c8293",
+          "meaning": "Two saved ships in synthetic fixed poses;not gameplay or material-ready ACK"
+        },
+        "material_events": [
+          {
+            "layers": 1,
+            "supervisor_monotonic_ns": 63472686337800,
+            "clock": "QueryPerformanceCounter",
+            "initial": false
+          },
+          {
+            "layers": 2,
+            "supervisor_monotonic_ns": 63473342187200,
+            "clock": "QueryPerformanceCounter",
+            "initial": false
+          }
+        ]
+      },
+      {
+        "case": "after_first_snapshot",
+        "folder": "artifacts\\remix-runtime\\runs\\20261026-104652-057412-return-fixture",
+        "error": null,
+        "fixture_exit": 0,
+        "host_exit": 0,
+        "snapshots": [
+          {
+            "path": "artifacts\\remix-runtime\\runs\\20261026-104652-057412-return-fixture\\fixture-ship.bmp",
+            "sha256": "b2c5714eeaffd5d75ae683b4fbb7dabd0eaa2cc68839b834ed372109906f2148",
+            "fca_region_unique_colors": 2
+          },
+          {
+            "path": "artifacts\\remix-runtime\\runs\\20261026-104652-057412-return-fixture\\fixture-ship-late.bmp",
+            "sha256": "34e1ea2c34cf90630f5fb45e098898ff86d41b56c4fdd01c7e5e779644997c15",
+            "fca_region_unique_colors": 2
+          }
+        ],
+        "probe": {
+          "mode": "after-snapshot",
+          "debug_view": 89,
+          "events": [],
+          "diagnostic_only": true,
+          "production_qualification_eligible": false,
+          "source": "artifacts\\remix-runtime\\runs\\20261026-052012-553947-in-game\\gate",
+          "probe_sha256": "cd7b72a882da8c08c668da462efe4609a430729d83f65415e94c3b66933c8293",
+          "meaning": "Two saved ships in synthetic fixed poses;not gameplay or material-ready ACK"
+        },
+        "material_events": [
+          {
+            "layers": 1,
+            "supervisor_monotonic_ns": 63526872871300,
+            "clock": "QueryPerformanceCounter",
+            "initial": false
+          },
+          {
+            "layers": 2,
+            "supervisor_monotonic_ns": 63527214473700,
+            "clock": "QueryPerformanceCounter",
+            "initial": false
+          }
+        ]
+      },
+      {
+        "case": "distinct_timestamp_diagnostic",
+        "folder": "artifacts\\remix-runtime\\runs\\20261026-104940-800962-return-fixture",
+        "error": null,
+        "fixture_exit": 0,
+        "host_exit": 0,
+        "snapshots": [
+          {
+            "path": "artifacts\\remix-runtime\\runs\\20261026-104940-800962-return-fixture\\fixture-ship.bmp",
+            "sha256": "3d81052e9e683d9df024600aa88d790f45fd2a28047ee523e761eb8f096b7923",
+            "fca_region_unique_colors": 2
+          },
+          {
+            "path": "artifacts\\remix-runtime\\runs\\20261026-104940-800962-return-fixture\\fixture-ship-late.bmp",
+            "sha256": "d40fef6e784179d9b1a83394672341c4382b8f7bf5212772372a2567a8254373",
+            "fca_region_unique_colors": 197
+          }
+        ],
+        "probe": {
+          "mode": "control",
+          "debug_view": 89,
+          "publication_clock": "distinct",
+          "publications": [
+            {
+              "at_ns": 63694191820600,
+              "previous_mtime_ns": 1793011784295652500,
+              "natural_mtime_ns": 1793011788490908400,
+              "published_mtime_ns": 1793011785000000000,
+              "content_sha256": "ebbfc5f6d9b6eb91b6a149abc87f13f5154f07ec580f5b7c015df3ef0f71ca73"
+            },
+            {
+              "at_ns": 63694834077200,
+              "previous_mtime_ns": 1793011785000000000,
+              "natural_mtime_ns": 1793011789133625300,
+              "published_mtime_ns": 1793011786000000000,
+              "content_sha256": "7426ad65db73f87cf005e83b5ddb995b5b26f6c890a862592dae53f4e62cd988"
+            }
+          ],
+          "events": [],
+          "diagnostic_only": true,
+          "production_qualification_eligible": false,
+          "source": "artifacts\\remix-runtime\\runs\\20261026-052012-553947-in-game\\gate",
+          "probe_sha256": "8e785ecbe4a28a0326335476a83c29d619a69c72279a58f924f628e17ce5b601",
+          "meaning": "Two saved ships in synthetic fixed poses;not gameplay or material-ready ACK"
+        },
+        "material_events": [
+          {
+            "layers": 1,
+            "supervisor_monotonic_ns": 63694193844300,
+            "clock": "QueryPerformanceCounter",
+            "initial": false
+          },
+          {
+            "layers": 2,
+            "supervisor_monotonic_ns": 63694843087300,
+            "clock": "QueryPerformanceCounter",
+            "initial": false
+          }
+        ]
+      },
+      {
+        "case": "constant_timestamp_negative",
+        "folder": "artifacts\\remix-runtime\\runs\\20261026-105119-089917-return-fixture",
+        "error": null,
+        "fixture_exit": 0,
+        "host_exit": 0,
+        "snapshots": [
+          {
+            "path": "artifacts\\remix-runtime\\runs\\20261026-105119-089917-return-fixture\\fixture-ship.bmp",
+            "sha256": "93037d1f0940b896c5a265e0c3106ab36df422256120a884029fd752840009f8",
+            "fca_region_unique_colors": 2
+          },
+          {
+            "path": "artifacts\\remix-runtime\\runs\\20261026-105119-089917-return-fixture\\fixture-ship-late.bmp",
+            "sha256": "a0549ad9e5f9a6c7fddafd24b2ac151cef7a1ad942f023bbf137357413745243",
+            "fca_region_unique_colors": 2
+          }
+        ],
+        "probe": {
+          "mode": "after-snapshot",
+          "debug_view": 89,
+          "publication_clock": "same-second",
+          "publications": [
+            {
+              "at_ns": 63793634486400,
+              "previous_mtime_ns": 1793011882508902900,
+              "natural_mtime_ns": 1793011887933975500,
+              "published_mtime_ns": 1793011882000000000,
+              "content_sha256": "ebbfc5f6d9b6eb91b6a149abc87f13f5154f07ec580f5b7c015df3ef0f71ca73"
+            },
+            {
+              "at_ns": 63793924697500,
+              "previous_mtime_ns": 1793011882000000000,
+              "natural_mtime_ns": 1793011888224109000,
+              "published_mtime_ns": 1793011882000000000,
+              "content_sha256": "7426ad65db73f87cf005e83b5ddb995b5b26f6c890a862592dae53f4e62cd988"
+            }
+          ],
+          "events": [],
+          "diagnostic_only": true,
+          "production_qualification_eligible": false,
+          "source": "artifacts\\remix-runtime\\runs\\20261026-052012-553947-in-game\\gate",
+          "probe_sha256": "8e785ecbe4a28a0326335476a83c29d619a69c72279a58f924f628e17ce5b601",
+          "meaning": "Two saved ships in synthetic fixed poses;not gameplay or material-ready ACK"
+        },
+        "material_events": [
+          {
+            "layers": 1,
+            "supervisor_monotonic_ns": 63793636161300,
+            "clock": "QueryPerformanceCounter",
+            "initial": false
+          },
+          {
+            "layers": 2,
+            "supervisor_monotonic_ns": 63793930112300,
+            "clock": "QueryPerformanceCounter",
+            "initial": false
+          }
+        ]
+      },
+      {
+        "case": "integrated_fix",
+        "folder": "artifacts\\remix-runtime\\runs\\20261026-105556-985784-return-fixture",
+        "error": null,
+        "fixture_exit": 0,
+        "host_exit": 0,
+        "snapshots": [
+          {
+            "path": "artifacts\\remix-runtime\\runs\\20261026-105556-985784-return-fixture\\fixture-ship.bmp",
+            "sha256": "dbba9536f68e999eb54c21e4ccbf034f249ccfd44607e417d335832039aceb13",
+            "fca_region_unique_colors": 2
+          },
+          {
+            "path": "artifacts\\remix-runtime\\runs\\20261026-105556-985784-return-fixture\\fixture-ship-late.bmp",
+            "sha256": "bef4d07aa1eb8f6ca4980600c8ed12e5e3ce6d404ee70c6873456800f5cdc08e",
+            "fca_region_unique_colors": 197
+          }
+        ],
+        "probe": {
+          "mode": "control",
+          "debug_view": 89,
+          "publication_clock": "natural",
+          "publications": [
+            {
+              "at_ns": 64070380977800,
+              "previous_mtime_ns": 1793012160453679800,
+              "natural_mtime_ns": 1793012164680132200,
+              "published_mtime_ns": 1793012164680132200,
+              "content_sha256": "ebbfc5f6d9b6eb91b6a149abc87f13f5154f07ec580f5b7c015df3ef0f71ca73"
+            },
+            {
+              "at_ns": 64071028429900,
+              "previous_mtime_ns": 1793012164680132200,
+              "natural_mtime_ns": 1793012165328172700,
+              "published_mtime_ns": 1793012165328172700,
+              "content_sha256": "7426ad65db73f87cf005e83b5ddb995b5b26f6c890a862592dae53f4e62cd988"
+            }
+          ],
+          "events": [],
+          "diagnostic_only": true,
+          "production_qualification_eligible": false,
+          "source": "artifacts\\remix-runtime\\runs\\20261026-052012-553947-in-game\\gate",
+          "probe_sha256": "f827747f079f1c4beddfe40cf24c7b4ebb0f37bc2d0a647e34c177cdcf2818ee",
+          "meaning": "Two saved ships in synthetic fixed poses;not gameplay or material-ready ACK"
+        },
+        "material_events": [
+          {
+            "layers": 1,
+            "supervisor_monotonic_ns": 64070382519900,
+            "clock": "QueryPerformanceCounter",
+            "initial": false,
+            "usd_revision": {
+              "policy": "remix-openusd-windows-second-revision-v1",
+              "previous_mtime_ns": 1793012160453679800,
+              "natural_mtime_ns": 1793012164680132200,
+              "published_mtime_ns": 1793012164680132200,
+              "meaning": "Distinct file revision;not runtime material installation ACK"
+            }
+          },
+          {
+            "layers": 2,
+            "supervisor_monotonic_ns": 64071037143600,
+            "clock": "QueryPerformanceCounter",
+            "initial": false,
+            "usd_revision": {
+              "policy": "remix-openusd-windows-second-revision-v1",
+              "previous_mtime_ns": 1793012164680132200,
+              "natural_mtime_ns": 1793012165328172700,
+              "published_mtime_ns": 1793012165328172700,
+              "meaning": "Distinct file revision;not runtime material installation ACK"
+            }
+          }
+        ]
+      },
+      {
+        "case": "integrated_fix_forced_collision",
+        "folder": "artifacts\\remix-runtime\\runs\\20261026-105854-127363-return-fixture",
+        "error": null,
+        "fixture_exit": 0,
+        "host_exit": 0,
+        "snapshots": [
+          {
+            "path": "artifacts\\remix-runtime\\runs\\20261026-105854-127363-return-fixture\\fixture-ship.bmp",
+            "sha256": "d47aeed0b8c598a2b46c951db87f7943e7b7687d964f720f8de3b4353be3d844",
+            "fca_region_unique_colors": 2
+          },
+          {
+            "path": "artifacts\\remix-runtime\\runs\\20261026-105854-127363-return-fixture\\fixture-ship-late.bmp",
+            "sha256": "94633f91b5e50d11f7c2be004572da57e3e2471bf1f2b4e777ab795470d877b0",
+            "fca_region_unique_colors": 197
+          }
+        ],
+        "probe": {
+          "mode": "control",
+          "debug_view": 89,
+          "publication_clock": "natural",
+          "collide_write_clock": true,
+          "publications": [
+            {
+              "at_ns": 64247378679700,
+              "previous_mtime_ns": 1793012337528291000,
+              "natural_mtime_ns": 1793012338000000000,
+              "published_mtime_ns": 1793012338000000000,
+              "content_sha256": "ebbfc5f6d9b6eb91b6a149abc87f13f5154f07ec580f5b7c015df3ef0f71ca73"
+            },
+            {
+              "at_ns": 64247995962900,
+              "previous_mtime_ns": 1793012338000000000,
+              "natural_mtime_ns": 1793012339000000000,
+              "published_mtime_ns": 1793012339000000000,
+              "content_sha256": "7426ad65db73f87cf005e83b5ddb995b5b26f6c890a862592dae53f4e62cd988"
+            }
+          ],
+          "events": [],
+          "diagnostic_only": true,
+          "production_qualification_eligible": false,
+          "source": "artifacts\\remix-runtime\\runs\\20261026-052012-553947-in-game\\gate",
+          "probe_sha256": "1c64e56021cd02b72687b04d1656c2ac43d0d40f9ff7215a5c058a0746f50255",
+          "meaning": "Two saved ships in synthetic fixed poses;not gameplay or material-ready ACK"
+        },
+        "material_events": [
+          {
+            "layers": 1,
+            "supervisor_monotonic_ns": 64247380955500,
+            "clock": "QueryPerformanceCounter",
+            "initial": false,
+            "usd_revision": {
+              "policy": "remix-openusd-windows-second-revision-v1",
+              "previous_mtime_ns": 1793012337528291000,
+              "natural_mtime_ns": 1793012337100000000,
+              "published_mtime_ns": 1793012338000000000,
+              "meaning": "Distinct file revision;not runtime material installation ACK"
+            }
+          },
+          {
+            "layers": 2,
+            "supervisor_monotonic_ns": 64248005138800,
+            "clock": "QueryPerformanceCounter",
+            "initial": false,
+            "usd_revision": {
+              "policy": "remix-openusd-windows-second-revision-v1",
+              "previous_mtime_ns": 1793012338000000000,
+              "natural_mtime_ns": 1793012338100000000,
+              "published_mtime_ns": 1793012339000000000,
+              "meaning": "Distinct file revision;not runtime material installation ACK"
+            }
+          }
+        ]
+      }
+    ],
+    "packaged_timestamp": {
+      "dll": "C:\\Project\\SFC-Modernize Engine\\artifacts\\remix-runtime\\deps\\candidate-1.6.1\\runtime\\usd_arch.dll",
+      "sha256": "52dab8f4b87ce09d86ed6f048a7071a55c29071aa7a13981f259d789997f51b5",
+      "namespace": "pxrInternal_v0_25_11",
+      "public_export": "ArchGetModificationTime(char const*,double*)",
+      "observations": [
+        {
+          "requested_ns": 1793011739100000000,
+          "actual_ntfs_ns": 1793011739100000000,
+          "usd_timestamp": 1793011739.0
+        },
+        {
+          "requested_ns": 1793011739800000000,
+          "actual_ntfs_ns": 1793011739800000000,
+          "usd_timestamp": 1793011739.0
+        },
+        {
+          "requested_ns": 1793011740100000000,
+          "actual_ntfs_ns": 1793011740100000000,
+          "usd_timestamp": 1793011740.0
+        }
+      ]
+    },
+    "conclusion": "Same-second revisions invisible to packaged Windows OpenUSD;distinct revision timestamps restore roughness without new geometry or periodic notification",
+    "limits": [
+      "Synthetic fixed camera and saved live geometry",
+      "First snapshot can precede enhancement installation",
+      "No per-material installed ACK",
+      "Actual SFC confirmation pending",
+      "Runtime/public-source instruction parity not asserted"
+    ]
+  },
+  "implementation": {
+    "files": [
+      "tools/remix_runtime/material_library.py",
+      "tools/remix_runtime/async_material_checkout.py",
+      "tools/remix_runtime/qualify_async_material.py",
+      "tests/test_material_revision.py",
+      "docs/reconnaissance/probes/20261026_material_refresh_isolation.py",
+      "docs/reconnaissance/probes/20261026_material_refresh_analysis.py",
+      "docs/runs/2026-10-26-codex-material-revision-clock.md",
+      "docs/HANDOFF.md",
+      "docs/STATUS.md",
+      "tools/d3d9_proof/README.md",
+      "docs/reconnaissance/probes/D3D9-ASYNC-MATERIAL-001.md"
+    ],
+    "policy": "remix-openusd-windows-second-revision-v1",
+    "scope": "Opt-in Remix USD publisher only",
+    "waits_added": 0,
+    "refresh_timers": 0,
+    "captured_geometry_uv_images_changed": false,
+    "material_values_changed": false,
+    "normal_runtime_changed": false,
+    "metadata_caveat": "Logical modification timestamps may lead wallclock by the number of rapid publications;not QPC performance timing"
+  },
+  "validation": {
+    "python_tests": 557,
+    "result": "PASS",
+    "candidate_build": "artifacts/candidate-hot-reload/run200-candidate-build.txt",
+    "native_lights": "artifacts/candidate-hot-reload/run200-light-tests.txt",
+    "normal_fixture": "artifacts/remix-runtime/runs/20261026-105940-306897-return-fixture",
+    "normal_qualification": "PASS",
+    "checkout_evidence": [
+      {
+        "folder": "artifacts\\remix-runtime\\runs\\20261026-110250-300934-return-fixture",
+        "result_sha256": "996AF983EFA63E3F709194184F9B2D97240C47637E5EA3E018C7BB4056D2B7B4",
+        "late_asset": false,
+        "content": {
+          "files": 381,
+          "exceptions": [
+            "assets/1/texture-0.bin: Remix-only base row-origin conversion",
+            "assets/1/texture-1.bin: Remix-only base row-origin conversion",
+            "assets/1/texture-2.bin: Remix-only base row-origin conversion",
+            "assets/1/texture-3.bin: Remix-only base row-origin conversion",
+            "assets/1/texture-4.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-0.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-1.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-10.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-11.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-12.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-13.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-14.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-15.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-16.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-17.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-18.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-19.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-2.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-20.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-21.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-22.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-23.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-24.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-25.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-26.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-27.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-28.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-29.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-3.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-30.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-31.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-32.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-33.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-34.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-35.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-36.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-37.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-38.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-39.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-4.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-40.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-41.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-42.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-43.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-44.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-45.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-46.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-47.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-48.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-49.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-5.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-50.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-51.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-52.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-53.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-54.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-55.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-6.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-7.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-8.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-9.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-0.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-1.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-10.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-11.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-12.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-13.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-14.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-15.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-16.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-17.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-18.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-19.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-2.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-20.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-21.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-22.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-23.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-24.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-25.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-26.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-27.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-28.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-29.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-3.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-30.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-31.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-32.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-33.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-34.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-35.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-36.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-37.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-38.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-39.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-4.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-40.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-41.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-42.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-43.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-44.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-45.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-5.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-6.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-7.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-8.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-9.bin: Remix-only base row-origin conversion"
+          ],
+          "reference_to_received_paths": {
+            "1": "1",
+            "2": "2",
+            "3": "3"
+          }
+        },
+        "delivery": {
+          "post_start_omissions": 1,
+          "max_consecutive_omissions": 1,
+          "records": 721
+        },
+        "steady_frames": 600,
+        "steady_draws": 596
+      },
+      {
+        "folder": "artifacts\\remix-runtime\\runs\\20261026-110353-037458-return-fixture",
+        "result_sha256": "57C23AB6EE7E210D0A04B6F6035EE0FB9A3A5074F867173DC3D98CF005CF4C2A",
+        "late_asset": true,
+        "content": {
+          "files": 381,
+          "exceptions": [
+            "assets/1/texture-0.bin: Remix-only base row-origin conversion",
+            "assets/1/texture-1.bin: Remix-only base row-origin conversion",
+            "assets/1/texture-2.bin: Remix-only base row-origin conversion",
+            "assets/1/texture-3.bin: Remix-only base row-origin conversion",
+            "assets/1/texture-4.bin: Remix-only base row-origin conversion",
+            "assets/2/scene.bin: exact declared shared-owner fixture pose/frame;geometry unchanged",
+            "assets/2/texture-0.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-1.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-10.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-11.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-12.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-13.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-14.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-15.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-16.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-17.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-18.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-19.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-2.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-20.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-21.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-22.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-23.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-24.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-25.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-26.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-27.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-28.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-29.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-3.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-30.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-31.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-32.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-33.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-34.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-35.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-36.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-37.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-38.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-39.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-4.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-40.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-41.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-42.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-43.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-44.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-45.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-46.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-47.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-48.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-49.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-5.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-50.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-51.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-52.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-53.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-54.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-55.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-6.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-7.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-8.bin: Remix-only base row-origin conversion",
+            "assets/2/texture-9.bin: Remix-only base row-origin conversion",
+            "assets/3/scene.bin: exact declared shared-owner fixture pose/frame;geometry unchanged",
+            "assets/3/texture-0.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-1.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-10.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-11.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-12.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-13.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-14.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-15.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-16.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-17.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-18.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-19.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-2.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-20.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-21.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-22.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-23.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-24.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-25.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-26.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-27.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-28.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-29.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-3.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-30.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-31.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-32.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-33.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-34.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-35.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-36.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-37.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-38.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-39.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-4.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-40.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-41.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-42.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-43.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-44.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-45.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-5.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-6.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-7.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-8.bin: Remix-only base row-origin conversion",
+            "assets/3/texture-9.bin: Remix-only base row-origin conversion"
+          ],
+          "reference_to_received_paths": {
+            "1": "1",
+            "2": "2",
+            "3": "3"
+          }
+        },
+        "delivery": {
+          "post_start_omissions": 1,
+          "max_consecutive_omissions": 1,
+          "records": 902
+        },
+        "steady_frames": 600,
+        "steady_draws": 596
+      }
+    ],
+    "normal_preflight": "PASS",
+    "checkout_preflight": "PASS",
+    "sfc_launched": false
+  },
+  "upstream": [
+    {
+      "url": "https://github.com/PixarAnimationStudios/OpenUSD/blob/v25.11/pxr/base/arch/fileSystem.cpp#L154",
+      "evidence": "Windows _wstat64 st_mtime has whole-second precision"
+    },
+    {
+      "url": "https://openusd.org/release/api/class_ar_resolver.html",
+      "evidence": "Unchanged modification timestamp can skip SdfLayer reload"
+    },
+    {
+      "url": "https://github.com/NVIDIAGameWorks/dxvk-remix/blob/0a6cd5b1ee814ec390c358e0c9c32ece8895ddc0/src/dxvk/rtx_render/rtx_mod_usd.cpp#L1360",
+      "evidence": "ReloadStage uses UsdStage::Reload;callback/rebuild is not an installed-material ACK"
+    },
+    {
+      "url": "https://github.com/NVIDIAGameWorks/dxvk-remix/blob/0a6cd5b1ee814ec390c358e0c9c32ece8895ddc0/src/dxvk/shaders/rtx/utility/debug_view_indices.h#L96",
+      "evidence": "Debug view89 primary perceptual roughness"
+    }
+  ],
+  "preservation": {
+    "archives": [
+      {
+        "run": "20261026-104508-124830-return-fixture",
+        "archive": "artifacts\\remix-runtime\\archives\\run200-20261026-104508-124830-return-fixture-images.zip",
+        "sha256": "df9fbca63bc8b6cbb67cd23a78bd57719ad90af3914ea8dd091d1dfbbd078374",
+        "original_bytes": 81893584,
+        "archive_bytes": 5273977,
+        "recoverable": true
+      },
+      {
+        "run": "20261026-104559-209587-return-fixture",
+        "archive": "artifacts\\remix-runtime\\archives\\run200-20261026-104559-209587-return-fixture-images.zip",
+        "sha256": "8a2fbd899774078bc5a1cba11c9210787b742dc6c38c7cec588c02914d2aad37",
+        "original_bytes": 81893584,
+        "archive_bytes": 5273977,
+        "recoverable": true
+      },
+      {
+        "run": "20261026-104652-057412-return-fixture",
+        "archive": "artifacts\\remix-runtime\\archives\\run200-20261026-104652-057412-return-fixture-images.zip",
+        "sha256": "4457e47c0d68dda63584e802ddc9cc8fac9edc19626257c30cca1d90fd38c4c2",
+        "original_bytes": 81893584,
+        "archive_bytes": 5273977,
+        "recoverable": true
+      },
+      {
+        "run": "20261026-104940-800962-return-fixture",
+        "archive": "artifacts\\remix-runtime\\archives\\run200-20261026-104940-800962-return-fixture-images.zip",
+        "sha256": "9c3203ae54e82a09126a26b69852b3070119d32a2c240b47cf318f058dcb17dc",
+        "original_bytes": 81893584,
+        "archive_bytes": 5273977,
+        "recoverable": true,
+        "original_result_error": null
+      },
+      {
+        "run": "20261026-105119-089917-return-fixture",
+        "archive": "artifacts\\remix-runtime\\archives\\run200-20261026-105119-089917-return-fixture-images.zip",
+        "sha256": "74478559440f6f1673388f6c6fc16183a2b1f002f22f6c9535bb04ef6c77090a",
+        "original_bytes": 81893584,
+        "archive_bytes": 5273977,
+        "recoverable": true,
+        "original_result_error": null
+      },
+      {
+        "run": "20261026-105556-985784-return-fixture",
+        "archive": "artifacts\\remix-runtime\\archives\\run200-20261026-105556-985784-return-fixture-images.zip",
+        "sha256": "8d19a04a9af07b0c55fc80c54d9d5893cedb4a1230fb93fc1214645293117e2a",
+        "original_bytes": 81893584,
+        "archive_bytes": 5273977,
+        "recoverable": true,
+        "original_result_error": null
+      },
+      {
+        "run": "20261026-052012-553947-in-game",
+        "archive": "artifacts\\remix-runtime\\archives\\run200-20261026-052012-553947-in-game-images.zip",
+        "sha256": "0d3424ff0d0bf1835497955d5a540481744facc949d14b17114861f53619a2f9",
+        "original_bytes": 90282992,
+        "archive_bytes": 5703735,
+        "recoverable": true,
+        "original_result_error": null
+      },
+      {
+        "run": "20261025-001325-195259-return-fixture",
+        "archive": "artifacts\\remix-runtime\\archives\\run200-20261025-001325-195259-return-fixture-images.zip",
+        "sha256": "3e511e6436b3c8c13d4638a9938502f772fc59e6473737b62d25e03488dee181",
+        "original_bytes": 37451440,
+        "archive_bytes": 2700783,
+        "recoverable": true,
+        "original_result_error": "Live fixture: Live GPU cleanup failed"
+      },
+      {
+        "run": "20261025-000946-406742-return-fixture",
+        "archive": "artifacts\\remix-runtime\\archives\\run200-20261025-000946-406742-return-fixture-images.zip",
+        "sha256": "5a3c8649b23f0177e9174e4c54e712fed1ff35cd5c995eab9e3ef1365850a164",
+        "original_bytes": 37451440,
+        "archive_bytes": 2700783,
+        "recoverable": true,
+        "original_result_error": "Live fixture: Owned live GPU workflow failed to retire normally"
+      },
+      {
+        "run": "20261024-223136-631957-return-fixture",
+        "archive": "artifacts\\remix-runtime\\archives\\run200-20261024-223136-631957-return-fixture-images.zip",
+        "sha256": "a63e3b648790d736bcc72f636949010a8649f24fbbd9a8a580c09d4e8e418ed0",
+        "original_bytes": 37451440,
+        "archive_bytes": 2700783,
+        "recoverable": true,
+        "original_result_error": null
+      },
+      {
+        "run": "20261024-223041-611477-return-fixture",
+        "archive": "artifacts\\remix-runtime\\archives\\run200-20261024-223041-611477-return-fixture-images.zip",
+        "sha256": "d82e2c0d80907e6513be97a42b66c78b5b0c9b1fabc7b48a790b61b477326839",
+        "original_bytes": 37451440,
+        "archive_bytes": 2700783,
+        "recoverable": true,
+        "original_result_error": null
+      },
+      {
+        "run": "20261024-223011-587482-return-fixture",
+        "archive": "artifacts\\remix-runtime\\archives\\run200-20261024-223011-587482-return-fixture-images.zip",
+        "sha256": "232853817c1014687b94f3648b088e1bbf9d6cbe28d4af5bf1e3601f1ebd5d48",
+        "original_bytes": 37451440,
+        "archive_bytes": 2700783,
+        "recoverable": true,
+        "original_result_error": null
+      },
+      {
+        "run": "20261024-222840-243099-return-fixture",
+        "archive": "artifacts\\remix-runtime\\archives\\run200-20261024-222840-243099-return-fixture-images.zip",
+        "sha256": "89a9127958c63d112b016b66b1bbff232b24bd72338b7cbe4e3bbffc0bee838d",
+        "original_bytes": 37451440,
+        "archive_bytes": 2700783,
+        "recoverable": true,
+        "original_result_error": null
+      },
+      {
+        "run": "20261024-195312-767178-return-fixture",
+        "archive": "artifacts\\remix-runtime\\archives\\run200-20261024-195312-767178-return-fixture-gpu-images.zip",
+        "sha256": "bc6e488d5e40bbc01a5fb03d16dd4a85c861a501509ceb5b86715b912f7937bb",
+        "original_bytes": 58034896,
+        "archive_bytes": 4094799,
+        "recoverable": true,
+        "original_result_error": "Live fixture: Owned live GPU workflow failed to retire normally"
+      },
+      {
+        "run": "20261024-202001-789867-return-fixture",
+        "archive": "artifacts\\remix-runtime\\archives\\run200-20261024-202001-789867-return-fixture-gpu-images.zip",
+        "sha256": "6e57e268260cb8793ffc619b2ad71699afcc7c3b6f95711cdcf817e6df9c6e1f",
+        "original_bytes": 58034896,
+        "archive_bytes": 4094799,
+        "recoverable": true,
+        "original_result_error": "Live fixture: Owned live GPU workflow failed to retire normally"
+      },
+      {
+        "run": "20261024-203405-713587-return-fixture",
+        "archive": "artifacts\\remix-runtime\\archives\\run200-20261024-203405-713587-return-fixture-gpu-images.zip",
+        "sha256": "694dd1f1b71a59ca6697a7b5e65e2c2e0c4dd9bead6b9ef7420784794af45cda",
+        "original_bytes": 58034896,
+        "archive_bytes": 4094799,
+        "recoverable": true,
+        "original_result_error": null
+      },
+      {
+        "run": "20261024-220322-841745-return-fixture",
+        "archive": "artifacts\\remix-runtime\\archives\\run200-20261024-220322-841745-return-fixture-gpu-images.zip",
+        "sha256": "07c45ecfa9fef94c7c7a0a1a8e32aedc7766baf5fcf71b45a11974344b017022",
+        "original_bytes": 58034896,
+        "archive_bytes": 4094799,
+        "recoverable": true,
+        "original_result_error": null
+      },
+      {
+        "run": "20261024-221455-060160-return-fixture",
+        "archive": "artifacts\\remix-runtime\\archives\\run200-20261024-221455-060160-return-fixture-gpu-images.zip",
+        "sha256": "5cdad78d7494a1cc875dc00a7378c14b6db5071650e8b50546a5e89e04b455c4",
+        "original_bytes": 58034896,
+        "archive_bytes": 4094799,
+        "recoverable": true,
+        "original_result_error": null
+      },
+      {
+        "run": "20261024-222746-361314-return-fixture",
+        "archive": "artifacts\\remix-runtime\\archives\\run200-20261024-222746-361314-return-fixture-gpu-images.zip",
+        "sha256": "c68675feee02485db8838aa886f2af6e57549889415af7507b0f924eac021950",
+        "original_bytes": 58034896,
+        "archive_bytes": 4094799,
+        "recoverable": true,
+        "original_result_error": null
+      },
+      {
+        "run": "20261026-045947-486323-return-fixture",
+        "archive": "artifacts\\remix-runtime\\archives\\run200-20261026-045947-486323-return-fixture-gpu-images.zip",
+        "sha256": "99acb6f0981de9dbeef803021c7806727da8d8a42cfd106a3815ac0ce7e7c2c2",
+        "original_bytes": 102477040,
+        "archive_bytes": 6509510,
+        "recoverable": true,
+        "original_result_error": null
+      },
+      {
+        "run": "20261026-105854-127363-return-fixture",
+        "archive": "artifacts\\remix-runtime\\archives\\run200-20261026-105854-127363-return-fixture-gpu-images.zip",
+        "sha256": "d1ee66a885e1ed6bdcc6a2f45a8ba19b6d1fa05769a2566df44f325e3d4e92a1",
+        "original_bytes": 83204544,
+        "archive_bytes": 5553080,
+        "recoverable": true,
+        "original_result_error": null
+      },
+      {
+        "run": "20261026-110250-300934-return-fixture",
+        "archive": "artifacts\\remix-runtime\\archives\\run200-20261026-110250-300934-return-fixture-gpu-images.zip",
+        "sha256": "91d83e4b9da0f0d4a291efdf3b755a2ee5b139fd4a8f279e4993302701252a6d",
+        "original_bytes": 163930400,
+        "archive_bytes": 10171006,
+        "recoverable": true
+      },
+      {
+        "run": "20261026-110353-037458-return-fixture",
+        "archive": "artifacts\\remix-runtime\\archives\\run200-20261026-110353-037458-return-fixture-gpu-images.zip",
+        "sha256": "50f1b1a43fdbd606fcb54fed7d6025bfa85d1aa0969d2c5611bf373c155ee8ac",
+        "original_bytes": 163930400,
+        "archive_bytes": 10171006,
+        "recoverable": true
+      }
+    ],
+    "original_bytes": 1668104896,
+    "compressed_bytes": 110525691,
+    "ledger_bytes": 18604133556,
+    "aggregate_cap_bytes": 20000000000,
+    "restore_before_image_content_reinspection": true,
+    "raw_packets_results_logs_bmps_retained": true
+  },
+  "limitations": [
+    "Actual SFC material-update confirmation pending",
+    "First base snapshot may precede enhanced installation",
+    "No per-material installed ACK",
+    "No full-enhancement subsecond claim",
+    "Other watcher/lifecycle failures not universally excluded",
+    "Existing idle CPU/memory findings remain open",
+    "Packaged runtime/public source instruction parity unverified"
+  ],
+  "final_repository": {
+    "head": "93e8dba",
+    "staged": false,
+    "committed": false,
+    "pushed": false,
+    "prior_dirty_work_preserved": true
+  },
+  "exact_next_action": "Sponsor runs start_d3d9_multiship_session.ps1 -AsyncMaterialCheckout;inspect initial roughness before any shuttle,play normally,exit on cue;review results"
+}

@@ -29,7 +29,7 @@ class ParallelAssetTests(unittest.TestCase):
         for name in ('primary','secondary'):Image.new('RGB',(3,2),(80,120,160)).save(root/(name+'.bmp'))
         @contextmanager
         def reserve(*_):yield
-        relay=SimpleNamespace(root=root,folder=root,material_config=(ROOT/'tools/remix_runtime/config/materials.toml').read_bytes(),output_reservations=SimpleNamespace(asset=reserve))
+        relay=SimpleNamespace(root=root,folder=root,material_config=(ROOT/'tools/remix_runtime/config/rendering.toml').read_bytes(),output_reservations=SimpleNamespace(asset=reserve))
         mesh={'points':[(1,2,3),(4,5,6),(7,8,9)],'corners':[(i,(0,0,1),(.2,.3)) for i in range(3)],'polygons':[(0,0)],
               'groups':[{'group':0,'flags':0x21,'primary':1,'secondary':2}],
               'refs':{'resources':[{'id':1,'filename':'primary.bmp'},{'id':2,'filename':'secondary.bmp'}]}}
@@ -159,7 +159,7 @@ class ParallelAssetTests(unittest.TestCase):
         finally:release.set();thread.join(timeout=2)
 
     def test_original_decoded_once_and_piece_bytes_match_accepted_convention(self):
-        values=struct.unpack('<2I10fQ',encode((ROOT/'tools/remix_runtime/config/materials.toml').read_bytes()))[2:12]
+        values=struct.unpack('<2I10fQ',encode((ROOT/'tools/remix_runtime/config/rendering.toml').read_bytes()))[2:12]
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp);Image.new('RGB',(3,2),(80,120,160)).save(root/'a.bmp')
             source=read_image(root,'a.bmp')

@@ -1,0 +1,71 @@
+{
+  "probe": "PLAYER-REPLACEMENT-001",
+  "run": 207,
+  "date": "2026-10-27",
+  "result": "BLOCKED_SUPPRESSED_SOURCE_FRAME_WITHOUT_MATCHING_OUTPUT",
+  "native_inputs": {
+    "client_sha256": "4D65761D7DD69EF1504070261B81E9C200C0AF18105033E1C4D2222C62320C29",
+    "checks": [
+      "006AC5A0",
+      "006AC600",
+      "006AC631",
+      "006AC66C",
+      "006AC69F",
+      "006AC6D0",
+      "006AC719",
+      "006AC754",
+      "006ABFFD",
+      "006AC004",
+      "006AC00C",
+      "006AC561",
+      "006AC57E"
+    ],
+    "files": {
+      "wrapper": {
+        "start": "0x6ac5a0",
+        "end_exclusive": "0x6ac757",
+        "bytes": 439,
+        "sha256": "46b067cd127c3bc0e16ab72bd47be5435c6df4f2e980db153eff86a117463622"
+      },
+      "prepare": {
+        "start": "0x6abfc0",
+        "end_exclusive": "0x6ac596",
+        "bytes": 1494,
+        "sha256": "557feb1ddba68c2370d28f68a62cb41c2e34aab934a6cfc357feebe828eb9fcb"
+      }
+    },
+    "manager_vtable": "0x007B8D4C",
+    "polygon_slot": "0x180",
+    "result": "STATIC_ANCHORS_VERIFIED_NATIVE_EXECUTION_PENDING",
+    "limitation": "No game hooks or suppression enabled; state methods stubbed in isolated native test"
+  },
+  "receiver": {
+    "path": "tools/remix_runtime/d3d9_game_receiver.h",
+    "sha256": "4ff01eecca00825b01984c7d3782e6de17c03a956aa7a72b982e11bbf93a6385",
+    "lines": {
+      "restore_previous": 129,
+      "search_ready_output": 140,
+      "attempt_composition": 158,
+      "missing_output_tail": 164
+    }
+  },
+  "history_sha256": "5049e6a740631a52bcb24bd53d179eb15947c3422b8122c24c87160d3b1286b9",
+  "native_log": "Pinned x86 zero-count PASS checks=225 wrapper_cases=32 unreadable_polygon_list=1 callee_saved_stack=1 manager_bytes_unchanged=1 state_methods=STUBBED not_gameplay=1\n",
+  "buffer64_log": "Replacement buffer counterexample REPRODUCED checks=10 additive_missing_output_original_present=1 suppressed_missing_output_ship_absent=1 HUD_frame_identity_preserved=1 implementation=existing_History synthetic_pixels=1 replacement_gate=BLOCKED not_gameplay=1\n",
+  "buffer32_log": "Replacement buffer counterexample REPRODUCED checks=10 additive_missing_output_original_present=1 suppressed_missing_output_ship_absent=1 HUD_frame_identity_preserved=1 implementation=existing_History synthetic_pixels=1 replacement_gate=BLOCKED not_gameplay=1\n",
+  "python_tests": 575,
+  "preflight": "PASS_NO_GAME_LAUNCHED",
+  "original_suppression_enabled": false,
+  "production_sources_changed": false,
+  "accepted_baseline": [
+    "Sponsor-confirmed depth",
+    "Previous aligned overlay",
+    "Current D3D9/Remix pipeline and appearance"
+  ],
+  "limitations": [
+    "State vtable methods are doubles in x86 empty-list test",
+    "GPU counterexample uses actual History with synthetic ship/HUD pixels,not full receiver/game",
+    "No new live suppression,hook-restoration or gameplay pass"
+  ],
+  "next_action": "Qualify replacement-specific presentation commit/rollback so a suppressed source frame cannot be presented without replacement; retain current bounds and fail-safe behavior."
+}

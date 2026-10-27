@@ -49,11 +49,10 @@ def encode_generated_dds(image):
 
 
 def encode_remix_material_dds(image):
-    # Remix replacement-material/DDS boundary ONLY. Captured UVs and ordinary
-    # D3D9 uploads keep their original bits. Equivalent to old SDK v=1-v,once.
-    # All generated color/emission/roughness maps share the same origin policy.
-    from PIL import Image
-    return encode_generated_dds(image.transpose(Image.Transpose.FLIP_TOP_BOTTOM))
+    # One Remix-only image-origin policy shared with the first base upload.
+    # Canonical UVs/original images and plain D3D9 consumers stay unchanged.
+    from remix_coordinates import image as remix_image
+    return encode_generated_dds(remix_image(image))
 
 
 def shader(name,images,values):
@@ -99,7 +98,8 @@ def prepare(folder,game_root,config=None,*,evidence_mode='test'):
     if refs.get('textures_enabled')!=1:raise ValueError('Native textured path not enabled;no guessed appearance')
     if evidence_mode=='test' and (hashlib.sha256(source.read_bytes()).hexdigest()!=scene['source_packet_sha256'] or hashlib.sha256(source.with_suffix('.json').read_bytes()).hexdigest()!=scene['source_references_sha256']):
         raise ValueError('Fresh source association changed')
-    raw=(config or (ROOT/'tools/remix_runtime/config/materials.toml').read_bytes())
+    from rendering_config import scoped
+    raw=scoped(config or (ROOT/'tools/remix_runtime/config/rendering.toml').read_bytes(),'material')
     packet=encode(raw);values=struct.unpack('<2I10fQ',packet)[2:12]
     if not 1<=len(scene['textures'])<=256:raise ValueError('Ordinary material image count')
     hashes=subprocess.run([str(HASHER),'--batch',str(folder),str(len(scene['textures']))],capture_output=True,text=True,timeout=10,check=True,

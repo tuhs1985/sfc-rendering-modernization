@@ -1,0 +1,172 @@
+{
+  "result": "READY_FOR_SPONSOR_PLAYER_REPLACEMENT_RUNTIME_TEST_NOT_GAMEPLAY_PASS",
+  "run": 209,
+  "parent": "93e8dba",
+  "runtime_source_changed": false,
+  "replacement": {
+    "receipt": "artifacts\\player-replacement\\qualification.json",
+    "sha256": "F7661BDEEA5DFCD0FD7EEF6FBD913E2F3DD0FB50C4C2C1991AADF4FDE078E8D0",
+    "fixtures": {
+      "steady": {
+        "folder": "C:\\Project\\SFC-Modernize Engine\\artifacts\\remix-runtime\\runs\\20261027-054131-181602-return-fixture",
+        "error": null,
+        "fixture_exit": 0,
+        "host_exit": 0,
+        "replacement": {
+          "native_capable": 1,
+          "renderer_capable": 1,
+          "suppressed": 603,
+          "rejected": 0,
+          "committed": 601,
+          "repeated": 1,
+          "recovered": 0,
+          "native_stop": 0,
+          "native_restored_frame": 0,
+          "repeat_max": 1,
+          "native_frame": 201052,
+          "mode": 2,
+          "generation": 2,
+          "owner": 3,
+          "revision": 3,
+          "epoch": 3,
+          "pid": 43940,
+          "session": [
+            1510712645,
+            2199668982,
+            3174497623,
+            4063814196
+          ]
+        },
+        "result_sha256": "6A7A8B1B6C7B95A14EF9444CF8DE7700FBCF6B6DA9A09ECA52E3FFFFCE9AF2BC"
+      },
+      "faults": {
+        "folder": "C:\\Project\\SFC-Modernize Engine\\artifacts\\remix-runtime\\runs\\20261027-054158-705753-return-fixture",
+        "error": null,
+        "fixture_exit": 0,
+        "host_exit": 0,
+        "replacement": {
+          "native_capable": 1,
+          "renderer_capable": 1,
+          "suppressed": 205,
+          "rejected": 0,
+          "committed": 200,
+          "repeated": 4,
+          "recovered": 1,
+          "native_stop": 0,
+          "native_restored_frame": 200460,
+          "repeat_max": 2,
+          "native_frame": 201037,
+          "mode": 2,
+          "generation": 2,
+          "owner": 3,
+          "revision": 3,
+          "epoch": 3,
+          "pid": 47580,
+          "session": [
+            3363020377,
+            3831450934,
+            3051722098,
+            4101958894
+          ]
+        },
+        "result_sha256": "AD99BE77F006AFCBE35DD96B8B1399091E83ECD8223E207F902303F88D6067C9"
+      }
+    },
+    "scope": [
+      "Unique configured player-fixture model,not engine player flag",
+      "No SFC suppression runtime proof yet",
+      "At most two extra game-frame repeats;recovery latches native until restart"
+    ]
+  },
+  "regression_fixtures": {
+    "normal-qualified": {
+      "folder": "artifacts\\remix-runtime\\runs\\20261027-104343-692306-return-fixture",
+      "result_sha256": "6C7AC4962A57DB3DD42FCD06CE36B9499F298F3ABF7309E0831C74D1BEAF5F4C",
+      "error": null,
+      "host_exit": 0,
+      "fixture_exit": 0,
+      "frames": 600,
+      "draws": 592,
+      "accepted": true,
+      "archive_receipt": "artifacts\\remix-runtime\\runs\\20261027-104343-692306-return-fixture\\run208-archive.json"
+    },
+    "initial-qualified": {
+      "folder": "artifacts\\remix-runtime\\runs\\20261027-104415-449392-return-fixture",
+      "result_sha256": "04868F8B3593F46EB31482984D58C2125C6E3D490BA6DC8AAD4D1FF76CBF22F9",
+      "error": null,
+      "host_exit": 0,
+      "fixture_exit": 0,
+      "frames": 600,
+      "draws": 599,
+      "accepted": true,
+      "archive_receipt": "artifacts\\remix-runtime\\runs\\20261027-104415-449392-return-fixture\\run208-archive.json"
+    },
+    "late-qualified": {
+      "folder": "artifacts\\remix-runtime\\runs\\20261027-104444-296502-return-fixture",
+      "result_sha256": "144A6774A0FA94AE5AE31F1DB79516C11A0486E06D196F8A8527DA64C6DA969E",
+      "error": null,
+      "host_exit": 0,
+      "fixture_exit": 0,
+      "frames": 600,
+      "draws": 596,
+      "accepted": false,
+      "archive_receipt": "artifacts\\remix-runtime\\runs\\20261027-104444-296502-return-fixture\\run208-archive.json"
+    },
+    "late-retry": {
+      "folder": "artifacts\\remix-runtime\\runs\\20261027-104641-514544-return-fixture",
+      "result_sha256": "E95435B74947316A450D9C3CD72924920D5CC11E9EF4293CD63FEBCBF09C8A8E",
+      "error": null,
+      "host_exit": 0,
+      "fixture_exit": 0,
+      "frames": 600,
+      "draws": 599,
+      "accepted": true,
+      "archive_receipt": "artifacts\\remix-runtime\\runs\\20261027-104641-514544-return-fixture\\run208-archive.json"
+    },
+    "tuning-qualified": {
+      "folder": "artifacts\\remix-runtime\\runs\\20261027-104721-061268-return-fixture",
+      "result_sha256": "EBEA1D9399C04129FB5B0EDD1F56E14CFE2EB59A5E899608DE8419FE4A9AABF0",
+      "error": null,
+      "host_exit": 0,
+      "fixture_exit": 0,
+      "frames": 600,
+      "draws": 595,
+      "accepted": true,
+      "archive_receipt": "artifacts\\remix-runtime\\runs\\20261027-104721-061268-return-fixture\\run208-archive.json"
+    }
+  },
+  "settings_unchanged": {
+    "rendering": "78177E1D40498186B60C7912B46B897BA08D332DF4A24EA41F92C042E89202C5",
+    "lights": "1DBB9BF007927DA891EAFBF93BB3F3C015080BA98F23E375997F881D85861FE0"
+  },
+  "accepted_critical": {
+    "StarFleetOP.exe": "4D65761D7DD69EF1504070261B81E9C200C0AF18105033E1C4D2222C62320C29",
+    "DDraw.dll": "62F1E1B2AC5196F4A74B35B898BA8644322F976026324E2F767A4096BFB58748",
+    "D3DImm.dll": "F51507ACBB1C5510AB72881EEFDE5E4DFE6376667546E86DDCF62E6A9EE4923F",
+    "dxgi.dll": "E35E4E2E47F4765F0799CB54C88E5ADE49B50CD7895C137B9D557F263344CAB7",
+    "dgVoodoo.conf": "1A9A53DC8185C7DFD7E984B2CAA19A615AD475FD5C0FC26DC6842E5C43209DCD",
+    "ReShade.ini": "2AF4D74A147EDCF90F0811629DACE3BE3DA6C34E8739FA3E1E573AE93FAE9501",
+    "sfc.ini": "FB3689DCC28AF4C3C86DA7E0E4989F2C267D8AA640572C052EA16B7BB53FB0C4"
+  },
+  "copied_critical": {
+    "StarFleetOP.exe": "4D65761D7DD69EF1504070261B81E9C200C0AF18105033E1C4D2222C62320C29",
+    "DDraw.dll": "62F1E1B2AC5196F4A74B35B898BA8644322F976026324E2F767A4096BFB58748",
+    "D3DImm.dll": "F51507ACBB1C5510AB72881EEFDE5E4DFE6376667546E86DDCF62E6A9EE4923F",
+    "dxgi.dll": "E35E4E2E47F4765F0799CB54C88E5ADE49B50CD7895C137B9D557F263344CAB7",
+    "dgVoodoo.conf": "1A9A53DC8185C7DFD7E984B2CAA19A615AD475FD5C0FC26DC6842E5C43209DCD",
+    "ReShade.ini": "2AF4D74A147EDCF90F0811629DACE3BE3DA6C34E8739FA3E1E573AE93FAE9501",
+    "sfc.ini": "FB3689DCC28AF4C3C86DA7E0E4989F2C267D8AA640572C052EA16B7BB53FB0C4"
+  },
+  "evidence_bytes": 18593793080,
+  "limits": {
+    "aggregate_bytes": 20000000000,
+    "tactical_seconds": 90,
+    "workflow_seconds": 285,
+    "output_bytes": 134217728,
+    "extra_hold_presentations": 2
+  },
+  "sfc_launched": false,
+  "index_empty": true,
+  "known_issue": "First late-loading control failed max-consecutive omission gate (4);one identical repeat passed;startup variability unresolved",
+  "next_action": "Sponsor starts start_d3d9_player_replacement_session.ps1 with F-CA against a different model;review live result before claiming replacement PASS"
+}

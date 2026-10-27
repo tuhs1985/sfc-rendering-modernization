@@ -31,7 +31,7 @@ def binaries():
 
 
 def configs():
-    result={name:digest(ROOT/f'tools/remix_runtime/config/{name}.toml') for name in ('lights','materials','image','quality')}
+    result={name:digest(ROOT/f'tools/remix_runtime/config/{name}.toml') for name in ('lights','rendering')}
     result['offset_ship']=digest(ROOT/'tools/d3d9_proof/offset_ship.toml')
     return result
 

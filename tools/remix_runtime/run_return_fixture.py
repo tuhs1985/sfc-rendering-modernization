@@ -47,6 +47,10 @@ def main():
     parser.add_argument('--buffer-early-ready',action='store_true',help='Use normal16ms source lead to exercise queued output before the saved scene is presented')
     parser.add_argument('--multi-ship',action='store_true',help='Two different historical fresh packets through aligned retained scene;offline only')
     parser.add_argument('--parallel-assets',action='store_true',help='Offline qualification: intra-asset tasks and per-group progressive materials')
+    parser.add_argument('--async-material-checkout',action='store_true',help='Isolated1.6.1/flat/complete-stage parallel checkout;never qualifies normal1.5.2')
+    parser.add_argument('--live-tuning',action='store_true',help='Offline current-D3D9 live-control qualification;no SFC')
+    parser.add_argument('--player-replacement',action='store_true',help='Offline synthetic-source transactional player replacement;never launches SFC')
+    parser.add_argument('--replacement-faults',action='store_true',help='Standalone fixture only: withhold shared output for one then two presentations')
     parser.add_argument('--texture-upload',choices=('inherit','staged-lock','initial-data'),default='inherit',help='Offline comparison: documented SYSTEMMEM initial pixels;unchanged runtime/texture content')
     parser.add_argument('--asset-admission-service',choices=('inherit','on','off'),default='inherit',help='Offline A/B: service ready assets on the renderer thread during output waits')
     parser.add_argument('--parallel-material-delay-ms',type=int,choices=(0,3000,5000),default=0,help='Offline parallel control: delay one group per asset without occupying a worker')
@@ -72,11 +76,19 @@ def main():
     parser.add_argument('--with-depth',action='store_true',help='Bind known synthetic D24S8 descriptor, not actual scene depth')
     parser.add_argument('--observation-only',action='store_true',help='No Remix runtime/image; control channel and depth observations only')
     args=parser.parse_args()
+    if args.async_material_checkout:
+        if args.player_replacement and args.live_tuning:parser.error('Replacement fixture excludes tuning')
+        if (not args.multi_ship or not args.prewarm or args.pipeline_mode!='performance' or args.runtime_candidate
+                or args.candidate_initial_replacements or args.candidate_asset_loading!='inherit'):
+            parser.error('Async material checkout requires performance multi-ship/prewarm and excludes other candidate overrides')
+        args.parallel_assets=True;args.material_library='flat'
+    if args.player_replacement and not args.async_material_checkout:parser.error('Replacement fixture requires pinned async baseline')
+    if args.replacement_faults and not args.player_replacement:parser.error('Replacement faults require replacement fixture')
     if args.parallel_assets and not args.multi_ship:parser.error('--parallel-assets requires --multi-ship')
     if args.texture_upload!='inherit' and not(args.multi_ship and args.pipeline_mode=='performance'):parser.error('Texture upload comparison requires performance multi-ship')
     if args.asset_admission_service!='inherit' and not args.parallel_assets:parser.error('Admission service comparison requires --parallel-assets')
     if args.parallel_material_delay_ms and not args.parallel_assets:parser.error('Material delay requires --parallel-assets')
-    if args.parallel_assets and (args.pipeline_mode!='performance' or args.runtime_candidate or args.api_texture_prefetch or args.material_library!='layers' or args.material_texture_loading!='preload' or args.loading_policy!='inherit' or args.isolate_initial_material_library or args.isolate_late_material_reload or args.render_prewarm!='off'):
+    if args.parallel_assets and (args.pipeline_mode!='performance' or args.runtime_candidate or args.api_texture_prefetch or (args.material_library!='layers' and not args.async_material_checkout) or args.material_texture_loading!='preload' or args.loading_policy!='inherit' or args.isolate_initial_material_library or args.isolate_late_material_reload or args.render_prewarm!='off'):
         parser.error('Parallel qualification uses performance and the unchanged pinned D3D9/material policy;do not mix other experiments')
     if args.runtime_candidate and not(args.multi_ship and args.prewarm):parser.error('--runtime-candidate requires --multi-ship --prewarm')
     if args.candidate_initial_replacements and not args.runtime_candidate:parser.error('--candidate-initial-replacements requires --runtime-candidate')
@@ -134,6 +146,10 @@ def main():
         from qualify_multiship import locks
         backend_locks=locks()
     candidate_receipt=None
+    checkout_backend=None
+    if args.async_material_checkout:
+        from async_material_checkout import backend_inputs,receipt
+        checkout_backend=backend_inputs();candidate_receipt=receipt(checkout_backend)
     if args.runtime_candidate:
         from runtime_candidate import verify
         import live_owner_timing
@@ -179,19 +195,32 @@ def main():
         env.pop('SFC_D3D9_SOURCE_TIMING',None)
         env.pop('SFC_D3D9_LIVE_TIMING',None);env.pop('SFC_D3D9_FIXTURE_ROWS',None)
         env.pop('SFC_D3D9_MULTISCENE',None)
+        env['SFC_D3D9_PLAYER_REPLACEMENT']='1' if args.player_replacement else '0'
+        env.pop('SFC_REPLACEMENT_FIXTURE_FAULTS',None)
+        if args.replacement_faults:env['SFC_REPLACEMENT_FIXTURE_FAULTS']='1'
         env.pop('SFC_MULTISCENE_LATE_ASSET',None)
         if args.source_timing:
             from present_calibration import Receiver
             semantic=Receiver();env.update(SFC_D3D9_SOURCE_TIMING='1',SFC_REMIX_CALIBRATION_SCENE=semantic.name)
         if args.live_owner_timing:
-            if args.multi_ship and args.parallel_assets:from progressive_scene_relay import Relay
+            if args.async_material_checkout:from async_material_checkout import Relay
+            elif args.multi_ship and args.parallel_assets:from progressive_scene_relay import Relay
             elif args.multi_ship:from multi_scene_relay import Relay
             else:from live_owner_timing import Relay
             from run_offline import CAPTURE
             from scene_bundle import snapshots
             from live_scene import decode_mesh
             mode_args={'pipeline_mode':args.pipeline_mode} if args.multi_ship else {}
+            if args.player_replacement:mode_args['player_replacement']=True
+            if args.async_material_checkout:mode_args['checkout_backend']=checkout_backend
             live_relay=Relay(work,semantic,TEST,additive=args.d3d9_additive,offline_fixture=args.d3d9_additive,persistent=args.persistent_scene,buffered=args.synchronized_buffer,**mode_args)
+            live_relay.live_tuning=args.live_tuning
+            if args.live_tuning:
+                if not args.async_material_checkout:raise ValueError('Live tuning fixture requires current async baseline')
+                from d3d9_tuning import Controls
+                from rendering_config import DEFAULT
+                tuning_path=work/'rendering-test.toml';tuning_path.write_bytes(DEFAULT.read_bytes())
+                live_relay.tuning_controls=Controls(live_relay,tuning_path)
             if args.parallel_assets:live_relay.parallel_material_delay_ms=args.parallel_material_delay_ms
             if args.parallel_assets and args.asset_admission_service!='inherit':live_relay.admission_service=args.asset_admission_service=='on'
             if args.texture_upload!='inherit':live_relay.initial_texture_data=args.texture_upload=='initial-data'
@@ -262,6 +291,17 @@ def main():
                 if verified and raw_pid==int(verified[1]):
                     if args.prewarm and args.multi_ship:live_relay.start_on_launch(raw_pid)
                     live_relay.poll(raw_pid)
+                    if args.live_tuning and live_relay.process:
+                        controls=live_relay.tuning_controls
+                        if not getattr(live_relay,'fixture_tuning_changed',False) and live_relay.preparer.settled(set(live_relay.preparer.jobs)) and not live_relay.pending_complete_ids:
+                            import tomllib
+                            text=tuning_path.read_text()
+                            text=re.sub(r'(?m)^emissive_intensity\s*=.*$','emissive_intensity = 0.25',text)
+                            text=re.sub(r'(?m)^gamma\s*=.*$','gamma = 1.1',text)
+                            # Deliberately change native bloom and grade only in
+                            # the fixture-private profile,never sponsor settings.
+                            text=re.sub(r'(?m)^"rtx.bloom.burnIntensity"\s*=.*$','"rtx.bloom.burnIntensity" = 0.0',text)
+                            tuning_path.write_text(text);live_relay.fixture_tuning_changed=True
             state=channel.snapshot()
             if args.rebind_owner and live_relay and live_relay.process and len(rebind_requests)<2:
                 from owner_rebind import acknowledged,request
@@ -373,6 +413,10 @@ def main():
     receipt['pipeline_mode']=args.pipeline_mode
     receipt['prewarm']=args.prewarm
     receipt['runtime_candidate']=candidate_receipt
+    receipt['async_material_checkout']=args.async_material_checkout
+    receipt['live_tuning_fixture']=args.live_tuning
+    receipt['player_replacement_fixture']=args.player_replacement
+    receipt['replacement_faults_fixture']=args.replacement_faults
     receipt['startup_profile']=args.startup_profile
     receipt['texture_upload']=args.texture_upload
     receipt['menu_idle_seconds']=args.menu_idle_seconds

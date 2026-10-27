@@ -6,7 +6,26 @@ from light_shapes import FIELDS as SHAPE_FIELDS,validate_shape
 
 FIELDS = {'id', 'enabled', 'intensity_multiplier', 'color_multiplier',
           'position_offset', 'direction_override', 'radius',
-          'angular_diameter_degrees', 'volumetric_multiplier', 'raytracing'} | SHAPE_FIELDS
+          'angular_diameter_degrees', 'volumetric_multiplier', 'raytracing',
+          'angle_mode','azimuth_degrees','elevation_degrees'} | SHAPE_FIELDS
+
+
+def angled_direction(direction,control):
+    """SFC world-Z-up source bearing; native/Remix direction is the ray vector.
+
+    Mesh-local Y is NOT world up: captured supplied transforms map it to +Z.
+    Source azimuth is atan2(y,x); elevation is atan2(z,hypot(x,y)).
+    """
+    az=control.get('azimuth_degrees',0);el=control.get('elevation_degrees',0)
+    mode=control.get('angle_mode','offset')
+    if mode=='offset' and az==0 and el==0:return direction
+    if mode=='offset':
+        az+=(math.degrees(math.atan2(-direction[1],-direction[0]))
+             if math.hypot(direction[0],direction[1])>1e-12 else 0.0)
+        el+=math.degrees(math.atan2(-direction[2],math.hypot(direction[0],direction[1])))
+    el=math.radians(max(-90,min(90,el)));az=math.radians(az)
+    horizontal=math.cos(el)
+    return [-horizontal*math.cos(az),-horizontal*math.sin(az),-math.sin(el)]
 
 
 def number(value, lo, hi):
@@ -57,6 +76,12 @@ def validate(data, registry):
                    volumetric_multiplier=number(row.get('volumetric_multiplier', 1), 0, 16))
         if 'type' in row:out['shape']=validate_shape(row,number,vector)
         elif set(row)&(SHAPE_FIELDS-{'radius'}):raise ValueError('Explicit type required for light-shape settings')
+        mode=row.get('angle_mode','offset')
+        if mode not in ('offset','absolute'):raise ValueError('angle_mode must be offset or absolute')
+        out.update(angle_mode=mode,azimuth_degrees=number(row.get('azimuth_degrees',0),-360,360),
+                   elevation_degrees=number(row.get('elevation_degrees',0),-90,90))
+        if (mode!='offset' or out['azimuth_degrees'] or out['elevation_degrees']) and out.get('shape',{}).get('type','directional')!='directional':
+            raise ValueError('Angle controls currently require a directional light;dome uses environment_rotation_degrees')
         if 'direction_override' in row:
             if kind != 'directional' and 'type' not in row:
                 raise ValueError('Direction override not qualified for this light kind')

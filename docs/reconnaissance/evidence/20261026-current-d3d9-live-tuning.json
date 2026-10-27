@@ -1,0 +1,75 @@
+{
+  "run": 204,
+  "client_date": "2026-10-26",
+  "timezone": "America/New_York",
+  "result": "READY_FOR_SPONSOR_CURRENT_D3D9_TUNING_CHECKOUT",
+  "baseline": "docs/reconnaissance/evidence/baselines/20261026-sponsor-appearance-r3",
+  "baseline_files": {
+    "tools/remix_runtime/config/rendering.toml": {
+      "snapshot": "rendering.toml",
+      "sha256": "982360db5bd97cd6988120a54ea59e401486ac6331f0f4677a18aa21794e4113",
+      "bytes": 5869
+    },
+    "tools/remix_runtime/config/lights.toml": {
+      "snapshot": "lights.toml",
+      "sha256": "9015edf237517657cc4cafc3d2ff2898e7504b789f41012f6d5ba5fd1b933161",
+      "bytes": 2263
+    },
+    "tools/d3d9_proof/multi_ship.toml": {
+      "snapshot": "multi_ship.toml",
+      "sha256": "c0d868c4e65334d1a06de33f1eaf73e7323286d69c07f60449f5dda154ed23f9",
+      "bytes": 351
+    },
+    "tools/d3d9_proof/offset_ship.toml": {
+      "snapshot": "offset_ship.toml",
+      "sha256": "63602870efb5be8fccd61edc7c802303b6ca22fd307b7a81a1358fabd78d5645",
+      "bytes": 279
+    }
+  },
+  "external_backup": {
+    "path": "C:\\Project\\SFC-Modernize Engine Backups\\20261026-appearance-r3.zip",
+    "sha256": "a6b8d015f5135ecdcd419b9ac6422345118ef07fad50bdcd481b86ae5e78e498"
+  },
+  "settings_byte_unchanged": true,
+  "backend": "Ordinary D3D9;explicit pinned Remix1.6.1 async-material checkout;no SDK mesh submission",
+  "python_tests": 568,
+  "fixtures": {
+    "normal": "C:\\Project\\SFC-Modernize Engine\\artifacts\\remix-runtime\\runs\\20261027-004343-555358-return-fixture",
+    "initial": "C:\\Project\\SFC-Modernize Engine\\artifacts\\remix-runtime\\runs\\20261027-004412-062967-return-fixture",
+    "late": "C:\\Project\\SFC-Modernize Engine\\artifacts\\remix-runtime\\runs\\20261027-004441-220227-return-fixture",
+    "tuning": "C:\\Project\\SFC-Modernize Engine\\artifacts\\remix-runtime\\runs\\20261027-004516-334319-return-fixture"
+  },
+  "native_tuning_result": "OFFLINE_D3D9_TUNING_PREPARED_NOT_GAMEPLAY_PASS",
+  "native_controls": {
+    "accepted": 1,
+    "rejected": 0,
+    "generated_bytes": 0,
+    "image_revisions": 2,
+    "quality_revisions": 1
+  },
+  "live_controls": [
+    "image/native bloom",
+    "quality",
+    "native lights policy",
+    "material constants/generated maps"
+  ],
+  "limits": {
+    "tactical_seconds": 1800,
+    "workflow_seconds": 1980,
+    "aggregate_bytes": 20000000000,
+    "original_drawing": "preserved"
+  },
+  "tuning_preflight": "PASS",
+  "game_launched_by_codex": false,
+  "actual_extended_gameplay": "PENDING",
+  "staged": false,
+  "committed": false,
+  "pushed": false,
+  "limitations": [
+    "No actual ten-minute SFC soak by Codex",
+    "Active ReShade preset contribution not newly measured",
+    "No per-material installed-pixel or retirement ACK",
+    "Immutable generated material images kept until process exit within existing bounds",
+    "Old SDK qualification is historical/stale;PowerShell tuning entries now route to current D3D9"
+  ]
+}

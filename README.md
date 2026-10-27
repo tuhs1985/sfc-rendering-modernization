@@ -4,9 +4,9 @@ An experimental rendering-modernization project for **Starfleet Command: Orion P
 
 The aim is to improve tactical 3D rendering while preserving gameplay, controls, tactical information, missions, campaigns and save continuity. This is not a rebuild of the game engine.
 
-**Current result:** we capture fresh ship geometry and scene state from the running game, submit it through our own **ordinary Direct3D 9 adapter**, and let NVIDIA RTX Remix render it. GPU-shared output is composited into SFC's actual game window. Persistent tracking and a bounded, synchronized presentation buffer keep the selected ship resident across camera changes. The current in-game proof adds a textured copy beside an original ship; **it does not replace that ship or the entire scene**.
+**Current result:** we capture fresh ship geometry and scene state from the running game, submit it through our own **ordinary Direct3D 9 adapter**, and let NVIDIA RTX Remix render it. GPU-shared output is composited into SFC's actual game window. Persistent tracking and bounded presentation buffering retain supported ships across camera changes. The demonstrated in-game path adds textured copies alongside originals. A separate, default-off **player-ship replacement** checkout is now qualified offline and awaiting gameplay confirmation; full-scene replacement is not established.
 
-The current D3D9 display test deliberately selects the Federation heavy cruiser (`fca.mod`). Generalizing that path to other classes and multiple visible ships is the next coverage increment—not an already delivered capability.
+The multi-ship diagnostic accepts fresh supported assets. The first replacement checkout deliberately selects a unique Federation heavy cruiser (`fca.mod`); it requires that player fixture against a different enemy model, rather than assuming a verified engine player flag. See the [current checkpoint](docs/HANDOFF.md).
 
 This is a research/development workspace, not a ready-to-install graphics mod.
 
@@ -20,7 +20,7 @@ Click the preview to watch on YouTube. The test shows the original FCA alongside
 
 - **Semantic capture:** observe ship/model ownership before the engine reduces it to generic draw calls.
 - **Fresh assets:** capture supported rigid triangular meshes and their texture associations from the running game, rather than substituting a prepared ship model.
-- **Live scene connection:** earlier Toolkit-preview tests displayed multiple observed ships, including fighters. The current D3D9-to-Remix in-game path displays one qualified FCA instance; those are separate coverage results.
+- **Live scene connection:** supported fresh ships and fighters can be retained through the D3D9-to-Remix additive path. Tested coverage is recorded per run; it does not establish every model or rendering family.
 - **Persistent tracking:** a bounded registry retains qualified ship identity, geometry revisions and simulation-derived transforms independently of camera visibility. A camera switch does not itself retire or reload a living ship.
 - **Standard graphics input:** a separate 64-bit host builds D3D9 vertex/index buffers and texture bindings from the captured data, then submits ordinary indexed triangle draws that Remix intercepts.
 - **In-game return:** a project ReShade add-on composites shared GPU output into the copied game's D3D11 presentation path. The opt-in buffer pairs the previous complete native frame, depth and returned ship rather than putting old ship pixels on a new camera view.
@@ -133,7 +133,7 @@ The repository is public. Game files, downloaded dependencies and local runtime 
 Before any runtime test:
 
 1. Obtain a legitimate supported game installation. Preserve the accepted installation and archival originals.
-2. Review the [dependency manifest](docs/reconnaissance/remix-return-dependencies.json), [D3D9 proof notes](tools/d3d9_proof/README.md), and [current buffered probe](docs/reconnaissance/probes/D3D9-SYNC-BUFFER-001.md). The tested stack includes pinned Remix **1.5.2**, matching output/control headers, the recorded dgVoodoo/ReShade setup, and Microsoft Detours. Use the recorded matching versions—not whichever SDK header or DLL is newest.
+2. Review the [dependency manifest](docs/reconnaissance/remix-return-dependencies.json), [D3D9 proof notes](tools/d3d9_proof/README.md), and [current handoff](docs/HANDOFF.md). Normal Remix **1.5.2** remains a separate baseline; the current material/tuning and player-replacement checkout uses the pinned **1.6.1** runtime/host/header set. The recorded dgVoodoo/ReShade setup and Microsoft Detours also remain qualified dependencies. Use each workflow's matching versions—not whichever SDK header or DLL is newest.
 3. Review local paths in `tools/d3d9_proof/`, `tools/remix_runtime/` and `tools/m1_component/`. Builds target Visual Studio **2026 Community**, C++20 and the Windows SDK, with separate x86/x64 tools. The prepared launchers accept Windows PowerShell **5.1** and forward to the pinned modern PowerShell/Python environment; the workflow uses PowerShell **7** and Python **3.12** internally. Buffered GPU-read completion also requires the qualified D3D11 fence interfaces.
 4. Prepare and verify an **independent test installation**, dependency hashes, native builds, regression tests and GPU qualification. The preparation entry points include `prepare_test_install.ps1`, `prepare_runtime.ps1`, `prepare_reshade_sdk.ps1` and `prepare_detours.ps1`; they are controlled development steps, not a general installer. Preserve their manifests and review the runbook before using them.
 5. Complete the non-executing preflight before launching gameplay:
@@ -144,34 +144,44 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\d3d9_proof\start
 
 `-CheckOnly` checks local prerequisites and source/binary/config qualification without starting the game or renderer. A new machine will need setup and qualification before it can pass. The gate requires separate early- and late-delivery standalone tests, not only Python regressions.
 
-**Only in an already prepared and qualified workspace**, launch the current buffered FCA comparison from an appropriately elevated PowerShell parent:
+**Only in an already prepared and qualified workspace**, launch the multi-ship additive comparison from an appropriately elevated PowerShell parent:
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\d3d9_proof\start_d3d9_buffered_scene_session.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\d3d9_proof\start_d3d9_multiship_session.ps1 -AsyncMaterialCheckout
 ```
 
-The execution-policy override is process-scoped; do not disable UAC or globally weaken Windows security. The runner builds/checks the required tools and launches the verified test-copy workflow. Use the familiar two-ship skirmish with the configured FCA, play normally and switch cameras freely, then exit normally at the final two low beeps. This diagnostic uses a **90-second tactical window** inside the bounded prepared workflow. Exit when requested so controlled component removal can finish; early exit still retains evidence but may not demonstrate unload.
+The execution-policy override is process-scoped; do not disable UAC or globally weaken Windows security. The runner checks the prepared tools and launches the verified test-copy workflow. Use a familiar skirmish, play normally and switch cameras freely, then exit normally at the final two low beeps. This diagnostic uses a **90-second tactical window** inside the bounded prepared workflow. Keep the game open through component restoration; early exit retains evidence but may not demonstrate controlled unload.
 
-The unbuffered [`start_d3d9_persistent_scene_session.ps1`](tools/d3d9_proof/start_d3d9_persistent_scene_session.ps1) remains a comparison baseline. The older [`start_light_tuning_session.ps1`](tools/remix_runtime/start_light_tuning_session.ps1) is a separate appearance-tuning workflow, not an alias for the new buffered D3D9 test. It ends on game exit with its own **30-minute safety ceiling**.
+The unbuffered [`start_d3d9_persistent_scene_session.ps1`](tools/d3d9_proof/start_d3d9_persistent_scene_session.ps1) remains a historical comparison baseline. [`start_light_tuning_session.ps1`](tools/remix_runtime/start_light_tuning_session.ps1) now uses the current fast D3D9/Remix path with live appearance controls; it ends on game exit with its own **30-minute safety ceiling**.
+
+The separate [`start_d3d9_player_replacement_session.ps1`](tools/d3d9_proof/start_d3d9_player_replacement_session.ps1) prepares one aligned player replacement, rather than an offset copy. Original drawing continues until paired output authorizes suppression. It stages SFC's background/HUD and matching Remix ship offscreen, then displays the complete picture. At most two additional complete-picture presentations bridge missing output; sustained failure restores intact native rendering and latches replacement off until restart. Use F-CA versus a different model and follow [Run209's checkout instructions](docs/runs/2026-10-27-codex-player-replacement-qualified.md). The background itself is **not** sent into Remix.
+
+The [renderer-boundary audit](docs/reconnaissance/2026-10-27-renderer-boundary-audit.md) explains the reusable data/transaction boundaries and remaining Remix/D3D11 assumptions. Interchangeable renderer and presentation adapters remain an open engineering gate.
 
 If setup fails, retain the generated evidence and inspect the reported condition before retrying. Never copy experimental DLLs into the accepted installation or manually delete active-session files to work around an error.
 
 ## Adjusting the returned ship
 
 - [`lights.toml`](tools/remix_runtime/config/lights.toml): mapped native lights and an independent project fill light.
-- [`materials.toml`](tools/remix_runtime/config/materials.toml): roughness, illuminated-marking strength and supported optional surface controls.
-- [`image.toml`](tools/remix_runtime/config/image.toml): separately enabled live brightness, exposure, contrast, midtone/gamma and saturation controls; restore defaults with image.example.toml.
-- [`quality.toml`](tools/remix_runtime/config/quality.toml): separate filtering, temporal AA and denoiser controls; supersampling remains at the qualified1× setting.
+- [`rendering.toml`](tools/remix_runtime/config/rendering.toml): the single editable profile for surface materials, emission, generated roughness, texture filtering/AA, whole-image adjustments and native Remix bloom. Sections describe each control's scope; bloom affects the whole Remix image, not illumination alone. Current tuned values are preserved.
+
+- [`rendering.example.toml`](tools/remix_runtime/config/rendering.example.toml): factory restore profile. Generated configuration files inside run folders are evidence snapshots, not alternate settings to edit.
 - [Control reference](tools/remix_runtime/config/README.md): units, ranges, live reload, light types and unsupported options.
-- [Current temporary appearance baseline](docs/reconnaissance/evidence/baselines/20261019-sponsor-temporary-appearance-r2/README.md): the sponsor's recorded settings and attribution caveats, not physically calibrated conversion factors; older checkpoints remain historical.
+- [Protected appearance rollback — revision3](docs/reconnaissance/evidence/baselines/20261026-sponsor-appearance-r3/README.md): historical settings, hashes and restoration. Current editable profiles may contain newer sponsor tuning; do not automatically overwrite them with this snapshot. Values are temporary artistic choices, not physically calibrated factors.
 
 Save valid configuration changes while the tuning session is active to apply them live. Invalid edits retain the last accepted settings. These settings affect the Remix-rendered copy, not the original game assets or native lights. Per-light shadow/ray-tracing disable is not exposed by the pinned SDK.
 
+The dedicated `start_light_tuning_session.ps1` now uses the fast ordinary-D3D9
+Remix1.6.1 checkout, with live controls and minimal recording until normal exit
+(30-minute tactical safety ceiling). It does not use the older SDK/ImGui path.
+See [Run204](docs/runs/2026-10-26-codex-current-d3d9-live-tuning.md) for qualification,
+restoration and the remaining sponsor gameplay check.
+
 ## Important limitations
 
-- Original-ship suppression/replacement, full-scene visibility and correct interaction with retained weapons, shields, explosions and UI are not established.
-- The current D3D9 path selects exactly `assets/models/fca/fca.mod`, not a proven native player flag. A different race/model is excluded by that fixture rule. The registry's 32-owner capacity is not proof that the D3D9 backend already renders all owners; generic multi-asset/multi-ship submission is the next increment.
-- The opt-in buffer pairs one adjacent frame, with a 50 ms hard expiry rather than an intentional 50 ms delay. It retains safe omission when output is unavailable; no motion prediction, unlimited stale hold or exact synchronized replacement contract is delivered.
+- Original-ship replacement is qualified offline for the first player checkout; in-game suppression, controlled unload and interaction with retained effects still need confirmation. Full-scene replacement is not established.
+- The current multi-ship checkout accepts fresh supported ship assets; the older single-FCA diagnostic remains separate. The32-owner/64-asset limits and tested models do not establish universal object, geometry or mission coverage.
+- The established additive buffer pairs one adjacent frame with a 50 ms input limit. The new replacement transaction separately retains up to two earlier source frames, checks exact output/receipt identity, and can repeat a whole completed picture twice before latched native recovery. No motion prediction or indefinite stale overlay is used. Actual replacement playability remains to test.
 - The qualified buffered output extent is 1920×1080. Resize/device recreation can omit the extra ship until a fresh supported session; automatic recovery at arbitrary resolutions is not established.
 - Supported mainline rigid meshes do not imply arbitrary deformation, damage updates, every LOD or every game object is covered.
 - Transient weapon/effect lights are observed but are not yet mapped as qualified live Remix lights.

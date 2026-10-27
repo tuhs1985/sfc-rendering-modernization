@@ -1,5 +1,26 @@
 # Plain D3D9 offline proof
 
+## Optional asynchronous-material checkout (Run194)
+
+The normal command keeps its existing1.5.2 runtime. Add `-AsyncMaterialCheckout`
+to `start_d3d9_multiship_session.ps1` for the separately qualified1.6.1 host/header,
+parallel base-first assets and completed single-file material publication. Do not
+combine it with `-ExperimentalParallelAssets` or Test mode. Settings and original
+ship drawing stay unchanged; this is an additive gameplay checkout, not replacement.
+The separate `qualify_async_material.py --initial <fixture> --late <fixture>` gate
+requires the normal qualification plus actual integrated candidate fixtures, exact
+captured content matching, paired output, full-interval delivery and cleanup. It
+does not overwrite the normal receipt. Diagnostics from Run193 cannot certify it.
+
+Use the usual two-ship skirmish, briefly keep both ships visible, switch cameras,
+move/turn, optionally launch a shuttle/fighter, and exit on the existing request.
+No magenta/on-off cycle or manual timestamps. The unchanged90-second tactical and
+285-second total workflow limits apply. Omit the flag to return to the normal path.
+No Toolkit startup, imported template or SDK mesh submission is used.
+See [Run194](../../docs/runs/2026-10-25-codex-async-material-checkout.md) and the
+[probe definition](../../docs/reconnaissance/probes/D3D9-ASYNC-MATERIAL-001.md).
+Offline initial600/600 and late596/600 are not a live-game or sub-two-second PASS.
+
 ## Owned initial-pixel upload (Run188)
 
 The shared Renderer can create documented single-mip SYSTEMMEM staging textures
@@ -294,3 +315,49 @@ explicitly selects Federation FCA in offset_ship.toml,not first enemy/native pla
 flag;missing/duplicate configured owners reject. Keep the same player cruiser.
 Four appearance TOMLs remain frozen. Source/binary/config changes invalidate the
 qualification;no rebuild during sponsor setup. See probe D3D9-ADDITIVE-001.
+
+### Remix base-image mapping (Run197)
+
+The progressive fallback now applies `remix_coordinates` when deriving its first
+BGRA texture upload, before admission. Enhanced color/emission/roughness DDS use
+the same backend image-origin policy. Material hashes are computed from the
+actual adapted base bytes. Captured positions, normals, UVs, triangle/group order,
+original images and their provenance hashes remain canonical. Neutral scene
+export/plain D3D9 replay do not implicitly apply this Remix conversion; a future
+D3D12 backend must define its own requirements. No geometry-axis/face repair.
+
+Base-first appearance is independent of enhanced-material installation. The live
+Run196 missed-update case remains open; file publication, returned-frame counters
+and native asset ACKs are not material-ready acknowledgements. Do not restore the
+rejected metadata-touch workarounds or enable private renderer warm-up in normal
+launchers without separately demonstrated correctness and performance.
+
+### One-time material startup priming (Run199 checkout)
+
+`-AsyncMaterialCheckout` now exercises the existing private renderer startup once
+before declaring renderer readiness. It then waits without further private draws.
+Enhanced-library publication cannot race this preparation; base asset delivery is
+independent. No fixed material grace window or notification retries. The normal
+runtime without the opt-in remains separately qualified.
+
+Test with the familiar two ships first; inspect material appearance before adding
+a shuttle, then exit on the usual request. Original ships remain visible and the
+same corrected camera-left copies/settings are used. This is a priming experiment,
+not a live fix claim. Existing menu/workflow time bounds remain. Idle tests found
+stable private allocations/handles but roughly two cores of pre-existing renderer
+CPU use with and without priming; see Run199 for memory/cleanup limitations.
+
+### Material revision compatibility (Run200 checkout)
+
+Live startup priming did not fix late roughness. Standalone NVIDIA roughness views
+and the packaged OpenUSD25.11 library confirmed whole-second Windows timestamp
+precision: two fast USD revisions can appear unchanged despite OS notification.
+The opt-in checkout assigns distinct revision timestamps BEFORE atomic exchange.
+No sleep, repeated touch or base-display barrier. Logical file time may lead
+wallclock; performance measurements still use QPC.
+
+Only the Remix/USD publisher applies this policy. Canonical data, initial mapping,
+material values, normal1.5.2 and future adapters stay independent. Read Run200
+before changing this again; rejected timer/touch experiments are not the fix.
+The same `-AsyncMaterialCheckout` launcher is ready for gameplay confirmation
+without requiring a shuttle to activate enhanced maps.

@@ -7,6 +7,7 @@
 #include "input_admission.h"
 #include "multi_scene_wire.h"
 #include "run_lifetime.h"
+#include "replacement_transaction.h"
 struct LiveOwnerInput {
  sfc_calibration::Reader source;live_owner::Store* store=nullptr;uint64_t last=0,started=0;DWORD invalid=0,replaced=0,received=0,unqualified=0;
  DWORD owner=0,revision=0,model=0,meshSource=0;uint64_t limit=90000;
@@ -15,12 +16,14 @@ struct LiveOwnerInput {
  owner_rebind::Control* binding=nullptr;uint64_t bindCookie=0;DWORD bindGeneration=0,rebound=0,oldPackets=0;
  DWORD previousOwner=0,previousRevision=0,previousModel=0,previousSource=0;
  uint64_t frequency=0;DWORD expired=0;
- volatile LONG* closedFrame=nullptr;DWORD admissionCounts[2][static_cast<unsigned>(live_owner::Admission::Count)]{};
+ volatile LONG* closedFrame=nullptr;DWORD admissionCounts[2][static_cast<unsigned>(live_owner::Admission::Count)]{};bool replacementMode=false;
  void (*idleWork)(void*)=nullptr;void* idleContext=nullptr; // Backend worker only;never installed in SFC.
  static uint64_t ticks(){LARGE_INTEGER q{};QueryPerformanceCounter(&q);return static_cast<uint64_t>(q.QuadPart);}
  ~LiveOwnerInput(){source.close();}
  void start(const Scene& scene){
+  replacementMode=replacement::requested();
   wchar_t game[2]{};if(GetEnvironmentVariableW(L"SFC_D3D9_GAME_OUTPUT",game,2)==1&&game[0]==L'1')limit=110000;
+  if(GetEnvironmentVariableW(L"SFC_D3D9_LIVE_TUNING",game,2)==1&&game[0]==L'1')limit=1980000;
   require(source.prepare()&&source.requested,"live input explicit mapping");
   auto* base=reinterpret_cast<BYTE*>(source.mailbox)-sfc_calibration::Offset;store=reinterpret_cast<live_owner::Store*>(base+live_owner::Offset);
   wchar_t pidText[16]{};GetEnvironmentVariableW(L"SFC_D3D9_GAME_PID",pidText,16);const auto pid=static_cast<DWORD>(_wcstoui64(pidText,nullptr,10));
@@ -68,7 +71,7 @@ struct LiveOwnerInput {
   }return false;
  }
  bool admit(const live_owner::Packet& p,unsigned stage=1){
-  const auto reason=store?live_owner::admission(p,store->header,ticks(),frequency,closedFrame):live_owner::Admission::Clock;
+  const auto reason=store?live_owner::admission(p,store->header,ticks(),frequency,closedFrame,replacementMode):live_owner::Admission::Clock;
   ++admissionCounts[stage==0?0:1][static_cast<unsigned>(reason)];
   if(reason==live_owner::Admission::Accepted)return true;
   ++expired;return false;

@@ -2,6 +2,7 @@
 // Included after the existing Scene/Renderer and LiveOwnerInput definitions.
 #pragma once
 #include "multi_scene_wire.h"
+#include "replacement_transaction.h"
 #include <map>
 #include <memory>
 #include <future>
@@ -11,7 +12,7 @@ struct MultiSceneRuntime {
  std::array<multi_scene::Asset,64> entries{};std::array<std::shared_ptr<Resident>,64> bound{};
  std::map<std::array<BYTE,32>,std::shared_ptr<Resident>> content;
  fs::path root;IDirect3DDevice9* device=nullptr;const Scene* bootstrapScene=nullptr;Renderer* bootstrapRenderer=nullptr;bool enabled=false;DWORD pid=0;uint64_t bytes=0,frames=0,draws=0,omitted=0,rejected=0,loads=0,shared=0;
- std::map<uint64_t,uint64_t> ownerDraws;
+ std::map<uint64_t,uint64_t> ownerDraws;bool replacementOnly=false;
  struct Prepared {Scene scene;std::vector<std::vector<BYTE>> textures;uint64_t backing=0,cpu_us=0;};
  std::future<Prepared> preparing;multi_scene::Asset pendingAsset{};
  uint64_t lookup_header=0,lookup_packet=0,lookup_identity=0,decode_rejected=0,projection_rejected=0;
@@ -33,7 +34,7 @@ struct MultiSceneRuntime {
  }
  void start(const fs::path& directory,IDirect3DDevice9* d,const Scene& initial,Renderer& initialRenderer,TextureUpload policy=TextureUpload::StagedLock){
   uploadPolicy=policy;
-  wchar_t flag[2]{};enabled=GetEnvironmentVariableW(L"SFC_D3D9_MULTISCENE",flag,2)==1&&flag[0]==L'1';if(!enabled)return;
+  wchar_t flag[2]{};enabled=GetEnvironmentVariableW(L"SFC_D3D9_MULTISCENE",flag,2)==1&&flag[0]==L'1';if(!enabled)return;replacementOnly=replacement::requested();
   root=directory;device=d;bootstrapScene=&initial;bootstrapRenderer=&initialRenderer;require(source.prepare()&&source.requested,"multi-scene explicit mapping");
   auto* base=reinterpret_cast<BYTE*>(source.mailbox)-sfc_calibration::Offset;store=reinterpret_cast<multi_scene::Store*>(base+multi_scene::Offset);
   wchar_t pidText[16]{};GetEnvironmentVariableW(L"SFC_D3D9_GAME_PID",pidText,16);pid=static_cast<DWORD>(_wcstoui64(pidText,nullptr,10));
@@ -84,6 +85,7 @@ struct MultiSceneRuntime {
  }
  bool draw(uint32_t width,uint32_t height,const float* displacement){bool first=true;unsigned count=0;
   for(DWORD n=0;n<packet.count;++n){const auto& row=packet.rows[n];std::shared_ptr<Resident> resident;DWORD asset=0;
+   if(replacementOnly&&(row[1]!=packet.anchor||row[7]!=packet.revision))continue;
    for(unsigned i=0;i<64;++i)if(bound[i]&&multi_scene::matches(entries[i],row)){resident=bound[i];asset=i+1;break;}
    if(!resident){++omitted;continue;}live_owner::Packet p{};p.row=row;Frame frame{};
    if(!live_owner::decode(p,frame)){++decode_rejected;++rejected;continue;}

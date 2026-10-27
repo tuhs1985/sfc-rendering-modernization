@@ -1,0 +1,5 @@
+# Diagnostic placement ONLY. One common camera-left translation for the cohort;
+# no model scaling,world-height change,extra delay or original draw suppression.
+# Same distance as accepted FCA run20261022-042653-754380 (-15.897722721099854).
+# Set0 only for a separately qualified aligned-overlay diagnostic.
+camera_left_distance = 15.897722721099854

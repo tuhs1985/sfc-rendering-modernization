@@ -1,0 +1,19 @@
+# Run201 — material revision fix demonstrated in gameplay
+
+Review only. M1 integration/performance continues; no formal milestone or complete-scene replacement claim. Parent93e8dba; previous implementation remains unstaged/uncommitted, no push. No new code, build, GPU fixture or SFC launch by Codex.
+
+Actual run:`artifacts/remix-runtime/runs/20261026-205704-225333-in-game`. Sponsor reports enhanced materials appear quickly enough that the initial absence is difficult to notice unless deliberately watching; illumination remains a noticeable distinction. Do not broaden this into an unsolicited all-controls/no-flicker attestation. Only KFF/FCA were captured, two acknowledged owners: no shuttle/third-asset publication was required. Both complete stages published naturally in different whole seconds; this gameplay run does not independently reproduce a timestamp collision, but supports the prior seven causal controls and successful update behavior.
+
+KFF base ready0.245s,enhanced files0.606s,library0.669s after its discovery. FCA base0.405s,enhanced files0.786s,library0.850s. These are CPU/publication readiness, not exact installed-pixel times. Timing overlaps renderer admission: do not sum durations. FCA native CPU preparation719.836ms/GPU admission4.216ms remains separate. No new subsecond-full-material/presentation claim.
+
+ErrorNone,normal game exit,controller0/renderer0,clean gate unload,normal owned exit,proxy restored,launcher settings/client hashes unchanged. Two admitted assets,invalid0,rejected0,partial empty,workers closed. Workflow199.328s/run93,488,643bytes within existing bounds.5397paired returns,8without-ship records;7post-first-match omitted returns,max3consecutive. No provenance failures; these are not proven SFC frame drops. Actual sponsor visible timing is the acceptance evidence; logs have no per-material installed ACK.
+
+## Illumination preparation finding
+
+Confirmed in`tools/remix_runtime/parallel_assets.py:material_piece`:decode original primary/secondary images;match dimensions;compute8bit RGB(primary×secondary/255);convert toRGBA;apply established Remix image-origin conversion;encode/hash DDS. The shader's illumination-strength setting is separate. Source glow information already exists, but the current adapter produces a coloured emissive derivative rather than submitting that secondary image unchanged. This preserves the accepted qualified path; do not replace it with a guessed image role.
+
+The same material job also writes colour and generated roughness;checkout publishes a complete stage per asset. Therefore emission currently shares that readiness boundary. Its individual cost and exact pixel-installation delay are not measured here. A next increment can evaluate colour+existing-glow publication independently of optional roughness, while retaining immediate base display. It must account for additional material reload cost; do not silently restore repeated partial-group publications or change material math/strength to look faster.
+
+Curated evidence:`docs/reconnaissance/evidence/20261026-live-material-revision-result.json`. Existing Run200557tests and graphics/source/launcher qualifications remain current; not rerun or rebranded as new tests. Raw run preserved; no cleanup needed to stay below20GB. Handoff/STATUS/guarded Obsidian tracker updated. Runtime illumination changes, mipmap/compression experiments and persistent derivative cache are recommendations, not implemented or automatically accepted plans.
+
+**Exact next action:** retain the demonstrated material-notification fix; scope the next texture-preparation increment around measured conversion/publication costs and earlier original-glow availability, keeping first-ship display independent. No repeat gameplay needed to establish this run's successful update.
