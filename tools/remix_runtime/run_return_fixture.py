@@ -50,6 +50,8 @@ def main():
     parser.add_argument('--async-material-checkout',action='store_true',help='Isolated1.6.1/flat/complete-stage parallel checkout;never qualifies normal1.5.2')
     parser.add_argument('--live-tuning',action='store_true',help='Offline current-D3D9 live-control qualification;no SFC')
     parser.add_argument('--player-replacement',action='store_true',help='Offline synthetic-source transactional player replacement;never launches SFC')
+    parser.add_argument('--native-insertion-policy',choices=('Strict','ExtraFrame'),help='Offline native early insertion comparison;never launches SFC')
+    parser.add_argument('--native-insertion-baseline',action='store_true',help='Native fixture/source/renderer baseline without gate admission or insertion')
     parser.add_argument('--native-foreground',action='store_true',help='Offline original-shader shield retention and same-frame composition')
     parser.add_argument('--replacement-faults',action='store_true',help='Standalone fixture only: withhold shared output for one then two presentations')
     parser.add_argument('--texture-upload',choices=('inherit','staged-lock','initial-data'),default='inherit',help='Offline comparison: documented SYSTEMMEM initial pixels;unchanged runtime/texture content')
@@ -77,6 +79,10 @@ def main():
     parser.add_argument('--with-depth',action='store_true',help='Bind known synthetic D24S8 descriptor, not actual scene depth')
     parser.add_argument('--observation-only',action='store_true',help='No Remix runtime/image; control channel and depth observations only')
     args=parser.parse_args()
+    if args.native_insertion_policy:
+        if args.native_foreground or args.replacement_faults or args.live_tuning:parser.error('Native insertion fixture excludes old replay/fault/tuning modes')
+        args.player_replacement=True;args.multi_ship=True;args.async_material_checkout=True;args.prewarm=True;args.with_depth=True
+    if args.native_insertion_baseline and not args.native_insertion_policy:parser.error('Native baseline requires explicit comparison policy')
     if args.async_material_checkout:
         if args.player_replacement and args.live_tuning:parser.error('Replacement fixture excludes tuning')
         if (not args.multi_ship or not args.prewarm or args.pipeline_mode!='performance' or args.runtime_candidate
@@ -99,7 +105,7 @@ def main():
         if args.loading_policy!='inherit':parser.error('--candidate-asset-loading excludes --loading-policy overrides')
     if args.startup_profile and not(args.multi_ship and args.prewarm):parser.error('--startup-profile requires --multi-ship --prewarm')
     if args.loading_policy!='inherit' and not args.startup_profile:parser.error('--loading-policy requires --startup-profile')
-    if args.material_library!='layers' and not args.startup_profile:parser.error('--material-library requires --startup-profile')
+    if args.material_library!='layers' and not (args.startup_profile or args.async_material_checkout):parser.error('--material-library requires --startup-profile')
     if args.material_texture_loading!='preload' and (not args.startup_profile or args.material_library!='layers' or args.api_texture_prefetch):parser.error('Texture streaming comparison requires startup profile/layers and excludes API prefetch')
     if args.native_log_level!='inherit' and not args.startup_profile:parser.error('--native-log-level requires --startup-profile')
     if args.api_texture_prefetch and not args.startup_profile:parser.error('--api-texture-prefetch requires --startup-profile')
@@ -124,7 +130,7 @@ def main():
         args.persistent_scene=True
     if args.d3d9_additive:args.live_owner_timing=True;args.source_timing=True;args.observation_only=True;args.graceful=True
     inspect_requested=args.inspect_visibility or args.inspect_early_depth
-    if args.with_depth and not (args.inspect_early_depth or args.search_depth or args.broad_capture or args.depth_snapshots):parser.error('--with-depth requires --inspect-early-depth or --search-depth or --broad-capture or --depth-snapshots')
+    if args.with_depth and not (args.native_insertion_policy or args.inspect_early_depth or args.search_depth or args.broad_capture or args.depth_snapshots):parser.error('--with-depth requires --inspect-early-depth or --search-depth or --broad-capture or --depth-snapshots')
     if args.observation_only and (not (args.inspect_early_depth or args.search_depth or args.broad_capture or args.depth_snapshots or args.source_timing) or not args.graceful):parser.error('--observation-only requires a read-only mode and --graceful')
     if args.source_timing and not(args.observation_only and args.graceful):parser.error('--source-timing requires --observation-only --graceful')
     if args.live_owner_timing and not args.source_timing:parser.error('--live-owner-timing requires --source-timing')
@@ -140,7 +146,7 @@ def main():
         from run_offline import storage,AGGREGATE_BYTES
         # Include concurrent image-converter reservations, not just the eventual
         # compressed output. Otherwise a fixture can start but refuse an owner.
-        reserve_mib=1024 if args.multi_ship_resources else (768 if args.multi_ship else 192)
+        reserve_mib=1024 if args.multi_ship_resources else (288 if args.native_insertion_policy else 768 if args.multi_ship else 192)
         if storage()+reserve_mib*1024*1024>AGGREGATE_BYTES:
             raise RuntimeError(f'Additive fixture lacks{reserve_mib}MiB reservation within20GB cap;archive completed evidence first')
     backend_locks=None
@@ -179,7 +185,7 @@ def main():
     env.pop('SFC_FIXTURE_MENU_IDLE_MS',None)
     if args.menu_idle_seconds:env['SFC_FIXTURE_MENU_IDLE_MS']=str(args.menu_idle_seconds*1000)
     env['SFC_PIPELINE_MODE']=args.pipeline_mode if args.multi_ship else 'test'
-    host=fixture=channel=None;semantic=None;timing_result=None;streams=[];start=time.monotonic();error=None;history=[];live_relay=None;live_result=None;live_manifest=None;live_rows=[]
+    host=fixture=channel=None;semantic=None;timing_result=None;streams=[];start=time.monotonic();error=None;history=[];live_relay=None;live_result=None;live_manifest=None;live_rows=[];native_capture=None;native_result=None
     try:
         def output(name):
             f=open(work/name,'wb');streams.append(f);return f
@@ -199,12 +205,19 @@ def main():
         env.pop('SFC_D3D9_MULTISCENE',None)
         env['SFC_D3D9_PLAYER_REPLACEMENT']='1' if args.player_replacement else '0'
         env['SFC_D3D9_NATIVE_FOREGROUND']='1' if args.native_foreground else '0'
+        env['SFC_NATIVE_INSERTION_GATE']='1' if args.native_insertion_policy else '0'
+        if args.native_insertion_policy:env['SFC_NATIVE_INSERTION_POLICY']=args.native_insertion_policy
+        env['SFC_NATIVE_GATE_BASELINE']='1' if args.native_insertion_baseline else '0'
+        env['SFC_NATIVE_GATE_FIXTURE_DELAYS']='1' if args.native_insertion_policy else '0'
         env.pop('SFC_REPLACEMENT_FIXTURE_FAULTS',None)
         if args.replacement_faults:env['SFC_REPLACEMENT_FIXTURE_FAULTS']='1'
         env.pop('SFC_MULTISCENE_LATE_ASSET',None)
         if args.source_timing:
             from present_calibration import Receiver
             semantic=Receiver();env.update(SFC_D3D9_SOURCE_TIMING='1',SFC_REMIX_CALIBRATION_SCENE=semantic.name)
+            if args.native_insertion_policy:
+                from native_gate import Capture
+                native_capture=Capture(semantic.channel,work,[int(semantic.name[-32:][i:i+8],16) for i in range(0,32,8)])
         if args.live_owner_timing:
             if args.async_material_checkout:from async_material_checkout import Relay
             elif args.multi_ship and args.parallel_assets:from progressive_scene_relay import Relay
@@ -217,6 +230,7 @@ def main():
             if args.player_replacement:mode_args['player_replacement']=True
             if args.async_material_checkout:mode_args['checkout_backend']=checkout_backend
             live_relay=Relay(work,semantic,TEST,additive=args.d3d9_additive,offline_fixture=args.d3d9_additive,persistent=args.persistent_scene,buffered=args.synchronized_buffer,**mode_args)
+            if args.native_insertion_policy:live_relay.native_gate_policy=args.native_insertion_policy
             live_relay.live_tuning=args.live_tuning
             if args.live_tuning:
                 if not args.async_material_checkout:raise ValueError('Live tuning fixture requires current async baseline')
@@ -356,6 +370,10 @@ def main():
             report=analyze_run(work,images=True)
             if bool(report['complete'])!=args.with_depth:raise RuntimeError('Depth snapshot positive/negative evidence failed')
             if not args.with_depth and report['snapshots']:raise RuntimeError('Unexpected depth without candidate')
+        elif args.native_insertion_policy:
+            if 'NATIVE_GATE_END frames=600' not in text or 'state_errors=0' not in text:raise RuntimeError('Native gate fixture incomplete/state changed')
+            if not args.native_insertion_baseline and text.count('NATIVE_GATE_PIXELS mismatches=0')<2:raise RuntimeError('Native gate colour/depth/order evidence incomplete')
+            channel.set('stop',1)
         elif args.source_timing:
             if 'SOURCE_TIMING_END ' not in text or 'state_errors=0 resized=1 recreated=1' not in text:raise RuntimeError('Source timing fixture state evidence incomplete')
             from source_timing import save
@@ -408,6 +426,11 @@ def main():
                     from native_foreground_qualification import save as save_foreground
                     live_result['native_foreground']=save_foreground(semantic.channel,work)
             except Exception as exc:error=(error+'; ' if error else '')+'Live fixture: '+str(exc)
+        if native_capture:
+            try:
+                native_result=native_capture.finish()
+                if native_result.get('error'):raise RuntimeError(native_result['error'])
+            except Exception as exc:error=(error+'; ' if error else '')+'Native gate evidence: '+str(exc)
         if semantic:semantic.close()
         for f in streams:f.close()
         (work/'result.json').write_text(json.dumps({'probe':'REMIX-RETURN-001-FIXTURE','expanded_search':search,'observation_only':args.observation_only,'graceful':args.graceful,'inspect_early_depth':args.inspect_early_depth,'inspect_visibility':args.inspect_visibility,'known_fixture_depth':args.with_depth,'error':error,'seconds':time.monotonic()-start,'host_exit':host.returncode if host else None,'fixture_exit':fixture.returncode if fixture else None,'history':history,'final':final,'runtime_environment':ENV,'source_files':{p.name:digest(p) for p in (BIN/'return_host.exe',BIN/'SFCRemixReturn.dll',BIN/'d3d11_return_fixture.exe',BIN/'return_launcher.exe')}},indent=2))
@@ -422,6 +445,9 @@ def main():
     receipt['async_material_checkout']=args.async_material_checkout
     receipt['live_tuning_fixture']=args.live_tuning
     receipt['player_replacement_fixture']=args.player_replacement
+    receipt['native_insertion_policy']=args.native_insertion_policy
+    receipt['native_insertion_baseline']=args.native_insertion_baseline
+    receipt['native_gate']=native_result
     receipt['native_foreground_fixture']=args.native_foreground
     if args.native_foreground:receipt['native_foreground']=(live_result or {}).get('native_foreground')
     receipt['replacement_faults_fixture']=args.replacement_faults

@@ -14,6 +14,9 @@ public:
  void prepare(ID3D11Device* device){Microsoft::WRL::ComPtr<ID3D11Device5> d;
   if(FAILED(device->QueryInterface(IID_PPV_ARGS(&d)))||FAILED(d->CreateFence(0,D3D11_FENCE_FLAG_NONE,IID_PPV_ARGS(&fence))))throw std::runtime_error("Buffered GPU read fence unsupported");}
  bool pending()const{return expected.load(std::memory_order_acquire)!=0;}
+ // Terminal native-gate teardown only:retain the fence until process exit if
+ // completion cannot be established. Never acknowledge/reuse that output slot.
+ void retainOnTerminalFailure(){fence.Detach();}
  void signal(ID3D11DeviceContext4* context){
   if(!fence||pending()||next>=UINT64_MAX-1)throw std::runtime_error("Buffered GPU read lease invalid");
   const auto value=++next;if(FAILED(context->Signal(fence.Get(),value)))throw std::runtime_error("Buffered GPU read signal failed");

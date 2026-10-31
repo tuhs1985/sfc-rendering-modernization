@@ -112,6 +112,7 @@ def main():
     parser.add_argument('--player-replacement',action='store_true',help='Default-off unique player-fixture mesh suppression with complete-frame presentation')
     parser.add_argument('--native-foreground',action='store_true',help='Default-off player shield preservation with original native shaders')
     parser.add_argument('--native-insertion-observe',action='store_true',help='Read-only native model/draw/output timing;no suppression or returned image')
+    parser.add_argument('--native-insertion-policy',choices=('Strict','ExtraFrame'),help='Qualified pre-effects native player insertion;explicit absolute deadline policy')
     parser.add_argument('--lifecycle-capture',action='store_true',help='Separate bounded camera-gap/destruction observations;no native death inference')
     parser.add_argument('--camera-recovery',action='store_true',help='Two alive camera-away/back checks;no destruction requested')
     parser.add_argument('--offscreen-position',action='store_true',help='Default-off external read-only ship position across camera gaps;not renderer input')
@@ -132,6 +133,9 @@ def main():
     parser.add_argument('--light-tuning',action='store_true',help='Low-recording live controls until normal game exit;30minute tactical ceiling')
     parser.add_argument('--scene-depth',action='store_true',help='Default-off depth-filtered additive ship;original drawing/UI path unchanged')
     args=parser.parse_args()
+    if args.native_insertion_policy:
+        if args.native_insertion_observe or args.native_foreground or args.light_tuning:parser.error('Native gate excludes observation,shield replay and tuning')
+        args.player_replacement=True;args.multi_ship=True;args.async_material_checkout=True
     if args.native_insertion_observe:
         if args.native_foreground or args.light_tuning or args.player_replacement:parser.error('Native insertion observation excludes replacement,shield replay and tuning')
         # Reuse qualified fixture selection and private anchor-only rendering;
@@ -204,7 +208,10 @@ def main():
     preflight()
     checkout_backend=None
     if args.source_timing:
-        if args.native_insertion_observe:from native_insertion_probe import require_qualification
+        if args.native_insertion_policy:
+            from native_gate import require_qualification as gate_qualified
+            require_qualification=lambda:gate_qualified(args.native_insertion_policy)
+        elif args.native_insertion_observe:from native_insertion_probe import require_qualification
         elif args.player_replacement:from player_replacement import require_qualification
         elif d3d9_tuning:from qualify_d3d9_tuning import require_qualification_tuning as require_qualification
         elif args.async_material_checkout:from qualify_async_material import require_qualification
@@ -223,7 +230,7 @@ def main():
         import sys
         sys.path.insert(0,str(ROOT/'tools/d3d9_proof'))
         from run_offline import storage,AGGREGATE_BYTES
-        reserve=(192 if args.d3d9_additive else 128 if args.live_owner_timing else 64)*1024*1024
+        reserve=(288 if args.native_insertion_policy else 192 if args.d3d9_additive else 128 if args.live_owner_timing else 64)*1024*1024
         if storage()+reserve>AGGREGATE_BYTES:raise RuntimeError('Source timing reservation exceeds20GB evidence allowance')
     if args.capture_native_lights:
         from light_discovery import require_qualification as require_light_qualification
@@ -327,7 +334,7 @@ def main():
     if args.depth_snapshots:metadata['scene']='No Remix renderer; three paired read-only depth/color snapshots; no original draws suppressed'
     (work/'manifest.json').write_text(json.dumps(metadata,indent=2))
     host=launcher=controller=channel=None;receiver=None;streams=[];pid=None;error=None;normal=False;gate_clean=False;history=[];phase_results={};last=0;host_shutdown_expected=False;proxy_restored=None;image_reader=None;image_result=None
-    light_relay=None;tuning_exited=False;timing_relay=None;live_timing_result=None;offscreen=None;insertion_capture=None;insertion_result=None
+    light_relay=None;tuning_exited=False;timing_relay=None;live_timing_result=None;offscreen=None;insertion_capture=None;insertion_result=None;native_capture=None;native_result=None
     rollback=work/'dxgi-original.rollback'
     config_backup=work/'ReShade.original.ini'
     def out(name):f=open(work/name,'wb');streams.append(f);return f
@@ -423,6 +430,10 @@ def main():
         env['SFC_D3D9_PLAYER_REPLACEMENT']='1' if args.player_replacement else '0'
         env['SFC_D3D9_NATIVE_FOREGROUND']='1' if args.native_foreground else '0'
         env['SFC_NATIVE_INSERTION_OBSERVE']='1' if args.native_insertion_observe else '0'
+        env['SFC_NATIVE_INSERTION_GATE']='1' if args.native_insertion_policy else '0'
+        env.pop('SFC_NATIVE_GATE_BASELINE',None)
+        env.pop('SFC_NATIVE_GATE_FIXTURE_DELAYS',None)
+        if args.native_insertion_policy:env['SFC_NATIVE_INSERTION_POLICY']=args.native_insertion_policy
         env.pop('SFC_REPLACEMENT_FIXTURE_FAULTS',None) # Test executable owns this diagnostic; never send it to SFC.
         env['SFC_PIPELINE_MODE']=args.pipeline_mode if args.multi_ship else 'test'
         if args.synchronized_buffer:env['SFC_D3D9_SYNC_BUFFER']='1'
@@ -434,6 +445,9 @@ def main():
         if semantic_enabled:
             from present_calibration import Receiver
             if receiver is None:receiver=Receiver()
+            if args.native_insertion_policy:
+                from native_gate import Capture
+                native_capture=Capture(receiver.channel,work,session=[int(receiver.name[-32:][i:i+8],16) for i in range(0,32,8)])
             if args.native_insertion_observe:
                 from native_insertion_probe import Capture
                 insertion_capture=Capture(receiver.channel,work,session=[int(receiver.name[-32:][i:i+8],16) for i in range(0,32,8)])
@@ -448,6 +462,7 @@ def main():
                 if args.async_material_checkout:mode_args['checkout_backend']=checkout_backend
                 timing_relay=Relay(work,receiver,TEST,additive=args.d3d9_additive,persistent=args.persistent_scene,buffered=args.synchronized_buffer,**mode_args)
                 timing_relay.live_tuning=d3d9_tuning
+                if args.native_insertion_policy:timing_relay.native_gate_policy=args.native_insertion_policy
             env['SFC_REMIX_CALIBRATION_SCENE']=receiver.name
             env.pop('SFC_REMIX_VISIBLE_SHIP',None)
             env.pop('SFC_REMIX_TEXTURED_SHIP',None)
@@ -462,6 +477,8 @@ def main():
                                 image_limit_bytes=broad_capture.OVERALL,image_policy=policy())
                 if args.player_replacement:metadata.update(probe='PLAYER-REPLACEMENT-001',scene='Capture-first player-fixture suppression;transactional whole-frame presentation',replacement_requested=True,original_suppressed='See final native receipts',fallback='Two additional complete-picture presentations,then latched native rendering')
                 if args.native_insertion_observe:metadata.update(probe='NATIVE-INSERTION-001',scene='Read-only native draw order and private output readiness;no visible returned image',replacement_requested=False,original_suppressed=False,shield_replay=False,detail_bytes=8*1024*1024)
+                if args.native_insertion_policy:metadata.update(probe='NATIVE-GATE-001',scene='Exact-ticket native colour/depth insertion before subsequent engine effects/text',timing_policy=args.native_insertion_policy,reference_hz=60,shield_replay=False,late_composition=False,fallback='Original selected lists remain intact for an uncommitted owner/frame',detail_bytes=8*1024*1024,display_policy='Current native source frame;absolute deadline;commit colour/depth before zero-count suppression',
+                    synchronized_buffer=dict(frames=0,complete_native_HUD_delayed=False,prediction=False,stale_overlay_hold=False,coordinator='Absolute source-frame deadline;immutable completed-output lease'))
             (work/'manifest.json').write_text(json.dumps(metadata,indent=2))
         if args.depth_snapshots:env['SFC_REMIX_DEPTH_OUTPUT']=str(work)
         env.pop('SFC_REMIX_SCENE_DEPTH',None)
@@ -547,7 +564,7 @@ def main():
             if broad['status']!=2 or broad['error']:raise RuntimeError('Broad writer not active at tactical gate; prelude may have saturated; preserve partial evidence')
         if state['gamePid']!=pid or not state['startupRestored'] or not state['startupVerified'] or not state['ready']:raise RuntimeError('Image component startup/device not qualified; original game remains normal')
         channel.set('armed',1);channel.set('enabled',int(args.d3d9_additive or not args.observation_only));winsound.Beep(880,200);active=time.monotonic();phase=-1
-        if args.d3d9_additive and not args.native_insertion_observe:
+        if args.d3d9_additive and not (args.native_insertion_observe or args.native_insertion_policy):
             print('Preparing current D3D9 tuning;edit settings after the copies appear. No timed motion instructions.' if d3d9_tuning else 'Preparing the extra textured ship;original game stays normal. Keep both ships visible and alive. Timed instructions start when the first matching ship image is ready.',flush=True)
             preparing=active
             while time.monotonic()-preparing<30:
@@ -727,6 +744,11 @@ def main():
                 insertion_result=insertion_capture.finish()
                 if insertion_result['error']:raise RuntimeError(insertion_result['error'])
             except Exception as exc:error=(error+'; ' if error else '')+'Insertion evidence: '+str(exc)
+        if native_capture:
+            try:
+                native_result=native_capture.finish()
+                if native_result.get('error'):raise RuntimeError(native_result['error'])
+            except Exception as exc:error=(error+'; ' if error else '')+'Native gate evidence: '+str(exc)
         if channel:channel.close()
         if receiver:
             if timing_relay and timing_relay.servicing and timing_relay.service.thread.is_alive():
@@ -762,6 +784,9 @@ def main():
             result.update(probe='PLAYER-REPLACEMENT-001',original_ship_suppressed=bool(replacement.get('suppressed')),replacement=replacement,
                           result='PLAYER_REPLACEMENT_SPONSOR_REVIEW_REQUIRED' if not error and replacement.get('committed') else 'PARTIAL')
         if args.native_foreground:result['native_foreground']=(live_timing_result or {}).get('native_foreground')
+        if args.native_insertion_policy:
+            result.update(probe='NATIVE-GATE-001',timing_policy=args.native_insertion_policy,native_gate=native_result,shield_replay=False,late_composition=False,
+                result='NATIVE_GATE_SPONSOR_COMPARISON_REQUIRED' if not error and native_result and native_result.get('commits') else 'PARTIAL')
         if args.native_insertion_observe:
             result.update(probe='NATIVE-INSERTION-001',native_insertion=insertion_result,backbuffer_ship_drawing=False,
                           original_ship_suppressed=False,observation_only=True,

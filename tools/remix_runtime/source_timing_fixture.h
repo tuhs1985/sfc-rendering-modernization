@@ -5,6 +5,8 @@
 #include "../d3d9_proof/owner_rebind.h"
 #include "../d3d9_proof/multi_scene_wire.h"
 #include "../d3d9_proof/replacement_transaction.h"
+#include "../native_insertion/gate_contract.h"
+#include "../scene_bridge/persistent_scene.h"
 #include <vector>
 #include <fstream>
 struct SourceTimingFixture {
@@ -35,18 +37,29 @@ struct SourceTimingFixture {
  void publish(DWORD frame){
   if(!enabled)return;
   if(liveEnabled){frame+=200000;sfc_calibration::begin(source.mailbox,frame);live.begin(frame);
+   if(native_gate::requested()){auto* base=reinterpret_cast<BYTE*>(source.mailbox)-sfc_calibration::Offset;
+    auto* gate=reinterpret_cast<native_gate::Store*>(base+native_gate::Offset);if(gate->header.magic==native_gate::Magic)native_gate::begin(*gate,frame,GetCurrentThreadId());}
    if(cohort.store){cohort.begin();live_owner::Packet anchor{};bool prepared=false;auto* base=reinterpret_cast<BYTE*>(source.mailbox)-sfc_calibration::Offset;
     auto* replacementStore=reinterpret_cast<replacement::Store*>(base+replacement::Offset);
     if(replacement::requested()&&replacement::valid(replacementStore,source.session,GetCurrentProcessId())){InterlockedExchange(&replacementStore->native_capable,1);replacement::begin(*replacementStore,frame,GetCurrentThreadId());}
     for(DWORD i=0;i<rows.size();++i){
      if(lateAssetFixture&&i==2&&InterlockedCompareExchange(reinterpret_cast<LONG*>(base+11*1024*1024+128*1024+512),0,0)<120)continue;
      auto row=rows[i];row[2]=frame;row[45]=i;row[47]=GetCurrentThreadId();row[94]=row[95]=0;
-     if(replacement::requested()&&replacement::valid(replacementStore,source.session,GetCurrentProcessId()))replacement::suppress(*replacementStore,frame,row[1],row[7],row[5],row[6],GetCurrentThreadId(),true,replacement::now()); // SYNTHETIC source only; not an installed engine hook.
+     if(native_gate::requested()){
+      // Fixture-only changing rigid pose. Recompute the independently checked
+      // engine-composed projection rather than pairing old pixels with a pose.
+      sfc_scene::Matrix world{},view{},projection{};memcpy(world.data(),row.data()+8,64);memcpy(view.data(),row.data()+49,64);memcpy(projection.data(),row.data()+66,64);
+      auto turn=sfc_scene::identity();const float angle=float(frame%600)*.002f;turn[0]=turn[10]=cosf(angle);turn[2]=sinf(angle);turn[8]=-sinf(angle);
+      world=sfc_scene::multiply(world,turn);world[3]+=sinf(angle)*.1f;memcpy(row.data()+8,world.data(),64);
+      auto screen=sfc_scene::identity();float viewport[6]{};memcpy(viewport,row.data()+83,24);screen[0]=viewport[4];screen[5]=-viewport[5];screen[3]=viewport[0]+viewport[4];screen[7]=viewport[1]+viewport[5];
+      const auto composed=sfc_scene::multiply(screen,sfc_scene::multiply(projection,sfc_scene::multiply(view,world)));memcpy(row.data()+25,composed.data(),64);
+     }
+     if(!native_gate::requested()&&replacement::requested()&&replacement::valid(replacementStore,source.session,GetCurrentProcessId()))replacement::suppress(*replacementStore,frame,row[1],row[7],row[5],row[6],GetCurrentThreadId(),true,replacement::now()); // SYNTHETIC source only; not an installed engine hook.
      LARGE_INTEGER q{};QueryPerformanceCounter(&q);sfc_calibration::stamp(row,static_cast<ULONGLONG>(q.QuadPart));if(live.prepare(row,anchor))prepared=true;
      if(!sfc_calibration::offer(source.mailbox,i,row))live.reject(frame);cohort.offer(row);
      auto* guard=reinterpret_cast<LONG*>(base+4096+i*512);InterlockedIncrement(guard);memcpy(base+4100+i*512,row.data(),sizeof(row));InterlockedIncrement(guard);}
     if(cohort.publish(static_cast<uint64_t>(InterlockedCompareExchange64(&live.store->header.selected,0,0)))&&prepared)live.commit(anchor);
-    Sleep(GetEnvironmentVariableW(L"SFC_SYNC_FIXTURE_SHORT_LEAD",nullptr,0)?3:16);return;
+    if(!native_gate::requested())Sleep(GetEnvironmentVariableW(L"SFC_SYNC_FIXTURE_SHORT_LEAD",nullptr,0)?3:16);return;
    }
    auto row=rows[(frame-200001)%rows.size()];row[0]=0;row[2]=frame;row[4]=1;row[45]=0;row[47]=GetCurrentThreadId();row[94]=row[95]=0;
    if(rebindFixture){

@@ -26,6 +26,8 @@
 #include "../d3d9_proof/replacement_transaction.h"
 #include "../native_foreground/source_notice.h"
 #include "../native_insertion/probe_wire.h"
+#include "../native_insertion/gate_contract.h"
+#include "../native_insertion/gate_events.h"
 
 namespace {
 
@@ -48,6 +50,11 @@ constexpr std::size_t kThreadCapacity = 8;
 replacement::Store* g_replacement=nullptr;
 native_foreground::source_notice::Store* g_foreground_notice=nullptr;
 native_insertion::Store* g_insertion_probe=nullptr;
+bool g_native_gate_requested=false;
+native_gate::Store* g_native_gate=nullptr;native_gate::Dispatch g_native_dispatch=nullptr;
+HMODULE g_native_adapter=nullptr;HANDLE g_native_stop_event=nullptr;volatile LONG g_in_native_gate=0,g_native_committed=0;
+volatile LONG g_in_hook_spans=0;
+native_gate::Ticket g_native_ticket{};bool g_native_decided=false,g_native_inserted=false;
 
 enum EventKind : DWORD {
     kScene = 0,
@@ -1037,7 +1044,7 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
             g_live_scene.updatePersistent(event.ecx,static_cast<DWORD>(g_frame),static_cast<DWORD>(GetTickCount64()-g_gate_tick),safe_copy);
         if(g_insertion_probe&&g_live_scene.cohort.store&&g_live_scene.cohort.pending.frame==static_cast<DWORD>(g_frame))
             native_insertion::offered(*g_insertion_probe,static_cast<DWORD>(g_frame),g_live_scene.cohort.pending.offered);
-        if(g_replacement&&state&&!g_insertion_probe){
+        if(g_replacement&&state&&!g_insertion_probe&&!g_native_gate_requested){
             replacement::Control c{};
             if(replacement::read(g_replacement->control,c)&&c.owner==state->owner_id&&c.mode==replacement::Active){
                 DWORD revision=0;for(const auto& o:g_live_scene.owners)if(o.identity.owner==state->owner_id&&!o.retired)revision=o.revision;
@@ -1125,6 +1132,7 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
         event.origin = 0x0069E300;
         if (g_gate) {
             DWORD frame = static_cast<DWORD>(InterlockedIncrement(&g_frame));
+            if(g_native_gate){native_gate::begin(*g_native_gate,frame,thread_id);g_native_decided=false;g_native_inserted=false;}
             if(g_insertion_probe&&g_live_scene.directSource.store)native_insertion::begin(*g_insertion_probe,frame,
                 static_cast<uint64_t>(InterlockedCompareExchange64(&g_live_scene.directSource.store->header.selected,0,0)));
             if(g_replacement)replacement::begin(*g_replacement,frame,thread_id);
@@ -1376,9 +1384,88 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
     InterlockedDecrement(&g_in_recorders);
 }
 
+// Separate post-recorder stage:never wait with g_lock held or from a graphics
+// notification. The enclosing hook still preserves the original x86/FPU state.
+static bool close_native_batch(DWORD manager){
+ DWORD count=0,mode=0,triangles=0,device=0;
+ const DWORD batch=manager+0x1f4c;
+ if(!safe_read32(batch+0x1cb0,count))return false;
+ if(!count)return true;
+ if(count>216||!safe_read32(batch+0x1cbc,mode)||(mode!=1&&mode!=4)||
+    !safe_read32(batch+0x1cb4,triangles)||(mode==4&&triangles>72)||!safe_read32(batch+0x1cc0,device)||!device)return false;
+ using Flush=void(__thiscall*)(void*);
+ __try{reinterpret_cast<Flush>(GetModuleHandleW(nullptr)?reinterpret_cast<DWORD>(GetModuleHandleW(nullptr))+0x2ab380:0)(reinterpret_cast<void*>(batch));}
+ __except(EXCEPTION_EXECUTE_HANDLER){return false;}
+ return safe_read32(batch+0x1cb0,count)&&!count&&safe_read32(batch+0x1cbc,mode)&&mode==0xffffffff;
+}
+extern "C" void __cdecl CoordinateAfterCapture(DWORD kind,const DWORD* saved){
+ if(kind!=kWrapper||!g_native_gate_requested||!g_native_gate||!g_native_dispatch||!g_running)return;
+ const auto active=InterlockedIncrement(&g_in_native_gate);
+ struct Drain{~Drain(){InterlockedDecrement(&g_in_native_gate);}}drain;
+ if(active!=1){InterlockedExchange(&g_native_gate->header.partial,1);InterlockedExchange(&g_native_gate->header.stop,1);if(g_native_stop_event)SetEvent(g_native_stop_event);return;}
+ const DWORD thread=GetCurrentThreadId(),frame=static_cast<DWORD>(g_frame);
+ native_gate::Ticket ticket{};bool selected=false,qualified=false,primary=false;
+ EnterCriticalSection(&g_lock);
+ auto* state=thread_state(thread);
+ if(state&&g_live_scene.directSource.store){const auto choice=static_cast<uint64_t>(InterlockedCompareExchange64(&g_live_scene.directSource.store->header.selected,0,0));
+  selected=state->owner_id==DWORD(choice)&&state->owner_id!=0;
+  if(selected){
+   const DWORD stack=snapshot_entry_esp(saved),manager=saved[6];DWORD caller=0,count=0,list=0,flag=0,vt=0;
+   safe_read32(stack,caller);primary=caller==0x0042e55d;
+   ticket.pid=GetCurrentProcessId();ticket.thread=thread;ticket.frame=frame;ticket.owner=state->owner_id;ticket.revision=DWORD(choice>>32);
+   ticket.model=state->model0;ticket.source=state->source;ticket.manager=manager;memcpy(ticket.session,g_native_gate->header.session,16);
+   qualified=state->model_scope&&state->copy_depth==1&&validated_copy_owner(*state)&&manager==state->model_manager&&
+    safe_read32(manager,vt)&&vt==0x007b8d4c&&(primary||caller==0x0042e626)&&
+    safe_read32(state->model0+0x10,ticket.count)&&ticket.count&&ticket.count<=8192&&
+    safe_read32(state->model0+0x14,ticket.primary)&&ticket.primary&&safe_read32(state->model0+0x18,ticket.secondary)&&
+    safe_read32(stack+4,count)&&safe_read32(stack+8,list)&&safe_read32(stack+12,flag)&&flag==1&&count==ticket.count&&list==(primary?ticket.primary:ticket.secondary);
+   if(qualified){const auto& pending=g_live_scene.cohort.pending;
+    ticket.sequence=pending.sequence;ticket.hash=pending.checksum;ticket.offered=pending.offered;ticket.generation=g_native_gate->header.generation;
+    ticket.frameStart=g_native_gate->header.frameStart;ticket.deadline=native_gate::deadline(g_native_gate->header,ticket.frameStart);
+    qualified=pending.frame==frame&&pending.anchor==ticket.owner&&pending.revision==ticket.revision&&native_gate::valid(ticket,g_native_gate->header);
+   }
+  }
+ }
+ LeaveCriticalSection(&g_lock);
+ if(!selected)return;
+ auto fail=[&]{if(g_native_inserted){InterlockedExchange(&g_native_gate->header.partial,1);InterlockedExchange(&g_native_gate->header.stop,1);SetEvent(g_native_stop_event);}};
+ if(!qualified){fail();g_native_decided=true;return;}
+ if(g_native_decided){
+  if(!g_native_inserted)return;
+  if(ticket.frame!=g_native_ticket.frame||ticket.owner!=g_native_ticket.owner||ticket.revision!=g_native_ticket.revision||
+     ticket.model!=g_native_ticket.model||ticket.source!=g_native_ticket.source||ticket.count!=g_native_ticket.count||
+     ticket.primary!=g_native_ticket.primary||ticket.secondary!=g_native_ticket.secondary||ticket.manager!=g_native_ticket.manager||
+     ticket.sequence!=g_native_ticket.sequence||ticket.hash!=g_native_ticket.hash||ticket.generation!=g_native_ticket.generation){fail();return;}
+ }else{
+  g_native_decided=true;if(!primary||g_native_gate->header.stop)return;
+  native_gate::Reply reply{};
+  const auto acquired=g_native_dispatch(DWORD(native_gate::Action::Acquire),&ticket,&reply);
+  if(acquired!=DWORD(native_gate::Result::Acquired)||reply.result!=native_gate::Result::Acquired)return;
+  // No selected list was forwarded yet. Flush only preceding queued primitives.
+  DWORD currentCount=0,currentPrimary=0,currentSecondary=0;
+  const bool unchanged=g_running&&frame==DWORD(g_frame)&&safe_read32(ticket.model+0x10,currentCount)&&currentCount==ticket.count&&
+    safe_read32(ticket.model+0x14,currentPrimary)&&currentPrimary==ticket.primary&&safe_read32(ticket.model+0x18,currentSecondary)&&currentSecondary==ticket.secondary;
+  if(!unchanged||!close_native_batch(ticket.manager)){
+   g_native_dispatch(DWORD(native_gate::Action::Cancel),&ticket,&reply);return;
+  }
+  const auto committed=g_native_dispatch(DWORD(native_gate::Action::Commit),&ticket,&reply);
+  if(committed!=DWORD(native_gate::Result::Inserted)||reply.result!=native_gate::Result::Inserted){
+   if(committed!=DWORD(native_gate::Result::Partial))g_native_dispatch(DWORD(native_gate::Action::Cancel),&ticket,&reply);return;
+  }
+  g_native_ticket=ticket;g_native_inserted=true;InterlockedExchange(&g_native_committed,static_cast<LONG>(frame));
+ }
+ if(!safe_write32(snapshot_entry_esp(saved)+4,0)){fail();return;}
+ if(primary)++g_native_gate->current.primary;else ++g_native_gate->current.secondary;
+ if(g_replacement){replacement::Receipt receipt{};if(replacement::sample(*g_replacement,frame,receipt)){
+   receipt.owner=ticket.owner;receipt.revision=ticket.revision;receipt.model=ticket.model;receipt.source=ticket.source;receipt.flags|=replacement::Seen|replacement::Suppressed;
+   if(primary)++receipt.primary;else ++receipt.secondary;replacement::write(g_replacement->receipt[frame%replacement::Frames],receipt);InterlockedIncrement(&g_replacement->suppressed);
+  }}
+}
+
 #define M1_HOOK_BODY(kind_value, trampoline_name) \
     __asm { pushfd } \
     __asm { pushad } \
+    __asm { lock inc dword ptr [g_in_hook_spans] } \
     __asm { cld } \
     __asm { sub esp, 544 } \
     __asm { mov eax, esp } \
@@ -1390,12 +1477,18 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
     __asm { push kind_value } \
     __asm { call RecordHook } \
     __asm { add esp, 8 } \
+    __asm { lea eax, [esp + 544] } \
+    __asm { push eax } \
+    __asm { push kind_value } \
+    __asm { call CoordinateAfterCapture } \
+    __asm { add esp, 8 } \
     __asm { mov eax, esp } \
     __asm { add eax, 15 } \
     __asm { and eax, 0FFFFFFF0h } \
     __asm { fxrstor [eax] } \
     __asm { add esp, 544 } \
     __asm { popad } \
+    __asm { lock dec dword ptr [g_in_hook_spans] } \
     __asm { popfd } \
     __asm { jmp dword ptr [trampoline_name] }
 
@@ -1433,7 +1526,8 @@ extern "C" void __declspec(naked) HookDestroy() {M1_HOOK_BODY(9,g_tramp_destroy)
 #undef M1_HOOK_BODY
 
 std::vector<HANDLE> suspend_other_threads(bool& ok) {
-    return sfc_m1::suspend_thread_transaction(ok, g_thread_suspend_diagnostic);
+    sfc_m1::ThreadSuspendApi api{};if(g_native_gate_requested)api.extra_access=THREAD_GET_CONTEXT;
+    return sfc_m1::suspend_thread_transaction(ok, g_thread_suspend_diagnostic,api);
 }
 
 void write_thread_failure(const char* stage) {
@@ -1960,6 +2054,10 @@ extern "C" DWORD WINAPI M1StartW(void* parameter) {
     if (InterlockedCompareExchange(&g_running, 0, 0)) return 10;
     g_foreground_notice=nullptr;
     g_insertion_probe=nullptr;
+    g_native_gate=nullptr;g_native_dispatch=nullptr;g_native_decided=false;g_native_inserted=false;g_native_committed=0;
+#ifndef M1_GATE_ONLY
+    g_native_gate_requested=native_gate::requested();
+#endif
     if (!load_config(static_cast<const wchar_t*>(parameter))) return 1;
     if(g_persistent_requested&&g_config.live_channel.empty())return 1;
     const DWORD module_base = reinterpret_cast<DWORD>(GetModuleHandleW(nullptr));
@@ -2023,6 +2121,20 @@ extern "C" DWORD WINAPI M1StartW(void* parameter) {
             native_foreground::source_notice::initialize(*g_foreground_notice,candidate->session,GetCurrentProcessId());
         }
     }
+    if(g_native_gate_requested){
+        auto* base=g_live_scene.view;DWORD session[4]{};
+        if(!base||!g_replacement)return 3;memcpy(session,reinterpret_cast<DWORD*>(base)+4,16);
+        auto* gate=reinterpret_cast<native_gate::Store*>(base+native_gate::Offset);
+        BYTE anchor[6]{};const BYTE expected[]{0x56,0x8b,0xf1,0x8b,0x86,0xc0};
+        if(!native_gate::valid(gate->header,session,GetCurrentProcessId())||
+           !safe_copy(module_base+0x2ab380,anchor,sizeof(anchor))||memcmp(anchor,expected,sizeof(anchor)))return 3;
+        if(!GetModuleHandleExW(0,L"SFCRemixReturn.dll",&g_native_adapter))return 3;
+        g_native_dispatch=reinterpret_cast<native_gate::Dispatch>(GetProcAddress(g_native_adapter,"SFCNativeInsertionV1"));
+        g_native_stop_event=OpenEventW(EVENT_MODIFY_STATE|SYNCHRONIZE,FALSE,native_gate::eventName(session,L"Stop").c_str());
+        if(!g_native_dispatch||!g_native_stop_event){if(g_native_stop_event){CloseHandle(g_native_stop_event);g_native_stop_event=nullptr;}
+            FreeLibrary(g_native_adapter);g_native_adapter=nullptr;g_native_dispatch=nullptr;return 3;}
+        g_native_gate=gate;
+    }
 #endif
 
     bool suspend_ok = false;
@@ -2049,6 +2161,12 @@ extern "C" DWORD WINAPI M1StartW(void* parameter) {
 }
 
 extern "C" DWORD WINAPI M1Stop(void*) {
+    if(g_native_gate){
+        InterlockedExchange(&g_native_gate->header.stop,1);SetEvent(g_native_stop_event);
+        const auto until=GetTickCount64()+2000;
+        while(g_native_committed&&g_native_gate->header.frame<=g_native_committed&&GetTickCount64()<until)Sleep(1);
+        if(g_native_committed&&g_native_gate->header.frame<=g_native_committed)return 12;
+    }
     if(g_replacement){
         InterlockedExchange(&g_replacement->native_stop,1);replacement::Control c{};replacement::read(g_replacement->control,c);
         if(c.mode==replacement::Active||c.mode==replacement::Recovering){
@@ -2066,18 +2184,32 @@ extern "C" DWORD WINAPI M1Stop(void*) {
     if (!InterlockedExchange(&g_running, 0)) return 11;
     if(g_live_scene.calibration)InterlockedExchange(&g_live_scene.calibration->active,0);
     const ULONGLONG deadline = GetTickCount64() + 5000;
-    while ((g_in_recorders || g_tint_live) && GetTickCount64() < deadline) Sleep(1);
-    if (g_in_recorders || g_tint_live) return 12;
+    while ((g_in_recorders || g_tint_live || g_in_native_gate || g_in_hook_spans) && GetTickCount64() < deadline) Sleep(1);
+    if (g_in_recorders || g_tint_live || g_in_native_gate || g_in_hook_spans) return 12;
 
     const DWORD module_base = reinterpret_cast<DWORD>(GetModuleHandleW(nullptr));
     bool suspend_ok = false;
-    auto suspended = suspend_other_threads(suspend_ok);
-    if (!suspend_ok) { write_thread_failure("stop"); return 13; }
+    std::vector<HANDLE> suspended;bool outside=false;
+    do{
+        suspended=suspend_other_threads(suspend_ok);
+        if(!suspend_ok){write_thread_failure("stop");return 13;}
+        outside=!g_in_recorders&&!g_in_native_gate&&!g_in_hook_spans;
+        if(g_native_gate_requested)for(HANDLE thread:suspended){CONTEXT c{};c.ContextFlags=CONTEXT_CONTROL;
+            if(!GetThreadContext(thread,&c)){outside=false;break;}
+            for(const auto& hook:g_hooks){const DWORD code=reinterpret_cast<DWORD>(hook.destination),tramp=reinterpret_cast<DWORD>(hook.trampoline);
+                if((c.Eip>=code&&c.Eip<code+128)||(tramp&&c.Eip>=tramp&&c.Eip<tramp+hook.length+5)){outside=false;break;}}
+        }
+        if(outside)break;resume_threads(suspended);suspended.clear();Sleep(1);
+    }while(GetTickCount64()<deadline);
+    if(!outside)return 12;
     const bool restored = restore_hooks(module_base);
     resume_threads(suspended);
     g_foreground_notice=nullptr;
     if(g_insertion_probe){InterlockedExchange(&g_insertion_probe->header.stopped,1);g_insertion_probe=nullptr;}
     if(g_replacement){InterlockedExchange(&g_replacement->native_capable,0);g_replacement=nullptr;}
+    g_native_gate=nullptr;g_native_dispatch=nullptr;
+    if(g_native_stop_event){CloseHandle(g_native_stop_event);g_native_stop_event=nullptr;}
+    if(g_native_adapter){FreeLibrary(g_native_adapter);g_native_adapter=nullptr;}
     if(!stop_live())return 12; // Never unload storage while worker remains live.
     const bool wrote = write_outputs(restored);
     if (g_burst_event) SetEvent(g_burst_event);

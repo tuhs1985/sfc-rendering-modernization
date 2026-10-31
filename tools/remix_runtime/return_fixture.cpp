@@ -13,6 +13,7 @@
 #include "depth_search_wire.h"
 #include "broad_trace.h"
 #include "source_timing_fixture.h"
+#include "../native_insertion/gate_fixture.h"
 #include "../native_foreground/shield_fixture.h"
 #include "../d3d9_proof/game_output_wire.h"
 #include "../d3d9_proof/synchronized_frame.h"
@@ -213,6 +214,8 @@ int wmain(){
     {
       const bool gameOutput=GetEnvironmentVariableW(L"SFC_D3D9_GAME_OUTPUT",nullptr,0)!=0;bool imageSample=false;unsigned resizedFrame=0,imageStartFrame=0,multiReadyAt=0;LONG imageStartDraws=0;
       SourceTimingFixture sourceTiming;Scene scene;if(gameOutput){scene.width=1920;scene.height=1080;}scene.init(window);const auto start=GetTickCount64();bool enabled=false,disabled=false,resized=false,recreated=false,afterResize=false,afterRecreate=false,disconnected=false;unsigned frames=0,stateErrors=0;
+      const bool nativeGate=native_gate::requested();native_gate::Fixture nativeFixture;
+      if(nativeGate)nativeFixture.init(scene.device.Get(),scene.context.Get(),reinterpret_cast<BYTE*>(sourceTiming.source.mailbox)-sfc_calibration::Offset,sourceTiming.source.session,component);
       const bool nativeForeground=native_foreground::source_notice::requested();
       if(nativeForeground){if(!gameOutput||!replacement::requested()||!scene.fixtureDepth)throw std::runtime_error("Native foreground fixture requires replacement and native depth");
         foreground_fixture::initialize(scene.device.Get(),scene.context.Get(),scene.fixtureDepth.Get());}
@@ -235,7 +238,7 @@ int wmain(){
         MSG m{};while(PeekMessageW(&m,nullptr,0,0,PM_REMOVE)){TranslateMessage(&m);DispatchMessageW(&m);}
         if(gameOutput)sourceTiming.publish(frames+1);
         scene.clear();
-        if(broad||snapshot||gameOutput){
+        if((broad||snapshot||gameOutput)&&!nativeGate){
           // Valid original geometry exercises both public draw callbacks. Same
           // blue as clear; depth testing remains explicitly disabled.
           scene.context->VSSetShader(scene.fixtureVS.Get(),nullptr,0);scene.context->PSSetShader(scene.fixturePS.Get(),nullptr,0);
@@ -256,8 +259,24 @@ int wmain(){
           std::cout<<"REPLACEMENT_SOURCE_GAP_INJECTED frame="<<200001+frames<<'\n';
         }
         const bool synchronized=GetEnvironmentVariableW(L"SFC_D3D9_SYNC_BUFFER",nullptr,0)!=0;
-        if(synchronized)scene.stampFrame(200001+frames);
+        bool insertedNative=false;
+        if(nativeGate){
+          if(imageSample)nativeFixture.store->current.flags|=16;
+          const bool verify=nativeFixture.verified<2&&(!imageSample||frames>=imageStartFrame+500);
+          insertedNative=nativeFixture.frame(sourceTiming.cohort.pending,scene.fixtureDepth.Get(),scene.target.Get(),verify);
+          scene.restoreState();auto* rt=scene.target.Get();scene.context->OMSetRenderTargets(1,&rt,nullptr);
+          const auto target=nativeFixture.store->header.frameStart+(nativeFixture.store->header.frequency+59)/60;
+          for(;;){const auto current=native_gate::now();if(current>=target)break;const auto left=target-current;if(left>nativeFixture.store->header.frequency/1000)Sleep(1);else SwitchToThread();} // fixture-only source pacing
+        }else if(synchronized)scene.stampFrame(200001+frames);
         if(!gameOutput)sourceTiming.publish(frames+1);check(scene.swap->Present(0,0),"fixture present");++frames;if(!scene.statePreserved(broad||snapshot||gameOutput))++stateErrors;
+        if(nativeGate){
+          if(insertedNative&&nativeFixture.armedVerification)nativeFixture.verify(sourceTiming.cohort.pending.anchor);
+          if(!imageSample&&(nativeFixture.draws||(nativeFixture.baseline&&nativeFixture.pool->header.published))){imageSample=true;imageStartFrame=frames;}
+          if(imageSample&&frames>=imageStartFrame+600){
+            std::cout<<"NATIVE_GATE_END frames="<<frames-imageStartFrame<<" draws="<<nativeFixture.draws<<" verified="<<nativeFixture.verified<<" baseline="<<nativeFixture.baseline<<" state_errors="<<stateErrors<<'\n';
+            if(stateErrors||(!nativeFixture.baseline&&nativeFixture.verified<2))throw std::runtime_error("Native gate fixture validation incomplete");break;
+          }continue;
+        }
         if(gameOutput){
           auto* base=reinterpret_cast<BYTE*>(sourceTiming.source.mailbox)-sfc_calibration::Offset;auto& pool=*reinterpret_cast<game_output::Pool*>(base+game_output::Offset);
           if(replacementFaults){
@@ -346,7 +365,8 @@ int wmain(){
         }
         Sleep(16);
       }
-      if(sourceTiming.enabled){std::cout<<"SOURCE_TIMING_END frames="<<frames<<" state_errors="<<stateErrors<<" resized="<<resized<<" recreated="<<recreated<<'\n';if(stateErrors||!resized||!recreated)throw std::runtime_error("source timing state/resize/recreation");}
+      if(nativeGate){if(!imageSample||frames<imageStartFrame+600)throw std::runtime_error("Native gate600frame replay incomplete");}
+      else if(sourceTiming.enabled){std::cout<<"SOURCE_TIMING_END frames="<<frames<<" state_errors="<<stateErrors<<" resized="<<resized<<" recreated="<<recreated<<'\n';if(stateErrors||!resized||!recreated)throw std::runtime_error("source timing state/resize/recreation");}
       else if(snapshot){
         std::cout<<"DEPTH_SNAPSHOT_END frames="<<frames<<" state_errors="<<stateErrors<<"\n";
         if(stateErrors)throw std::runtime_error("snapshot fixture original state changed");

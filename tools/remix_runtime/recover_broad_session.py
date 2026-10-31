@@ -9,7 +9,7 @@ from run_return_fixture import TEST
 
 def supported_transaction(manifest):
     return (any(manifest.get(n,{}).get('enabled') is True for n in ('broad_capture','depth_snapshots'))
-            or (manifest.get('probe') in ('D3D9-ADDITIVE-001','D3D9-MULTISHIP-001','PLAYER-REPLACEMENT-001','NATIVE-INSERTION-001')
+            or (manifest.get('probe') in ('D3D9-ADDITIVE-001','D3D9-MULTISHIP-001','PLAYER-REPLACEMENT-001','NATIVE-INSERTION-001','NATIVE-GATE-001')
                 and isinstance(manifest.get('full_support_qualification'),dict)
                 and bool(manifest['full_support_qualification'])))
 

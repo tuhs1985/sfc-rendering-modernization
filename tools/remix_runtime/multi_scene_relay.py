@@ -89,6 +89,10 @@ class Relay(SingleRelay):
              'SFC_D3D9_SHARED_LIGHTS':'1','SFC_D3D9_SYNC_BUFFER':'1','SFC_D3D9_MULTISCENE':'1',
              'SFC_PIPELINE_MODE':self.mode,'SFC_D3D9_OFFSET_X':str(camera_offset()[0])}
         env['SFC_D3D9_PLAYER_REPLACEMENT']='1' if self.player_replacement else '0'
+        env['SFC_NATIVE_INSERTION_GATE']='1' if getattr(self,'native_gate_policy',None) else '0'
+        if getattr(self,'native_gate_policy',None):env['SFC_NATIVE_INSERTION_POLICY']=self.native_gate_policy
+        if getattr(self,'native_gate_policy',None) and self.offline_fixture:env['SFC_NATIVE_GATE_FIXTURE_DELAYS']='1'
+        else:env.pop('SFC_NATIVE_GATE_FIXTURE_DELAYS',None)
         if self.player_replacement:env['SFC_D3D9_OFFSET_X']='0'
         for key in ('SFC_D3D9_INITIAL_ASSET_MASK','SFC_D3D9_REBIND_COOKIE','SFC_D3D9_EXPECTED_MODEL',
                     'SFC_D3D9_EXPECTED_SOURCE','SFC_D3D9_ASSET_SHA256','DXVK_RTX_CAPTURE_ENABLE_ON_FRAME',

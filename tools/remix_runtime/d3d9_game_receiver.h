@@ -12,6 +12,8 @@
 #include "../d3d9_proof/multi_scene_wire.h"
 #include "../native_foreground/shield_controller.h"
 #include "../native_insertion/observer.h"
+#include "../native_insertion/gate_wait.h"
+#include "ship_replacement_compositor.h"
 #include <thread>
 #include <atomic>
 namespace d3d9_game {
@@ -31,6 +33,32 @@ class Receiver {
  DWORD replacementEpoch=0;
  std::unique_ptr<native_foreground::ShieldController> foreground;
  std::unique_ptr<native_insertion::Observer> insertionProbe;
+ bool nativeGateMode=false;native_gate::Store* gateStore=nullptr;native_gate::Events gateEvents;
+ replacement::Store* nativePassiveLedger=nullptr;
+ std::unique_ptr<ship_replacement::DepthCompositor> nativeCompositor;
+ int gateSlot=-1;uint64_t gateToken=0,nextGateToken=0;native_gate::Ticket gateTicket{};live_owner::Row gateRow{};
+ std::atomic<HANDLE> gatePeer{nullptr};
+ void gateCancel(){if(gateSlot>=0){InterlockedExchange(&pool->slots[gateSlot].state,output_wire::idle);gateSlot=-1;gateToken=0;}}
+ bool gateSource(const native_gate::Ticket& t){
+  if(!cohort||!multi_scene::read(*cohort,t.frame,t.sequence,cohortFrame)||cohortFrame.checksum!=t.hash)return false;
+  for(const auto& r:cohortFrame.rows)if(r[1]==t.owner&&r[7]==t.revision&&r[5]==t.model&&r[6]==t.source&&r[2]==t.frame&&r[47]==t.thread){gateRow=r;return true;}
+  return false;
+ }
+ bool gateTry(const native_gate::Ticket& t){
+  if(stopping.load()||!game_output::valid(pool->header,source.session,GetCurrentProcessId())||!pool->header.ready||pool->header.stopped||pool->header.error)return false;
+  for(unsigned i=0;i<2;++i){auto& item=imported[i];auto& wire=pool->slots[i];
+   if(!item.ready.load(std::memory_order_acquire)||item.lease.pending()||
+      InterlockedCompareExchange(&wire.state,output_wire::acquired,output_wire::ready)!=output_wire::ready)continue;
+   const auto p=wire.packet;const auto meta=game_output::metadata(wire);
+   const bool identity=output_wire::valid(p,p.session,pool->header.receiver_pid)&&p.width==1920&&p.height==1080&&p.resource_epoch==i+1&&
+       !memcmp(p.handles,item.identity.handles,sizeof(p.handles))&&game_output::matches(p,meta,gateRow.data(),source.session,t.hash,t.sequence)&&
+       gateStore->header.ready[i].sequence==p.sequence&&gateStore->header.ready[i].qpc>=t.offered;
+   if(identity){gateSlot=static_cast<int>(i);gateToken=++nextGateToken;gateTicket=t;
+    gateStore->current.ready=gateStore->header.ready[i].qpc;gateStore->current.resourceEpoch=DWORD(p.resource_epoch);return true;}
+   if(p.source_frame<t.frame)InterlockedIncrement(&gateStore->header.stale);else InterlockedIncrement(&gateStore->header.invalid);
+   InterlockedExchange(&wire.state,output_wire::idle);
+  }return false;
+ }
  void replacementControl(replacement::Mode mode,const live_owner::Row* row=nullptr,DWORD frame=0,DWORD reason=UINT32_MAX){
   if(!replacementLedger)return;replacement::Control c{};replacement::read(replacementLedger->control,c);
   c.mode=mode;c.epoch=replacementEpoch;c.permit=mode==replacement::Active?frame+1:0;
@@ -167,7 +195,7 @@ class Receiver {
  void imports(){
   try{while(!stopping.load()){
    if(InterlockedCompareExchange(&pool->header.ready,0,0)&&game_output::valid(pool->header,source.session,GetCurrentProcessId())){
-    if(!receiver){receiver=OpenProcess(SYNCHRONIZE,FALSE,pool->header.receiver_pid);if(!receiver)throw std::runtime_error("D3D9 receiver lifetime");}
+    if(!receiver){receiver=OpenProcess(SYNCHRONIZE,FALSE,pool->header.receiver_pid);if(!receiver)throw std::runtime_error("D3D9 receiver lifetime");gatePeer.store(receiver,std::memory_order_release);}
     if(InterlockedCompareExchange(&pool->header.stopped,0,0))break;
     if(WaitForSingleObject(receiver,0)!=WAIT_TIMEOUT){InterlockedExchange(&pool->header.ready,0);InterlockedExchange(&pool->header.stopped,1);break;}
     for(unsigned slot=0;slot<2;++slot){auto& item=imported[slot];auto& wire=pool->slots[slot];
@@ -188,18 +216,36 @@ class Receiver {
       }
       if(buffered)item.lease.prepare(device.Get());
       else{D3D11_QUERY_DESC q{D3D11_QUERY_EVENT,0};ship_triplet::checked(device->CreateQuery(&q,&item.query),"game GPU lease fence");}item.identity=p;
-      InterlockedExchange(&wire.state,output_wire::idle);item.ready.store(true,std::memory_order_release);
+      item.ready.store(true,std::memory_order_release);
+      InterlockedExchange(&wire.state,nativeGateMode?output_wire::ready:output_wire::idle);
+      if(nativeGateMode)SetEvent(gateEvents.ready);
      }catch(...){InterlockedExchange(&wire.state,output_wire::idle);throw;}
     }
    }Sleep(1);
-  }}catch(...){InterlockedIncrement(&pool->stats.resource_failed);InterlockedExchange(&pool->header.error,1);}
+  }
+  if(nativeGateMode){
+   const auto until=GetTickCount64()+2000;bool pending=false;
+   do{pending=false;for(unsigned i=0;i<2;++i){auto& item=imported[i];if(item.lease.pending()){
+     if(item.lease.retire())InterlockedExchange(&pool->slots[i].state,output_wire::idle);else pending=true;}}
+    if(pending&&GetTickCount64()<until)Sleep(1);else break;
+   }while(true);
+   if(pending)throw std::runtime_error("Native insertion GPU read drain incomplete");
+  }
+  }catch(...){InterlockedIncrement(&pool->stats.resource_failed);InterlockedExchange(&pool->header.error,1);
+   if(nativeGateMode){if(gateStore){InterlockedExchange(&gateStore->header.partial,1);InterlockedExchange(&gateStore->header.stop,1);SetEvent(gateEvents.stop);}
+    // This session cannot restart. Preserve the fixed imported resources on a
+    // terminal failure;no unsafe slot ACK or hot-path rollback is attempted.
+    for(auto& item:imported){item.lease.retainOnTerminalFailure();for(auto& view:item.views)view.Detach();for(auto& texture:item.textures)texture.Detach();}
+    nativeCompositor.release();
+   }
+  }
  }
 public:
  Receiver(return_path::Mapping& m,ID3D11Device* d,ID3D11Texture2D* back=nullptr):mapping(m),device(d),compositor(d,true,true,wantsBuffer()),depth(d,ship_scene_depth::data(m)){
   if(d->GetCreationFlags()&D3D11_CREATE_DEVICE_SINGLETHREADED)throw std::runtime_error("Game device disallows worker imports");
   if(!source.prepare()||!source.requested)throw std::runtime_error("Explicit semantic source required for D3D9 insertion");
   pool=reinterpret_cast<game_output::Pool*>(reinterpret_cast<BYTE*>(source.mailbox)-sfc_calibration::Offset+game_output::Offset);d->GetImmediateContext(&context);
-  replacementMode=replacement::requested()&&!native_insertion::requested();buffered=wantsBuffer();if(buffered){
+  nativeGateMode=native_gate::requested();replacementMode=replacement::requested()&&!native_insertion::requested()&&!nativeGateMode;buffered=wantsBuffer();if(buffered){
    ship_triplet::checked(context.As(&fencedContext),"Buffered game context fence support");
    if(!back)throw std::runtime_error("Buffered scene requires explicit game target");
    auto* base=reinterpret_cast<BYTE*>(source.mailbox)-sfc_calibration::Offset;bufferAudit=reinterpret_cast<synchronized_frame::Store*>(base+synchronized_frame::Offset);
@@ -207,7 +253,7 @@ public:
    if(!h.magic){memset(bufferAudit,0,sizeof(*bufferAudit));h.magic=synchronized_frame::Magic;h.version=1;h.bytes=sizeof(*bufferAudit);h.pid=GetCurrentProcessId();memcpy(h.session,source.session,16);}
    else if(h.magic!=synchronized_frame::Magic||h.version!=1||h.bytes!=sizeof(*bufferAudit)||h.pid!=GetCurrentProcessId()||memcmp(h.session,source.session,16))throw std::runtime_error("Buffered scene audit identity");
    D3D11_TEXTURE2D_DESC shape{};back->GetDesc(&shape);
-   if(!replacementMode&&!native_insertion::requested()&&shape.Width==1920&&shape.Height==1080)history=std::make_unique<scene_frame_buffer::History>(d,back);
+   if(!replacementMode&&!native_insertion::requested()&&!nativeGateMode&&shape.Width==1920&&shape.Height==1080)history=std::make_unique<scene_frame_buffer::History>(d,back);
    // Unsupported resize remains original drawing only,until a fresh runtime.
   }
   wchar_t multi[2]{};if(GetEnvironmentVariableW(L"SFC_D3D9_MULTISCENE",multi,2)==1&&multi[0]==L'1'){
@@ -238,10 +284,20 @@ public:
        throw std::runtime_error("Native insertion passive ledger identity/state");
    insertionProbe=std::make_unique<native_insertion::Observer>(d,base,source.session);
   }
+  if(nativeGateMode){
+   auto* base=reinterpret_cast<BYTE*>(source.mailbox)-sfc_calibration::Offset;
+   if(!buffered||!cohort||!native_insertion::preparePassiveLedger(base,source.session,GetCurrentProcessId()))throw std::runtime_error("Native gate passive ledger");
+   nativePassiveLedger=reinterpret_cast<replacement::Store*>(base+replacement::Offset);
+   gateStore=reinterpret_cast<native_gate::Store*>(base+native_gate::Offset);
+   if(gateStore->header.magic)throw std::runtime_error("Native gate fresh device/session required");
+   native_gate::initialize(*gateStore,source.session,GetCurrentProcessId(),native_gate::policy());
+   gateEvents.create(source.session);nativeCompositor=std::make_unique<ship_replacement::DepthCompositor>(d);
+  }
   worker=std::thread([this]{imports();});
  }
  ~Receiver(){stop();source.close();if(receiver)CloseHandle(receiver);}
  void stop(){if(stopping.exchange(true))return;
+  if(gateStore){InterlockedExchange(&gateStore->header.stop,1);SetEvent(gateEvents.stop);}
   replacementControl(replacement::Recovering,nullptr,0,replacement::Shutdown|replacement::Terminal);if(worker.joinable())worker.join();
   // Stop, publish the final ACK and destroy while the source mapping is valid.
   // Member destruction follows the destructor body, after source.close().
@@ -249,8 +305,39 @@ public:
   if(pool)InterlockedExchange(&pool->header.stopped,1);}
  void nativeShieldDraw(uint64_t native,UINT count,UINT instances,UINT first,INT base,UINT firstInstance){if(!stopping&&foreground)foreground->draw(native,count,instances,first,base,firstInstance);}
  void nativeUnsupportedDraw(){if(!stopping&&foreground)foreground->unsupportedDraw();}
- void observe(uint64_t native){if(!stopping.load()){if(insertionProbe)insertionProbe->draw(native,pool);else depth.observe(native,source.mailbox);}}
- void cleared(uint64_t native){if(!stopping.load())depth.cleared(native);}
+ void nativeInsertionFailed(){if(gateStore){InterlockedExchange(&gateStore->header.partial,1);InterlockedExchange(&gateStore->header.stop,1);SetEvent(gateEvents.stop);}}
+ DWORD nativeInsertion(DWORD action,const native_gate::Ticket* ticket,native_gate::Reply* reply){
+  using namespace native_gate;
+  if(!reply||reply->bytes!=sizeof(Reply)||reply->version!=Version||!nativeGateMode||!gateStore||GetCurrentThreadId()!=thread)return DWORD(Result::Invalid);
+  if(action==DWORD(Action::Cancel)){gateCancel();reply->result=Result::Original;return DWORD(reply->result);}
+  if(!ticket||!valid(*ticket,gateStore->header)||ticket->thread!=thread||ticket->frame!=DWORD(gateStore->header.frame)||
+     stopping.load()||gateStore->header.stop||!return_path::read(mapping.state->armed)||!return_path::read(mapping.state->enabled)||return_path::read(mapping.state->stop))return DWORD(Result::Original);
+  if(action==DWORD(Action::Acquire)){
+   const auto peer=gatePeer.load(std::memory_order_acquire);if(gateSlot>=0||!peer||!gateSource(*ticket))return DWORD(Result::Original);
+   const auto result=acquire(*ticket,*gateStore,gateEvents,peer,[&]{return gateTry(*ticket);});
+   if(result!=Result::Acquired)gateCancel();reply->result=result;reply->token=gateToken;reply->generation=gateStore->header.generation;return DWORD(result);
+  }
+  if(action!=DWORD(Action::Commit)||gateSlot<0||reply->token!=gateToken||!same(*ticket,gateTicket))return DWORD(Result::Invalid);
+  const auto peer=gatePeer.load(std::memory_order_acquire);
+  if(!peer||WaitForSingleObject(peer,0)!=WAIT_TIMEOUT||!pool->header.ready||pool->header.stopped||pool->header.error){gateCancel();gateStore->current.outcome=DWORD(Result::Disconnected);gateStore->current.ended=now();reply->result=Result::Disconnected;return DWORD(reply->result);}
+  if(now()>=ticket->deadline){gateCancel();InterlockedIncrement(&gateStore->header.misses);gateStore->current.outcome=DWORD(Result::Timeout);gateStore->current.ended=now();reply->result=Result::Timeout;return DWORD(reply->result);}
+  auto& item=imported[gateSlot];const auto& packet=pool->slots[gateSlot].packet;
+  Microsoft::WRL::ComPtr<ID3D11RenderTargetView> target;Microsoft::WRL::ComPtr<ID3D11DepthStencilView> z;context->OMGetRenderTargets(1,&target,&z);
+  ship_triplet::Key key{};memcpy(key.session,source.session,16);memcpy(key.sourceSession,source.session,16);memcpy(key.asset,pool->asset,32);
+  key.owner=key.objectId=ticket->owner;key.revision=ticket->revision;key.frame=ticket->frame;key.pose=key.camera=ticket->hash;
+  key.width=1920;key.height=1080;key.resourceEpoch=DWORD(packet.resource_epoch);key.depthConvention=1;key.sourcePid=GetCurrentProcessId();
+  float viewport[4]{};memcpy(viewport,gateRow.data()+83,16);bool good=true;
+  for(unsigned i=0;i<4;++i){good&=std::isfinite(viewport[i])&&viewport[i]>=0&&viewport[i]<=1920&&fabs(viewport[i]-round(viewport[i]))<.001f;if(good)key.viewport[i]=DWORD(viewport[i]);}
+  ID3D11ShaderResourceView* views[]{item.views[0].Get(),item.views[1].Get(),item.views[2].Get()};
+  if(!good||!nativeCompositor->draw(target.Get(),z.Get(),views,key)){gateCancel();gateStore->current.outcome=DWORD(Result::Original);gateStore->current.ended=now();reply->result=Result::Original;return DWORD(reply->result);}
+  // From this point submission is committed:retain ownership through GPU use.
+  item.lease.signal(fencedContext.Get());gateStore->current.inserted=now();gateStore->current.ended=now();
+  gateStore->current.outcome=DWORD(Result::Inserted);InterlockedIncrement(&gateStore->header.commits);
+  if(nativePassiveLedger)InterlockedIncrement(&nativePassiveLedger->committed);
+  gateSlot=-1;gateToken=0;reply->result=Result::Inserted;return DWORD(reply->result);
+ }
+ void observe(uint64_t native){if(!nativeGateMode&&!stopping.load()){if(insertionProbe)insertionProbe->draw(native,pool);else depth.observe(native,source.mailbox);}}
+ void cleared(uint64_t native){if(!nativeGateMode&&!stopping.load())depth.cleared(native);}
  void retire(){
   if(buffered||GetCurrentThreadId()!=thread)return;
   for(unsigned i=0;i<2;++i){auto& item=imported[i];if(!item.ready.load(std::memory_order_acquire)||!item.pending)continue;
@@ -260,6 +347,19 @@ public:
   }
  }
  void step(ID3D11RenderTargetView* target){
+  if(nativeGateMode){if(gateStore&&return_path::read(mapping.state->armed)&&!return_path::read(mapping.state->stop)&&
+      gateStore->current.frame&&GetCurrentThreadId()==thread){
+    gateStore->current.queue=0;for(unsigned i=0;i<2;++i){auto& slot=pool->slots[i];const auto state=output_wire::state(&slot);if(state==output_wire::ready||state==output_wire::acquired)++gateStore->current.queue;
+     if(InterlockedCompareExchange(&slot.state,output_wire::acquired,output_wire::ready)==output_wire::ready){
+      if(slot.packet.source_frame==gateStore->current.frame&&gateStore->header.ready[i].sequence==slot.packet.sequence)gateStore->current.ready=gateStore->header.ready[i].qpc;
+      InterlockedIncrement(&gateStore->header.stale);InterlockedExchange(&slot.state,output_wire::idle);}}
+    auto* live=reinterpret_cast<live_owner::Store*>(reinterpret_cast<BYTE*>(source.mailbox)-sfc_calibration::Offset+live_owner::Offset);
+    gateStore->current.reserved[0]=0;for(auto& slot:live->input)if(frame_ingress::state(&slot.state)!=frame_ingress::Free)++gateStore->current.reserved[0];
+    gateStore->current.reserved[1]=static_cast<DWORD>(InterlockedCompareExchange(&pool->header.busy,0,0));
+    gateStore->current.presented=native_gate::now();native_gate::append(*gateStore);
+    if(cohort)InterlockedExchange(&cohort->header.closed_frame,static_cast<LONG>(gateStore->current.frame));
+   }
+   return;}
   if(insertionProbe){if(!stopping.load()&&GetCurrentThreadId()==thread&&return_path::read(mapping.state->armed)&&
       !return_path::read(mapping.state->stop))insertionProbe->present(pool);return;}
   if(replacementMode){try{replacementStep(target);}catch(...){

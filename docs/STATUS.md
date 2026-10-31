@@ -1,7 +1,7 @@
 ---
 title: SFC Modernization — Status Tracker
 updated: 2026-10-31
-checkpoint: Run224 clean observation; early output timing measured
+checkpoint: Run227 native player insertion demonstrated
 tags:
   - sfc-modernization
   - project-status
@@ -12,19 +12,21 @@ tags:
 > [!summary] Where we are
 > We can take live ships, textures, camera and lighting information from SFC, render through Remix, and put the result inside the game window. Gameplay and tactical UI remain native; the qualified player mesh can be replaced. The API experiment is parked. Current work reduces loading pauses while preserving the fresh-asset pipeline and accepted appearance.
 
-**Current checkpoint:** the observation run succeeded and cleaned up correctly. We can see SFC's scene colour/depth targets and later effects drawing. The matching Remix image is produced roughly9ms after the early ship boundary, although usually before final display. Moving the existing compositor earlier alone cannot fix this; synchronization is the next task. Shield replay stays parked. [Run224](runs/2026-10-31-codex-native-insertion-timing-review.md).
+**Current checkpoint:** native player replacement worked in both actual-game timing tests. You confirmed no noticeable impact and that shields and Paused text now appear correctly over the replacement. The ship and its depth enter before later native drawing;shield replay remains parked.
 
 **Your settings:** lighting, materials, images, quality and reflections are unchanged. Registry lettering stays solid through the existing hull-depth fix.
 
-**Validation:** you confirmed normal gameplay, HUD, targeting and controls during camera rotations, pause and shield damage. This run recorded useful data with no ring drops. Hooks were removed, the component unloaded and the copied setup restored. No original ship was suppressed. Settings/client files unchanged. No further discovery run needed to confirm the timing gap.
+**Validation:** after the first successful insertion,Strict delivered5265/5265 recorded replacement requests;ExtraFrame5180/5180. Neither recorded a failed request in that interval. Both cleaned up normally,restored hooks and the copied setup,and preserved accepted client files. There was no growing replacement backlog. One Strict recording gap remains unattributed;it is documented rather than treated as a proven gameplay problem.
+
+**Timing choice:** recommend **Strict** for continued tests because its tighter16.7ms admission deadline delivered stable replacement here. Keep ExtraFrame's33.3ms option for explicit comparisons. Both actual runs stayed near60presentations/second in ordinary intervals. These are different manual runs,so their timing differences are not a controlled measure of policy overhead. No default or refresh setting has been changed.
 
 **Interface audit:** capture/identity foundations are reusable, but asset preparation still assumes Remix and output sharing assumes D3D11. Renderer interchangeability stays open; no refactor was made. [Findings](<C:/Project/SFC-Modernize Engine/docs/reconnaissance/2026-10-27-renderer-boundary-audit.md>).
 
 **Alpha release scope:** replacement, weapon lighting, damage textures and a fast-loading destruction/break model are required. LOD models are optional. These are recorded requirements, not completed features. [Sponsor direction](<C:/Project/SFC-Modernize Engine/docs/decisions/2026-10-27-alpha-release-scope.md>).
 
-**Next action:** qualify where returned ship colour and depth can enter the actual native scene before effects/text. Check matching-frame readiness there and fix the unload issue. No new game run ready yet;keep the proven capture/assets/camera work.
+**Next action:** the player proof is complete. The next contained increment is applying the same safe insertion/suppression contract to other supported retained ships. Weapon lighting,damage textures and fast destruction models remain required for alpha. No additional repeat of these timing checks is currently needed. [Run227](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-31-codex-native-insertion-gameplay-comparison.md>).
 
-Updated through **Run221,October29,2026**. Repository handoff and run records control resumption.
+Updated through **Run227,October31,2026**. Repository handoff and run records control resumption. Sponsor authorized committing and pushing this validated checkpoint;Git history records publication.
 
 ## Status key
 
@@ -49,12 +51,12 @@ Updated through **Run221,October29,2026**. Repository handoff and run records co
 
 ### SFC-18 — Player-ship replacement
 
-**REGISTRY FIX CONFIRMED; SHIELD REPLAY FAILED; NATIVE INSERTION NEXT.**
+**NATIVE PLAYER INSERTION DEMONSTRATED; OTHER SHIPS NEXT.**
 
 - Registry lettering is solid in the accepted game run. Current work preserves the player ship shields over the replacement.
 - Shield replay did not capture/replay actual game draws;that approach is parked.
 - Late insertion also covers pause text. Target actual native scene colour/depth insertion before effects/UI.
-- Reuse depth compositor and capture/assets/state pipeline. Boundary ownership,timing and controlled unload remain to qualify.
+- Capture-first coordination,previous-batch closure and native colour/depth insertion passed offline and player-fixture gameplay checks. Both policies worked without noticeable impact;shields and pause text layer correctly. Extend to other supported owners as a separate increment.
 - [Run221](runs/2026-10-29-codex-native-insertion-reassessment.md),[replacement contract](reconnaissance/player-replacement-transaction.md).
 
 ### SFC-15 — Remaining rendering families

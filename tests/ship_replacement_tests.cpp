@@ -38,21 +38,22 @@ static void admission(){
  std::array<uint32_t,96> row{};for(unsigned i=0;i<96;++i)row[i]=i;
  const auto raw=observe(o.key,row);check(raw.state[0]==8&&raw.state[33]==41&&raw.state[34]==49&&raw.state[73]==88);
 }
-static void gpu(){
+static void gpu(bool rgbaNative=false){
  ComPtr<ID3D11Device> d;ComPtr<ID3D11DeviceContext> c;D3D_FEATURE_LEVEL obtained{};
  const D3D_FEATURE_LEVEL level=D3D_FEATURE_LEVEL_10_1;
  checked(D3D11CreateDevice(nullptr,D3D_DRIVER_TYPE_HARDWARE,nullptr,0,&level,1,D3D11_SDK_VERSION,&d,&obtained,&c),"hardware device");
  UINT quality=0;checked(d->CheckMultisampleQualityLevels(DXGI_FORMAT_B8G8R8A8_UNORM,8,&quality),"8MSAA query");check(quality>0);
  DepthCompositor compositor(d.Get());const auto o=observation();
  D3D11_TEXTURE2D_DESC desc{};desc.Width=desc.Height=64;desc.ArraySize=desc.MipLevels=1;desc.SampleDesc.Count=8;
- desc.Format=DXGI_FORMAT_B8G8R8A8_UNORM;desc.BindFlags=D3D11_BIND_RENDER_TARGET;
+ desc.Format=rgbaNative?DXGI_FORMAT_R8G8B8A8_TYPELESS:DXGI_FORMAT_B8G8R8A8_UNORM;desc.BindFlags=D3D11_BIND_RENDER_TARGET;
  ComPtr<ID3D11Texture2D> color,depth,resolved,staging;ComPtr<ID3D11RenderTargetView> target;ComPtr<ID3D11DepthStencilView> zview;
- checked(d->CreateTexture2D(&desc,nullptr,&color),"native color");checked(d->CreateRenderTargetView(color.Get(),nullptr,&target),"native RTV");
+ checked(d->CreateTexture2D(&desc,nullptr,&color),"native color");D3D11_RENDER_TARGET_VIEW_DESC nativeViewDesc{};nativeViewDesc.Format=DXGI_FORMAT_R8G8B8A8_UNORM;nativeViewDesc.ViewDimension=D3D11_RTV_DIMENSION_TEXTURE2DMS;
+ checked(d->CreateRenderTargetView(color.Get(),rgbaNative?&nativeViewDesc:nullptr,&target),"native RTV");
  desc.Format=DXGI_FORMAT_R32_TYPELESS;desc.BindFlags=D3D11_BIND_DEPTH_STENCIL|D3D11_BIND_SHADER_RESOURCE;
  checked(d->CreateTexture2D(&desc,nullptr,&depth),"native depth");
  D3D11_DEPTH_STENCIL_VIEW_DESC zd{};zd.Format=DXGI_FORMAT_D32_FLOAT;zd.ViewDimension=D3D11_DSV_DIMENSION_TEXTURE2DMS;
  checked(d->CreateDepthStencilView(depth.Get(),&zd,&zview),"native DSV");
- desc.SampleDesc.Count=1;desc.Format=DXGI_FORMAT_B8G8R8A8_UNORM;desc.BindFlags=0;
+ desc.SampleDesc.Count=1;desc.Format=rgbaNative?DXGI_FORMAT_R8G8B8A8_UNORM:DXGI_FORMAT_B8G8R8A8_UNORM;desc.BindFlags=0;
  checked(d->CreateTexture2D(&desc,nullptr,&resolved),"resolve");desc.Usage=D3D11_USAGE_STAGING;desc.CPUAccessFlags=D3D11_CPU_ACCESS_READ;
  checked(d->CreateTexture2D(&desc,nullptr,&staging),"staging");
  std::vector<uint32_t> rgba(4096,0xffff0000u),ids(4096,0);std::vector<float> zs(4096,.5f);
@@ -67,9 +68,10 @@ static void gpu(){
   checked(d->CreateTexture2D(&desc,&data,&inputs[i]),"triplet input");checked(d->CreateShaderResourceView(inputs[i].Get(),nullptr,&srvs[i]),"triplet view");}
  ID3D11ShaderResourceView* views[]={srvs[0].Get(),srvs[1].Get(),srvs[2].Get()};
  const float blue[4]={0,0,1,1};
- auto read=[&](){c->OMSetRenderTargets(0,nullptr,nullptr);c->ResolveSubresource(resolved.Get(),0,color.Get(),0,DXGI_FORMAT_B8G8R8A8_UNORM);c->CopyResource(staging.Get(),resolved.Get());
+ auto read=[&](){c->OMSetRenderTargets(0,nullptr,nullptr);c->ResolveSubresource(resolved.Get(),0,color.Get(),0,rgbaNative?DXGI_FORMAT_R8G8B8A8_UNORM:DXGI_FORMAT_B8G8R8A8_UNORM);c->CopyResource(staging.Get(),resolved.Get());
   D3D11_MAPPED_SUBRESOURCE m{};checked(c->Map(staging.Get(),0,D3D11_MAP_READ,0,&m),"fixture readback");std::vector<uint32_t> pixels(4096);
-  for(unsigned y=0;y<64;++y)memcpy(pixels.data()+y*64,static_cast<BYTE*>(m.pData)+y*m.RowPitch,256);c->Unmap(staging.Get(),0);return pixels;};
+  for(unsigned y=0;y<64;++y)memcpy(pixels.data()+y*64,static_cast<BYTE*>(m.pData)+y*m.RowPitch,256);c->Unmap(staging.Get(),0);
+  if(rgbaNative)for(auto& p:pixels)p=(p&0xff00ff00u)|((p&0xff)<<16)|((p>>16)&0xff);return pixels;};
  c->ClearRenderTargetView(target.Get(),blue);c->ClearDepthStencilView(zview.Get(),D3D11_CLEAR_DEPTH,.25f,0);
  c->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);auto* rt=target.Get();c->OMSetRenderTargets(1,&rt,zview.Get());
  check(compositor.draw(target.Get(),zview.Get(),views,o.key));
@@ -114,6 +116,7 @@ O nearPS(){O o;o.c=float4(0,1,0,1);o.z=.1;return o;}
  bad=o.key;bad.width=63;check(!compositor.draw(target.Get(),zview.Get(),views,bad));
  bad=o.key;bad.viewport[0]=1;check(!compositor.draw(target.Get(),zview.Get(),views,bad));
  auto* original=views[1];views[1]=srvs[0].Get();check(!compositor.draw(target.Get(),zview.Get(),views,o.key));views[1]=original;
+ if(rgbaNative)return; // The remaining historical additive test uses typed BGRA.
  ComPtr<ID3D11RenderTargetView> wrongTarget;desc.Format=DXGI_FORMAT_B8G8R8A8_UNORM;desc.BindFlags=D3D11_BIND_RENDER_TARGET;
  ComPtr<ID3D11Texture2D> single;checked(d->CreateTexture2D(&desc,nullptr,&single),"single sample target");checked(d->CreateRenderTargetView(single.Get(),nullptr,&wrongTarget),"single RTV");
  check(!compositor.draw(wrongTarget.Get(),zview.Get(),views,o.key));
@@ -148,5 +151,5 @@ O nearPS(){O o;o.c=float4(0,1,0,1);o.z=.1;return o;}
  retained.observe(reinterpret_cast<uintptr_t>(c.Get()),&mailbox);c->OMSetRenderTargets(1,&rt,secondView.Get());retained.observe(reinterpret_cast<uintptr_t>(c.Get()),&mailbox);
  check(!retained.finish(21,64,64));retained.observe(reinterpret_cast<uintptr_t>(c.Get()),&mailbox);check(retained.finish(21,64,64)&&stats.epoch==2);
 }
-int main(){try{admission();gpu();std::cout<<"Replacement offline PASS "<<checks<<" checks;8MSAA depth/coverage/order/state;NO SFC hooks or suppression\n";return 0;}
+int main(){try{admission();gpu();gpu(true);std::cout<<"Replacement offline PASS "<<checks<<" checks;BGRA and RGBA-typeless8MSAA depth/coverage/order/state;NO SFC hooks or suppression\n";return 0;}
  catch(const std::exception& e){std::cerr<<e.what()<<"\n";return 1;}}

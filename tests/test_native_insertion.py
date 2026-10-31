@@ -55,6 +55,6 @@ class ProbeTests(unittest.TestCase):
         self.assertIn('replacementMode=replacement::requested()&&!native_insertion::requested()',code)
         self.assertIn('if(insertionProbe)',code)
         producer=(root/'tools/m1_component/m1_component.cpp').read_text()
-        self.assertIn('if(g_replacement&&state&&!g_insertion_probe)',producer)
+        self.assertIn('if(g_replacement&&state&&!g_insertion_probe&&!g_native_gate_requested)',producer)
 
 if __name__=='__main__':unittest.main()

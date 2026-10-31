@@ -5,6 +5,7 @@
 #include <dxgi.h>
 #include <wrl/client.h>
 #include <memory>
+#include <mutex>
 #include <imgui.h>
 #include <reshade.hpp>
 #include <detours.h>
@@ -35,7 +36,7 @@ bool inspectVisibility=false,inspectEarly=false;ULONGLONG lastVisibility=0;
 bool searchMode=false,searchFixture=false;depth_search::Search search;
 bool broadMode=false;
 bool sourceTimingRequested=false;std::unique_ptr<source_timing::Observer> sourceTiming;
-bool directGameRequested=false;std::unique_ptr<d3d9_game::Receiver> directGame;
+bool directGameRequested=false;std::shared_ptr<d3d9_game::Receiver> directGame;std::mutex nativeGateBinding;
 bool nativeForegroundRequested=false;
 void nativeShader(reshade::api::device* d,reshade::api::pipeline_layout,uint32_t count,
                   const reshade::api::pipeline_subobject* objects,reshade::api::pipeline pipeline){
@@ -89,7 +90,8 @@ void inspectDepth(return_path::State& s){
 }
 void hide(){visibleAt=0;}
 void releaseResources(){
-  directGame.reset();for(auto& target:directTargets)target.Reset();directCount=0;
+  std::shared_ptr<d3d9_game::Receiver> retired;{std::lock_guard<std::mutex> lock(nativeGateBinding);retired.swap(directGame);}
+  if(retired)retired->stop();for(auto& target:directTargets)target.Reset();directCount=0;
   sourceTiming.reset();
 #ifdef SFC_LIVE_RETURN
   if(liveReceiver){liveReceiver->stop();liveReceiver.reset();}
@@ -116,7 +118,8 @@ void init(reshade::api::effect_runtime* runtime){
        for(unsigned i=0;i<directCount;++i){directBack[i]=runtime->get_back_buffer(i).handle;auto* back=reinterpret_cast<ID3D11Texture2D*>(static_cast<uintptr_t>(directBack[i]));
         if(!back)throw std::runtime_error("Game backbuffer missing");ship_triplet::checked(device->CreateRenderTargetView(back,nullptr,&directTargets[i]),"Game target view");}
        auto* firstBack=reinterpret_cast<ID3D11Texture2D*>(static_cast<uintptr_t>(directBack[0]));
-       directGame=std::make_unique<d3d9_game::Receiver>(*channel,device.Get(),firstBack);
+       auto prepared=std::make_shared<d3d9_game::Receiver>(*channel,device.Get(),firstBack);
+       {std::lock_guard<std::mutex> lock(nativeGateBinding);directGame=std::move(prepared);}
       }
       activeRuntime=runtime;s.gamePid=GetCurrentProcessId();InterlockedIncrement(&s.epoch);return_path::write(s.ready,1);return;}
     if(depth_snapshot::capture)depth_snapshot::capture->init(device.Get());
@@ -290,6 +293,15 @@ static BOOL attach(HMODULE module){
 }
 extern "C" __declspec(dllexport) BOOL __cdecl SFCSearchFixtureStart(void* const* points){
   return searchMode&&searchFixture&&search.install(points,true);
+}
+extern "C" __declspec(dllexport) DWORD WINAPI SFCNativeInsertionV1(DWORD action,const native_gate::Ticket* ticket,native_gate::Reply* reply){
+ std::shared_ptr<d3d9_game::Receiver> owner;{std::lock_guard<std::mutex> lock(nativeGateBinding);owner=directGame;}
+ if(!owner)return DWORD(native_gate::Result::Original);
+ try{return owner->nativeInsertion(action,ticket,reply);}catch(...){
+  // No stale original-count decision follows a partially failed insertion.
+  // A retained receiver reference protects resources while stop revokes requests.
+  owner->nativeInsertionFailed();if(reply)reply->result=native_gate::Result::Partial;return DWORD(native_gate::Result::Partial);
+ }
 }
 BOOL WINAPI DllMain(HMODULE module,DWORD reason,LPVOID){
   if(DetourIsHelperProcess())return TRUE;

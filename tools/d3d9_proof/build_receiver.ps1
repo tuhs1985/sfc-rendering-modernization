@@ -7,7 +7,7 @@ New-Item -ItemType Directory -Force -Path $bin | Out-Null
 Push-Location $bin
 try{
  $vc='C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvars32.bat'
- $cmd='"{0}" && set "CL=" && set "_CL_=" && cl /nologo /std:c++20 /EHsc /W4 /WX {2} /fp:precise "{1}\tools\d3d9_proof\output_receiver.cpp" /Fe:output_receiver.exe /link /Brepro d3d11.lib dxgi.lib' -f $vc,$root,$opt
+ $cmd='"{0}" && set "CL=" && set "_CL_=" && cl /nologo /std:c++20 /EHsc /W4 /WX {2} /fp:precise "{1}\tools\d3d9_proof\output_receiver.cpp" /Fe:output_receiver.exe /link /Brepro d3d11.lib dxgi.lib advapi32.lib' -f $vc,$root,$opt
  & $env:ComSpec /d /s /c $cmd
  if($LASTEXITCODE -ne 0){throw 'x86 output receiver build failed'}
  $cmd='"{0}" && cl /nologo /std:c++20 /EHsc /W4 /WX "{1}\tests\d3d9_output_wire_tests.cpp" /Fe:output_wire_tests.exe /link /Brepro' -f $vc,$root

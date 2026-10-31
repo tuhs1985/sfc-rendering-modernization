@@ -1,11 +1,13 @@
 // Standalone receiver worker ONLY. No game callback allocation,waits or file IO.
 #pragma once
 #include "replacement_transaction.h"
+#include "../native_insertion/gate_events.h"
 #include "game_output_wire.h"
 #include "live_owner_wire.h"
 #include <cmath>
 #include "../m1_component/m1_present_calibration.h"
 struct GameOutputWriter {
+ native_gate::Events gateEvents;native_gate::Store* gateStore=nullptr;
  sfc_calibration::Reader source;game_output::Pool* pool=nullptr;
  Microsoft::WRL::ComPtr<ID3D11Texture2D> textures[2][3];uint64_t handles[2][3]{};
  bool enabled=false,retainReady=false,replacementMode=false;uint64_t session=0;
@@ -16,6 +18,11 @@ struct GameOutputWriter {
   if(!enabled||pool)return;
   check(source.prepare()&&source.requested,"game pool explicit semantic mapping");
   auto* base=reinterpret_cast<BYTE*>(source.mailbox)-sfc_calibration::Offset;
+  if(native_gate::requested()){
+   gateStore=reinterpret_cast<native_gate::Store*>(base+native_gate::Offset);
+   check(native_gate::valid(gateStore->header,source.session,reinterpret_cast<live_owner::Store*>(base+live_owner::Offset)->header.pid),"native gate pool session");
+   gateEvents.open(source.session);
+  }
   const auto& live=reinterpret_cast<live_owner::Store*>(base+live_owner::Offset)->header;
   const auto game=live.pid;check(game&&live_owner::header_valid(live,source.session),"game pool source PID/session");
   pool=reinterpret_cast<game_output::Pool*>(base+game_output::Offset);
@@ -54,6 +61,12 @@ struct GameOutputWriter {
  }
  void publish(int slot,output_wire::Packet packet,const game_output::Metadata& metadata){
   if(slot<0)return;
+  // Standalone comparison ONLY:the gameplay runner explicitly removes this
+  // fixture switch. Delay occurs outside SFC after the real GPU copy finishes.
+  wchar_t fixtureDelay[2]{};
+  if(native_gate::requested()&&GetEnvironmentVariableW(L"SFC_NATIVE_GATE_FIXTURE_DELAYS",fixtureDelay,2)==1&&fixtureDelay[0]==L'1'){
+   if(packet.source_frame%37==0)Sleep(32);else if(packet.source_frame%19==0)Sleep(12);
+  }
   auto& out=pool->slots[slot];packet.producer_pid=GetCurrentProcessId();packet.resource_epoch=static_cast<uint64_t>(slot+1);
   memcpy(packet.handles,handles[slot],sizeof(packet.handles));packet.checksum=output_wire::checksum(packet);
   if(replacementMode){
@@ -66,6 +79,9 @@ struct GameOutputWriter {
    binding.frame=static_cast<DWORD>(packet.source_frame);binding.generation=receipt.generation;binding.owner=packet.owner;binding.revision=packet.revision;binding.epoch=control.epoch;
    replacement::write(r->output[slot],binding);
   }
-  out.packet=packet;game_output::metadata(out,metadata);InterlockedIncrement(&pool->header.published);InterlockedExchange(&out.state,output_wire::ready);
+  out.packet=packet;game_output::metadata(out,metadata);
+  if(gateStore){gateStore->header.ready[slot]={packet.sequence,native_gate::now()};}
+  InterlockedIncrement(&pool->header.published);InterlockedExchange(&out.state,output_wire::ready);
+  if(gateStore)SetEvent(gateEvents.ready);
  }
 };

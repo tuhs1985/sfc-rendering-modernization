@@ -2,9 +2,11 @@
 // Composite at a qualified pre-UI boundary,writing returned normalized depth.
 #pragma once
 #include "ship_triplet_compositor.h"
+#include "device_identity.h"
 namespace ship_replacement {
 using Microsoft::WRL::ComPtr;
 class DepthCompositor {
+ GraphicsDeviceIdentity identity;
  ComPtr<ID3D11Device> ownerDevice;
  ComPtr<ID3D11DeviceContext> immediate,deferred;
  ComPtr<ID3D11VertexShader> vertex;ComPtr<ID3D11PixelShader> pixel;
@@ -13,6 +15,7 @@ class DepthCompositor {
  struct Parameters{uint32_t owner,width,height,pad;float viewportMap[4];};
 public:
  explicit DepthCompositor(ID3D11Device* device):ownerDevice(device){
+  identity.initialize(device);
   using ship_triplet::checked;
   if(device->GetFeatureLevel()<D3D_FEATURE_LEVEL_10_1)throw std::runtime_error("replacement feature level");
   device->GetImmediateContext(&immediate);checked(device->CreateDeferredContext(0,&deferred),"replacement context");
@@ -48,7 +51,7 @@ Output main(float4 p:SV_Position){
   // Full-resolution 1:1 inputs only. No nearest-rescale/misregistered depth.
   if(!target||!nativeDepth||!views[0]||!views[1]||!views[2]||!ship_triplet::validKey(key)||key.diagnosticMode)return false;
   ComPtr<ID3D11Device> td,zd;target->GetDevice(&td);nativeDepth->GetDevice(&zd);
-  if(td.Get()!=ownerDevice.Get()||zd.Get()!=ownerDevice.Get())return false;
+  if(!identity.matches(td.Get())||!identity.matches(zd.Get()))return false;
   ComPtr<ID3D11Resource> cr,zr;target->GetResource(&cr);nativeDepth->GetResource(&zr);
   ComPtr<ID3D11Texture2D> ct,zt;if(FAILED(cr.As(&ct))||FAILED(zr.As(&zt)))return false;
   D3D11_TEXTURE2D_DESC c{},z{};ct->GetDesc(&c);zt->GetDesc(&z);
@@ -57,11 +60,12 @@ Output main(float4 p:SV_Position){
      uint64_t(key.viewport[0])+key.viewport[2]>c.Width||uint64_t(key.viewport[1])+key.viewport[3]>c.Height||
      c.ArraySize!=1||c.MipLevels!=1||z.ArraySize!=1||z.MipLevels!=1||
      c.SampleDesc.Count!=8||c.SampleDesc.Quality!=0||z.SampleDesc.Count!=8||z.SampleDesc.Quality!=0||
-     c.Format!=DXGI_FORMAT_B8G8R8A8_UNORM||z.Format!=DXGI_FORMAT_R32_TYPELESS||
-     rv.ViewDimension!=D3D11_RTV_DIMENSION_TEXTURE2DMS||rv.Format!=c.Format||
+     !((c.Format==DXGI_FORMAT_B8G8R8A8_UNORM&&rv.Format==DXGI_FORMAT_B8G8R8A8_UNORM)||
+       ((c.Format==DXGI_FORMAT_R8G8B8A8_TYPELESS||c.Format==DXGI_FORMAT_R8G8B8A8_UNORM)&&rv.Format==DXGI_FORMAT_R8G8B8A8_UNORM))||z.Format!=DXGI_FORMAT_R32_TYPELESS||
+     rv.ViewDimension!=D3D11_RTV_DIMENSION_TEXTURE2DMS||
      dv.ViewDimension!=D3D11_DSV_DIMENSION_TEXTURE2DMS||dv.Format!=DXGI_FORMAT_D32_FLOAT||dv.Flags)return false;
   for(unsigned i=0;i<3;++i){
-   ComPtr<ID3D11Device> vd;views[i]->GetDevice(&vd);if(vd.Get()!=ownerDevice.Get())return false;
+   ComPtr<ID3D11Device> vd;views[i]->GetDevice(&vd);if(!identity.matches(vd.Get()))return false;
    ComPtr<ID3D11Resource> r;views[i]->GetResource(&r);ComPtr<ID3D11Texture2D> t;
    if(FAILED(r.As(&t))||r.Get()==cr.Get()||r.Get()==zr.Get())return false;
    D3D11_TEXTURE2D_DESC d{};t->GetDesc(&d);D3D11_SHADER_RESOURCE_VIEW_DESC s{};views[i]->GetDesc(&s);

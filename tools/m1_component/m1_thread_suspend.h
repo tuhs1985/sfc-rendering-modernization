@@ -19,6 +19,7 @@ struct ThreadSuspendApi {
     decltype(&ResumeThread) resume = &ResumeThread;
     decltype(&CloseHandle) close = &CloseHandle;
     decltype(&GetLastError) error = &GetLastError;
+    DWORD extra_access = 0;
 };
 
 inline std::vector<HANDLE> suspend_thread_transaction(bool& ok,
@@ -39,7 +40,7 @@ inline std::vector<HANDLE> suspend_thread_transaction(bool& ok,
     while (available) {
         if (entry.th32OwnerProcessID == pid && entry.th32ThreadID != current) {
             diagnostic.thread = entry.th32ThreadID;
-            HANDLE thread = api.open(THREAD_SUSPEND_RESUME, FALSE, entry.th32ThreadID);
+            HANDLE thread = api.open(THREAD_SUSPEND_RESUME|api.extra_access, FALSE, entry.th32ThreadID);
             if (!thread) {
                 diagnostic.api = "OpenThread"; diagnostic.error = api.error(); break;
             }
