@@ -4,6 +4,8 @@
 #include "multi_scene_wire.h"
 #include "replacement_transaction.h"
 #include "physical_hull_depth.h"
+#include "../native_insertion/cohort_contract.h"
+#include "pipeline_mode.h"
 #include <map>
 #include <memory>
 #include <future>
@@ -15,9 +17,11 @@ struct MultiSceneRuntime {
  std::map<std::array<BYTE,32>,std::shared_ptr<Resident>> content;
  fs::path root;IDirect3DDevice9* device=nullptr;const Scene* bootstrapScene=nullptr;Renderer* bootstrapRenderer=nullptr;bool enabled=false;DWORD pid=0;uint64_t bytes=0,frames=0,draws=0,omitted=0,rejected=0,loads=0,shared=0;
  std::map<uint64_t,uint64_t> ownerDraws;bool replacementOnly=false;
+ native_cohort::Store* insertion=nullptr;native_cohort::Manifest rendered{};
  struct Prepared {Scene scene;std::vector<std::vector<BYTE>> textures;uint64_t backing=0,cpu_us=0;};
  std::future<Prepared> preparing;multi_scene::Asset pendingAsset{};
  uint64_t lookup_header=0,lookup_packet=0,lookup_identity=0,decode_rejected=0,projection_rejected=0;
+ bool projectionAudit=!pipeline_mode::performance();uint64_t projectionDisagreements=0;
  uint64_t initialMask=0,initialWaits=0;bool initialReady=false;
  TextureUpload uploadPolicy=TextureUpload::StagedLock;
  static uint64_t clock(){LARGE_INTEGER q{},f{};QueryPerformanceCounter(&q);QueryPerformanceFrequency(&f);const auto n=uint64_t(q.QuadPart),d=uint64_t(f.QuadPart);return n/d*1000000+n%d*1000000/d;}
@@ -37,16 +41,17 @@ struct MultiSceneRuntime {
  void start(const fs::path& directory,IDirect3DDevice9* d,const Scene& initial,Renderer& initialRenderer,TextureUpload policy=TextureUpload::StagedLock,PhysicalHullDepth* physical=nullptr,const PhysicalHullDepth::Mesh* bootstrapHull=nullptr){
   hull=physical;initialHull=bootstrapHull;
   uploadPolicy=policy;
-  wchar_t flag[2]{};enabled=GetEnvironmentVariableW(L"SFC_D3D9_MULTISCENE",flag,2)==1&&flag[0]==L'1';if(!enabled)return;replacementOnly=replacement::requested();
+  wchar_t flag[2]{};enabled=GetEnvironmentVariableW(L"SFC_D3D9_MULTISCENE",flag,2)==1&&flag[0]==L'1';if(!enabled)return;replacementOnly=replacement::requested()&&!native_cohort::requested();
   root=directory;device=d;bootstrapScene=&initial;bootstrapRenderer=&initialRenderer;require(source.prepare()&&source.requested,"multi-scene explicit mapping");
   auto* base=reinterpret_cast<BYTE*>(source.mailbox)-sfc_calibration::Offset;store=reinterpret_cast<multi_scene::Store*>(base+multi_scene::Offset);
   wchar_t pidText[16]{};GetEnvironmentVariableW(L"SFC_D3D9_GAME_PID",pidText,16);pid=static_cast<DWORD>(_wcstoui64(pidText,nullptr,10));
   require(multi_scene::valid(store->header,source.session,pid),"multi-scene session/process/version");
+  if(native_cohort::requested()){insertion=reinterpret_cast<native_cohort::Store*>(base+native_cohort::Offset);require(native_cohort::valid(insertion->header,source.session,pid),"Native cohort membership channel");}
   wchar_t mask[32]{};if(GetEnvironmentVariableW(L"SFC_D3D9_INITIAL_ASSET_MASK",mask,32)){
    wchar_t* end=nullptr;initialMask=_wcstoui64(mask,&end,16);require(initialMask&&end&&!*end,"initial catalog mask");}
  }
  ~MultiSceneRuntime(){if(preparing.valid())preparing.wait();if(enabled){std::cout<<"MULTISCENE_SUMMARY frames="<<frames<<" draws="<<draws<<" loads="<<loads<<" shared="<<shared<<" omitted="<<omitted<<" rejected="<<rejected<<" retained_bytes="<<bytes<<" owners="<<ownerDraws.size()<<'\n';
-  std::cout<<"MULTISCENE_STAGES lookup_header="<<lookup_header<<" lookup_packet="<<lookup_packet<<" lookup_identity="<<lookup_identity<<" decode="<<decode_rejected<<" projection="<<projection_rejected<<'\n';
+  std::cout<<"MULTISCENE_STAGES lookup_header="<<lookup_header<<" lookup_packet="<<lookup_packet<<" lookup_identity="<<lookup_identity<<" decode="<<decode_rejected<<" projection="<<projection_rejected<<" projection_audit="<<projectionDisagreements<<'\n';
   std::cout<<"MULTISCENE_INITIAL mask="<<initialMask<<" ready="<<initialReady<<" waits="<<initialWaits<<'\n';
   for(const auto& pair:ownerDraws)std::cout<<"MULTISCENE_OWNER owner="<<DWORD(pair.first)<<" revision="<<DWORD(pair.first>>32)<<" draws="<<pair.second<<'\n';}source.close();}
  void assets(){if(!enabled)return;
@@ -89,19 +94,21 @@ struct MultiSceneRuntime {
   if(packet.anchor!=anchor.row[1]||packet.revision!=anchor.row[7]){++lookup_identity;return false;}return true;
  }
  bool draw(uint32_t width,uint32_t height,const float* displacement){bool first=true;unsigned count=0;
+  rendered={};if(insertion){memcpy(rendered.session,source.session,16);rendered.frame=packet.frame;rendered.anchor=packet.anchor;rendered.revision=packet.revision;rendered.sequence=packet.sequence;rendered.hash=packet.checksum;}
   for(DWORD n=0;n<packet.count;++n){const auto& row=packet.rows[n];std::shared_ptr<Resident> resident;DWORD asset=0;
    if(replacementOnly&&(row[1]!=packet.anchor||row[7]!=packet.revision))continue;
    for(unsigned i=0;i<64;++i)if(bound[i]&&multi_scene::matches(entries[i],row)){resident=bound[i];asset=i+1;break;}
    if(!resident){++omitted;continue;}live_owner::Packet p{};p.row=row;Frame frame{};
    if(!live_owner::decode(p,frame)){++decode_rejected;++rejected;continue;}
-   bool good=true;const auto& vertices=resident->scene.vertices;const auto stride=(std::max)(size_t(1),vertices.size()/64);
-   for(size_t k=0;k<vertices.size();k+=stride)if(!live_owner::projection_matches(p,frame,vertices[k].p)){good=false;break;}
-   if(!good){++projection_rejected;++rejected;continue;}
+   projectionDisagreements+=live_owner::audit_projection(p,frame,resident->scene.vertices,projectionAudit);
    for(unsigned axis=0;axis<3;++axis)frame.model[axis*4+3]+=displacement[axis];
    resident->drawRenderer->draw(frame,false,width,height,first);first=false;++count;++draws;
    if(hull)hull->submit(resident->hullMesh,frame);
+   if(insertion){require(rendered.count<32,"Native cohort rendered member capacity");auto& m=rendered.members[rendered.count++];m.owner=row[1];m.revision=row[7];m.model=row[5];m.source=row[6];m.asset=asset;memcpy(m.content,entries[asset-1].content,32);}
    ++ownerDraws[live_owner::selection(row[1],row[7])];
    if(frames<8||frames%60==0)std::cout<<"MULTISCENE_DRAW frame="<<packet.frame<<" owner="<<row[1]<<" revision="<<row[7]<<" asset="<<asset<<" set_hash="<<packet.checksum<<'\n';
   }++frames;return count!=0;
  }
+ void publishInsertion(uint64_t output){if(!insertion)return;rendered.output=output;rendered.checksum=native_cohort::checksum(rendered);
+  require(native_cohort::qualifies(rendered,*store,packet),"Native cohort exact submitted membership");native_cohort::write(insertion->upstream,rendered);}
 };

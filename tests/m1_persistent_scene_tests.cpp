@@ -34,7 +34,9 @@ int wmain(int argc,wchar_t** argv){
   const std::uint16_t angle=static_cast<std::uint16_t>(frame*8);memcpy(x.data.data()+x.id.ship+0x94,&angle,2);
   auto view=ident;view[3]=frame>=60?3.f:0.f;memcpy(x.data.data()+x.id.manager+0x628,view.data(),64);
   scene.directSource.begin(frame);sfc_calibration::begin(scene.calibration,frame);
+  if(frame==60)InterlockedExchange(&scene.calibration->busy,1); // Diagnostic mirror unavailable.
   scene.updatePersistent(x.id.manager,frame,frame*16,read);
+  if(frame==60){InterlockedExchange(&scene.calibration->busy,0);check_mesh(scene.calibrationMisses==1&&scene.directSource.store->header.bad_frame!=60,"diagnostic mirror cannot reject functional frame");}
   live_owner::Packet published{};Frame decoded{};
   check_mesh(live_owner::take(scene.directSource.store->input,scene.directSource.store->header,published,watermark,malformed)&&!malformed,"full-rate offscreen native publication");
   check_mesh(live_owner::decode(published,decoded)&&decoded.frame==frame&&decoded.owner==1&&decoded.revision==1,"stable instance and current pose");

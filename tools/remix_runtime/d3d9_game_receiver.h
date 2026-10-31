@@ -14,6 +14,7 @@
 #include "../native_insertion/observer.h"
 #include "../native_insertion/gate_wait.h"
 #include "ship_replacement_compositor.h"
+#include "../native_insertion/cohort_contract.h"
 #include <thread>
 #include <atomic>
 namespace d3d9_game {
@@ -23,7 +24,7 @@ class Receiver {
  return_path::Mapping& mapping;Source source;game_output::Pool* pool=nullptr;
  Microsoft::WRL::ComPtr<ID3D11Device> device;Microsoft::WRL::ComPtr<ID3D11DeviceContext> context;
  ship_triplet::Compositor compositor;ship_scene_depth::Source depth;
- struct Import {Microsoft::WRL::ComPtr<ID3D11Texture2D> textures[3];Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> views[3];Microsoft::WRL::ComPtr<ID3D11Query> query;game_gpu::ReadLease lease;output_wire::Packet identity{};std::atomic<bool> ready{false};bool pending=false;};
+ struct Import {Microsoft::WRL::ComPtr<ID3D11Texture2D> textures[3];Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> views[3];Microsoft::WRL::ComPtr<ID3D11Query> query;game_gpu::ReadLease lease;output_wire::Packet identity{};std::atomic<bool> ready{false},held{false};bool pending=false;};
  Import imported[2];std::atomic<bool> stopping{false};std::thread worker;HANDLE receiver=nullptr;
  DWORD thread=GetCurrentThreadId();sfc_calibration::Snapshot snapshot{};
  bool buffered=false;std::unique_ptr<scene_frame_buffer::History> history;synchronized_frame::Store* bufferAudit=nullptr;
@@ -38,7 +39,9 @@ class Receiver {
  std::unique_ptr<ship_replacement::DepthCompositor> nativeCompositor;
  int gateSlot=-1;uint64_t gateToken=0,nextGateToken=0;native_gate::Ticket gateTicket{};live_owner::Row gateRow{};
  std::atomic<HANDLE> gatePeer{nullptr};
- void gateCancel(){if(gateSlot>=0){InterlockedExchange(&pool->slots[gateSlot].state,output_wire::idle);gateSlot=-1;gateToken=0;}}
+ bool cohortGate=false,cohortWrites=false;DWORD cohortAttempt=0;native_cohort::Store* cohortProof=nullptr;native_cohort::Manifest cohortMembers{};
+ void finishCohortLease(){if(gateSlot<0)return;imported[gateSlot].held.store(false,std::memory_order_release);if(!cohortWrites)InterlockedExchange(&pool->slots[gateSlot].state,output_wire::idle);gateSlot=-1;gateToken=0;cohortWrites=false;}
+ void gateCancel(){if(gateSlot>=0){imported[gateSlot].held.store(false,std::memory_order_release);InterlockedExchange(&pool->slots[gateSlot].state,output_wire::idle);gateSlot=-1;gateToken=0;}}
  bool gateSource(const native_gate::Ticket& t){
   if(!cohort||!multi_scene::read(*cohort,t.frame,t.sequence,cohortFrame)||cohortFrame.checksum!=t.hash)return false;
   for(const auto& r:cohortFrame.rows)if(r[1]==t.owner&&r[7]==t.revision&&r[5]==t.model&&r[6]==t.source&&r[2]==t.frame&&r[47]==t.thread){gateRow=r;return true;}
@@ -50,10 +53,12 @@ class Receiver {
    if(!item.ready.load(std::memory_order_acquire)||item.lease.pending()||
       InterlockedCompareExchange(&wire.state,output_wire::acquired,output_wire::ready)!=output_wire::ready)continue;
    const auto p=wire.packet;const auto meta=game_output::metadata(wire);
+   const bool joined=cohortGate?(game_output::valid(meta,source.session)&&meta.source_sequence==t.sequence&&p.owner==cohortFrame.anchor&&p.revision==cohortFrame.revision&&p.source_frame==t.frame&&p.source_state_hash==t.hash&&
+       native_cohort::read(cohortProof->slots[i],cohortMembers)&&cohortMembers.output==p.sequence&&native_cohort::qualifies(cohortMembers,*cohort,cohortFrame)):game_output::matches(p,meta,gateRow.data(),source.session,t.hash,t.sequence);
    const bool identity=output_wire::valid(p,p.session,pool->header.receiver_pid)&&p.width==1920&&p.height==1080&&p.resource_epoch==i+1&&
-       !memcmp(p.handles,item.identity.handles,sizeof(p.handles))&&game_output::matches(p,meta,gateRow.data(),source.session,t.hash,t.sequence)&&
+       !memcmp(p.handles,item.identity.handles,sizeof(p.handles))&&joined&&
        gateStore->header.ready[i].sequence==p.sequence&&gateStore->header.ready[i].qpc>=t.offered;
-   if(identity){gateSlot=static_cast<int>(i);gateToken=++nextGateToken;gateTicket=t;
+   if(identity){gateSlot=static_cast<int>(i);gateToken=++nextGateToken;gateTicket=t;if(cohortGate)item.held.store(true,std::memory_order_release);
     gateStore->current.ready=gateStore->header.ready[i].qpc;gateStore->current.resourceEpoch=DWORD(p.resource_epoch);return true;}
    if(p.source_frame<t.frame)InterlockedIncrement(&gateStore->header.stale);else InterlockedIncrement(&gateStore->header.invalid);
    InterlockedExchange(&wire.state,output_wire::idle);
@@ -200,7 +205,7 @@ class Receiver {
     if(WaitForSingleObject(receiver,0)!=WAIT_TIMEOUT){InterlockedExchange(&pool->header.ready,0);InterlockedExchange(&pool->header.stopped,1);break;}
     for(unsigned slot=0;slot<2;++slot){auto& item=imported[slot];auto& wire=pool->slots[slot];
      if(item.ready.load(std::memory_order_acquire)){
-      if(buffered&&item.lease.retire()){InterlockedIncrement(reinterpret_cast<volatile LONG*>(&pool->reserved[0]));InterlockedExchange(&wire.state,output_wire::idle);}
+      if(buffered&&!item.held.load(std::memory_order_acquire)&&item.lease.retire()){InterlockedIncrement(reinterpret_cast<volatile LONG*>(&pool->reserved[0]));InterlockedExchange(&wire.state,output_wire::idle);}
       continue;
      }
      if(InterlockedCompareExchange(&wire.state,output_wire::acquired,output_wire::ready)!=output_wire::ready)continue;
@@ -292,6 +297,7 @@ public:
    if(gateStore->header.magic)throw std::runtime_error("Native gate fresh device/session required");
    native_gate::initialize(*gateStore,source.session,GetCurrentProcessId(),native_gate::policy());
    gateEvents.create(source.session);nativeCompositor=std::make_unique<ship_replacement::DepthCompositor>(d);
+   cohortGate=native_cohort::requested();if(cohortGate){cohortProof=reinterpret_cast<native_cohort::Store*>(base+native_cohort::Offset);if(cohortProof->header.magic)throw std::runtime_error("Native cohort fresh session required");native_cohort::initialize(*cohortProof,source.session,GetCurrentProcessId());}
   }
   worker=std::thread([this]{imports();});
  }
@@ -309,18 +315,23 @@ public:
  DWORD nativeInsertion(DWORD action,const native_gate::Ticket* ticket,native_gate::Reply* reply){
   using namespace native_gate;
   if(!reply||reply->bytes!=sizeof(Reply)||reply->version!=Version||!nativeGateMode||!gateStore||GetCurrentThreadId()!=thread)return DWORD(Result::Invalid);
-  if(action==DWORD(Action::Cancel)){gateCancel();reply->result=Result::Original;return DWORD(reply->result);}
+  if(action==DWORD(Action::Cancel)){if(!cohortGate)gateCancel();reply->result=Result::Original;return DWORD(reply->result);}
   if(!ticket||!valid(*ticket,gateStore->header)||ticket->thread!=thread||ticket->frame!=DWORD(gateStore->header.frame)||
      stopping.load()||gateStore->header.stop||!return_path::read(mapping.state->armed)||!return_path::read(mapping.state->enabled)||return_path::read(mapping.state->stop))return DWORD(Result::Original);
   if(action==DWORD(Action::Acquire)){
-   const auto peer=gatePeer.load(std::memory_order_acquire);if(gateSlot>=0||!peer||!gateSource(*ticket))return DWORD(Result::Original);
+   if(cohortGate&&gateSlot>=0&&gateTicket.frame!=ticket->frame)finishCohortLease();
+   const auto peer=gatePeer.load(std::memory_order_acquire);if((gateSlot>=0&&!cohortGate)||!peer||!gateSource(*ticket))return DWORD(Result::Original);
+   if(cohortGate&&gateSlot>=0){if(!native_cohort::contains(cohortMembers,*ticket))return DWORD(Result::Original);gateTicket=*ticket;reply->result=Result::Acquired;reply->token=gateToken;reply->generation=gateStore->header.generation;return DWORD(reply->result);}
+   if(cohortGate){if(cohortAttempt==ticket->frame)return DWORD(Result::Original);cohortAttempt=ticket->frame;}
    const auto result=acquire(*ticket,*gateStore,gateEvents,peer,[&]{return gateTry(*ticket);});
-   if(result!=Result::Acquired)gateCancel();reply->result=result;reply->token=gateToken;reply->generation=gateStore->header.generation;return DWORD(result);
+   if(result!=Result::Acquired)gateCancel();reply->result=result;reply->token=gateToken;reply->generation=gateStore->header.generation;
+   if(cohortGate&&result==Result::Acquired&&!native_cohort::contains(cohortMembers,*ticket)){reply->result=Result::Original;native_cohort::count(*cohortProof,*ticket,false,false);}
+   return DWORD(reply->result);
   }
   if(action!=DWORD(Action::Commit)||gateSlot<0||reply->token!=gateToken||!same(*ticket,gateTicket))return DWORD(Result::Invalid);
   const auto peer=gatePeer.load(std::memory_order_acquire);
-  if(!peer||WaitForSingleObject(peer,0)!=WAIT_TIMEOUT||!pool->header.ready||pool->header.stopped||pool->header.error){gateCancel();gateStore->current.outcome=DWORD(Result::Disconnected);gateStore->current.ended=now();reply->result=Result::Disconnected;return DWORD(reply->result);}
-  if(now()>=ticket->deadline){gateCancel();InterlockedIncrement(&gateStore->header.misses);gateStore->current.outcome=DWORD(Result::Timeout);gateStore->current.ended=now();reply->result=Result::Timeout;return DWORD(reply->result);}
+  if(!peer||WaitForSingleObject(peer,0)!=WAIT_TIMEOUT||!pool->header.ready||pool->header.stopped||pool->header.error){if(!cohortGate)gateCancel();gateStore->current.outcome=DWORD(Result::Disconnected);gateStore->current.ended=now();reply->result=Result::Disconnected;return DWORD(reply->result);}
+  if(!cohortGate&&now()>=ticket->deadline){gateCancel();InterlockedIncrement(&gateStore->header.misses);gateStore->current.outcome=DWORD(Result::Timeout);gateStore->current.ended=now();reply->result=Result::Timeout;return DWORD(reply->result);}
   auto& item=imported[gateSlot];const auto& packet=pool->slots[gateSlot].packet;
   Microsoft::WRL::ComPtr<ID3D11RenderTargetView> target;Microsoft::WRL::ComPtr<ID3D11DepthStencilView> z;context->OMGetRenderTargets(1,&target,&z);
   ship_triplet::Key key{};memcpy(key.session,source.session,16);memcpy(key.sourceSession,source.session,16);memcpy(key.asset,pool->asset,32);
@@ -329,12 +340,13 @@ public:
   float viewport[4]{};memcpy(viewport,gateRow.data()+83,16);bool good=true;
   for(unsigned i=0;i<4;++i){good&=std::isfinite(viewport[i])&&viewport[i]>=0&&viewport[i]<=1920&&fabs(viewport[i]-round(viewport[i]))<.001f;if(good)key.viewport[i]=DWORD(viewport[i]);}
   ID3D11ShaderResourceView* views[]{item.views[0].Get(),item.views[1].Get(),item.views[2].Get()};
-  if(!good||!nativeCompositor->draw(target.Get(),z.Get(),views,key)){gateCancel();gateStore->current.outcome=DWORD(Result::Original);gateStore->current.ended=now();reply->result=Result::Original;return DWORD(reply->result);}
+  if(!good||!nativeCompositor->draw(target.Get(),z.Get(),views,key)){if(!cohortGate)gateCancel();gateStore->current.outcome=DWORD(Result::Original);gateStore->current.ended=now();reply->result=Result::Original;return DWORD(reply->result);}
   // From this point submission is committed:retain ownership through GPU use.
-  item.lease.signal(fencedContext.Get());gateStore->current.inserted=now();gateStore->current.ended=now();
+  item.lease.signal(fencedContext.Get(),cohortGate);if(cohortGate){cohortWrites=true;native_cohort::count(*cohortProof,*ticket,true,false);}gateStore->current.inserted=now();gateStore->current.ended=now();
   gateStore->current.outcome=DWORD(Result::Inserted);InterlockedIncrement(&gateStore->header.commits);
+  if(cohortGate){InterlockedIncrement(&pool->stats.drawn);InterlockedIncrement(&mapping.state->drawCount);}
   if(nativePassiveLedger)InterlockedIncrement(&nativePassiveLedger->committed);
-  gateSlot=-1;gateToken=0;reply->result=Result::Inserted;return DWORD(reply->result);
+  if(!cohortGate){gateSlot=-1;gateToken=0;}reply->result=Result::Inserted;return DWORD(reply->result);
  }
  void observe(uint64_t native){if(!nativeGateMode&&!stopping.load()){if(insertionProbe)insertionProbe->draw(native,pool);else depth.observe(native,source.mailbox);}}
  void cleared(uint64_t native){if(!nativeGateMode&&!stopping.load())depth.cleared(native);}
@@ -347,6 +359,7 @@ public:
   }
  }
  void step(ID3D11RenderTargetView* target){
+  if(cohortGate&&GetCurrentThreadId()==thread)finishCohortLease();
   if(nativeGateMode){if(gateStore&&return_path::read(mapping.state->armed)&&!return_path::read(mapping.state->stop)&&
       gateStore->current.frame&&GetCurrentThreadId()==thread){
     gateStore->current.queue=0;for(unsigned i=0;i<2;++i){auto& slot=pool->slots[i];const auto state=output_wire::state(&slot);if(state==output_wire::ready||state==output_wire::acquired)++gateStore->current.queue;

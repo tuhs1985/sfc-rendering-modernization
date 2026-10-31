@@ -39,10 +39,10 @@ def fnv(raw):
     return value
 
 
-def packet(snapshot,selected,session,controls,scale,master,generation,observed,revision,shapes=False):
+def packet(snapshot,selected,session,controls,scale,master,generation,observed,revision,shapes=False,persistent_scene=False):
     if snapshot['session_words']!=session or snapshot['owner_epoch']!=selected['owner_epoch']:
         raise ValueError('Light session/owner mismatch')
-    if not snapshot['global_gate_raw'] or snapshot['consumed_prefix']<2:
+    if not persistent_scene and (not snapshot['global_gate_raw'] or snapshot['consumed_prefix']<2):
         raise ValueError('Native steady lighting not qualified')
     h=struct.pack('<12I2Q',0x3154474c,1,200,generation,*session,
                   snapshot['owner_epoch'],snapshot['model_process_local'],snapshot['source_process_local'],snapshot['frame'],observed,revision)
@@ -50,7 +50,7 @@ def packet(snapshot,selected,session,controls,scale,master,generation,observed,r
     for i in range(2):
         slot=snapshot['slots'][i];control=controls[f'native_directional_{i}']
         v=slot['values']
-        if slot['native_type']!=0 or not slot['consumed_by_native_response'] or v is None:
+        if slot['native_type']!=0 or (not persistent_scene and not slot['consumed_by_native_response']) or v is None:
             raise ValueError('Unqualified native light type/state')
         import math
         direction=control.get('direction_override',v['direction_input'])

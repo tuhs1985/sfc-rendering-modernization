@@ -25,7 +25,7 @@ def synthetic_instance(packet,references,owner):
     return bytes(raw),json.dumps(refs).encode()
 
 
-def rows_and_packets(work,session,extended=False):
+def rows_and_packets(work,session,extended=False,shared_owner=False):
     gate=work/'gate';gate.mkdir()
     first=decode_mesh(CAPTURES[0].read_bytes(),CAPTURES[0].with_suffix('.json').read_bytes())
     updates=CAPTURES[0].parent/'LIVE-SCENE-001-updates.jsonl'
@@ -35,6 +35,7 @@ def rows_and_packets(work,session,extended=False):
     rows=[];proof=[]
     sources=list(CAPTURES)
     if extended:sources+=[ROOT/'artifacts/remix-runtime/runs/20261023-191630-707670-in-game/gate/LIVE-SCENE-001-asset-2.bin',CAPTURES[0]]
+    elif shared_owner:sources+=[CAPTURES[0]]
     for index,path in enumerate(sources):
         mesh=decode_mesh(path.read_bytes(),path.with_suffix('.json').read_bytes())
         revision=int(path.stem.rsplit('-',1)[1]);row=list(anchor)
@@ -51,7 +52,7 @@ def rows_and_packets(work,session,extended=False):
         row[8:25]=list(struct.unpack('<16I',struct.pack('<16f',*(x for r in world for x in r))))+[0x100]
         row[25:42]=list(struct.unpack('<16I',struct.pack('<16f',*(x for r in composed for x in r))))+[0]
         rows.append(row)
-        if extended and index==3:
+        if (extended and index==3) or (shared_owner and not extended and index==2):
             packet,references=synthetic_instance(path.read_bytes(),path.with_suffix('.json').read_bytes(),31)
             revision=63;row[1]=31;row[7]=revision
             (gate/f'LIVE-SCENE-001-asset-{revision}.bin').write_bytes(packet)

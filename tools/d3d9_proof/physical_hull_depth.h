@@ -2,17 +2,18 @@
 // Remix PSR depth describes reflected/refracted surfaces, not hull coverage.
 // Worker only: immutable cached geometry, fixed 32-instance submission array.
 #pragma once
+#include "../native_insertion/cohort_contract.h"
 struct PhysicalHullDepth {
  struct Mesh {ComPtr<ID3D11Buffer> vertices,indices;UINT count=0;uint64_t bytes=0;};
  struct Submission {const Mesh* mesh=nullptr;Frame frame{};};
- ComPtr<ID3D11Device> device;ComPtr<ID3D11RenderTargetView> target;
+ ComPtr<ID3D11Device> device;ComPtr<ID3D11RenderTargetView> target,owners;
  ComPtr<ID3D11DepthStencilView> depth;ComPtr<ID3D11VertexShader> vertex;
  ComPtr<ID3D11PixelShader> pixel;ComPtr<ID3D11InputLayout> layout;
  ComPtr<ID3D11Buffer> constants;ComPtr<ID3D11RasterizerState> raster;
  ComPtr<ID3D11DepthStencilState> zstate;ComPtr<ID3D11BlendState> opaque;
  std::array<Submission,32> submissions{};unsigned count=0;UINT width=0,height=0;
  bool enabled=false;uint64_t batches=0,draws=0,geometryBytes=0;
- void start(ID3D11Device* d,ID3D11Texture2D* output,bool active){
+ void start(ID3D11Device* d,ID3D11Texture2D* output,bool active,ID3D11Texture2D* picking=nullptr){
   enabled=active;if(!enabled)return;device=d;D3D11_TEXTURE2D_DESC desc{};output->GetDesc(&desc);
   require(desc.Format==DXGI_FORMAT_R32_FLOAT&&desc.SampleDesc.Count==1&&desc.ArraySize==1&&desc.MipLevels==1,"physical hull output layout");
   width=desc.Width;height=desc.Height;
@@ -20,19 +21,20 @@ struct PhysicalHullDepth {
   // one. At 1920x1080 the complete controlled pool stays below 128 MiB.
   require(uint64_t(width)*height*4*16<=128ull*1024*1024,"physical hull total output128MiB cap");
   ok(d->CreateRenderTargetView(output,nullptr,&target),"physical hull output");
+  if(native_cohort::requested()){require(picking!=nullptr,"Native cohort owner image");D3D11_TEXTURE2D_DESC p{};picking->GetDesc(&p);require(p.Width==width&&p.Height==height&&p.Format==DXGI_FORMAT_R32_FLOAT&&p.SampleDesc.Count==1,"Native cohort owner image shape");ok(d->CreateRenderTargetView(picking,nullptr,&owners),"Native cohort owner target");}
   desc.Format=DXGI_FORMAT_D32_FLOAT;desc.BindFlags=D3D11_BIND_DEPTH_STENCIL;desc.MiscFlags=0;
   ComPtr<ID3D11Texture2D> buffer;ok(d->CreateTexture2D(&desc,nullptr,&buffer),"physical hull Z");
   ok(d->CreateDepthStencilView(buffer.Get(),nullptr,&depth),"physical hull DSV");
   const char* vs=R"(cbuffer M:register(b0){row_major float4x4 model;row_major float4x4 view;row_major float4x4 projection;};
 float4 main(float3 p:POSITION):SV_Position{return mul(projection,mul(view,mul(model,float4(p,1))));})";
-  const char* ps="float main(float4 p:SV_Position):SV_Target{return p.z;}";
+  const char* ps=owners?"cbuffer M:register(b0){row_major float4x4 model;row_major float4x4 view;row_major float4x4 projection;uint owner;uint3 pad;};struct O{float z:SV_Target0;float id:SV_Target1;};O main(float4 p:SV_Position){O o;o.z=p.z;o.id=asfloat(owner);return o;}":"float main(float4 p:SV_Position):SV_Target{return p.z;}";
   ComPtr<ID3DBlob> v,p;ok(D3DCompile(vs,strlen(vs),nullptr,nullptr,nullptr,"main","vs_4_1",D3DCOMPILE_ENABLE_STRICTNESS,0,&v,nullptr),"physical hull VS compile");
   ok(D3DCompile(ps,strlen(ps),nullptr,nullptr,nullptr,"main","ps_4_1",D3DCOMPILE_ENABLE_STRICTNESS,0,&p,nullptr),"physical hull PS compile");
   ok(d->CreateVertexShader(v->GetBufferPointer(),v->GetBufferSize(),nullptr,&vertex),"physical hull VS");
   ok(d->CreatePixelShader(p->GetBufferPointer(),p->GetBufferSize(),nullptr,&pixel),"physical hull PS");
   D3D11_INPUT_ELEMENT_DESC input{"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0};
   ok(d->CreateInputLayout(&input,1,v->GetBufferPointer(),v->GetBufferSize(),&layout),"physical hull layout");
-  D3D11_BUFFER_DESC cb{};cb.ByteWidth=sizeof(float)*48;cb.BindFlags=D3D11_BIND_CONSTANT_BUFFER;
+  D3D11_BUFFER_DESC cb{};cb.ByteWidth=sizeof(float)*52;cb.BindFlags=D3D11_BIND_CONSTANT_BUFFER;
   ok(d->CreateBuffer(&cb,nullptr,&constants),"physical hull transforms");
   D3D11_RASTERIZER_DESC r{};r.FillMode=D3D11_FILL_SOLID;r.CullMode=D3D11_CULL_NONE;r.DepthClipEnable=TRUE;
   ok(d->CreateRasterizerState(&r,&raster),"physical hull raster");
@@ -58,11 +60,11 @@ float4 main(float3 p:POSITION):SV_Position{return mul(projection,mul(view,mul(mo
  }
  void draw(ID3D11DeviceContext* c){
   if(!enabled)return;c->ClearState();const float background[4]={-1234,0,0,0};c->ClearRenderTargetView(target.Get(),background);c->ClearDepthStencilView(depth.Get(),D3D11_CLEAR_DEPTH,1,0);
-  auto* rt=target.Get();c->OMSetRenderTargets(1,&rt,depth.Get());c->OMSetDepthStencilState(zstate.Get(),0);c->OMSetBlendState(opaque.Get(),nullptr,0xffffffff);
+  ID3D11RenderTargetView* rt[]{target.Get(),owners.Get()};if(owners){const float empty[4]{};c->ClearRenderTargetView(owners.Get(),empty);}c->OMSetRenderTargets(owners?2u:1u,rt,depth.Get());c->OMSetDepthStencilState(zstate.Get(),0);c->OMSetBlendState(opaque.Get(),nullptr,0xffffffff);
   c->RSSetState(raster.Get());c->IASetInputLayout(layout.Get());c->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-  c->VSSetShader(vertex.Get(),nullptr,0);c->PSSetShader(pixel.Get(),nullptr,0);auto* cb=constants.Get();c->VSSetConstantBuffers(0,1,&cb);
+  c->VSSetShader(vertex.Get(),nullptr,0);c->PSSetShader(pixel.Get(),nullptr,0);auto* cb=constants.Get();c->VSSetConstantBuffers(0,1,&cb);if(owners)c->PSSetConstantBuffers(0,1,&cb);
   for(unsigned i=0;i<count;++i){const auto& s=submissions[i];const auto& f=s.frame;
-   float matrices[48];memcpy(matrices,f.model,64);memcpy(matrices+16,f.view,64);memcpy(matrices+32,f.projection,64);c->UpdateSubresource(constants.Get(),0,nullptr,matrices,0,0);
+   float matrices[52]{};memcpy(matrices,f.model,64);memcpy(matrices+16,f.view,64);memcpy(matrices+32,f.projection,64);memcpy(matrices+48,&f.owner,4);c->UpdateSubresource(constants.Get(),0,nullptr,matrices,0,0);
    // Remix's returned ray-traced image spans the full output target. The
    // receiver maps it into SFC's tactical viewport once, for colour AND depth.
    // Applying the native viewport here again misregisters hull and colour.

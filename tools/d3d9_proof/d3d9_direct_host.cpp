@@ -23,6 +23,7 @@ static void apiok(remixapi_ErrorCode result,const char* why){if(result!=REMIXAPI
 #include "pipeline_mode.h"
 #include "warm_start.h"
 #include "startup_profile.h"
+#include "startup_policy.h"
 static int64_t outputTicks(){LARGE_INTEGER t{};require(QueryPerformanceCounter(&t)!=FALSE,"output QPC");return t.QuadPart;}
 struct SharedOutput{
  ComPtr<ID3D11Texture2D> image,staging;ComPtr<IDirect3DTexture9> imported;ComPtr<IDirect3DSurface9> surface;
@@ -48,7 +49,8 @@ static void read11(ID3D11DeviceContext* context,ID3D11Query* query,SharedOutput&
  context->Unmap(output.staging.Get(),0);require(bool(file),"readback file write");
 }
 int wmain(int argc,wchar_t** argv){
- const bool detailed=!pipeline_mode::performance();
+ const bool detailed=!pipeline_mode::performance();const unsigned bootstrapPresents=startup_policy::bootstrap_presents();
+ std::cout<<"STARTUP_POLICY bootstrap_presents="<<bootstrapPresents<<" legacy_startup_warmup="<<(bootstrapPresents==24)<<'\n';
  wchar_t buffered[2]{};const bool bufferedDiagnostics=GetEnvironmentVariableW(L"SFC_D3D9_LIVE_TIMING",buffered,2)==1&&buffered[0]==L'1';
  DeferredDiagnostics diagnosticLog(std::cout,bufferedDiagnostics);
  std::cout.setf(std::ios::unitbuf);remixapi_Interface external{};bool registered=false;
@@ -98,13 +100,13 @@ int wmain(int argc,wchar_t** argv){
    remixapi_Float4D background{-1234,0,0,0},zero{};apiok(external.dxvk_SetDefaultOutput(types[1],&background),"depth background sentinel");apiok(external.dxvk_SetDefaultOutput(types[2],&zero),"picking background sentinel");
    DirectVisualControls visuals;visuals.start(external,native.Get(),outputs[0].image.Get());
    NormalCoverage coverage;coverage.start(native.Get(),outputs[1].image.Get(),outputs[2].image.Get());
-   PhysicalHullDepth hull;hull.start(native.Get(),outputs[1].image.Get(),coverage.enabled);
+   PhysicalHullDepth hull;hull.start(native.Get(),outputs[1].image.Get(),coverage.enabled,outputs[2].image.Get());
    // Additive mode supplies its own UNION coverage; it never consumes vendor
    // picking. Only genuine picking consumers request vendor image retention.
    if(!coverage.enabled)apiok(external.dxvk_CopyRenderingOutput(outputs[2].surface.Get(),types[2]),"request picking image retention");
    WorkerGpuFence postFence;if(coverage.enabled)postFence.start(native.Get(),context.Get());
    const auto postValues=visuals.image.post();
-   const bool combinedPost=coverage.enabled&&visuals.enabled&&(visuals.tuning||postValues[0]!=1||postValues[1]!=1||postValues[2]!=1);
+   const bool combinedPost=!native_cohort::requested()&&coverage.enabled&&visuals.enabled&&(visuals.tuning||postValues[0]!=1||postValues[1]!=1||postValues[2]!=1);
    if(combinedPost){visuals.grade.prepareCoverage(native.Get(),outputs[1].image.Get(),outputs[2].image.Get());std::cout<<"COMBINED_POST grade_coverage=1 draws_per_frame=1\n";}
    wchar_t multiFlag[2]{};const bool multiMode=GetEnvironmentVariableW(L"SFC_D3D9_MULTISCENE",multiFlag,2)==1&&multiFlag[0]==L'1';
    float offsetX=0;if(coverage.enabled){wchar_t text[64]{};require(GetEnvironmentVariableW(L"SFC_D3D9_OFFSET_X",text,64)>0,"Additive offset required");offsetX=static_cast<float>(_wtof(text));require(std::isfinite(offsetX)&&(multiMode?(offsetX<=0&&offsetX>=-1e6f):(std::abs(offsetX)>1e-5f&&std::abs(offsetX)<=1e6f)),"explicit aligned-cohort or diagnostic offset bounds");}
@@ -162,17 +164,14 @@ int wmain(int argc,wchar_t** argv){
      float displacement[3]{};
      if(coverage.enabled&&offsetX!=0){require(diagnostic_offset::camera_left(state.view,-offsetX,displacement),"qualified camera-left offset");for(unsigned i=0;i<3;++i)state.model[i*4+3]+=displacement[i];} // Raw packet unchanged.
      if(!(liveMode&&!frame)&&!lights.update(external,state,liveMode&&frame?&rawInput:nullptr,ownerInput,static_cast<uint64_t>(frequency.QuadPart))){
-      require(liveMode,"Offline light fixture association required");if(lightOmitted++<32)std::cout<<"LIGHT_INPUT_UNAVAILABLE source_sequence="<<rawInput.sequence<<" source_frame="<<state.frame<<'\n';continue;
+      require(liveMode,"Offline light fixture association required");if(lightOmitted++<32)std::cout<<"LIGHT_UPDATE_UNAVAILABLE source_sequence="<<rawInput.sequence<<" source_frame="<<state.frame<<" geometry_continues=1\n";
      }
      if(liveMode&&frame&&!ownerInput.admit(rawInput))continue;
      const bool measureCohort=cohort.enabled&&frame&&!measuredCohort;
      if(paced&&frame&&!latest){if(!scheduleStart)scheduleStart=outputTicks();const auto due=scheduleStart+static_cast<int64_t>(frame-1)*frequency.QuadPart/60;while(outputTicks()<due)Sleep(1);}
-     // TRANSITIONAL compatibility policy, NOT NVIDIA-required readiness.
-     // Run160 tested one startup Present: earlier pixels exposed incomplete
-     // initial appearance and later misses. Keep the accepted policy until a
-     // vendor-backed material lifecycle replacement is qualified. Ordinary
-     // live updates remain one Present; GPU/source checks are independent.
-     const auto began=outputTicks();const unsigned presents=(singlePresent||liveMode)&&frame?1u:24u;
+     // One startup Present by default. The old24-Present/sleep workaround is
+     // explicitly opt-in;actual output copies and GPU completion remain required.
+     const auto began=outputTicks();const unsigned presents=(singlePresent||liveMode)&&frame?1u:bootstrapPresents;
      if(measureCohort)startup.mark("cohort_draw_begin");
      bool submitted=false;
      for(unsigned warm=0;warm<presents;++warm){if(!frame)startup.mark("bootstrap_begin",warm,false);hull.begin();lights.draw(external);if(cohort.enabled&&frame){if(!cohort.draw(scene.width,scene.height,displacement))break;}else{renderer.draw(state,false,scene.width,scene.height);hull.submit(bootstrapHull,state);}if(!frame)startup.mark("bootstrap_drawn",warm,false);submitted=true;ok(device->PresentEx(nullptr,nullptr,nullptr,nullptr,0),"normal D3D9 PresentEx");
@@ -198,7 +197,7 @@ int wmain(int argc,wchar_t** argv){
      const auto renderReady=outputTicks();
      hull.draw(context.Get());
      const bool graded=combinedPost?visuals.grade.drawCoverage(context.Get(),outputs[0].image.Get(),visuals.image.post(),state.owner):visuals.apply(context.Get(),outputs[0].image.Get());
-     const bool covered=combinedPost||coverage.draw(context.Get(),state.owner,scene.width,scene.height);
+     const bool covered=native_cohort::requested()||combinedPost||coverage.draw(context.Get(),state.owner,scene.width,scene.height);
      if(graded||covered){
       if(coverage.enabled)postFence.wait(&admission);else{
       context->End(consumerFence.Get());context->Flush();const auto limit=GetTickCount64()+5000;BOOL done=FALSE;HRESULT status;
@@ -212,6 +211,7 @@ int wmain(int argc,wchar_t** argv){
      const auto localDone=outputTicks();
      if(detailed)std::cout<<"RETURNED frame="<<frame<<" source_frame="<<state.frame<<" completed=1 ordinary_draws=1\n";
      ++outputSequence;
+     if(cohort.enabled&&frame)cohort.publishInsertion(outputSequence);
      if(argc==5){output_wire::Packet p{};p.sequence=outputSequence;p.source_frame=state.frame;p.owner=state.owner;p.revision=state.revision;p.source_state_hash=liveMode&&frame?rawInput.state_hash:output_wire::hash(&state,sizeof(Frame));p.scene_hash=sceneHash;p.width=scene.width;p.height=scene.height;p.luid_low=adapterLuid.LowPart;p.luid_high=adapterLuid.HighPart;memcpy(p.handles,sharedHandles.data(),sizeof(p.handles));
       if(liveMode&&frame){game_output::Metadata meta{};meta.source_sequence=rawInput.sequence;memcpy(meta.source_session,rawInput.session,16);meta.checksum=game_output::checksum(meta);game_output::metadata(*peer.channel,meta);}
       if(cohort.enabled&&frame)p.source_state_hash=cohort.packet.checksum;
@@ -233,7 +233,7 @@ int wmain(int argc,wchar_t** argv){
      }
     }
     if(latest)std::cout<<"INPUT_REPLAY_COMPLETE source_late="<<ingress.source_late<<" obsolete="<<ingress.stats.obsolete<<" expired="<<ingress.stats.expired<<" invalid="<<ingress.stats.invalid<<" lag_used="<<ingress.lag_used<<" lag_sequence="<<ingress.lag_sequence<<" mapping_bytes="<<sizeof(frame_ingress::Channel)<<'\n';
-    if(liveMode)std::cout<<"LIVE_OWNER_COMPLETE received="<<ownerInput.received<<" invalid="<<ownerInput.invalid<<" unqualified="<<ownerInput.unqualified<<" game_drawing=0\n";
+    if(liveMode)std::cout<<"LIVE_OWNER_COMPLETE received="<<ownerInput.received<<" invalid="<<ownerInput.invalid<<" unqualified="<<ownerInput.unqualified<<" game_drawing=0 projection_audit="<<ownerInput.projectionDisagreements<<'\n';
     if(liveMode)std::cout<<"LIVE_OUTPUT_SUMMARY outputs="<<outputSequence<<" light_omitted="<<lightOmitted<<'\n';
     if(liveMode){std::cout<<"LIVE_ADMISSION expired="<<ownerInput.expired<<" old_epoch="<<ownerInput.oldPackets<<" maximum_age_us="<<(ownerInput.closedFrame?50000:2000)<<'\n';
      for(unsigned stage=0;stage<2;++stage){std::cout<<"LIVE_ADMISSION_STAGE stage="<<stage;

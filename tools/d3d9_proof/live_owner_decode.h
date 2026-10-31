@@ -34,4 +34,11 @@ template<class F>inline bool projection_matches(const Packet& p,const F& frame,c
  const auto* v=frame.viewport;const double x=v[0]+v[2]*(clip[0]/clip[3]+1)/2,y=v[1]+v[3]*(1-clip[1]/clip[3])/2;
  return std::isfinite(x)&&std::isfinite(y)&&fabs(x-native[0]/native[3])<=.25&&fabs(y-native[1]/native[3])<=.25;
 }
+// Optional evidence only. A screen-space comparison must never veto a valid
+// owner or the entire tracked scene, especially for points behind the camera.
+template<class F,class V>inline unsigned audit_projection(const Packet& p,const F& frame,const V& vertices,bool enabled){
+ if(!enabled)return 0;unsigned failures=0;const size_t stride=(std::max)(size_t(1),vertices.size()/64);
+ for(size_t i=0;i<vertices.size();i+=stride)failures+=!projection_matches(p,frame,vertices[i].p);
+ return failures;
+}
 }

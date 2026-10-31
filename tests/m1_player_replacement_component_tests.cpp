@@ -64,10 +64,28 @@ int main(){
  test(!g_in_native_gate&&memcmp(mesh.data(),&g_mesh_packet,mesh.size())==0);
  // Coordinator reentrancy refuses another dispatch and drains its own count.
  g_in_native_gate=1;stack[1]=1;CoordinateAfterCapture(kWrapper,saved.data());test(stack[1]==1&&g_in_native_gate==1&&gateCommits==1);g_in_native_gate=0;
+ // Multi-owner mode: two epochs sharing one mesh retain independent decisions.
+ g_native_cohort_mode=true;auto cohort=std::make_unique<native_cohort::Store>();native_cohort::initialize(*cohort,session,GetCurrentProcessId());g_native_cohort=cohort.get();
+ const DWORD firstOwner=state->owner_id;
+ auto otherShip=ship;auto otherVisual=visual;otherShip[34]=reinterpret_cast<DWORD>(otherVisual.data());
+ const DWORD secondOwner=g_owners.observe(reinterpret_cast<DWORD>(otherShip.data()),reinterpret_cast<DWORD>(otherVisual.data()),103).id;test(secondOwner==firstOwner+1);
+ auto& retained=g_live_scene.registry.entries[0];retained.live=retained.qualified=true;retained.revision=4;retained.id.owner=firstOwner;retained.id.model=state->model0;retained.id.source=state->source;
+ auto& second=g_live_scene.registry.entries[1];second=retained;second.id.owner=firstOwner+1;
+ gate->header.stop=gate->header.partial=0;start(103);for(auto& d:g_native_owners)d={};auto& pending=g_live_scene.cohort.pending;pending.count=2;
+ for(unsigned i=0;i<2;++i){pending.rows[i][1]=firstOwner+i;pending.rows[i][7]=4;pending.rows[i][5]=state->model0;pending.rows[i][6]=state->source;}
+ const auto before=gateCommits;
+ for(unsigned i=0;i<2;++i){state->owner_id=firstOwner+i;state->ship=reinterpret_cast<DWORD>(i?otherShip.data():ship.data());state->visual=reinterpret_cast<DWORD>(i?otherVisual.data():visual.data());stack[0]=0x0042e55d;stack[1]=1;CoordinateAfterCapture(kWrapper,saved.data());test(stack[1]==0);
+  stack[0]=0x0042e626;stack[1]=1;CoordinateAfterCapture(kWrapper,saved.data());test(stack[1]==0);}
+ test(gateCommits==before+2&&cohort->header.suppressed==4);
+ // A retired owner cannot borrow the other owner's successful decision.
+ second.live=false;state->owner_id=firstOwner+1;stack[1]=1;CoordinateAfterCapture(kWrapper,saved.data());test(stack[1]==1&&gateCommits==before+2&&gate->header.partial&&gate->header.stop);
+ state->owner_id=firstOwner;state->ship=reinterpret_cast<DWORD>(ship.data());state->visual=reinterpret_cast<DWORD>(visual.data());g_native_cohort_mode=false;g_native_cohort=nullptr;
  // Unload's conservative PC exclusion covers each complete naked hook stub.
  for(const auto& hook:g_hooks){const auto* bytes=reinterpret_cast<const BYTE*>(hook.destination);bool end=false;
   for(unsigned j=0;j+6<=128;++j)if(bytes[j]==0xff&&bytes[j+1]==0x25){end=true;break;}test(end);}
  // A later unknown caller is untouched and marks the session partial.
+ gate->header.stop=gate->header.partial=0;
+ stack[0]=0x0042e55d;stack[1]=1;CoordinateAfterCapture(kWrapper,saved.data());test(stack[1]==0);
  stack[0]=0x11111111;stack[1]=1;CoordinateAfterCapture(kWrapper,saved.data());test(stack[1]==1&&gate->header.partial==1);
  g_native_gate=nullptr;g_native_gate_requested=false;g_native_dispatch=nullptr;g_live_scene.directSource.store=nullptr;
  g_replacement=nullptr;g_running=0;DeleteCriticalSection(&g_lock);

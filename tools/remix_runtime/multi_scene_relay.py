@@ -90,10 +90,12 @@ class Relay(SingleRelay):
              'SFC_PIPELINE_MODE':self.mode,'SFC_D3D9_OFFSET_X':str(camera_offset()[0])}
         env['SFC_D3D9_PLAYER_REPLACEMENT']='1' if self.player_replacement else '0'
         env['SFC_NATIVE_INSERTION_GATE']='1' if getattr(self,'native_gate_policy',None) else '0'
+        env['SFC_D3D9_LEGACY_STARTUP_WARMUP']='1' if getattr(self,'legacy_startup_warmup',False) else '0'
+        env['SFC_NATIVE_INSERTION_ALL_SHIPS']='1' if getattr(self,'native_all_ships',False) else '0'
         if getattr(self,'native_gate_policy',None):env['SFC_NATIVE_INSERTION_POLICY']=self.native_gate_policy
         if getattr(self,'native_gate_policy',None) and self.offline_fixture:env['SFC_NATIVE_GATE_FIXTURE_DELAYS']='1'
         else:env.pop('SFC_NATIVE_GATE_FIXTURE_DELAYS',None)
-        if self.player_replacement:env['SFC_D3D9_OFFSET_X']='0'
+        if self.player_replacement or getattr(self,'native_all_ships',False):env.update(SFC_D3D9_OFFSET_X='0',SFC_D3D9_PLAYER_REPLACEMENT='1')
         for key in ('SFC_D3D9_INITIAL_ASSET_MASK','SFC_D3D9_REBIND_COOKIE','SFC_D3D9_EXPECTED_MODEL',
                     'SFC_D3D9_EXPECTED_SOURCE','SFC_D3D9_ASSET_SHA256','DXVK_RTX_CAPTURE_ENABLE_ON_FRAME',
                     'DXVK_DUMP_SCREENSHOT_FRAME','DXVK_TERMINATE_APP_FRAME','SFC_DIRECT64_BACKBUFFER_DIAGNOSTIC'):
@@ -458,5 +460,12 @@ class Relay(SingleRelay):
         if self.player_replacement:
             report['scope']='Unique configured player-fixture model;fresh capture,zero offset,transactional presentation'
             report['result']='PLAYER_REPLACEMENT_SPONSOR_REVIEW_REQUIRED' if report['replacement']['committed'] and report['replacement']['suppressed'] and not self.partial and not state['asset_rejected'] else 'PARTIAL'
+        if getattr(self,'native_all_ships',False):
+            report['multi_scene']['coverage']='Per-pixel semantic owner identity from nearest physical hull;exact rendered membership joined to output'
+            from native_cohort import save
+            report['native_cohort']=save(self.receiver.channel,self.folder)
+            report['multi_scene']['original_suppressed']=bool(report['native_cohort']['suppressed'])
+            report['scope']='Owner-qualified native replacement of freshly retained supported ships;one shared completed frame,owner-labelled physical coverage'
+            report['result']='NATIVE_COHORT_REVIEW_REQUIRED' if report['native_cohort']['inserted'] and not self.partial and not state['asset_rejected'] else 'PARTIAL'
         (self.folder/'live-owner.analysis.json').write_text(json.dumps(report,indent=2))
         return report

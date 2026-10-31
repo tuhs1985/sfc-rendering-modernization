@@ -1,7 +1,7 @@
 ---
 title: SFC Modernization — Status Tracker
 updated: 2026-10-31
-checkpoint: Run227 native player insertion demonstrated
+checkpoint: Run234 multi-ship camera stability checkout passed
 tags:
   - sfc-modernization
   - project-status
@@ -12,21 +12,27 @@ tags:
 > [!summary] Where we are
 > We can take live ships, textures, camera and lighting information from SFC, render through Remix, and put the result inside the game window. Gameplay and tactical UI remain native; the qualified player mesh can be replaced. The API experiment is parked. Current work reduces loading pauses while preserving the fresh-asset pipeline and accepted appearance.
 
-**Current checkpoint:** native player replacement worked in both actual-game timing tests. You confirmed no noticeable impact and that shields and Paused text now appear correctly over the replacement. The ship and its depth enter before later native drawing;shield replay remains parked.
+**Current checkpoint:** your aggressive camera-switch checkout showed no visible native/enhanced swaps. All six ships (KDD, FDD, FFF, FCA, RCL and LFF) reached replacement. Their geometry was loaded once and reused. This validates the latest submission and persistent-light fixes in this mission. Shield replay remains parked.
 
 **Your settings:** lighting, materials, images, quality and reflections are unchanged. Registry lettering stays solid through the existing hull-depth fix.
 
-**Validation:** after the first successful insertion,Strict delivered5265/5265 recorded replacement requests;ExtraFrame5180/5180. Neither recorded a failed request in that interval. Both cleaned up normally,restored hooks and the copied setup,and preserved accepted client files. There was no growing replacement backlog. One Strict recording gap remains unattributed;it is documented rather than treated as a proven gameplay problem.
+**Current validation:** two isolated deadline misses occurred within the first 2.4 seconds; none occurred afterward during the remaining approximately 87 seconds. Five additional native frames occurred during initial Romulan asset preparation. Median frame time was 16.72 ms, about 60 frames/second. Cleanup, hook restoration and unchanged client checks passed. Detailed diagnostics reached their cap; functional gate records were not dropped. [Run234](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-31-codex-native-camera-stability-checkout.md>).
 
-**Timing choice:** recommend **Strict** for continued tests because its tighter16.7ms admission deadline delivered stable replacement here. Keep ExtraFrame's33.3ms option for explicit comparisons. Both actual runs stayed near60presentations/second in ordinary intervals. These are different manual runs,so their timing differences are not a controlled measure of policy overhead. No default or refresh setting has been changed.
+**Timing choice:** Strict remains the current baseline and delivered stable replacement in this checkout. ExtraFrame remains available. Rendering readiness is still about 12.4 ms; removing false scene rejections improved continuity without a demonstrated large GPU-speed change.
 
 **Interface audit:** capture/identity foundations are reusable, but asset preparation still assumes Remix and output sharing assumes D3D11. Renderer interchangeability stays open; no refactor was made. [Findings](<C:/Project/SFC-Modernize Engine/docs/reconnaissance/2026-10-27-renderer-boundary-audit.md>).
 
 **Alpha release scope:** replacement, weapon lighting, damage textures and a fast-loading destruction/break model are required. LOD models are optional. These are recorded requirements, not completed features. [Sponsor direction](<C:/Project/SFC-Modernize Engine/docs/decisions/2026-10-27-alpha-release-scope.md>).
 
-**Next action:** the player proof is complete. The next contained increment is applying the same safe insertion/suppression contract to other supported retained ships. Weapon lighting,damage textures and fast destruction models remain required for alpha. No additional repeat of these timing checks is currently needed. [Run227](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-31-codex-native-insertion-gameplay-comparison.md>).
+**Latest checkout complete:** screen-position comparisons and diagnostic snapshot misses no longer block valid geometry. Scene lights0/1 and configuredGI retain accepted values through camera gaps; explicit config OFF remains available. One startup Present was confirmed, with the legacy24 workaround off. Small startup/admission exceptions remain documented. The earlier RDE cloak question remains open; this run used RCL. Per-light persistence controls remain pinned for later.
 
-Updated through **Run227,October31,2026**. Repository handoff and run records control resumption. Sponsor authorized committing and pushing this validated checkpoint;Git history records publication.
+**Checks audit:** increment1(C01–C04)is implemented. The remaining optional diagnostics,caching and asset/launch cleanup are still separate increments. Keep frame/owner identity,GPU ownership and structural safety. [Audit C01–C15](<C:/Project/SFC-Modernize Engine/docs/reconnaissance/2026-10-31-runtime-checks-audit.md>).
+
+**Startup workaround:** the24-render loop is **off by default**;startup now uses one render. Append `-LegacyStartupWarmup` to the native multi-ship launcher to restore it explicitly. Default and toggle both passed standalone GPU checks. Visual settings are unchanged.
+
+**Pinned for later — light lifetime controls:** expose persistence/lifetime per light in `lights.toml`,rather than fixing scene-versus-temporary behavior in code. Preserve current scene0/1and GI persistence as defaults;temporary/effect lights need their own lifetime policy. Exact option names and timeout controls remain to be designed. This is recorded work only;no settings or runtime behavior changed.
+
+Updated through **Run233,October31,2026**. Repository handoff and run records control resumption. The prior player checkpoint was committed/pushed; this multi-ship increment remains unstaged and uncommitted.
 
 ## Status key
 
@@ -46,17 +52,20 @@ Updated through **Run227,October31,2026**. Repository handoff and run records co
 - Damage textures are not currently read by this path, per sponsor. Break-model transition and loading need qualification; no arbitrary timing number set.
 - **Break-model finding:** `_brk.mod` exists and SFC already loaded FCA/KFF break assets during setup, before tactical rendering. We may prepare their fresh in-memory data while the ship is alive; breakup-piece movement and transition remain unqualified. [Run212](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-27-codex-break-model-inspection.md>).
 - **Optional:** LOD models. Their absence alone does not block alpha release.
-- Automatic player-replacement recovery is the next checkout after initial replacement was observed. No alpha readiness or formal milestone PASS claimed.
+- Native player replacement is demonstrated; multi-ship replacement is prepared for checkout. No alpha readiness or formal milestone PASS claimed.
 - [Alpha scope](<C:/Project/SFC-Modernize Engine/docs/decisions/2026-10-27-alpha-release-scope.md>).
 
 ### SFC-18 — Player-ship replacement
 
-**NATIVE PLAYER INSERTION DEMONSTRATED; OTHER SHIPS NEXT.**
+**SUPPORTED MULTI-SHIP INSERTION DEMONSTRATED; TIMING AND CLOAK GAPS OPEN.**
 
-- Registry lettering is solid in the accepted game run. Current work preserves the player ship shields over the replacement.
+- Registry lettering is solid in the accepted game run. Native shields and pause text now layer correctly over player replacement.
 - Shield replay did not capture/replay actual game draws;that approach is parked.
-- Late insertion also covers pause text. Target actual native scene colour/depth insertion before effects/UI.
-- Capture-first coordination,previous-batch closure and native colour/depth insertion passed offline and player-fixture gameplay checks. Both policies worked without noticeable impact;shields and pause text layer correctly. Extend to other supported owners as a separate increment.
+- Earlier native colour/depth insertion resolves the previous late-composition ordering problem.
+- Capture-first coordination,previous-batch closure and native colour/depth insertion passed offline and gameplay checks. Multi-ship sponsor checkout confirms supported owners,including shared-model KFT instances. Heavier mission has intermittent deadline/qualification fallbacks;cloaked Romulan admission/transparency is unqualified,not a demonstrated Remix failure.
+- [Run229 gameplay review](runs/2026-10-31-codex-native-multiship-gameplay-review.md).
+- **Research finding:** offscreen screen-position validation can reject living cached ships;the scheduling-anchor check can then withhold the whole scene. Actual checker reproduces this with captured LFF and KFF geometry. Fix/retest pending;late source-state arrival ruled out for the recorded90steady timeouts. [Run230](runs/2026-10-31-codex-camera-transition-root-cause.md).
+- [Run228](runs/2026-10-31-codex-native-multiship-replacement.md),[multi-ship contract](decisions/2026-10-31-native-cohort-contract.md).
 - [Run221](runs/2026-10-29-codex-native-insertion-reassessment.md),[replacement contract](reconnaissance/player-replacement-transaction.md).
 
 ### SFC-15 — Remaining rendering families

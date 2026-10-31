@@ -15,6 +15,14 @@ class Channel:
 
 
 class SharedLightTests(unittest.TestCase):
+    def test_scene_light_cache_does_not_block_anchor_change(self):
+        from live_light_binding import Binding
+        from types import SimpleNamespace
+        state=SimpleNamespace(persistent=True,last_native=(1,2,3),latest={'sequence':2},ready=False,poll=lambda:False)
+        self.assertTrue(Binding.prepare_owner(state,[9]*96));self.assertTrue(state.ready)
+        state.persistent=False
+        self.assertFalse(Binding.prepare_owner(state,[8]*96))
+
     def test_complete_raw_snapshot_owner_time_and_collision(self):
         c=Channel();initialize(c);c.write(RAW_OFFSET+28,struct.pack('<I',77))
         cell=RAW_OFFSET+64+3*RAW_STRIDE;raw=bytearray(6156);struct.pack_into('<I',raw,32,3)

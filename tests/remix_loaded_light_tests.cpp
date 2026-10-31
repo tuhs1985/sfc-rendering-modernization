@@ -30,5 +30,32 @@ int main(){
  return_path::clock=1501;test(!lights.update(api,seed,key,1000,model,&good));return_path::clock=1100;
  bad=good;bad.rows[0].values[10]=1;bad.checksum=lightChecksum(bad);test(!lights.update(api,seed,key,1000,model,&bad));
  test(creates==2&&destroys==0);lights.close(api);test(destroys==2);
+ // Current lights survive a transient missing/newer packet without accepting
+ // it as current. Expired/wrong-owner lights are removed;fresh data recovers.
+ RemixLiveLights retained;
+ test(retained.updateOrRetain(api,seed,key,1000,model,&good,nullptr));
+ const auto stableCreates=creates;
+ test(retained.updateOrRetain(api,seed,key,1000,model,nullptr,nullptr));test(creates==stableCreates&&retained.retainedUpdates==1);
+ bad=good;bad.h[11]=101;bad.checksum=lightChecksum(bad);
+ test(retained.updateOrRetain(api,seed,key,1000,model,&bad,nullptr));test(creates==stableCreates);
+ return_path::clock=1501;test(!retained.updateOrRetain(api,seed,key,1000,model,nullptr,nullptr));test(!retained.handles[0]&&!retained.handles[1]);
+ return_path::clock=1100;test(retained.updateOrRetain(api,seed,key,1000,model,&good,nullptr));
+ ++key.owner;test(!retained.updateOrRetain(api,seed,key,1000,model,nullptr,nullptr));test(!retained.handles[0]&&!retained.handles[1]);--key.owner;
+ test(retained.updateOrRetain(api,seed,key,1000,model,&good,nullptr));retained.close(api);
+ // Scene0/1 plus configured project fill persist through long camera gaps
+ // and scheduling-owner changes. Config OFF and a new session still apply.
+ RemixLiveLights scene;ship_live::Seed sceneSeed;ship_live::Key sceneKey;
+ auto scenePacket=good;for(auto& row:scenePacket.rows)row.values[10]=1;scenePacket.checksum=lightChecksum(scenePacket);
+ LightShapePacket shapes{};shapes.h[0]=0x50414853;shapes.h[1]=2;shapes.h[2]=sizeof(shapes);shapes.h[3]=3;shapes.revision=1;
+ for(unsigned i=0;i<3;++i){auto& row=shapes.rows[i];row.slot=i;for(unsigned k=0;k<4;++k)row.v[k]=1;row.v[11]=1;}
+ shapes.rows[2].reserved=1;shapes.rows[2].v[15]=shapes.rows[2].v[16]=shapes.rows[2].v[17]=.2f;shapes.rows[2].v[18]=1;shapes.rows[2].v[21]=.53f;shapes.checksum=shapeChecksum(shapes);
+ test(scene.updateOrRetain(api,sceneSeed,sceneKey,1000,model,&scenePacket,&shapes,true));test(scene.handles[0]&&scene.handles[1]&&scene.handles[2]);
+ return_path::clock=100000;sceneKey.frame=9000;
+ test(scene.updateOrRetain(api,sceneSeed,sceneKey,1000,model,nullptr,nullptr,true));test(scene.handles[0]&&scene.handles[1]&&scene.handles[2]);
+ ++sceneKey.owner;++sceneSeed.model;
+ test(scene.updateOrRetain(api,sceneSeed,sceneKey,1000,model,nullptr,nullptr,true));
+ scenePacket.h[8]=sceneKey.owner;scenePacket.h[9]=sceneSeed.model;scenePacket.rows[0].enabled=0;scenePacket.checksum=lightChecksum(scenePacket);
+ test(scene.updateOrRetain(api,sceneSeed,sceneKey,1000,model,&scenePacket,&shapes,true));test(!scene.handles[0]&&scene.handles[1]&&scene.handles[2]);
+ ++sceneKey.sourceSession[0];test(!scene.updateOrRetain(api,sceneSeed,sceneKey,1000,model,nullptr,nullptr,true));test(!scene.handles[0]&&!scene.handles[1]&&!scene.handles[2]);
  std::cout<<"Loaded light PASS "<<checks<<" checks;no GPU/file input\n";return 0;
 }

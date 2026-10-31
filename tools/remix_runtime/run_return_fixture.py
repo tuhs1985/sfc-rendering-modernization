@@ -51,6 +51,7 @@ def main():
     parser.add_argument('--live-tuning',action='store_true',help='Offline current-D3D9 live-control qualification;no SFC')
     parser.add_argument('--player-replacement',action='store_true',help='Offline synthetic-source transactional player replacement;never launches SFC')
     parser.add_argument('--native-insertion-policy',choices=('Strict','ExtraFrame'),help='Offline native early insertion comparison;never launches SFC')
+    parser.add_argument('--native-all-ships',action='store_true',help='Owner-labelled native replacement of all supported retained fixture ships')
     parser.add_argument('--native-insertion-baseline',action='store_true',help='Native fixture/source/renderer baseline without gate admission or insertion')
     parser.add_argument('--native-foreground',action='store_true',help='Offline original-shader shield retention and same-frame composition')
     parser.add_argument('--replacement-faults',action='store_true',help='Standalone fixture only: withhold shared output for one then two presentations')
@@ -78,10 +79,12 @@ def main():
     parser.add_argument('--slow-end-scene',action='store_true',help='Offline only: detach while simulated original COM call sleeps')
     parser.add_argument('--with-depth',action='store_true',help='Bind known synthetic D24S8 descriptor, not actual scene depth')
     parser.add_argument('--observation-only',action='store_true',help='No Remix runtime/image; control channel and depth observations only')
+    parser.add_argument('--legacy-startup-warmup',action='store_true',help='Opt-in old24Present startup workaround;default one Present')
     args=parser.parse_args()
+    if args.native_all_ships and not args.native_insertion_policy:parser.error('Native cohort requires explicit timing policy')
     if args.native_insertion_policy:
         if args.native_foreground or args.replacement_faults or args.live_tuning:parser.error('Native insertion fixture excludes old replay/fault/tuning modes')
-        args.player_replacement=True;args.multi_ship=True;args.async_material_checkout=True;args.prewarm=True;args.with_depth=True
+        args.player_replacement=not args.native_all_ships;args.multi_ship=True;args.async_material_checkout=True;args.prewarm=True;args.with_depth=True
     if args.native_insertion_baseline and not args.native_insertion_policy:parser.error('Native baseline requires explicit comparison policy')
     if args.async_material_checkout:
         if args.player_replacement and args.live_tuning:parser.error('Replacement fixture excludes tuning')
@@ -146,7 +149,7 @@ def main():
         from run_offline import storage,AGGREGATE_BYTES
         # Include concurrent image-converter reservations, not just the eventual
         # compressed output. Otherwise a fixture can start but refuse an owner.
-        reserve_mib=1024 if args.multi_ship_resources else (288 if args.native_insertion_policy else 768 if args.multi_ship else 192)
+        reserve_mib=1024 if args.multi_ship_resources else (544 if args.native_all_ships else 288 if args.native_insertion_policy else 768 if args.multi_ship else 192)
         if storage()+reserve_mib*1024*1024>AGGREGATE_BYTES:
             raise RuntimeError(f'Additive fixture lacks{reserve_mib}MiB reservation within20GB cap;archive completed evidence first')
     backend_locks=None
@@ -203,7 +206,8 @@ def main():
         env.pop('SFC_D3D9_SOURCE_TIMING',None)
         env.pop('SFC_D3D9_LIVE_TIMING',None);env.pop('SFC_D3D9_FIXTURE_ROWS',None)
         env.pop('SFC_D3D9_MULTISCENE',None)
-        env['SFC_D3D9_PLAYER_REPLACEMENT']='1' if args.player_replacement else '0'
+        env['SFC_D3D9_PLAYER_REPLACEMENT']='1' if args.player_replacement or args.native_all_ships else '0'
+        env['SFC_NATIVE_INSERTION_ALL_SHIPS']='1' if args.native_all_ships else '0'
         env['SFC_D3D9_NATIVE_FOREGROUND']='1' if args.native_foreground else '0'
         env['SFC_NATIVE_INSERTION_GATE']='1' if args.native_insertion_policy else '0'
         if args.native_insertion_policy:env['SFC_NATIVE_INSERTION_POLICY']=args.native_insertion_policy
@@ -231,6 +235,8 @@ def main():
             if args.async_material_checkout:mode_args['checkout_backend']=checkout_backend
             live_relay=Relay(work,semantic,TEST,additive=args.d3d9_additive,offline_fixture=args.d3d9_additive,persistent=args.persistent_scene,buffered=args.synchronized_buffer,**mode_args)
             if args.native_insertion_policy:live_relay.native_gate_policy=args.native_insertion_policy
+            live_relay.native_all_ships=args.native_all_ships
+            live_relay.legacy_startup_warmup=args.legacy_startup_warmup
             live_relay.live_tuning=args.live_tuning
             if args.live_tuning:
                 if not args.async_material_checkout:raise ValueError('Live tuning fixture requires current async baseline')
@@ -254,7 +260,7 @@ def main():
             if args.multi_ship:live_relay.overlap_texture_prefetch=args.overlap_texture_prefetch
             if args.multi_ship:
                 from multi_scene_fixture import rows_and_packets
-                live_rows=rows_and_packets(work,semantic.name,extended=args.multi_ship_resources)
+                live_rows=rows_and_packets(work,semantic.name,extended=args.multi_ship_resources,shared_owner=args.native_all_ships)
                 env.update(SFC_D3D9_LIVE_TIMING='1',SFC_D3D9_MULTISCENE='1',SFC_D3D9_FIXTURE_ROWS=str(work/'fixture-rows.bin'))
                 if args.multi_ship_late_asset:env['SFC_MULTISCENE_LATE_ASSET']='1'
             else:
@@ -373,6 +379,7 @@ def main():
         elif args.native_insertion_policy:
             if 'NATIVE_GATE_END frames=600' not in text or 'state_errors=0' not in text:raise RuntimeError('Native gate fixture incomplete/state changed')
             if not args.native_insertion_baseline and text.count('NATIVE_GATE_PIXELS mismatches=0')<2:raise RuntimeError('Native gate colour/depth/order evidence incomplete')
+            if args.native_all_ships and (not re.search(r'NATIVE_COHORT_END owners=3\b',text) or not re.search(r'NATIVE_COHORT_PIXELS owners_with_pixels=[23]\b',text)):raise RuntimeError('Independent multi-owner pixels/shared-asset delivery incomplete')
             channel.set('stop',1)
         elif args.source_timing:
             if 'SOURCE_TIMING_END ' not in text or 'state_errors=0 resized=1 recreated=1' not in text:raise RuntimeError('Source timing fixture state evidence incomplete')
@@ -447,6 +454,8 @@ def main():
     receipt['player_replacement_fixture']=args.player_replacement
     receipt['native_insertion_policy']=args.native_insertion_policy
     receipt['native_insertion_baseline']=args.native_insertion_baseline
+    receipt['native_all_ships']=args.native_all_ships
+    receipt['legacy_startup_warmup']=args.legacy_startup_warmup
     receipt['native_gate']=native_result
     receipt['native_foreground_fixture']=args.native_foreground
     if args.native_foreground:receipt['native_foreground']=(live_result or {}).get('native_foreground')

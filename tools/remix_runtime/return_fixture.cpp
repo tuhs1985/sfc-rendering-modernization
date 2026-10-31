@@ -274,6 +274,7 @@ int wmain(){
           if(!imageSample&&(nativeFixture.draws||(nativeFixture.baseline&&nativeFixture.pool->header.published))){imageSample=true;imageStartFrame=frames;}
           if(imageSample&&frames>=imageStartFrame+600){
             std::cout<<"NATIVE_GATE_END frames="<<frames-imageStartFrame<<" draws="<<nativeFixture.draws<<" verified="<<nativeFixture.verified<<" baseline="<<nativeFixture.baseline<<" state_errors="<<stateErrors<<'\n';
+            if(native_cohort::requested()){std::cout<<"NATIVE_COHORT_END owners="<<nativeFixture.seenOwnerCount<<'\n';if(!nativeFixture.baseline&&nativeFixture.seenOwnerCount<2)throw std::runtime_error("Native cohort multiple owners missing");}
             if(stateErrors||(!nativeFixture.baseline&&nativeFixture.verified<2))throw std::runtime_error("Native gate fixture validation incomplete");break;
           }continue;
         }

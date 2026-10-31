@@ -9,6 +9,13 @@ foreach($arch in @('32','64')){
  if($LASTEXITCODE -ne 0){throw 'Native gate core build failed'}
  & (Join-Path $out "core$arch.exe") | Tee-Object -FilePath (Join-Path $out "core$arch.txt")
  if($LASTEXITCODE -ne 0){throw 'Native gate core failed'}
+ $cohortOut=Join-Path $root 'artifacts/player-replacement/native-cohort-tests'
+ New-Item -ItemType Directory -Force $cohortOut | Out-Null
+ $cmd='"{0}" && cl /nologo /std:c++20 /EHsc /O2 /W4 /WX "{1}\tools\native_insertion\cohort_tests.cpp" /Fe:"{2}\wire{3}.exe" /Fo:"{2}\wire{3}.obj" /link /Brepro advapi32.lib ole32.lib' -f $vc,$root,$cohortOut,$arch
+ & $env:ComSpec /d /s /c $cmd
+ if($LASTEXITCODE -ne 0){throw 'Native cohort wire build failed'}
+ & (Join-Path $cohortOut "wire$arch.exe") | Tee-Object -FilePath (Join-Path $cohortOut "wire$arch.txt")
+ if($LASTEXITCODE -ne 0){throw 'Native cohort wire failed'}
 }
 $client='C:\Games\Taldren Software Inc\Starfleet Command Orion Pirates\StarFleetOP.exe'
 if((Get-FileHash -LiteralPath $client).Hash -ne '4D65761D7DD69EF1504070261B81E9C200C0AF18105033E1C4D2222C62320C29'){throw 'Pinned native client mismatch'}

@@ -4,11 +4,11 @@ An experimental rendering-modernization project for **Starfleet Command: Orion P
 
 The aim is to improve tactical 3D rendering while preserving gameplay, controls, tactical information, missions, campaigns and save continuity. This is not a rebuild of the game engine.
 
-**Current result:** we capture fresh ship geometry and scene state from the running game, submit it through our own **ordinary Direct3D 9 adapter**, and let NVIDIA RTX Remix render it. GPU-shared output is composited into SFC's actual game window. Persistent tracking and bounded presentation buffering retain supported ships across camera changes. Additive copies and default-off player-ship suppression/replacement have been demonstrated. Replacement still covers foreground shields/text incorrectly; synchronization for an earlier native colour/depth insertion point is the current work. Full-scene replacement is not established.
+**Current result:** we capture fresh ship geometry and scene state from the running game, submit it through our own **ordinary Direct3D 9 adapter**, and let NVIDIA RTX Remix render it. GPU-shared output returns to SFC's actual colour/depth targets before later native shields, effects and text. Supported multi-ship replacement has passed gameplay checkout, including shared-model instances. The latest aggressive camera-switch checkout showed no visible native/enhanced swaps; small startup/admission exceptions and the earlier cloaked Romulan's upstream admission remain documented. Full-scene replacement is not established. See the [latest gameplay review](docs/runs/2026-10-31-codex-native-camera-stability-checkout.md).
 
-The multi-ship diagnostic accepts fresh supported assets. The first replacement checkout deliberately selects a unique Federation heavy cruiser (`fca.mod`); it requires that player fixture against a different enemy model, rather than assuming a verified engine player flag. See the [current checkpoint](docs/HANDOFF.md).
+The multi-ship path accepts fresh supported assets, with independent retained owner instances and shared geometry where content matches. The older player-only diagnostic still uses a unique Federation heavy cruiser (`fca.mod`). The new default-off multi-ship replacement removes that filename restriction. See the [current checkpoint](docs/HANDOFF.md).
 
-The latest [read-only native insertion check](docs/runs/2026-10-31-codex-native-insertion-timing-review.md) completed with normal gameplay, controlled hook removal and restored test files. Matching output was published roughly 9ms after the selected visual/model exit marker, usually before final presentation. Simply moving the late compositor earlier is insufficient. Shield extraction/replay is a parked experiment; earlier same-frame insertion is not yet implemented.
+The [player gameplay checkout](docs/runs/2026-10-31-codex-native-insertion-gameplay-comparison.md) passed both synchronization policies, with normal cleanup and unchanged client files. The [multi-ship extension](docs/decisions/2026-10-31-native-cohort-contract.md) admits one completed scene and inserts each supported owner at its own original mesh boundary. Shield extraction/replay remains parked.
 
 This is a research/development workspace, not a ready-to-install graphics mod.
 
@@ -77,11 +77,11 @@ This D3D9 adapter is a step toward a renderer-independent boundary. It does not 
 
 The host uses the pinned runtime's output-copy interface to place actual Remix output into GPU-shareable resources. An owned 32-bit D3D11 receiver copies completed output into a fixed handoff pool. Shared handles, GPU completion signals and session/owner/revision/frame identities govern reuse; a raw image identifier alone is not enough.
 
-Inside the copied game, the project ReShade add-on combines returned color/depth/owner coverage with the qualified native game depth at the before-effects presentation point. **ReShade is our present insertion mechanism**, not the source of the captured models or the ray-traced rendering. The result is in SFC's displayed frame, not a desktop window laid over the game.
+Inside the copied game, the project ReShade add-on provides the native insertion adapter. The capture hook coordinates matching output before forwarding the selected original mesh submission. The adapter writes colour and physical depth into the active native targets, then the hook suppresses only the committed owner's mesh lists. SFC continues drawing its shields, effects and text normally. **ReShade remains an integration dependency**, not the source of captured models or ray-traced rendering. The result is inside SFC's displayed frame.
 
-The current default-off synchronized test retains **one adjacent complete native frame**, including its native HUD pixels and matching depth, and accepts only the returned ship image belonging to that saved frame. It does not attach stale pixels to the newest camera. Queued images cannot be overwritten before use, and an independent worker releases completed GPU reads without making SFC wait. Later ReShade UI and the OS hardware cursor are not deliberately delayed.
+The default-off native replacement waits at one separate coordination point for the exact scene/camera/pose output, within an absolute deadline. Multi-ship replacement shares that admitted output among owners without additional waits. Output slots remain protected until all queued native GPU reads finish. It does not attach an old pose to a new camera.
 
-The copy remains additive and deliberately offset for comparison. Missing, late, disconnected or invalid output omits the extra ship rather than blocking original SFC rendering. Occasional omissions remain; this is not a synchronized original-ship replacement guarantee.
+Offset and late-composition launchers remain diagnostics. In native replacement, missing or invalid output leaves that owner's original drawing intact before commit. Supported multi-ship replacement has passed gameplay checkout; it is not a universal model-coverage claim.
 
 ### Where to inspect this pipeline
 
@@ -156,7 +156,15 @@ The execution-policy override is process-scoped; do not disable UAC or globally 
 
 The unbuffered [`start_d3d9_persistent_scene_session.ps1`](tools/d3d9_proof/start_d3d9_persistent_scene_session.ps1) remains a historical comparison baseline. [`start_light_tuning_session.ps1`](tools/remix_runtime/start_light_tuning_session.ps1) now uses the current fast D3D9/Remix path with live appearance controls; it ends on game exit with its own **30-minute safety ceiling**.
 
-The separate [`start_d3d9_player_replacement_session.ps1`](tools/d3d9_proof/start_d3d9_player_replacement_session.ps1) prepares one aligned player replacement, rather than an offset copy. Original drawing continues until paired output authorizes suppression. It stages SFC's background/HUD and matching Remix ship offscreen, then displays the complete picture. At most two additional complete-picture presentations bridge missing output; sustained delivery gaps restore intact native rendering, then automatically qualify fresh paired output and return to replacement. Explicit shutdown stays disabled. Use F-CA versus a different model and follow [Run213's checkout instructions](docs/runs/2026-10-27-codex-player-replacement-auto-recovery.md). The background itself is **not** sent into Remix.
+The current prepared native multi-ship replacement checkout is:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\native_insertion\start_native_multiship_session.ps1
+```
+
+It defaults to Strict and inserts supported ships in their normal positions. Use different models, change cameras, expose shields and briefly pause/unpause. Follow the normal exit cue. This is a prepared development checkout, not a general installer or a claim that every model is qualified. [Run228](docs/runs/2026-10-31-codex-native-multiship-replacement.md).
+
+The older [`start_d3d9_player_replacement_session.ps1`](tools/d3d9_proof/start_d3d9_player_replacement_session.ps1) preserves the historical complete-picture comparison from [Run213](docs/runs/2026-10-27-codex-player-replacement-auto-recovery.md). It is not the current native insertion workflow. The background itself is **not** sent into Remix.
 
 The [renderer-boundary audit](docs/reconnaissance/2026-10-27-renderer-boundary-audit.md) explains the reusable data/transaction boundaries and remaining Remix/D3D11 assumptions. Interchangeable renderer and presentation adapters remain an open engineering gate.
 
@@ -181,7 +189,7 @@ restoration and the remaining sponsor gameplay check.
 
 ## Important limitations
 
-- Player-ship suppression/replacement and controlled unload have been observed in gameplay. Foreground shield/text ordering remains unresolved; full-scene replacement is not established. See [Run224](docs/runs/2026-10-31-codex-native-insertion-timing-review.md) for the measured synchronization blocker.
+- Native player replacement, correct foreground shield/text ordering and controlled unload have been observed in gameplay. Supported multi-ship replacement has also passed gameplay checkout; full-scene replacement is not established. See the [current handoff](docs/HANDOFF.md).
 - The current multi-ship checkout accepts fresh supported ship assets; the older single-FCA diagnostic remains separate. The32-owner/64-asset limits and tested models do not establish universal object, geometry or mission coverage.
 - The established additive buffer pairs one adjacent frame with a 50 ms input limit. Replacement separately retains up to two earlier source frames, checks exact output/receipt identity, and can repeat a whole completed picture twice before temporary native recovery and fresh-output reactivation. Automatic recovery has been exercised; it does not resolve native effect ordering. No motion prediction or indefinite stale overlay is used.
 - The qualified buffered output extent is 1920×1080. Resize/device recreation can omit the extra ship until a fresh supported session; automatic recovery at arbitrary resolutions is not established.

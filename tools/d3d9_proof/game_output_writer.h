@@ -2,12 +2,14 @@
 #pragma once
 #include "replacement_transaction.h"
 #include "../native_insertion/gate_events.h"
+#include "../native_insertion/cohort_contract.h"
 #include "game_output_wire.h"
 #include "live_owner_wire.h"
 #include <cmath>
 #include "../m1_component/m1_present_calibration.h"
 struct GameOutputWriter {
  native_gate::Events gateEvents;native_gate::Store* gateStore=nullptr;
+ native_cohort::Store* cohortStore=nullptr;native_cohort::Manifest members{};
  sfc_calibration::Reader source;game_output::Pool* pool=nullptr;
  Microsoft::WRL::ComPtr<ID3D11Texture2D> textures[2][3];uint64_t handles[2][3]{};
  bool enabled=false,retainReady=false,replacementMode=false;uint64_t session=0;
@@ -22,6 +24,7 @@ struct GameOutputWriter {
    gateStore=reinterpret_cast<native_gate::Store*>(base+native_gate::Offset);
    check(native_gate::valid(gateStore->header,source.session,reinterpret_cast<live_owner::Store*>(base+live_owner::Offset)->header.pid),"native gate pool session");
    gateEvents.open(source.session);
+   if(native_cohort::requested()){cohortStore=reinterpret_cast<native_cohort::Store*>(base+native_cohort::Offset);check(native_cohort::valid(cohortStore->header,source.session,reinterpret_cast<live_owner::Store*>(base+live_owner::Offset)->header.pid),"Native cohort pool identity");}
   }
   const auto& live=reinterpret_cast<live_owner::Store*>(base+live_owner::Offset)->header;
   const auto game=live.pid;check(game&&live_owner::header_valid(live,source.session),"game pool source PID/session");
@@ -51,6 +54,10 @@ struct GameOutputWriter {
  }
  int copy(ID3D11Device* device,ID3D11DeviceContext* context,const output_wire::Packet& input,const game_output::Metadata& metadata,ID3D11Texture2D* const (&images)[3]){
   prepare(device,input);
+  if(cohortStore){auto* base=reinterpret_cast<BYTE*>(source.mailbox)-sfc_calibration::Offset;auto* catalog=reinterpret_cast<multi_scene::Store*>(base+multi_scene::Offset);multi_scene::Frame snapshot{};
+   if(!native_cohort::read(cohortStore->upstream,members)||members.output!=input.sequence||members.frame!=input.source_frame||members.anchor!=input.owner||members.revision!=input.revision||members.sequence!=metadata.source_sequence||members.hash!=input.source_state_hash||
+      !multi_scene::read(*catalog,members.frame,members.sequence,snapshot)||!native_cohort::qualifies(members,*catalog,snapshot))return -1;
+  }
   if(!game_output::valid(metadata,source.session))return -1; // Bootstrap is never displayed.
   check(input.session==session&&input.producer_pid==pool->header.host_pid,"game pool source identity changed");
   // Buffered presentation still needs READY images;never replace one before
@@ -80,6 +87,7 @@ struct GameOutputWriter {
    replacement::write(r->output[slot],binding);
   }
   out.packet=packet;game_output::metadata(out,metadata);
+  if(cohortStore)native_cohort::write(cohortStore->slots[slot],members);
   if(gateStore){gateStore->header.ready[slot]={packet.sequence,native_gate::now()};}
   InterlockedIncrement(&pool->header.published);InterlockedExchange(&out.state,output_wire::ready);
   if(gateStore)SetEvent(gateEvents.ready);

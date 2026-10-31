@@ -186,6 +186,7 @@ class Relay:
                  'SFC_D3D9_LIVE_TIMING':'1','SFC_D3D9_GAME_PID':str(pid),'SFC_REMIX_CALIBRATION_SCENE':self.receiver.name,
                  'SFC_D3D9_EXPECTED_MODEL':str(row[5]),'SFC_D3D9_EXPECTED_SOURCE':str(row[6]),
                  'SFC_DIRECT64_TIMING_ONLY':'1','SFC_DIRECT64_PACED_FRAMES':'0','SFC_DIRECT64_LATEST_INPUT':'0','SFC_DIRECT64_SINGLE_PRESENT':'1','SFC_DIRECT64_INJECT_LAG_MS':'0'}
+        env['SFC_D3D9_LEGACY_STARTUP_WARMUP']='1' if getattr(self,'legacy_startup_warmup',False) else '0'
         for key in ('DXVK_RTX_CAPTURE_ENABLE_ON_FRAME','DXVK_DUMP_SCREENSHOT_FRAME','DXVK_TERMINATE_APP_FRAME'):env.pop(key,None)
         if not self.offline_fixture:
             for key in ('SFC_DIRECT64_BACKBUFFER_DIAGNOSTIC','SFC_D3D9_REBIND_FIXTURE','SFC_D3D9_FIXTURE_ROWS','SFC_SYNC_FIXTURE_SHORT_LEAD'):
@@ -215,13 +216,15 @@ class Relay:
             if self.multi_scene:
                 from multi_scene import camera_offset,CONFIG as placement_config
                 self.selected['camera_offset']=camera_offset()
-                if getattr(self,'player_replacement',False):self.selected['camera_offset']=[0,0,0]
+                if getattr(self,'player_replacement',False) or getattr(self,'native_all_ships',False):self.selected['camera_offset']=[0,0,0]
                 self.selected['placement']='common camera-left diagnostic translation;no original suppression'
                 if getattr(self,'player_replacement',False):self.selected['placement']='Zero-offset player replacement with complete-frame transaction'
+                if getattr(self,'native_all_ships',False):self.selected['placement']='Zero-offset retained ships;owner-specific native insertion from one verified scene output'
                 (self.folder/'multi-ship-config-accepted.toml').write_bytes(placement_config.read_bytes())
             else:self.selected['camera_offset']=camera_left_offset(span)
             env.update(SFC_D3D9_ASSET_SHA256=manifest['asset_sha256'],SFC_D3D9_OFFSET_X=str(self.selected['camera_offset'][0]))
-            env['SFC_D3D9_PLAYER_REPLACEMENT']='1' if getattr(self,'player_replacement',False) else '0'
+            env['SFC_D3D9_PLAYER_REPLACEMENT']='1' if getattr(self,'player_replacement',False) or getattr(self,'native_all_ships',False) else '0'
+            env['SFC_NATIVE_INSERTION_ALL_SHIPS']='1' if getattr(self,'native_all_ships',False) else '0'
             from owner_rebind import initialize as init_binding,request
             self.binding_generation=1;self.bound_row=list(row)
             # Stable residency token covers fresh geometry/group/original-image content.
@@ -241,7 +244,7 @@ class Relay:
             activate(gpu,env,self.receiver.name)
             self.process=self.prewarm_process
         else:self.process=sp.Popen(command,env=env,creationflags=sp.CREATE_NO_WINDOW)
-        print(('Transactional player replacement: ' if getattr(self,'player_replacement',False) else 'Multi-ship ordinary-D3D9 diagnostic: ' if self.multi_scene else 'Offset ordinary-D3D9 ship: ' if self.additive else 'Separate D3D9 renderer timing: ')+manifest['model_name']+('. Original drawing remains until paired output authorizes replacement.' if getattr(self,'player_replacement',False) else '. Original ship stays visible;existing visual baseline.' if self.additive else '. No new picture will be displayed.'),flush=True)
+        print(('Native supported-ship replacement: ' if getattr(self,'native_all_ships',False) else 'Transactional player replacement: ' if getattr(self,'player_replacement',False) else 'Multi-ship ordinary-D3D9 diagnostic: ' if self.multi_scene else 'Offset ordinary-D3D9 ship: ' if self.additive else 'Separate D3D9 renderer timing: ')+manifest['model_name']+('. Original drawing remains until matching output authorizes each ship.' if getattr(self,'native_all_ships',False) else '. Original drawing remains until paired output authorizes replacement.' if getattr(self,'player_replacement',False) else '. Original ship stays visible;existing visual baseline.' if self.additive else '. No new picture will be displayed.'),flush=True)
         if self.additive and not self.offline_fixture:self.start_service(pid)
 
     def recover(self,pid):

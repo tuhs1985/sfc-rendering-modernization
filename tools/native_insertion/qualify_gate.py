@@ -1,5 +1,5 @@
 """Freeze native insertion comparison preparation,never a gameplay success claim."""
-import argparse,hashlib,json,sys
+import argparse,hashlib,json,re,sys
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/'tools/remix_runtime'))
@@ -28,7 +28,8 @@ def qualify(baseline,strict,extra):
         if 'Replacement offline PASS 85 checks' not in (ROOT/f'artifacts/remix-runtime/replacement-bin/replacement{arch}.stdout.txt').read_text():raise ValueError('Native compositor tests incomplete')
     if 'Pinned native flush PASS 12300 checks' not in (out/'flush.txt').read_text():raise ValueError('Native flush ABI incomplete')
     component=out/'m1_player_replacement_component_tests.txt'
-    if 'Player suppression recorder PASS checks=36' not in component.read_text():raise ValueError('Actual capture/coordinator tests incomplete')
+    tested=re.search(r'Player suppression recorder PASS checks=(\d+)',component.read_text())
+    if not tested or int(tested[1])<36:raise ValueError('Actual capture/coordinator tests incomplete')
     python_log=(out/'python-tests.txt').read_text()
     if 'OK' not in python_log or 'FAILED' in python_log or 'Traceback' in python_log:raise ValueError('Python regression checks incomplete')
     names=['artifacts/remix-runtime/return-bin/SFCRemixReturn.dll','artifacts/remix-runtime/return-bin/d3d11_return_fixture.exe',

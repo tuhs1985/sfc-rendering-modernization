@@ -11,11 +11,13 @@ inline uint64_t lightChecksum(const LiveLightPacket& packet){
  for(unsigned i=0;i<sizeof(packet)-8;++i)value=(value^bytes[i])*1099511628211ull;
  return value;
 }
-inline bool validLightPacket(const LiveLightPacket& p,const uint32_t* session,uint32_t owner,uint32_t model,uint32_t source,uint32_t frame,uint64_t frequency,uint64_t now){
+enum class LightValidation {TimedOwner,SceneUpdate,RetainedScene};
+inline bool validLightPacket(const LiveLightPacket& p,const uint32_t* session,uint32_t owner,uint32_t model,uint32_t source,uint32_t frame,uint64_t frequency,uint64_t now,LightValidation policy=LightValidation::TimedOwner){
  if(!frequency||!owner||!model||!source||p.h[0]!=0x3154474c||p.h[1]!=1||p.h[2]!=sizeof(p)||!p.h[3]||
-    memcmp(p.h+4,session,16)||p.h[8]!=owner||p.h[9]!=model||p.h[10]!=source||
-    p.h[11]>frame||frame-p.h[11]>30||!p.observed||p.observed>now||now-p.observed>frequency/2||
+    memcmp(p.h+4,session,16)||!p.h[8]||!p.h[9]||!p.h[10]||!p.observed||p.observed>now||
     p.checksum!=lightChecksum(p))return false;
+ if(policy!=LightValidation::RetainedScene&&(p.h[8]!=owner||p.h[9]!=model||p.h[10]!=source))return false;
+ if(policy==LightValidation::TimedOwner&&(p.h[11]>frame||frame-p.h[11]>30||now-p.observed>frequency/2))return false;
  for(unsigned i=0;i<2;++i){const auto& r=p.rows[i];
   if(r.slot!=i||r.enabled>1||r.reserved[0]||r.reserved[1])return false;
   for(float f:r.values)if(!std::isfinite(f))return false;

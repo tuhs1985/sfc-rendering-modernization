@@ -2,6 +2,7 @@
 // insertion;no shield capture/replay and no SFC launch.
 #pragma once
 #include "gate_contract.h"
+#include "cohort_contract.h"
 #include "../d3d9_proof/game_output_wire.h"
 #include "../d3d9_proof/multi_scene_wire.h"
 #include <d3d11.h>
@@ -21,6 +22,7 @@ struct Fixture {
  Store* store=nullptr;game_output::Pool* pool=nullptr;replacement::Store* ledger=nullptr;DWORD* session=nullptr;
  Dispatch dispatch=nullptr;bool baseline=false,armedVerification=false,rejectedTickets=false;unsigned checks=0,verified=0,draws=0;DWORD w=1920,h=1080;
  float mappedViewport[4]{0,0,1920,1080};
+ std::array<DWORD,32> frameOwners{},seenOwners{};unsigned frameOwnerCount=0,seenOwnerCount=0;
  void check(bool b,const char* why){++checks;if(!b)throw std::runtime_error(why);}
  void init(ID3D11Device* device,ID3D11DeviceContext* context,BYTE* base,DWORD* s,HMODULE addon){
   d=device;c=context;session=s;store=reinterpret_cast<Store*>(base+Offset);pool=reinterpret_cast<game_output::Pool*>(base+game_output::Offset);ledger=reinterpret_cast<replacement::Store*>(base+replacement::Offset);
@@ -64,12 +66,13 @@ Texture2D<float4> image:register(t0);float4 copy(float4 p:SV_Position):SV_Target
   const float blue[]{0,0,1,1};c->ClearRenderTargetView(target.Get(),blue);c->ClearDepthStencilView(depth,D3D11_CLEAR_DEPTH,1,0);
   auto* rt=target.Get();c->OMSetRenderTargets(1,&rt,depth);c->OMSetDepthStencilState(nullptr,0);
   D3D11_VIEWPORT vp{0,0,float(w),float(h),0,1};c->RSSetViewports(1,&vp);
-  bool inserted=false;Ticket t{};Reply reply{};
+  bool inserted=false;armedVerification=false;frameOwnerCount=0;
   if(source.frame%37==0)store->current.flags|=4;else if(source.frame%19==0)store->current.flags|=8;
   if(!baseline&&valid(source)){
-   for(const auto& row:source.rows)if(row[1]==source.anchor&&row[7]==source.revision){
+   for(DWORD member=0;member<source.count;++member){const auto& row=source.rows[member];Ticket t{};Reply reply{};
+    if(!native_cohort::requested()&&(row[1]!=source.anchor||row[7]!=source.revision))continue;
     memcpy(t.session,session,16);t.pid=GetCurrentProcessId();t.thread=GetCurrentThreadId();t.frame=source.frame;t.owner=row[1];t.revision=row[7];t.model=row[5];t.source=row[6];
-    t.manager=1;t.count=1;t.primary=1;t.secondary=1;t.generation=store->header.generation;t.sequence=source.sequence;t.hash=source.checksum;t.offered=source.offered;t.frameStart=store->header.frameStart;t.deadline=deadline(store->header,t.frameStart);memcpy(mappedViewport,row.data()+83,16);break;}
+    t.manager=1;t.count=1;t.primary=1;t.secondary=1;t.generation=store->header.generation;t.sequence=source.sequence;t.hash=source.checksum;t.offered=source.offered;t.frameStart=store->header.frameStart;t.deadline=deadline(store->header,t.frameStart);memcpy(mappedViewport,row.data()+83,16);
    if(!rejectedTickets&&valid(t,store->header)){
     auto wrong=t;wrong.hash^=1;check(dispatch(DWORD(Action::Acquire),&wrong,&reply)!=DWORD(Result::Acquired),"Wrong camera/cohort ticket admitted");
     wrong=t;++wrong.generation;check(dispatch(DWORD(Action::Acquire),&wrong,&reply)!=DWORD(Result::Acquired),"Stale generation admitted");
@@ -80,8 +83,7 @@ Texture2D<float4> image:register(t0);float4 copy(float4 p:SV_Position):SV_Target
    if(valid(t,store->header)&&dispatch(DWORD(Action::Acquire),&t,&reply)==DWORD(Result::Acquired)){
     // Snapshot expected triplet while the acquired lease prevents overwrite.
     // GPU copies precede Commit's read fence;CPU readback happens after Present.
-    armedVerification=false;
-    if(verify){
+    if(verify&&!armedVerification){
      for(auto& slot:pool->slots)if(output_wire::state(&slot)==output_wire::acquired&&slot.packet.source_frame==t.frame){
       for(unsigned i=0;i<3;++i){ComPtr<ID3D11Texture2D> image;check(SUCCEEDED(d->OpenSharedResource(reinterpret_cast<HANDLE>(uintptr_t(slot.packet.handles[i])),IID_PPV_ARGS(&image))),"Fixture leased output");c->CopyResource(expected[i].Get(),image.Get());}
       armedVerification=true;break;
@@ -91,10 +93,13 @@ Texture2D<float4> image:register(t0);float4 copy(float4 p:SV_Position):SV_Target
       store->current.flags|=2; // Diagnostic readback frame,not a clean timing sample.
      }
     }
-    inserted=dispatch(DWORD(Action::Commit),&t,&reply)==DWORD(Result::Inserted);
-    if(!inserted){dispatch(DWORD(Action::Cancel),&t,&reply);armedVerification=false;}
-    if(inserted){++draws;store->current.primary=store->current.secondary=1;
+    const bool insertedNow=dispatch(DWORD(Action::Commit),&t,&reply)==DWORD(Result::Inserted);inserted|=insertedNow;
+    if(!insertedNow){dispatch(DWORD(Action::Cancel),&t,&reply);if(!inserted)armedVerification=false;}
+    if(insertedNow){++draws;store->current.primary=store->current.secondary=1;check(frameOwnerCount<32,"Fixture owner bound");frameOwners[frameOwnerCount++]=t.owner;
+     bool known=false;for(unsigned k=0;k<seenOwnerCount;++k)known|=seenOwners[k]==t.owner;if(!known){check(seenOwnerCount<32,"Fixture seen owner bound");seenOwners[seenOwnerCount++]=t.owner;}
+     if(native_cohort::requested())native_cohort::count(*reinterpret_cast<native_cohort::Store*>(reinterpret_cast<BYTE*>(store)-Offset+native_cohort::Offset),t,false,true);
      replacement::Receipt r{};if(replacement::sample(*ledger,t.frame,r)){r.owner=t.owner;r.revision=t.revision;r.flags|=replacement::Seen|replacement::Suppressed;replacement::write(ledger->receipt[t.frame%replacement::Frames],r);InterlockedIncrement(&ledger->suppressed);}}
+   }
    }
   }
   // A normal native far effect with depth testing ON and writes OFF. It must
@@ -114,18 +119,20 @@ Texture2D<float4> image:register(t0);float4 copy(float4 p:SV_Position):SV_Target
  void verify(DWORD owner){if(!armedVerification)return;D3D11_MAPPED_SUBRESOURCE actual{},ref[3]{};
   check(SUCCEEDED(c->Map(readNative.Get(),0,D3D11_MAP_READ,0,&actual)),"Native fixture readback");
   for(unsigned i=0;i<3;++i)check(SUCCEEDED(c->Map(expected[i].Get(),0,D3D11_MAP_READ,0,&ref[i])),"Reference fixture readback");
-  unsigned mismatches=0,covered=0,textCovered=0;
+  unsigned mismatches=0,covered=0,textCovered=0;std::array<unsigned,32> ownerPixels{};
   for(unsigned y=0;y<h;++y)for(unsigned x=0;x<w;++x){DWORD id{};float z=1;
    const auto qx=static_cast<int>(floor((float(x)+.5f-mappedViewport[0])*w/mappedViewport[2])),qy=static_cast<int>(floor((float(y)+.5f-mappedViewport[1])*h/mappedViewport[3]));
    if(qx>=0&&qy>=0&&qx<int(w)&&qy<int(h)){memcpy(&id,static_cast<BYTE*>(ref[2].pData)+qy*ref[2].RowPitch+qx*4,4);memcpy(&z,static_cast<BYTE*>(ref[1].pData)+qy*ref[1].RowPitch+qx*4,4);}
    DWORD expectedColour=0xff00ff00; // native green background/effect
-   if(id==owner&&std::isfinite(z)&&z>=0&&z<1){++covered;if(x%64<8)++textCovered;DWORD bgra{};memcpy(&bgra,static_cast<BYTE*>(ref[0].pData)+qy*ref[0].RowPitch+qx*4,4);expectedColour=(bgra&0xff00ff00u)|((bgra&0xff)<<16)|((bgra>>16)&0xff);expectedColour|=0xff000000;}
+   bool accepted=id==owner;if(native_cohort::requested()){accepted=false;for(unsigned k=0;k<frameOwnerCount;++k)if(id==frameOwners[k]){accepted=true;++ownerPixels[k];break;}}
+   if(accepted&&std::isfinite(z)&&z>=0&&z<1){++covered;if(x%64<8)++textCovered;DWORD bgra{};memcpy(&bgra,static_cast<BYTE*>(ref[0].pData)+qy*ref[0].RowPitch+qx*4,4);expectedColour=(bgra&0xff00ff00u)|((bgra&0xff)<<16)|((bgra>>16)&0xff);expectedColour|=0xff000000;}
    if(y%64<4){const auto blue=(std::min<DWORD>)(255,((expectedColour>>16)&255)+32);expectedColour=(expectedColour&0xff00ffffu)|(blue<<16);}
    if(x%64<8)expectedColour=0xff00ff00;
    DWORD pixel{};memcpy(&pixel,static_cast<BYTE*>(actual.pData)+y*actual.RowPitch+x*4,4);if(pixel!=expectedColour)++mismatches;
   }
   c->Unmap(readNative.Get(),0);for(unsigned i=0;i<3;++i)c->Unmap(expected[i].Get(),0);
   std::cout<<"NATIVE_GATE_PIXELS mismatches="<<mismatches<<" covered="<<covered<<" native_depth_and_text=1\n";
+  if(native_cohort::requested()){unsigned present=0;for(auto pixels:ownerPixels)present+=pixels>10;std::cout<<"NATIVE_COHORT_PIXELS owners_with_pixels="<<present<<" seen_owners="<<seenOwnerCount<<'\n';if(verified)check(present>=2,"Multiple independent ship pixels required");}
   check(covered>100&&textCovered>10&&mismatches==0,"Native gate colour/depth/coverage/native text mismatch");++verified;armedVerification=false;
  }
 };

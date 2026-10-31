@@ -1,6 +1,6 @@
 """Bounded worker-only current native lights -> existing Remix light policy.
 
-No historical-light fallback. Configuration is frozen for the90s insertion proof.
+Scene slots0/1 and project fill retain accepted session values across view gaps.
 """
 import ctypes as C
 import hashlib
@@ -68,7 +68,7 @@ class Binding:
             pid=struct.unpack('<I',self.receiver.channel.read(10*1024*1024+28,4))[0]
             from light_transport import RAW_OFFSET
             publication=struct.unpack('<I',self.receiver.channel.read(RAW_OFFSET+36,4))[0]
-            if self.persistent and publication==self.bank_publication and self.last_native and self.last_native[0]==row[1] and self.latest and 0<=row[3]-self.latest['native_elapsed_ms']<=400:
+            if self.persistent and publication==self.bank_publication and self.last_native and self.last_native[0]==row[1] and self.latest:
                 self.ready=True;return True
             source_row=row
             observed=read_native(self.receiver.channel,row[1],pid)
@@ -90,12 +90,12 @@ class Binding:
             self.native_cache[source_row[1]]=(captured,native)
             if (native['session_words']!=self.session or native['owner_epoch']!=source_row[1] or
                 native['model_process_local']!=source_row[5] or native['source_process_local']!=source_row[6] or
-                native['elapsed_ms']>row[3] or row[3]-native['elapsed_ms']>400):return False
+                native['elapsed_ms']>row[3] or (not self.persistent and row[3]-native['elapsed_ms']>400)):return False
             identity=(row[1],native['sequence'],captured,source_row[1])
             if identity==self.last_native:self.ready=True;return True
             self.generation+=1
             normalized=world_light_context(native,row) if self.persistent else native
-            raw=packet(normalized,dict(owner_epoch=row[1]),self.session,self.controls,self.scale,self.master,self.generation,captured,self.config_revision,shapes=True)
+            raw=packet(normalized,dict(owner_epoch=row[1]),self.session,self.controls,self.scale,self.master,self.generation,captured,self.config_revision,shapes=True,persistent_scene=self.persistent)
             publish_encoded(self.receiver.channel,pid,raw,self.shapes,captured)
             self.last_native=identity
             self.bank_publication=publication
@@ -109,7 +109,10 @@ class Binding:
 
     def prepare_owner(self,row):
         self.row=list(row);self.ready=False
-        return self.poll()
+        if self.poll():return True
+        if self.persistent and self.last_native and self.latest:
+            self.ready=True;return True # Scene lighting is not owned by the new scheduling ship.
+        return False
 
     def summary(self):return dict(config_sha256=self.config_hash,packets=self.generation,busy=self.busy,invalid=self.invalid,latest=self.latest,
-                                 policy='Frozen config;fresh same-session/owner/model/source native lights only;no replay fallback')
+                                 policy='Scene slots0/1 plus configured project fill persist for session;explicit config enable honoured;observation timestamps preserved' if self.persistent else 'Fresh same-session/owner/model/source native lights only')

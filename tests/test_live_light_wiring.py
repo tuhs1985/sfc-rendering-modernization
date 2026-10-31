@@ -42,6 +42,16 @@ class LiveLightTests(unittest.TestCase):
         row,controls=self.setup_packet();row['slots'][0]['native_type']=5
         with self.assertRaises(ValueError):live_lights.packet(row,{'owner_epoch':2},row['session_words'],controls,1,.5,1,123,1)
 
+    def test_scene_lights_ignore_native_visibility_gates_but_honour_config(self):
+        row,controls=self.setup_packet();row['global_gate_raw']=0;row['consumed_prefix']=0
+        for slot in row['slots'][:2]:slot['consumed_by_native_response']=False
+        raw=live_lights.packet(row,{'owner_epoch':2},row['session_words'],controls,1,1,1,123,1,persistent_scene=True)
+        self.assertEqual(struct.unpack_from('<I',raw,68)[0],1)
+        controls['native_directional_0']['enabled']=False
+        raw=live_lights.packet(row,{'owner_epoch':2},row['session_words'],controls,1,1,2,123,2,persistent_scene=True)
+        self.assertEqual(struct.unpack_from('<I',raw,68)[0],0)
+        self.assertEqual(struct.unpack_from('<I',raw,132)[0],1)
+
     def test_shadow_softness_is_independent_of_strength(self):
         row,controls=self.setup_packet()
         controls['native_directional_0']['angular_diameter_degrees']=2

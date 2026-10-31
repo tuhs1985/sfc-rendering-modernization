@@ -8,6 +8,7 @@
 #include "multi_scene_wire.h"
 #include "run_lifetime.h"
 #include "replacement_transaction.h"
+#include "pipeline_mode.h"
 struct LiveOwnerInput {
  sfc_calibration::Reader source;live_owner::Store* store=nullptr;uint64_t last=0,started=0;DWORD invalid=0,replaced=0,received=0,unqualified=0;
  DWORD owner=0,revision=0,model=0,meshSource=0;uint64_t limit=90000;
@@ -18,6 +19,7 @@ struct LiveOwnerInput {
  uint64_t frequency=0;DWORD expired=0;
  volatile LONG* closedFrame=nullptr;DWORD admissionCounts[2][static_cast<unsigned>(live_owner::Admission::Count)]{};bool replacementMode=false;
  void (*idleWork)(void*)=nullptr;void* idleContext=nullptr; // Backend worker only;never installed in SFC.
+ bool projectionAudit=!pipeline_mode::performance();uint64_t projectionDisagreements=0;
  static uint64_t ticks(){LARGE_INTEGER q{};QueryPerformanceCounter(&q);return static_cast<uint64_t>(q.QuadPart);}
  ~LiveOwnerInput(){source.close();}
  void start(const Scene& scene){
@@ -64,9 +66,8 @@ struct LiveOwnerInput {
     if(live_owner::matches_asset(packet,previousOwner,previousRevision,previousModel,previousSource)){++oldPackets;continue;}
     if(!live_owner::matches_asset(packet,owner,revision,model,meshSource)||!live_owner::decode(packet,out)||packet.row[47]!=store->header.source_thread){++unqualified;continue;}
     if(!admit(packet,0))continue;
-    bool good=true;const size_t stride=(std::max)(size_t(1),scene.vertices.size()/64);
-    for(size_t i=0;i<scene.vertices.size();i+=stride)if(!live_owner::projection_matches(packet,out,scene.vertices[i].p)){good=false;break;}
-    if(!good){++unqualified;continue;}validation_ticks=ticks()-validation_started;++received;return true;
+    projectionDisagreements+=live_owner::audit_projection(packet,out,scene.vertices,projectionAudit);
+    validation_ticks=ticks()-validation_started;++received;return true;
    }++empty_polls;const auto sleeping=ticks();poll.pause();sleep_ticks+=ticks()-sleeping;
   }return false;
  }

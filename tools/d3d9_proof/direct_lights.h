@@ -38,14 +38,17 @@ struct DirectLights {
   }
   key.owner=state.owner;key.revision=state.revision;key.frame=state.frame;
   LiveLightPacket p{};LightShapePacket shapes{};
+  bool sampled=false;
   if(shared){
-   if(!sfc_light_transport::valid(shared->header,sfc_light_transport::EncodedMagic,sizeof(*shared),sharedSource.session,expectedPid))return false;
+   if(sfc_light_transport::valid(shared->header,sfc_light_transport::EncodedMagic,sizeof(*shared),sharedSource.session,expectedPid)){
    sfc_light_transport::EncodedPayload payload{};ULONGLONG captured=0;
-   if(!sfc_light_transport::read(shared->cell,payload,captured))return false;
+   if(sfc_light_transport::read(shared->cell,payload,captured)){
    memcpy(&p,payload.packet,sizeof(p));memcpy(&shapes,payload.shapes,sizeof(shapes));++reads;
-   if(captured!=p.observed)return false;
-  }else{std::unique_lock<std::mutex> lock(mutex,std::try_to_lock);if(!lock.owns_lock()||!ready)return false;p=cached;shapes=cachedShapes;}
-  return lights.update(api,seed,key,frequency,state.model,&p,&shapes);
+   sampled=captured==p.observed;}}
+  }else{std::unique_lock<std::mutex> lock(mutex,std::try_to_lock);if(lock.owns_lock()&&ready){p=cached;shapes=cachedShapes;sampled=true;}}
+  // This encoded channel contains scene slots0/1 plus configured project fill,
+  // never weapon/effect slots. Their lifetime is the scene session.
+  return lights.updateOrRetain(api,seed,key,frequency,state.model,sampled?&p:nullptr,sampled?&shapes:nullptr,true);
  }
  void start(){wchar_t flag[2]{};enabled=GetEnvironmentVariableW(L"SFC_D3D9_LIGHT_SETTINGS",flag,2)==1&&flag[0]==L'1';if(enabled){
   wchar_t fast[2]{};const bool requested=GetEnvironmentVariableW(L"SFC_D3D9_SHARED_LIGHTS",fast,2)==1&&fast[0]==L'1';
@@ -59,5 +62,5 @@ struct DirectLights {
   }else{read();reader=std::thread([this]{while(!stopping.load()){read();Sleep(10);}});}
  }}
  void draw(remixapi_Interface& api){if(enabled)lights.draw(api);}
- void close(remixapi_Interface& api){stop();if(enabled){std::cout<<"LIGHT_UPDATE_SUMMARY changes="<<lights.applied<<" cache_reads="<<reads<<" read_failures="<<readFailures<<'\n';lights.close(api);}}
+ void close(remixapi_Interface& api){stop();if(enabled){std::cout<<"LIGHT_UPDATE_SUMMARY changes="<<lights.applied<<" cache_reads="<<reads<<" read_failures="<<readFailures<<" retained_updates="<<lights.retainedUpdates<<" unavailable_updates="<<lights.unavailableUpdates<<'\n';lights.close(api);}}
 };

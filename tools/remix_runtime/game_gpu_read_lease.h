@@ -17,8 +17,8 @@ public:
  // Terminal native-gate teardown only:retain the fence until process exit if
  // completion cannot be established. Never acknowledge/reuse that output slot.
  void retainOnTerminalFailure(){fence.Detach();}
- void signal(ID3D11DeviceContext4* context){
-  if(!fence||pending()||next>=UINT64_MAX-1)throw std::runtime_error("Buffered GPU read lease invalid");
+ void signal(ID3D11DeviceContext4* context,bool appendHeld=false){
+  if(!fence||(pending()&&!appendHeld)||next>=UINT64_MAX-1)throw std::runtime_error("Buffered GPU read lease invalid");
   const auto value=++next;if(FAILED(context->Signal(fence.Get(),value)))throw std::runtime_error("Buffered GPU read signal failed");
   expected.store(value,std::memory_order_release);
  }

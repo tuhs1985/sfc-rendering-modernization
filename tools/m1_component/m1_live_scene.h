@@ -40,6 +40,7 @@ struct LiveScene {
     LONGLONG max_capture_ticks=0;LARGE_INTEGER frequency{};
     volatile LONG enabled=0;
     bool lightTuning=false,sourceTiming=false,lifecycleCapture=false,performance=false;
+    DWORD calibrationMisses=0;
     // Default-off diagnostic journal, protected by the existing nonwaiting mailbox.
     // Independent of the latest-state table: a retirement cannot be coalesced away.
     std::array<std::array<DWORD,96>,256> lifecycle{};
@@ -207,7 +208,7 @@ struct LiveScene {
         if(calibration && !registered){auto exact=r;exact[47]=GetCurrentThreadId();
             if(sourceTiming){LARGE_INTEGER q{};if(QueryPerformanceCounter(&q))sfc_calibration::stamp(exact,static_cast<ULONGLONG>(q.QuadPart));}
             directSource.offer(exact);
-            if(!sfc_calibration::offer(calibration,index,exact))directSource.reject(exact[2]);}
+            if(!sfc_calibration::offer(calibration,index,exact))++calibrationMisses;}
         if(sampled)return;
         o.last_ms=id.elapsed;offer(index,r);
     }
@@ -240,7 +241,8 @@ struct LiveScene {
             if(cohort.store){if(directSource.prepare(r,anchor))anchorPrepared=true;}
             else directSource.offer(r);
             DWORD slot=0;for(;slot<owner_count;++slot)if(owners[slot].identity.owner==e.id.owner)break;
-            if(slot==owner_count||!sfc_calibration::offer(calibration,slot,r)){directSource.reject(frame);continue;}
+            if(slot==owner_count){directSource.reject(frame);continue;} // Functional registry association remains required.
+            if(!sfc_calibration::offer(calibration,slot,r))++calibrationMisses;
             cohort.offer(r);
             // Only low-volume diagnostic state is rate limited;frame publication above isn't.
             if(elapsed-owners[slot].last_ms>=34){owners[slot].last_ms=elapsed;offer(slot,r);}
@@ -362,7 +364,7 @@ struct LiveScene {
         if(b.persistent){std::ofstream persistent(b.output+L"\\PERSISTENT-SCENE-001.json");
             persistent<<"{\"schema\":1,\"admitted\":"<<b.registry.admitted<<",\"destroyed\":"<<b.registry.destroyed
               <<",\"rejected\":"<<b.registry.rejected<<",\"pose_updates\":"<<b.registry.updated<<",\"offscreen_updates\":"<<b.registry.offscreen
-              <<",\"publications\":"<<b.persistentPublications<<",\"failed_updates\":"<<b.persistentFailures
+              <<",\"publications\":"<<b.persistentPublications<<",\"failed_updates\":"<<b.persistentFailures<<",\"calibration_misses\":"<<b.calibrationMisses
               <<",\"frames\":"<<b.persistentFrames<<",\"update_ticks\":"<<b.persistentTicks<<",\"max_update_ticks\":"<<b.persistentMaxTicks<<",\"qpc_frequency\":"<<b.frequency.QuadPart<<",\"stopped\":true}";}
         InterlockedExchange(reinterpret_cast<LONG*>(b.view+12),failed?3:2);return 0;
     }
