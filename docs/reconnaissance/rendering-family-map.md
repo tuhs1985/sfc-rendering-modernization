@@ -1,5 +1,18 @@
 # SFC rendering families — evidence map
 
+## Current shield clarification — Run217,2026-10-27
+
+[Run217](../runs/2026-10-27-codex-shield-boundary-characterization.md) supersedes
+older UNKNOWN/strong-hypothesis statements for the shield draw CONTEXT/state:
+owner+1BC branch calls00426563 from004165AA after the mainline hull call.
+Caller004165AF matches303historical translated samples with additiveONE/ONE,
+depthtestON,depthwritesOFF;one additional flushoutlier is excluded. Opaque work
+can follow these contexts beforePresent. Exact batch-exclusive ownership and
+native-resource-to-GPU-label/replayable buffer versions remain unqualified.
+Preserve native foreground separately with exact frame pairing;no globalphase
+or metadata-only replay assumption. [Interface sequence](native-foreground-preservation.md).
+
+
 Checkpoint:2026-10-25 Run173, **targeted offline inventory plus two complete expanded metadata/light surveys;
 one actual SFC native effects/resource/quad join
 confirmed; broader effect classification partial**. No rendering-support

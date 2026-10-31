@@ -5,8 +5,10 @@
 #include <cstring>
 #include <algorithm>
 namespace replacement {
-constexpr DWORD Offset=12*1024*1024-64*1024,Bytes=64*1024,Magic=0x31525053,Version=1,Frames=64;
-enum Mode:DWORD {Priming=0,Active=1,Recovering=2,LatchedOriginal=3};
+constexpr DWORD Offset=12*1024*1024-64*1024,Bytes=64*1024,Magic=0x31525053,Version=2,Frames=64;
+enum Mode:DWORD {Priming=0,Active=1,Recovering=2,LatchedOriginal=3,NativeFallback=4};
+enum Reason:DWORD {None=0,OutputMiss=1,SourceGap=2,NativeRefusal=3,DepthGap=4,IdentityChange=5,RendererUnavailable=6,Shutdown=7,ResourceFailure=8};
+constexpr DWORD Terminal=0x80000000u;
 enum Flags:DWORD {Suppressed=1,Invalid=2,Seen=4};
 struct Control {DWORD mode=Priming,generation=1,owner=0,revision=0,model=0,source=0,thread=0,epoch=0,permit=0;
  DWORD reason=0;uint64_t expires=0;};
@@ -15,7 +17,8 @@ struct Binding {uint64_t output=0,sourceSequence=0,stateHash=0;DWORD frame=0,gen
 template<class T>struct alignas(64) Cell {volatile LONG sequence=0;DWORD reserved=0;T value{};BYTE padding[64-(8+sizeof(T))%64]{};};
 struct alignas(64) Store {DWORD magic=0,version=0,bytes=0,pid=0,session[4]{};DWORD reserved[8]{};
  Cell<Control> control;Cell<Receipt> receipt[Frames];Cell<Binding> output[2];
- volatile LONG native_capable=0,renderer_capable=0,suppressed=0,rejected=0,committed=0,repeated=0,recovered=0,native_stop=0,native_restored_frame=0,repeat_max=0,native_frame=0;BYTE padding[20]{};};
+ volatile LONG native_capable=0,renderer_capable=0,suppressed=0,rejected=0,committed=0,repeated=0,recovered=0,native_stop=0,native_restored_frame=0,repeat_max=0,native_frame=0;
+ volatile LONG rearmed=0,native_presentations=0,recovery_reason=0;BYTE padding[8]{};};
 static_assert(sizeof(Store)<=Bytes&&Offset+Bytes==12*1024*1024);
 static_assert(sizeof(Store)==4416&&offsetof(Store,suppressed)==4360,"versioned Python receipt layout");
 template<class T>inline bool read(const Cell<T>& c,T& out){
@@ -56,7 +59,7 @@ struct Policy {
  Mode mode=Priming;DWORD repeats=0;bool complete=false;
  void completed(){complete=true;repeats=0;}
  bool miss(bool hard=false){if(!complete)return false;++repeats;if(hard||repeats>=2)mode=Recovering;return true;}
- void nativeRecovery(){mode=LatchedOriginal;repeats=0;}
+ void nativeRecovery(bool terminal=false){mode=terminal?LatchedOriginal:NativeFallback;repeats=0;}
 };
 inline bool bindingMatches(const Binding& b,const Receipt& r,uint64_t output,uint64_t sequence,uint64_t hash,DWORD epoch){
  return !(r.flags&Invalid)&&(r.flags&Suppressed)&&b.frame==r.frame&&b.generation==r.generation&&b.owner==r.owner&&b.revision==r.revision&&

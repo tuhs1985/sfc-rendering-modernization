@@ -1,0 +1,26 @@
+{
+  "run": 219,
+  "date": "2026-10-28",
+  "status": "PAUSED_AT_SPONSOR_REQUEST_NOT_READY_FOR_GAMEPLAY",
+  "settings": {
+    "tools/remix_runtime/config/rendering.toml": "78177E1D40498186B60C7912B46B897BA08D332DF4A24EA41F92C042E89202C5",
+    "tools/remix_runtime/config/lights.toml": "1DBB9BF007927DA891EAFBF93BB3F3C015080BA98F23E375997F881D85861FE0"
+  },
+  "clients": {
+    "C:\\Games\\Taldren Software Inc\\Starfleet Command Orion Pirates\\StarFleetOP.exe": "4D65761D7DD69EF1504070261B81E9C200C0AF18105033E1C4D2222C62320C29",
+    "C:\\Project\\SFC-Remix-Return-Test\\StarFleetOP.exe": "4D65761D7DD69EF1504070261B81E9C200C0AF18105033E1C4D2222C62320C29"
+  },
+  "as_built_tests": {
+    "native_gpu": 271,
+    "native_abi": 17,
+    "python": 583
+  },
+  "index_empty": true,
+  "new_sfc_run": false,
+  "standalone_remix_foreground_fixture_run": false,
+  "next": "Review/guard native MSAA sample masks and sample-frequency shaders for single-sample replay; rebuild only if changed, then run genuine standalone --native-foreground steady/fault fixtures. No SFC until qualified.",
+  "source_freeze_matches": true,
+  "native_build_manifest_matches": true,
+  "full_runtime_qualification": false,
+  "source_rebuild_required_only_after_further_edits": true
+}

@@ -1,0 +1,92 @@
+{
+  "run": 221,
+  "date": "2026-10-29",
+  "result": "LIVE_FOREGROUND_FAILURE_CONFIRMED_NATIVE_SCENE_INSERTION_NEXT",
+  "sfc_launched_by_codex": false,
+  "rendering_implementation_changed": false,
+  "source_run": "artifacts/remix-runtime/runs/20261029-055718-417633-in-game",
+  "result_sha256": "6a815b4e97e742cd949b1a40d72be6ee3ec5a22526a4cda4b67d46f541106e52",
+  "sponsor_observations": [
+    "Replacement ship still covers shields",
+    "Replacement ship also covers native pause text",
+    "Sponsor requests native scene insertion instead of shield extraction/replay"
+  ],
+  "native": {
+    "flags": 24,
+    "eligible_frames": 5014,
+    "partial_frames": 436,
+    "captured_draws": 0,
+    "replayed_draws": 0,
+    "retained_bytes": 0,
+    "setup_rejections": 0,
+    "hooks_restored": 1,
+    "last_presentation_flags": 24,
+    "pid": 12192,
+    "session": [
+      3307821718,
+      3175108517,
+      2382692216,
+      1255708447
+    ],
+    "packed_native_depth": "D24S8;invalid bit2,replacement bit0",
+    "output_budget_bytes": 132710400
+  },
+  "replacement": {
+    "native_capable": 1,
+    "renderer_capable": 1,
+    "suppressed": 5014,
+    "rejected": 0,
+    "committed": 4997,
+    "repeated": 12,
+    "recovered": 4,
+    "native_stop": 0,
+    "native_restored_frame": 5530,
+    "repeat_max": 2,
+    "native_frame": 6107,
+    "rearmed": 3,
+    "native_presentations": 3,
+    "recovery_reason": 1,
+    "protocol": 2,
+    "mode": 2,
+    "generation": 8,
+    "owner": 2,
+    "revision": 2,
+    "epoch": 1,
+    "reason": 2147483655,
+    "pid": 12192,
+    "session": [
+      3307821718,
+      3175108517,
+      2382692216,
+      1255708447
+    ]
+  },
+  "normal_game_exit": true,
+  "controlled_unload": false,
+  "controller_exit": 8,
+  "runner_error": "Semantic component removal/unload not confirmed; exit normally",
+  "renderer_exit": 0,
+  "original_critical_unchanged": true,
+  "launcher_settings_unchanged": true,
+  "proxy_restored": true,
+  "source_sha256": {
+    "tools/remix_runtime/return_addon.cpp": "00c0be084293931311283a466003069e6bbad3556cd3abadbb4d4c22823de910",
+    "tools/remix_runtime/d3d9_game_receiver.h": "ef44264ec366d58d614e9adb85c2dbb909ef3f9d04bda944fb977eb9119c4314",
+    "tools/remix_runtime/scene_frame_buffer.h": "1330eddd0d6844a53b2a1dbb5c56f2aac10c31407a93b74a5adce66ff1912389",
+    "tools/remix_runtime/ship_replacement_compositor.h": "4725c87de53a60d99154d8efd76ce05806775235ce97ae4ec4535bbe2466be19",
+    "tools/native_foreground/shield_controller.h": "76da9f0480ae150a6ff8a54d7a3f1742acb16e1c4a79d4bace49a70e930c58b4",
+    "tests/ship_replacement_tests.cpp": "55fdd3e82dfdbcf236964e34b483c80e1901fb72ceae3c9e1f5900667a707b04"
+  },
+  "last_notices_count": 64,
+  "conclusions": [
+    "0 captured and0 replayed shield draws:the live producer-to-draw join is unproved;fixture PASS is not actual shield preservation",
+    "Current beforePresent transaction composites after native scene/text into a saved flattened picture;pre-ReShade is not pre-native-UI",
+    "Historical native shields test depth but do not write it;final depth cannot restore their lost blended contribution",
+    "Pause-text draw/state path is not joined in this capture;sponsor overlap plus current code supports late-ordering diagnosis",
+    "Existing unused DepthCompositor writes SV_Depth to native8MSAA target;synthetic later near/far/depth-disabled UI ordering tests exist",
+    "Native helper004103E2 already identified as generic attached-trait dispatcher in earlier inventory;not a newly unknown helper",
+    "No global opaque-then-transparent phase assumed:historical captures show per-owner interleaving",
+    "Earlier insertion still needs a real producer/batch-flush/native-target boundary and matching output readiness;moving callback or using N-1 pixels on N native geometry is not established"
+  ],
+  "next": "Park shield replay. Trace/admit returned colour+physical depth at the actual selected mesh/native draw point before relevant native effects and UI;reuse capture/assets/transport,qualify exact-source readiness separately. Resolve controlled-unload failure before next sponsor run."
+}

@@ -43,7 +43,8 @@ int main(){try{
  replacement::begin(*store,164,7);test(!replacement::sample(*store,100,receipt));
  replacement::Policy policy;test(!policy.miss());policy.completed();policy.mode=replacement::Active;
  test(policy.miss()&&policy.repeats==1&&policy.mode==replacement::Active);test(policy.miss()&&policy.repeats==2&&policy.mode==replacement::Recovering);
- policy.nativeRecovery();test(policy.mode==replacement::LatchedOriginal);policy.completed();test(policy.mode==replacement::LatchedOriginal);
+ policy.nativeRecovery();test(policy.mode==replacement::NativeFallback);policy.completed();test(policy.mode==replacement::NativeFallback);
+ policy.nativeRecovery(true);test(policy.mode==replacement::LatchedOriginal);policy.completed();test(policy.mode==replacement::LatchedOriginal);
  ComPtr<ID3D11Device> device;ComPtr<ID3D11DeviceContext> context;
  ship_triplet::checked(D3D11CreateDevice(nullptr,D3D_DRIVER_TYPE_HARDWARE,nullptr,0,nullptr,0,D3D11_SDK_VERSION,&device,nullptr,&context),"device");
  D3D11_TEXTURE2D_DESC desc{};desc.Width=1920;desc.Height=1080;desc.MipLevels=desc.ArraySize=1;desc.Format=DXGI_FORMAT_B8G8R8A8_UNORM;desc.SampleDesc.Count=1;
@@ -64,7 +65,7 @@ int main(){try{
  tx.show(back.Get());test(read(device.Get(),context.Get(),back.Get())==finished); // No accumulated grading.
  test(!tx.history.slot(0).valid);test(tx.committedFrame==101);
  bool rejected=false;try{tx.commit(0,1050);}catch(const std::runtime_error&){rejected=true;}test(rejected);
- tx.native(back.Get(),102,1050);tx.policy.nativeRecovery();test(tx.policy.mode==replacement::LatchedOriginal);
+ tx.native(back.Get(),102,1050);tx.policy.nativeRecovery();test(tx.policy.mode==replacement::NativeFallback);
  context->ClearState();context->Flush();ship_triplet::checked(device->GetDeviceRemovedReason(),"healthy");
  std::cout<<"Player replacement transaction PASS checks="<<checks<<" bits="<<sizeof(void*)*8<<" missing_output_hole_prevented=1 offscreen_commit=1 repeat_pixels_exact=1 ABI_layout=1\n";
 }catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}return 0;}

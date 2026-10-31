@@ -1,0 +1,28 @@
+{
+  "run": 218,
+  "status": "ISOLATED RESOURCE RETENTION QUALIFIED; LIVE SHIELD ASSEMBLY OPEN",
+  "checks": 53,
+  "build": "MSVC x64 C++20 /W4 /WX /O2 /fp:precise",
+  "native_size_synthetic_packet_bytes": 1015808,
+  "packet_cap_bytes": 4194304,
+  "files": {
+    "tools/native_foreground/retained_resources.h": "F9581E7E0FECABD2007CE762F2BB5D09BCBB358B89E015F7E8C2911EA9768C70",
+    "tools/native_foreground/producer_scope.h": "16DE14C08DB9032A8D78D5FEB88A5547F523265253CFAF550F69B05771C80503",
+    "tools/native_foreground/retained_resources_tests.cpp": "4D782C3A841228D747C5AAD5BC2902BE458D8DC6C5E3F7F982B9B815BF11486A",
+    "tools/native_foreground/README.md": "06D78A5D11E68E5A2949B53F3195ECE10CB778F482651CBF231723C1937CC83F"
+  },
+  "executable_sha256": "A3744C63BC2B522254870D87F1D78393FCA3FF4E7E5457D6251F5AAD617B4BD9",
+  "settings": {
+    "tools/remix_runtime/config/rendering.toml": "78177E1D40498186B60C7912B46B897BA08D332DF4A24EA41F92C042E89202C5",
+    "tools/remix_runtime/config/lights.toml": "1DBB9BF007927DA891EAFBF93BB3F3C015080BA98F23E375997F881D85861FE0"
+  },
+  "production_hook_changes": false,
+  "new_sfc_run": false,
+  "remaining": [
+    "original draw pipeline bindings",
+    "native producer/resource to translated view join",
+    "masked same-source-frame foreground/depth assembly",
+    "output resource reuse within 128MiB"
+  ],
+  "test_output": "Native foreground retained-resource GPU PASS 53 checks; historical-size packet 1015808 bytes; no production hooks enabled\n"
+}

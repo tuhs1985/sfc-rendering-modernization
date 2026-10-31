@@ -1,0 +1,150 @@
+{
+  "run": 220,
+  "date": "2026-10-28",
+  "result": "OFFLINE_NATIVE_SHIELD_CONNECTION_READY_NOT_SFC_PASS",
+  "sfc_launched": false,
+  "fixtures": {
+    "steady": {
+      "folder": "artifacts/remix-runtime/runs/20261028-120527-891841-return-fixture",
+      "sha256": "2e34d0fc8192c8984959f164467fc85981651087dd4cd238bad91a2c7176dcf7",
+      "window": {
+        "frames": 600,
+        "draws": 599
+      },
+      "foreground": {
+        "flags": 24,
+        "eligible_frames": 604,
+        "partial_frames": 7,
+        "captured_draws": 1383,
+        "replayed_draws": 1200,
+        "retained_bytes": 344,
+        "setup_rejections": 0,
+        "hooks_restored": 1,
+        "last_presentation_flags": 24,
+        "pid": 45784,
+        "session": [
+          1881253567,
+          3469296882,
+          2628617610,
+          1595694493
+        ],
+        "packed_native_depth": "D24S8;invalid bit2,replacement bit0",
+        "output_budget_bytes": 132710400
+      },
+      "replacement": {
+        "native_capable": 1,
+        "renderer_capable": 1,
+        "suppressed": 603,
+        "rejected": 0,
+        "committed": 600,
+        "repeated": 2,
+        "recovered": 0,
+        "native_stop": 0,
+        "native_restored_frame": 0,
+        "repeat_max": 1,
+        "native_frame": 201014,
+        "rearmed": 0,
+        "native_presentations": 0,
+        "recovery_reason": 0,
+        "protocol": 2,
+        "mode": 2,
+        "generation": 2,
+        "owner": 3,
+        "revision": 3,
+        "epoch": 3,
+        "reason": 2147483655,
+        "pid": 45784,
+        "session": [
+          1881253567,
+          3469296882,
+          2628617610,
+          1595694493
+        ]
+      },
+      "verified_pixel_samples": 3
+    },
+    "faults": {
+      "folder": "artifacts/remix-runtime/runs/20261028-120555-006103-return-fixture",
+      "sha256": "50463a8d37714543072e5803f6fa3a5a5cae5fc50854b96ffdc69bacd70b845a",
+      "window": {
+        "frames": 600,
+        "draws": 382
+      },
+      "foreground": {
+        "flags": 24,
+        "eligible_frames": 395,
+        "partial_frames": 6,
+        "captured_draws": 809,
+        "replayed_draws": 766,
+        "retained_bytes": 0,
+        "setup_rejections": 0,
+        "hooks_restored": 1,
+        "last_presentation_flags": 24,
+        "pid": 47212,
+        "session": [
+          2540502646,
+          1755660502,
+          2902564516,
+          790717346
+        ],
+        "packed_native_depth": "D24S8;invalid bit2,replacement bit0",
+        "output_budget_bytes": 132710400
+      },
+      "replacement": {
+        "native_capable": 1,
+        "renderer_capable": 1,
+        "suppressed": 393,
+        "rejected": 1,
+        "committed": 383,
+        "repeated": 6,
+        "recovered": 3,
+        "native_stop": 1,
+        "native_restored_frame": 200627,
+        "repeat_max": 2,
+        "native_frame": 201006,
+        "rearmed": 2,
+        "native_presentations": 2,
+        "recovery_reason": 2,
+        "protocol": 2,
+        "mode": 2,
+        "generation": 6,
+        "owner": 3,
+        "revision": 3,
+        "epoch": 3,
+        "reason": 2147483655,
+        "pid": 47212,
+        "session": [
+          2540502646,
+          1755660502,
+          2902564516,
+          790717346
+        ]
+      },
+      "verified_pixel_samples": 3
+    }
+  },
+  "focused_gpu_checks": 286,
+  "abi_checks": 17,
+  "python_tests": 583,
+  "preflight": "Read-only preflight PASS. No game/renderer started.",
+  "settings": {
+    "rendering": "78177E1D40498186B60C7912B46B897BA08D332DF4A24EA41F92C042E89202C5",
+    "lights": "1DBB9BF007927DA891EAFBF93BB3F3C015080BA98F23E375997F881D85861FE0"
+  },
+  "clients": {
+    "C:\\Games\\Taldren Software Inc\\Starfleet Command Orion Pirates\\StarFleetOP.exe": "4D65761D7DD69EF1504070261B81E9C200C0AF18105033E1C4D2222C62320C29",
+    "C:\\Project\\SFC-Remix-Return-Test\\StarFleetOP.exe": "4D65761D7DD69EF1504070261B81E9C200C0AF18105033E1C4D2222C62320C29"
+  },
+  "aggregate_evidence_bytes": 19057028335,
+  "evidence_cap": 20000000000,
+  "output_budget_bytes": 132710400,
+  "native_snapshot_cap_bytes": 33554432,
+  "limitations": [
+    "Selected player shield context only;not all effects or other ships",
+    "Direct indexed rigid VS/PS subset,full sample mask,qualified pixel-frequency shader",
+    "Single-sample shield replay does not establish exact native8MSAA edge equivalence",
+    "Current-user bounded source storage;addon code pinned to process lifetime",
+    "Actual SFC shield appearance/camera/suppression/unload checkout pending",
+    "Older separate tuning/additive qualifications not renewed by this test"
+  ]
+}

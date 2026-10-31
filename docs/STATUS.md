@@ -1,7 +1,7 @@
 ---
 title: SFC Modernization — Status Tracker
-updated: 2026-10-27
-checkpoint: Run210 interface audit documented; player-replacement checkout remains ready
+updated: 2026-10-31
+checkpoint: Run224 clean observation; early output timing measured
 tags:
   - sfc-modernization
   - project-status
@@ -10,19 +10,21 @@ tags:
 # SFC Modernization — Status Tracker
 
 > [!summary] Where we are
-> We can take live ships, textures, camera and lighting information from SFC, render through Remix, and put the result inside the game window. Original drawing remains intact. The API experiment is parked. Current work reduces loading pauses while preserving the fresh-asset pipeline and accepted appearance.
+> We can take live ships, textures, camera and lighting information from SFC, render through Remix, and put the result inside the game window. Gameplay and tactical UI remain native; the qualified player mesh can be replaced. The API experiment is parked. Current work reduces loading pauses while preserving the fresh-asset pipeline and accepted appearance.
 
-**Current checkpoint:** ready for your first player-ship replacement test. The background and Remix ship are finished together before display. The final standalone replacement run delivered600of600frames, and intentional late-output tests recovered safely. This is not yet a successful in-game replacement claim.
+**Current checkpoint:** the observation run succeeded and cleaned up correctly. We can see SFC's scene colour/depth targets and later effects drawing. The matching Remix image is produced roughly9ms after the early ship boundary, although usually before final display. Moving the existing compositor earlier alone cannot fix this; synchronization is the next task. Shield replay stays parked. [Run224](runs/2026-10-31-codex-native-insertion-timing-review.md).
 
-**Your settings:** current lighting/rendering values are unchanged. The existing tuning launcher stays available. R3 remains a historical rollback reference.
+**Your settings:** lighting, materials, images, quality and reflections are unchanged. Registry lettering stays solid through the existing hull-depth fix.
 
-**Validation:** final replacement qualification, normal/material/tuning regressions and both launcher preflights pass. One material-loading control had a brief startup interruption; its identical repeat passed, and the limitation is recorded. No game launched. Sponsor authorized committing and pushing this reviewed checkpoint.
+**Validation:** you confirmed normal gameplay, HUD, targeting and controls during camera rotations, pause and shield damage. This run recorded useful data with no ring drops. Hooks were removed, the component unloaded and the copied setup restored. No original ship was suppressed. Settings/client files unchanged. No further discovery run needed to confirm the timing gap.
 
 **Interface audit:** capture/identity foundations are reusable, but asset preparation still assumes Remix and output sharing assumes D3D11. Renderer interchangeability stays open; no refactor was made. [Findings](<C:/Project/SFC-Modernize Engine/docs/reconnaissance/2026-10-27-renderer-boundary-audit.md>).
 
-**Next action:** run start_d3d9_player_replacement_session.ps1 using your F-CA against a different model. Expect one player ship at its original position, no offset copy. Move, turn, rotate/switch cameras and play briefly with weapons/shields; exit normally when requested. Review the captured result before expanding replacement.
+**Alpha release scope:** replacement, weapon lighting, damage textures and a fast-loading destruction/break model are required. LOD models are optional. These are recorded requirements, not completed features. [Sponsor direction](<C:/Project/SFC-Modernize Engine/docs/decisions/2026-10-27-alpha-release-scope.md>).
 
-This is a readable tracker, not execution authority. Updated through **Run210, October27,2026 (America/New_York)**. Repository handoff and run records control resumption.
+**Next action:** qualify where returned ship colour and depth can enter the actual native scene before effects/text. Check matching-frame readiness there and fix the unload issue. No new game run ready yet;keep the proven capture/assets/camera work.
+
+Updated through **Run221,October29,2026**. Repository handoff and run records control resumption.
 
 ## Status key
 
@@ -34,16 +36,26 @@ This is a readable tracker, not execution authority. Updated through **Run210, O
 
 ## Current work
 
+### SFC-19 — Alpha mod release requirements
+
+**RECORDED / OPEN — release scope, not authorization to expand the current test.**
+
+- **Required:** ship replacement; weapon-generated lighting applied to replacements; damage textures read/applied; destruction/break model with fast loading.
+- Damage textures are not currently read by this path, per sponsor. Break-model transition and loading need qualification; no arbitrary timing number set.
+- **Break-model finding:** `_brk.mod` exists and SFC already loaded FCA/KFF break assets during setup, before tactical rendering. We may prepare their fresh in-memory data while the ship is alive; breakup-piece movement and transition remain unqualified. [Run212](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-27-codex-break-model-inspection.md>).
+- **Optional:** LOD models. Their absence alone does not block alpha release.
+- Automatic player-replacement recovery is the next checkout after initial replacement was observed. No alpha readiness or formal milestone PASS claimed.
+- [Alpha scope](<C:/Project/SFC-Modernize Engine/docs/decisions/2026-10-27-alpha-release-scope.md>).
+
 ### SFC-18 — Player-ship replacement
 
-**READY FOR SPONSOR CHECKOUT — in-game result pending.**
+**REGISTRY FIX CONFIRMED; SHIELD REPLAY FAILED; NATIVE INSERTION NEXT.**
 
-- Background/HUD and replacement ship commit together as one completed picture.
-- Unique configured F-CA, zero offset; use a different enemy model. An engine player flag is not proved.
-- Capture precedes selected mesh suppression. Other ships/effects/UI stay native.
-- Standalone600/600delivery, bounded missed-output recovery, final qualifications and launcher preflights pass.
-- Current appearance preserved; tuning workflow retained. No gameplay or milestone PASS claimed.
-- [Run209](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-27-codex-player-replacement-qualified.md>), [contract](<C:/Project/SFC-Modernize Engine/docs/reconnaissance/player-replacement-transaction.md>).
+- Registry lettering is solid in the accepted game run. Current work preserves the player ship shields over the replacement.
+- Shield replay did not capture/replay actual game draws;that approach is parked.
+- Late insertion also covers pause text. Target actual native scene colour/depth insertion before effects/UI.
+- Reuse depth compositor and capture/assets/state pipeline. Boundary ownership,timing and controlled unload remain to qualify.
+- [Run221](runs/2026-10-29-codex-native-insertion-reassessment.md),[replacement contract](reconnaissance/player-replacement-transaction.md).
 
 ### SFC-15 — Remaining rendering families
 

@@ -1,0 +1,175 @@
+{
+  "run": 215,
+  "date": "2026-10-27",
+  "result": "OFFLINE_REGISTRY_DEPTH_FIX_READY_NOT_SFC_PASS",
+  "sfc_launched": false,
+  "comparison": {
+    "original_covered": 15202,
+    "physical_covered": 15267,
+    "reference_covered": 15267,
+    "holes_restored": 65,
+    "holes_total": 65,
+    "extra_vs_reference": 0,
+    "missing_vs_reference": 0,
+    "depth_error_mean": 2.238990504110916e-07,
+    "depth_error_max": 1.6093254089355469e-06
+  },
+  "color_comparison": {
+    "color_byte_exact": false,
+    "mean_abs_byte_difference": 0.022867838541666668,
+    "different_bytes": 22587,
+    "original_sha256": "3a5565bacb82e6ccdf1de8272bc14328ea87f5404ba37f7f88afdd101f7af2eb",
+    "fixed_sha256": "c009c0a17bad260c97e046faa1ee87291ee8a3c1b4b52c606f2a028490c3e4c5"
+  },
+  "gpu_benchmark": "PHYSICAL_HULL_DEPTH enabled=1 reflected_depth_used=0 scratch_bytes=8294400\nHULL_GPU batch=0 mean_us=12.634\nHULL_GPU batch=1 mean_us=4.48\nHULL_GPU batch=2 mean_us=4.378\nHULL_GPU batch=3 mean_us=4.413\nHULL_GPU batch=4 mean_us=4.403\nHULL_GPU batch=5 mean_us=4.414\nHULL_GPU batch=6 mean_us=4.384\nHULL_GPU batch=7 mean_us=4.416\nHULL_GPU batch=8 mean_us=4.414\nHULL_GPU_MEDIAN us=4.414 size=1920x1080 vertices=19110 indices=19110 dsv_bytes=8294400 total_controlled_bytes=132710400\nPHYSICAL_HULL_SUMMARY batches=288 draws=288 uploaded_bytes=687960\n",
+  "fixtures": {
+    "steady": {
+      "folder": "artifacts\\remix-runtime\\runs\\20261028-024505-814819-return-fixture",
+      "error": null,
+      "fixture_exit": 0,
+      "host_exit": 0,
+      "window": [
+        600,
+        599
+      ],
+      "replacement": {
+        "native_capable": 1,
+        "renderer_capable": 1,
+        "suppressed": 603,
+        "rejected": 0,
+        "committed": 600,
+        "repeated": 2,
+        "recovered": 0,
+        "native_stop": 0,
+        "native_restored_frame": 0,
+        "repeat_max": 1,
+        "native_frame": 201020,
+        "rearmed": 0,
+        "native_presentations": 0,
+        "recovery_reason": 0,
+        "protocol": 2,
+        "mode": 2,
+        "generation": 2,
+        "owner": 3,
+        "revision": 3,
+        "epoch": 3,
+        "reason": 2147483655,
+        "pid": 4472,
+        "session": [
+          3873463251,
+          4001645103,
+          2718600868,
+          3722631944
+        ]
+      },
+      "state_restored": true
+    },
+    "faults": {
+      "folder": "artifacts\\remix-runtime\\runs\\20261028-024533-760429-return-fixture",
+      "error": null,
+      "fixture_exit": 0,
+      "host_exit": 0,
+      "window": [
+        600,
+        384
+      ],
+      "replacement": {
+        "native_capable": 1,
+        "renderer_capable": 1,
+        "suppressed": 393,
+        "rejected": 1,
+        "committed": 385,
+        "repeated": 4,
+        "recovered": 3,
+        "native_stop": 1,
+        "native_restored_frame": 200639,
+        "repeat_max": 2,
+        "native_frame": 201018,
+        "rearmed": 2,
+        "native_presentations": 2,
+        "recovery_reason": 2,
+        "protocol": 2,
+        "mode": 2,
+        "generation": 6,
+        "owner": 3,
+        "revision": 3,
+        "epoch": 3,
+        "reason": 2147483655,
+        "pid": 51672,
+        "session": [
+          1443205032,
+          1927629430,
+          2610080204,
+          311138436
+        ]
+      },
+      "state_restored": true
+    },
+    "normal": {
+      "folder": "artifacts\\remix-runtime\\runs\\20261028-024603-409772-return-fixture",
+      "error": null,
+      "fixture_exit": 0,
+      "host_exit": 0,
+      "window": [
+        600,
+        591
+      ],
+      "replacement": null,
+      "state_restored": true
+    },
+    "initial": {
+      "folder": "artifacts\\remix-runtime\\runs\\20261028-024938-237468-return-fixture",
+      "error": null,
+      "fixture_exit": 0,
+      "host_exit": 0,
+      "window": [
+        600,
+        596
+      ],
+      "replacement": null,
+      "state_restored": true
+    },
+    "late": {
+      "folder": "artifacts\\remix-runtime\\runs\\20261028-025008-450721-return-fixture",
+      "error": null,
+      "fixture_exit": 0,
+      "host_exit": 0,
+      "window": [
+        600,
+        596
+      ],
+      "replacement": null,
+      "state_restored": true
+    },
+    "tuning": {
+      "folder": "artifacts\\remix-runtime\\runs\\20261028-025049-420003-return-fixture",
+      "error": null,
+      "fixture_exit": 0,
+      "host_exit": 0,
+      "window": [
+        600,
+        596
+      ],
+      "replacement": null,
+      "state_restored": true
+    }
+  },
+  "settings": {
+    "rendering": "78177E1D40498186B60C7912B46B897BA08D332DF4A24EA41F92C042E89202C5",
+    "lights": "1DBB9BF007927DA891EAFBF93BB3F3C015080BA98F23E375997F881D85861FE0"
+  },
+  "aggregate_bytes": 18888917604,
+  "geometry_sharing": "One immutable D3D11 depth mesh per resident content;32 bounded pose submissions;256MiB retained cap includes extra buffers",
+  "output_resources_bytes": 132710400,
+  "scratch_depth_bytes": 8294400,
+  "notes": [
+    "First physical replay misapplied native viewport;retained as failed attempt;corrected full-output mapping matches all15267referencepixels.",
+    "One late fixture refused pre-launch1024MiB scratch reservation;completed initial fixture archived and restored only for comparison;retry passed.",
+    "Current lighting/material/image/AA controls unchanged;PSRR/PSTR remain enabled/default.",
+    "Vendor device-objects warning retained;owned processes exited.",
+    "Final-source source-locked repetition after trailing-blank-line correction;compiled host hash unchanged.",
+    "Final-repeat initial reservation also refused before launch;older closed-fixture DLL/rollback copies SHA-verified archived,then remaining checks passed.",
+    "Final source replacement window599/600;earlier identical-binary check600/600.No zero-omission claim.",
+    "Current AA-off baseline tested;temporal jitter/coverage edges not newly qualified."
+  ]
+}

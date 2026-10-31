@@ -24,6 +24,8 @@
 #include "m1_live_bridge.h"
 #include "m1_live_scene.h"
 #include "../d3d9_proof/replacement_transaction.h"
+#include "../native_foreground/source_notice.h"
+#include "../native_insertion/probe_wire.h"
 
 namespace {
 
@@ -44,6 +46,8 @@ constexpr std::size_t kEventCapacity = 100000;
 constexpr std::size_t kOwnerCapacity = 32;
 constexpr std::size_t kThreadCapacity = 8;
 replacement::Store* g_replacement=nullptr;
+native_foreground::source_notice::Store* g_foreground_notice=nullptr;
+native_insertion::Store* g_insertion_probe=nullptr;
 
 enum EventKind : DWORD {
     kScene = 0,
@@ -1031,7 +1035,9 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
         observe_mesh_export(state,event,outcome,safe_copy);
         if(outcome==1&&g_live_scene_mode&&g_live_scene.persistent)
             g_live_scene.updatePersistent(event.ecx,static_cast<DWORD>(g_frame),static_cast<DWORD>(GetTickCount64()-g_gate_tick),safe_copy);
-        if(g_replacement&&state){
+        if(g_insertion_probe&&g_live_scene.cohort.store&&g_live_scene.cohort.pending.frame==static_cast<DWORD>(g_frame))
+            native_insertion::offered(*g_insertion_probe,static_cast<DWORD>(g_frame),g_live_scene.cohort.pending.offered);
+        if(g_replacement&&state&&!g_insertion_probe){
             replacement::Control c{};
             if(replacement::read(g_replacement->control,c)&&c.owner==state->owner_id&&c.mode==replacement::Active){
                 DWORD revision=0;for(const auto& o:g_live_scene.owners)if(o.identity.owner==state->owner_id&&!o.retired)revision=o.revision;
@@ -1119,6 +1125,8 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
         event.origin = 0x0069E300;
         if (g_gate) {
             DWORD frame = static_cast<DWORD>(InterlockedIncrement(&g_frame));
+            if(g_insertion_probe&&g_live_scene.directSource.store)native_insertion::begin(*g_insertion_probe,frame,
+                static_cast<uint64_t>(InterlockedCompareExchange64(&g_live_scene.directSource.store->header.selected,0,0)));
             if(g_replacement)replacement::begin(*g_replacement,frame,thread_id);
             if(g_live_scene_mode){g_live_scene.directSource.begin(frame);sfc_calibration::begin(g_live_scene.calibration,frame);}
             if (frame > 2) {
@@ -1182,6 +1190,11 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
             }
             bool first_seen = false;
             event.owner_id = observe_owner(event.ship, event.visual, first_seen);
+            if(g_foreground_notice&&g_replacement&&event.owner_id) {
+                DWORD shield=0;
+                if(safe_read32(event.ship+0x1BC,shield))native_foreground::source_notice::offer(
+                    *g_foreground_notice,*g_replacement,static_cast<DWORD>(g_frame),event.ship,shield,event.owner_id,thread_id);
+            }
             if (state && event.owner_id) {
                 state->owner_id = event.owner_id;
                 state->ship = event.ship;
@@ -1257,6 +1270,7 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
         const bool mainline = event.return_address == kVisualMainlineReturn &&
             event.model0_vtable == kModel0Vtable &&
             event.visual_vtable == kVisualVtable && event.owner_id;
+        if(g_insertion_probe&&mainline)native_insertion::model(*g_insertion_probe,true,event.owner_id,event.model0,event.source,event.manager);
         if(g_replacement&&!mainline){replacement::Control c{};if(replacement::read(g_replacement->control,c)&&c.mode==replacement::Active&&c.owner==event.owner_id)replacement::invalidate(*g_replacement,static_cast<DWORD>(g_frame));}
         if (event.return_address == kKnownExceptionReturn) {
             InterlockedIncrement(&g_exception_509843);
@@ -1321,6 +1335,8 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
     } else if (kind == kVisualExit) {
         event.origin = 0x0042FDD5;
         if (state) {
+            if(g_insertion_probe&&state->model_scope)native_insertion::model(*g_insertion_probe,false,
+                state->owner_id,state->model0,state->source,state->model_manager);
             if(state->surface_pending && surface_tuple(*state)) {
                 ++g_surface_phases[state->surface_pending-1].parent;
                 state->surface_pending=0;
@@ -1942,6 +1958,8 @@ extern "C" DWORD WINAPI M1StartW(void* parameter) {
     g_persistent_requested=false;
 #endif
     if (InterlockedCompareExchange(&g_running, 0, 0)) return 10;
+    g_foreground_notice=nullptr;
+    g_insertion_probe=nullptr;
     if (!load_config(static_cast<const wchar_t*>(parameter))) return 1;
     if(g_persistent_requested&&g_config.live_channel.empty())return 1;
     const DWORD module_base = reinterpret_cast<DWORD>(GetModuleHandleW(nullptr));
@@ -1990,11 +2008,20 @@ extern "C" DWORD WINAPI M1StartW(void* parameter) {
         if(!g_live_scene_mode && !g_live_bridge.start(g_config.live_channel,g_config.output_dir))return 3;
     }
 #ifndef M1_GATE_ONLY
+    if(native_insertion::requested()){
+        if(!g_live_scene_mode||!g_live_scene.directSource.store||!g_live_scene.cohort.store)return 3;
+        g_insertion_probe=reinterpret_cast<native_insertion::Store*>(g_live_scene.view+native_insertion::Offset);
+        native_insertion::initialize(*g_insertion_probe,reinterpret_cast<DWORD*>(g_live_scene.view)+4,GetCurrentProcessId());
+    }
     if(replacement::requested()){
         if(!g_live_scene_mode||!g_live_scene.persistent||!g_config.enable_wrapper_observation)return 3;
         auto* candidate=reinterpret_cast<replacement::Store*>(g_live_scene.view+replacement::Offset);
         if(!replacement::valid(candidate,reinterpret_cast<DWORD*>(g_live_scene.view)+4,GetCurrentProcessId()))return 3;
         g_replacement=candidate;InterlockedExchange(&g_replacement->native_capable,1);
+        if(native_foreground::source_notice::requested()) {
+            g_foreground_notice=reinterpret_cast<native_foreground::source_notice::Store*>(g_live_scene.view+native_foreground::source_notice::Offset);
+            native_foreground::source_notice::initialize(*g_foreground_notice,candidate->session,GetCurrentProcessId());
+        }
     }
 #endif
 
@@ -2030,6 +2057,12 @@ extern "C" DWORD WINAPI M1Stop(void*) {
             if(static_cast<DWORD>(InterlockedCompareExchange(&g_replacement->native_restored_frame,0,0))<=frame)return 12; // Retain hooks/storage, originals enabled, never unload an unacknowledged frame.
         }
     }
+    if(g_foreground_notice){
+        const auto until=GetTickCount64()+2000;
+        auto* ack=reinterpret_cast<volatile LONG*>(&g_foreground_notice->reserved[7]);
+        while(!InterlockedCompareExchange(ack,0,0)&&GetTickCount64()<until)Sleep(1);
+        if(InterlockedCompareExchange(ack,0,0)!=1)return 12; // Foreground hook worker must restore its own byte gates first.
+    }
     if (!InterlockedExchange(&g_running, 0)) return 11;
     if(g_live_scene.calibration)InterlockedExchange(&g_live_scene.calibration->active,0);
     const ULONGLONG deadline = GetTickCount64() + 5000;
@@ -2042,6 +2075,8 @@ extern "C" DWORD WINAPI M1Stop(void*) {
     if (!suspend_ok) { write_thread_failure("stop"); return 13; }
     const bool restored = restore_hooks(module_base);
     resume_threads(suspended);
+    g_foreground_notice=nullptr;
+    if(g_insertion_probe){InterlockedExchange(&g_insertion_probe->header.stopped,1);g_insertion_probe=nullptr;}
     if(g_replacement){InterlockedExchange(&g_replacement->native_capable,0);g_replacement=nullptr;}
     if(!stop_live())return 12; // Never unload storage while worker remains live.
     const bool wrote = write_outputs(restored);

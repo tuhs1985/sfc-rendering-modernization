@@ -1,0 +1,468 @@
+{
+  "run": 214,
+  "date": "2026-10-27",
+  "status": "CAUSE_REPRODUCED_OFFLINE_NOT_FIXED",
+  "source_game_run": "artifacts/remix-runtime/runs/20261028-020234-504365-in-game",
+  "sfc_launched": false,
+  "game_error": null,
+  "normal_game_exit": true,
+  "gate_clean_unloaded": true,
+  "gate_controller_exit": 0,
+  "renderer_exit": 0,
+  "original_critical_unchanged": true,
+  "launcher_settings_unchanged": true,
+  "cases": [
+    {
+      "case": "actual-complete",
+      "covered": 15202,
+      "restored_against_baseline": 0,
+      "lost_against_baseline": 0,
+      "restored_original_depth_values": [],
+      "job": {
+        "schema": "remix.job.v1",
+        "pid": 50340,
+        "exit_code": 0,
+        "stop_reason": 0,
+        "elapsed_ms": 19453,
+        "console_bytes": 28873,
+        "peak_scratch_bytes": 102364261,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      },
+      "files": {
+        "returned-0-0.raw32": "3a5565bacb82e6ccdf1de8272bc14328ea87f5404ba37f7f88afdd101f7af2eb",
+        "returned-0-1.raw32": "02c727c04453a21c7cc848d40919bb45dd4eac514e8b791697e1a7ca5d5c970e",
+        "returned-0-2.raw32": "528455c8f2979cd481617c21c7867981756b71e5adb4106edb6dbe385bab2017"
+      },
+      "config": "rtx.enableReplacementAssets = False\nrtx.enableRaytracing = True\nrtx.captureInstances = True\nrtx.captureEnableMultiframe = False\nrtx.graphicsPreset = 4\nrtx.integrateIndirectMode = 0\nrtx.enableRayReconstruction = False\nrtx.dlssPreset = 0\nrtx.upscalerType = 0\nrtx.resolutionScale = 1.0\nrtx.enableReplacementMaterials = True\nrtx.enableReplacementMeshes = False\nrtx.initializer.asyncAssetLoading = True\nrtx.enableReplacementAssets = True\n"
+    },
+    {
+      "case": "psr-off",
+      "covered": 15267,
+      "restored_against_baseline": 65,
+      "lost_against_baseline": 0,
+      "restored_original_depth_values": [
+        -1234.0
+      ],
+      "job": {
+        "schema": "remix.job.v1",
+        "pid": 50972,
+        "exit_code": 0,
+        "stop_reason": 0,
+        "elapsed_ms": 19657,
+        "console_bytes": 28753,
+        "peak_scratch_bytes": 102364071,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      },
+      "files": {
+        "returned-0-0.raw32": "b5d4adde72628dc5fe7d30ab6dfd3328c8bdc19de54474a7257132387b50c0af",
+        "returned-0-1.raw32": "1c1758b13bc1e469c822d01f039dc3fec4694c8ef217bb2fd6d96ce296d32f8a",
+        "returned-0-2.raw32": "c98f08f8c9c5eb6deecc05070e628f89f23d7ba4c66274f3ce59a11ad580ad63"
+      },
+      "config": "rtx.enableReplacementAssets = False\nrtx.enableRaytracing = True\nrtx.captureInstances = True\nrtx.captureEnableMultiframe = False\nrtx.graphicsPreset = 4\nrtx.integrateIndirectMode = 0\nrtx.enableRayReconstruction = False\nrtx.dlssPreset = 0\nrtx.upscalerType = 0\nrtx.resolutionScale = 1.0\nrtx.enableReplacementMaterials = True\nrtx.enableReplacementMeshes = False\nrtx.initializer.asyncAssetLoading = True\nrtx.enableReplacementAssets = True\n\nrtx.enablePSRR = False\nrtx.enablePSTR = False\n"
+    },
+    {
+      "case": "reflection-psr-off",
+      "covered": 15267,
+      "restored_against_baseline": 65,
+      "lost_against_baseline": 0,
+      "restored_original_depth_values": [
+        -1234.0
+      ],
+      "job": {
+        "schema": "remix.job.v1",
+        "pid": 48784,
+        "exit_code": 0,
+        "stop_reason": 0,
+        "elapsed_ms": 19422,
+        "console_bytes": 29133,
+        "peak_scratch_bytes": 102364830,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      },
+      "files": {
+        "returned-0-0.raw32": "8f4cbeae48b5152ee8d878084c06e885fa62b97752102e78a88a07ad252894d0",
+        "returned-0-1.raw32": "1c1758b13bc1e469c822d01f039dc3fec4694c8ef217bb2fd6d96ce296d32f8a",
+        "returned-0-2.raw32": "c98f08f8c9c5eb6deecc05070e628f89f23d7ba4c66274f3ce59a11ad580ad63"
+      },
+      "config": "rtx.enableReplacementAssets = False\nrtx.enableRaytracing = True\nrtx.captureInstances = True\nrtx.captureEnableMultiframe = False\nrtx.graphicsPreset = 4\nrtx.integrateIndirectMode = 0\nrtx.enableRayReconstruction = False\nrtx.dlssPreset = 0\nrtx.upscalerType = 0\nrtx.resolutionScale = 1.0\nrtx.enableReplacementMaterials = True\nrtx.enableReplacementMeshes = False\nrtx.initializer.asyncAssetLoading = True\nrtx.enableReplacementAssets = True\n\nrtx.enablePSRR = False\nrtx.enablePSTR = True\n"
+    }
+  ],
+  "texture_alpha": [
+    {
+      "file": "texture-0.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-1.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-10.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 1024
+    },
+    {
+      "file": "texture-11.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-12.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-13.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 1344
+    },
+    {
+      "file": "texture-14.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-15.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 2
+    },
+    {
+      "file": "texture-16.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-17.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-18.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-19.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-2.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-20.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-21.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 24
+    },
+    {
+      "file": "texture-22.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-23.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-24.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-25.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-26.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-27.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-28.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 1240
+    },
+    {
+      "file": "texture-29.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 14
+    },
+    {
+      "file": "texture-3.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-30.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-31.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-32.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-33.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 8824
+    },
+    {
+      "file": "texture-34.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 160
+    },
+    {
+      "file": "texture-35.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-36.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-37.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-38.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 5504
+    },
+    {
+      "file": "texture-39.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 1240
+    },
+    {
+      "file": "texture-4.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-40.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-41.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 45996
+    },
+    {
+      "file": "texture-42.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-43.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 52
+    },
+    {
+      "file": "texture-44.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-45.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-46.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-47.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-48.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-49.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-5.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-50.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-51.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 1616
+    },
+    {
+      "file": "texture-52.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-53.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 1548
+    },
+    {
+      "file": "texture-54.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-55.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-6.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-7.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-8.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 0
+    },
+    {
+      "file": "texture-9.bin",
+      "alpha_min": 255,
+      "alpha_max": 255,
+      "black_pixels": 244
+    }
+  ],
+  "pinned_source_commit": "0a6cd5b1ee814ec390c358e0c9c32ece8895ddc0",
+  "limitations": [
+    "Frozen captured first frame with no replayed native lights;not exact live final color.",
+    "Required offline coverage offset -0.0001 only;identical in every case.",
+    "Earlier aligned native hull masking is a hypothesis;not established from old image pairs.",
+    "Production settings,host,compositor and original assets unchanged.",
+    "Initial fixture attempts used dispatcher DLL then omitted referenced assets/offset;preserved as failed harness attempts,not pipeline failures."
+  ],
+  "replacement": {
+    "native_capable": 0,
+    "renderer_capable": 1,
+    "suppressed": 5301,
+    "rejected": 1,
+    "committed": 5291,
+    "repeated": 6,
+    "recovered": 3,
+    "native_stop": 1,
+    "native_restored_frame": 5520,
+    "repeat_max": 2,
+    "native_frame": 7194,
+    "rearmed": 2,
+    "native_presentations": 2,
+    "recovery_reason": 1,
+    "protocol": 2,
+    "mode": 2,
+    "generation": 6,
+    "owner": 2,
+    "revision": 2,
+    "epoch": 1,
+    "reason": 2147483655,
+    "pid": 24340,
+    "session": [
+      393263443,
+      2663599652,
+      3042387641,
+      2817265906
+    ]
+  }
+}

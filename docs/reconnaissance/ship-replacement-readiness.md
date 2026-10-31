@@ -1,6 +1,32 @@
 # One-ship return integration — readiness at 2026-10-17
 
-## Current — 2026-10-27 Run209: READY for sponsor player-replacement test
+## Current — Run215 physical hull depth, 2026-10-27
+
+Returned colour remains Remix-rendered, including reflections. The existing R32
+normalized-depth and union-coverage outputs now come from an adapter-owned
+physical hull pass over the same cached meshes/poses; vendor PSR virtual depth
+is not a physical hull mask. Full-output projection precedes the existing native
+viewport mapping once. No wire layout,source-frame matching,suppression,lease or
+fallback-policy change. New depth buffer is included in the128MiB output budget;
+auxiliary cached geometry is charged to256MiB resident budget. Opaque rigid
+triangles only. [Run215](../runs/2026-10-27-codex-physical-hull-depth-fix.md) records
+captured-pixel/native/GPU/recovery qualification; sponsor visual checkout pending.
+Older statements assuming exported Remix depth always means hull are superseded.
+
+
+## Current — Run213, 2026-10-27: temporary fallback and automatic return
+
+Initial player replacement was observed in gameplay; ordinary camera/delivery
+gaps no longer permanently disable it. Protocol2 restores intact native drawing,
+then automatically primes fresh paired output at a new generation and resumes.
+Explicit shutdown remains disabled. Exact matching and resource ownership stay.
+[Run213](../runs/2026-10-27-codex-player-replacement-auto-recovery.md) and
+[v2 transaction](player-replacement-transaction.md) supersede old ordinary-failure
+latch descriptions. Offline/native/GPU/legacy/tuning gates pass; sponsor recovery
+and controlled-unload checkout remain pending. Same launcher/current settings.
+
+
+## Historical — 2026-10-27 Run209: READY for sponsor player-replacement test
 
 Final-source replacement, existing overlay/material/tuning qualifications and
 both read-only launcher preflights pass. Current sponsor settings preserved.

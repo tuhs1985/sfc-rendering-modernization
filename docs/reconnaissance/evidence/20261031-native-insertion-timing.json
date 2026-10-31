@@ -1,0 +1,79 @@
+{
+  "run": "artifacts/remix-runtime/runs/20261031-042154-201204-in-game",
+  "source_sha256": "b9e55e5170b931e65b1f31abb340de55e9519676e5428fe80f2259cacdace030",
+  "raw_records": 65536,
+  "raw_seconds": 80.6219742,
+  "all_events": 93464,
+  "raw_detail_omitted": 27928,
+  "ring_drops": 0,
+  "joined_outputs": 4836,
+  "comparisons": {
+    "source_published": {
+      "publication_minus_boundary_ms": {
+        "n": 4836,
+        "min": 9.0043,
+        "median": 10.1469,
+        "p95": 11.3268,
+        "max": 23.5007
+      },
+      "published_by_boundary": 0,
+      "published_after_boundary": 4836
+    },
+    "model_end": {
+      "publication_minus_boundary_ms": {
+        "n": 4701,
+        "min": 8.0824,
+        "median": 9.3003,
+        "p95": 10.5533,
+        "max": 22.7103
+      },
+      "published_by_boundary": 0,
+      "published_after_boundary": 4701
+    },
+    "first_after_readonly": {
+      "publication_minus_boundary_ms": {
+        "n": 4380,
+        "min": 8.139,
+        "median": 9.2719,
+        "p95": 10.3022,
+        "max": 13.7297
+      },
+      "published_by_boundary": 0,
+      "published_after_boundary": 4380
+    },
+    "present": {
+      "publication_minus_boundary_ms": {
+        "n": 4836,
+        "min": -6.6271,
+        "median": -5.2437,
+        "p95": -3.9103,
+        "max": 8.0625
+      },
+      "published_by_boundary": 4814,
+      "published_after_boundary": 22
+    }
+  },
+  "cleanup": {
+    "error": null,
+    "normal_game_exit": true,
+    "gate_clean_unloaded": true,
+    "gate_controller_exit": 0,
+    "renderer_exit": 0,
+    "original_critical_unchanged": true,
+    "broad_proxy_restored": true
+  },
+  "identities": [
+    {
+      "owner": 2,
+      "revision": 2,
+      "records": 65536
+    }
+  ],
+  "publication_clock": "Packet.published_qpc is upstream output_producer.h publication, preserved by game_output_writer.h. Game-side GPU copy/fence/READY occurs later. Compared deltas are conservative lower bounds on usable game-output lateness.",
+  "limitations": [
+    "First two draws per phase only;read-only depth draws not independently exclusively identified as shield.",
+    "No full pose/camera/hash/GPU-completion proof;publication timing cannot grant replacement authority.",
+    "All-event readiness summary contains post-stop native callbacks;raw prefix and matching Present boundaries used for timing joins.",
+    "8MiB raw detail cap reached;no ring drops;later detail omitted,summary preserved."
+  ]
+}

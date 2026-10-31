@@ -13,6 +13,7 @@
 #include "depth_search_wire.h"
 #include "broad_trace.h"
 #include "source_timing_fixture.h"
+#include "../native_foreground/shield_fixture.h"
 #include "../d3d9_proof/game_output_wire.h"
 #include "../d3d9_proof/synchronized_frame.h"
 using Microsoft::WRL::ComPtr;
@@ -125,6 +126,9 @@ struct Scene {
   void resize(){context->ClearState();target.Reset();width=1024;height=768;check(swap->ResizeBuffers(1,width,height,DXGI_FORMAT_B8G8R8A8_UNORM,0),"fixture resize");targetView();}
   void clear(){
     const float blue[]={0.02f,0.05f,0.3f,1};context->ClearRenderTargetView(target.Get(),blue);
+    restoreState();
+  }
+  void restoreState(){
     const float factor[]={0.1f,0.2f,0.3f,0.4f};context->OMSetBlendState(blend.Get(),factor,0xFFFFFFFA);context->OMSetDepthStencilState(depth.Get(),42);
     context->RSSetState(raster.Get());D3D11_VIEWPORT viewport{3,4,static_cast<float>(width-10),static_cast<float>(height-20),0.2f,0.8f};context->RSSetViewports(1,&viewport);
     const D3D11_RECT scissor{10,20,500,400};context->RSSetScissorRects(1,&scissor);
@@ -153,8 +157,11 @@ struct Scene {
     if(expectedScene){DWORD actual[2]{};memcpy(&actual[0],static_cast<BYTE*>(p.pData)+4*p.RowPitch+400,4);memcpy(&actual[1],static_cast<BYTE*>(p.pData)+(height-5)*p.RowPitch+400,4);
       const bool exact=actual[0]==(0xff000000u|(expectedScene&0xffffffu))&&actual[1]==(0xff000000u|((expectedScene^0x55aa55u)&0xffffffu));
       std::cout<<"BUFFERED_SCENE_PIXELS frame="<<expectedScene<<" native_HUD_and_scene_exact="<<exact<<'\n';if(!exact)throw std::runtime_error("Buffered background/HUD mixed with newer frame");}
+    int originalBlue[3]{77,13,5};
+    if(native_foreground::source_notice::requested()&&expectedScene){const auto tint=foreground_fixture::tint(expectedScene);
+      for(unsigned i=0;i<3;++i)originalBlue[i]+=int(tint[2-i]*255+.5f);}
     for(unsigned y=0;y<height;++y){const auto* row=static_cast<const unsigned char*>(p.pData)+y*p.RowPitch;for(unsigned x=0;x<width;++x){const auto* c=row+x*4;
-      const bool different=std::abs(int(c[0])-77)>3||std::abs(int(c[1])-13)>3||std::abs(int(c[2])-5)>3;
+      const bool different=std::abs(int(c[0])-originalBlue[0])>3||std::abs(int(c[1])-originalBlue[1])>3||std::abs(int(c[2])-originalBlue[2])>3;
       changed+=different;if(x<80&&y>height-80&&different)border=false;
     }}
     if(GetEnvironmentVariableW(L"SFC_FIXTURE_SHIP_SNAPSHOT",nullptr,0)){
@@ -206,7 +213,11 @@ int wmain(){
     {
       const bool gameOutput=GetEnvironmentVariableW(L"SFC_D3D9_GAME_OUTPUT",nullptr,0)!=0;bool imageSample=false;unsigned resizedFrame=0,imageStartFrame=0,multiReadyAt=0;LONG imageStartDraws=0;
       SourceTimingFixture sourceTiming;Scene scene;if(gameOutput){scene.width=1920;scene.height=1080;}scene.init(window);const auto start=GetTickCount64();bool enabled=false,disabled=false,resized=false,recreated=false,afterResize=false,afterRecreate=false,disconnected=false;unsigned frames=0,stateErrors=0;
-      LONG withheld[2]{-1,-1};unsigned withholdPresents=0;bool singleFaultDone=false;
+      const bool nativeForeground=native_foreground::source_notice::requested();
+      if(nativeForeground){if(!gameOutput||!replacement::requested()||!scene.fixtureDepth)throw std::runtime_error("Native foreground fixture requires replacement and native depth");
+        foreground_fixture::initialize(scene.device.Get(),scene.context.Get(),scene.fixtureDepth.Get());}
+      LONG withheld[2]{-1,-1};unsigned withholdPresents=0;bool singleFaultDone=false,nativeFallbackSeen=false;
+      LONG commitsBeforeFault=0,rearmedBeforeStop=0,suppressedBeforeStop=0;
       const bool replacementFaults=replacement::requested()&&GetEnvironmentVariableW(L"SFC_REPLACEMENT_FIXTURE_FAULTS",nullptr,0)!=0;
       const bool observationOnly=GetEnvironmentVariableW(L"SFC_RETURN_OBSERVATION_ONLY",nullptr,0)!=0;
       const bool expanded=GetEnvironmentVariableW(L"SFC_RETURN_EXPANDED_SEARCH",nullptr,0)!=0;
@@ -234,7 +245,16 @@ int wmain(){
           scene.context->VSSetShader(nullptr,nullptr,0);scene.context->PSSetShader(nullptr,nullptr,0);
           auto* rt=scene.target.Get();scene.context->OMSetRenderTargets(1,&rt,nullptr);
         }
+        if(nativeForeground){ComPtr<ID3D11Texture2D> back;check(scene.swap->GetBuffer(0,IID_PPV_ARGS(&back)),"foreground fixture back");
+          foreground_fixture::draw(reinterpret_cast<BYTE*>(sourceTiming.source.mailbox)-sfc_calibration::Offset,back.Get());
+          scene.restoreState();auto* target=scene.target.Get();scene.context->OMSetRenderTargets(1,&target,nullptr);}
         if(expanded){if(!preserved(probeBegin)||!preserved(probeEnd)||!preserved(invokeAfterFlush,true)||!preserved(probePresent))throw std::runtime_error("engine observer stack/flags/FP state changed");}
+        if(replacementFaults&&imageSample&&frames==imageStartFrame+300){
+          // Standalone one-frame source/camera qualification gap AFTER native
+          // suppression,so the actual receiver must hide that incomplete source.
+          InterlockedExchange(&sourceTiming.live.store->header.bad_frame,static_cast<LONG>(200001+frames));
+          std::cout<<"REPLACEMENT_SOURCE_GAP_INJECTED frame="<<200001+frames<<'\n';
+        }
         const bool synchronized=GetEnvironmentVariableW(L"SFC_D3D9_SYNC_BUFFER",nullptr,0)!=0;
         if(synchronized)scene.stampFrame(200001+frames);
         if(!gameOutput)sourceTiming.publish(frames+1);check(scene.swap->Present(0,0),"fixture present");++frames;if(!scene.statePreserved(broad||snapshot||gameOutput))++stateErrors;
@@ -248,15 +268,27 @@ int wmain(){
               unsigned taken=0;for(unsigned slot=0;slot<2;++slot){auto& state=pool.slots[slot].state;
                 for(LONG prior:{LONG(output_wire::ready),LONG(output_wire::idle)})if(InterlockedCompareExchange(&state,output_wire::acquired,prior)==prior){withheld[slot]=prior;++taken;break;}}
               if(!taken)throw std::runtime_error("No output leases available for deterministic fault");
-              withholdPresents=frames==imageStartFrame+100?1u:2u;
+              withholdPresents=frames==imageStartFrame+100?1u:4u;
+              if(frames==imageStartFrame+200)commitsBeforeFault=ledger.committed;
               std::cout<<"REPLACEMENT_OUTPUT_WITHHELD presents="<<withholdPresents<<" leases="<<taken<<'\n';
             }
             if(imageSample&&frames==imageStartFrame+110){replacement::Control c{};replacement::read(ledger.control,c);
               if(c.mode!=replacement::Active||!ledger.repeated||ledger.recovered)throw std::runtime_error("Single missed output did not resume replacement");singleFaultDone=true;
               std::cout<<"REPLACEMENT_SINGLE_MISS_RECOVERED repeated="<<ledger.repeated<<'\n';}
-            if(imageSample&&frames==imageStartFrame+210){replacement::Control c{};replacement::read(ledger.control,c);
-              if(!singleFaultDone||c.mode!=replacement::LatchedOriginal||!ledger.recovered||ledger.repeat_max>2)throw std::runtime_error("Sustained missed output failed safe native recovery");
+            if(imageSample&&frames==imageStartFrame+203){replacement::Control c{};replacement::read(ledger.control,c);
+              if(!singleFaultDone||c.mode!=replacement::NativeFallback||!ledger.recovered||ledger.repeat_max>2)throw std::runtime_error("Sustained missed output failed temporary native recovery");
+              nativeFallbackSeen=true;scene.shipSample(200000+frames,false,false);
               std::cout<<"REPLACEMENT_SUSTAINED_MISS_NATIVE repeat_max="<<ledger.repeat_max<<" recovered="<<ledger.recovered<<'\n';}
+            if(imageSample&&frames==imageStartFrame+220){replacement::Control c{};replacement::read(ledger.control,c);
+              if(!nativeFallbackSeen||c.mode!=replacement::Active||!ledger.rearmed||ledger.committed<=commitsBeforeFault||c.generation<=2)throw std::runtime_error("Temporary native fallback did not automatically resume fresh replacement");
+              std::cout<<"REPLACEMENT_AUTO_RESUMED generation="<<c.generation<<" rearmed="<<ledger.rearmed<<'\n';}
+            if(imageSample&&frames==imageStartFrame+320){replacement::Control c{};replacement::read(ledger.control,c);
+              if(c.mode!=replacement::Active||ledger.rearmed<2)throw std::runtime_error("One-frame source gap did not resume replacement");
+              std::cout<<"REPLACEMENT_SOURCE_GAP_RESUMED generation="<<c.generation<<" rearmed="<<ledger.rearmed<<'\n';}
+            if(imageSample&&frames==imageStartFrame+400){rearmedBeforeStop=ledger.rearmed;suppressedBeforeStop=ledger.suppressed;InterlockedExchange(&ledger.native_stop,1);}
+            if(imageSample&&frames==imageStartFrame+410){replacement::Control c{};replacement::read(ledger.control,c);
+              if(c.mode!=replacement::LatchedOriginal||ledger.rearmed!=rearmedBeforeStop||ledger.suppressed!=suppressedBeforeStop)throw std::runtime_error("Explicit stop incorrectly rearmed replacement");
+              std::cout<<"REPLACEMENT_STOP_STAYS_NATIVE rearmed="<<ledger.rearmed<<'\n';}
           }
           if(sourceTiming.cohort.store&&!multiReadyAt&&sourceTiming.cohort.store->header.asset_ready==static_cast<LONG>(sourceTiming.rows.size())){multiReadyAt=frames;std::cout<<"MULTISCENE_BOTH_READY frame="<<frames<<" first_draws="<<pool.stats.drawn<<'\n';}
           const bool cohortSettled=replacement::requested()||!sourceTiming.cohort.store||(multiReadyAt&&frames>=multiReadyAt+60);
@@ -270,8 +302,15 @@ int wmain(){
             if(replacementFaults)scene.shipSample(200000+frames,false,false); // Verify the recovered native frame,not stale ship pixels.
             else if(replacement::requested())scene.shipSample(pool.stats.frame); // A held complete frame must retain its own HUD stamp too.
             else if(!replacement::requested()&&GetEnvironmentVariableW(L"SFC_FIXTURE_SHIP_SNAPSHOT",nullptr,0)&&pool.stats.frame+(synchronized?1u:0u)==200000+frames)scene.shipSample(synchronized?pool.stats.frame:0,true);
+            // Fixture-owned FX resources must not survive an incompatible
+            // resize or be copied onto a different device's backbuffer.
+            if(nativeForeground)foreground_fixture::shutdown();
             scene.resize();resized=true;resizedFrame=frames;}
-          if(resized&&!recreated&&frames>=resizedFrame+90){scene.reset();scene.width=1920;scene.height=1080;scene.init(window);recreated=true;}
+          if(resized&&!recreated&&frames>=resizedFrame+90){
+            if(nativeForeground)foreground_fixture::shutdown();
+            scene.reset();scene.width=1920;scene.height=1080;scene.init(window);
+            if(nativeForeground)foreground_fixture::initialize(scene.device.Get(),scene.context.Get(),scene.fixtureDepth.Get());
+            recreated=true;}
           if(recreated&&frames>=resizedFrame+180)break;
         }
         if(sourceTiming.enabled){if(!gameOutput&&frames==(sourceTiming.liveEnabled?450u:90u)){scene.resize();resized=true;}if(!gameOutput&&frames==(sourceTiming.liveEnabled?900u:180u)){scene.reset();scene.init(window);recreated=true;}if(!gameOutput&&frames>=(sourceTiming.liveEnabled?1800u:210u))break;if(!sourceTiming.liveEnabled)Sleep(16);else if(synchronized)Sleep(13);continue;}
@@ -325,8 +364,11 @@ int wmain(){
         std::cout<<"FIXTURE_END frames="<<frames<<" state_errors="<<stateErrors<<" phases="<<enabled<<disabled<<afterResize<<afterRecreate<<disconnected<<"\n";
         if(!enabled||!disabled||!afterResize||!afterRecreate||!disconnected||stateErrors)throw std::runtime_error("fixture phases/state incomplete");
       }
+      if(nativeForeground){std::cout<<"NATIVE_FOREGROUND_FIXTURE_END verified="<<foreground_fixture::verified<<'\n';
+        if(foreground_fixture::verified<3)throw std::runtime_error("Native foreground matching-frame pixels not verified");
+        foreground_fixture::shutdown();}
       result=0;
     }
   }catch(const std::exception& e){std::cout<<"FIXTURE_FAILED "<<e.what()<<"\n";}
-  if(window)DestroyWindow(window);if(proxy)FreeLibrary(proxy);return result;
+  foreground_fixture::shutdown();if(window)DestroyWindow(window);if(proxy)FreeLibrary(proxy);return result;
 }

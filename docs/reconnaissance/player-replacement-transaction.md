@@ -1,4 +1,68 @@
-# PLAYER-REPLACEMENT-001 — whole-picture transaction, version 1
+# PLAYER-REPLACEMENT-001 — whole-picture transaction
+
+## Current — Run215 physical hull depth, 2026-10-27
+
+Returned colour remains Remix-rendered, including reflections. The existing R32
+normalized-depth and union-coverage outputs now come from an adapter-owned
+physical hull pass over the same cached meshes/poses; vendor PSR virtual depth
+is not a physical hull mask. Full-output projection precedes the existing native
+viewport mapping once. No wire layout,source-frame matching,suppression,lease or
+fallback-policy change. New depth buffer is included in the128MiB output budget;
+auxiliary cached geometry is charged to256MiB resident budget. Opaque rigid
+triangles only. [Run215](../runs/2026-10-27-codex-physical-hull-depth-fix.md) records
+captured-pixel/native/GPU/recovery qualification; sponsor visual checkout pending.
+Older statements assuming exported Remix depth always means hull are superseded.
+
+
+## Current — version 2, Run213: temporary fallback and automatic return
+
+Sponsor's first gameplay test showed working replacement, then permanent native
+fallback during camera testing. Sponsor supersedes the version1 permanent-latch
+policy for ordinary delivery/source gaps: retain a brief complete-picture hold,
+restore original drawing for a sustained gap, then return to enhanced rendering
+as soon as fresh matching output is qualified. This is a recovery policy, not
+permission to display stale output or conceal frequent rendering failures.
+
+The fixed Store remains4,416bytes at the existing offset; its version is now2.
+Three LONG counters consume former padding: rearmed, native_presentations and
+recovery_reason. The native_presentations counter counts the NativeFallback state
+only, not every presentation spent recovering/priming. Control.reason identifies
+the current transition; recovery_reason preserves the last non-shutdown cause.
+Python can inspect historical version1 receipts, but native peers and new
+qualification require matching version2. Older qualification receipts are stale.
+
+- **Priming / Active / Recovering** retain capture-first, exact source/output
+  matching, first-list50ms authorization and max two extra whole-picture repeats.
+- **NativeFallback (4)** follows a confirmed intact native source. Original SFC
+  drawing continues while the existing retained renderer is checked. Once healthy
+  source/capability data returns, increment activation generation and re-enter
+  Priming; fresh matching canary output is required before suppressing again.
+  There is no cooldown, renderer restart, geometry reconstruction or texture reload.
+- **LatchedOriginal (3)** remains for explicit shutdown/disable and the existing
+  device-recreation safety path. Failed resources/unsupported output cannot
+  authorize replacement. Ordinary missed output and transient source/camera
+  qualification gaps no longer permanently latch the session off.
+- Recovery reasons distinguish output miss, source gap, native refusal, missing
+  depth, identity change, renderer unavailability, shutdown and resource failure.
+  Reason high bit marks terminal recovery. Session/owner/revision/epoch and all
+  frame/checksum/GPU-ownership rules remain enforced across every reactivation.
+- Supervisor evidence samples the counters/reasons at the existing bounded
+  five-second cadence. No added render-hook file access, allocations, waits,
+  refresh cap, new image surfaces or geometry firehose.
+
+The standalone fault fixture now withholds one then four output presentations,
+verifies temporary original rendering and automatic generation-qualified return,
+injects one invalid source frame after synthetic suppression and verifies return,
+then explicitly stops and proves suppression stays off. It verifies native frame
+markers, state restoration, resize/recreation and a single retained asset load.
+This is synthetic-source testing through genuine Remix, not a new SFC camera test.
+New native proof logs live in artifacts/player-replacement/native-tests, preserving
+Run208's immutable historical proofs. See [Run213](../runs/2026-10-27-codex-player-replacement-auto-recovery.md).
+
+## Historical version 1 — Run208/209
+
+The following original record defines the unchanged capture/commit foundations;
+its permanent latch on ordinary delivery failure is superseded above.
 
 Run208, 2026-10-27. Default OFF. This extends the established ordinary-D3D9
 adapter and Remix return; it does not introduce a new renderer or Toolkit path.

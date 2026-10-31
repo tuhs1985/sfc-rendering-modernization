@@ -26,11 +26,18 @@ class ReplacementSummaryTests(unittest.TestCase):
         self.assertEqual(result['session'],[1,2,3,4])
 
     def test_wrong_version_or_shape_is_rejected(self):
-        for offset,value in ((0,0),(4,2),(8,4400)):
+        for offset,value in ((0,0),(4,3),(8,4400)):
             raw=self.packet();struct.pack_into('<I',raw,offset,value)
             with self.assertRaises(ValueError):summary(self.channel(raw))
 
     def test_incomplete_transfer_is_not_a_summary(self):
         with self.assertRaises(ValueError):summary(self.channel(self.packet()[:-1]))
+
+    def test_v2_recovery_statistics_and_legacy_reading(self):
+        raw=self.packet();struct.pack_into('<I',raw,4,2)
+        struct.pack_into('<3I',raw,4396,4,9,2)
+        result=summary(self.channel(raw))
+        self.assertEqual((result['protocol'],result['rearmed'],result['native_presentations'],result['recovery_reason']),(2,4,9,2))
+        self.assertEqual(summary(self.channel(self.packet()))['protocol'],1)
 
 if __name__=='__main__':unittest.main()

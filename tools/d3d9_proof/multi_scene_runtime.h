@@ -3,11 +3,13 @@
 #pragma once
 #include "multi_scene_wire.h"
 #include "replacement_transaction.h"
+#include "physical_hull_depth.h"
 #include <map>
 #include <memory>
 #include <future>
 struct MultiSceneRuntime {
- struct Resident {Scene scene;std::unique_ptr<Renderer> renderer;Renderer* drawRenderer=nullptr;uint64_t bytes=0;multi_scene::Asset provenance{};};
+ struct Resident {Scene scene;std::unique_ptr<Renderer> renderer;Renderer* drawRenderer=nullptr;PhysicalHullDepth::Mesh hullMesh;uint64_t bytes=0;multi_scene::Asset provenance{};};
+ PhysicalHullDepth* hull=nullptr;const PhysicalHullDepth::Mesh* initialHull=nullptr;
  sfc_calibration::Reader source;multi_scene::Store* store=nullptr;multi_scene::Frame packet{};
  std::array<multi_scene::Asset,64> entries{};std::array<std::shared_ptr<Resident>,64> bound{};
  std::map<std::array<BYTE,32>,std::shared_ptr<Resident>> content;
@@ -32,7 +34,8 @@ struct MultiSceneRuntime {
   require(imageBytes==a.image_bytes&&hash==a.textures_hash,"multi-scene texture bytes/provenance");
   p.backing=2*(p.scene.vertices.size()*sizeof(Vertex)+p.scene.indices.size()*4+imageBytes);p.cpu_us=clock()-began;return p;
  }
- void start(const fs::path& directory,IDirect3DDevice9* d,const Scene& initial,Renderer& initialRenderer,TextureUpload policy=TextureUpload::StagedLock){
+ void start(const fs::path& directory,IDirect3DDevice9* d,const Scene& initial,Renderer& initialRenderer,TextureUpload policy=TextureUpload::StagedLock,PhysicalHullDepth* physical=nullptr,const PhysicalHullDepth::Mesh* bootstrapHull=nullptr){
+  hull=physical;initialHull=bootstrapHull;
   uploadPolicy=policy;
   wchar_t flag[2]{};enabled=GetEnvironmentVariableW(L"SFC_D3D9_MULTISCENE",flag,2)==1&&flag[0]==L'1';if(!enabled)return;replacementOnly=replacement::requested();
   root=directory;device=d;bootstrapScene=&initial;bootstrapRenderer=&initialRenderer;require(source.prepare()&&source.requested,"multi-scene explicit mapping");
@@ -65,6 +68,8 @@ struct MultiSceneRuntime {
      require(bytes+item->bytes<=256ull*1024*1024,"multi-scene retained256MiB cap");
      if(a.path_id==1){require(item->scene.vertices.size()==bootstrapScene->vertices.size(),"multi-scene bootstrap identity");item->drawRenderer=bootstrapRenderer;}
      else{item->renderer=std::make_unique<Renderer>(device,item->scene,folder,&prepared.textures,uploadPolicy);item->drawRenderer=item->renderer.get();}
+     if(hull&&hull->enabled){if(a.path_id==1){require(initialHull!=nullptr,"physical hull bootstrap required");item->hullMesh=*initialHull;}else item->hullMesh=hull->prepare(item->scene);
+      item->bytes+=item->hullMesh.bytes;require(bytes+item->bytes<=256ull*1024*1024,"physical hull retained256MiB cap");}
      std::cout<<"MULTISCENE_ASSET_TIMING id="<<a.id<<" cpu_us="<<prepared.cpu_us<<" gpu_admit_us="<<clock()-gpuBegan<<" at_us="<<clock()<<'\n';
      const auto* uploader=item->drawRenderer;
      std::cout<<"MULTISCENE_UPLOAD id="<<a.id<<" initial="<<uploader->initialDataUploads<<" staged="<<uploader->stagedUploads<<" unsupported="<<uploader->initialDataUnsupported<<'\n';
@@ -94,6 +99,7 @@ struct MultiSceneRuntime {
    if(!good){++projection_rejected;++rejected;continue;}
    for(unsigned axis=0;axis<3;++axis)frame.model[axis*4+3]+=displacement[axis];
    resident->drawRenderer->draw(frame,false,width,height,first);first=false;++count;++draws;
+   if(hull)hull->submit(resident->hullMesh,frame);
    ++ownerDraws[live_owner::selection(row[1],row[7])];
    if(frames<8||frames%60==0)std::cout<<"MULTISCENE_DRAW frame="<<packet.frame<<" owner="<<row[1]<<" revision="<<row[7]<<" asset="<<asset<<" set_hash="<<packet.checksum<<'\n';
   }++frames;return count!=0;

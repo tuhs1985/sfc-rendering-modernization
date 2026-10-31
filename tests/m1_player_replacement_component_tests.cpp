@@ -31,6 +31,9 @@ int main(){
  test(memcmp(mesh.data(),&g_mesh_packet,mesh.size())==0);test(g_wrapper_samples[0].data[10]==1); // Observer retained original count.
  stack[0]=0x0042E626;stack[1]=1;invokeRecorder(saved.data());test(stack[1]==0);
  replacement::Receipt r{};test(replacement::sample(*ledger,100,r)&&r.primary==1&&r.secondary==1);
+ // Metadata-only insertion mode must veto even a mistakenly active permit.
+ auto probe=std::make_unique<native_insertion::Store>();native_insertion::initialize(*probe,session,GetCurrentProcessId());g_insertion_probe=probe.get();
+ stack[1]=1;invokeRecorder(saved.data());test(stack[1]==1);g_insertion_probe=nullptr;
  // Revoked and nested invocations remain untouched; partial frame is rejected.
  InterlockedExchange(&ledger->native_stop,1);stack[1]=1;invokeRecorder(saved.data());test(stack[1]==1);
  InterlockedExchange(&ledger->native_stop,0);state->copy_depth=2;stack[1]=1;invokeRecorder(saved.data());test(stack[1]==1);

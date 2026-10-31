@@ -41,5 +41,12 @@ try{
  if($LASTEXITCODE -ne 0){throw 'Combined post GPU test failed'}
  $combinedResult | Set-Content -Encoding UTF8 combined-post-tests.txt
  $combinedResult | Write-Output
+ $cmd='"{0}" && set "CL=" && set "_CL_=" && cl /nologo /std:c++20 /EHsc /W4 /WX {2} /fp:precise "{1}\tests\physical_hull_depth_tests.cpp" /Fe:physical_hull_depth_tests.exe /link /Brepro user32.lib d3d11.lib dxgi.lib d3dcompiler.lib' -f $vc,$root,$opt
+ & $env:ComSpec /d /s /c $cmd
+ if($LASTEXITCODE -ne 0){throw 'Physical hull depth GPU test build failed'}
+ $hullResult=& .\physical_hull_depth_tests.exe
+ if($LASTEXITCODE -ne 0){throw 'Physical hull depth GPU test failed'}
+ $hullResult | Set-Content -Encoding UTF8 physical-hull-depth-tests.txt
+ $hullResult | Write-Output
  @{optimization=$opt;floating_point='/fp:precise';inherited_cl_options='cleared in compiler child';architecture='x64'} | ConvertTo-Json | Set-Content build-policy.json
 }finally{Pop-Location}

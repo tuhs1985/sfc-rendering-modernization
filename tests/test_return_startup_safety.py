@@ -33,7 +33,7 @@ class StartupSafetyTests(unittest.TestCase):
         self.assertEqual(runner.tactical_gate_timeout(True),120)
         self.assertLessEqual(runner.tactical_gate_timeout(True)+120+30+15,285)
     def test_only_recorded_supported_proxy_transactions_are_recoverable(self):
-        for probe in ('D3D9-ADDITIVE-001','D3D9-MULTISHIP-001'):
+        for probe in ('D3D9-ADDITIVE-001','D3D9-MULTISHIP-001','PLAYER-REPLACEMENT-001','NATIVE-INSERTION-001'):
             self.assertTrue(recovery.supported_transaction({'probe':probe,'full_support_qualification':{'result':'qualified'}}))
             self.assertFalse(recovery.supported_transaction({'probe':probe}))
         self.assertFalse(recovery.supported_transaction({'probe':'UNKNOWN','full_support_qualification':{'result':'qualified'}}))
@@ -41,6 +41,10 @@ class StartupSafetyTests(unittest.TestCase):
         self.recovery_case({'broad_capture':{'enabled':True}})
     def test_verified_multi_ship_recovery_and_live_game_refusal(self):
         self.recovery_case({'probe':'D3D9-MULTISHIP-001','full_support_qualification':{'result':'qualified'}})
+    def test_verified_observation_recovery_and_live_game_refusal(self):
+        self.recovery_case({'probe':'NATIVE-INSERTION-001','full_support_qualification':{'result':'qualified'}})
+    def test_verified_replacement_recovery_and_live_game_refusal(self):
+        self.recovery_case({'probe':'PLAYER-REPLACEMENT-001','full_support_qualification':{'result':'qualified'}})
     def recovery_case(self,transaction):
         with tempfile.TemporaryDirectory() as folder:
             root=Path(folder);run=root/'artifacts/remix-runtime/runs/test-in-game';run.mkdir(parents=True)

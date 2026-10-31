@@ -10,6 +10,8 @@
 #include "game_gpu_read_lease.h"
 #include "replacement_presentation.h"
 #include "../d3d9_proof/multi_scene_wire.h"
+#include "../native_foreground/shield_controller.h"
+#include "../native_insertion/observer.h"
 #include <thread>
 #include <atomic>
 namespace d3d9_game {
@@ -27,9 +29,12 @@ class Receiver {
  multi_scene::Store* cohort=nullptr;multi_scene::Frame cohortFrame{};
  bool replacementMode=false;replacement::Store* replacementLedger=nullptr;std::unique_ptr<replacement::Presentation> presentation;
  DWORD replacementEpoch=0;
- void replacementControl(replacement::Mode mode,const live_owner::Row* row=nullptr,DWORD frame=0){
+ std::unique_ptr<native_foreground::ShieldController> foreground;
+ std::unique_ptr<native_insertion::Observer> insertionProbe;
+ void replacementControl(replacement::Mode mode,const live_owner::Row* row=nullptr,DWORD frame=0,DWORD reason=UINT32_MAX){
   if(!replacementLedger)return;replacement::Control c{};replacement::read(replacementLedger->control,c);
   c.mode=mode;c.epoch=replacementEpoch;c.permit=mode==replacement::Active?frame+1:0;
+  if(reason!=UINT32_MAX){c.reason=reason;if(reason&&(reason&~replacement::Terminal)!=replacement::Shutdown)InterlockedExchange(&replacementLedger->recovery_reason,static_cast<LONG>(reason));}
   if(row){c.owner=(*row)[1];c.revision=(*row)[7];c.model=(*row)[5];c.source=(*row)[6];c.thread=thread;}
   c.expires=replacement::now()+mapping.state->qpcFrequency/20;replacement::write(replacementLedger->control,c);
  }
@@ -37,9 +42,11 @@ class Receiver {
   if(!replacementLedger||!presentation||!target||GetCurrentThreadId()!=thread){replacementControl(replacement::Recovering);return;}
   if(!replacement::valid(replacementLedger,source.session,GetCurrentProcessId()))throw std::runtime_error("Replacement ledger changed");
   auto& tx=*presentation;Microsoft::WRL::ComPtr<ID3D11Resource> resource;target->GetResource(&resource);
+  struct ForegroundRetain {Receiver* self;~ForegroundRetain(){if(self->foreground&&self->presentation){auto& h=self->presentation->history;
+   self->foreground->retain(0,h.slot(0).valid?h.slot(0).row[2]:0,h.slot(1).valid?h.slot(1).row[2]:0);}}} foregroundRetain{this};
   Microsoft::WRL::ComPtr<ID3D11Texture2D> back;if(FAILED(resource.As(&back))){replacementControl(replacement::Recovering);return;}
   const auto time=replacement::now();replacement::Control control{};
-  if(!replacement::read(replacementLedger->control,control)||control.mode>replacement::LatchedOriginal){replacementControl(replacement::Recovering);control.mode=replacement::Recovering;}
+  if(!replacement::read(replacementLedger->control,control)||control.mode>replacement::NativeFallback){replacementControl(replacement::Recovering,nullptr,0,replacement::ResourceFailure|replacement::Terminal);control.mode=replacement::Recovering;}
   sfc_calibration::Snapshot current{};const live_owner::Row* row=nullptr;uint64_t hash=0;
   bool sourceGood=sfc_calibration::read(source.mailbox,current);
   auto* base=reinterpret_cast<BYTE*>(source.mailbox)-sfc_calibration::Offset;
@@ -60,12 +67,35 @@ class Receiver {
    if(!replacementLedger->suppressed)tx.native(back.Get(),nativeFrame,time);depth.discardFrame();return;
   }
   if(control.mode==replacement::LatchedOriginal){depth.discardFrame();return;}
+  if(control.mode==replacement::NativeFallback){
+   // A real intact source frame has already acknowledged recovery. Keep drawing
+   // native while probing the existing retained renderer;never rebuild the ship.
+   InterlockedIncrement(&replacementLedger->native_presentations);
+   if(intact){
+    tx.native(back.Get(),nativeFrame,time);
+    if(healthy&&sourceGood&&replacementLedger->native_capable&&replacementLedger->renderer_capable){
+     ++control.generation;control.mode=replacement::Priming;control.permit=0;control.reason=0;
+     replacement::write(replacementLedger->control,control);tx.discard();tx.policy.mode=replacement::Priming;
+     replacementControl(replacement::Priming,row,current.frame,0);
+    }
+   }
+   if(cohort&&nativeFrame)InterlockedExchange(&cohort->header.closed_frame,static_cast<LONG>(nativeFrame-1));
+   depth.discardFrame();return;
+  }
   if(control.mode==replacement::Recovering||!healthy||!hasReceipt||!sourceGood||
      (control.mode==replacement::Active&&(!row||control.owner!=(*row)[1]||control.revision!=(*row)[7]||control.model!=(*row)[5]||control.source!=(*row)[6]||
        receipt.flags&replacement::Invalid||((receipt.flags&replacement::Seen)&&!(receipt.flags&replacement::Suppressed))))){
    if(control.mode==replacement::Priming&&intact){tx.native(back.Get(),current.frame,time);depth.discardFrame();return;}
-   replacementControl(replacement::Recovering);tx.policy.mode=replacement::Recovering;tx.discard();
-   if(intact){tx.native(back.Get(),nativeFrame,time);tx.policy.nativeRecovery();replacementControl(replacement::LatchedOriginal);InterlockedIncrement(&replacementLedger->recovered);InterlockedExchange(&replacementLedger->native_restored_frame,static_cast<LONG>(nativeFrame));}
+   DWORD reason=control.reason;
+   if(replacementLedger->native_stop||return_path::read(mapping.state->stop)||!return_path::read(mapping.state->enabled))reason=replacement::Shutdown|replacement::Terminal;
+   else if(control.mode!=replacement::Recovering){
+    if(!healthy)reason=replacement::RendererUnavailable;
+    else if(!hasReceipt||!sourceGood)reason=replacement::SourceGap;
+    else if(receipt.flags&replacement::Invalid||((receipt.flags&replacement::Seen)&&!(receipt.flags&replacement::Suppressed)))reason=replacement::NativeRefusal;
+    else reason=replacement::IdentityChange;
+   }
+   replacementControl(replacement::Recovering,nullptr,0,reason);tx.policy.mode=replacement::Recovering;tx.discard();
+   if(intact){tx.native(back.Get(),nativeFrame,time);tx.policy.nativeRecovery((reason&replacement::Terminal)!=0);replacementControl(tx.policy.mode);InterlockedIncrement(&replacementLedger->recovered);InterlockedExchange(&replacementLedger->native_restored_frame,static_cast<LONG>(nativeFrame));}
    else if(tx.policy.complete)tx.show(back.Get());
    depth.discardFrame();return;
   }
@@ -86,6 +116,7 @@ class Receiver {
     if(!game_output::matches(packet,metadata,f.row.data(),source.session,f.stateHash,live_owner::sequence(f.row))){
      InterlockedExchange(&wire.state,packet.source_frame>tx.committedFrame?output_wire::ready:output_wire::idle);continue;
     }
+    if(foreground&&!foreground->frameGood(r)){f.valid=false;InterlockedExchange(&wire.state,output_wire::idle);break;}
     if(control.mode==replacement::Priming){canary=true;InterlockedExchange(&wire.state,output_wire::idle);break;}
     replacement::Binding binding{};
     if(f.row[2]<=tx.committedFrame||!replacement::read(replacementLedger->output[slot],binding)||
@@ -98,30 +129,36 @@ class Receiver {
     float viewport[4]{};memcpy(viewport,f.row.data()+83,16);bool good=true;
     for(unsigned i=0;i<4;++i){good&=std::isfinite(viewport[i])&&viewport[i]>=0&&viewport[i]<=1920&&fabs(viewport[i]-round(viewport[i]))<.001f;if(good)key.viewport[i]=static_cast<DWORD>(viewport[i]);}
     ID3D11ShaderResourceView* views[]={item.views[0].Get(),item.views[1].Get(),item.views[2].Get()};const D3D11_VIEWPORT full{0,0,1920,1080,0,1};
-    if(!good||!compositor.draw(f.colorTarget.Get(),views,key,full,f.depthView.Get())){
-      f.valid=false;replacementControl(replacement::Recovering);InterlockedExchange(&wire.state,output_wire::idle);break;
+    native_viewport::Mapping nativeMap{};bool composed=false;
+    if(good){if(foreground){if(native_viewport::mapping(key.width,key.height,key.viewport,nativeMap))
+      composed=foreground->assemble(r,f.colorTarget.Get(),f.foregroundDepth.Get(),views,key.objectId,nativeMap.origin,nativeMap.scale);
+     }else composed=compositor.draw(f.colorTarget.Get(),views,key,full,f.depthView.Get());}
+    if(!composed){
+      f.valid=false;replacementControl(replacement::Recovering,nullptr,0,replacement::ResourceFailure);InterlockedExchange(&wire.state,output_wire::idle);break;
     }
-    try{item.lease.signal(fencedContext.Get());}catch(...){f.valid=false;replacementControl(replacement::Recovering);InterlockedExchange(&pool->header.error,1);break;}
+    try{item.lease.signal(fencedContext.Get());}catch(...){f.valid=false;replacementControl(replacement::Recovering,nullptr,0,replacement::ResourceFailure);InterlockedExchange(&pool->header.error,1);break;}
     tx.commit(index,time);committed=true;pool->stats.frame=key.frame;InterlockedIncrement(&replacementLedger->committed);InterlockedIncrement(&pool->stats.drawn);InterlockedIncrement(&mapping.state->drawCount);break;
    }
   }
   auto* nativeDepth=depth.finish(current.frame,1920,1080);
   if(control.mode==replacement::Priming){
    tx.native(back.Get(),current.frame,time);
-   if(canary&&replacementLedger->native_capable&&replacementLedger->renderer_capable&&nativeDepth){
-    ++control.generation;control.mode=replacement::Active;replacement::write(replacementLedger->control,control);tx.policy.mode=replacement::Active;tx.discard();
+   if(canary&&replacementLedger->native_capable&&replacementLedger->renderer_capable&&nativeDepth&&(!foreground||foreground->frameGood(receipt))){
+    ++control.generation;control.mode=replacement::Active;control.reason=0;replacement::write(replacementLedger->control,control);tx.policy.mode=replacement::Active;tx.discard();
+    if(replacementLedger->recovered)InterlockedIncrement(&replacementLedger->rearmed);
    }
-  }else if(!committed&&hadPrevious){
+  }else if(!committed&&(hadPrevious||(foreground&&tx.policy.complete&&uint64_t(tx.committedFrame)+1<current.frame))){
    // 50ms qualifies a PENDING input above. An already complete whole picture
    // has the separately approved two-presentation hold; it is never composited
    // onto newer native pixels. Do not turn a slow presentation into two misses.
-   if(tx.policy.miss()){InterlockedIncrement(&replacementLedger->repeated);replacementLedger->repeat_max=(std::max)(static_cast<LONG>(replacementLedger->repeat_max),static_cast<LONG>(tx.policy.repeats));if(tx.policy.mode==replacement::Recovering)replacementControl(replacement::Recovering);}
+   if(tx.policy.miss()){InterlockedIncrement(&replacementLedger->repeated);replacementLedger->repeat_max=(std::max)(static_cast<LONG>(replacementLedger->repeat_max),static_cast<LONG>(tx.policy.repeats));if(tx.policy.mode==replacement::Recovering)replacementControl(replacement::Recovering,nullptr,0,replacement::OutputMiss);}
   }
   replacement::Control latest{};replacement::read(replacementLedger->control,latest);
+  const bool foregroundMissing=foreground&&latest.mode==replacement::Active&&(receipt.flags&replacement::Suppressed)&&!foreground->frameGood(receipt);
   if(latest.mode!=replacement::Recovering&&nativeDepth){
-   if(receipt.generation==latest.generation){const unsigned index=tx.freeSlot();tx.history.captureAt(index,back.Get(),nativeDepth,*row,time,hash);tx.receipts[index]=receipt;}
+   if(receipt.generation==latest.generation&&!foregroundMissing){const unsigned index=tx.freeSlot();tx.history.captureAt(index,back.Get(),nativeDepth,*row,time,hash);tx.receipts[index]=receipt;}
    replacementControl(static_cast<replacement::Mode>(latest.mode),row,current.frame);
-  }else if(!nativeDepth)replacementControl(replacement::Recovering);
+  }else if(!nativeDepth)replacementControl(replacement::Recovering,nullptr,0,replacement::DepthGap);
   const DWORD oldest=tx.oldest();if(cohort)InterlockedExchange(&cohort->header.closed_frame,static_cast<LONG>(oldest?oldest-1:current.frame));
   if(tx.policy.complete)tx.show(back.Get());
  }
@@ -162,7 +199,7 @@ public:
   if(d->GetCreationFlags()&D3D11_CREATE_DEVICE_SINGLETHREADED)throw std::runtime_error("Game device disallows worker imports");
   if(!source.prepare()||!source.requested)throw std::runtime_error("Explicit semantic source required for D3D9 insertion");
   pool=reinterpret_cast<game_output::Pool*>(reinterpret_cast<BYTE*>(source.mailbox)-sfc_calibration::Offset+game_output::Offset);d->GetImmediateContext(&context);
-  replacementMode=replacement::requested();buffered=wantsBuffer();if(buffered){
+  replacementMode=replacement::requested()&&!native_insertion::requested();buffered=wantsBuffer();if(buffered){
    ship_triplet::checked(context.As(&fencedContext),"Buffered game context fence support");
    if(!back)throw std::runtime_error("Buffered scene requires explicit game target");
    auto* base=reinterpret_cast<BYTE*>(source.mailbox)-sfc_calibration::Offset;bufferAudit=reinterpret_cast<synchronized_frame::Store*>(base+synchronized_frame::Offset);
@@ -170,7 +207,7 @@ public:
    if(!h.magic){memset(bufferAudit,0,sizeof(*bufferAudit));h.magic=synchronized_frame::Magic;h.version=1;h.bytes=sizeof(*bufferAudit);h.pid=GetCurrentProcessId();memcpy(h.session,source.session,16);}
    else if(h.magic!=synchronized_frame::Magic||h.version!=1||h.bytes!=sizeof(*bufferAudit)||h.pid!=GetCurrentProcessId()||memcmp(h.session,source.session,16))throw std::runtime_error("Buffered scene audit identity");
    D3D11_TEXTURE2D_DESC shape{};back->GetDesc(&shape);
-   if(!replacementMode&&shape.Width==1920&&shape.Height==1080)history=std::make_unique<scene_frame_buffer::History>(d,back);
+   if(!replacementMode&&!native_insertion::requested()&&shape.Width==1920&&shape.Height==1080)history=std::make_unique<scene_frame_buffer::History>(d,back);
    // Unsupported resize remains original drawing only,until a fresh runtime.
   }
   wchar_t multi[2]{};if(GetEnvironmentVariableW(L"SFC_D3D9_MULTISCENE",multi,2)==1&&multi[0]==L'1'){
@@ -190,13 +227,29 @@ public:
    if(!replacement::valid(replacementLedger,source.session,GetCurrentProcessId()))throw std::runtime_error("Replacement ledger identity");
    replacement::Control c{};replacement::read(replacementLedger->control,c);replacementEpoch=c.epoch+1;
    replacementControl(fresh?replacement::Priming:replacement::LatchedOriginal);
-   presentation=std::make_unique<replacement::Presentation>(d,back);
+   const bool nativeForeground=native_foreground::source_notice::requested();
+   presentation=std::make_unique<replacement::Presentation>(d,back,nativeForeground);
+   if(nativeForeground)foreground=std::make_unique<native_foreground::ShieldController>(d,replacementLedger,
+       reinterpret_cast<native_foreground::source_notice::Store*>(base+native_foreground::source_notice::Offset),source.session);
+  }
+  if(native_insertion::requested()){
+   auto* base=reinterpret_cast<BYTE*>(source.mailbox)-sfc_calibration::Offset;
+   if(!buffered||!cohort||!native_insertion::preparePassiveLedger(base,source.session,GetCurrentProcessId()))
+       throw std::runtime_error("Native insertion passive ledger identity/state");
+   insertionProbe=std::make_unique<native_insertion::Observer>(d,base,source.session);
   }
   worker=std::thread([this]{imports();});
  }
  ~Receiver(){stop();source.close();if(receiver)CloseHandle(receiver);}
- void stop(){replacementControl(replacement::Recovering);stopping.store(true);if(worker.joinable())worker.join();if(pool)InterlockedExchange(&pool->header.stopped,1);}
- void observe(uint64_t native){if(!stopping.load())depth.observe(native,source.mailbox);}
+ void stop(){if(stopping.exchange(true))return;
+  replacementControl(replacement::Recovering,nullptr,0,replacement::Shutdown|replacement::Terminal);if(worker.joinable())worker.join();
+  // Stop, publish the final ACK and destroy while the source mapping is valid.
+  // Member destruction follows the destructor body, after source.close().
+  if(foreground){if(foreground->stop())foreground.reset();else{foreground.release();if(pool)InterlockedExchange(&pool->header.error,1);}}
+  if(pool)InterlockedExchange(&pool->header.stopped,1);}
+ void nativeShieldDraw(uint64_t native,UINT count,UINT instances,UINT first,INT base,UINT firstInstance){if(!stopping&&foreground)foreground->draw(native,count,instances,first,base,firstInstance);}
+ void nativeUnsupportedDraw(){if(!stopping&&foreground)foreground->unsupportedDraw();}
+ void observe(uint64_t native){if(!stopping.load()){if(insertionProbe)insertionProbe->draw(native,pool);else depth.observe(native,source.mailbox);}}
  void cleared(uint64_t native){if(!stopping.load())depth.cleared(native);}
  void retire(){
   if(buffered||GetCurrentThreadId()!=thread)return;
@@ -207,8 +260,10 @@ public:
   }
  }
  void step(ID3D11RenderTargetView* target){
+  if(insertionProbe){if(!stopping.load()&&GetCurrentThreadId()==thread&&return_path::read(mapping.state->armed)&&
+      !return_path::read(mapping.state->stop))insertionProbe->present(pool);return;}
   if(replacementMode){try{replacementStep(target);}catch(...){
-    replacementControl(replacement::Recovering);InterlockedIncrement(&pool->stats.resource_failed);
+    replacementControl(replacement::Recovering,nullptr,0,replacement::ResourceFailure);InterlockedIncrement(&pool->stats.resource_failed);
     if(presentation&&presentation->policy.complete&&target){Microsoft::WRL::ComPtr<ID3D11Resource> r;target->GetResource(&r);Microsoft::WRL::ComPtr<ID3D11Texture2D> back;
      if(SUCCEEDED(r.As(&back))){D3D11_TEXTURE2D_DESC d{};back->GetDesc(&d);if(d.Width==1920&&d.Height==1080&&d.SampleDesc.Count==1)presentation->show(back.Get());}}
    }return;}

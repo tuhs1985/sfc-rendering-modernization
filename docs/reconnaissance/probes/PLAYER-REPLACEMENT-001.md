@@ -1,6 +1,22 @@
 # PLAYER-REPLACEMENT-001 — isolated boundary and buffer qualification
 
-## Run209 — READY for sponsor checkout
+Run215: replacement now uses physical cached-mesh depth/coverage,not Remix PSR
+virtual depth. Reflections/settings unchanged. Offline65registry holes restored;
+599/600final replacement,recovery and shutdown regressions pass. Same launcher/current
+bounds. Check lettering against bright effects in the next sponsor checkout.
+
+
+## Run213 — version2 automatic recovery checkout ready
+
+Use the same launcher. One miss resumes; prolonged missing output restores native
+rendering then automatically reactivates fresh matched output. Standalone source-gap
+and explicit-stop controls pass; one retained asset load, native pixels/state exact.
+Native proof output now artifacts/player-replacement/native-tests, preserving old
+Run208 proofs. See [Run213](../../runs/2026-10-27-codex-player-replacement-auto-recovery.md).
+Explicit-stop/native-device restrictions remain. No revised SFC recovery PASS yet.
+
+
+## Run209 historical readiness
 
 Final replacement/native/GPU evidence and existing normal/material/tuning
 qualifications pass; both launcher preflights pass. No actual SFC replacement

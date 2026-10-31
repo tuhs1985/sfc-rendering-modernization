@@ -50,6 +50,7 @@ def main():
     parser.add_argument('--async-material-checkout',action='store_true',help='Isolated1.6.1/flat/complete-stage parallel checkout;never qualifies normal1.5.2')
     parser.add_argument('--live-tuning',action='store_true',help='Offline current-D3D9 live-control qualification;no SFC')
     parser.add_argument('--player-replacement',action='store_true',help='Offline synthetic-source transactional player replacement;never launches SFC')
+    parser.add_argument('--native-foreground',action='store_true',help='Offline original-shader shield retention and same-frame composition')
     parser.add_argument('--replacement-faults',action='store_true',help='Standalone fixture only: withhold shared output for one then two presentations')
     parser.add_argument('--texture-upload',choices=('inherit','staged-lock','initial-data'),default='inherit',help='Offline comparison: documented SYSTEMMEM initial pixels;unchanged runtime/texture content')
     parser.add_argument('--asset-admission-service',choices=('inherit','on','off'),default='inherit',help='Offline A/B: service ready assets on the renderer thread during output waits')
@@ -84,6 +85,7 @@ def main():
         args.parallel_assets=True;args.material_library='flat'
     if args.player_replacement and not args.async_material_checkout:parser.error('Replacement fixture requires pinned async baseline')
     if args.replacement_faults and not args.player_replacement:parser.error('Replacement faults require replacement fixture')
+    if args.native_foreground and not args.player_replacement:parser.error('Native foreground requires player replacement fixture')
     if args.parallel_assets and not args.multi_ship:parser.error('--parallel-assets requires --multi-ship')
     if args.texture_upload!='inherit' and not(args.multi_ship and args.pipeline_mode=='performance'):parser.error('Texture upload comparison requires performance multi-ship')
     if args.asset_admission_service!='inherit' and not args.parallel_assets:parser.error('Admission service comparison requires --parallel-assets')
@@ -196,6 +198,7 @@ def main():
         env.pop('SFC_D3D9_LIVE_TIMING',None);env.pop('SFC_D3D9_FIXTURE_ROWS',None)
         env.pop('SFC_D3D9_MULTISCENE',None)
         env['SFC_D3D9_PLAYER_REPLACEMENT']='1' if args.player_replacement else '0'
+        env['SFC_D3D9_NATIVE_FOREGROUND']='1' if args.native_foreground else '0'
         env.pop('SFC_REPLACEMENT_FIXTURE_FAULTS',None)
         if args.replacement_faults:env['SFC_REPLACEMENT_FIXTURE_FAULTS']='1'
         env.pop('SFC_MULTISCENE_LATE_ASSET',None)
@@ -401,6 +404,9 @@ def main():
             try:
                 raw_pid=struct.unpack_from('<I',semantic.channel.read(10*1024*1024,32),28)[0]
                 live_result=live_relay.finish(raw_pid)
+                if args.native_foreground:
+                    from native_foreground_qualification import save as save_foreground
+                    live_result['native_foreground']=save_foreground(semantic.channel,work)
             except Exception as exc:error=(error+'; ' if error else '')+'Live fixture: '+str(exc)
         if semantic:semantic.close()
         for f in streams:f.close()
@@ -416,6 +422,8 @@ def main():
     receipt['async_material_checkout']=args.async_material_checkout
     receipt['live_tuning_fixture']=args.live_tuning
     receipt['player_replacement_fixture']=args.player_replacement
+    receipt['native_foreground_fixture']=args.native_foreground
+    if args.native_foreground:receipt['native_foreground']=(live_result or {}).get('native_foreground')
     receipt['replacement_faults_fixture']=args.replacement_faults
     receipt['startup_profile']=args.startup_profile
     receipt['texture_upload']=args.texture_upload

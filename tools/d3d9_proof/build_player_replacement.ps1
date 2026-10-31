@@ -1,6 +1,6 @@
 $ErrorActionPreference='Stop'
 $root=(Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
-$out=Join-Path $root 'artifacts/player-replacement/run208'
+$out=Join-Path $root 'artifacts/player-replacement/native-tests'
 New-Item -ItemType Directory -Force $out | Out-Null
 foreach($arch in @('32','64')){
  $vc='C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvars'+$arch+'.bat'

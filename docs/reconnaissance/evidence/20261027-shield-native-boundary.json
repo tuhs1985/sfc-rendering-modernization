@@ -1,0 +1,67 @@
+{
+  "run": 217,
+  "date": "2026-10-27",
+  "result": "SHIELD_CONTEXT_AND_INTERLEAVED_ORDER_CONFIRMED_FOREGROUND_PRESERVATION_REQUIRED",
+  "sfc_launched": false,
+  "implementation_changed": false,
+  "pinned_client_hash": "4d65761d7dd69ef1504070261b81e9c200c0af18105033e1c4d2222c62320c29",
+  "static_byte_checks_passed": 5,
+  "native_order": {
+    "owner": "tEntityShip",
+    "hull_visual_field": "0x88",
+    "hull_visual_render_call": "0x0041655A",
+    "intervening_helper": "0x004103E2",
+    "shield_state_field": "0x1BC",
+    "shield_call": "0x004165AA",
+    "shield_function": "0x00426563",
+    "shield_caller_return": "0x004165AF",
+    "shield_ret": "0x00426883"
+  },
+  "trace_summaries": [
+    {
+      "run": "20261025-141645-535316-in-game",
+      "matched_context_draws": 206,
+      "qualified_additive_no_depth_write": 206,
+      "other_flush_state": 0,
+      "qualified_with_later_opaque": 71,
+      "max_later_opaque": 18
+    },
+    {
+      "run": "20261025-141338-349874-in-game",
+      "matched_context_draws": 98,
+      "qualified_additive_no_depth_write": 97,
+      "other_flush_state": 1,
+      "qualified_with_later_opaque": 15,
+      "max_later_opaque": 41
+    }
+  ],
+  "origin_hashes": {
+    "20261025-141645-535316-in-game": "881982ce5e5333b25a6f9cc6548481e91d27926d915f4a3b56b8fd91df6cb1f4",
+    "20261025-141338-349874-in-game": "05b44a3801bc90a030c727f2043b2d95ef4e7cd4e45c104c849a558a9480a75c"
+  },
+  "saturated_additive_counterexample": {
+    "native_background": 0.75,
+    "replacement_hull": 0.1,
+    "shield_contributions": [
+      0.5,
+      1.0
+    ],
+    "native_final": [
+      255,
+      255
+    ],
+    "correct_replaced": [
+      153,
+      255
+    ],
+    "depth_write": false
+  },
+  "confidence": [
+    "Exact historical call-context/state joins confirmed;not exclusive batch geometry ownership or proof every shield call was sampled.",
+    "No-global-opaque-then-transparent shortcut:opaque depth-writing draws follow qualified shield contexts in the same command context before Present.",
+    "Latest run shield-state join remains inferred from historical same-client path,not a new latest-run capture.",
+    "Current late opaque paste cannot generically recover an already flattened/clipped foreground effect from colour and depth alone."
+  ],
+  "next": "Design bounded same-source-frame native foreground preservation;do not just move Present code,use depth bias,or reconstruct alpha from saturated colour differences.",
+  "limits": "No new runtime/build/GPU/general tests;streamed archived metadata in1MiB blocks,no extraction or payload export;only small derivedJSON."
+}

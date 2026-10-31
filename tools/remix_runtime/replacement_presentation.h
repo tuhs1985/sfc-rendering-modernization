@@ -8,7 +8,7 @@ class Presentation {
  Microsoft::WRL::ComPtr<ID3D11Texture2D> complete;
 public:
  scene_frame_buffer::History history;Policy policy;Receipt receipts[2]{};DWORD committedFrame=0;uint64_t committedAt=0;
- Presentation(ID3D11Device* d,ID3D11Texture2D* target):history(d,target,true){
+ Presentation(ID3D11Device* d,ID3D11Texture2D* target,bool foreground=false):history(d,target,true,foreground){
   D3D11_TEXTURE2D_DESC desc{};target->GetDesc(&desc);desc.BindFlags=desc.CPUAccessFlags=desc.MiscFlags=0;desc.Usage=D3D11_USAGE_DEFAULT;
   ship_triplet::checked(d->CreateTexture2D(&desc,nullptr,&complete),"last complete picture");d->GetImmediateContext(&context);
  }

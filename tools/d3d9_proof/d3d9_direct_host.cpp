@@ -14,6 +14,7 @@ static void apiok(remixapi_ErrorCode result,const char* why){if(result!=REMIXAPI
 #include "visual_controls.h"
 #include "direct_lights.h"
 #include "normal_coverage.h"
+#include "physical_hull_depth.h"
 #include "game_output_wire.h"
 #include "worker_gpu_fence.h"
 #include "camera_left.h"
@@ -97,6 +98,7 @@ int wmain(int argc,wchar_t** argv){
    remixapi_Float4D background{-1234,0,0,0},zero{};apiok(external.dxvk_SetDefaultOutput(types[1],&background),"depth background sentinel");apiok(external.dxvk_SetDefaultOutput(types[2],&zero),"picking background sentinel");
    DirectVisualControls visuals;visuals.start(external,native.Get(),outputs[0].image.Get());
    NormalCoverage coverage;coverage.start(native.Get(),outputs[1].image.Get(),outputs[2].image.Get());
+   PhysicalHullDepth hull;hull.start(native.Get(),outputs[1].image.Get(),coverage.enabled);
    // Additive mode supplies its own UNION coverage; it never consumes vendor
    // picking. Only genuine picking consumers request vendor image retention.
    if(!coverage.enabled)apiok(external.dxvk_CopyRenderingOutput(outputs[2].surface.Get(),types[2]),"request picking image retention");
@@ -137,7 +139,7 @@ int wmain(int argc,wchar_t** argv){
    if(detailed)timing<<"sequence,source_frame,presents,draw_present_us,output_gpu_us,local_readback_us,peer_us,scheduled_us,completed_us,copy_submit_us,render_ready_wait_us,postprocess_us,query_polls,query_sleeps,query_sleep_us,query_last_pending_qpc,query_ready_qpc,input_empty_polls,input_sleep_us,input_validation_us\n";int64_t scheduleStart=0;
    wchar_t textureFlag[2]{};const auto texturePolicy=GetEnvironmentVariableW(L"SFC_D3D9_INITIAL_TEXTURE_DATA",textureFlag,2)==1&&textureFlag[0]==L'1'?TextureUpload::InitialData:TextureUpload::StagedLock;
    std::cout<<"TEXTURE_UPLOAD initial_data="<<(texturePolicy==TextureUpload::InitialData)<<" source_lifetime="<<(texturePolicy==TextureUpload::InitialData?"renderer":"staging_scope")<<'\n';
-   {Renderer renderer(device.Get(),scene,root,nullptr,texturePolicy);DirectLights lights;lights.start();MultiSceneRuntime cohort;cohort.start(root,device.Get(),scene,renderer,texturePolicy);
+   {Renderer renderer(device.Get(),scene,root,nullptr,texturePolicy);auto bootstrapHull=hull.prepare(scene);DirectLights lights;lights.start();MultiSceneRuntime cohort;cohort.start(root,device.Get(),scene,renderer,texturePolicy,&hull,&bootstrapHull);
     AssetService admission;wchar_t admissionFlag[2]{};
     admission.start(cohort.enabled&&GetEnvironmentVariableW(L"SFC_D3D9_ADMISSION_SERVICE",admissionFlag,2)==1&&admissionFlag[0]==L'1',
       [](void* p){static_cast<MultiSceneRuntime*>(p)->assets();},&cohort);
@@ -173,7 +175,7 @@ int wmain(int argc,wchar_t** argv){
      const auto began=outputTicks();const unsigned presents=(singlePresent||liveMode)&&frame?1u:24u;
      if(measureCohort)startup.mark("cohort_draw_begin");
      bool submitted=false;
-     for(unsigned warm=0;warm<presents;++warm){if(!frame)startup.mark("bootstrap_begin",warm,false);lights.draw(external);if(cohort.enabled&&frame){if(!cohort.draw(scene.width,scene.height,displacement))break;}else renderer.draw(state,false,scene.width,scene.height);if(!frame)startup.mark("bootstrap_drawn",warm,false);submitted=true;ok(device->PresentEx(nullptr,nullptr,nullptr,nullptr,0),"normal D3D9 PresentEx");
+     for(unsigned warm=0;warm<presents;++warm){if(!frame)startup.mark("bootstrap_begin",warm,false);hull.begin();lights.draw(external);if(cohort.enabled&&frame){if(!cohort.draw(scene.width,scene.height,displacement))break;}else{renderer.draw(state,false,scene.width,scene.height);hull.submit(bootstrapHull,state);}if(!frame)startup.mark("bootstrap_drawn",warm,false);submitted=true;ok(device->PresentEx(nullptr,nullptr,nullptr,nullptr,0),"normal D3D9 PresentEx");
       admission.tick(frame?AssetService::Boundary:AssetService::Bootstrap);
       if(!frame)startup.mark("bootstrap_presented",warm,false);
       MSG message{};while(PeekMessageW(&message,nullptr,0,0,PM_REMOVE)){TranslateMessage(&message);DispatchMessageW(&message);}if(presents>1)Sleep(10);
@@ -189,10 +191,12 @@ int wmain(int argc,wchar_t** argv){
      if(peer.disconnected){std::cout<<"OUTPUT_OMITTED peer_retired=1 source_frame="<<state.frame<<'\n';continue;}
      // Additive coverage replaces ordinary picking from semantic identity/depth.
      // Do not copy an unused vendor picking image every frame.
-     for(unsigned i=0;i<(coverage.enabled?2u:3u);++i)apiok(external.dxvk_CopyRenderingOutput(outputs[i].surface.Get(),types[i]),"copy normal rendered output");
+     // Physical hull depth/coverage is independent of PSR's virtual surfaces.
+     for(unsigned i=0;i<(coverage.enabled?1u:3u);++i)apiok(external.dxvk_CopyRenderingOutput(outputs[i].surface.Get(),types[i]),"copy normal rendered output");
      const auto copiesQueued=outputTicks();
      const auto renderPoll=wait9(fence.Get(),renderPollWait,&admission);
      const auto renderReady=outputTicks();
+     hull.draw(context.Get());
      const bool graded=combinedPost?visuals.grade.drawCoverage(context.Get(),outputs[0].image.Get(),visuals.image.post(),state.owner):visuals.apply(context.Get(),outputs[0].image.Get());
      const bool covered=combinedPost||coverage.draw(context.Get(),state.owner,scene.width,scene.height);
      if(graded||covered){

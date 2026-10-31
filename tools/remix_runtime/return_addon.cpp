@@ -22,7 +22,7 @@ using Microsoft::WRL::ComPtr;
 // before this external component. No replacement or forwarder is supplied.
 extern "C" __declspec(dllimport) bool ReShadeRegisterAddon(void*,uint32_t);
 extern "C" __declspec(dllexport) const char* NAME="SFC Remix return-path proof";
-extern "C" __declspec(dllexport) const char* DESCRIPTION="Default-off additive diagnostic image; no ship suppression.";
+extern "C" __declspec(dllexport) const char* DESCRIPTION="Default-off SFC rendering checkout; paired player replacement and native shields.";
 namespace {
 wchar_t session[128]{};bool registered=false;
 std::unique_ptr<return_path::Mapping> channel;
@@ -36,9 +36,18 @@ bool searchMode=false,searchFixture=false;depth_search::Search search;
 bool broadMode=false;
 bool sourceTimingRequested=false;std::unique_ptr<source_timing::Observer> sourceTiming;
 bool directGameRequested=false;std::unique_ptr<d3d9_game::Receiver> directGame;
+bool nativeForegroundRequested=false;
+void nativeShader(reshade::api::device* d,reshade::api::pipeline_layout,uint32_t count,
+                  const reshade::api::pipeline_subobject* objects,reshade::api::pipeline pipeline){
+ if(d->get_api()!=reshade::api::device_api::d3d11||!pipeline.handle||count!=1||
+    objects[0].type!=reshade::api::pipeline_subobject_type::pixel_shader||objects[0].count!=1||!objects[0].data)return;
+ const auto& code=*static_cast<const reshade::api::shader_desc*>(objects[0].data);
+ native_foreground::shader_compatibility::remember(reinterpret_cast<ID3D11PixelShader*>(static_cast<uintptr_t>(pipeline.handle)),code.code,code.code_size);
+}
 ComPtr<ID3D11RenderTargetView> directTargets[4];uint64_t directBack[4]{};uint32_t directCount=0;
-bool directDraw(reshade::api::command_list* c,uint32_t,uint32_t,uint32_t,uint32_t){if(directGame)directGame->observe(c->get_native());return false;}
-bool directIndexed(reshade::api::command_list* c,uint32_t,uint32_t,uint32_t,int32_t,uint32_t){return directDraw(c,0,0,0,0);}
+bool directDraw(reshade::api::command_list* c,uint32_t,uint32_t,uint32_t,uint32_t){if(directGame){directGame->observe(c->get_native());directGame->nativeUnsupportedDraw();}return false;}
+bool directIndexed(reshade::api::command_list* c,uint32_t count,uint32_t instances,uint32_t first,int32_t base,uint32_t firstInstance){
+ if(directGame){directGame->observe(c->get_native());directGame->nativeShieldDraw(c->get_native(),count,instances,first,base,firstInstance);}return false;}
 bool directClear(reshade::api::command_list* c,reshade::api::resource_view,const float*,const uint8_t*,uint32_t,const reshade::api::rect*){if(directGame)directGame->cleared(c->get_native());return false;}
 #ifdef SFC_LIVE_RETURN
 std::unique_ptr<ship_live::Receiver> liveReceiver;
@@ -248,6 +257,8 @@ static BOOL attach(HMODULE module){
     }
     if(!reshade::register_addon(module))return FALSE;
     registered=true;
+    nativeForegroundRequested=directGameRequested&&native_foreground::source_notice::requested();
+    if(nativeForegroundRequested)reshade::register_event<reshade::addon_event::init_pipeline>(nativeShader);
     if(directGameRequested){reshade::register_event<reshade::addon_event::draw>(directDraw);reshade::register_event<reshade::addon_event::draw_indexed>(directIndexed);reshade::register_event<reshade::addon_event::clear_depth_stencil_view>(directClear);}
 #ifdef SFC_LIVE_RETURN
     if(sceneDepthTest){reshade::register_event<reshade::addon_event::draw>(sceneDraw);reshade::register_event<reshade::addon_event::draw_indexed>(sceneIndexed);reshade::register_event<reshade::addon_event::clear_depth_stencil_view>(sceneClear);}
@@ -284,6 +295,7 @@ BOOL WINAPI DllMain(HMODULE module,DWORD reason,LPVOID){
   if(DetourIsHelperProcess())return TRUE;
   if(reason==DLL_PROCESS_ATTACH)return attach(module);
   if(reason==DLL_PROCESS_DETACH&&registered){
+    if(nativeForegroundRequested)reshade::unregister_event<reshade::addon_event::init_pipeline>(nativeShader);
     if(directGameRequested){reshade::unregister_event<reshade::addon_event::draw>(directDraw);reshade::unregister_event<reshade::addon_event::draw_indexed>(directIndexed);reshade::unregister_event<reshade::addon_event::clear_depth_stencil_view>(directClear);}
 #ifdef SFC_LIVE_RETURN
     if(sceneDepthTest){reshade::unregister_event<reshade::addon_event::draw>(sceneDraw);reshade::unregister_event<reshade::addon_event::draw_indexed>(sceneIndexed);reshade::unregister_event<reshade::addon_event::clear_depth_stencil_view>(sceneClear);}
