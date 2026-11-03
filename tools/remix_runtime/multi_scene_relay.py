@@ -8,6 +8,7 @@ import ctypes as C
 import hashlib
 import json
 from pathlib import Path
+from scene_capacity import OWNERS,ASSETS
 import re
 import struct
 import subprocess
@@ -26,6 +27,10 @@ class Relay(SingleRelay):
         from pipeline_mode import validate
         self.mode=validate(kwargs.pop('pipeline_mode','performance'))
         super().__init__(*args,**kwargs,multi_scene=True)
+        # Multi-scene preparation/recovery owns its packets;do not retain a second
+        # fleet-sized decoded copy in the legacy calibration sidecar.
+        self.receiver.retain_assets=False
+        self.receiver.assets.clear()
         self.replacement_names={}
         if self.player_replacement:
             from owner_selection import selected_model,CONFIG
@@ -68,6 +73,8 @@ class Relay(SingleRelay):
         if backend:EXE,RUNTIME=backend['exe'],backend['runtime']
         from evidence_budget import AGGREGATE_BYTES
         from multi_scene import camera_offset
+        from warm_start import initialize
+        initialize(self.receiver.channel,pid)
         gpu=self.folder/'gpu';gpu.mkdir(exist_ok=True)
         # Do not ingest an empty library and immediately reload it. The native
         # host enables replacement assets only after the complete activation.
@@ -89,6 +96,12 @@ class Relay(SingleRelay):
              'SFC_D3D9_SHARED_LIGHTS':'1','SFC_D3D9_SYNC_BUFFER':'1','SFC_D3D9_MULTISCENE':'1',
              'SFC_PIPELINE_MODE':self.mode,'SFC_D3D9_OFFSET_X':str(camera_offset()[0])}
         env['SFC_D3D9_PLAYER_REPLACEMENT']='1' if self.player_replacement else '0'
+        env['SFC_D3D9_TEXTURE_MEMORY']='1' if getattr(self,'texture_memory',None) else '0'
+        from environment_resources import publish as prepare_environment
+        environment_receipt=prepare_environment(self.receiver.channel,pid,gpu)
+        (gpu/'environment-preparation.json').write_text(json.dumps(environment_receipt,indent=2))
+        env['SFC_D3D9_PREPARED_ENVIRONMENT']='1'
+        env['SFC_D3D9_SLOW_COMPLETION']='1' if getattr(self,'completion_diagnostics',False) else '0'
         env['SFC_NATIVE_INSERTION_GATE']='1' if getattr(self,'native_gate_policy',None) else '0'
         env['SFC_D3D9_LEGACY_STARTUP_WARMUP']='1' if getattr(self,'legacy_startup_warmup',False) else '0'
         env['SFC_NATIVE_INSERTION_ALL_SHIPS']='1' if getattr(self,'native_all_ships',False) else '0'
@@ -167,7 +180,7 @@ class Relay(SingleRelay):
             self.recover(pid)
 
     def current_rows(self):
-        return [r for i in range(32) if (r:=self.receiver.channel.sample_owner(i)) and r[1] and r[2] and r[7] and r[4]==1 and r[48]==1]
+        return [r for i in getattr(self.receiver.channel,"owner_indices",lambda:range(OWNERS))() if (r:=self.receiver.channel.sample_owner(i)) and r[1] and r[2] and r[7] and r[4]==1 and r[48]==1]
 
     def discover(self,rows):
         if self.player_replacement:
@@ -176,7 +189,7 @@ class Relay(SingleRelay):
                 refs=self.folder/'gate'/f'LIVE-SCENE-001-asset-{row[7]}.json'
                 key=(row[1],row[7])
                 if key not in self.replacement_names and refs.is_file():
-                    if refs.stat().st_size>256*1024 or len(self.replacement_names)>=64:raise ValueError('Replacement association bounds')
+                    if refs.stat().st_size>256*1024 or len(self.replacement_names)>=ASSETS:raise ValueError('Replacement association bounds')
                     self.replacement_names[key]=json.loads(refs.read_text()).get('model_filename','').lower().replace('\\','/')
                 if self.replacement_names.get(key)==target:
                     matching.append(row)
@@ -184,7 +197,7 @@ class Relay(SingleRelay):
             rows=matching
         for row in rows:
             key=row[1],row[7]
-            if key in self.attempts or len(self.attempts)>=64:continue
+            if key in self.attempts or len(self.attempts)>=ASSETS:continue
             source=self.folder/'gate'/f'LIVE-SCENE-001-asset-{row[7]}.bin'
             if not source.is_file() or not source.with_suffix('.json').is_file():continue
             snapshot=source.parent/'run-metadata.json'
@@ -234,7 +247,7 @@ class Relay(SingleRelay):
                     raw_pid=struct.unpack_from('<I',self.receiver.channel.read(10*1024*1024,32),28)[0]
                     data=packet(root,[layer],raw_pid,self.receiver.name)
                     self.prefetch_requests+=1
-                    if self.prefetch_requests>64:raise ValueError('Prefetch request bound')
+                    if self.prefetch_requests>ASSETS:raise ValueError('Prefetch request bound')
                     pending=root/f'texture-prefetch-{self.prefetch_requests}.pending';pending.write_bytes(data);pending.replace(pending.with_suffix('.bin'))
             except (ValueError,OSError,subprocess.SubprocessError) as exc:self.fail_job(job,exc)
         for job in self.preparer.jobs.values():
@@ -399,7 +412,7 @@ class Relay(SingleRelay):
         if self.anchor_missing<3:return
         for row in rows:
             if not any((a['owner'],a['revision'])==(row[1],row[7]) and wire.acknowledgement(self.receiver.channel,a['id'])==1 for a in self.catalog):continue
-            if self.binding_generation>=64:return
+            if self.binding_generation>=0x3fffffff:return
             if self.lights and not self.lights.prepare_owner(row):return
             if self.light_replay:
                 self.light_replay.owner=row[1]
@@ -415,18 +428,21 @@ class Relay(SingleRelay):
         try:super().stop()
         finally:
             if self.prewarm_process and not self.process:
-                (self.folder/'gpu/renderer-cancel').touch()
+                from warm_start import cancel
+                cancel(self.receiver.channel)
                 try:self.prewarm_process.wait(timeout=30)
                 except subprocess.TimeoutExpired:
                     self.prewarm_process.terminate();self.prewarm_process.wait(timeout=5)
                     self.error='Prewarm cancellation timed out;owned guard stopped'
             self.preparer.close()
+            if getattr(self,'texture_memory',None):self.texture_memory.close()
             if self.frame_log and not self.frame_log.closed:self.frame_log.close()
 
     def finish(self,pid):
         report=super().finish(pid)
-        ready_path=self.folder/'gpu/renderer-ready.bin';ready_qpc=ready_pid=None
-        if ready_path.is_file():ready_qpc,ready_pid=struct.unpack('<2Q',ready_path.read_bytes())
+        from warm_start import ready,snapshot
+        readiness=ready(self.receiver.channel) if self.prewarm_process else None
+        ready_qpc,ready_pid=readiness if readiness else (None,None)
         if self.preparer.report()['unfinished']:self.partial.append(dict(reason='Stopped with unpublished preparation jobs',ids=self.preparer.report()['unfinished']))
         state=wire.summary(self.receiver.channel)
         block=self.receiver.channel.read(wire.OFFSET,wire.STORE_BYTES)
@@ -445,6 +461,7 @@ class Relay(SingleRelay):
                                   initial_published_ns=self.initial_published_ns,renderer_started_ns=self.renderer_started_ns,
                                   prewarm_started_ns=self.prewarm_started_ns,renderer_activation_ns=self.renderer_activation_ns,
                                   prewarm_ready_qpc=ready_qpc,prewarm_host_pid=ready_pid,
+                                  startup_transport=snapshot(self.receiver.channel) if self.prewarm_process else None,
                                   loading_policy=self.loading_receipt,
                                   material_library=self.material_library,
                                   api_texture_prefetch=self.api_texture_prefetch,
@@ -455,6 +472,12 @@ class Relay(SingleRelay):
                                   image_policy=__import__('multi_scene_resources').policy(),
                                   image_warning=self.image_bytes>=__import__('evidence_budget').AGGREGATE_BYTES*4//5,original_images=len(self.original_images),
                                   coverage='Union of qualified submitted set;not native per-pixel owner identity',original_suppressed=False)
+        if getattr(self,'texture_memory',None):
+            from texture_memory import BUDGET
+            report['multi_scene']['texture_transport']=dict(protocol=2,mode='immutable-scene-and-texture-memory',
+                created=self.texture_memory.created,acknowledged=self.texture_memory.acknowledged,
+                peak_bytes=self.texture_memory.peak,remaining_bytes=self.texture_memory.bytes,budget_bytes=BUDGET,
+                renderer_texture_file_fallback=False)
         report['scope']='Retained multi-ship diagnostic with recorded common camera-left offset;originals remain;not replacement or universal coverage'
         report['result']='MULTISHIP_OVERLAY_REVIEW_REQUIRED' if len(draws)>=2 and len(self.resident)>=2 and not self.partial and not state['asset_rejected'] and report['game_output']['drawn'] else 'PARTIAL'
         if self.player_replacement:

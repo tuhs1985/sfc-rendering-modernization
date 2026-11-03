@@ -6,8 +6,10 @@
 #include <mutex>
 #include <atomic>
 #include "../m1_component/m1_light_transport.h"
+#include "direct_effect_lights.h"
 struct DirectLights {
  bool enabled=false;RemixLiveLights lights;
+ DirectEffectLights effects;
  std::mutex mutex;std::thread reader;std::atomic<bool> stopping{false};
  LiveLightPacket cached{};LightShapePacket cachedShapes{};bool ready=false;uint64_t reads=0,readFailures=0;
  sfc_calibration::Reader sharedSource;sfc_light_transport::Encoded* shared=nullptr;DWORD expectedPid=0;
@@ -37,6 +39,7 @@ struct DirectLights {
    memcpy(key.sourceSession,identity,16);seed.model=identity[4];seed.source=identity[5];
   }
   key.owner=state.owner;key.revision=state.revision;key.frame=state.frame;
+  if(shared)effects.update(api,state.frame,sharedSource.session,expectedPid);
   LiveLightPacket p{};LightShapePacket shapes{};
   bool sampled=false;
   if(shared){
@@ -55,12 +58,13 @@ struct DirectLights {
   if(requested){
    require(sharedSource.prepare()&&sharedSource.requested,"explicit shared light mapping");
    auto* base=reinterpret_cast<BYTE*>(sharedSource.mailbox)-sfc_calibration::Offset;
+   effects.attach(base);
    shared=reinterpret_cast<sfc_light_transport::Encoded*>(base+sfc_light_transport::EncodedOffset);
    wchar_t pid[16]{};GetEnvironmentVariableW(L"SFC_D3D9_GAME_PID",pid,16);expectedPid=static_cast<DWORD>(_wcstoui64(pid,nullptr,10));
    require(expectedPid&&sfc_light_transport::valid(shared->header,sfc_light_transport::EncodedMagic,sizeof(*shared),sharedSource.session,expectedPid),"shared light session/PID/contract");
    std::cout<<"SHARED_LIGHTS active=1 per_frame_file_reads=0\n";
   }else{read();reader=std::thread([this]{while(!stopping.load()){read();Sleep(10);}});}
  }}
- void draw(remixapi_Interface& api){if(enabled)lights.draw(api);}
- void close(remixapi_Interface& api){stop();if(enabled){std::cout<<"LIGHT_UPDATE_SUMMARY changes="<<lights.applied<<" cache_reads="<<reads<<" read_failures="<<readFailures<<" retained_updates="<<lights.retainedUpdates<<" unavailable_updates="<<lights.unavailableUpdates<<'\n';lights.close(api);}}
+ void draw(remixapi_Interface& api){if(enabled){lights.draw(api);effects.draw(api);}}
+ void close(remixapi_Interface& api){stop();if(enabled){std::cout<<"LIGHT_UPDATE_SUMMARY changes="<<lights.applied<<" cache_reads="<<reads<<" read_failures="<<readFailures<<" retained_updates="<<lights.retainedUpdates<<" unavailable_updates="<<lights.unavailableUpdates<<'\n';effects.close(api);lights.close(api);}}
 };

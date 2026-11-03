@@ -1,8 +1,9 @@
 // Adapter-owned physical first-hit depth for qualified opaque rigid meshes.
 // Remix PSR depth describes reflected/refracted surfaces, not hull coverage.
-// Worker only: immutable cached geometry, fixed 32-instance submission array.
+// Worker only: immutable cached geometry; capacity matches the admitted scene.
 #pragma once
 #include "../native_insertion/cohort_contract.h"
+#include "../scene_bridge/scene_capacity.h"
 struct PhysicalHullDepth {
  struct Mesh {ComPtr<ID3D11Buffer> vertices,indices;UINT count=0;uint64_t bytes=0;};
  struct Submission {const Mesh* mesh=nullptr;Frame frame{};};
@@ -11,8 +12,8 @@ struct PhysicalHullDepth {
  ComPtr<ID3D11PixelShader> pixel;ComPtr<ID3D11InputLayout> layout;
  ComPtr<ID3D11Buffer> constants;ComPtr<ID3D11RasterizerState> raster;
  ComPtr<ID3D11DepthStencilState> zstate;ComPtr<ID3D11BlendState> opaque;
- std::array<Submission,32> submissions{};unsigned count=0;UINT width=0,height=0;
- bool enabled=false;uint64_t batches=0,draws=0,geometryBytes=0;
+ std::array<Submission,scene_capacity::Owners> submissions{};unsigned count=0;UINT width=0,height=0;
+ bool enabled=false;uint64_t batches=0,draws=0,geometryBytes=0,omitted=0;
  void start(ID3D11Device* d,ID3D11Texture2D* output,bool active,ID3D11Texture2D* picking=nullptr){
   enabled=active;if(!enabled)return;device=d;D3D11_TEXTURE2D_DESC desc{};output->GetDesc(&desc);
   require(desc.Format==DXGI_FORMAT_R32_FLOAT&&desc.SampleDesc.Count==1&&desc.ArraySize==1&&desc.MipLevels==1,"physical hull output layout");
@@ -54,9 +55,11 @@ float4 main(float3 p:POSITION):SV_Position{return mul(projection,mul(view,mul(mo
   ok(device->CreateBuffer(&b,&data,&m.indices),"physical hull cached indices");m.bytes+=b.ByteWidth;m.count=static_cast<UINT>(scene.indices.size());geometryBytes+=m.bytes;return m;
  }
  void begin(){count=0;}
- void submit(const Mesh& mesh,const Frame& frame){
-  if(!enabled||!frame.active)return;require(count<submissions.size()&&mesh.vertices&&mesh.indices&&mesh.count,"physical hull bounded submission");
-  submissions[count++]={&mesh,frame};
+ bool submit(const Mesh& mesh,const Frame& frame){
+  if(!enabled)return true;
+  if(!frame.active)return false;
+  if(count>=submissions.size()||!mesh.vertices||!mesh.indices||!mesh.count){++omitted;return false;}
+  submissions[count++]={&mesh,frame};return true;
  }
  void draw(ID3D11DeviceContext* c){
   if(!enabled)return;c->ClearState();const float background[4]={-1234,0,0,0};c->ClearRenderTargetView(target.Get(),background);c->ClearDepthStencilView(depth.Get(),D3D11_CLEAR_DEPTH,1,0);
@@ -73,5 +76,5 @@ float4 main(float3 p:POSITION):SV_Position{return mul(projection,mul(view,mul(mo
    c->DrawIndexed(s.mesh->count,0,0);++draws;
   }++batches;c->ClearState();
  }
- ~PhysicalHullDepth(){if(enabled)std::cout<<"PHYSICAL_HULL_SUMMARY batches="<<batches<<" draws="<<draws<<" uploaded_bytes="<<geometryBytes<<'\n';}
+ ~PhysicalHullDepth(){if(enabled)std::cout<<"PHYSICAL_HULL_SUMMARY batches="<<batches<<" draws="<<draws<<" uploaded_bytes="<<geometryBytes<<" capacity="<<submissions.size()<<" omitted="<<omitted<<'\n';}
 };

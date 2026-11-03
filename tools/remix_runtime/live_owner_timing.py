@@ -4,6 +4,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+from scene_capacity import OWNERS,ASSETS
 import re
 import struct
 import subprocess as sp
@@ -48,6 +49,7 @@ def source_hashes():
            'tools/d3d9_proof/d3d9_direct_host.cpp','tools/d3d9_proof/d3d9_replay.cpp','tools/d3d9_proof/output_producer.h',
            'tools/d3d9_proof/output_receiver.cpp','tools/d3d9_proof/output_channel.h','tools/d3d9_proof/ingress_replay.h',
            'tools/d3d9_proof/frame_ingress.h','tools/d3d9_proof/start_live_owner_timing_session.ps1',
+           'tools/d3d9_proof/startup_ticket.h','tools/d3d9_proof/warm_start.h','tools/remix_runtime/warm_start.py',
            'tools/scene_bridge/scene_bundle.py','tools/remix_runtime/live_owner_timing.py',
            'tests/d3d9_live_owner_tests.cpp','tools/remix_runtime/qualify_live_owner.py','tests/test_live_owner_timing.py')
     result.update({p:digest(ROOT/p) for p in names});return result
@@ -132,7 +134,7 @@ class Relay:
         from scene_bundle import prepare
         from live_scene import decode_mesh
         candidates=[]
-        for index in range(32):
+        for index in range(OWNERS):
             row=self.receiver.channel.sample_owner(index)
             if not row or not row[1] or not row[2] or row[4]!=1 or not row[7] or row[48]!=1:continue
             asset=self.folder/'gate'/f'LIVE-SCENE-001-asset-{row[7]}.bin'
@@ -241,7 +243,7 @@ class Relay:
         if getattr(self,'prewarm_process',None):
             if self.prewarm_process.poll() is not None:raise ValueError('Prepared renderer exited before activation')
             from warm_start import activate
-            activate(gpu,env,self.receiver.name)
+            activate(self.receiver.channel,env,self.receiver.name)
             self.process=self.prewarm_process
         else:self.process=sp.Popen(command,env=env,creationflags=sp.CREATE_NO_WINDOW)
         print(('Native supported-ship replacement: ' if getattr(self,'native_all_ships',False) else 'Transactional player replacement: ' if getattr(self,'player_replacement',False) else 'Multi-ship ordinary-D3D9 diagnostic: ' if self.multi_scene else 'Offset ordinary-D3D9 ship: ' if self.additive else 'Separate D3D9 renderer timing: ')+manifest['model_name']+('. Original drawing remains until matching output authorizes each ship.' if getattr(self,'native_all_ships',False) else '. Original drawing remains until paired output authorizes replacement.' if getattr(self,'player_replacement',False) else '. Original ship stays visible;existing visual baseline.' if self.additive else '. No new picture will be displayed.'),flush=True)
@@ -264,7 +266,7 @@ class Relay:
         if now-self.recovery_polled<.002:return
         self.recovery_polled=now
         current_frame=struct.unpack('<I',self.receiver.channel.read(OFFSET+44,4))[0]
-        rows=[r for i in range(32) if (r:=self.receiver.channel.sample_owner(i)) and r[1] and r[2] and r[7] and r[48]==1 and r[4]==1 and 0<=current_frame-r[2]<=8]
+        rows=[r for i in getattr(self.receiver.channel,"owner_indices",lambda:range(OWNERS))() if (r:=self.receiver.channel.sample_owner(i)) and r[1] and r[2] and r[7] and r[48]==1 and r[4]==1 and 0<=current_frame-r[2]<=8]
         if any((r[1],r[7])==(self.bound_row[1],self.bound_row[7]) for r in rows):return
         candidates=[]
         from live_scene import decode_mesh
@@ -294,7 +296,7 @@ class Relay:
                 if key not in self.recovery_rejected and len(self.recovery_rejected)<64:
                     self.recovery_rejected.add(key);self.binding_events.append(dict(rejected=reason,frame=current_frame))
             return
-        if self.binding_generation>=64:return
+        if self.binding_generation>=0x3fffffff:return
         row,_=choice
         # Publish qualified NEW-owner lights before worker selection changes.
         # Missing fresh observations postpone rebind,never relabel old lights.

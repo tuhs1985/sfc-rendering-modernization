@@ -46,7 +46,7 @@ constexpr DWORD kModel0Vtable = 0x007983E8;
 constexpr DWORD kVisualMainlineReturn = 0x0042FDD5;
 constexpr DWORD kKnownExceptionReturn = 0x00509843;
 constexpr std::size_t kEventCapacity = 100000;
-constexpr std::size_t kOwnerCapacity = 32;
+constexpr std::size_t kOwnerCapacity = scene_capacity::Owners;
 constexpr std::size_t kThreadCapacity = 8;
 replacement::Store* g_replacement=nullptr;
 native_foreground::source_notice::Store* g_foreground_notice=nullptr;
@@ -55,9 +55,9 @@ bool g_native_gate_requested=false;
 native_gate::Store* g_native_gate=nullptr;native_gate::Dispatch g_native_dispatch=nullptr;
 HMODULE g_native_adapter=nullptr;HANDLE g_native_stop_event=nullptr;volatile LONG g_in_native_gate=0,g_native_committed=0;
 volatile LONG g_in_hook_spans=0;
-native_gate::Ticket g_native_ticket{};bool g_native_decided=false,g_native_inserted=false;
-struct NativeOwnerDecision {DWORD owner=0,revision=0;native_gate::Ticket ticket{};bool decided=false,inserted=false;};
-bool g_native_cohort_mode=false;native_cohort::Store* g_native_cohort=nullptr;std::array<NativeOwnerDecision,32> g_native_owners{};
+native_gate::Ticket g_native_ticket{};bool g_native_decided=false,g_native_inserted=false,g_native_blocked=false;
+struct NativeOwnerDecision {DWORD owner=0,revision=0;native_gate::Ticket ticket{};bool decided=false,inserted=false,blocked=false;};
+bool g_native_cohort_mode=false;native_cohort::Store* g_native_cohort=nullptr;std::array<NativeOwnerDecision,scene_capacity::Owners> g_native_owners{};
 
 enum EventKind : DWORD {
     kScene = 0,
@@ -1135,7 +1135,7 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
         event.origin = 0x0069E300;
         if (g_gate) {
             DWORD frame = static_cast<DWORD>(InterlockedIncrement(&g_frame));
-            if(g_native_gate){native_gate::begin(*g_native_gate,frame,thread_id);g_native_decided=false;g_native_inserted=false;if(g_native_cohort_mode)for(auto& d:g_native_owners)d={};}
+            if(g_native_gate){native_gate::begin(*g_native_gate,frame,thread_id);g_native_decided=false;g_native_inserted=false;g_native_blocked=false;if(g_native_cohort_mode)for(auto& d:g_native_owners)d={};}
             if(g_insertion_probe&&g_live_scene.directSource.store)native_insertion::begin(*g_insertion_probe,frame,
                 static_cast<uint64_t>(InterlockedCompareExchange64(&g_live_scene.directSource.store->header.selected,0,0)));
             if(g_replacement)replacement::begin(*g_replacement,frame,thread_id);
@@ -1405,7 +1405,7 @@ extern "C" void __cdecl CoordinateAfterCapture(DWORD kind,const DWORD* saved){
  if(kind!=kWrapper||!g_native_gate_requested||!g_native_gate||!g_native_dispatch||!g_running)return;
  const auto active=InterlockedIncrement(&g_in_native_gate);
  struct Drain{~Drain(){InterlockedDecrement(&g_in_native_gate);}}drain;
- if(active!=1){InterlockedExchange(&g_native_gate->header.partial,1);InterlockedExchange(&g_native_gate->header.stop,1);if(g_native_stop_event)SetEvent(g_native_stop_event);return;}
+ if(active!=1){native_gate::retry(*g_native_gate,native_gate::RetryReason::Overlap,0);return;}
  const DWORD thread=GetCurrentThreadId(),frame=static_cast<DWORD>(g_frame);
  native_gate::Ticket ticket{};bool selected=false,qualified=false,primary=false;DWORD observedOwner=0;NativeOwnerDecision* ownerDecision=nullptr;
  EnterCriticalSection(&g_lock);
@@ -1434,17 +1434,20 @@ extern "C" void __cdecl CoordinateAfterCapture(DWORD kind,const DWORD* saved){
   }
  }
  LeaveCriticalSection(&g_lock);
- if(!selected){if(g_native_cohort_mode)for(const auto& d:g_native_owners)if(d.owner==observedOwner&&d.inserted){InterlockedExchange(&g_native_gate->header.partial,1);InterlockedExchange(&g_native_gate->header.stop,1);if(g_native_stop_event)SetEvent(g_native_stop_event);break;}return;}
+ if(!selected){if(g_native_cohort_mode)for(auto& d:g_native_owners)if(d.owner==observedOwner&&d.inserted&&!d.blocked){
+   d.blocked=true;native_gate::retry(*g_native_gate,native_gate::RetryReason::OwnerChanged,observedOwner);break;}return;}
  bool& decided=ownerDecision?ownerDecision->decided:g_native_decided;bool& inserted=ownerDecision?ownerDecision->inserted:g_native_inserted;
+ bool& blocked=ownerDecision?ownerDecision->blocked:g_native_blocked;
  auto& committedTicket=ownerDecision?ownerDecision->ticket:g_native_ticket;
- auto fail=[&]{if(inserted){InterlockedExchange(&g_native_gate->header.partial,1);InterlockedExchange(&g_native_gate->header.stop,1);if(g_native_stop_event)SetEvent(g_native_stop_event);}};
- if(!qualified){fail();decided=true;return;}
+ auto retry=[&]{blocked=true;decided=true;native_gate::retry(*g_native_gate,native_gate::RetryReason::SubmissionChanged,observedOwner);};
+ if(blocked)return;
+ if(!qualified){retry();return;}
  if(decided){
   if(!inserted)return;
   if(ticket.frame!=committedTicket.frame||ticket.owner!=committedTicket.owner||ticket.revision!=committedTicket.revision||
      ticket.model!=committedTicket.model||ticket.source!=committedTicket.source||ticket.count!=committedTicket.count||
      ticket.primary!=committedTicket.primary||ticket.secondary!=committedTicket.secondary||ticket.manager!=committedTicket.manager||
-     ticket.sequence!=committedTicket.sequence||ticket.hash!=committedTicket.hash||ticket.generation!=committedTicket.generation){fail();return;}
+     ticket.sequence!=committedTicket.sequence||ticket.hash!=committedTicket.hash||ticket.generation!=committedTicket.generation){retry();return;}
  }else{
   decided=true;if(!primary||g_native_gate->header.stop)return;
   native_gate::Reply reply{};
@@ -1463,7 +1466,10 @@ extern "C" void __cdecl CoordinateAfterCapture(DWORD kind,const DWORD* saved){
   }
   committedTicket=ticket;inserted=true;InterlockedExchange(&g_native_committed,static_cast<LONG>(frame));
  }
- if(!safe_write32(snapshot_entry_esp(saved)+4,0)){fail();return;}
+ if(!safe_write32(snapshot_entry_esp(saved)+4,0)){
+  native_gate::terminal(*g_native_gate,native_gate::TerminalReason::SuppressionWrite,observedOwner);
+  if(g_native_stop_event)SetEvent(g_native_stop_event);return;
+ }
  if(primary)++g_native_gate->current.primary;else ++g_native_gate->current.secondary;
  if(g_native_cohort)native_cohort::count(*g_native_cohort,ticket,false,true);
  if(g_replacement){replacement::Receipt receipt{};if(replacement::sample(*g_replacement,frame,receipt)){
@@ -2064,7 +2070,7 @@ extern "C" DWORD WINAPI M1StartW(void* parameter) {
     if (InterlockedCompareExchange(&g_running, 0, 0)) return 10;
     g_foreground_notice=nullptr;
     g_insertion_probe=nullptr;
-    g_native_gate=nullptr;g_native_dispatch=nullptr;g_native_decided=false;g_native_inserted=false;g_native_committed=0;
+    g_native_gate=nullptr;g_native_dispatch=nullptr;g_native_decided=false;g_native_inserted=false;g_native_blocked=false;g_native_committed=0;
     g_native_cohort=nullptr;g_native_cohort_mode=native_cohort::requested();for(auto& d:g_native_owners)d={};
 #ifndef M1_GATE_ONLY
     g_native_gate_requested=native_gate::requested();

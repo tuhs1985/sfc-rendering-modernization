@@ -57,5 +57,22 @@ int main(){
  scenePacket.h[8]=sceneKey.owner;scenePacket.h[9]=sceneSeed.model;scenePacket.rows[0].enabled=0;scenePacket.checksum=lightChecksum(scenePacket);
  test(scene.updateOrRetain(api,sceneSeed,sceneKey,1000,model,&scenePacket,&shapes,true));test(!scene.handles[0]&&scene.handles[1]&&scene.handles[2]);
  ++sceneKey.sourceSession[0];test(!scene.updateOrRetain(api,sceneSeed,sceneKey,1000,model,nullptr,nullptr,true));test(!scene.handles[0]&&!scene.handles[1]&&!scene.handles[2]);
+ // Preparation is not a live observation. Keep pending resource through a
+ // missing first packet;adopt only when actual validated values agree.
+ RemixLiveLights prepared;prepared.preparedHandle=reinterpret_cast<remixapi_LightHandle>(uintptr_t(900));
+ prepared.preparedShape=shapes.rows[2];prepared.preparedRow.slot=2;prepared.preparedRow.enabled=1;
+ memcpy(prepared.preparedRow.values,shapes.rows[2].v+18,12);memcpy(prepared.preparedRow.values+3,shapes.rows[2].v+15,12);
+ prepared.preparedRow.values[6]=shapes.rows[2].v[21];prepared.preparedRow.values[7]=shapes.rows[2].v[22];
+ auto beforeDestroy=destroys;
+ test(!prepared.updateOrRetain(api,seed,key,1000,model,nullptr,nullptr,true));test(prepared.preparedHandle&&destroys==beforeDestroy);
+ scenePacket=good;for(auto& r:scenePacket.rows)r.values[10]=1;scenePacket.checksum=lightChecksum(scenePacket);
+ auto beforeCreate=creates;
+ test(prepared.updateOrRetain(api,seed,key,1000,model,&scenePacket,&shapes,true));
+ test(!prepared.preparedHandle&&prepared.handles[2]==reinterpret_cast<remixapi_LightHandle>(uintptr_t(900))&&creates==beforeCreate+2);
+ prepared.close(api);test(destroys==beforeDestroy+3);
+ RemixLiveLights cancelled;cancelled.preparedHandle=reinterpret_cast<remixapi_LightHandle>(uintptr_t(901));beforeDestroy=destroys;
+ cancelled.close(api);cancelled.close(api);test(destroys==beforeDestroy+1);
+ RemixLiveLights changed;changed.preparedHandle=reinterpret_cast<remixapi_LightHandle>(uintptr_t(902));beforeDestroy=destroys;
+ test(changed.updateOrRetain(api,seed,key,1000,model,&scenePacket,&shapes,true));test(!changed.preparedHandle&&destroys==beforeDestroy+1);changed.close(api);
  std::cout<<"Loaded light PASS "<<checks<<" checks;no GPU/file input\n";return 0;
 }

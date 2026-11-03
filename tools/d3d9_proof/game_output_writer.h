@@ -13,6 +13,8 @@ struct GameOutputWriter {
  sfc_calibration::Reader source;game_output::Pool* pool=nullptr;
  Microsoft::WRL::ComPtr<ID3D11Texture2D> textures[2][3];uint64_t handles[2][3]{};
  bool enabled=false,retainReady=false,replacementMode=false;uint64_t session=0;
+ BYTE activatedAsset[32]{};float activatedOffset=0;bool identityBound=false;
+ void bind(const BYTE (&asset)[32],float offset){check(!identityBound&&std::isfinite(offset),"one late output identity");memcpy(activatedAsset,asset,32);activatedOffset=offset;identityBound=true;}
  ~GameOutputWriter(){if(pool){InterlockedExchange(&pool->header.stopped,1);InterlockedExchange(&pool->header.ready,0);}source.close();}
  void start(){wchar_t mode[2]{};enabled=GetEnvironmentVariableW(L"SFC_D3D9_GAME_OUTPUT",mode,2)==1&&mode[0]==L'1';replacementMode=replacement::requested();
   retainReady=GetEnvironmentVariableW(L"SFC_D3D9_SYNC_BUFFER",mode,2)==1&&mode[0]==L'1';}
@@ -37,11 +39,12 @@ struct GameOutputWriter {
    Microsoft::WRL::ComPtr<IDXGIResource> r;hr(textures[slot][i].As(&r),"game pool shared interface");HANDLE handle=nullptr;hr(r->GetSharedHandle(&handle),"game pool handle");handles[slot][i]=reinterpret_cast<uintptr_t>(handle);
   }
   memset(pool,0,sizeof(*pool));auto& h=pool->header;h.magic=game_output::Magic;h.version=game_output::Version;h.bytes=sizeof(*pool);h.game_pid=game;
-  wchar_t asset[66]{};check(GetEnvironmentVariableW(L"SFC_D3D9_ASSET_SHA256",asset,66)==64,"game pool content identity required");
-  for(unsigned i=0;i<32;++i){unsigned byte=0;for(unsigned j=0;j<2;++j){const auto c=asset[2*i+j];check((c>=L'0'&&c<=L'9')||(c>=L'a'&&c<=L'f'),"game pool asset hex");byte=byte*16+unsigned(c<=L'9'?c-L'0':c-L'a'+10);}pool->asset[i]=static_cast<BYTE>(byte);}
-  wchar_t offset[64]{};check(GetEnvironmentVariableW(L"SFC_D3D9_OFFSET_X",offset,64)>0,"diagnostic world offset required");
+  if(identityBound)memcpy(pool->asset,activatedAsset,32);
+  else {wchar_t asset[66]{};check(GetEnvironmentVariableW(L"SFC_D3D9_ASSET_SHA256",asset,66)==64,"game pool content identity required");
+  for(unsigned i=0;i<32;++i){unsigned byte=0;for(unsigned j=0;j<2;++j){const auto c=asset[2*i+j];check((c>=L'0'&&c<=L'9')||(c>=L'a'&&c<=L'f'),"game pool asset hex");byte=byte*16+unsigned(c<=L'9'?c-L'0':c-L'a'+10);}pool->asset[i]=static_cast<BYTE>(byte);}}
+  wchar_t offset[64]{};if(!identityBound)check(GetEnvironmentVariableW(L"SFC_D3D9_OFFSET_X",offset,64)>0,"diagnostic world offset required");
   wchar_t multi[2]{};const bool cohort=GetEnvironmentVariableW(L"SFC_D3D9_MULTISCENE",multi,2)==1&&multi[0]==L'1';
-  pool->camera_offset[0]=static_cast<float>(_wtof(offset));
+  pool->camera_offset[0]=identityBound?activatedOffset:static_cast<float>(_wtof(offset));
   check(std::isfinite(pool->camera_offset[0])&&(cohort?(pool->camera_offset[0]<=0&&pool->camera_offset[0]>=-1e6f):(pool->camera_offset[0]<-1e-5f&&pool->camera_offset[0]>=-1e6f)),"explicit aligned-cohort or camera-left diagnostic offset");
   pool->diagnostic_mode=pool->camera_offset[0]==0?0u:1u;pool->reserved[2]=cohort?1u:0u; // Union coverage,not a native per-owner picking map.
   pool->reserved[3]=retainReady?1u:0u;

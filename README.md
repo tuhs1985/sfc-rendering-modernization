@@ -189,8 +189,9 @@ restoration and the remaining sponsor gameplay check.
 
 ## Important limitations
 
+- Current gameplay checkpoint: sponsor-accepted stable multi-ship replacement using the explicit `-TimingPolicy ExtraFrame` option. A carrier/fighter run replaced all63 tracked owner revisions across15 model assets with no deadline misses, about19ms median source-to-presentation delivery, and clean teardown. The preceding Strict run handled72 owner revisions but missed96 deadlines. The battles differed; these results establish a tested configuration, not universal mission coverage. Small new-asset admission gaps and occasional whole-game hitches remain documented in the [stress comparison](docs/runs/2026-11-02-codex-extraframe-stress-comparison.md). The launcher default remains Strict; select ExtraFrame explicitly.
 - Native player replacement, correct foreground shield/text ordering and controlled unload have been observed in gameplay. Supported multi-ship replacement has also passed gameplay checkout; full-scene replacement is not established. See the [current handoff](docs/HANDOFF.md).
-- The current multi-ship checkout accepts fresh supported ship assets; the older single-FCA diagnostic remains separate. The32-owner/64-asset limits and tested models do not establish universal object, geometry or mission coverage.
+- The current multi-ship checkout accepts fresh supported ship assets; the older single-FCA diagnostic remains separate. The current byte-budgeted transport accommodates256 concurrent owner slots and1,024 session asset revisions;160-owner transport tests do not establish100-object GPU performance or universal model/mission coverage. See [fleet capacity preparation](docs/runs/2026-10-31-codex-fleet-capacity-correction.md).
 - The established additive buffer pairs one adjacent frame with a 50 ms input limit. Replacement separately retains up to two earlier source frames, checks exact output/receipt identity, and can repeat a whole completed picture twice before temporary native recovery and fresh-output reactivation. Automatic recovery has been exercised; it does not resolve native effect ordering. No motion prediction or indefinite stale overlay is used.
 - The qualified buffered output extent is 1920×1080. Resize/device recreation can omit the extra ship until a fresh supported session; automatic recovery at arbitrary resolutions is not established.
 - Supported mainline rigid meshes do not imply arbitrary deformation, damage updates, every LOD or every game object is covered.
@@ -200,6 +201,8 @@ restoration and the remaining sponsor gameplay check.
 - Supersampling, DLSS integration and a final graphics backend are not delivered capabilities.
 
 ## Repository map
+
+For troubleshooting tools, timing captures and trace limitations, see the [diagnostic tools reference](docs/DIAGNOSTICS.md). Normal gameplay does not require enabling these tools.
 
 | Location | Purpose |
 | --- | --- |

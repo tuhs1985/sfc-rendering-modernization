@@ -55,5 +55,18 @@ class GateTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(dir=n.ROOT/'artifacts/player-replacement/native-gate-tests') as d:
             Path(d,'NATIVE-GATE-001.bin').write_bytes(b'')
             self.assertEqual(n.analyze(d,None)['result'],'PARTIAL')
+    def test_stopped_repeated_record_is_not_another_commit_or_timing_sample(self):
+        with tempfile.TemporaryDirectory(dir=n.ROOT/'artifacts/player-replacement/native-gate-tests') as d:
+            repeated=bytearray(row(2));struct.pack_into('<Q',repeated,104,9000000)
+            Path(d,'NATIVE-GATE-001.bin').write_bytes(row(1)+row(2)+repeated)
+            h=n.header(setup().data[:256]);h['partial']=1
+            r=n.analyze(d,h)
+            self.assertEqual((r['raw_records'],r['records'],r['commits'],r['repeated_source_records']),(3,2,2,1))
+            self.assertLess(r['native_frame_elapsed_ms']['maximum'],20)
+            self.assertEqual(r['result'],'PARTIAL_TERMINAL_STOP')
+    def test_recovery_receipt_uses_preexisting_reserved_header_bytes(self):
+        c=setup();struct.pack_into('<10I',c.data,160,1,2,3,4,3,99,7,1,100,8)
+        r=n.header(c.data[:256])['recovery']
+        self.assertEqual((r['overlap'],r['submission_changed'],r['last_frame'],r['terminal_owner']),(2,4,99,8))
 
 if __name__=='__main__':unittest.main()

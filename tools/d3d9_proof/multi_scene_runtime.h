@@ -6,6 +6,7 @@
 #include "physical_hull_depth.h"
 #include "../native_insertion/cohort_contract.h"
 #include "pipeline_mode.h"
+#include "texture_memory.h"
 #include <map>
 #include <memory>
 #include <future>
@@ -13,7 +14,7 @@ struct MultiSceneRuntime {
  struct Resident {Scene scene;std::unique_ptr<Renderer> renderer;Renderer* drawRenderer=nullptr;PhysicalHullDepth::Mesh hullMesh;uint64_t bytes=0;multi_scene::Asset provenance{};};
  PhysicalHullDepth* hull=nullptr;const PhysicalHullDepth::Mesh* initialHull=nullptr;
  sfc_calibration::Reader source;multi_scene::Store* store=nullptr;multi_scene::Frame packet{};
- std::array<multi_scene::Asset,64> entries{};std::array<std::shared_ptr<Resident>,64> bound{};
+ std::array<multi_scene::Asset,multi_scene::Assets> entries{};std::array<std::shared_ptr<Resident>,multi_scene::Assets> bound{};
  std::map<std::array<BYTE,32>,std::shared_ptr<Resident>> content;
  fs::path root;IDirect3DDevice9* device=nullptr;const Scene* bootstrapScene=nullptr;Renderer* bootstrapRenderer=nullptr;bool enabled=false;DWORD pid=0;uint64_t bytes=0,frames=0,draws=0,omitted=0,rejected=0,loads=0,shared=0;
  std::map<uint64_t,uint64_t> ownerDraws;bool replacementOnly=false;
@@ -25,16 +26,24 @@ struct MultiSceneRuntime {
  uint64_t initialMask=0,initialWaits=0;bool initialReady=false;
  TextureUpload uploadPolicy=TextureUpload::StagedLock;
  static uint64_t clock(){LARGE_INTEGER q{},f{};QueryPerformanceCounter(&q);QueryPerformanceFrequency(&f);const auto n=uint64_t(q.QuadPart),d=uint64_t(f.QuadPart);return n/d*1000000+n%d*1000000/d;}
- static Prepared prepare(const fs::path& folder,const multi_scene::Asset& a,uint64_t residentBytes){
+ static Prepared prepare(const fs::path& folder,const multi_scene::Asset& a,uint64_t residentBytes,std::array<DWORD,4> session={}){
   const auto began=clock();Prepared p{};
   require(residentBytes+2*(uint64_t(a.geometry_bytes)+a.image_bytes)<=256ull*1024*1024,"pending+resident256MiB cap");
+  if(texture_memory::requested()){
+   auto payload=texture_memory::receive_asset(session.data(),a);p.scene=load_bytes(payload.geometry);
+   require(p.scene.width==1920&&p.scene.height==1080,"multi-scene output extent");
+   uint32_t count=0;for(const auto& group:p.scene.groups)count=(std::max)(count,group.material+1);
+   require(count==payload.textures.size(),"asset memory scene/image association");p.textures=std::move(payload.textures);
+   p.backing=2*(p.scene.vertices.size()*sizeof(Vertex)+p.scene.indices.size()*4+a.image_bytes);p.cpu_us=clock()-began;return p;
+  }
   require(!fs::is_symlink(fs::symlink_status(folder)),"multi-scene asset symlink");
   const auto raw=read(folder/L"scene.bin",2*1024*1024);require(raw.size()==a.geometry_bytes&&output_wire::hash(raw.data(),raw.size())==a.replay_hash,"multi-scene replay bytes/provenance");
   p.scene=load(folder);require(p.scene.width==1920&&p.scene.height==1080,"multi-scene output extent");
   uint32_t images=0;for(auto g:p.scene.groups)images=(std::max)(images,g.material+1);
   uint64_t hash=14695981039346656037ull,imageBytes=0;
   for(uint32_t n=0;n<images;++n){auto image=read(folder/(L"texture-"+std::to_wstring(n)+L".bin"),64*1024*1024+16);
-   imageBytes+=image.size();require(imageBytes<=a.image_bytes,"prepared texture byte cap");hash^=output_wire::hash(image.data(),image.size());hash*=1099511628211ull;p.textures.push_back(std::move(image));}
+   imageBytes+=image.size();require(imageBytes<=a.image_bytes,"prepared texture byte cap");hash^=output_wire::hash(image.data(),image.size());hash*=1099511628211ull;
+   p.textures.push_back(std::move(image));}
   require(imageBytes==a.image_bytes&&hash==a.textures_hash,"multi-scene texture bytes/provenance");
   p.backing=2*(p.scene.vertices.size()*sizeof(Vertex)+p.scene.indices.size()*4+imageBytes);p.cpu_us=clock()-began;return p;
  }
@@ -56,7 +65,7 @@ struct MultiSceneRuntime {
   for(const auto& pair:ownerDraws)std::cout<<"MULTISCENE_OWNER owner="<<DWORD(pair.first)<<" revision="<<DWORD(pair.first>>32)<<" draws="<<pair.second<<'\n';}source.close();}
  void assets(){if(!enabled)return;
   if(preparing.valid()&&preparing.wait_for(std::chrono::seconds(0))!=std::future_status::ready)return;
-  for(unsigned i=0;i<64;++i){auto& slot=store->assets[i];if(InterlockedCompareExchange(&slot.ack,0,0))continue;
+  for(unsigned i=0;i<multi_scene::Assets;++i){auto& slot=store->assets[i];if(InterlockedCompareExchange(&slot.ack,0,0))continue;
    if(preparing.valid()&&pendingAsset.id!=i+1)continue;
    multi_scene::Asset a{};if(!multi_scene::read(slot,a))continue;
    try{
@@ -67,7 +76,8 @@ struct MultiSceneRuntime {
       a.replay_hash==proof.replay_hash&&a.textures_hash==proof.textures_hash,"shared asset content/provenance mismatch");++shared;}
     else{
      const auto folder=a.path_id==1?root:root/L"assets"/std::to_wstring(a.path_id);
-     if(!preparing.valid()){pendingAsset=a;preparing=std::async(std::launch::async,[folder,a,residentBytes=bytes]{return prepare(folder,a,residentBytes);});return;}
+     if(!preparing.valid()){pendingAsset=a;std::array<DWORD,4> session{};memcpy(session.data(),source.session,16);
+      preparing=std::async(std::launch::async,[folder,a,residentBytes=bytes,session]{return prepare(folder,a,residentBytes,session);});return;}
      require(memcmp(&a,&pendingAsset,sizeof(a))==0,"asset changed during preparation");auto prepared=preparing.get();
      const auto gpuBegan=clock();item=std::make_shared<Resident>();item->scene=std::move(prepared.scene);item->bytes=prepared.backing;
      require(bytes+item->bytes<=256ull*1024*1024,"multi-scene retained256MiB cap");
@@ -97,14 +107,16 @@ struct MultiSceneRuntime {
   rendered={};if(insertion){memcpy(rendered.session,source.session,16);rendered.frame=packet.frame;rendered.anchor=packet.anchor;rendered.revision=packet.revision;rendered.sequence=packet.sequence;rendered.hash=packet.checksum;}
   for(DWORD n=0;n<packet.count;++n){const auto& row=packet.rows[n];std::shared_ptr<Resident> resident;DWORD asset=0;
    if(replacementOnly&&(row[1]!=packet.anchor||row[7]!=packet.revision))continue;
-   for(unsigned i=0;i<64;++i)if(bound[i]&&multi_scene::matches(entries[i],row)){resident=bound[i];asset=i+1;break;}
+   for(unsigned i=0;i<multi_scene::Assets;++i)if(bound[i]&&multi_scene::matches(entries[i],row)){resident=bound[i];asset=i+1;break;}
    if(!resident){++omitted;continue;}live_owner::Packet p{};p.row=row;Frame frame{};
    if(!live_owner::decode(p,frame)){++decode_rejected;++rejected;continue;}
    projectionDisagreements+=live_owner::audit_projection(p,frame,resident->scene.vertices,projectionAudit);
    for(unsigned axis=0;axis<3;++axis)frame.model[axis*4+3]+=displacement[axis];
+   // Admit depth/owner coverage before colour or replacement authorization.
+   // Capacity pressure leaves only this owner native; never stop the renderer.
+   if(hull&&!hull->submit(resident->hullMesh,frame)){++omitted;continue;}
    resident->drawRenderer->draw(frame,false,width,height,first);first=false;++count;++draws;
-   if(hull)hull->submit(resident->hullMesh,frame);
-   if(insertion){require(rendered.count<32,"Native cohort rendered member capacity");auto& m=rendered.members[rendered.count++];m.owner=row[1];m.revision=row[7];m.model=row[5];m.source=row[6];m.asset=asset;memcpy(m.content,entries[asset-1].content,32);}
+   if(insertion){require(rendered.count<multi_scene::Owners,"Native cohort rendered member capacity");auto& m=rendered.members[rendered.count++];m.owner=row[1];m.revision=row[7];m.model=row[5];m.source=row[6];m.asset=asset;memcpy(m.content,entries[asset-1].content,32);}
    ++ownerDraws[live_owner::selection(row[1],row[7])];
    if(frames<8||frames%60==0)std::cout<<"MULTISCENE_DRAW frame="<<packet.frame<<" owner="<<row[1]<<" revision="<<row[7]<<" asset="<<asset<<" set_hash="<<packet.checksum<<'\n';
   }++frames;return count!=0;

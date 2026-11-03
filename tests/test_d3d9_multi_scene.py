@@ -35,9 +35,9 @@ class MultiSceneTests(unittest.TestCase):
         return r
 
     def test_cross_abi_layout_and_no_overlap(self):
-        self.assertEqual(wire.STORE_BYTES,107072)
-        self.assertGreater(wire.OFFSET,12*1024*1024+2621568)
-        self.assertLess(wire.OFFSET+wire.STORE_BYTES,15*1024*1024)
+        self.assertEqual(wire.STORE_BYTES,64+wire.FRAMES*wire.FRAME_SLOT+wire.ASSETS*wire.ASSET_SLOT)
+        self.assertGreaterEqual(wire.OFFSET,9*1024*1024)
+        self.assertLess(wire.OFFSET+wire.STORE_BYTES,10*1024*1024)
         self.assertEqual(wire.ASSET.size,88)
 
     def test_catalog_content_and_bytes(self):
@@ -48,7 +48,7 @@ class MultiSceneTests(unittest.TestCase):
         self.assertEqual(fields[-1],wire.fnv(raw[:-8]))
 
     def test_invalid_identity_caps(self):
-        for identity in (0,65):
+        for identity in (0,wire.ASSETS+1):
             with self.assertRaises(ValueError):wire.asset_packet(identity,1,self.row(),'ab'*32,b'a',[])
         with self.assertRaises(ValueError):wire.asset_packet(1,1,self.row(),'00'*32,b'a',[])
         with self.assertRaises(ValueError):wire.asset_packet(1,1,self.row(),'ab'*32,bytes(2*1024*1024+1),[])

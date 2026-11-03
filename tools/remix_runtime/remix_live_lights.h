@@ -4,6 +4,7 @@
 #include "remix_light_shapes.h"
 struct RemixLiveLights {
  remixapi_LightHandle handles[3]{};LiveLightRow previous[3]{};
+ remixapi_LightHandle preparedHandle=nullptr;LiveLightRow preparedRow{};LightShapeRow preparedShape{};
  bool created[3]{};unsigned logs=0;uint64_t applied=0,configRevision=0;
  LightShapeRow previousShapes[3]{};
  LiveLightPacket accepted{};LightShapePacket acceptedShapes{};bool acceptedReady=false;
@@ -36,6 +37,13 @@ struct RemixLiveLights {
     memcpy(shape.v+8,pos,12);}positioned[i]=shape;
   }
   for(unsigned i=0;i<3;++i){const auto& r=i<2?p.rows[i]:added;const auto& shape=positioned[i];
+   if(i==2&&preparedHandle){
+    if(!handles[i]&&r.enabled&&!memcmp(&r,&preparedRow,sizeof(r))&&!memcmp(&shape,&preparedShape,sizeof(shape))){
+     handles[i]=preparedHandle;previous[i]=r;previousShapes[i]=shape;created[i]=true;++applied;
+     std::cout<<"PREPARED_DOME_ADOPTED slot=2 recreated=0\n";
+    }else check(api.DestroyLight(preparedHandle),"retire changed prepared dome");
+    preparedHandle=nullptr;
+   }
    if(!created[i]||memcmp(&r,&previous[i],sizeof(r))||memcmp(&shape,&previousShapes[i],sizeof(shape))){
     // Called only after previous output fence completes;no outstanding host draw.
     if(handles[i]){check(api.DestroyLight(handles[i]),"retire native mapped light");handles[i]=nullptr;}
@@ -50,13 +58,14 @@ struct RemixLiveLights {
   configRevision=p.revision;return true;
  }
  void draw(remixapi_Interface& api){for(auto h:handles)if(h)check(api.DrawLightInstance(h),"mapped native light draw");}
- void close(remixapi_Interface& api){for(auto& h:handles)if(h){check(api.DestroyLight(h),"mapped native light destroy");h=nullptr;}}
+ void close(remixapi_Interface& api,bool retirePrepared=true){for(auto& h:handles)if(h){check(api.DestroyLight(h),"mapped native light destroy");h=nullptr;}
+  if(retirePrepared&&preparedHandle){check(api.DestroyLight(preparedHandle),"prepared dome destroy");preparedHandle=nullptr;}}
  bool updateOrRetain(remixapi_Interface& api,const ship_live::Seed& seed,const ship_live::Key& key,uint64_t frequency,const float* model,const LiveLightPacket* next,const LightShapePacket* shapes,bool persistentScene=false){
   if(next&&update(api,seed,key,frequency,model,next,shapes,persistentScene?LightValidation::SceneUpdate:LightValidation::TimedOwner)){accepted=*next;acceptedShapes=shapes?*shapes:LightShapePacket{};acceptedReady=true;return true;}
   // Scene slots0/1 and project fill belong to the session,not the scheduling
   // ship. Keep them through camera gaps/rebinding;never alter observation time.
   // Owner-local/effect callers retain the existing timed policy by default.
   if(acceptedReady&&update(api,seed,key,frequency,model,&accepted,&acceptedShapes,persistentScene?LightValidation::RetainedScene:LightValidation::TimedOwner)){++retainedUpdates;return true;}
-  close(api);for(auto& value:created)value=false;configRevision=0;++unavailableUpdates;return false;
+  close(api,false);for(auto& value:created)value=false;configRevision=0;++unavailableUpdates;return false;
  }
 };

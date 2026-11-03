@@ -46,7 +46,7 @@ int wmain(int argc,wchar_t** argv){
     check_mesh(scene.owners[0].retired,"owner retirement");
     const auto previous_sequence=scene.owners[0].sequence;
     for(DWORD i=scene.owner_count;i<32;++i){scene.owners[i].identity.owner=100+i;scene.owners[i].retired=true;}
-    scene.owner_count=32;id.owner=999;++id.frame;id.elapsed=800;scene.observe(id,read,[]{return true;});
+    scene.owner_count=kSceneOwners;id.owner=999;++id.frame;id.elapsed=800;scene.observe(id,read,[]{return true;});
     check_mesh(scene.owners[0].identity.owner==999 && scene.owners[0].sequence>previous_sequence,
         "retired owner slot reused with new epoch and monotonic sequence");
     // Maximum triangular packet stays below 2MiB; reject count overflow before reads.

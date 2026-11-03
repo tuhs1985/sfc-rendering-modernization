@@ -13,7 +13,48 @@ class DepthCompositor {
  ComPtr<ID3D11DepthStencilState> depthState;ComPtr<ID3D11RasterizerState> raster;
  ComPtr<ID3D11BlendState> blend;ComPtr<ID3D11Buffer> parameters;
  struct Parameters{uint32_t owner,width,height,pad;float viewportMap[4];};
+ struct TargetCache {ComPtr<ID3D11RenderTargetView> color;ComPtr<ID3D11DepthStencilView> depth;
+  ComPtr<ID3D11Resource> colorResource,depthResource;UINT width=0,height=0;} targetCache;
+ struct InputCache {ComPtr<ID3D11ShaderResourceView> views[3];ComPtr<ID3D11Resource> resources[3];UINT width=0,height=0;} inputCache[2];
+ unsigned nextInputCache=0;uint64_t targetChecks=0,inputChecks=0;
+ bool qualifyTarget(ID3D11RenderTargetView* target,ID3D11DepthStencilView* nativeDepth){
+  if(targetCache.color.Get()==target&&targetCache.depth.Get()==nativeDepth)return true;
+  ++targetChecks;
+  ComPtr<ID3D11Device> td,zd;target->GetDevice(&td);nativeDepth->GetDevice(&zd);
+  if(!identity.matches(td.Get())||!identity.matches(zd.Get()))return false;
+  ComPtr<ID3D11Resource> cr,zr;target->GetResource(&cr);nativeDepth->GetResource(&zr);
+  ComPtr<ID3D11Texture2D> ct,zt;if(FAILED(cr.As(&ct))||FAILED(zr.As(&zt)))return false;
+  D3D11_TEXTURE2D_DESC c{},z{};ct->GetDesc(&c);zt->GetDesc(&z);
+  D3D11_RENDER_TARGET_VIEW_DESC rv{};target->GetDesc(&rv);D3D11_DEPTH_STENCIL_VIEW_DESC dv{};nativeDepth->GetDesc(&dv);
+  if(c.Width!=z.Width||c.Height!=z.Height||
+     c.ArraySize!=1||c.MipLevels!=1||z.ArraySize!=1||z.MipLevels!=1||
+     c.SampleDesc.Count!=8||c.SampleDesc.Quality!=0||z.SampleDesc.Count!=8||z.SampleDesc.Quality!=0||
+     !((c.Format==DXGI_FORMAT_B8G8R8A8_UNORM&&rv.Format==DXGI_FORMAT_B8G8R8A8_UNORM)||
+       ((c.Format==DXGI_FORMAT_R8G8B8A8_TYPELESS||c.Format==DXGI_FORMAT_R8G8B8A8_UNORM)&&rv.Format==DXGI_FORMAT_R8G8B8A8_UNORM))||z.Format!=DXGI_FORMAT_R32_TYPELESS||
+     rv.ViewDimension!=D3D11_RTV_DIMENSION_TEXTURE2DMS||
+     dv.ViewDimension!=D3D11_DSV_DIMENSION_TEXTURE2DMS||dv.Format!=DXGI_FORMAT_D32_FLOAT||dv.Flags)return false;
+  targetCache={};targetCache.color=target;targetCache.depth=nativeDepth;
+  targetCache.colorResource=cr;targetCache.depthResource=zr;targetCache.width=c.Width;targetCache.height=c.Height;return true;
+ }
+ const InputCache* qualifyInputs(ID3D11ShaderResourceView* const (&views)[3],const ship_triplet::Key& key){
+  for(const auto& cached:inputCache)if(cached.width==key.width&&cached.height==key.height&&
+      cached.views[0].Get()==views[0]&&cached.views[1].Get()==views[1]&&cached.views[2].Get()==views[2])return &cached;
+  ++inputChecks;InputCache candidate{};candidate.width=key.width;candidate.height=key.height;
+  for(unsigned i=0;i<3;++i){
+   ComPtr<ID3D11Device> vd;views[i]->GetDevice(&vd);if(!identity.matches(vd.Get()))return nullptr;
+   ComPtr<ID3D11Resource> r;views[i]->GetResource(&r);ComPtr<ID3D11Texture2D> t;
+   if(FAILED(r.As(&t)))return nullptr;
+   D3D11_TEXTURE2D_DESC d{};t->GetDesc(&d);D3D11_SHADER_RESOURCE_VIEW_DESC s{};views[i]->GetDesc(&s);
+   const auto format=i?DXGI_FORMAT_R32_FLOAT:DXGI_FORMAT_B8G8R8A8_UNORM;
+   if(d.Width!=key.width||d.Height!=key.height||d.SampleDesc.Count!=1||d.ArraySize!=1||d.MipLevels!=1||
+      d.Format!=format||s.Format!=format||s.ViewDimension!=D3D11_SRV_DIMENSION_TEXTURE2D||s.Texture2D.MostDetailedMip||s.Texture2D.MipLevels!=1)return nullptr;
+   candidate.views[i]=views[i];candidate.resources[i]=r;
+  }
+  auto& cached=inputCache[nextInputCache++%2];cached=std::move(candidate);return &cached;
+ }
 public:
+ uint64_t targetValidations()const{return targetChecks;}
+ uint64_t inputValidations()const{return inputChecks;}
  explicit DepthCompositor(ID3D11Device* device):ownerDevice(device){
   identity.initialize(device);
   using ship_triplet::checked;
@@ -50,29 +91,12 @@ Output main(float4 p:SV_Position){
            ID3D11ShaderResourceView* const (&views)[3],const ship_triplet::Key& key){
   // Full-resolution 1:1 inputs only. No nearest-rescale/misregistered depth.
   if(!target||!nativeDepth||!views[0]||!views[1]||!views[2]||!ship_triplet::validKey(key)||key.diagnosticMode)return false;
-  ComPtr<ID3D11Device> td,zd;target->GetDevice(&td);nativeDepth->GetDevice(&zd);
-  if(!identity.matches(td.Get())||!identity.matches(zd.Get()))return false;
-  ComPtr<ID3D11Resource> cr,zr;target->GetResource(&cr);nativeDepth->GetResource(&zr);
-  ComPtr<ID3D11Texture2D> ct,zt;if(FAILED(cr.As(&ct))||FAILED(zr.As(&zt)))return false;
-  D3D11_TEXTURE2D_DESC c{},z{};ct->GetDesc(&c);zt->GetDesc(&z);
-  D3D11_RENDER_TARGET_VIEW_DESC rv{};target->GetDesc(&rv);D3D11_DEPTH_STENCIL_VIEW_DESC dv{};nativeDepth->GetDesc(&dv);
-  if(c.Width!=key.width||c.Height!=key.height||c.Width!=z.Width||c.Height!=z.Height||
-     uint64_t(key.viewport[0])+key.viewport[2]>c.Width||uint64_t(key.viewport[1])+key.viewport[3]>c.Height||
-     c.ArraySize!=1||c.MipLevels!=1||z.ArraySize!=1||z.MipLevels!=1||
-     c.SampleDesc.Count!=8||c.SampleDesc.Quality!=0||z.SampleDesc.Count!=8||z.SampleDesc.Quality!=0||
-     !((c.Format==DXGI_FORMAT_B8G8R8A8_UNORM&&rv.Format==DXGI_FORMAT_B8G8R8A8_UNORM)||
-       ((c.Format==DXGI_FORMAT_R8G8B8A8_TYPELESS||c.Format==DXGI_FORMAT_R8G8B8A8_UNORM)&&rv.Format==DXGI_FORMAT_R8G8B8A8_UNORM))||z.Format!=DXGI_FORMAT_R32_TYPELESS||
-     rv.ViewDimension!=D3D11_RTV_DIMENSION_TEXTURE2DMS||
-     dv.ViewDimension!=D3D11_DSV_DIMENSION_TEXTURE2DMS||dv.Format!=DXGI_FORMAT_D32_FLOAT||dv.Flags)return false;
-  for(unsigned i=0;i<3;++i){
-   ComPtr<ID3D11Device> vd;views[i]->GetDevice(&vd);if(!identity.matches(vd.Get()))return false;
-   ComPtr<ID3D11Resource> r;views[i]->GetResource(&r);ComPtr<ID3D11Texture2D> t;
-   if(FAILED(r.As(&t))||r.Get()==cr.Get()||r.Get()==zr.Get())return false;
-   D3D11_TEXTURE2D_DESC d{};t->GetDesc(&d);D3D11_SHADER_RESOURCE_VIEW_DESC s{};views[i]->GetDesc(&s);
-   const auto format=i?DXGI_FORMAT_R32_FLOAT:DXGI_FORMAT_B8G8R8A8_UNORM;
-   if(d.Width!=key.width||d.Height!=key.height||d.SampleDesc.Count!=1||d.ArraySize!=1||d.MipLevels!=1||
-      d.Format!=format||s.Format!=format||s.ViewDimension!=D3D11_SRV_DIMENSION_TEXTURE2D||s.Texture2D.MostDetailedMip||s.Texture2D.MipLevels!=1)return false;
-  }
+  if(!qualifyTarget(target,nativeDepth))return false;
+  if(targetCache.width!=key.width||targetCache.height!=key.height||
+     uint64_t(key.viewport[0])+key.viewport[2]>targetCache.width||uint64_t(key.viewport[1])+key.viewport[3]>targetCache.height)return false;
+  const auto* inputs=qualifyInputs(views,key);if(!inputs)return false;
+  // Aliasing depends on the active targets,not just the immutable input views.
+  for(const auto& r:inputs->resources)if(r.Get()==targetCache.colorResource.Get()||r.Get()==targetCache.depthResource.Get())return false;
   Parameters p{key.objectId,key.width,key.height,0,{static_cast<float>(key.viewport[0]),static_cast<float>(key.viewport[1]),
       static_cast<float>(key.width)/key.viewport[2],static_cast<float>(key.height)/key.viewport[3]}};deferred->ClearState();
   deferred->UpdateSubresource(parameters.Get(),0,nullptr,&p,0,0);auto* cb=parameters.Get();deferred->PSSetConstantBuffers(0,1,&cb);

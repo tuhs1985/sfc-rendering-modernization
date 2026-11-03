@@ -40,7 +40,7 @@ int main(){
  }
  const DWORD session[]{1,2,3,4};auto store=std::make_unique<multi_scene::Store>();auto& h=store->header;
  h.bytes=sizeof(*store);h.pid=GetCurrentProcessId();memcpy(h.session,session,16);
- test(sizeof(*store)==107072);test(sizeof(multi_scene::FrameSlot)==12352);test(sizeof(multi_scene::AssetSlot)==128);
+ test(sizeof(*store)==64+multi_scene::Frames*sizeof(multi_scene::FrameSlot)+multi_scene::Assets*sizeof(multi_scene::AssetSlot));test(sizeof(multi_scene::FrameSlot)==98368);test(sizeof(multi_scene::AssetSlot)==128);
  test(multi_scene::valid(h,session,GetCurrentProcessId()));test(!multi_scene::valid(h,session,GetCurrentProcessId()+1));
  test(!multi_scene::initial_resolved(*store,3));
  store->assets[0].ack=1;test(!multi_scene::initial_resolved(*store,3));
@@ -62,11 +62,11 @@ int main(){
  test(!multi_scene::read(*store,10,4,*frame));test(!multi_scene::read(*store,11,3,*frame));
  auto& slot=store->frames[10%multi_scene::Frames];++slot.guard;test(!multi_scene::read(*store,10,3,*frame));++slot.guard;
  source.begin();source.offer(b);source.publish(live_owner::selection(7,1));test(h.dropped==1&&h.published==1);
- source.begin();for(DWORD i=0;i<40;++i){b[1]=i+1;source.offer(b);}test(source.pending.count==32);
+ source.begin();for(DWORD i=0;i<multi_scene::Owners+8;++i){b[1]=i+1;source.offer(b);}test(source.pending.count==multi_scene::Owners);
  multi_scene::Asset asset{};asset.id=asset.path_id=1;asset.owner=7;asset.revision=1;asset.model=70;asset.source=71;
  asset.geometry_bytes=1024;asset.image_bytes=4096;asset.content[0]=1;asset.replay_hash=2;asset.textures_hash=3;asset.checksum=multi_scene::checksum(asset);
  test(multi_scene::valid(asset));test(multi_scene::matches(asset,a));b=a;b[7]=2;test(!multi_scene::matches(asset,b)); // pointer reuse/new revision
- auto corrupt=asset;corrupt.id=65;corrupt.checksum=multi_scene::checksum(corrupt);test(!multi_scene::valid(corrupt));
+ auto corrupt=asset;corrupt.id=multi_scene::Assets+1;corrupt.checksum=multi_scene::checksum(corrupt);test(!multi_scene::valid(corrupt));
  corrupt=asset;corrupt.geometry_bytes=2*1024*1024+1;corrupt.checksum=multi_scene::checksum(corrupt);test(!multi_scene::valid(corrupt));
  corrupt=asset;corrupt.image_bytes=128*1024*1024+1;corrupt.checksum=multi_scene::checksum(corrupt);test(!multi_scene::valid(corrupt));
  corrupt=asset;corrupt.content[0]=0;corrupt.checksum=multi_scene::checksum(corrupt);test(!multi_scene::valid(corrupt));
@@ -94,6 +94,10 @@ int main(){
  ih.frame=12;test(live_owner::admission(taken,ih,1500001,10000000,&h.closed_frame)==live_owner::Admission::Age);
  ih.bad_frame=12;test(live_owner::admission(taken,ih,1100000,10000000,&h.closed_frame)==live_owner::Admission::BadFrame);
  ih.bad_frame=0;test(live_owner::admission(taken,ih,999999,10000000,&h.closed_frame)==live_owner::Admission::Clock);
+ // More than100 independent instances survive one coherent actual wire publication.
+ source.begin();for(DWORD i=0;i<160;++i){auto r=a;r[1]=i+1;r[2]=15;r[7]=i+1;r[94]=i?0:13;source.offer(r);}
+ test(source.publish(live_owner::selection(1,1)));test(multi_scene::read(*store,15,13,*frame)&&frame->count==160);
+ asset.id=asset.path_id=multi_scene::Assets;asset.checksum=multi_scene::checksum(asset);test(multi_scene::valid(asset));
  source.close();test(h.stopped&&!multi_scene::valid(h,session,GetCurrentProcessId()));
  std::cout<<"Multi-scene PASS "<<checks<<" checks pointer_bits="<<sizeof(void*)*8<<" store="<<sizeof(*store)<<'\n';
 }

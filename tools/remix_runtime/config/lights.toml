@@ -8,6 +8,8 @@ backend = "remix_sdk_0_6_4"
 
 
 
+
+
 # Provisional unit conversion,NOT physical calibration.
 
 conversion_scale = 1.0
@@ -74,7 +76,7 @@ intensity_multiplier = 1.0
 
 color_multiplier = [1.0, 1.0, 1.0]
 
-angular_diameter_degrees = 5
+angular_diameter_degrees = 1
 
 raytracing = "renderer_default"
 
@@ -211,3 +213,23 @@ angular_diameter_degrees = 1.0
 volumetric_multiplier = 1.0
 
 raytracing = "renderer_default"
+
+# Transient SFC light slots2..63:game position,RGB and enable state,each frame.
+# Sphere is an explicit Remix proxy,NOT a recovered SFC emitter shape.
+# Native +0x28 is range/falloff,NOT power. RGB drives radiance independently;
+# intensity_multiplier is the provisional per-effect strength conversion,
+# also multiplied by the existing conversion_scale and master_multiplier.
+# Existing directional lights and project_fill settings below are unchanged.
+[effects]
+enabled = false
+intensity_multiplier = 1.0
+color_multiplier = [1.0, 1.0, 1.0]
+radius = 1.0 # Remix emitter size in existing native world units;not game range
+
+# Optional individual slot override,any slot2..63. Native OFF always wins.
+# [[effect_lights]]
+# slot = 2
+# enabled = true
+# intensity_multiplier = 1.0
+# color_multiplier = [1.0, 1.0, 1.0]
+# radius = 1.0

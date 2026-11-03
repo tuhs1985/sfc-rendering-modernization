@@ -1,5 +1,6 @@
 // Opt-in same-process, nonblocking calibration mailbox. Not replacement sync.
 #pragma once
+#include "../scene_bridge/scene_capacity.h"
 #include <windows.h>
 #include <array>
 #include <cstring>
@@ -62,7 +63,7 @@ public:
   view=static_cast<BYTE*>(MapViewOfFile(handle,FILE_MAP_READ|FILE_MAP_WRITE,0,0,16*1024*1024));
   if(!view){close();return false;}
   const auto* h=reinterpret_cast<const DWORD*>(view);
-  if(h[0]!=0x31424C53||h[1]!=3||h[2]!=16*1024*1024){close();return false;}
+  if(h[0]!=0x31424C53||h[1]!=scene_capacity::Version||h[2]!=16*1024*1024){close();return false;}
   for(unsigned i=0;i<4;++i){wchar_t hex[9]{};std::memcpy(hex,name+wcslen(prefix)+i*8,8*sizeof(wchar_t));
    if(h[4+i]!=wcstoul(hex,nullptr,16)){close();return false;}session[i]=h[4+i];}
   mailbox=reinterpret_cast<Mailbox*>(view+Offset);return true;

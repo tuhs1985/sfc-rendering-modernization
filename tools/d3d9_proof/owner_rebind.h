@@ -18,7 +18,7 @@ inline bool read(Control& c,const live_owner::Header& h,Target& out){
  out=c.request;MemoryBarrier();return before==InterlockedCompareExchange(&c.guard,0,0);
 }
 inline bool valid(const Target& t,uint64_t cookie,DWORD previous){
- return t.generation==previous+1&&t.generation<=64&&t.owner&&t.revision&&t.model&&t.source&&!t.reserved&&
+ return t.generation==previous+1&&t.generation<=0x3fffffff&&t.owner&&t.revision&&t.model&&t.source&&!t.reserved&&
   t.cookie==cookie&&cookie&&t.checksum==live_owner::checksum(t);
 }
 inline bool apply(Control& c,live_owner::Store& store,const Target& t,uint64_t cookie,DWORD& generation){

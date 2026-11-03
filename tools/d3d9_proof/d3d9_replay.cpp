@@ -36,8 +36,8 @@ struct Group{uint32_t id,material,first,count;};
 struct Frame{uint32_t owner,revision,frame,active;float model[16],view[16],projection[16],viewport[4];};
 static_assert(sizeof(Vertex)==32&&sizeof(Group)==16&&sizeof(Frame)==224);
 struct Scene{uint32_t width=0,height=0;std::vector<Vertex> vertices;std::vector<uint32_t> indices;std::vector<Group> groups;std::vector<Frame> frames;};
-static Scene load(const fs::path& root){
- auto b=read(root/L"scene.bin",2*1024*1024);size_t at=0;auto h=take<std::array<uint32_t,8>>(b,at);
+static Scene load_bytes(const std::vector<BYTE>& b){
+ size_t at=0;auto h=take<std::array<uint32_t,8>>(b,at);
  require(h[0]==0x31534653&&h[1]==1&&h[2]>=3&&h[2]<=32768&&h[2]%3==0&&h[3]==h[2]&&h[4]&&h[4]<=256&&h[5]&&h[5]<=16&&h[6]&&h[6]<=1920&&h[7]&&h[7]<=1080,"scene schema");
  Scene s;s.width=h[6];s.height=h[7];
  for(uint32_t i=0;i<h[2];++i){auto v=take<Vertex>(b,at);for(float x:v.p)require(std::isfinite(x),"position finite");for(float x:v.n)require(std::isfinite(x),"normal finite");for(float x:v.uv)require(std::isfinite(x),"UV finite");s.vertices.push_back(v);}
@@ -49,6 +49,7 @@ static Scene load(const fs::path& root){
   require(f.viewport[0]>=0&&f.viewport[1]>=0&&f.viewport[2]>0&&f.viewport[3]>0&&f.viewport[0]+f.viewport[2]<=1920&&f.viewport[1]+f.viewport[3]<=1080,"viewport range");s.frames.push_back(f);}
  require(at==b.size(),"trailing scene data");return s;
 }
+static Scene load(const fs::path& root){return load_bytes(read(root/L"scene.bin",2*1024*1024));}
 // Native column-vector matrices -> D3D row-vector API,transpose ONLY.
 static D3DMATRIX matrix(const float* column){D3DMATRIX m{};for(unsigned i=0;i<4;++i)for(unsigned j=0;j<4;++j)m.m[i][j]=column[j*4+i];return m;}
 static LRESULT CALLBACK proc(HWND w,UINT msg,WPARAM p,LPARAM l){return DefWindowProcW(w,msg,p,l);}

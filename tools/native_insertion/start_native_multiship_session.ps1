@@ -1,10 +1,11 @@
 # Fresh supported ships,zero offset,owner-qualified native insertion.
-param([ValidateSet('Strict','ExtraFrame')][string]$TimingPolicy='Strict',[switch]$LegacyStartupWarmup)
+param([ValidateSet('Strict','ExtraFrame')][string]$TimingPolicy='Strict',[switch]$LegacyStartupWarmup,[switch]$CompletionDiagnostics)
 $ErrorActionPreference='Stop'
 $modern='C:\Users\rober\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\powershell\pwsh.exe'
 if($PSVersionTable.PSVersion.Major -lt 7){
  $forward=@('-NoProfile','-ExecutionPolicy','Bypass','-File',$PSCommandPath,'-TimingPolicy',$TimingPolicy)
  if($LegacyStartupWarmup){$forward+='-LegacyStartupWarmup'}
+ if($CompletionDiagnostics){$forward+='-CompletionDiagnostics'}
  & $modern @forward
  if($LASTEXITCODE -ne 0){throw 'Native multi-ship replacement needs review;evidence retained'}
  return
@@ -16,5 +17,6 @@ $principal=[Security.Principal.WindowsPrincipal]::new([Security.Principal.Window
 $python='C:\Users\rober\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe'
 $runArgs=@('-B',(Join-Path $root 'tools/remix_runtime/run_return_game.py'),'--execute','--native-insertion-policy',$TimingPolicy,'--native-all-ships','--pipeline-mode','performance','--budget-seconds','285')
 if($LegacyStartupWarmup){$runArgs+='--legacy-startup-warmup'}
+if($CompletionDiagnostics){$runArgs+='--completion-diagnostics'}
 & $python @runArgs
 if($LASTEXITCODE -ne 0){throw 'Native multi-ship replacement needs review;copied-install recovery evidence retained'}

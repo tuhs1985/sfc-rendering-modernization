@@ -88,8 +88,8 @@ class AssetPreparationTests(unittest.TestCase):
         with self.assertRaises(ValueError):PreparationQueue(None,None,workers=5)
         queue=PreparationQueue(None,None)
         try:
-            for i in range(1,65):queue.submit(i,[i])
-            with self.assertRaises(ValueError):queue.submit(65,[65])
+            for i in range(1,161):queue.submit(i,[i])
+            with self.assertRaises(ValueError):queue.submit(1025,[1025])
         finally:queue.close()
 
     def test_parallel_disk_reservations_release_even_on_error(self):

@@ -6,6 +6,7 @@ import ctypes as C
 import hashlib
 import json
 from pathlib import Path
+from scene_capacity import OWNERS,ASSETS
 import time
 import tomllib
 from light_controls import validate,scales
@@ -38,6 +39,8 @@ class Binding:
         (self.gpu/'light-shapes-manifest.json').write_text(json.dumps(manifest,indent=2))
         self.config_hash=hashlib.sha256(raw).hexdigest()
         self.persistent=persistent;self.native_cache={};self.bank_publication=None
+        from effect_lights import publish
+        self.effect_controls=publish(self.receiver.channel,data,self.config_revision)
 
     def poll(self):
         if self.tuning and time.monotonic()-self.config_polled>=.5:
@@ -53,6 +56,8 @@ class Binding:
                     shapes,manifest=build(controls,revision,self.gpu,self.config.parent)
                     pending=self.gpu/'light-shapes.pending';pending.write_bytes(shapes);pending.replace(self.gpu/'light-shapes.bin')
                     self.controls=controls;self.scale=scale;self.master=master;self.shapes=shapes;self.config_revision=revision;self.config_hash=digest
+                    from effect_lights import publish
+                    self.effect_controls=publish(self.receiver.channel,data,revision)
                     self.last_native=None;self.bank_publication=None
                     (self.gpu/'lights-config-accepted.toml').write_bytes(raw)
                     (self.gpu/'light-shapes-manifest.json').write_text(json.dumps(manifest,indent=2))
@@ -60,7 +65,7 @@ class Binding:
             except (OSError,ValueError) as exc:
                 if self.messages<100:print('D3D9 LIGHT CONFIG_REJECTED last_good=1 '+str(exc),flush=True);self.messages+=1
         self.ready=False
-        row=next((r for i in range(32) if (r:=self.receiver.channel.sample_owner(i)) and r[1]==self.row[1] and r[7]==self.row[7] and r[4]==1),None)
+        row=next((r for i in getattr(self.receiver.channel,"owner_indices",lambda:range(OWNERS))() if (r:=self.receiver.channel.sample_owner(i)) and r[1]==self.row[1] and r[7]==self.row[7] and r[4]==1),None)
         if not row:return False
         try:
             from light_transport import read_native,publish_encoded
@@ -76,7 +81,7 @@ class Binding:
                 # Only the original WORLD-space directional records are consumed
                 # by packet();owner-local diagnostic vectors never enter this join.
                 candidates=[]
-                for i in range(32):
+                for i in range(OWNERS):
                     candidate=self.receiver.channel.sample_owner(i)
                     if not candidate or candidate[4]!=1 or candidate[3]>row[3] or row[3]-candidate[3]>200:continue
                     value=read_native(self.receiver.channel,candidate[1],pid)

@@ -3,6 +3,7 @@ import ctypes as C
 import hashlib
 import json
 from pathlib import Path
+from scene_capacity import OWNERS,ASSETS
 import struct
 import time
 import tomllib
@@ -149,7 +150,7 @@ class Relay:
                 row=decode(raw)
                 if self.tuning and self.last_native and row['sequence']<=self.last_native['sequence']:continue
                 if row['owner_epoch']==selected['owner_epoch'] and row['session_words']==self.session:
-                    current=next((r for i in range(32) if (r:=self.receiver.channel.sample_owner(i)) is not None and r[1]==selected['owner_epoch'] and r[4]==1),None)
+                    current=next((r for i in getattr(self.receiver.channel,"owner_indices",lambda:range(OWNERS))() if (r:=self.receiver.channel.sample_owner(i)) is not None and r[1]==selected['owner_epoch'] and r[4]==1),None)
                     if current is None or row['elapsed_ms']>current[3] or current[3]-row['elapsed_ms']>500:continue
                     self.last_native=row;counter=C.c_longlong();frequency=C.c_longlong()
                     C.windll.kernel32.QueryPerformanceCounter(C.byref(counter));C.windll.kernel32.QueryPerformanceFrequency(C.byref(frequency))

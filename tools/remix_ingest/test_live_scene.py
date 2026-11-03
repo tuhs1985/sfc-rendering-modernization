@@ -6,6 +6,7 @@ import tempfile
 import time
 import unittest
 from PIL import Image
+from scene_capacity import STATE_OFFSET
 from live_scene import SceneChannel,SceneConsumer,decode_mesh,qualify_mesh,ImageStore,DATA,STRIDE
 from replay_live_scene import asset_variant,observation
 
@@ -84,9 +85,9 @@ class SceneTests(unittest.TestCase):
                 receiver.acknowledge(0,1);self.assertIsNone(receiver.asset_transfer(0))
                 with self.assertRaises(ValueError):receiver.acknowledge(0,2)
                 r=observation(decode_mesh(packet,refs)['header'],0,1,1,1)
-                creator.write(4096,struct.pack('<I',1));creator.write(4100,struct.pack('<96I',*r))
+                creator.write(STATE_OFFSET,struct.pack('<I',1));creator.write(STATE_OFFSET+4,struct.pack('<96I',*r))
                 self.assertIsNone(receiver.sample_owner(0))
-                creator.write(4096,struct.pack('<I',2));self.assertEqual(receiver.sample_owner(0)[7],1)
+                creator.write(STATE_OFFSET,struct.pack('<I',2));self.assertEqual(receiver.sample_owner(0)[7],1)
             finally:receiver.close()
             from live_bridge import Channel
             with self.assertRaises(ValueError):Channel(creator.name)

@@ -46,8 +46,10 @@ def validate(data, registry):
     Registry maps stable logical ID to {kind: directional|point}. Unknown native
     types are deliberately not eligible. No process pointers are accepted as IDs.
     """
-    if set(data)-{'schema_version', 'backend', 'lights', 'conversion_scale', 'master_multiplier'}:
+    if set(data)-{'schema_version', 'backend', 'lights', 'conversion_scale', 'master_multiplier','effects','effect_lights'}:
         raise ValueError('Unknown light configuration field')
+    from effect_lights import controls as effect_controls
+    effect_controls(data)
     if type(data.get('schema_version')) is not int or data['schema_version'] != 1 or data.get('backend') != 'remix_sdk_0_6_4':
         raise ValueError('Unsupported light schema/backend')
     scales(data)

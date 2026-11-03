@@ -81,6 +81,11 @@ static void gpu(bool rgbaNative=false){
  auto pixels=read();check(pixels[32*64+32]==0xff0000ffu); // Near retained scene wins.
  c->ClearRenderTargetView(target.Get(),blue);c->ClearDepthStencilView(zview.Get(),D3D11_CLEAR_DEPTH,1,0);
  check(compositor.draw(target.Get(),zview.Get(),views,o.key));pixels=read();
+ check(compositor.targetValidations()==1&&compositor.inputValidations()==1);
+ // Different owners share immutable descriptors,but still select their pixels.
+ auto otherOwner=o.key;otherOwner.objectId=8;
+ check(compositor.draw(target.Get(),zview.Get(),views,otherOwner));
+ check(compositor.targetValidations()==1&&compositor.inputValidations()==1);
  check(pixels[32*64+32]==0xffff0000u&&pixels[0]==0xff0000ffu);
  check(pixels[20*64+20]==0xff0000ffu&&pixels[21*64+21]==0xff0000ffu);
  check(pixels[22*64+22]==0xff000000u);
@@ -116,6 +121,15 @@ O nearPS(){O o;o.c=float4(0,1,0,1);o.z=.1;return o;}
  bad=o.key;bad.width=63;check(!compositor.draw(target.Get(),zview.Get(),views,bad));
  bad=o.key;bad.viewport[0]=1;check(!compositor.draw(target.Get(),zview.Get(),views,bad));
  auto* original=views[1];views[1]=srvs[0].Get();check(!compositor.draw(target.Get(),zview.Get(),views,o.key));views[1]=original;
+ check(compositor.inputValidations()==2); // Changed invalid view was inspected,not cached.
+ check(compositor.draw(target.Get(),zview.Get(),views,o.key));check(compositor.inputValidations()==2);
+ // A new valid input view is checked once;returning to the first slot is cached.
+ ComPtr<ID3D11ShaderResourceView> alternate;checked(d->CreateShaderResourceView(inputs[1].Get(),nullptr,&alternate),"alternate input view");
+ views[1]=alternate.Get();check(compositor.draw(target.Get(),zview.Get(),views,o.key));check(compositor.inputValidations()==3);
+ views[1]=original;check(compositor.draw(target.Get(),zview.Get(),views,o.key));check(compositor.inputValidations()==3);
+ // New native target/depth views invalidate target qualification.
+ ComPtr<ID3D11DepthStencilView> newDepth;checked(d->CreateDepthStencilView(depth.Get(),&zd,&newDepth),"replacement DSV");
+ check(compositor.draw(target.Get(),newDepth.Get(),views,o.key));check(compositor.targetValidations()==2);
  if(rgbaNative)return; // The remaining historical additive test uses typed BGRA.
  ComPtr<ID3D11RenderTargetView> wrongTarget;desc.Format=DXGI_FORMAT_B8G8R8A8_UNORM;desc.BindFlags=D3D11_BIND_RENDER_TARGET;
  ComPtr<ID3D11Texture2D> single;checked(d->CreateTexture2D(&desc,nullptr,&single),"single sample target");checked(d->CreateRenderTargetView(single.Get(),nullptr,&wrongTarget),"single RTV");

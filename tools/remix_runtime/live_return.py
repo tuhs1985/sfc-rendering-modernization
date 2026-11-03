@@ -1,5 +1,6 @@
 """Fresh asset worker/provenance and bounded return telemetry; never a game callback."""
 from pathlib import Path
+from scene_capacity import OWNERS,ASSETS
 import ctypes as C
 import hashlib
 import json
@@ -118,7 +119,7 @@ class FreshReceiver(Receiver):
             path=asset/f'asset-{revision}.bin';path.write_bytes(packet);path.with_suffix('.json').write_bytes(refs)
             self.assets[revision]=(path,mesh);self.channel.acknowledge(slot,generation)
         if self.selected or not self.pid or not self.session:return
-        for index in range(32):
+        for index in range(OWNERS):
             row=self.channel.sample_owner(index)
             if row is None or row[4]!=1 or row[7] not in self.assets or row[7] in self.attempted:continue
             source,mesh=self.assets[row[7]];h=mesh['header']

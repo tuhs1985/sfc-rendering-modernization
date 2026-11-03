@@ -1,6 +1,7 @@
 // Remix-only type overrides, fixed808B v2 companion. Native packet stays200B.
 #pragma once
 #include <filesystem>
+namespace remix_environment {inline std::filesystem::path cacheRoot;}
 struct LightShapeRow{uint32_t slot,kind,ship,reserved;float v[28];char texture[128];};
 struct LightShapePacket{uint32_t h[4];uint64_t revision,reserved;LightShapeRow rows[3];uint64_t checksum;};
 static_assert(sizeof(LightShapeRow)==256&&sizeof(LightShapePacket)==808);
@@ -50,7 +51,11 @@ inline remixapi_LightHandle createShapedLight(remixapi_Interface& api,const Live
   const float a=v[14]*.01745329252f;dome.transform.matrix[0][0]=std::cos(a);dome.transform.matrix[0][2]=std::sin(a);
   dome.transform.matrix[1][1]=1;dome.transform.matrix[2][0]=-std::sin(a);dome.transform.matrix[2][2]=std::cos(a);
   for(unsigned i=0;i<68;++i)texture+=static_cast<wchar_t>(shape.texture[i]);
-  const auto path=std::filesystem::current_path()/L"textures"/texture;
+  auto path=std::filesystem::current_path()/L"textures"/texture;
+  if(!remix_environment::cacheRoot.empty()){
+   const auto cached=remix_environment::cacheRoot/texture;
+   if(std::filesystem::is_regular_file(cached)&&!std::filesystem::is_symlink(cached))path=cached;
+  }
   if(!std::filesystem::is_regular_file(path)||std::filesystem::file_size(path)>128*1024*1024)throw std::runtime_error("Dome DDS missing/bound");
   texture=path.wstring();dome.colorTexture=texture.c_str();info.pNext=&dome;break;}
  case 2:case 6:sphere.sType=REMIXAPI_STRUCT_TYPE_LIGHT_INFO_SPHERE_EXT;sphere.position=position;sphere.radius=v[0];sphere.volumetricRadianceScale=r.values[7];

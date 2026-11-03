@@ -21,10 +21,18 @@ struct Record {
  uint64_t start=0,entered=0,ready=0,inserted=0,ended=0,presented=0,sequence=0,hash=0;
 };
 struct Stamp {uint64_t sequence=0,qpc=0;};
+enum class RetryReason:LONG {Overlap=1,OwnerChanged=2,SubmissionChanged=3};
+enum class TerminalReason:LONG {SuppressionWrite=1,DispatchException=2,OutputResourceFailure=3};
+struct Recovery {
+ DWORD version=0;volatile LONG counts[3]{};
+ volatile LONG lastReason=0,lastFrame=0,lastOwner=0,terminalReason=0,terminalFrame=0,terminalOwner=0;
+ BYTE reserved[56]{};
+};
+static_assert(sizeof(Recovery)==96);
 struct alignas(64) Header {
  DWORD magic=0,version=0,bytes=0,pid=0,session[4]{},policy=0,generation=0;
  volatile LONG stop=0,error=0,frame=0,thread=0,written=0,read=0,dropped=0,requests=0,commits=0,misses=0,stale=0,invalid=0,stopWakes=0,active=0,maxActive=0,partial=0;
- DWORD pad[2]{};uint64_t frameStart=0,frequency=0;Stamp ready[2]{};BYTE padding[96]{};
+ DWORD pad[2]{};uint64_t frameStart=0,frequency=0;Stamp ready[2]{};Recovery recovery{};
 };
 struct Store {Header header{};Record current{};Record records[Capacity]{};};
 static_assert(sizeof(Header)==256&&sizeof(Record)==128&&sizeof(Store)==8576);
@@ -37,7 +45,17 @@ inline Policy policy(){wchar_t f[32]{};GetEnvironmentVariableW(L"SFC_NATIVE_INSE
  if(!wcscmp(f,L"Strict"))return Policy::Strict;if(!wcscmp(f,L"ExtraFrame"))return Policy::ExtraFrame;throw std::runtime_error("Explicit native insertion policy required");}
 inline void initialize(Store& s,const DWORD* session,DWORD pid,Policy p){memset(&s,0,sizeof(s));s.header.version=Version;s.header.bytes=sizeof(s);s.header.pid=pid;
  memcpy(s.header.session,session,16);s.header.policy=static_cast<DWORD>(p);s.header.generation=1;LARGE_INTEGER f{};QueryPerformanceFrequency(&f);s.header.frequency=f.QuadPart;
+ s.header.recovery.version=1;
  MemoryBarrier();InterlockedExchange(reinterpret_cast<volatile LONG*>(&s.header.magic),Magic);}
+// Callback-only counters;no file access,allocation,waiting,or session disable.
+inline void retry(Store& s,RetryReason reason,DWORD owner){auto& r=s.header.recovery;
+ InterlockedIncrement(&r.counts[static_cast<unsigned>(reason)-1]);
+ InterlockedExchange(&r.lastFrame,s.header.frame);InterlockedExchange(&r.lastOwner,static_cast<LONG>(owner));
+ InterlockedExchange(&r.lastReason,static_cast<LONG>(reason));}
+inline void terminal(Store& s,TerminalReason reason,DWORD owner){auto& r=s.header.recovery;
+ if(InterlockedCompareExchange(&r.terminalReason,-1,0)==0){r.terminalFrame=s.header.frame;r.terminalOwner=static_cast<LONG>(owner);
+  MemoryBarrier();InterlockedExchange(&r.terminalReason,static_cast<LONG>(reason));}
+ InterlockedExchange(&s.header.partial,1);InterlockedExchange(&s.header.stop,1);}
 inline uint64_t deadline(const Header& h,uint64_t start){return start+(h.frequency*h.policy+59)/60;}
 inline bool valid(const Ticket& t,const Header& h){return t.bytes==sizeof(t)&&t.version==Version&&!memcmp(t.session,h.session,16)&&t.pid==h.pid&&t.thread&&
  t.frame&&t.owner&&t.revision&&t.model&&t.source&&t.manager&&t.count&&t.count<=65536&&t.primary&&t.generation==h.generation&&

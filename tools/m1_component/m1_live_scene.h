@@ -1,5 +1,6 @@
 #pragma once
 #include "m1_live_bridge.h"
+#include "../scene_bridge/scene_capacity.h"
 #include "m1_present_calibration.h"
 #include "../d3d9_proof/live_owner_wire.h"
 #include "../scene_bridge/persistent_scene.h"
@@ -8,12 +9,13 @@
 #ifdef SFC_NATIVE_LIGHT_DISCOVERY
 #include "native_light_observer.h"
 #include "m1_light_transport.h"
+#include "../scene_bridge/effect_lights.h"
 #endif
 
 namespace sfc_m1 {
-constexpr DWORD kSceneBytes=16*1024*1024,kSceneOwners=32,kSceneRevisions=64;
+constexpr DWORD kSceneBytes=16*1024*1024,kSceneOwners=scene_capacity::Owners,kSceneRevisions=scene_capacity::Assets;
 constexpr DWORD kSceneAssetBytes=2*1024*1024,kSceneAssets=4,kSceneData=65536;
-// State table: 4096 + owner*512; guard then original96words (word7 revision).
+// Protocol4 state table: scene_capacity::StateOffset + owner*512.
 // Asset descriptors:256 + slot*64; generation,ack,meshbytes,refsbytes,owner,revision.
 struct SceneAsset {
     LiveMeshPacket mesh;
@@ -55,6 +57,8 @@ struct LiveScene {
 #ifdef SFC_NATIVE_LIGHT_DISCOVERY
     sfc_native_lights::Observer lights;
     sfc_light_transport::Raw* sharedLights=nullptr;
+    sfc_effect_lights::Store* effectLights=nullptr;
+    sfc_effect_lights::Frame effectScratchA{},effectScratchB{};
 #endif
     bool start(const std::wstring& name,const std::wstring& directory) {
         performance=pipeline_mode::performance();
@@ -64,7 +68,7 @@ struct LiveScene {
         view=static_cast<BYTE*>(MapViewOfFile(mapping,FILE_MAP_READ|FILE_MAP_WRITE,0,0,kSceneBytes));
         if(!view){close();return false;}
         const auto* h=reinterpret_cast<DWORD*>(view);
-        if(h[0]!=kLiveMagic || h[1]!=3 || h[2]!=kSceneBytes || h[3]!=0){close();return false;}
+        if(h[0]!=kLiveMagic || h[1]!=scene_capacity::Version || h[2]!=kSceneBytes || h[3]!=0){close();return false;}
         const auto hex=name.substr(name.size()-32);
         for(DWORD i=0;i<4;++i)if(h[4+i]!=std::stoul(hex.substr(i*8,8),nullptr,16)){close();return false;}
         output=directory;stop_event=CreateEventW(nullptr,TRUE,FALSE,nullptr);
@@ -106,6 +110,9 @@ struct LiveScene {
                 sharedLights=reinterpret_cast<sfc_light_transport::Raw*>(view+sfc_light_transport::RawOffset);
                 if(!lights.followEpochs||!sfc_light_transport::valid(sharedLights->header,sfc_light_transport::RawMagic,sizeof(*sharedLights),h+4,0)){sharedLights=nullptr;close();return false;}
                 sharedLights->header.pid=GetCurrentProcessId();
+                effectLights=reinterpret_cast<sfc_effect_lights::Store*>(view+sfc_effect_lights::Offset);
+                if(!sfc_effect_lights::valid(*effectLights,h+4,0)){effectLights=nullptr;close();return false;}
+                effectLights->header.pid=GetCurrentProcessId();effectScratchA={};effectScratchB={};
                 for(DWORD n=0;n<sizeof(*sharedLights);n+=4096){auto* page=reinterpret_cast<volatile BYTE*>(sharedLights)+n;*page=*page;}
             }
         }
@@ -117,7 +124,8 @@ struct LiveScene {
     }
     void close(){cohort.close();directSource.close();if(calibration){InterlockedExchange(&calibration->active,0);calibration=nullptr;}
 #ifdef SFC_NATIVE_LIGHT_DISCOVERY
-        sharedLights=nullptr;
+        if(effectLights)InterlockedExchange(&effectLights->header.stopped,1);
+        effectLights=nullptr;sharedLights=nullptr;
 #endif
         if(view){UnmapViewOfFile(view);view=nullptr;}if(mapping){CloseHandle(mapping);mapping=nullptr;}
         if(stop_event){CloseHandle(stop_event);stop_event=nullptr;}}
@@ -208,7 +216,7 @@ struct LiveScene {
         if(calibration && !registered){auto exact=r;exact[47]=GetCurrentThreadId();
             if(sourceTiming){LARGE_INTEGER q{};if(QueryPerformanceCounter(&q))sfc_calibration::stamp(exact,static_cast<ULONGLONG>(q.QuadPart));}
             directSource.offer(exact);
-            if(!sfc_calibration::offer(calibration,index,exact))++calibrationMisses;}
+            if(index<sfc_calibration::Owners&&!sfc_calibration::offer(calibration,index,exact))++calibrationMisses;}
         if(sampled)return;
         o.last_ms=id.elapsed;offer(index,r);
     }
@@ -217,6 +225,11 @@ struct LiveScene {
     template<class Read>void updatePersistent(DWORD manager,DWORD frame,DWORD elapsed,Read read){
         if(!persistent||persistentFrame==frame||!frame)return;persistentFrame=frame;
         DWORD vt=0;if(!read(manager,&vt,4)||vt!=0x007b8d4c)return;
+#ifdef SFC_NATIVE_LIGHT_DISCOVERY
+        // World light bank observed once per source frame BEFORE scene wake-up.
+        // Fixed double-copy;no 5Hz discovery limit,owner dependency,or disk output.
+        if(effectLights)sfc_effect_lights::capture(*effectLights,manager,frame,effectScratchA,effectScratchB,read);
+#endif
         std::array<DWORD,40> camera{},check{};
         if(!read(manager+0x628,camera.data(),68)||!read(manager+0x55c,camera.data()+17,68)||!read(manager+0x75c,camera.data()+34,24)||
            !read(manager+0x628,check.data(),68)||!read(manager+0x55c,check.data()+17,68)||!read(manager+0x75c,check.data()+34,24)||camera!=check)return;
@@ -242,7 +255,7 @@ struct LiveScene {
             else directSource.offer(r);
             DWORD slot=0;for(;slot<owner_count;++slot)if(owners[slot].identity.owner==e.id.owner)break;
             if(slot==owner_count){directSource.reject(frame);continue;} // Functional registry association remains required.
-            if(!sfc_calibration::offer(calibration,slot,r))++calibrationMisses;
+            if(slot<sfc_calibration::Owners&&!sfc_calibration::offer(calibration,slot,r))++calibrationMisses;
             cohort.offer(r);
             // Only low-volume diagnostic state is rate limited;frame publication above isn't.
             if(elapsed-owners[slot].last_ms>=34){owners[slot].last_ms=elapsed;offer(slot,r);}
@@ -256,7 +269,7 @@ struct LiveScene {
     static DWORD WINAPI run(void* raw){
         auto& b=*static_cast<LiveScene*>(raw);
         InterlockedExchange(reinterpret_cast<LONG*>(b.view+12),1);
-        std::array<DWORD,32> last{},counts{},loggedMs{};std::array<DWORD,4> generations{};
+        std::array<DWORD,kSceneOwners> last{},counts{},loggedMs{};std::array<DWORD,4> generations{};
         DWORD bytes=0,records=0,transfers=0;bool failed=false,saturated=false;
         std::ofstream log;
         if(!b.performance)log.open(b.output+L"\\LIVE-SCENE-001-updates.jsonl",std::ios::binary|std::ios::trunc);
@@ -325,12 +338,13 @@ struct LiveScene {
                     InterlockedExchange(&a.ready,0);break;
                 }
             }
-            for(DWORD i=0;i<32;++i){
+            for(DWORD i=0;i<kSceneOwners;++i){
                 std::array<DWORD,96> r{};
                 if(TryAcquireSRWLockExclusive(&b.mailbox)){r=b.pending[i];ReleaseSRWLockExclusive(&b.mailbox);}
                 if(r[0]<=last[i])continue;last[i]=r[0];
-                auto* guard=reinterpret_cast<LONG*>(b.view+4096+i*512);
-                InterlockedIncrement(guard);std::memcpy(b.view+4100+i*512,r.data(),sizeof(r));MemoryBarrier();InterlockedIncrement(guard);
+                auto* guard=reinterpret_cast<LONG*>(b.view+scene_capacity::StateOffset+i*512);
+                InterlockedIncrement(guard);std::memcpy(b.view+scene_capacity::StateOffset+4+i*512,r.data(),sizeof(r));MemoryBarrier();InterlockedIncrement(guard);
+                auto* high=reinterpret_cast<LONG*>(b.view+128);if(DWORD(*high)<i+1)InterlockedExchange(high,LONG(i+1));
                 if(b.performance)continue; // Latest state is functional;JSONL is optional.
                 if(failed || counts[i]>=((b.lightTuning&&!b.lifecycleCapture)?100u:2700u))continue;
                 // 20Hz detail spans the full120s watchdog; event journal is independent.

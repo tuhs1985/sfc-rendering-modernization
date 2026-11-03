@@ -58,3 +58,5 @@ Native VB/IB upload readback comparisons,texture GPU pixel readback comparisons,
 4. C11–C15 startup/new-asset/deployment cleanup separately,so camera-transition measurements are not confused with startup speed.
 
 Audit only. No checks have been disabled and no timing improvement is claimed by this document.
+
+**Subsequent implementation:** Run232/233 addressed C01–C04, scene-light lifetime and C15's explicit startup toggle. [Run235](../runs/2026-10-31-codex-normal-path-cleanup.md) removes C07's unused native-mode callbacks and caches the repeated receiver/compositor work in C09/C10. C05/C06 detailed diagnostic toolsets, C08 and remaining asset/deployment items are still open. The inventory above records the original audit, not current execution for completed items.

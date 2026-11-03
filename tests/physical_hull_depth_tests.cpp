@@ -24,7 +24,28 @@ int main(){try{
  auto viewport=f;viewport.viewport[0]=960;viewport.viewport[2]=960;hull.begin();hull.submit(mesh,viewport);hull.draw(c.Get());expectDepth(sample(48,32),.5f);expectDepth(sample(0,0),-1234); // receiver applies native viewport once
  auto inactive=f;inactive.active=0;hull.begin();hull.submit(mesh,inactive);hull.draw(c.Get());expectDepth(sample(48,32),-1234);
  hull.begin();hull.draw(c.Get());expectDepth(sample(72,32),-1234); // no stale depth on retirement
- hull.begin();for(unsigned i=0;i<32;++i)hull.submit(mesh,f);bool rejected=false;try{hull.submit(mesh,f);}catch(const std::exception&){rejected=true;}require(rejected,"32 instance cap");
+ hull.begin();for(unsigned i=0;i<scene_capacity::Owners;++i){f.owner=i+1;require(hull.submit(mesh,f),"admitted scene owner has hull capacity");}
+ require(hull.count==scene_capacity::Owners&&hull.count>100,"full scene capacity beyond model33");
+ require(!hull.submit(mesh,f)&&hull.count==scene_capacity::Owners&&hull.omitted==1,"overflow omits owner without exception or overwrite");
+ hull.draw(c.Get());expectDepth(sample(48,32),.5f);
+ hull.begin();require(hull.submit(mesh,f)&&hull.count==1,"next frame recovers after capacity pressure");
+ PhysicalHullDepth::Mesh missing;require(!hull.submit(missing,f)&&hull.count==1,"invalid coverage cannot authorize colour");
  require(hull.geometryBytes==108,"no geometry uploads on pose updates");
+ // Actual per-owner GPU coverage for the full admitted scene,not just array
+ // insertion. One shared mesh,256 distinct transforms/owner IDs;owner33 and
+ // later must occupy their own pixels and remain eligible for replacement.
+ SetEnvironmentVariableW(L"SFC_NATIVE_INSERTION_GATE",L"1");SetEnvironmentVariableW(L"SFC_NATIVE_INSERTION_ALL_SHIPS",L"1");
+ D3D11_TEXTURE2D_DESC od{};output->GetDesc(&od);ComPtr<ID3D11Texture2D> ownerImage,ownerReadback;
+ ok(d->CreateTexture2D(&od,nullptr,&ownerImage),"owner coverage target");od.Usage=D3D11_USAGE_STAGING;od.BindFlags=0;od.CPUAccessFlags=D3D11_CPU_ACCESS_READ;
+ ok(d->CreateTexture2D(&od,nullptr,&ownerReadback),"owner coverage readback");
+ PhysicalHullDepth fleet;fleet.start(d.Get(),output.Get(),true,ownerImage.Get());auto shared=fleet.prepare(scene);fleet.begin();
+ for(unsigned i=0;i<scene_capacity::Owners;++i){auto ship=pose();ship.owner=0x3f800000u+i;
+  ship.model[0]=ship.model[5]=.05f;ship.model[3]=-.9375f+float(i%16)*.125f;ship.model[7]=.9375f-float(i/16)*.125f;
+  require(fleet.submit(shared,ship),"full fleet coverage admission");}
+ fleet.draw(c.Get());c->CopyResource(ownerReadback.Get(),ownerImage.Get());D3D11_MAPPED_SUBRESOURCE owners{};
+ ok(c->Map(ownerReadback.Get(),0,D3D11_MAP_READ,0,&owners),"fleet owner readback");
+ for(unsigned i=0;i<scene_capacity::Owners;++i){const unsigned x=(i%16)*6+3,y=(i/16)*4+2;uint32_t owner=0;
+  memcpy(&owner,static_cast<BYTE*>(owners.pData)+y*owners.RowPitch+x*4,4);require(owner==0x3f800000u+i,"correct independent owner pixels through full capacity");}
+ c->Unmap(ownerReadback.Get(),0);require(fleet.draws==scene_capacity::Owners&&fleet.geometryBytes==108,"fleet shares immutable geometry");
  std::cout<<"Physical hull GPU PASS translation rotation viewport clipping overlap order retirement capacity cache; checks="<<checks<<'\n';return 0;
  }catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}}

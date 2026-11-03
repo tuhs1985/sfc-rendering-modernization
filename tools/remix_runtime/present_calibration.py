@@ -7,7 +7,7 @@ import sys
 
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/'tools/remix_ingest'))
-from live_scene import SceneChannel,decode_mesh
+from live_scene import SceneChannel,decode_mesh,ASSETS
 
 STAMP=struct.Struct('<16Q')
 HEADER=struct.Struct('<12I')
@@ -30,6 +30,7 @@ class Receiver:
         self.channel=SceneChannel(create=True)
         self.revisions={}
         self.assets={}
+        self.retain_assets=True # Legacy single-owner recovery consumes decoded packets.
 
     @property
     def name(self):return self.channel.name
@@ -39,13 +40,13 @@ class Receiver:
             transfer=self.channel.asset_transfer(slot)
             if transfer is None:continue
             generation,revision,owner,mesh,refs=transfer
-            if not 1<=revision<=8:raise ValueError('Calibration eight-revision cap')
+            if not 1<=revision<=ASSETS:raise ValueError('Asset revision outside session transport budget')
             data=decode_mesh(mesh,refs)
             if data['header'][4]!=owner:raise ValueError('Asset transfer owner mismatch')
             identity=hashlib.sha256(mesh+refs).hexdigest()
             if revision in self.revisions and self.revisions[revision]!=identity:raise ValueError('Reused asset revision')
             self.revisions[revision]=identity
-            self.assets[revision]=data # immutable decoded packet;do not decode again in recovery
+            if self.retain_assets:self.assets[revision]=data
             self.channel.acknowledge(slot,generation)
 
     def close(self):self.channel.close()

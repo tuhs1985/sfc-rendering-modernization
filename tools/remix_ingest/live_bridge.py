@@ -21,12 +21,13 @@ NAME = re.compile(r'Local\\SFCBridge_[a-f0-9]{32}\Z')
 
 
 class Channel:
+    name_pattern=NAME
     size=SIZE
     version=2
     receiver_write=False
     def __init__(self, name=None, create=False):
         self.name = name or 'Local\\SFCBridge_'+uuid.uuid4().hex
-        if not NAME.fullmatch(self.name):
+        if not self.name_pattern.fullmatch(self.name):
             raise ValueError('Invalid explicit session name')
         self.handle = self.view = None
         self.k = C.WinDLL('kernel32', use_last_error=True)

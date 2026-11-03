@@ -28,9 +28,12 @@ class Relay(Baseline):
         self.admission_service=True
         self.initial_texture_data=True
         self.preparer.close();self.preparer=Pipeline(self)
+        from texture_memory import Pool
+        self.texture_memory=Pool(self.receiver.name)
         self.anchor_id=None;self.path_count=0;self.material_pieces={};self.progressive_events=[];self.pending_enhancements=deque()
         self.pending_stage_ids=set();self.pending_complete_ids=set();self.pending_library=False
         self.publication_busy_since=None;self.publication_retries=0
+        self.publication_warned=False;self.publication_warning_count=0;self.publication_last_error=None
 
     def start_service(self,pid):
         # The preparation coordinator starts before first asset, not after the
@@ -67,6 +70,7 @@ class Relay(Baseline):
             self.flush_enhancements()
 
     def collect_prepared(self):
+        if getattr(self,'texture_memory',None):self.texture_memory.reclaim(self.receiver.channel)
         self.preparer.pump();events=self.preparer.events;self.preparer.events=[]
         for kind,value in events:
             if kind=='failed':self.fail_job(value,value['error']);continue
@@ -117,22 +121,32 @@ class Relay(Baseline):
         self.retry_publication()
 
     def retry_publication(self):
-        # Atomic replacement can fail briefly while Remix holds the old stage
-        # open without DELETE sharing. Keep the prior stage and retry next cycle;
+        # Publication may encounter a transient access denial. A retained USD
+        # reader alone does not prove missing DELETE sharing. Retry next cycle;
         # no sleep, file deletion, game wait, or repeated map generation.
+        # Pending sets/boolean coalesce to the latest stage/library;duration is
+        # diagnostic only and never terminates otherwise valid rendering.
         busy=False
+        def denied(exc,operation,identity=None):
+            self.publication_last_error=dict(operation=operation,asset_id=identity,
+                errno=exc.errno,winerror=getattr(exc,'winerror',None),message=str(exc)[:1024])
         for identity in list(self.pending_stage_ids):
             try:self.write_stage(self.preparer.jobs[identity])
-            except PermissionError:busy=True;self.publication_retries+=1;continue
+            except PermissionError as exc:
+                denied(exc,'asset-stage',identity);busy=True;self.publication_retries+=1;continue
             self.pending_stage_ids.remove(identity);self.pending_library=True
         if self.pending_library:
             try:self.commit_layers(initial=not bool(self.process))
-            except PermissionError:busy=True;self.publication_retries+=1
+            except PermissionError as exc:
+                denied(exc,'master-library');busy=True;self.publication_retries+=1
             else:self.pending_library=False
         if busy:
             if self.publication_busy_since is None:self.publication_busy_since=time.monotonic()
-            if time.monotonic()-self.publication_busy_since>5:raise RuntimeError('Material atomic publication sharing-busy for5s;preserve existing base')
-        else:self.publication_busy_since=None
+            if time.monotonic()-self.publication_busy_since>5 and not getattr(self,'publication_warned',False):
+                self.publication_warned=True
+                self.publication_warning_count=getattr(self,'publication_warning_count',0)+1
+                print('Material update delayed;continuing with last accepted materials and retrying.',flush=True)
+        else:self.publication_busy_since=None;self.publication_warned=False
         if not self.pending_library:
             for identity in list(self.pending_complete_ids):
                 if identity in self.pending_stage_ids:continue
@@ -165,7 +179,8 @@ class Relay(Baseline):
             if group[0] not in pieces:continue
             p=pieces[group[0]];blocks[p['remix_hash']]=shader(p['remix_hash'],p['images'],p['values'])
         stage='#usda 1.0\n(defaultPrim = "RootNode")\ndef Xform "RootNode"\n{\n def Scope "Looks"\n {\n'+''.join(blocks.values())+' }\n}\n'
-        pending=folder/'mod.usda.pending';pending.write_text(stage,encoding='utf-8');pending.replace(folder/'mod.usda')
+        from material_library import replace_material_file
+        pending=folder/'mod.usda.pending';pending.write_text(stage,encoding='utf-8');replace_material_file(pending,folder/'mod.usda')
         self.progressive_events.append(dict(event='material_stage_published',id=job['id'],groups=list(pieces),at_ns=time.perf_counter_ns(),meaning='Atomic CPU stage replacement;not GPU consumption'))
         self.mod_layer(job['gpu'],write=False)
         # Group ordering matches the original scene even if tasks complete in a
@@ -197,6 +212,13 @@ class Relay(Baseline):
         report['multi_scene']['native_texture_uploads']=[dict((key,int(value)) for key,value in __import__('re').findall(r'(\w+)=(\d+)',line))
             for line in log.splitlines() if line.startswith('MULTISCENE_UPLOAD ')]
         report['multi_scene']['material_publication_retries']=self.publication_retries
+        report['multi_scene']['material_publication_status']=dict(
+            pending_stages=len(self.pending_stage_ids),pending_library=self.pending_library,
+            delayed=self.publication_busy_since is not None,
+            delayed_seconds=max(0,time.monotonic()-self.publication_busy_since) if self.publication_busy_since is not None else 0,
+            warnings=getattr(self,'publication_warning_count',0),
+            last_error=getattr(self,'publication_last_error',None),
+            meaning='File publication only;not runtime material installation ACK')
         report['multi_scene']['output_stage_timings']=[dict((key,int(value)) for key,value in __import__('re').findall(r'(\w+)=(\d+)',line))
             for line in log.splitlines() if line.startswith('OUTPUT_STAGE_TIMING ')]
         report['multi_scene']['progressive_scope']='Material publication only;runtime consumption requires pixels/timing comparison'

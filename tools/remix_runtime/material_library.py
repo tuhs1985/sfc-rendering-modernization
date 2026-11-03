@@ -5,8 +5,56 @@ generated asset paths are rebased; no geometry, map roles or shading values chan
 """
 import json
 import os
+import ctypes
+from functools import lru_cache
 from pathlib import Path
 from material_binding import shader
+
+
+@lru_cache(maxsize=1)
+def _windows_replace_file():
+    api=ctypes.WinDLL('kernel32',use_last_error=True).ReplaceFileW
+    api.argtypes=[ctypes.c_wchar_p,ctypes.c_wchar_p,ctypes.c_wchar_p,
+                  ctypes.c_uint32,ctypes.c_void_p,ctypes.c_void_p]
+    api.restype=ctypes.c_int
+    return api
+
+
+def replace_material_file(pending,target):
+    """Exchange a completed generated library without truncating loaded readers.
+
+    Windows ReplaceFileW accepts the packaged USD reader retaining the old file;
+    Path.replace/MoveFileExW does not in the qualified held-reader control.
+    Flags0 preserves security/attributes;never ignore ACL or read-only failures.
+    First creation (and non-Windows tools) retains ordinary rename semantics.
+    Runs on the supervisor,not the game's rendering callback.
+    """
+    pending=Path(pending);target=Path(target)
+    if pending.is_symlink() or target.is_symlink():raise ValueError('Material publication symlink')
+    if os.name!='nt' or not target.exists():
+        pending.replace(target);return 'rename-new' if os.name=='nt' else 'rename'
+    if target.stat().st_file_attributes & 1:
+        raise PermissionError(13,'Material destination is read-only',str(target))
+    # Use extended absolute paths,including UNC paths,without relying on the
+    # process's long-path manifest. The source and target stay in one directory.
+    def windows_path(path):
+        name=str(path.resolve())
+        if name.startswith('\\\\?\\'):return name
+        return '\\\\?\\UNC\\'+name[2:] if name.startswith('\\\\') else '\\\\?\\'+name
+    if _windows_replace_file()(windows_path(target),windows_path(pending),None,0,None,None):
+        return 'ReplaceFileW'
+    error=ctypes.get_last_error()
+    # Microsoft documents1176/1177 as partial exchanges. If the public name
+    # disappeared,restore the already completed pending library under that name.
+    # Never overwrite an extant target or delete unknown/loaded files. Report the
+    # original failure even after repair;do not claim a normal publication ACK.
+    if error in (1176,1177) and not target.exists():
+        if not pending.is_file() or pending.is_symlink():
+            raise RuntimeError(f'Material ReplaceFileW partial failure {error};target absent and pending unavailable')
+        try:pending.replace(target)
+        except OSError as recovery:
+            raise RuntimeError(f'Material ReplaceFileW partial failure {error};target-name recovery failed: {recovery}') from recovery
+    raise ctypes.WinError(error)
 
 
 def publish_remix_revision(root,text):
@@ -26,9 +74,10 @@ def publish_remix_revision(root,text):
     info=pending.stat();natural=info.st_mtime_ns
     published=natural if previous is None else max(natural,(previous//1_000_000_000+1)*1_000_000_000)
     if published!=natural:os.utime(pending,ns=(info.st_atime_ns,published))
-    pending.replace(target)  # Existing caller handles transient sharing-busy.
+    exchange=replace_material_file(pending,target)
     return dict(policy='remix-openusd-windows-second-revision-v1',
         previous_mtime_ns=previous,natural_mtime_ns=natural,published_mtime_ns=published,
+        exchange=exchange,
         meaning='Distinct file revision;not runtime material installation ACK')
 
 

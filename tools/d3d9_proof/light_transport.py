@@ -12,6 +12,8 @@ RAW_STRIDE=6208
 
 
 def initialize(channel):
+    from effect_lights import initialize as initialize_effects
+    initialize_effects(channel)
     words=[int(channel.name[-32:][i:i+8],16) for i in range(0,32,8)]
     for offset,magic,size in ((RAW_OFFSET,RAW_MAGIC,RAW_BYTES),(ENCODED_OFFSET,ENCODED_MAGIC,ENCODED_BYTES)):
         channel.write(offset,struct.pack('<8I',magic,1,size,*words,0)+bytes(size-32))

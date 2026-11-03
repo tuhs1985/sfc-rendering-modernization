@@ -22,7 +22,7 @@ def initialize(channel,pid):
 
 
 def request(channel,generation,row,cookie):
-    if not 1<=generation<=64 or not all(row[i] for i in (1,5,6,7)) or row[4]!=1 or not cookie:
+    if not 1<=generation<=0x3fffffff or not all(row[i] for i in (1,5,6,7)) or row[4]!=1 or not cookie:
         raise ValueError('Invalid rebind request')
     raw=TARGET.pack(generation,row[1],row[7],row[5],row[6],0,cookie,0)
     raw=raw[:-8]+struct.pack('<Q',fnv(raw[:-8]))

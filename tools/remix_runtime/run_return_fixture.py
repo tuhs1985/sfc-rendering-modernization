@@ -64,6 +64,8 @@ def main():
     parser.add_argument('--pipeline-mode',choices=('performance','test'),default='test')
     parser.add_argument('--prewarm',action='store_true',help='Start native renderer before discovering prepared fixture assets')
     parser.add_argument('--startup-profile',action='store_true',help='Offline only: bounded native startup phase/QPC/memory measurements')
+    parser.add_argument('--completion-diagnostics',action='store_true',help='Default-off bounded records of unusually slow rendering completion')
+    parser.add_argument('--effect-light-fixture',action='store_true',help='Standalone synthetic moving/pulsing effect bank;never used in SFC')
     parser.add_argument('--loading-policy',choices=('inherit','async','blocking','rtxio'),default='inherit',help='Offline startup only: explicitly exercise pinned Remix loading/compilation settings')
     parser.add_argument('--material-library',choices=('layers','flat'),default='layers',help='Offline startup only: same materials/images without layered USD composition')
     parser.add_argument('--material-texture-loading',choices=('preload','stream'),default='preload',help='Offline only: compare existing Remix per-material preload flag with native streaming;image bytes unchanged')
@@ -81,6 +83,7 @@ def main():
     parser.add_argument('--observation-only',action='store_true',help='No Remix runtime/image; control channel and depth observations only')
     parser.add_argument('--legacy-startup-warmup',action='store_true',help='Opt-in old24Present startup workaround;default one Present')
     args=parser.parse_args()
+    if args.effect_light_fixture and not args.native_all_ships:parser.error('Effect-light fixture requires native multi-ship return')
     if args.native_all_ships and not args.native_insertion_policy:parser.error('Native cohort requires explicit timing policy')
     if args.native_insertion_policy:
         if args.native_foreground or args.replacement_faults or args.live_tuning:parser.error('Native insertion fixture excludes old replay/fault/tuning modes')
@@ -183,6 +186,7 @@ def main():
     # No existing game config changed. Disable fixture menu/input capture only.
     (work/'ReShade.ini').write_text('[GENERAL]\nEffectSearchPaths=./no-effects\nPresetPath=./fixture.ini\n[OVERLAY]\nTutorialProgress=4\nShowFPS=0\nShowFrameTime=0\n[INPUT]\nInputProcessing=0\n')
     env={**os.environ,**ENV,'DXVK_LOG_PATH':str(work)}
+    env['SFC_EFFECT_LIGHT_FIXTURE']='1' if args.effect_light_fixture else '0'
     env.pop('SFC_FIXTURE_SHIP_SNAPSHOT',None)
     if args.startup_profile:env['SFC_FIXTURE_SHIP_SNAPSHOT']='1'
     env.pop('SFC_FIXTURE_MENU_IDLE_MS',None)
@@ -234,6 +238,7 @@ def main():
             if args.player_replacement:mode_args['player_replacement']=True
             if args.async_material_checkout:mode_args['checkout_backend']=checkout_backend
             live_relay=Relay(work,semantic,TEST,additive=args.d3d9_additive,offline_fixture=args.d3d9_additive,persistent=args.persistent_scene,buffered=args.synchronized_buffer,**mode_args)
+            live_relay.completion_diagnostics=args.completion_diagnostics
             if args.native_insertion_policy:live_relay.native_gate_policy=args.native_insertion_policy
             live_relay.native_all_ships=args.native_all_ships
             live_relay.legacy_startup_warmup=args.legacy_startup_warmup
@@ -464,6 +469,7 @@ def main():
     receipt['texture_upload']=args.texture_upload
     receipt['menu_idle_seconds']=args.menu_idle_seconds
     receipt['render_prewarm']=args.render_prewarm
+    receipt['effect_light_fixture']=args.effect_light_fixture
     receipt['loading_policy']=args.loading_policy
     receipt['material_library']=args.material_library
     receipt['material_texture_loading']=args.material_texture_loading

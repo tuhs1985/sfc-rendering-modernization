@@ -23,7 +23,8 @@ class RebindTests(unittest.TestCase):
         self.assertEqual(struct.unpack('<I',channel.read(OFFSET+32,4))[0],4)
         raw=channel.read(OFFSET+64,40);self.assertEqual(TARGET.unpack(raw),(2,4,3,99,98,0,123,fnv(raw[:-8])))
         channel.write(OFFSET+104,struct.pack('<I',2));self.assertEqual(acknowledged(channel),2)
-        with self.assertRaises(ValueError):request(channel,65,row,123)
+        request(channel,1000,row,123)
+        with self.assertRaises(ValueError):request(channel,0x40000000,row,123)
 
     def test_new_epoch_pointer_reuse_and_ambiguous_content(self):
         row=[0]*96;row[1]=4;row[7]=3

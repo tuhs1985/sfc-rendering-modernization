@@ -6,7 +6,8 @@ import threading
 import time
 
 WORKERS=4
-MAX_JOBS=64
+from scene_capacity import ASSETS
+MAX_JOBS=ASSETS
 
 
 class PreparationQueue:
@@ -18,7 +19,7 @@ class PreparationQueue:
 
     def submit(self,identity,row):
         if self.closed or not 1<=identity<=MAX_JOBS or identity in self.jobs:raise ValueError('Preparation job identity/state')
-        # Coordinator queues at most64 tiny row descriptors,not64 decoded meshes.
+        # Only tiny row descriptors are queued;decoded meshes remain worker-bounded.
         if len(self.jobs)>=MAX_JOBS:raise ValueError('Preparation catalog capacity')
         self.jobs[identity]=dict(id=identity,row=list(row),phase='identify_wait',future=None,
                                 discovered_ns=time.perf_counter_ns())

@@ -25,6 +25,17 @@ from collections import deque
 
 
 class ParallelAssetTests(unittest.TestCase):
+    def test_large_fleet_descriptors_do_not_expand_worker_concurrency(self):
+        from scene_capacity import ASSETS
+        relay=SimpleNamespace(material_config=(ROOT/'tools/remix_runtime/config/rendering.toml').read_bytes())
+        pipeline=Pipeline(relay)
+        try:
+            for i in range(1,161):pipeline.submit(i,[i])
+            self.assertEqual(len(pipeline.jobs),160)
+            self.assertEqual(len(pipeline.graph.tasks),0)
+            with self.assertRaises(ValueError):pipeline.submit(ASSETS+1,[1])
+        finally:pipeline.close()
+
     def mini_pipeline(self,root,secondary_block=None,base_block=None):
         for name in ('primary','secondary'):Image.new('RGB',(3,2),(80,120,160)).save(root/(name+'.bmp'))
         @contextmanager
@@ -121,6 +132,51 @@ class ParallelAssetTests(unittest.TestCase):
             relay.retry_publication();self.assertEqual(released,[]);self.assertTrue(relay.pending_library)
             relay.retry_publication();self.assertEqual(released,[1]);self.assertFalse(relay.pending_library)
         self.assertEqual(relay.publication_retries,2)
+
+    def test_prolonged_material_denial_warns_once_keeps_latest_and_recovers(self):
+        relay=object.__new__(Relay);relay.process=object();released=[]
+        job={'id':1,'published':True,'generation':1}
+        relay.pending_stage_ids={1};relay.pending_complete_ids={1};relay.pending_library=False
+        relay.publication_busy_since=None;relay.publication_retries=0
+        relay.preparer=SimpleNamespace(jobs={1:job},_release=lambda j:released.append(j['id']))
+        clock=[0];written=[]
+        with patch('progressive_scene_relay.time.monotonic',side_effect=lambda:clock[0]),patch('builtins.print') as warning:
+            with patch.object(Relay,'write_stage',side_effect=PermissionError(13,'held reader')):
+                for now in (0,6,60,600,86400):
+                    clock[0]=now;job['generation']+=1;relay.pending_stage_ids.add(1)
+                    relay.retry_publication()
+                self.assertEqual(relay.pending_stage_ids,{1});self.assertEqual(released,[])
+                self.assertEqual(relay.publication_retries,5);warning.assert_called_once()
+                self.assertEqual(relay.publication_last_error['operation'],'asset-stage')
+            with patch.object(Relay,'write_stage',side_effect=lambda j:written.append(j['generation'])),\
+                 patch.object(Relay,'commit_layers',side_effect=PermissionError(13,'held master')):
+                relay.retry_publication();self.assertTrue(relay.pending_library)
+                self.assertEqual(relay.publication_last_error['operation'],'master-library')
+                self.assertEqual(released,[])
+            with patch.object(Relay,'commit_layers',return_value=None):relay.retry_publication()
+            self.assertEqual(written,[6]);self.assertEqual(released,[1])
+            self.assertIsNone(relay.publication_busy_since);self.assertFalse(relay.publication_warned)
+            self.assertFalse(relay.pending_library);self.assertEqual(relay.pending_complete_ids,set())
+            self.assertEqual(relay.publication_warning_count,1)
+
+    def test_denied_asset_does_not_block_other_asset_publication(self):
+        relay=object.__new__(Relay);relay.process=object();released=[]
+        relay.pending_stage_ids={1,2};relay.pending_complete_ids={1,2};relay.pending_library=False
+        relay.publication_busy_since=None;relay.publication_retries=0
+        relay.preparer=SimpleNamespace(jobs={1:{'id':1},2:{'id':2}},_release=lambda j:released.append(j['id']))
+        def write(job):
+            if job['id']==1:raise PermissionError(13,'blocked')
+        with patch.object(Relay,'write_stage',side_effect=write),patch.object(Relay,'commit_layers') as commit:
+            relay.retry_publication();commit.assert_called_once()
+        self.assertEqual(relay.pending_stage_ids,{1});self.assertEqual(released,[2])
+
+    def test_non_permission_material_failure_is_not_hidden(self):
+        relay=object.__new__(Relay);relay.process=object()
+        relay.pending_stage_ids={1};relay.pending_complete_ids=set();relay.pending_library=False
+        relay.publication_busy_since=None;relay.publication_retries=0
+        relay.preparer=SimpleNamespace(jobs={1:{'id':1}})
+        with patch.object(Relay,'write_stage',side_effect=OSError(28,'disk full')):
+            with self.assertRaises(OSError):relay.retry_publication()
 
     def test_ready_material_does_not_wait_for_delayed_material_or_other_ship(self):
         release=threading.Event();tasks=Tasks()

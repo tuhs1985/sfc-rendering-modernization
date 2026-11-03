@@ -16,7 +16,7 @@ def configure_child(backend,environment):
     before=environment.get('DXVK_ASYNC_ASSET_LOADING')
     environment['DXVK_ASYNC_ASSET_LOADING']='1'
     # Exercise the existing private renderer startup once. Its completion precedes
-    # renderer-ready.bin; afterward warm_start waits without further Presents.
+    # shared startup readiness; afterward warm_start waits without further Presents.
     environment['SFC_D3D9_RENDER_PREWARM']='triangle'
     environment['SFC_D3D9_STARTUP_PROFILE']='1'
     return ('rtx.initializer.asyncAssetLoading = True\n'
@@ -68,13 +68,10 @@ class Relay(Progressive):
         # publication waits if it races the one-time renderer preparation.
         if self.pending_stage_ids or self.pending_library:
             if self.material_prime_ready is None:
-                path=self.folder/'gpu/renderer-ready.bin'
-                try:raw=path.read_bytes()
-                except FileNotFoundError:return
-                if len(raw)<16:return  # Native writer has not finished yet.
-                if len(raw)!=16:raise ValueError('Material priming readiness length')
-                qpc,pid=struct.unpack('<2Q',raw)
-                if not qpc or not 0<pid<=0xffffffff:raise ValueError('Material priming readiness identity')
+                from warm_start import ready
+                readiness=ready(self.receiver.channel)
+                if readiness is None:return
+                qpc,pid=readiness
                 self.material_prime_ready=dict(qpc=qpc,host_pid=pid,observed_ns=time.perf_counter_ns(),
                     meaning='Private startup completed;not a per-material installation ACK')
         super().retry_publication()

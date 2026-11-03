@@ -24,22 +24,30 @@ static void apiok(remixapi_ErrorCode result,const char* why){if(result!=REMIXAPI
 #include "warm_start.h"
 #include "startup_profile.h"
 #include "startup_policy.h"
+#include "slow_completion.h"
 static int64_t outputTicks(){LARGE_INTEGER t{};require(QueryPerformanceCounter(&t)!=FALSE,"output QPC");return t.QuadPart;}
 struct SharedOutput{
  ComPtr<ID3D11Texture2D> image,staging;ComPtr<IDirect3DTexture9> imported;ComPtr<IDirect3DSurface9> surface;
 };
 struct PollTiming {uint64_t polls=0,sleeps=0,sleep_ticks=0,last_pending=0,ready=0;};
-static PollTiming wait9(IDirect3DQuery9* query,WorkerPoll& poll,AssetService* service=nullptr){
+static PollTiming wait9(IDirect3DQuery9* query,WorkerPoll& poll,AssetService* service=nullptr,DWORD sourceFrame=0,void(*checkStop)(void*)=nullptr,void* stopContext=nullptr){
+ slow_completion::Scope slow(sourceFrame);
  PollTiming timing{};
  ok(query->Issue(D3DISSUE_END),"output completion issue");const auto deadline=GetTickCount64()+5000;HRESULT status;
- for(;;){++timing.polls;status=query->GetData(nullptr,0,D3DGETDATA_FLUSH);const auto observed=outputTicks();if(status!=S_FALSE){timing.ready=observed;break;}
+ for(;;){if(checkStop)checkStop(stopContext);++timing.polls;const auto queryAt=slow.clock();status=query->GetData(nullptr,0,D3DGETDATA_FLUSH);slow.query(queryAt);const auto observed=outputTicks();if(status!=S_FALSE){timing.ready=observed;break;}
   timing.last_pending=observed;require(GetTickCount64()<deadline,"offline GPU completion5s limit");
-  if(service)service->tick(AssetService::RenderQuery);
-  ++timing.sleeps;poll.pause();timing.sleep_ticks+=outputTicks()-observed;}
+  const auto serviceAt=slow.clock();if(service)service->tick(AssetService::RenderQuery);slow.service(serviceAt);
+  const auto pauseAt=slow.clock();++timing.sleeps;poll.pause();slow.pause(pauseAt);timing.sleep_ticks+=outputTicks()-observed;}
  ok(status,"output completion");return timing;
 }
 #include "render_prewarm.h"
 #include "texture_prefetch.h"
+#include "prepared_environment.h"
+struct ScopedLights {
+ DirectLights& lights;remixapi_Interface& api;bool closed=false;
+ void close(){if(!closed){closed=true;lights.close(api);}}
+ ~ScopedLights(){if(!closed)try{close();}catch(...){std::cerr<<"LIGHT_CLEANUP_FAILED\n";}}
+};
 static void read11(ID3D11DeviceContext* context,ID3D11Query* query,SharedOutput& output,const fs::path& path,UINT width,UINT height){
  context->CopyResource(output.staging.Get(),output.image.Get());context->End(query);context->Flush();const auto deadline=GetTickCount64()+5000;BOOL complete=FALSE;HRESULT status;
  while((status=context->GetData(query,&complete,sizeof(complete),0))==S_FALSE||!complete){require(SUCCEEDED(status),"consumer query error");require(GetTickCount64()<deadline,"consumer5s limit");Sleep(1);}ok(status,"consumer completion");
@@ -58,7 +66,7 @@ int wmain(int argc,wchar_t** argv){
  StartupProfile startup;
  try{
   require(argc==3||argc==5,"replay directory,runtime and optional receiver/mode required");const fs::path root=fs::absolute(argv[1]),library=fs::absolute(argv[2]);
-  const bool prewarm=warm_start::requested();Scene scene;if(prewarm){scene.width=1920;scene.height=1080;}else scene=load(root);
+  const bool prewarm=warm_start::requested();require(!texture_memory::requested()||prewarm,"asset memory requires existing startup handshake");Scene scene;if(prewarm){scene.width=1920;scene.height=1080;}else scene=load(root);
   wchar_t investigate[2]{};require(output_wire::qualified_extent(scene.width,scene.height)||(GetEnvironmentVariableW(L"SFC_DIRECT64_INVESTIGATE_EXTENT",investigate,2)==1&&investigate[0]==L'1'),"unqualified output extent;explicit offline investigation required");
   module.value=LoadLibraryExW(library.c_str(),nullptr,LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR|LOAD_LIBRARY_SEARCH_SYSTEM32);require(module.value!=nullptr,"direct runtime load");
   wchar_t actual[MAX_PATH]{};require(GetModuleFileNameW(module.value,actual,MAX_PATH)>0&&fs::equivalent(library,actual),"loaded runtime differs");
@@ -110,20 +118,43 @@ int wmain(int argc,wchar_t** argv){
    if(combinedPost){visuals.grade.prepareCoverage(native.Get(),outputs[1].image.Get(),outputs[2].image.Get());std::cout<<"COMBINED_POST grade_coverage=1 draws_per_frame=1\n";}
    wchar_t multiFlag[2]{};const bool multiMode=GetEnvironmentVariableW(L"SFC_D3D9_MULTISCENE",multiFlag,2)==1&&multiFlag[0]==L'1';
    float offsetX=0;if(coverage.enabled){wchar_t text[64]{};require(GetEnvironmentVariableW(L"SFC_D3D9_OFFSET_X",text,64)>0,"Additive offset required");offsetX=static_cast<float>(_wtof(text));require(std::isfinite(offsetX)&&(multiMode?(offsetX<=0&&offsetX>=-1e6f):(std::abs(offsetX)>1e-5f&&std::abs(offsetX)<=1e6f)),"explicit aligned-cohort or diagnostic offset bounds");}
+   prepared_environment::Resource environment;
+   startup.mark("environment_prepare_begin");
+   environment.start(external,[&]{wait9(fence.Get(),renderPollWait,nullptr,0,[](void* value){static_cast<prepared_environment::Resource*>(value)->check();},&environment);});
+   startup.mark("environment_prepare_complete");
    if(render_prewarm::requested()){require(prewarm,"render warm requires early-start workflow");render_prewarm::run(device.Get(),renderPollWait,startup);}
+   OutputPeer peer;if(argc==5)peer.start(fs::absolute(argv[3]),root,argv[4],&startup,prewarm);
+   startup.mark("receiver_started");
    ApiTexturePrefetch texturePrefetch;
+   std::vector<BYTE> memoryScene;std::vector<std::vector<BYTE>> initialTextures;
    if(prewarm){startup.mark("idle_begin");
-    if(ApiTexturePrefetch::requested()&&ApiTexturePrefetch::overlap())warm_start::wait(root,[&]{texturePrefetch.pump(root,external,fence.Get(),renderPollWait,startup);});
-    else warm_start::wait(root);
-    startup.mark("activated");scene=load(root);require(scene.width==1920&&scene.height==1080,"warm output extent unchanged");
+    const auto activationObserve=[&](const char* stage,unsigned index){startup.mark(stage,index,false);};
+    if(ApiTexturePrefetch::requested()&&ApiTexturePrefetch::overlap())warm_start::wait(root,[&]{if(argc==5)peer.check_alive();texturePrefetch.pump(root,external,fence.Get(),renderPollWait,startup);},activationObserve);
+    else warm_start::wait(root,[&]{if(argc==5)peer.check_alive();},activationObserve);
+    startup.mark("activated");if(argc==5)peer.activate();startup.mark("receiver_activated",0,false);
+    if(texture_memory::requested()){
+     sfc_calibration::Reader input;require(input.prepare()&&input.requested,"initial asset session mapping");
+     struct Close{sfc_calibration::Reader& input;~Close(){input.close();}} close{input};
+     auto* base=reinterpret_cast<BYTE*>(input.mailbox)-sfc_calibration::Offset;
+     auto& catalog=*reinterpret_cast<multi_scene::Store*>(base+multi_scene::Offset);
+     wchar_t pidText[16]{};GetEnvironmentVariableW(L"SFC_D3D9_GAME_PID",pidText,16);
+     require(multi_scene::valid(catalog.header,input.session,DWORD(_wcstoui64(pidText,nullptr,10))),"initial asset catalog identity");
+     multi_scene::Asset initial{};bool found=false;
+     for(auto& slot:catalog.assets){multi_scene::Asset a{};if(multi_scene::read(slot,a)&&a.path_id==1){initial=a;found=true;break;}}
+     require(found,"initial asset catalog missing");auto payload=texture_memory::receive_asset(input.session,initial);
+     memoryScene=std::move(payload.geometry);initialTextures=std::move(payload.textures);scene=load_bytes(memoryScene);
+     DWORD count=0;for(const auto& group:scene.groups)count=(std::max)(count,DWORD(group.material+1));
+     require(count==initialTextures.size(),"initial asset scene/image association");
+     std::cout<<"ASSET_MEMORY initial=1 geometry_bytes="<<memoryScene.size()<<" images="<<count<<" image_bytes="<<initial.image_bytes<<'\n';
+    }else scene=load(root);
+    require(scene.width==1920&&scene.height==1080,"warm output extent unchanged");
     startup.mark("scene_loaded");
     if(ApiTexturePrefetch::requested())texturePrefetch.run(root,external,fence.Get(),renderPollWait,startup);
     apiok(external.SetConfigVariable("rtx.enableReplacementAssets","True"),"enable complete initial material library");
     startup.mark("materials_enabled");
     std::cout<<"WARM_ACTIVATED complete_material_library=1 replacements=1\n";}
-   const auto sceneBytes=read(root/L"scene.bin",2*1024*1024);const auto sceneHash=output_wire::hash(sceneBytes.data(),sceneBytes.size());
-   OutputPeer peer;if(argc==5)peer.start(fs::absolute(argv[3]),root,argv[4]);
-   startup.mark("receiver_started");
+   startup.mark("scene_packet_read_begin",0,false);const auto sceneBytes=texture_memory::requested()?std::move(memoryScene):read(root/L"scene.bin",2*1024*1024);startup.mark("scene_packet_read_complete",0,false);
+   const auto sceneHash=output_wire::hash(sceneBytes.data(),sceneBytes.size());startup.mark("scene_packet_hash_complete",0,false);
    wchar_t single[2]{};const bool singlePresent=GetEnvironmentVariableW(L"SFC_DIRECT64_SINGLE_PRESENT",single,2)==1&&single[0]==L'1';
    wchar_t pacedValue[16]{};GetEnvironmentVariableW(L"SFC_DIRECT64_PACED_FRAMES",pacedValue,16);const unsigned paced=static_cast<unsigned>(_wtoi(pacedValue));require(paced==0||(paced>=60&&paced<=300),"offline paced frame cap");
    wchar_t liveValue[2]{};const bool liveMode=GetEnvironmentVariableW(L"SFC_D3D9_LIVE_TIMING",liveValue,2)==1&&liveValue[0]==L'1';
@@ -141,7 +172,7 @@ int wmain(int argc,wchar_t** argv){
    if(detailed)timing<<"sequence,source_frame,presents,draw_present_us,output_gpu_us,local_readback_us,peer_us,scheduled_us,completed_us,copy_submit_us,render_ready_wait_us,postprocess_us,query_polls,query_sleeps,query_sleep_us,query_last_pending_qpc,query_ready_qpc,input_empty_polls,input_sleep_us,input_validation_us\n";int64_t scheduleStart=0;
    wchar_t textureFlag[2]{};const auto texturePolicy=GetEnvironmentVariableW(L"SFC_D3D9_INITIAL_TEXTURE_DATA",textureFlag,2)==1&&textureFlag[0]==L'1'?TextureUpload::InitialData:TextureUpload::StagedLock;
    std::cout<<"TEXTURE_UPLOAD initial_data="<<(texturePolicy==TextureUpload::InitialData)<<" source_lifetime="<<(texturePolicy==TextureUpload::InitialData?"renderer":"staging_scope")<<'\n';
-   {Renderer renderer(device.Get(),scene,root,nullptr,texturePolicy);auto bootstrapHull=hull.prepare(scene);DirectLights lights;lights.start();MultiSceneRuntime cohort;cohort.start(root,device.Get(),scene,renderer,texturePolicy,&hull,&bootstrapHull);
+   {Renderer renderer(device.Get(),scene,root,texture_memory::requested()?&initialTextures:nullptr,texturePolicy);auto bootstrapHull=hull.prepare(scene);DirectLights lights;lights.start();ScopedLights lightCleanup{lights,external};environment.transfer(lights.lights);MultiSceneRuntime cohort;cohort.start(root,device.Get(),scene,renderer,texturePolicy,&hull,&bootstrapHull);
     AssetService admission;wchar_t admissionFlag[2]{};
     admission.start(cohort.enabled&&GetEnvironmentVariableW(L"SFC_D3D9_ADMISSION_SERVICE",admissionFlag,2)==1&&admissionFlag[0]==L'1',
       [](void* p){static_cast<MultiSceneRuntime*>(p)->assets();},&cohort);
@@ -193,7 +224,7 @@ int wmain(int argc,wchar_t** argv){
      // Physical hull depth/coverage is independent of PSR's virtual surfaces.
      for(unsigned i=0;i<(coverage.enabled?1u:3u);++i)apiok(external.dxvk_CopyRenderingOutput(outputs[i].surface.Get(),types[i]),"copy normal rendered output");
      const auto copiesQueued=outputTicks();
-     const auto renderPoll=wait9(fence.Get(),renderPollWait,&admission);
+     const auto renderPoll=wait9(fence.Get(),renderPollWait,&admission,state.frame);
      const auto renderReady=outputTicks();
      hull.draw(context.Get());
      const bool graded=combinedPost?visuals.grade.drawCoverage(context.Get(),outputs[0].image.Get(),visuals.image.post(),state.owner):visuals.apply(context.Get(),outputs[0].image.Get());
@@ -241,7 +272,7 @@ int wmain(int argc,wchar_t** argv){
     if(admission.enabled)std::cout<<"ASSET_SERVICE_SUMMARY bootstrap="<<admission.calls[AssetService::Bootstrap]<<" query="<<admission.calls[AssetService::RenderQuery]
       <<" post="<<admission.calls[AssetService::Postprocess]<<" peer="<<admission.calls[AssetService::Peer]<<" boundary="<<admission.calls[AssetService::Boundary]
       <<" ticks="<<admission.ticks<<" frequency="<<frequency.QuadPart<<'\n';
-    lights.close(external);
+    lightCleanup.close();
    }
    if(argc==5)peer.finish();
    texturePrefetch.close(fence.Get(),renderPollWait);
@@ -251,6 +282,7 @@ int wmain(int argc,wchar_t** argv){
   auditModules();std::cout<<"DIRECT64_OUTPUT_RETURNED sdk_mesh_calls=0 offline_readback_only=1\n";result=0;
  }catch(const warm_start::Cancelled&){std::cout<<"WARM_CANCELLED no_scene_submitted=1\n";result=0;}
  catch(const std::exception& error){std::cerr<<"DIRECT64_FAILED "<<error.what()<<'\n';}
+ slow_completion::recorder().flush();
  if(registered){device.Detach();api.Detach();const auto status=external.Shutdown();std::cout<<"OUTPUT_API_SHUTDOWN "<<status<<'\n';if(status!=REMIXAPI_ERROR_CODE_SUCCESS)result=1;}
  return result;
 }

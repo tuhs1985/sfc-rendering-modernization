@@ -5,6 +5,7 @@ Never used as a fallback for missing live native light observations.
 import ctypes as C
 import json
 from pathlib import Path
+from scene_capacity import OWNERS,ASSETS
 import struct
 import threading
 import time
@@ -26,6 +27,9 @@ class Replay:
             model_process_local=scene['fresh_preparation_row'][5],source_process_local=scene['fresh_preparation_row'][6],frame=scene['frames'][0]['frame'])
         self.folder.joinpath('light-fixture-identity.bin').write_bytes(struct.pack('<6I',*self.session,self.snapshot['model_process_local'],self.snapshot['source_process_local']))
         config=ROOT/'tools/remix_runtime/config/lights.toml';raw=config.read_bytes();data=tomllib.loads(raw.decode())
+        if receiver:
+            from effect_lights import publish
+            publish(receiver.channel,data,1)
         self.controls={r['id']:r for r in validate(data,REGISTRY)};self.scale,self.master=scales(data)
         shapes,manifest=build(self.controls,1,self.folder,config.parent)
         self.folder.joinpath('light-shapes.bin').write_bytes(shapes)
@@ -37,7 +41,7 @@ class Replay:
 
     def publish(self):
         if self.receiver:
-            row=next((r for i in range(32) if (r:=self.receiver.channel.sample_owner(i)) and r[1]==self.owner and r[4]==1),None)
+            row=next((r for i in getattr(self.receiver.channel,"owner_indices",lambda:range(OWNERS))() if (r:=self.receiver.channel.sample_owner(i)) and r[1]==self.owner and r[4]==1),None)
             if not row:return
             self.snapshot['frame']=row[2]
         counter=C.c_longlong();C.windll.kernel32.QueryPerformanceCounter(C.byref(counter))

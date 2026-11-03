@@ -1,7 +1,7 @@
 ---
 title: SFC Modernization — Status Tracker
-updated: 2026-10-31
-checkpoint: Run234 multi-ship camera stability checkout passed
+updated: 2026-11-02
+checkpoint: Run276 sponsor accepts stable ExtraFrame multi-ship checkpoint
 tags:
   - sfc-modernization
   - project-status
@@ -9,10 +9,108 @@ tags:
 
 # SFC Modernization — Status Tracker
 
+**Accepted checkpoint:** sponsor accepts the ExtraFrame configuration as stable following the stress checkout. Commit and publication authorized. Continue with that explicit option; minor remaining findings stay tracked below.
+
+**Before the next test:** saved evidence needs archiving or cleanup to free at least another84MiB for the launcher's reservation. Source/dependency checks pass; this is storage housekeeping, not a rendering failure.
+
+**ExtraFrame stress worked:** all63tracked objects received replacements across15models, with zero deadline misses, compared with96in the earlier Strict run. Typical delivery delay stayed around19ms; the allowance does not impose a full-frame wait. Cleanup passed and materials had no errors. Two new-asset records lacked insertion, and separate whole-game hitches remain; the battles were different sizes. Recommend keeping the explicit ExtraFrame option for checkouts. Default launcher settings are unchanged. [Run276](<C:/Project/SFC-Modernize Engine/docs/runs/2026-11-02-codex-extraframe-stress-comparison.md>).
+
+**Stress result:** all72tracked objects received replacements, sharing17model assets. Material updates had no errors or retries, and cleanup passed. First replacement appeared in about one second. Stability remains partial:96post-startup frames missed the strict deadline, including a10frame/0.29second burst. Most misses coincide with later asset activity, but two larger hitches have a separate, unresolved between-frame component. Next suggested comparison is the existing ExtraFrame policy, with settings unchanged. [Run275](<C:/Project/SFC-Modernize Engine/docs/runs/2026-11-02-codex-seventy-two-owner-stress-review.md>).
+
+**Five-second stop rule removed:** delayed material updates now keep retrying while rendering continues with the last accepted materials. A deliberate seven-second delay passed the600frame rendering test, issued one warning and recovered automatically.80focused checks and both rendering policies pass; the same launcher is ready for stress testing. Windows replacement fix and current appearance are retained. [Run274](<C:/Project/SFC-Modernize Engine/docs/runs/2026-11-02-codex-nonfatal-material-retries.md>).
+
+**Material update fix ready:** existing generated material files now use Windows' dedicated replacement function. It passed77 focused checks and both600frame standalone rendering tests, with no publication retries and clean shutdown. Materials, lighting and original assets are unchanged. The same launcher is ready for your larger stress test. The separate five-second stop policy was not changed in this increment. [Run273](<C:/Project/SFC-Modernize Engine/docs/runs/2026-11-02-codex-windows-material-replacement.md>).
+
+**Gameplay review:** first run replaced26tracked objects across nine model types, with fast startup and five isolated single-frame misses after replacement began. It exited cleanly. The second run also displayed enhanced assets quickly, then stopped on the still-unmodified material-file update problem. Startup is a positive result in both; the second run still failed overall. Full stress test remains pending. [Run272](<C:/Project/SFC-Modernize Engine/docs/runs/2026-11-02-codex-prepared-dome-gameplay-review.md>).
+
+**Material-file investigation:** our current file-replacement operation fails when the bundled reader keeps the old file open. A standard Windows alternative passed all four direct comparisons and a600frame standalone rendering test with no publication errors. Recommend changing that operation and retaining the last working materials while updates retry, rather than stopping the run after five seconds. These are proposals: normal code and the ready gameplay launcher are unchanged. Exact historical reader ownership is not proved; this failure is not attributed to Defender. [Run271](<C:/Project/SFC-Modernize Engine/docs/runs/2026-11-02-codex-material-publication-investigation.md>).
+
+**Both fixes implemented:** the normal renderer prepares and reuses the actual project dome before gameplay. The separate 32-ship drawing cutoff is removed; it follows the existing 256-owner scene budget, and overflow leaves affected ships native without stopping other replacements. Both 600-frame timing-policy tests passed, plus a GPU check of 256 independent owner pixels. Your settings and original client are unchanged. Carrier/fighter gameplay checkout is next. The separate material-file permission problem remains open. [Run270](<C:/Project/SFC-Modernize Engine/docs/runs/2026-11-02-codex-prepared-dome-and-hull-capacity.md>).
+
+**Dome preparation tested:** an isolated build prepares the actual configured light before gameplay and reuses its handle. Five first-live completion waits were about 6–8 ms; immediate and delayed full tests passed, but three other delayed tests later stopped on a separate material-file publication denial. Normal renderer/settings are unchanged. Next: turn the tested resource approach into a qualified startup change and resolve publication retry behavior. The 32-entry hull limit is still open; no new fleet checkout yet. [Run269](<C:/Project/SFC-Modernize Engine/docs/runs/2026-11-02-codex-dome-resource-preparation-prototype.md>).
+
+**Startup cause identified:** the successful Windows trace shows Defender holding a Remix file-opening operation for 3.06 seconds while waiting for its scanning service's reply. That overlaps almost all of the 2.84-second first-live-frame delay. The exact internal scan reason remains unknown; this is not evidence of a malware flag or a new light-code regression. Next fix: reuse and fully prepare the actual environment resource before live rendering, keeping Defender and your lighting/settings unchanged. No production fix applied yet. [Run268](<C:/Project/SFC-Modernize Engine/docs/runs/2026-11-02-codex-dome-defender-wait-attribution.md>).
+
+**Trace launcher corrected:** the last attempt reproduced a 2.6-second rendering wait but did not save a Windows trace. Our recording trigger used the wrong countdown. It now starts recording directly before the actual activation, with seven focused checks passing. Same Administrator PowerShell command as before; no game actions needed. Root cause remains unproved, and normal rendering/settings are unchanged. [Run267](<C:/Project/SFC-Modernize Engine/docs/runs/2026-11-02-codex-dome-trace-trigger-correction.md>).
+
+**Startup investigation:** the test renderer without effects is an exact copy of our recorded pre-light executable. The same dome-file delay was recorded before the light additions. Current tests reproduce it without changing existing lighting, materials or runtime settings. Earlier reading/reusing the tiny dome image avoided that particular wait in two trials, but later material-file publication still stalled; no fix or full pass claimed. A short Windows trace needs your existing Administrator PowerShell to identify what is holding the files up. Prepared command: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\Project\SFC-Modernize Engine\artifacts\player-replacement\run266\start_dome_wait_trace.ps1"`. No game actions needed. [Run266](<C:/Project/SFC-Modernize Engine/docs/runs/2026-11-02-codex-pre-light-dome-comparison.md>).
+
+**Recent edits investigated:** replayed8captured model families with the current renderer and with the new effect-light code removed. Both worked immediately,but both failed after delayed startup while Remix opened the tiny dome/GI image. Startup warms a triangle,not that actual light resource. Next:prepare and verify the configured environment before gameplay,then fix the separate32-entry hull limit. No production rendering changes made during this comparison. [Run265](<C:/Project/SFC-Modernize Engine/docs/runs/codex-run265-recent-edit-startup-comparison.md>).
+
+**Latest carrier failure:** the game data arrived,but the first real replacement image did not finish within the existing five-second limit. No replacement ship reached SFC. This attempt hit the rendering-completion wait before the separate32-entry hull limit. Effect lights were OFF,and cleanup passed. Investigate the first-frame wait using the existing dome-image lead;the exact cause is not yet proven. [Run264](<C:/Project/SFC-Modernize Engine/docs/runs/2026-11-01-codex-carrier-first-frame-timeout.md>).
+
+**Storage cleaned:** removed redundant loose test copies through verified consolidation and cleared rebuildable symbol caches. Evidence usage fell from19.54GBto16.03GB,leaving roughly4GBunder the existing allowance. Useful captures,logs,rollback files and current dependencies are preserved. Launcher checks pass again. This does not fix the separate32-entry hull limit. [Run263](<C:/Project/SFC-Modernize Engine/docs/runs/2026-11-01-codex-evidence-storage-cleanup.md>).
+
+**Carrier failure identified:** a separate depth/coverage helper still had an old32-entry limit. The larger ship registry had been expanded,but this helper was missed. Correct that limit and its failure handling before another fleet test. Test files have been restored and no owned processes remain. [Run262](<C:/Project/SFC-Modernize Engine/docs/runs/2026-11-01-codex-carrier-depth-cap-failure.md>).
+
+**Light scope corrected:** additional effect lights are now OFF. Their code was prepared,but enabling them before the agreed integration test was premature. Existing scene/GI settings are preserved. Light integration and focused emission recording remain pending.
+
+**Effect lights prepared:** the game now supplies transient light positions,colours and on/off state to Remix every frame. Scene lights and GI retain your settings. A separate section in lights.toml controls effect strength,colour and emitter size. Both real rendering checks passed;next is a weapons-fire checkout. Shape is a sphere approximation,and brightness still needs visual confirmation. [Run261](<C:/Project/SFC-Modernize Engine/docs/runs/2026-11-01-codex-game-driven-effect-lights.md>).
+
+**Integration-test note:** collect more light-emission data during the checkout:colour/strength changes,range,position and fade/on/off timing,compared with what Remix receives. Prepare a small optional recorder first;the current tool saves totals only. Keep ordinary performance mode free of that recording overhead.
+
+**Replacement recovery fixed:** routine submission changes now fall back for the affected ship/frame and retry automatically;they no longer shut off the entire enhanced scene. Other ships keep replacing. The real hook tests and both rendering checks pass;appearance is unchanged. Same launcher for a carrier checkout,then we can move forward from Remix wiring. [Run260](<C:/Project/SFC-Modernize Engine/docs/runs/2026-11-01-codex-replacement-frame-recovery.md>).
+
+**Carrier stress test:** first replacement arrived in0.85seconds;29tracked objects used12shared model assets. All assets were accepted and cleanup passed. However,replacement silently stopped around78seconds,while SFC continued normally. The remaining timing records repeated the last replacement,so this is a partial result. Next:identify the stop condition and correct that reporting. [Run259](<C:/Project/SFC-Modernize Engine/docs/runs/2026-11-01-codex-carrier-stress-review.md>).
+
+**Exit whenever finished:** a normal early game exit now stops the test and cleans up its renderer, workers and test files without waiting for the recording timer. The shortened evidence is saved. Exit/cleanup checks pass; the next gameplay run will confirm early exit and relaunch. Lighting and appearance are unchanged. [Run258](<C:/Project/SFC-Modernize Engine/docs/runs/2026-11-01-codex-normal-early-exit-cleanup.md>).
+
+**Live loading confirmed:** the first replacement was inserted in0.88seconds. Both ships loaded,and all5,340recorded frames after the first replacement committed successfully. The game and renderer exited normally and client files were restored. [Run257](<C:/Project/SFC-Modernize Engine/docs/runs/2026-11-01-codex-subsecond-gameplay-and-relaunch.md>).
+
+**Next-launch block fixed:** editing the lighting file triggered an overly strict launch check. Lighting and rendering profiles now pass their existing value checks without needing to match old appearance hashes;code/runtime checks remain intact. Your settings are preserved. The same launcher passes again;no manual reset required. The cold dome-image preparation work remains pending.
+
+Previous checkpoint:
+
+**Geometry handoff fixed:** models and textures now arrive together through protected memory. Large-ship preparation took26–35milliseconds in the new checks. Both normal rendering tests passed,with your visual settings unchanged. An optional recorder now keeps only slow completion events. [Run256](<C:/Project/SFC-Modernize Engine/docs/runs/2026-11-01-codex-memory-geometry-delivery.md>).
+
+**Remaining delay identified:** Remix's command worker spent seconds opening the dome light's tiny160-byte environment image. The graphics card was waiting for that file operation. Next:prepare and retain that light resource before the first live frame needs it,without changing the light. That next fix is not implemented. Overall loading is not yet consistently fast. The existing launcher is prepared;`-CompletionDiagnostics` enables the bounded recorder for a test.
+
+Previous checkpoint:
+
+**Another delay identified:** a ship that normally takes about30milliseconds to prepare spent roughly4seconds waiting to open its small generated geometry file. We can remove that handoff by sending geometry through the same protected memory connection now used for textures. This is diagnosed,not implemented yet. [Run255](<C:/Project/SFC-Modernize Engine/docs/runs/2026-11-01-codex-remaining-startup-waits.md>).
+
+**Rendering timeout still unresolved:** three observed standalone checks completed,but did not reproduce the earlier five-second failure. “Waiting for completion” can include unfinished CPU work inside Remix;it is not proof that drawing itself took five seconds. Normal code/settings are unchanged. No game run needed from you yet.
+
+Previous checkpoint:
+
+**Texture handoff fixed:** prepared textures now reach the renderer through protected memory for the first ship and later ships. Initial setup took about2–5milliseconds instead of3–6seconds. Texture mapping, materials and lighting settings are preserved. Both successful rendering checks and the memory-transfer tests passed. [Run254](<C:/Project/SFC-Modernize Engine/docs/runs/2026-11-01-codex-memory-texture-delivery.md>).
+
+**Loading is not fully resolved:** two delayed-start checks hit a later five-second wait inside the rendering/output stage. Another run inserted its first ship in0.58seconds but loaded a later asset slowly. The exact remaining cause is not established. Failed evidence is retained;temporary diagnostics are removed from the normal build. Next:locate that later wait before asking you for another loading test. Changes remain uncommitted;Defender stays enabled.
+
+Previous checkpoint:
+
+**Four-second delay confirmed:** your live run took4.01seconds. About3seconds was in first-ship setup. A controlled reproduction caught Windows waiting to open the first generated texture file—only256KB—not drawing or converting the ship. The remaining file handoff must be replaced with bounded memory delivery of the already-prepared pixels. That fix is not implemented;no further loading test needed yet. Temporary diagnostics were removed from the normal path and evidence preserved. [Run253](<C:/Project/SFC-Modernize Engine/docs/runs/2026-11-01-codex-texture-open-regression.md>).
+
+**Receiver preparation is moved earlier:** it now starts before ships are needed,waits without GPU output,and receives the exact accepted asset identity when available. Cancellation/failure/late activation checks and both real rendering tests passed. Activating the prepared receiver took0.13–0.41milliseconds. Defender remains enabled. Overall loading still varies:a separate later setup step took2.75seconds in one test. Existing multi-ship launcher is ready for gameplay checkout;changes uncommitted. [Run252](<C:/Project/SFC-Modernize Engine/docs/runs/2026-11-01-codex-early-passive-receiver.md>).
+
+**Cause confirmed:** Defender held this receiver launch for3.276seconds while its service checked it,accounting for almost the entire delay. The corrected trace retained the wait and Defender's reply. No malware/block finding or exact internal rule established. Rendering tests/cleanup passed;Defender remains enabled. Next:prepare the receiver before ships need it,without bypassing protection. No more diagnostic runs needed. [Run251](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-31-codex-defender-receiver-cause.md>).
+
+**Recording correction:** Windows saved the trace,but my buffer was too small and retained only the final second after the launch delay. Increased the circular buffer and removed unrelated event categories;recording now stops promptly when the receiver starts. Same standalone command needs another run from Administrator PowerShell. Game/rendering code and Defender remain unchanged. Exact Windows cause is still unknown. [Run250](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-31-codex-receiver-trace-retention.md>).
+
+**Trace-tool correction:** the standalone test passed and reproduced the five-second delay,but my recording controller started its countdown too late and saved no Windows trace. It now uses the session identifier available before launch and the actual readiness timestamp. Same command,one repeat needed from Administrator PowerShell;no gameplay or production changes. [Run249](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-31-codex-receiver-observer-trigger-fix.md>).
+
+**Investigating the startup cause:** fast/slow gameplay used identical binaries/settings. The receiver's launch ordering predates cleanup,but all four slow launches in297saved profiles are recent—cause remains unresolved. A short standalone Windows trace is prepared;it needs your existing Administrator PowerShell because this session lacks Windows profiling permission. No gameplay actions or security changes. [Run248 and command](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-31-codex-receiver-cause-investigation.md>).
+
+**Larger battle caught the delay:** first replacement took6.06seconds;5.001seconds was Windows launching the receiver. Same renderer build launched it in4milliseconds in the previous run.22tracked objects delivered using5shared model assets;you confirmed normal gameplay after loading. Cleanup passed. The intermittent launch wait is now confirmed in the real game;its internal cause remains unknown. No code changes in this review. [Run247](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-31-codex-multimodel-receiver-delay.md>).
+
+**Latest gameplay checkout passed:** you confirmed normal ships,lighting,shields,pause text,controls and camera switching. First replacement entered the game in0.70seconds;F-CA independently confirmed replaced by1.65seconds. Receiver launch took4milliseconds,so the separate five-second launch wait did not occur this time. A few brief fallbacks remain in logs without visible issues. Cleanup and unchanged-game checks passed. This is one successful run,not proof the intermittent startup delay is gone. [Run246](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-31-codex-startup-functional-checkout.md>).
+
+**Later startup delay identified:** Windows spends about five seconds starting our receiving process from the renderer. Scene reading,texture work and diagnostics are not responsible for this measured wait. Both standalone reproductions passed rendering checks. The exact Windows-internal cause remains unknown;this is not another proven Defender finding. Next recommended change:start the receiver during launch preparation rather than after ships are ready. Not implemented yet. [Run245](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-31-codex-receiver-launch-stall.md>).
+
 > [!summary] Where we are
 > We can take live ships, textures, camera and lighting information from SFC, render through Remix, and put the result inside the game window. Gameplay and tactical UI remain native; the qualified player mesh can be replaced. The API experiment is parked. Current work reduces loading pauses while preserving the fresh-asset pipeline and accepted appearance.
 
 **Current checkpoint:** your aggressive camera-switch checkout showed no visible native/enhanced swaps. All six ships (KDD, FDD, FFF, FCA, RCL and LFF) reached replacement. Their geometry was loaded once and reused. This validates the latest submission and persistent-light fixes in this mission. Shield replay remains parked.
+
+**Startup ticket fixed:** the start-rendering signal now uses our existing protected memory connection. Activation fell from about5.5–6seconds to11–13milliseconds in standalone checks. The game's configuration/bootstrap order is preserved and Defender remains enabled. Both three-ship rendering checks passed. One produced output in0.48seconds from asset discovery;the other still took6.09seconds because of a separate5second delay later,around starting the output receiver. Consistent fast overall startup remains unresolved. Existing gameplay launcher is prepared;no new discovery trace needed. [Run244](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-31-codex-shared-startup-ticket.md>).
+
+**Stress delivery:**26tracked identities,7unique assets and19content reuses;at least25tracked together in a sampled frame. After first insertion,all5,006recorded requests inserted with zero deadline misses. Cleanup passed. [Run239](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-31-codex-fighter-stress-review.md>).
+
+**Fleet stress checkout ready:** the ninth-model stop is fixed. Active capture, preparation and replacement now agree on the shared memory layout:256 concurrent object slots and1,024 session asset revisions. Native/shared-memory tests cover160 independent objects;actual Remix integration passed both timing policies with three GPU instances. This is finite preallocated capacity,not unlimited storage or proof of100-object gameplay performance. Use the existing multi-ship launcher for your stress test. [Run237](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-31-codex-fleet-capacity-correction.md>).
+
+**Latest implementation:** removed unused legacy draw/clear callbacks from native replacement. Ships sharing a completed scene now reuse its validated snapshot; unchanged GPU resources are checked once rather than repeatedly for every ship. Essential frame/owner matching and GPU ownership safeguards remain. Standalone checks passed under both timing policies, with exact pixels/depth and normal cleanup. Same launcher;the receiver limit is now corrected and the expanded path is prepared for checkout. No FPS improvement is claimed yet. [Run235](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-31-codex-normal-path-cleanup.md>).
+
+**Cleanup still open:** separating detailed diagnostic recording into explicit toolsets (audit C05/C06), plus remaining matrix/asset/deployment checks. This increment did not silently disable those collectors. Weapon lighting remains the next planned functional alpha feature.
 
 **Your settings:** lighting, materials, images, quality and reflections are unchanged. Registry lettering stays solid through the existing hull-depth fix.
 
@@ -43,6 +141,32 @@ Updated through **Run233,October31,2026**. Repository handoff and run records co
 - **FIXED:** the specific defect was corrected and tested; broader issues may remain.
 
 ## Current work
+
+### SFC-21 — Large fleets and fighter swarms
+
+**CURRENT / PREPARED FOR STRESS CHECKOUT.**
+
+-100+ simultaneous instances are a normal design requirement,including wingmen,fighters,pseudo-fighters and other supported objects. Shared model content must retain separate instance identity.
+- Run237 fixes the old eight-revision stop and aligns the current transport budgets across capture,registry,preparation and replacement. Four workers/transfer slots limit concurrency,not scene size. Duplicate decoded-asset retention in the multi-ship sidecar is removed.
+- Current finite preallocation:256 concurrent owner slots and1,024 session asset revisions within16MiB;renderer residency and disk budgets remain. Exhaustion must leave affected objects native and preserve supported rendering. Dynamically growing/paged scene capacity beyond these bounds remains unimplemented.
+-160-owner transport/membership tests pass. Both600-frame Remix integration fixtures pass with three GPU instances. **Latest:** fighter-heavy gameplay passed steady delivery at26session identities,at least25concurrent tracked in a sampled frame. **Next:** resolve the observed startup activation gap and collect sponsor visual feedback. No claim of100-object GPU performance yet.
+
+### SFC-22 — Fighter displays with multiple models
+
+**PARKED / LATE ALPHA FOLLOW-UP — no investigation or fix authorized now.**
+
+- Sponsor observation: fighters are often displayed as1,2,3or4 models. The engine's mechanism is unknown; do not assume these are separate simulation owners, repeated draws or a combined mesh.
+- Do not infer fighter gameplay counts from visible model counts alone. This observation does not establish that the current replacement path handles every display arrangement correctly.
+- **Reopen:** only after most of the alpha-release work is complete. **Next action then:** correlate one fighter entity with its model submissions and transforms to explain the1–4-model presentation,then determine whether interface support needs extending. No priority change to current fleet testing or alpha requirements.
+
+### SFC-20 — Simple settings app
+
+**PINNED / FUTURE — sponsor requested recording the need, not implementation now.**
+
+- Provide a simple app for adjusting the project's existing settings without hand-editing TOML files.
+- Start from the existing lighting, material, image and quality controls; keep the configuration files authoritative and preserve accepted baselines. Group related settings clearly and retain their descriptions. Live application should follow each control's existing reload support.
+- Suggested conveniences for later scope review: sliders/number fields, enable switches, presets and restore-baseline. These are recommendations, not additional approved requirements.
+- **Why parked:** rendering/interface work remains current. **Reopen:** sponsor chooses to build the settings app. **Next action:** inventory the current controls, ranges and reload behavior, then propose the smallest usable editor. No app framework or packaging decision yet.
 
 ### SFC-19 — Alpha mod release requirements
 

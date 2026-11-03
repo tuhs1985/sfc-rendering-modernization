@@ -93,7 +93,7 @@ def geometry_parts(mesh):
 
 
 def prepare(source,output,game_root,*,live_record=None,evidence_mode='test',qualified_mesh=None,
-            prepared_capture=None,prepared_images=None,prepared_geometry=None,output_extent=(960,540),identity_calculator=None):
+            prepared_capture=None,prepared_images=None,prepared_geometry=None,output_extent=(960,540),identity_calculator=None,texture_sink=None,geometry_sink=None):
     """Read original runtime mesh;resolve original IMAGE files only,never MOD geometry."""
     if evidence_mode not in ('performance','test'):raise ValueError('Scene evidence mode')
     if evidence_mode=='performance' and live_record is None:raise ValueError('Performance preparation requires fresh live row')
@@ -142,6 +142,7 @@ def prepare(source,output,game_root,*,live_record=None,evidence_mode='test',qual
             if total>MAX_BYTES:raise ValueError('Combined image cap')
             index=len(textures);lookup[digest]=index
             payload=struct.pack('<4I',TEXTURE_MAGIC,metadata['width'],metadata['height'],len(bgra))+bgra
+            if texture_sink is not None:texture_sink(index,payload)
             (output/f'texture-{index}.bin').write_bytes(payload)
             if identity_calculator is not None:
                 catalog_images+=len(payload)
@@ -165,6 +166,7 @@ def prepare(source,output,game_root,*,live_record=None,evidence_mode='test',qual
         payload+=FRAME.pack(f['owner'],f['revision'],f['frame'],f['active'],
             *flatten(f['model']),*flatten(f['view']),*flatten(f['projection']),*f['viewport'])
     if len(payload)>2*1024*1024:raise ValueError('Replay mesh/frames byte cap')
+    if geometry_sink is not None:geometry_sink(payload)
     (output/'scene.bin').write_bytes(payload)
     # Content identity contains no renderer handles or native pointer IDs.
     identity=dict(geometry=mesh['geometry_sha256'],groups=[(g[0],textures[g[1]]['original_sha256'],g[2],g[3]) for g in groups])

@@ -18,6 +18,32 @@ static uint64_t ticks(){LARGE_INTEGER q{};check(QueryPerformanceCounter(&q)!=FAL
 #include "worker_gpu_fence.h"
 #include "deferred_diagnostics.h"
 #include "pipeline_mode.h"
+#include "output_startup.h"
+#include "receiver_activation.h"
+static bool activateReceiver(output_wire::Channel* channel,DWORD pid,uint64_t session,HANDLE parent,HANDLE ready,HANDLE done,GameOutputWriter& game,output_startup::Lifetime& lifetime){
+ if(output_wire::state(channel)==output_wire::stopped)return false;
+ check(output_wire::state(channel)==output_startup::Boot,"receiver bootstrap state");auto control=output_startup::read(*channel);
+ check(output_startup::valid(control,pid,session)&&!control.receiver&&!control.readyQpc&&!control.activatedQpc,"receiver bootstrap identity");
+ ReceiverActivation source;if(control.flags&output_startup::Ticket)check(source.open(pid),"receiver existing startup session");
+ control.receiver=GetCurrentProcessId();control.readyQpc=ticks();output_startup::write(*channel,control);InterlockedExchange(&channel->state,output_startup::Passive);check(SetEvent(done)!=FALSE,"passive readiness notification");
+ std::cout<<"RECEIVER_PASSIVE ready_qpc="<<control.readyQpc<<" ticket_required="<<bool(control.flags&output_startup::Ticket)<<'\n';
+ for(;;){
+  check(WaitForSingleObject(parent,0)==WAIT_TIMEOUT,"producer disconnected during passive startup");check(!lifetime.expired(GetTickCount64()),"receiver passive workflow timeout");
+  const auto state=output_wire::state(channel);if(state==output_wire::stopped)return false;
+  if((control.flags&output_startup::Ticket)&&!source.alive())return false;
+  if(state==output_startup::Activate){
+   const auto request=output_startup::read(*channel);check(output_startup::valid(request,pid,session)&&!memcmp(&request,&control,sizeof(control)),"immutable receiver activation request");
+   if(control.flags&output_startup::Ticket){startup_ticket::Activation a{};check(source.accepted(a),"receiver accepted asset/session activation required");
+    game.bind(a.asset,a.offset);memcpy(control.asset,a.asset,32);control.offset=a.offset;control.game=a.pid;memcpy(control.sourceSession,a.session,16);}
+   wchar_t mode[2]{};const bool live=GetEnvironmentVariableW(L"SFC_D3D9_LIVE_TIMING",mode,2)==1&&mode[0]==L'1';
+   check(lifetime.activate(GetTickCount64(),output_wire::receiver_lifetime_ms(live,game.enabled,GetEnvironmentVariableW(L"SFC_D3D9_LIVE_TUNING",nullptr,0)!=0)),"one receiver active deadline");
+   control.activatedQpc=ticks();output_startup::write(*channel,control);InterlockedExchange(&channel->state,output_wire::idle);check(SetEvent(done)!=FALSE,"activation receipt notification");
+   std::cout<<"RECEIVER_ACTIVATED qpc="<<control.activatedQpc<<" late_asset="<<bool(control.flags&output_startup::Ticket)<<'\n';return true;
+  }
+  check(state==output_startup::Passive,"receiver passive protocol state");
+  HANDLE waits[]={parent,ready,source.game,source.producer};check(WaitForMultipleObjects(control.flags&output_startup::Ticket?4:2,waits,FALSE,100)!=WAIT_FAILED,"receiver passive notification wait");
+ }
+}
 int wmain(int argc,wchar_t** argv){
  const bool detailed=!pipeline_mode::performance();
  auto* outbuf=std::cout.rdbuf();auto* errbuf=std::cerr.rdbuf();
@@ -35,13 +61,14 @@ int wmain(int argc,wchar_t** argv){
   readyEvent=OpenEventW(SYNCHRONIZE,FALSE,(std::wstring(argv[1])+L".ready").c_str());doneEvent=OpenEventW(EVENT_MODIFY_STATE,FALSE,(std::wstring(argv[1])+L".done").c_str());check(readyEvent&&doneEvent,"open private notifications");
   channel=static_cast<output_wire::Channel*>(MapViewOfFile(mapping,FILE_MAP_READ|FILE_MAP_WRITE,0,0,sizeof(output_wire::Channel)));check(channel!=nullptr,"map wire");
   parent=OpenProcess(SYNCHRONIZE,FALSE,pid);check(parent!=nullptr,"open parent lifetime");
+  output_startup::Lifetime lifetime(GetTickCount64());const bool activated=activateReceiver(channel,pid,session,parent,readyEvent,doneEvent,game,lifetime);
   ComPtr<ID3D11Device> device;ComPtr<ID3D11DeviceContext> context;ComPtr<ID3D11Query> query;WorkerGpuFence copyFence;
   ComPtr<ID3D11Texture2D> textures[3],cache[3],staging[3];uint64_t last=0,epoch=0;output_wire::Packet previous{};unsigned received=0;
   wchar_t live[2]{};const bool liveMode=GetEnvironmentVariableW(L"SFC_D3D9_LIVE_TIMING",live,2)==1&&live[0]==L'1';
-  const auto deadline=GetTickCount64()+output_wire::receiver_lifetime_ms(liveMode,game.enabled,GetEnvironmentVariableW(L"SFC_D3D9_LIVE_TUNING",nullptr,0)!=0);
-  for(;;){
-   check(GetTickCount64()<deadline,game.enabled?"receiver130s additive timeout":liveMode?"receiver110s live timeout":"receiver60s timeout");check(WaitForSingleObject(parent,0)==WAIT_TIMEOUT,"producer disconnected");
-   const auto state=output_wire::state(channel);if(state==output_wire::stopped){check(received>0,"no images received");result=0;break;}
+  if(!activated)result=0;
+  for(;activated;){
+   check(!lifetime.expired(GetTickCount64()),game.enabled?"receiver130s additive timeout":liveMode?"receiver110s live timeout":"receiver60s timeout");check(WaitForSingleObject(parent,0)==WAIT_TIMEOUT,"producer disconnected");
+   const auto state=output_wire::state(channel);if(state==output_wire::stopped){result=0;break;}
    if(state!=output_wire::ready){const HANDLE waits[]={parent,readyEvent};check(WaitForMultipleObjects(2,waits,FALSE,100)!=WAIT_FAILED,"producer notification wait");continue;}
    if(InterlockedCompareExchange(&channel->state,output_wire::acquired,output_wire::ready)!=output_wire::ready)continue;
    const auto p=channel->packet;
@@ -87,6 +114,7 @@ int wmain(int argc,wchar_t** argv){
    if(mode==L"disconnect"){result=0;break;}
   }
   if(context){context->ClearState();context->Flush();hr(device->GetDeviceRemovedReason(),"receiver healthy");}
+  if(!received)std::cout<<"RECEIVER_CANCELLED before_first_output=1 activated="<<activated<<'\n';
   std::cout<<"RECEIVER_RETIRED frames="<<received<<" result="<<result<<'\n';
  }catch(const std::exception& e){std::cerr<<"RECEIVER_REJECTED "<<e.what()<<'\n';if(channel)InterlockedExchange(&channel->state,output_wire::rejected);if(doneEvent)SetEvent(doneEvent);}
  if(channel)UnmapViewOfFile(channel);if(mapping)CloseHandle(mapping);if(parent)CloseHandle(parent);if(readyEvent)CloseHandle(readyEvent);if(doneEvent)CloseHandle(doneEvent);diagnosticLog.finish();std::cout.rdbuf(outbuf);std::cerr.rdbuf(errbuf);return result;

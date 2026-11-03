@@ -2,10 +2,12 @@
 // New opt-in protocol in unused scene-map space. No pointers or image bytes.
 #pragma once
 #include "live_owner_wire.h"
+#include "../scene_bridge/scene_capacity.h"
 #include "source_timing.h"
 namespace multi_scene {
-constexpr DWORD Offset=15*1024*1024-128*1024,Magic=0x31534d53,Owners=32,Assets=64,Frames=8;
-struct Header {DWORD magic=Magic,version=1,bytes=0,pid=0,session[4]{};
+constexpr DWORD Offset=scene_capacity::SceneOffset,Magic=0x31534d53,Owners=scene_capacity::Owners,Assets=scene_capacity::Assets,Frames=8;
+constexpr DWORD Version=2;
+struct Header {DWORD magic=Magic,version=Version,bytes=0,pid=0,session[4]{};
  volatile LONG stopped=0,frame=0,published=0,dropped=0,invalid=0,asset_ready=0,asset_rejected=0,closed_frame=0;};
 struct Frame {uint64_t sequence=0,offered=0;DWORD frame=0,anchor=0,revision=0,count=0;
  live_owner::Row rows[Owners]{};uint64_t checksum=0;};
@@ -15,12 +17,12 @@ struct Asset {DWORD id=0,path_id=0,owner=0,revision=0,model=0,source=0,geometry_
 struct alignas(64) AssetSlot {volatile LONG guard=0,ack=0;Asset packet{};BYTE padding[32]{};};
 struct Store {Header header{};FrameSlot frames[Frames]{};AssetSlot assets[Assets]{};};
 inline bool initial_resolved(Store& s,uint64_t mask){
- for(unsigned i=0;i<Assets;++i)if((mask&(uint64_t(1)<<i))&&!InterlockedCompareExchange(&s.assets[i].ack,0,0))return false;
+ for(unsigned i=0;i<64;++i)if((mask&(uint64_t(1)<<i))&&!InterlockedCompareExchange(&s.assets[i].ack,0,0))return false;
  return true; // Negative ACK remains an explicit asset failure,not an infinite wait.
 }
-static_assert(sizeof(Header)==64&&sizeof(Frame)==12328&&sizeof(Asset)==88&&Offset+sizeof(Store)<15*1024*1024);
-static_assert(source_timing::Offset+sizeof(source_timing::Store)<Offset,"multi-scene must not overlap source timing evidence");
-inline bool valid(const Header& h,const DWORD* session,DWORD pid){return h.magic==Magic&&h.version==1&&h.bytes==sizeof(Store)&&
+static_assert(sizeof(Header)==64&&sizeof(Frame)==40+384*Owners&&sizeof(Asset)==88&&Offset+sizeof(Store)<live_owner::Offset);
+static_assert(Offset+sizeof(Store)<source_timing::Offset,"multi-scene must not overlap source timing evidence");
+inline bool valid(const Header& h,const DWORD* session,DWORD pid){return h.magic==Magic&&h.version==Version&&h.bytes==sizeof(Store)&&
  h.pid==pid&&pid&&live_owner::same_session(h.session,session)&&!frame_ingress::state(const_cast<volatile LONG*>(&h.stopped));}
 inline uint64_t checksum(const Frame& f){return frame_ingress::hash(&f,offsetof(Frame,checksum));}
 inline uint64_t checksum(const Asset& a){return frame_ingress::hash(&a,offsetof(Asset,checksum));}
@@ -46,7 +48,7 @@ struct Source {Store* store=nullptr;Frame pending{};
  bool attach(BYTE* base,const DWORD* session){store=reinterpret_cast<Store*>(base+Offset);const auto pid=GetCurrentProcessId();
   if(store->header.pid==0)store->header.pid=pid;if(!valid(store->header,session,pid)){store=nullptr;return false;}return true;}
  void begin(){pending={};}
- void offer(const live_owner::Row& r){if(store&&pending.count<Owners)pending.rows[pending.count++]=r;}
+ void offer(const live_owner::Row& r){if(!store)return;if(pending.count<Owners)pending.rows[pending.count++]=r;else InterlockedIncrement(&store->header.dropped);}
  bool publish(uint64_t selected){if(!store||frame_ingress::state(&store->header.stopped))return false;
   pending.anchor=DWORD(selected);pending.revision=DWORD(selected>>32);
   for(DWORD i=0;i<pending.count;++i)if(pending.rows[i][1]==pending.anchor&&pending.rows[i][7]==pending.revision){

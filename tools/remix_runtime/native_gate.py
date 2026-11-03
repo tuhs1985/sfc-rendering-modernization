@@ -16,6 +16,11 @@ def header(raw):
     names=('stop','error','frame','thread','written','read','dropped','requests','commits','misses','stale','invalid','stop_wakes','active','max_active','partial')
     result=dict(zip(names,v[10:26]));result.update(pid=v[3],session=list(v[4:8]),policy=v[8],generation=v[9],frequency=v[29])
     if not 0<=result['written']-result['read']<=CAPACITY:raise ValueError('Gate ring cursors')
+    recovery=struct.unpack_from('<10I',raw,160)
+    if recovery[0]==1:
+        result['recovery']=dict(version=1,overlap=recovery[1],owner_changed=recovery[2],submission_changed=recovery[3],
+            last_reason=recovery[4],last_frame=recovery[5],last_owner=recovery[6],
+            terminal_reason=recovery[7],terminal_frame=recovery[8],terminal_owner=recovery[9])
     return result
 
 def record(raw):
@@ -62,6 +67,11 @@ def analyze(folder,h):
     with (Path(folder)/'NATIVE-GATE-001.bin').open('rb') as f:
         while b:=f.read(128):rows.append(record(b))
     if not h:return dict(result='PARTIAL',records=0,header=None)
+    raw_count=len(rows);seen=set();unique=[]
+    for r in rows:
+        identity=(r['generation'],r['frame'],r['start'])
+        if identity not in seen:seen.add(identity);unique.append(r)
+    rows=unique
     frequency=h['frequency'];scale=1000/frequency
     # Diagnostic fixture pixel readbacks are marked and excluded from clean
     # timing distributions,not deleted from the evidence or correctness totals.
@@ -86,7 +96,7 @@ def analyze(folder,h):
             samples=[(r['presented']-r['offered'])*scale for r in v if r['offered'] and not r['flags']&2]
             drift=(v[-1]['start']-origin['start'])*scale-(v[-1]['frame']-origin['frame'])*1000/60
             rolling.append(dict(second=bucket*5,frames=len(v),commits=sum(r['outcome']==2 for r in v),max_queue=max(r['queue'] for r in v),max_pending_source_slots=max(r['pending_source_slots'] for r in v),source_age_ms=stats(samples),reference_schedule_drift_ms=drift))
-    return dict(result='COMPARISON_REQUIRES_REVIEW',records=len(rows),measurement_frames=len(measured),header=h,policy='Strict' if h['policy']==1 else 'ExtraFrame',
+    return dict(result='PARTIAL_TERMINAL_STOP' if h.get('partial') else 'COMPARISON_REQUIRES_REVIEW',records=len(rows),raw_records=raw_count,repeated_source_records=raw_count-len(rows),measurement_frames=len(measured),header=h,policy='Strict' if h['policy']==1 else 'ExtraFrame',
         commits=sum(r['outcome']==2 for r in rows),original_frames=sum(r['outcome']!=2 for r in rows),
         measured_commits=sum(r['outcome']==2 for r in measured),measured_fallbacks=sum(r['outcome']!=2 for r in measured),
         injected_overruns=sum(bool(r['flags']&4) for r in measured),injected_representative_delays=sum(bool(r['flags']&8) for r in measured),

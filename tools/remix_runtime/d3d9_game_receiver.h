@@ -43,9 +43,7 @@ class Receiver {
  void finishCohortLease(){if(gateSlot<0)return;imported[gateSlot].held.store(false,std::memory_order_release);if(!cohortWrites)InterlockedExchange(&pool->slots[gateSlot].state,output_wire::idle);gateSlot=-1;gateToken=0;cohortWrites=false;}
  void gateCancel(){if(gateSlot>=0){imported[gateSlot].held.store(false,std::memory_order_release);InterlockedExchange(&pool->slots[gateSlot].state,output_wire::idle);gateSlot=-1;gateToken=0;}}
  bool gateSource(const native_gate::Ticket& t){
-  if(!cohort||!multi_scene::read(*cohort,t.frame,t.sequence,cohortFrame)||cohortFrame.checksum!=t.hash)return false;
-  for(const auto& r:cohortFrame.rows)if(r[1]==t.owner&&r[7]==t.revision&&r[5]==t.model&&r[6]==t.source&&r[2]==t.frame&&r[47]==t.thread){gateRow=r;return true;}
-  return false;
+  return cohort&&multi_scene::read(*cohort,t.frame,t.sequence,cohortFrame)&&native_cohort::retainedRow(cohortFrame,t,gateRow);
  }
  bool gateTry(const native_gate::Ticket& t){
   if(stopping.load()||!game_output::valid(pool->header,source.session,GetCurrentProcessId())||!pool->header.ready||pool->header.stopped||pool->header.error)return false;
@@ -237,7 +235,7 @@ class Receiver {
    if(pending)throw std::runtime_error("Native insertion GPU read drain incomplete");
   }
   }catch(...){InterlockedIncrement(&pool->stats.resource_failed);InterlockedExchange(&pool->header.error,1);
-   if(nativeGateMode){if(gateStore){InterlockedExchange(&gateStore->header.partial,1);InterlockedExchange(&gateStore->header.stop,1);SetEvent(gateEvents.stop);}
+   if(nativeGateMode){if(gateStore){native_gate::terminal(*gateStore,native_gate::TerminalReason::OutputResourceFailure,0);SetEvent(gateEvents.stop);}
     // This session cannot restart. Preserve the fixed imported resources on a
     // terminal failure;no unsafe slot ACK or hot-path rollback is attempted.
     for(auto& item:imported){item.lease.retainOnTerminalFailure();for(auto& view:item.views)view.Detach();for(auto& texture:item.textures)texture.Detach();}
@@ -267,7 +265,7 @@ public:
    const auto& h=cohort->header;
    // Presentation initializes BEFORE the native semantic component attaches.
    // Only the native producer claims pid;step requires its confirmed identity.
-   if(h.magic!=multi_scene::Magic||h.version!=1||h.bytes!=sizeof(*cohort)||memcmp(h.session,source.session,16)||
+   if(h.magic!=multi_scene::Magic||h.version!=multi_scene::Version||h.bytes!=sizeof(*cohort)||memcmp(h.session,source.session,16)||
       (h.pid&&h.pid!=GetCurrentProcessId()))throw std::runtime_error("Multi-scene game mapping identity");
   }
   if(replacementMode){
@@ -311,7 +309,7 @@ public:
   if(pool)InterlockedExchange(&pool->header.stopped,1);}
  void nativeShieldDraw(uint64_t native,UINT count,UINT instances,UINT first,INT base,UINT firstInstance){if(!stopping&&foreground)foreground->draw(native,count,instances,first,base,firstInstance);}
  void nativeUnsupportedDraw(){if(!stopping&&foreground)foreground->unsupportedDraw();}
- void nativeInsertionFailed(){if(gateStore){InterlockedExchange(&gateStore->header.partial,1);InterlockedExchange(&gateStore->header.stop,1);SetEvent(gateEvents.stop);}}
+ void nativeInsertionFailed(){if(gateStore){native_gate::terminal(*gateStore,native_gate::TerminalReason::DispatchException,gateTicket.owner);SetEvent(gateEvents.stop);}}
  DWORD nativeInsertion(DWORD action,const native_gate::Ticket* ticket,native_gate::Reply* reply){
   using namespace native_gate;
   if(!reply||reply->bytes!=sizeof(Reply)||reply->version!=Version||!nativeGateMode||!gateStore||GetCurrentThreadId()!=thread)return DWORD(Result::Invalid);
@@ -320,9 +318,11 @@ public:
      stopping.load()||gateStore->header.stop||!return_path::read(mapping.state->armed)||!return_path::read(mapping.state->enabled)||return_path::read(mapping.state->stop))return DWORD(Result::Original);
   if(action==DWORD(Action::Acquire)){
    if(cohortGate&&gateSlot>=0&&gateTicket.frame!=ticket->frame)finishCohortLease();
-   const auto peer=gatePeer.load(std::memory_order_acquire);if((gateSlot>=0&&!cohortGate)||!peer||!gateSource(*ticket))return DWORD(Result::Original);
-   if(cohortGate&&gateSlot>=0){if(!native_cohort::contains(cohortMembers,*ticket))return DWORD(Result::Original);gateTicket=*ticket;reply->result=Result::Acquired;reply->token=gateToken;reply->generation=gateStore->header.generation;return DWORD(reply->result);}
-   if(cohortGate){if(cohortAttempt==ticket->frame)return DWORD(Result::Original);cohortAttempt=ticket->frame;}
+   const auto peer=gatePeer.load(std::memory_order_acquire);if((gateSlot>=0&&!cohortGate)||!peer)return DWORD(Result::Original);
+   if(cohortGate&&gateSlot>=0){if(!native_cohort::contains(cohortMembers,*ticket)||!native_cohort::retainedRow(cohortFrame,*ticket,gateRow))return DWORD(Result::Original);gateTicket=*ticket;reply->result=Result::Acquired;reply->token=gateToken;reply->generation=gateStore->header.generation;return DWORD(reply->result);}
+   if(cohortGate&&cohortAttempt==ticket->frame)return DWORD(Result::Original);
+   if(!gateSource(*ticket))return DWORD(Result::Original);
+   if(cohortGate)cohortAttempt=ticket->frame;
    const auto result=acquire(*ticket,*gateStore,gateEvents,peer,[&]{return gateTry(*ticket);});
    if(result!=Result::Acquired)gateCancel();reply->result=result;reply->token=gateToken;reply->generation=gateStore->header.generation;
    if(cohortGate&&result==Result::Acquired&&!native_cohort::contains(cohortMembers,*ticket)){reply->result=Result::Original;native_cohort::count(*cohortProof,*ticket,false,false);}
@@ -360,8 +360,8 @@ public:
  }
  void step(ID3D11RenderTargetView* target){
   if(cohortGate&&GetCurrentThreadId()==thread)finishCohortLease();
-  if(nativeGateMode){if(gateStore&&return_path::read(mapping.state->armed)&&!return_path::read(mapping.state->stop)&&
-      gateStore->current.frame&&GetCurrentThreadId()==thread){
+  if(nativeGateMode){if(gateStore&&!gateStore->header.stop&&return_path::read(mapping.state->armed)&&!return_path::read(mapping.state->stop)&&
+      gateStore->current.frame&&!gateStore->current.presented&&GetCurrentThreadId()==thread){
     gateStore->current.queue=0;for(unsigned i=0;i<2;++i){auto& slot=pool->slots[i];const auto state=output_wire::state(&slot);if(state==output_wire::ready||state==output_wire::acquired)++gateStore->current.queue;
      if(InterlockedCompareExchange(&slot.state,output_wire::acquired,output_wire::ready)==output_wire::ready){
       if(slot.packet.source_frame==gateStore->current.frame&&gateStore->header.ready[i].sequence==slot.packet.sequence)gateStore->current.ready=gateStore->header.ready[i].qpc;

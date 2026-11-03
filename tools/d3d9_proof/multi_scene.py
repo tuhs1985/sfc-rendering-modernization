@@ -1,4 +1,4 @@
-"""Version1 bounded tracked-set/catalog wire. Worker-side only; no SFC calls."""
+"""Version2 byte-budgeted tracked-set/catalog wire. Worker-side only; no SFC calls."""
 import ctypes as C
 import struct
 import subprocess
@@ -7,10 +7,15 @@ import math
 import tomllib
 from owner_rebind import fnv
 
-OFFSET=15*1024*1024-128*1024
+import sys
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'remix_runtime'))
+from scene_capacity import SCENE_OFFSET,OWNERS,ASSETS
+OFFSET=SCENE_OFFSET
 MAGIC=0x31534d53
-OWNERS,ASSETS,FRAMES=32,64,8
-FRAME_BYTES,FRAME_SLOT,ASSET_SLOT=12328,12352,128
+FRAMES=8
+FRAME_BYTES=40+OWNERS*384
+FRAME_SLOT=(8+FRAME_BYTES+16+63)//64*64
+ASSET_SLOT=128
 ASSET_BASE=64+FRAMES*FRAME_SLOT
 STORE_BYTES=ASSET_BASE+ASSETS*ASSET_SLOT
 ASSET=struct.Struct('<8I32s3Q')
@@ -30,7 +35,7 @@ def camera_offset(raw=None):
 
 def initialize(channel):
     words=[int(channel.name[-32:][i:i+8],16) for i in range(0,32,8)]
-    channel.write(OFFSET,struct.pack('<16I',MAGIC,1,STORE_BYTES,0,*words,*([0]*8))+bytes(STORE_BYTES-64))
+    channel.write(OFFSET,struct.pack('<16I',MAGIC,2,STORE_BYTES,0,*words,*([0]*8))+bytes(STORE_BYTES-64))
 
 
 def asset_packet(identity,path_id,row,signature,replay,textures):
@@ -94,7 +99,7 @@ def acknowledgement(channel,identity):
 
 def summary(channel):
     h=struct.unpack('<16I',channel.read(OFFSET,64))
-    if h[:3]!=(MAGIC,1,STORE_BYTES):raise ValueError('Multi-scene final layout')
+    if h[:3]!=(MAGIC,2,STORE_BYTES):raise ValueError('Multi-scene final layout')
     return dict(pid=h[3],stopped=bool(h[8]),last_frame=h[9],published=h[10],dropped=h[11],invalid=h[12],
                 asset_ready=h[13],asset_rejected=h[14],closed_frame=h[15])
 

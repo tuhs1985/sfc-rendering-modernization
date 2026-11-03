@@ -52,7 +52,7 @@ int main(){
  auto direct=std::make_unique<live_owner::Store>();direct->header.selected=live_owner::selection(state->owner_id,4);g_live_scene.directSource.store=direct.get();
  auto gate=std::make_unique<native_gate::Store>();native_gate::initialize(*gate,session,GetCurrentProcessId(),native_gate::Policy::ExtraFrame);
  g_native_gate=gate.get();g_native_gate_requested=true;g_native_dispatch=&fakeGate;
- auto start=[&](DWORD frame){g_frame=frame;native_gate::begin(*gate,frame,GetCurrentThreadId());g_native_decided=g_native_inserted=false;
+ auto start=[&](DWORD frame){g_frame=frame;native_gate::begin(*gate,frame,GetCurrentThreadId());g_native_decided=g_native_inserted=g_native_blocked=false;for(auto& d:g_native_owners)d={};
   auto& p=g_live_scene.cohort.pending;p.frame=frame;p.anchor=state->owner_id;p.revision=4;p.sequence=frame;p.offered=native_gate::now();p.checksum=123;
   replacement::begin(*ledger,frame,GetCurrentThreadId());};
  start(101);gateTimeout=true;stack[0]=0x0042e55d;stack[1]=1;invokeRecorder(saved.data());CoordinateAfterCapture(kWrapper,saved.data());
@@ -63,7 +63,7 @@ int main(){
  test(stack[1]==0&&gateAcquires==2&&gateCommits==1&&gate->current.primary==1&&gate->current.secondary==1);
  test(!g_in_native_gate&&memcmp(mesh.data(),&g_mesh_packet,mesh.size())==0);
  // Coordinator reentrancy refuses another dispatch and drains its own count.
- g_in_native_gate=1;stack[1]=1;CoordinateAfterCapture(kWrapper,saved.data());test(stack[1]==1&&g_in_native_gate==1&&gateCommits==1);g_in_native_gate=0;
+ g_in_native_gate=1;stack[1]=1;CoordinateAfterCapture(kWrapper,saved.data());test(stack[1]==1&&g_in_native_gate==1&&gateCommits==1&&!gate->header.stop&&gate->header.recovery.counts[0]==1);g_in_native_gate=0;
  // Multi-owner mode: two epochs sharing one mesh retain independent decisions.
  g_native_cohort_mode=true;auto cohort=std::make_unique<native_cohort::Store>();native_cohort::initialize(*cohort,session,GetCurrentProcessId());g_native_cohort=cohort.get();
  const DWORD firstOwner=state->owner_id;
@@ -78,15 +78,30 @@ int main(){
   stack[0]=0x0042e626;stack[1]=1;CoordinateAfterCapture(kWrapper,saved.data());test(stack[1]==0);}
  test(gateCommits==before+2&&cohort->header.suppressed==4);
  // A retired owner cannot borrow the other owner's successful decision.
- second.live=false;state->owner_id=firstOwner+1;stack[1]=1;CoordinateAfterCapture(kWrapper,saved.data());test(stack[1]==1&&gateCommits==before+2&&gate->header.partial&&gate->header.stop);
+ second.live=false;state->owner_id=firstOwner+1;stack[1]=1;CoordinateAfterCapture(kWrapper,saved.data());test(stack[1]==1&&gateCommits==before+2&&!gate->header.partial&&!gate->header.stop&&gate->header.recovery.counts[1]==1);
+ // Retirement/changed submission never disables other owners in this frame.
+ state->owner_id=firstOwner;state->ship=reinterpret_cast<DWORD>(ship.data());state->visual=reinterpret_cast<DWORD>(visual.data());
+ stack[1]=1;CoordinateAfterCapture(kWrapper,saved.data());test(stack[1]==0&&gateCommits==before+2);
+ // A freshly qualified next frame retries naturally,with no restart/asset reload.
+ second.live=true;start(104);state->owner_id=firstOwner+1;state->ship=reinterpret_cast<DWORD>(otherShip.data());state->visual=reinterpret_cast<DWORD>(otherVisual.data());
+ stack[0]=0x0042e55d;stack[1]=1;CoordinateAfterCapture(kWrapper,saved.data());test(stack[1]==0&&gateCommits==before+3&&!gate->header.stop);
  state->owner_id=firstOwner;state->ship=reinterpret_cast<DWORD>(ship.data());state->visual=reinterpret_cast<DWORD>(visual.data());g_native_cohort_mode=false;g_native_cohort=nullptr;
  // Unload's conservative PC exclusion covers each complete naked hook stub.
  for(const auto& hook:g_hooks){const auto* bytes=reinterpret_cast<const BYTE*>(hook.destination);bool end=false;
   for(unsigned j=0;j+6<=128;++j)if(bytes[j]==0xff&&bytes[j+1]==0x25){end=true;break;}test(end);}
- // A later unknown caller is untouched and marks the session partial.
- gate->header.stop=gate->header.partial=0;
+ // Changed/unknown later submissions remain native for this owner/frame only.
+ start(105);
  stack[0]=0x0042e55d;stack[1]=1;CoordinateAfterCapture(kWrapper,saved.data());test(stack[1]==0);
- stack[0]=0x11111111;stack[1]=1;CoordinateAfterCapture(kWrapper,saved.data());test(stack[1]==1&&gate->header.partial==1);
+ stack[0]=0x11111111;stack[1]=1;CoordinateAfterCapture(kWrapper,saved.data());test(stack[1]==1&&!gate->header.partial&&!gate->header.stop&&gate->header.recovery.counts[2]==1);
+ stack[0]=0x0042e626;stack[1]=1;CoordinateAfterCapture(kWrapper,saved.data());test(stack[1]==1); // no further suppression in damaged decision
+ start(106);stack[0]=0x0042e55d;stack[1]=1;const auto recovered=gateCommits;
+ CoordinateAfterCapture(kWrapper,saved.data());test(stack[1]==0&&gateCommits==recovered+1&&!gate->header.stop);
+ // Unwritable suppression arguments after insertion are a genuine terminal fault.
+ auto* protectedStack=static_cast<DWORD*>(VirtualAlloc(nullptr,4096,MEM_COMMIT|MEM_RESERVE,PAGE_READWRITE));test(protectedStack!=nullptr);
+ memcpy(protectedStack,stack.data(),sizeof(stack));protectedStack[1]=1;DWORD old=0;test(VirtualProtect(protectedStack,4096,PAGE_READONLY,&old)!=FALSE);
+ start(107);saved[3]=reinterpret_cast<DWORD>(protectedStack)-4;CoordinateAfterCapture(kWrapper,saved.data());
+ test(protectedStack[1]==1&&gate->header.stop&&gate->header.partial&&gate->header.recovery.terminalReason==LONG(native_gate::TerminalReason::SuppressionWrite));
+ test(VirtualFree(protectedStack,0,MEM_RELEASE)!=FALSE);saved[3]=reinterpret_cast<DWORD>(stack.data())-4;
  g_native_gate=nullptr;g_native_gate_requested=false;g_native_dispatch=nullptr;g_live_scene.directSource.store=nullptr;
  g_replacement=nullptr;g_running=0;DeleteCriticalSection(&g_lock);
  std::cout<<"Player suppression recorder PASS checks="<<checks<<" original_capture_preserved=1 primary_secondary=1 nested_other_revoked_passthrough=1\n";

@@ -17,6 +17,33 @@ class StartupProfileTests(TestCase):
         self.assertEqual(report['activation_to_bootstrap_output_seconds'],.9)
         self.assertEqual(report['bootstrap'][0]['present_seconds'],.1)
         self.assertEqual(report['first_receiver_ack_seconds'],.1)
+    def test_diagnostic_cost_is_separate_and_complete(self):
+        trace=self.trace()
+        costs=[]
+        for stage in re.findall(r'STARTUP_PROFILE stage=(\w+)',trace):
+            costs.append(f'STARTUP_PROFILE_COST stage={stage} index=0 process_query_ticks=1 system_query_ticks=5000 frequency=1000')
+        report=analyze_text(trace+'\n'+'\n'.join(costs))
+        self.assertEqual(report['diagnostic_costs'][2]['system_query_seconds'],5)
+        with self.assertRaises(ValueError):analyze_text(trace+'\n'+costs[0])
+        with self.assertRaises(ValueError):analyze_text(trace+'\n'+'\n'.join(costs).replace('frequency=1000','frequency=0'))
+    def test_narrow_receiver_intervals(self):
+        names=('scene_packet_read_begin','scene_packet_read_complete','scene_packet_hash_complete','peer_start_begin','peer_guid_ready','peer_security_ready','peer_mapping_created','peer_events_created','peer_mapping_initialized','peer_process_begin','peer_process_created','peer_start_complete')
+        trace=self.trace().replace('frequency=1000','frequency=10000')
+        rows='\n'.join(f'STARTUP_PROFILE stage={s} index=0 qpc={201+i*7} frequency=10000 private_bytes=0 working_set=0 system_commit=0 commit_limit=0' for i,s in enumerate(names))
+        trace=trace.replace('STARTUP_PROFILE stage=receiver_started',rows+'\nSTARTUP_PROFILE stage=receiver_started')
+        report=analyze_text(trace)
+        self.assertEqual(len(report['receiver_phases']),13)
+        self.assertEqual(report['receiver_phases'][10]['begin'],'peer_process_begin')
+        self.assertEqual(report['receiver_phases'][10]['seconds'],.0007)
+        with self.assertRaises(ValueError):analyze_text(trace.replace('stage=peer_process_created','stage=wrong'))
+    def test_early_receiver_timing_is_not_charged_after_activation(self):
+        names=('peer_start_begin','peer_guid_ready','peer_security_ready','peer_mapping_created','peer_events_created','peer_mapping_initialized','peer_process_begin','peer_process_created','peer_passive_ready','peer_start_complete','receiver_started','idle_begin','activated','receiver_activated','scene_loaded','materials_enabled','renderer_assets_started','frame_begin','bootstrap_begin','bootstrap_drawn','bootstrap_presented','output_complete','receiver_ack')
+        text='\n'.join(f'STARTUP_PROFILE stage={s} index=0 qpc={i*100} frequency=1000 private_bytes=0 working_set=0 system_commit=0 commit_limit=0' for i,s in enumerate(names))
+        r=analyze_text(text)
+        self.assertTrue(r['early_passive_receiver'])
+        self.assertEqual(r['receiver_ready_before_activation_seconds'],.2)
+        self.assertEqual(r['receiver_creation_seconds'],.1)
+        self.assertTrue(all(p['seconds']>=0 for p in r['phases']))
     def test_missing_and_duplicate(self):
         with self.assertRaises(ValueError):analyze_text('')
         with self.assertRaises(ValueError):analyze_text(self.trace()+'\n'+self.trace())

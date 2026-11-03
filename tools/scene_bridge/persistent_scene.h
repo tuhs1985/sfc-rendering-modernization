@@ -1,6 +1,7 @@
 // Fixed game-facing simulation registry. No renderer/API resources or callbacks.
 #pragma once
 #include <array>
+#include "scene_capacity.h"
 #include <cmath>
 #include <cstdint>
 #include <cstring>
@@ -31,7 +32,7 @@ template<class Read>bool pose(Word ship,Matrix& out,Read read){
 }
 struct Entry {sfc_m1::MeshIdentity id{};std::array<Word,3> lod{};Word revision=0,generation=0,lastVisible=0,lastUpdated=0;bool live=false,qualified=false;Matrix world{};};
 struct Registry {
- std::array<Entry,32> entries{};Word generations=0,admitted=0,destroyed=0,rejected=0,updated=0,offscreen=0;
+ std::array<Entry,scene_capacity::Owners> entries{};Word generations=0,admitted=0,destroyed=0,rejected=0,updated=0,offscreen=0;
  Entry* find(Word owner){for(auto& e:entries)if(e.live&&e.id.owner==owner)return &e;return nullptr;}
  bool contains(Word owner){return find(owner)!=nullptr;}
  template<class Read>bool valid(const Entry& e,Read read){Word ship=0,visual=0,model=0,link=0,count=0,list=0;std::array<Word,3> lod{};

@@ -34,27 +34,18 @@ class AsyncMaterialTests(unittest.TestCase):
 
     def test_priming_gates_only_enhancement_publication(self):
         from progressive_scene_relay import Relay as Parent
-        with tempfile.TemporaryDirectory() as directory:
-            r=object.__new__(Relay);r.folder=Path(directory);r.material_prime_ready=None
-            r.pending_stage_ids={1};r.pending_library=False
-            with patch.object(Parent,'retry_publication') as publish:
-                r.retry_publication();publish.assert_not_called()
-                ready=r.folder/'gpu/renderer-ready.bin';ready.parent.mkdir()
-                ready.write_bytes(b'partial');r.retry_publication();publish.assert_not_called()
-                ready.write_bytes(struct.pack('<2Q',1234,789));r.retry_publication()
-                publish.assert_called_once();self.assertEqual(r.material_prime_ready['host_pid'],789)
-                # An idle cycle with no new enhancement does not reread the file.
-                r.pending_stage_ids.clear();ready.unlink();r.retry_publication()
-                self.assertEqual(publish.call_count,2)
-
+        r=object.__new__(Relay);r.material_prime_ready=None
+        r.pending_stage_ids={1};r.pending_library=False;r.receiver=SimpleNamespace(channel=object())
+        with patch.object(Parent,'retry_publication') as publish,patch('warm_start.ready',side_effect=[None,(1234,789)]):
+            r.retry_publication();publish.assert_not_called()
+            r.retry_publication();publish.assert_called_once()
+            self.assertEqual(r.material_prime_ready['host_pid'],789)
+            r.pending_stage_ids.clear();r.retry_publication();self.assertEqual(publish.call_count,2)
     def test_priming_rejects_invalid_readiness_instead_of_publishing(self):
-        with tempfile.TemporaryDirectory() as directory:
-            r=object.__new__(Relay);r.folder=Path(directory);r.material_prime_ready=None
-            r.pending_stage_ids={1};r.pending_library=False
-            ready=r.folder/'gpu/renderer-ready.bin';ready.parent.mkdir()
-            for raw in (bytes(17),struct.pack('<2Q',0,1),struct.pack('<2Q',1,1<<40)):
-                ready.write_bytes(raw)
-                with self.assertRaises(ValueError):r.retry_publication()
+        r=object.__new__(Relay);r.material_prime_ready=None
+        r.pending_stage_ids={1};r.pending_library=False;r.receiver=SimpleNamespace(channel=object())
+        with patch('warm_start.ready',side_effect=ValueError('Invalid readiness')):
+            with self.assertRaises(ValueError):r.retry_publication()
 
     def test_gameplay_qualification_and_backend_are_json_serializable(self):
         import qualify_async_material as gate

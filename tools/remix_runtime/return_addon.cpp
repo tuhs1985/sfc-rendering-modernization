@@ -15,6 +15,7 @@
 #include "depth_snapshot.h"
 #include "source_timing_addon.h"
 #include "d3d9_game_receiver.h"
+#include "../native_insertion/callback_policy.h"
 #ifdef SFC_LIVE_RETURN
 #include "ship_live_receiver.h"
 #endif
@@ -38,6 +39,7 @@ bool broadMode=false;
 bool sourceTimingRequested=false;std::unique_ptr<source_timing::Observer> sourceTiming;
 bool directGameRequested=false;std::shared_ptr<d3d9_game::Receiver> directGame;std::mutex nativeGateBinding;
 bool nativeForegroundRequested=false;
+bool directDrawObservers=false;
 void nativeShader(reshade::api::device* d,reshade::api::pipeline_layout,uint32_t count,
                   const reshade::api::pipeline_subobject* objects,reshade::api::pipeline pipeline){
  if(d->get_api()!=reshade::api::device_api::d3d11||!pipeline.handle||count!=1||
@@ -261,8 +263,9 @@ static BOOL attach(HMODULE module){
     if(!reshade::register_addon(module))return FALSE;
     registered=true;
     nativeForegroundRequested=directGameRequested&&native_foreground::source_notice::requested();
+    directDrawObservers=native_insertion::needsDrawObservers(directGameRequested,native_gate::requested(),nativeForegroundRequested);
     if(nativeForegroundRequested)reshade::register_event<reshade::addon_event::init_pipeline>(nativeShader);
-    if(directGameRequested){reshade::register_event<reshade::addon_event::draw>(directDraw);reshade::register_event<reshade::addon_event::draw_indexed>(directIndexed);reshade::register_event<reshade::addon_event::clear_depth_stencil_view>(directClear);}
+    if(directDrawObservers){reshade::register_event<reshade::addon_event::draw>(directDraw);reshade::register_event<reshade::addon_event::draw_indexed>(directIndexed);reshade::register_event<reshade::addon_event::clear_depth_stencil_view>(directClear);}
 #ifdef SFC_LIVE_RETURN
     if(sceneDepthTest){reshade::register_event<reshade::addon_event::draw>(sceneDraw);reshade::register_event<reshade::addon_event::draw_indexed>(sceneIndexed);reshade::register_event<reshade::addon_event::clear_depth_stencil_view>(sceneClear);}
 #endif
@@ -308,7 +311,7 @@ BOOL WINAPI DllMain(HMODULE module,DWORD reason,LPVOID){
   if(reason==DLL_PROCESS_ATTACH)return attach(module);
   if(reason==DLL_PROCESS_DETACH&&registered){
     if(nativeForegroundRequested)reshade::unregister_event<reshade::addon_event::init_pipeline>(nativeShader);
-    if(directGameRequested){reshade::unregister_event<reshade::addon_event::draw>(directDraw);reshade::unregister_event<reshade::addon_event::draw_indexed>(directIndexed);reshade::unregister_event<reshade::addon_event::clear_depth_stencil_view>(directClear);}
+    if(directDrawObservers){reshade::unregister_event<reshade::addon_event::draw>(directDraw);reshade::unregister_event<reshade::addon_event::draw_indexed>(directIndexed);reshade::unregister_event<reshade::addon_event::clear_depth_stencil_view>(directClear);}
 #ifdef SFC_LIVE_RETURN
     if(sceneDepthTest){reshade::unregister_event<reshade::addon_event::draw>(sceneDraw);reshade::unregister_event<reshade::addon_event::draw_indexed>(sceneIndexed);reshade::unregister_event<reshade::addon_event::clear_depth_stencil_view>(sceneClear);}
 #endif

@@ -7,12 +7,15 @@
 #include "../d3d9_proof/replacement_transaction.h"
 #include "../native_insertion/gate_contract.h"
 #include "../scene_bridge/persistent_scene.h"
+#include "../scene_bridge/effect_lights.h"
 #include <vector>
 #include <fstream>
 struct SourceTimingFixture {
  sfc_calibration::Reader source;bool enabled=false;
  bool liveEnabled=false,rebindFixture=false,lateAssetFixture=false;live_owner::Source live;multi_scene::Source cohort;std::vector<live_owner::Row> rows;
+ bool effectFixture=false;
  SourceTimingFixture(){
+  wchar_t effectMode[2]{};effectFixture=GetEnvironmentVariableW(L"SFC_EFFECT_LIGHT_FIXTURE",effectMode,2)==1&&effectMode[0]==L'1';
   wchar_t mode[2]{};enabled=GetEnvironmentVariableW(L"SFC_D3D9_SOURCE_TIMING",mode,2)==1&&mode[0]==L'1';
   if(enabled){if(!source.prepare()||!source.requested)throw std::runtime_error("fixture source channel");source.mailbox->snapshot={};memcpy(source.mailbox->snapshot.session,source.session,16);InterlockedExchange(&source.mailbox->active,1);}
   wchar_t liveMode[2]{},path[1024]{};liveEnabled=GetEnvironmentVariableW(L"SFC_D3D9_LIVE_TIMING",liveMode,2)==1&&liveMode[0]==L'1';
@@ -57,7 +60,18 @@ struct SourceTimingFixture {
      if(!native_gate::requested()&&replacement::requested()&&replacement::valid(replacementStore,source.session,GetCurrentProcessId()))replacement::suppress(*replacementStore,frame,row[1],row[7],row[5],row[6],GetCurrentThreadId(),true,replacement::now()); // SYNTHETIC source only; not an installed engine hook.
      LARGE_INTEGER q{};QueryPerformanceCounter(&q);sfc_calibration::stamp(row,static_cast<ULONGLONG>(q.QuadPart));if(live.prepare(row,anchor))prepared=true;
      if(!sfc_calibration::offer(source.mailbox,i,row))live.reject(frame);cohort.offer(row);
-     auto* guard=reinterpret_cast<LONG*>(base+4096+i*512);InterlockedIncrement(guard);memcpy(base+4100+i*512,row.data(),sizeof(row));InterlockedIncrement(guard);}
+     auto* guard=reinterpret_cast<LONG*>(base+scene_capacity::StateOffset+i*512);InterlockedIncrement(guard);memcpy(base+scene_capacity::StateOffset+4+i*512,row.data(),sizeof(row));InterlockedIncrement(guard);InterlockedExchange(reinterpret_cast<LONG*>(base+128),LONG(i+1));}
+    if(effectFixture){auto* effects=reinterpret_cast<sfc_effect_lights::Store*>(base+sfc_effect_lights::Offset);
+     if(!sfc_effect_lights::valid(*effects,source.session,0))throw std::runtime_error("Synthetic effect bank not initialized");
+     effects->header.pid=GetCurrentProcessId();sfc_effect_lights::Frame light{};light.frame=frame;light.thread=GetCurrentThreadId();light.manager=1;light.gate=1;
+     light.enables[0]=light.enables[1]=1;light.enables[2]=BYTE((frame/30)%2==0);light.records[2][0]=(frame/60)%2?1u:5u;
+     float pos[3]{},rgb[]{.75f,.25f,0},range=100;
+     // Convert captured float bit words before synthetic offset;never treat bits as numbers.
+     memcpy(pos,rows[0].data()+11,4);memcpy(pos+1,rows[0].data()+15,4);memcpy(pos+2,rows[0].data()+19,4);pos[0]+=float(frame%20);pos[2]+=20;
+     memcpy(light.records[2]+4,pos,12);memcpy(light.records[2]+7,rgb,12);memcpy(light.records[2]+10,&range,4);
+     LARGE_INTEGER tick{};QueryPerformanceCounter(&tick);light.captured=tick.QuadPart;
+     sfc_light_transport::publish(effects->header,effects->frames[frame%4],light,light.captured);
+    }
     if(cohort.publish(static_cast<uint64_t>(InterlockedCompareExchange64(&live.store->header.selected,0,0)))&&prepared)live.commit(anchor);
     if(!native_gate::requested())Sleep(GetEnvironmentVariableW(L"SFC_SYNC_FIXTURE_SHORT_LEAD",nullptr,0)?3:16);return;
    }
@@ -73,7 +87,7 @@ struct SourceTimingFixture {
    LARGE_INTEGER q{};QueryPerformanceCounter(&q);sfc_calibration::stamp(row,static_cast<ULONGLONG>(q.QuadPart));live.offer(row);
    if(!sfc_calibration::offer(source.mailbox,0,row))live.reject(frame);
    auto* base=reinterpret_cast<BYTE*>(source.mailbox)-sfc_calibration::Offset;
-   auto* guard=reinterpret_cast<LONG*>(base+4096);InterlockedIncrement(guard);memcpy(base+4100,row.data(),sizeof(row));InterlockedIncrement(guard);
+   auto* guard=reinterpret_cast<LONG*>(base+scene_capacity::StateOffset);InterlockedIncrement(guard);memcpy(base+scene_capacity::StateOffset+4,row.data(),sizeof(row));InterlockedIncrement(guard);InterlockedExchange(reinterpret_cast<LONG*>(base+128),1);
    Sleep(GetEnvironmentVariableW(L"SFC_SYNC_FIXTURE_SHORT_LEAD",nullptr,0)?3:16);return; // STANDALONE only;never inserted into SFC
   }
   sfc_calibration::begin(source.mailbox,frame);

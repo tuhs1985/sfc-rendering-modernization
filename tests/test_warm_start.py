@@ -21,15 +21,46 @@ class WarmStartTests(TestCase):
             env=self.env();env[key]=value
             with self.assertRaises(ValueError):packet(env,'Local\\SFCBridge_'+'a'*32)
         with self.assertRaises(ValueError):packet(self.env(),'wrong')
+    def channel(self):
+        import ctypes as C
+        class Memory:
+            name='Local\\SFCBridge_'+'a'*32
+            buffer=C.create_string_buffer(65536)
+            view=C.addressof(buffer)
+            def read(self,o,n):return C.string_at(self.view+o,n)
+            def write(self,o,b):C.memmove(self.view+o,b,len(b))
+        return Memory()
     def test_atomic_single_activation(self):
-        with tempfile.TemporaryDirectory() as directory:
-            activate(directory,self.env(),'Local\\SFCBridge_'+'a'*32)
-            self.assertEqual((Path(directory)/'renderer-activate.bin').stat().st_size,104)
-            self.assertFalse((Path(directory)/'renderer-activate.pending').exists())
-            with self.assertRaises(ValueError):activate(directory,self.env(),'Local\\SFCBridge_'+'a'*32)
-    def test_prewarm_is_before_game_graphics_wait(self):
+        from warm_start import initialize,OFFSET
+        c=self.channel();initialize(c,123)
+        activate(c,self.env(),c.name)
+        import struct
+        self.assertEqual(struct.unpack('<i',c.read(OFFSET+36,4))[0],2)
+        self.assertEqual(c.read(OFFSET+64,104),packet(self.env(),c.name))
+        with self.assertRaises(ValueError):activate(c,self.env(),c.name)
+        with self.assertRaises(ValueError):initialize(c,123)
+    def test_cancel_and_identity(self):
+        from warm_start import initialize,cancel,ready,OFFSET
+        import struct
+        c=self.channel();initialize(c,123);self.assertIsNone(ready(c))
+        c.write(OFFSET+44,struct.pack('<i',-1));self.assertIsNone(ready(c))
+        c.write(OFFSET+40,struct.pack('<IIQ',456,1,789));self.assertEqual(ready(c),(789,456))
+        wrong=self.env();wrong['SFC_D3D9_GAME_PID']='124'
+        with self.assertRaises(ValueError):activate(c,wrong,c.name)
+        with self.assertRaises(ValueError):activate(c,self.env(),'Local\\SFCBridge_'+'b'*32)
+        cancel(c)
+        with self.assertRaises(ValueError):activate(c,self.env(),c.name)
+    def test_bootstrap_and_no_file_ticket(self):
         text=(ROOT/'tools/remix_runtime/run_return_game.py').read_text()
         self.assertLess(text.index('timing_relay.start_on_launch(pid)'),text.index('wait_component_ready(channel.snapshot'))
         native=(ROOT/'tools/d3d9_proof/d3d9_direct_host.cpp').read_text()
-        self.assertLess(native.index('CreateDeviceEx('),native.index('warm_start::wait(root)'))
-        self.assertLess(native.index('warm_start::wait(root)'),native.index('Renderer renderer('))
+        self.assertLess(native.index('CreateDeviceEx('),native.index('warm_start::wait(root'))
+        self.assertLess(native.index('warm_start::wait(root'),native.index('Renderer renderer('))
+        source=(ROOT/'tools/m1_component/m1_component.cpp').read_text()
+        start=source.index('extern "C" DWORD WINAPI M1StartW')
+        self.assertLess(source.index('load_config(',start),source.index('g_live_scene.start(',start))
+        self.assertIn('GetPrivateProfileStringW(L"m1",L"LiveChannel"',source)
+        warm=(ROOT/'tools/d3d9_proof/warm_start.h').read_text()
+        self.assertNotIn('renderer-activate.bin',warm)
+        self.assertNotIn('renderer-ready.bin',warm)
+        self.assertNotIn('renderer-cancel',warm)

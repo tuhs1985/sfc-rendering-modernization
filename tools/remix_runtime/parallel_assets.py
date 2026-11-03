@@ -11,6 +11,7 @@ import json
 import struct
 import threading
 import time
+from scene_capacity import ASSETS
 
 WORKERS=4
 ACTIVE_ASSETS=4
@@ -113,7 +114,7 @@ def material_piece(primary,secondary,values):
 
 
 class Pipeline:
-    """At most four decoded assets; tiny pending descriptors cover remaining64.
+    """At most four decoded assets;remaining catalog entries are tiny descriptors.
 
     Each decoded input set is limited256MiB (RGBA+BGRA+original combined).
     Geometry/textures are immutable. Material pieces are published only by pump.
@@ -126,7 +127,7 @@ class Pipeline:
         if self.values[3]<0:raise ValueError('Negative normal USD anisotropy unsupported')
 
     def submit(self,identity,row):
-        if self.closed or identity in self.jobs or not 1<=identity<=64:raise ValueError('Preparation job identity/state')
+        if self.closed or identity in self.jobs or not 1<=identity<=ASSETS:raise ValueError('Preparation job identity/state')
         self.jobs[identity]=dict(id=identity,row=list(row),phase='waiting',discovered_ns=time.perf_counter_ns())
 
     def decode(self,job):
@@ -187,11 +188,15 @@ class Pipeline:
             raise ValueError('Remix base adaptation256MiB working cap')
         upload_images={name:base_image(images[name]) for name in job['primary']}
         folder=job['output']
+        memory=getattr(self.relay,'texture_memory',None)
         manifest=prepare(source,folder,self.relay.root,live_record=job['row'],evidence_mode='performance',
             qualified_mesh=mesh,prepared_capture=(raw,refs),prepared_images=upload_images,
-            prepared_geometry=self.graph.tasks[job['geometry_key']]['value'],output_extent=(1920,1080),identity_calculator=asset_identity)
+            prepared_geometry=self.graph.tasks[job['geometry_key']]['value'],output_extent=(1920,1080),identity_calculator=asset_identity,
+            texture_sink=(lambda index,payload:memory.write(job['id'],index,payload)) if memory else None,
+            geometry_sink=(lambda payload:memory.write_geometry(job['id'],payload)) if memory else None)
         steps.append(dict(stage='bundle_assembly_and_write',seconds=(time.perf_counter_ns()-begin)/1e9));begin=time.perf_counter_ns()
         packet=wire.prepared_packet(job['id'],job['id'],job['row'],signature,manifest['catalog_identity'])
+        if memory:memory.seal(job['id'],packet)
         steps.append(dict(stage='catalog_from_written_bytes',seconds=(time.perf_counter_ns()-begin)/1e9))
         manifest['conventions']['image']='Remix-only bottom-row-first BGRA8;original images/captured UV unchanged'
         manifest['remix_texture_origin']=POLICY
@@ -287,9 +292,20 @@ class Pipeline:
                 g=self.graph.tasks[job['geometry_key']]
                 if g['state']=='failed':raise ValueError(g['error'])
                 self._queue_derivatives(job)
-                if not job['basic_ready'] and g['state']=='done' and all(n in job['images'] for n in job['primary']):
+                if not job['basic_ready'] and job['phase']!='basic' and g['state']=='done' and all(n in job['images'] for n in job['primary']):
                     if any(not job['images'][n]['opaque'] for n in job['primary']):raise ValueError('Primary alpha unsupported')
                     key=('basic',job['id'])
+                    memory=getattr(self.relay,'texture_memory',None)
+                    if memory:
+                        resources={r['id']:r for r in job['capture'][3]['refs']['resources']};unique={}
+                        for group in job['capture'][3]['groups']:
+                            image=job['images'][resources[group['primary']]['filename']]
+                            unique.setdefault(image['sha256'],16+len(image['bgra']))
+                        from scene_bundle import FRAME
+                        parts=g['value'];mesh=job['capture'][3]
+                        group_count=sum(bool(parts[2].get(group['group'])) for group in mesh['groups'])
+                        scene_bytes=32+len(parts[1])+4*len(mesh['corners'])+16*group_count+FRAME.size
+                        if not memory.reserve(job['id'],list(unique.values()),scene_bytes):continue
                     self.graph.add(key,lambda job=job:self._basic(job));job['phase']='basic'
                 if job['phase']=='basic':
                     t=self.graph.tasks[('basic',job['id'])]
@@ -327,6 +343,8 @@ class Pipeline:
         return completed
 
     def _release(self,job):
+        memory=getattr(getattr(self,'relay',None),'texture_memory',None)
+        if (job['phase']=='alias' or (job['phase']=='failed' and not job.get('published'))) and memory:memory.release(job['id'])
         if job['phase']=='alias':
             # Canonical content owns the result. Cancel queued alias consumers
             # before their shared dependency entries can be removed. Running
