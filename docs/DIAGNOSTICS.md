@@ -1,6 +1,6 @@
 # Diagnostic tools reference
 
-Last reviewed: **2026-11-02, Run274**. Start with the newest [handoff](HANDOFF.md) for current problems and permitted test scope. Run270 implements the prepared project dome and removes the separate32-entry hull limit; Run273 promotes standard Windows material-file replacement. Run274 removes the five-second material-publication shutdown. Larger stress checkout remains pending.
+Last reviewed: **2026-11-02, Run278**. Start with the newest [handoff](HANDOFF.md) for current problems and permitted test scope. ExtraFrame is now the accepted launcher default after stress checkout. Effect-light integration is enabled; its first weapons-fire checkout remains pending.
 
 ## Choose the smallest useful tool
 
@@ -115,6 +115,8 @@ Nsight Systems provides graphics/API/GPU scheduling evidence. It is not a substi
 
 ## 7. Engine discovery and visual investigation
 
+**Light-emission integration recorder:** normal native multi-ship launcher `-LightDiagnostics`, off by default. [Worker/parser](../tools/remix_runtime/effect_light_trace.py), [fixed submission store](../tools/d3d9_proof/effect_light_trace.h), [tests](../tests/test_effect_light_trace.py). Records native bank and successfully submitted Remix light values by frame/configuration, bounded4MiB with omission/gap/error counts. No new SFC hook, renderer file IO or allocation. Separate worker drains after renderer stop, before shared mapping release. Existing current-user/session16MiB IPC and gameplay workflow; no new privilege/security policy. Read-only preflight accepts `--light-diagnostics` without `--execute`. [Run278](runs/2026-11-02-codex-effect-light-integration-checkout.md) records native layout/lifecycle and actual GPU checks. A successful API submission is not a final-pixel receipt or weapon-name attribution;join frames with insertion evidence. Recent rapid native events absent from rendered source frames are not guaranteed captured. This supersedes the earlier note that only aggregate effect counters existed.
+
 | Tool family | Purpose | Status / caution |
 | --- | --- | --- |
 | [Early-model observer](../tools/early_model_probe/start_early_model_session.ps1) | Locate model information before first draw | `-CheckOnly` avoids execution; older discovery workflow, not the normal renderer |
@@ -123,7 +125,7 @@ Nsight Systems provides graphics/API/GPU scheduling evidence. It is not a substi
 | [Mesh/texture analysis](../tools/m1_component/analyze_mesh_export.py), [texture-path analysis](../tools/m1_component/analyze_texture_path.py), [camera analysis](../tools/m1_component/analyze_live_camera.py) | Investigate captured geometry, associations, transforms and mapping | Offline analysis; preserve canonical captures and original images |
 | `tools/remix_ingest/`, `tools/remix_api_proof/` | Toolkit preview and separate direct-API experiments | Separate/historical paths; not required by ordinary D3D9 native replacement |
 
-Broad discovery, screenshots, geometry dumps and repeated on/off demonstrations do not belong in normal gameplay runs. The proposed targeted light-emission recorder remains planned, not implemented or enabled by this reference.
+Broad discovery, screenshots, geometry dumps and repeated on/off demonstrations do not belong in normal gameplay runs. The targeted light-emission recorder is implemented but remains opt-in;this reference does not enable it automatically.
 
 ## Evidence and maintenance
 

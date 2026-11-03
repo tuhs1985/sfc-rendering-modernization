@@ -1,7 +1,7 @@
 ---
 title: SFC Modernization — Status Tracker
-updated: 2026-11-02
-checkpoint: Run276 sponsor accepts stable ExtraFrame multi-ship checkpoint
+updated: 2026-11-03
+checkpoint: Run281 visible weapon lights; tentative radius2 baseline
 tags:
   - sfc-modernization
   - project-status
@@ -9,9 +9,15 @@ tags:
 
 # SFC Modernization — Status Tracker
 
+**Weapon lights are visible:** radius2.0 is the tentative baseline. The sponsor could see photon-associated lights after slowing to speed1. Logs confirm brief moving lights reach Remix without recording gaps. Exact weapon-to-light ownership remains unproven. Video2 linked in README. [Run281](runs/2026-11-03-codex-effect-radius-and-moving-lights.md).
+
+**First effect-light checkout:** the game supplied1,046active light submissions to Remix, with no missing or invalid records, but the sponsor saw no illumination. Most continuous active periods lasted long enough to see. The native falloff field is spatial range, not seconds. Internal placement/shadowing and brightness/falloff conversion remain possibilities; neither is proved yet. Next is a targeted visible-contribution check, not a guessed lifetime extension. [Run279](<C:/Project/SFC-Modernize Engine/docs/runs/2026-11-02-codex-first-effect-light-gameplay-review.md>).
+
+**Effect lights ready to try:** SFC now drives the new lights' position, colour and on/off state in Remix. Existing scene lighting and visual settings are preserved. Native tests and both600frame rendering checks pass. First run should add `-LightDiagnostics` to save bounded evidence while firing weapons and taking hits. Sphere shape and brightness remain provisional; gameplay confirmation is next. [Run278](<C:/Project/SFC-Modernize Engine/docs/runs/2026-11-02-codex-effect-light-integration-checkout.md>).
+
 **Accepted checkpoint:** sponsor accepts the ExtraFrame configuration as stable following the stress checkout. Commit and publication authorized. Continue with that explicit option; minor remaining findings stay tracked below.
 
-**Before the next test:** saved evidence needs archiving or cleanup to free at least another84MiB for the launcher's reservation. Source/dependency checks pass; this is storage housekeeping, not a rendering failure.
+**Ready for the next test:** ExtraFrame is now the launcher default. Leave off CompletionDiagnostics for the normal run. Cleanup reclaimed about1.23GB through verified, recoverable texture archives, leaving about1.71GB within the evidence allowance. Normal startup checks pass. [Run277](<C:/Project/SFC-Modernize Engine/docs/runs/2026-11-02-codex-cleanup-and-extraframe-default.md>).
 
 **ExtraFrame stress worked:** all63tracked objects received replacements across15models, with zero deadline misses, compared with96in the earlier Strict run. Typical delivery delay stayed around19ms; the allowance does not impose a full-frame wait. Cleanup passed and materials had no errors. Two new-asset records lacked insertion, and separate whole-game hitches remain; the battles were different sizes. Recommend keeping the explicit ExtraFrame option for checkouts. Default launcher settings are unchanged. [Run276](<C:/Project/SFC-Modernize Engine/docs/runs/2026-11-02-codex-extraframe-stress-comparison.md>).
 

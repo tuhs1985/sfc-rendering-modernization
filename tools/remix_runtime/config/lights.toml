@@ -221,10 +221,10 @@ raytracing = "renderer_default"
 # also multiplied by the existing conversion_scale and master_multiplier.
 # Existing directional lights and project_fill settings below are unchanged.
 [effects]
-enabled = false
+enabled = true
 intensity_multiplier = 1.0
 color_multiplier = [1.0, 1.0, 1.0]
-radius = 1.0 # Remix emitter size in existing native world units;not game range
+radius = 2.0 # Remix emitter size in existing native world units;not game range
 
 # Optional individual slot override,any slot2..63. Native OFF always wins.
 # [[effect_lights]]

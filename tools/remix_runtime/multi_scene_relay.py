@@ -68,6 +68,9 @@ class Relay(SingleRelay):
     def start_on_launch(self,pid):
         """Start the real renderer/device, without a ship or dummy scene template."""
         if self.prewarm_process or self.process:return
+        if getattr(self,'light_diagnostics',False):
+            from effect_light_trace import Recorder
+            self.effect_recorder=Recorder(self.receiver.channel,self.folder,pid)
         from live_owner_timing import EXE,RUNTIME,RECEIVER,GUARD
         backend=getattr(self,'renderer_backend',None)
         if backend:EXE,RUNTIME=backend['exe'],backend['runtime']
@@ -437,6 +440,8 @@ class Relay(SingleRelay):
             self.preparer.close()
             if getattr(self,'texture_memory',None):self.texture_memory.close()
             if self.frame_log and not self.frame_log.closed:self.frame_log.close()
+            if getattr(self,'effect_recorder',None):
+                self.effect_recording=self.effect_recorder.close();self.effect_recorder=None
 
     def finish(self,pid):
         report=super().finish(pid)
@@ -455,6 +460,7 @@ class Relay(SingleRelay):
         stage_counts=dict(zip(('lookup_header','lookup_packet','lookup_identity','decode','projection'),map(int,stages.groups())))
         asset_timings=[dict(id=int(i),cpu_us=int(c),gpu_admit_us=int(g),at_us=int(t)) for i,c,g,t in re.findall(r'MULTISCENE_ASSET_TIMING id=(\d+) cpu_us=(\d+) gpu_admit_us=(\d+) at_us=(\d+)',log)]
         report['multi_scene']=dict(state=state,assets=self.catalog,draws=draws,partial=self.partial,image_bytes=self.image_bytes,
+                                  effect_light_recording=getattr(self,'effect_recording',None),
                                   pipeline_mode=self.mode,detailed_evidence=self.mode=='test',
                                   delivery_stages=stage_counts,asset_timings=asset_timings,material_events=self.material_events,
                                   preparation=self.preparer.report(),initial_ids=sorted(self.initial_ids or []),

@@ -65,6 +65,7 @@ def main():
     parser.add_argument('--prewarm',action='store_true',help='Start native renderer before discovering prepared fixture assets')
     parser.add_argument('--startup-profile',action='store_true',help='Offline only: bounded native startup phase/QPC/memory measurements')
     parser.add_argument('--completion-diagnostics',action='store_true',help='Default-off bounded records of unusually slow rendering completion')
+    parser.add_argument('--light-diagnostics',action='store_true',help='Optional bounded effect-light submission evidence in standalone multi-ship fixture')
     parser.add_argument('--effect-light-fixture',action='store_true',help='Standalone synthetic moving/pulsing effect bank;never used in SFC')
     parser.add_argument('--loading-policy',choices=('inherit','async','blocking','rtxio'),default='inherit',help='Offline startup only: explicitly exercise pinned Remix loading/compilation settings')
     parser.add_argument('--material-library',choices=('layers','flat'),default='layers',help='Offline startup only: same materials/images without layered USD composition')
@@ -84,6 +85,7 @@ def main():
     parser.add_argument('--legacy-startup-warmup',action='store_true',help='Opt-in old24Present startup workaround;default one Present')
     args=parser.parse_args()
     if args.effect_light_fixture and not args.native_all_ships:parser.error('Effect-light fixture requires native multi-ship return')
+    if args.light_diagnostics and not args.native_all_ships:parser.error('Light diagnostics requires native multi-ship fixture')
     if args.native_all_ships and not args.native_insertion_policy:parser.error('Native cohort requires explicit timing policy')
     if args.native_insertion_policy:
         if args.native_foreground or args.replacement_faults or args.live_tuning:parser.error('Native insertion fixture excludes old replay/fault/tuning modes')
@@ -238,6 +240,7 @@ def main():
             if args.player_replacement:mode_args['player_replacement']=True
             if args.async_material_checkout:mode_args['checkout_backend']=checkout_backend
             live_relay=Relay(work,semantic,TEST,additive=args.d3d9_additive,offline_fixture=args.d3d9_additive,persistent=args.persistent_scene,buffered=args.synchronized_buffer,**mode_args)
+            live_relay.light_diagnostics=args.light_diagnostics
             live_relay.completion_diagnostics=args.completion_diagnostics
             if args.native_insertion_policy:live_relay.native_gate_policy=args.native_insertion_policy
             live_relay.native_all_ships=args.native_all_ships
@@ -470,6 +473,7 @@ def main():
     receipt['menu_idle_seconds']=args.menu_idle_seconds
     receipt['render_prewarm']=args.render_prewarm
     receipt['effect_light_fixture']=args.effect_light_fixture
+    receipt['light_diagnostics']=args.light_diagnostics
     receipt['loading_policy']=args.loading_policy
     receipt['material_library']=args.material_library
     receipt['material_texture_loading']=args.material_texture_loading

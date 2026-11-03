@@ -35,8 +35,15 @@ def qualify(folders):
                 raise ValueError('Actual moving/pulsing effect-light runtime/cleanup evidence missing')
             for arch in (32,64):
                 path=ROOT/f'artifacts/player-replacement/effect-light-tests/effect{arch}.txt'
-                if 'Effect lights PASS 30 checks' not in path.read_text():raise ValueError('Native effect-light lifecycle checks missing')
+                match=re.search(r'Effect lights PASS (\d+) checks',path.read_text())
+                if not match or int(match[1])<30:raise ValueError('Native effect-light lifecycle checks missing')
                 files[path.relative_to(ROOT).as_posix()]=digest(path)
+            if r.get('light_diagnostics'):
+                trace=json.loads((folder/'effect-light-submissions-summary.json').read_text())
+                if trace.get('error') or not trace.get('records') or not trace.get('active_slot_observations') or trace.get('invalid_reads'):
+                    raise ValueError('Effect light submission evidence incomplete')
+                for name in ('effect-light-submissions.jsonl','effect-light-submissions-summary.json'):
+                    files[(folder/name).relative_to(ROOT).as_posix()]=digest(folder/name)
         expected=24 if r.get('legacy_startup_warmup',False) else 1
         if f'STARTUP_POLICY bootstrap_presents={expected} ' not in native:raise ValueError('Explicit startup policy evidence missing')
         summary=re.search(r'MULTISCENE_SUMMARY .*loads=(\d+) shared=(\d+)',native)

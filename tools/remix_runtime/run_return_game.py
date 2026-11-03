@@ -141,8 +141,10 @@ def main():
     parser.add_argument('--scene-depth',action='store_true',help='Default-off depth-filtered additive ship;original drawing/UI path unchanged')
     parser.add_argument('--legacy-startup-warmup',action='store_true',help='Opt-in old24Present startup workaround;default is one Present')
     parser.add_argument('--completion-diagnostics',action='store_true',help='Default-off bounded slow renderer-completion records')
+    parser.add_argument('--light-diagnostics',action='store_true',help='Optional bounded native-to-Remix transient light submission evidence')
     args=parser.parse_args()
     if args.native_all_ships and not args.native_insertion_policy:parser.error('Native multi-ship replacement requires explicit timing policy')
+    if args.light_diagnostics and not args.native_all_ships:parser.error('Light diagnostics requires native multi-ship replacement')
     if args.native_insertion_policy:
         if args.native_insertion_observe or args.native_foreground or args.light_tuning:parser.error('Native gate excludes observation,shield replay and tuning')
         args.player_replacement=not args.native_all_ships;args.multi_ship=True;args.async_material_checkout=True
@@ -475,6 +477,7 @@ def main():
                 if args.experimental_parallel_assets:mode_args['experimental_live_checkout']=True
                 if args.async_material_checkout:mode_args['checkout_backend']=checkout_backend
                 timing_relay=Relay(work,receiver,TEST,additive=args.d3d9_additive,persistent=args.persistent_scene,buffered=args.synchronized_buffer,**mode_args)
+                timing_relay.light_diagnostics=args.light_diagnostics
                 timing_relay.completion_diagnostics=args.completion_diagnostics
                 timing_relay.live_tuning=d3d9_tuning
                 if args.native_insertion_policy:timing_relay.native_gate_policy=args.native_insertion_policy

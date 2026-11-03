@@ -31,7 +31,7 @@ Controls are appended to the existing `tools/remix_runtime/config/lights.toml`:
 enabled = true
 intensity_multiplier = 1.0
 color_multiplier = [1.0, 1.0, 1.0]
-radius = 1.0
+radius = 2.0
 
 # Optional per-slot override;native OFF and effects.enabled=false still win.
 [[effect_lights]]
@@ -46,6 +46,8 @@ Create/destroy API calls remain on the host render thread at the existing comple
 
 ## Checkout boundary
 
+**Run278 update:** the connection is now enabled for sponsor checkout. Optional `-LightDiagnostics` uses a fixed111,680byte,16cell submission store at source offset+64KiB, within the existing mapping. It records successful Remix draw-submission parameters joined to the original bank/frame/configuration generation; a worker saves meaningful changes up to4MiB and reports gaps/omissions. No new SFC hook or render-thread IO; ordinary runs create no recorder. This supersedes the recorder-pending wording below. See the [current checkout and final tests](../runs/2026-11-02-codex-effect-light-integration-checkout.md). Runtime pixel inclusion and weapon-family attribution still require evidence; API submission alone is not a final-image receipt.
+
 Sponsor follow-up: include targeted **light-emission characterization** in the integration checkout. Before that run, prepare an opt-in, bounded recorder using the existing source/host connection; the current launcher records aggregate counts, not the per-light data needed for this analysis. This is planned work, not an already enabled capture.
 
 Retain native slot/type and all original record words, global gate/enable-prefix state, world position, contribution RGB and range/falloff over activation, movement, fading and deactivation. Join these to source frame/QPC and the actual Remix position/radiance/radius and configuration revision. Correlate weapon launches/impacts/explosions using existing event evidence where available; keep unknown associations explicit. Compare near/far illumination on ships to distinguish source colour, brightness conversion and spatial falloff. Do not infer emitter shape or independent power from an unnamed field, or confuse material emissive maps with these bank lights.
@@ -53,3 +55,5 @@ Retain native slot/type and all original record words, global gate/enable-prefix
 Prefer state-change records and short bounded full-rate bursts so short flashes are represented. Worker-side evidence output only, within existing logging/storage limits; no render-thread files, new broad hooks, continuous image dumps or sponsor timestamps. Keep this diagnostic recorder off in ordinary performance mode. Prepare it before asking for the integration run, then use the results to decide which additional emission/shape relationships need investigation.
 
 Prepared for the current native multi-ship replacement launcher. Fire weapons, let impacts occur and switch cameras normally. Check that flashes illuminate replacement ships at the right positions and disappear with their effects. Brightness/radius can then be tuned. Exact weapon-family identification, effects that never register native lights, multiple unconfirmed manager banks and faithful native type5 attenuation remain unqualified. Synthetic API/GPU checks are not sponsor gameplay acceptance.
+
+Current tentative effect radius is2.0 (Run281). Sponsor saw weapon illumination; slowed photon firing supported projectile-associated lighting. Exact weapon ownership and physical conversion remain unqualified. Historical first-checkout invisibility is superseded.

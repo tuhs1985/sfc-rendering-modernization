@@ -329,10 +329,37 @@ old one-light diagnostic. Use multipliers for tuning,not native-memory changes.
 
 `native_directional_0` and `_1` identify the two qualified native type0slots,not
 proven engine names or a universal sun/ambient classification. Directions and
-native strengths come from fresh observations,not the old saved run. This first
-pass does NOT render transient native type5weapon/effect lights;their specialised
-native behaviour still needs mapping. Do not add invented IDs or set
+native strengths come from fresh observations,not the old saved run. Transient
+native type1/type5 lights now have the separate effect path described below;
+faithful native attenuation still needs mapping. Do not add invented IDs or set
 raytracing="off" expecting shadow-free illumination—it is rejected.
+
+### Game-driven effect lights
+
+In lights.toml, `[effects]` controls transient slots2–63. These now default ON.
+Scene lights0/1 and project_fill keep their separate settings.
+
+| Setting | Effect |
+| --- | --- |
+| enabled | Allows native active lights to contribute;false turns this addition off |
+| intensity_multiplier | Multiplies native RGB contribution;2 doubles the submitted radiance,not necessarily perceived brightness |
+| color_multiplier | Per-channel colour scaling;[1,1,1] preserves native colour |
+| radius | Remix spherical emitter size in native world units;affects softness and can affect total illumination;not native range |
+
+Effective radiance = native RGB × conversion_scale × master_multiplier ×
+effects intensity_multiplier × effects color_multiplier. Native range is not
+an additional power multiplier. Actual native OFF/global gate/prefix still wins;
+effect lights do not use the persistent scene lights' always-on behavior.
+
+Optional `[[effect_lights]]` entries with `slot = 2` through63 override these
+common values. Slot numbers may be reused for different weapons/effects; they
+are not weapon names. Sphere is a provisional emitter proxy,not a recovered SFC
+shape. The pinned SDK has no independent per-effect shadow-only disable control.
+Normal checkout freezes settings; the existing tuning session reloads valid edits.
+
+First integration checkout: use the normal native multi-ship launcher with
+`-LightDiagnostics`. This optional4MiB recorder collects source-to-submission
+evidence; it is off for ordinary play. See [Run278](../../../docs/runs/2026-11-02-codex-effect-light-integration-checkout.md).
 
 ## Longer tuning session
 
