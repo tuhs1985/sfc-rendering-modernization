@@ -18,7 +18,9 @@ This is a research/development workspace, not a ready-to-install graphics mod.
 
 Click the preview to watch on YouTube. The test shows the original FCA alongside its live Remix-rendered copy, with a 360-degree camera pan to demonstrate the lighting response. This is the additive integration proof, not original-ship replacement.
 
-**Video 2:** [Watch the next SFC rendering modernization demonstration](https://youtu.be/O-hdw14ai0E).
+[![SFC Rendering Modernization — Video 2](https://img.youtube.com/vi/O-hdw14ai0E/hqdefault.jpg)](https://youtu.be/O-hdw14ai0E)
+
+**Video 2:** the next SFC rendering modernization demonstration.
 
 [![SFC Rendering Modernization — RTX Remix Weapon Light Test](https://img.youtube.com/vi/0iGcIH7QHTo/hqdefault.jpg)](https://www.youtube.com/watch?v=0iGcIH7QHTo)
 
