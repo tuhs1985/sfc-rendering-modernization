@@ -1,13 +1,17 @@
 ---
 title: SFC Modernization — Status Tracker
 updated: 2026-11-03
-checkpoint: Run281 visible weapon lights; tentative radius2 baseline
+checkpoint: Run284 actual damage selection and mapping captured
 tags:
   - sfc-modernization
   - project-status
 ---
 
 # SFC Modernization — Status Tracker
+
+**Damage capture succeeded:** the F-CA progressed through light, medium and heavy damage, each linked to its original damage/SI images. We captured the separate damage mapping: same hull geometry, different texture coordinates. One mapping served all three stages, so it can be reused while damage state changes. No drops/read errors; cleanup and client checks passed. Next: finish the narrow blend/companion and first-use ordering work before adding this layer to Remix. [Run284](runs/2026-11-03-codex-damage-observation-review.md).
+
+**Damage investigation:** SFC draws damage as a separate layer over the intact hull, using shared light/medium/heavy images and its own mapping. Our current fresh capture omits that second layer. Existing sampled logs do not retain the missing damage state. [Run282](runs/2026-11-03-codex-damage-texture-investigation.md).
 
 **Weapon lights are visible:** radius2.0 is the tentative baseline. The sponsor could see photon-associated lights after slowing to speed1. Logs confirm brief moving lights reach Remix without recording gaps. Exact weapon-to-light ownership remains unproven. Video2 linked in README. [Run281](runs/2026-11-03-codex-effect-radius-and-moving-lights.md).
 
@@ -182,7 +186,7 @@ Updated through **Run233,October31,2026**. Repository handoff and run records co
 - Damage textures are not currently read by this path, per sponsor. Break-model transition and loading need qualification; no arbitrary timing number set.
 - **Break-model finding:** `_brk.mod` exists and SFC already loaded FCA/KFF break assets during setup, before tactical rendering. We may prepare their fresh in-memory data while the ship is alive; breakup-piece movement and transition remain unqualified. [Run212](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-27-codex-break-model-inspection.md>).
 - **Optional:** LOD models. Their absence alone does not block alpha release.
-- Native player replacement is demonstrated; multi-ship replacement is prepared for checkout. No alpha readiness or formal milestone PASS claimed.
+- Supported multi-ship replacement and visible weapon lighting are demonstrated. Damage-layer capture/application and fast break-model transitions remain open. No alpha readiness or formal milestone PASS claimed.
 - [Alpha scope](<C:/Project/SFC-Modernize Engine/docs/decisions/2026-10-27-alpha-release-scope.md>).
 
 ### SFC-18 — Player-ship replacement
@@ -322,6 +326,20 @@ Evidence: [hiccup review](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-24-
 | SFC-14 | **Arbitrary dynamic/damage geometry — UNQUALIFIED** | Supported captured rigid meshes and observable revisions work; unannounced in-place deformation is not established. | A mission reveals such changes, or broader model support requires a focused change-detection test. |
 
 References: [interface audit](<C:/Project/SFC-Modernize Engine/docs/reconnaissance/2026-10-24-live-interface-second-audit.md>), [future-renderer gate](<C:/Project/SFC-Modernize Engine/docs/decisions/2026-10-18-renderer-independent-boundary-gate.md>).
+
+### SFC-23 — First launch after PC restart — PARKED
+
+Sponsor reports SFC hangs for roughly20seconds on the first launch after a PC
+restart, occurring almost every time. Cause is unqualified; do not assume this
+is the earlier Defender wait or Remix initialization. Investigation explicitly
+deferred on November3,2026; current damage observation remains the active task.
+
+Reopen when the sponsor is ready for a post-restart test. Exact next action:
+prepare timing observation before restarting, then compare the first SFC launch
+with an immediate second launch using the same launcher/settings. Separate game
+startup, integration startup and renderer readiness so the delayed stage can be
+identified. Preserve Defender and existing settings. No restart, trace or test
+is authorized by this parked note alone.
 
 ## Already demonstrated — do not rediscover blindly
 

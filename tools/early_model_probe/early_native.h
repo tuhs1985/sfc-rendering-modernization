@@ -7,11 +7,19 @@
 #include <atomic>
 #include <cstring>
 #include <intrin.h>
+#ifdef SFC_DAMAGE_PROBE
+#include <fstream>
+#include <string>
+#endif
 #include "early_core.h"
 namespace early_model {
 using Zero=Word(__thiscall*)(void*);using One=Word(__thiscall*)(void*,Word);
 using Four=Word(__thiscall*)(void*,Word,Word,Word,Word);using Loader=Word(__cdecl*)(Word);
 struct Targets {One request=nullptr;Loader load=nullptr;One parse=nullptr,attach=nullptr,render=nullptr;Four mesh=nullptr;Zero visualRetire=nullptr,born=nullptr,retire=nullptr;};
+#ifdef SFC_DAMAGE_PROBE
+using Three=Word(__thiscall*)(void*,Word,Word,Word);
+inline Three damageWrapper=nullptr;
+#endif
 inline Targets native;inline std::atomic<bool> observing{false},uncertain{false};
 inline std::atomic<unsigned> active{0},busy{0},faults{0};inline std::atomic<uint64_t> tokens{0},callbackTicks{0};
 inline SRWLOCK bookLock=SRWLOCK_INIT;inline Book owners,visuals;inline thread_local Stack stack;
@@ -114,8 +122,14 @@ inline Word __fastcall onRender(void* p,void*,Word manager){
  struct Pop {~Pop(){stack.pop();}} pop;
  last.enter();const auto v=native.render(p,manager);last.leave();return v;
 }
+#ifdef SFC_DAMAGE_PROBE
+#include "../damage_probe/damage_hooks.inl"
+#endif
 inline Word __fastcall onMesh(void* p,void*,Word manager,Word source,Word a,Word b){
  LastError last;Active activeCall;const auto c=stack.current();bool ok=true;const auto caller=ptr(_ReturnAddress());
+#ifdef SFC_DAMAGE_PROBE
+ DamageScope damageScope(p,manager,source,a,b,caller);
+#endif
  if(observing&&c.role==FirstDraw&&mainline(fixtureMode?expectedCaller:caller,expectedCaller,c.visual,source,word(c.visual+0x158,ok))&&word(ptr(p),ok)==meshVt){
   auto r=record(FirstDraw,c.owner,c.visual);r.mesh=ptr(p);r.caller=caller;identities(r);
   if(TryAcquireSRWLockExclusive(&bookLock)){const bool first=owners.first(c.owner,r.data[0],ptr(p));ReleaseSRWLockExclusive(&bookLock);
@@ -137,6 +151,9 @@ inline LONG transaction(bool attach){
  CloseHandle(snapshot);if(!error)error=DetourUpdateThread(GetCurrentThread());
 #define EARLY_HOOK(field,callback) if(!error)error=attach?DetourAttach(reinterpret_cast<PVOID*>(&native.field),reinterpret_cast<PVOID>(callback)):DetourDetach(reinterpret_cast<PVOID*>(&native.field),reinterpret_cast<PVOID>(callback))
  EARLY_HOOK(request,onRequest);EARLY_HOOK(load,onLoad);EARLY_HOOK(parse,onParse);EARLY_HOOK(attach,onAttach);EARLY_HOOK(render,onRender);EARLY_HOOK(mesh,onMesh);EARLY_HOOK(visualRetire,onVisualRetire);EARLY_HOOK(born,onBorn);EARLY_HOOK(retire,onRetire);
+#ifdef SFC_DAMAGE_PROBE
+ if(!error)error=attach?DetourAttach(reinterpret_cast<PVOID*>(&damageWrapper),reinterpret_cast<PVOID>(onDamageWrapper)):DetourDetach(reinterpret_cast<PVOID*>(&damageWrapper),reinterpret_cast<PVOID>(onDamageWrapper));
+#endif
 #undef EARLY_HOOK
  if(!error)error=DetourTransactionCommit();else DetourTransactionAbort();for(unsigned i=0;i<used;++i)CloseHandle(handles[i]);return error;
 }

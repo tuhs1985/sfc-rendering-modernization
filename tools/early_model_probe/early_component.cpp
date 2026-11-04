@@ -17,6 +17,10 @@ early_model::Targets targets(){
   {0x004158C1,"\xB8\x13\xBB\x75\x00\xE8\x89\x09\x32\x00"}};
  if(reinterpret_cast<uintptr_t>(GetModuleHandleW(nullptr))!=0x400000)return {};
  for(const auto& c:checks){std::array<char,10> b{};if(!read(c.address,b.data(),b.size())||memcmp(b.data(),c.bytes,b.size()))return {};}
+#ifdef SFC_DAMAGE_PROBE
+ std::array<char,6> wrapper{};if(!read(0x006AC5A0,wrapper.data(),wrapper.size())||memcmp(wrapper.data(),"\x83\xEC\x08\x53\x56\x8B",6))return {};
+ damageWrapper=reinterpret_cast<Three>(0x006AC5A0);
+#endif
  return {reinterpret_cast<One>(0x004156F9),reinterpret_cast<Loader>(0x0042F51A),reinterpret_cast<One>(0x0042FEF9),reinterpret_cast<One>(0x00413A8D),reinterpret_cast<One>(0x004162B9),reinterpret_cast<Four>(0x0042E4B2),reinterpret_cast<Zero>(0x0042F918),reinterpret_cast<Zero>(0x004146A7),reinterpret_cast<Zero>(0x004158C1)};
 }
 DWORD WINAPI worker(void*){
@@ -32,6 +36,10 @@ DWORD WINAPI worker(void*){
    const std::wstring image(actual);if(image.find(L"\\artifacts\\remix-runtime\\runs\\")==std::wstring::npos||image.substr(image.find_last_of(L"\\/")+1)!=L"d3d11_return_fixture.exe"){return_path::write(state.error,225);return 1;}
    using Factory=BOOL(__cdecl*)(Targets*);const auto factory=reinterpret_cast<Factory>(GetProcAddress(GetModuleHandleW(nullptr),"EarlyFixtureConfig"));
    if(!factory||!factory(&t)){return_path::write(state.error,226);return 1;}fixtureMode=true;
+#ifdef SFC_DAMAGE_PROBE
+   using DamageFactory=Three(__cdecl*)();const auto damageFactory=reinterpret_cast<DamageFactory>(GetProcAddress(GetModuleHandleW(nullptr),"DamageFixtureWrapper"));
+   if(!damageFactory||(damageWrapper=damageFactory())==nullptr){return_path::write(state.error,227);return 1;}
+#endif
   }else t=targets();
   if(!t.request){return_path::write(state.error,223);return 1;}
   sink=collect;if(!runtime.prepare(&state,output)){return_path::write(state.error,224);return 1;}

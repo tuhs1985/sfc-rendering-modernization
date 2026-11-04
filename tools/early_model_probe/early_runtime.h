@@ -12,7 +12,12 @@ static_assert(sizeof(Header)==128);
 class Runtime {
  SRWLOCK guard=SRWLOCK_INIT;Record* ring=nullptr;
  std::atomic<unsigned> head{0},tail{0};std::atomic<bool> accepting{false};
- std::array<void*,9> entries{};std::array<std::array<BYTE,16>,9> originalBytes{};
+#ifdef SFC_DAMAGE_PROBE
+ static constexpr unsigned HookCount=10;
+#else
+ static constexpr unsigned HookCount=9;
+#endif
+ std::array<void*,HookCount> entries{};std::array<std::array<BYTE,16>,HookCount> originalBytes{};
 public:
  return_path::State* control=nullptr;Header* header=nullptr;std::wstring path;bool hooked=false;
  bool prepare(return_path::State* state,const wchar_t* output){
@@ -34,8 +39,11 @@ public:
   const auto until=GetTickCount64()+2000;while(active.load()&&GetTickCount64()<until)Sleep(1);
   LONG failure=error?error:active.load()?WAIT_TIMEOUT:NO_ERROR;Word restored=0;
   if(!error)for(unsigned i=0;i<entries.size();++i){std::array<BYTE,16> bytes{};if(read(ptr(entries[i]),bytes.data(),16)&&bytes==originalBytes[i])++restored;}
-  if(!failure&&restored!=9)failure=ERROR_INVALID_DATA;
+  if(!failure&&restored!=HookCount)failure=ERROR_INVALID_DATA;
   auto s=record(Statistics);s.data[0]=faults.load();s.data[1]=busy.load();s.data[2]=uncertain.load();s.data[3]=owners.serial;s.data[4]=visuals.serial;
+#ifdef SFC_DAMAGE_PROBE
+  s.data[5]=damageBusy.load();s.data[6]=damageOmitted.load();
+#endif
   s.token=callbackTicks.load();emitRecord(s);auto end=record(Stopped);end.data[0]=static_cast<Word>(failure);end.data[1]=active.load();end.data[2]=restored;end.data[3]=hooked;emitRecord(end);
   if(failure){header->error=failure;return_path::write(control->error,220);}return failure;
  }
@@ -44,6 +52,9 @@ public:
   if(file==INVALID_HANDLE_VALUE){header->error=ERROR_OPEN_FAILED;header->status=4;return_path::write(control->error,221);return 1;}
   DWORD nbytes=0;uint64_t size=128;bool ok=WriteFile(file,header,128,&nbytes,nullptr)&&nbytes==128;
   native=targets;entries={reinterpret_cast<void*>(targets.request),reinterpret_cast<void*>(targets.load),reinterpret_cast<void*>(targets.parse),reinterpret_cast<void*>(targets.attach),reinterpret_cast<void*>(targets.render),reinterpret_cast<void*>(targets.mesh),reinterpret_cast<void*>(targets.visualRetire),reinterpret_cast<void*>(targets.born),reinterpret_cast<void*>(targets.retire)};
+#ifdef SFC_DAMAGE_PROBE
+  entries[9]=reinterpret_cast<void*>(damageWrapper);
+#endif
   for(unsigned i=0;i<entries.size();++i)if(!read(ptr(entries[i]),originalBytes[i].data(),16))ok=false;
   accepting=true;const LONG error=ok?transaction(true):ERROR_WRITE_FAULT;hooked=!error;header->error=error;header->status=error?4:2;
   observing=!error;if(error){accepting=false;return_path::write(control->error,222);}else return_path::write(control->ready,1);
@@ -62,6 +73,9 @@ public:
     ++n;
    }
    tail.store(n,std::memory_order_release);header->queued=static_cast<LONG>(head.load()-n);header->fileBytes=size;if(size>=Hard/2)header->warning=1;
+#ifdef SFC_DAMAGE_PROBE
+   if(!damageWriteSnapshots(path)) {header->error=ERROR_WRITE_FAULT;ok=false;}
+#endif
    if(stopping&&n==head.load())break;if(!ok){header->error=ERROR_WRITE_FAULT;break;}Sleep(2);
   }
   if(!stopping){stop();accepting=false;}

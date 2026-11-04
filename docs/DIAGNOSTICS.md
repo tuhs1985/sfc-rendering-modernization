@@ -1,6 +1,6 @@
 # Diagnostic tools reference
 
-Last reviewed: **2026-11-02, Run278**. Start with the newest [handoff](HANDOFF.md) for current problems and permitted test scope. ExtraFrame is now the accepted launcher default after stress checkout. Effect-light integration is enabled; its first weapons-fire checkout remains pending.
+Last reviewed: **2026-11-03, Run284**. Start with the newest [handoff](HANDOFF.md) for current problems and permitted test scope. ExtraFrame is the accepted launcher default after stress checkout. Effect lights have passed the visible weapons-fire checkout. Focused damage observation captured all three standard F-CA damage stages; review that evidence before requesting more runs.
 
 ## Choose the smallest useful tool
 
@@ -12,9 +12,36 @@ Last reviewed: **2026-11-02, Run278**. Start with the newest [handoff](HANDOFF.m
 | Is the cost model preparation or file delivery? | Asset timing records and CPU-only preparation probe | Narrow file-open observation |
 | Did the returned ship have the right colour, depth and text ordering? | Standalone native insertion fixture | Focused pixel/depth tests; sponsor observation for actual gameplay |
 | What does the engine draw besides ships? | Retained rendering-family/effect captures and offline analysis | Explicit bounded survey run, excluding known bulk ship payloads |
+| Which damage image and mapping does a ship use? | [Damage-only observer](../tools/damage_probe/README.md) and Run282 pinned-code evidence | No broad survey; exact native blend arithmetic only if existing evidence is insufficient |
 | Is this a graphics-driver/GPU scheduling issue? | Existing timing evidence | NVIDIA Nsight, with a defined target and bounded capture |
 
 Diagnostics should stay opt-in. Do not turn them into normal frame-path work or interpret an observation failure as a reason to disable valid rendering. Packet identity, resource ownership and synchronization are functional requirements, not optional logging.
+
+## Damage-only native observation — Run283
+
+**Completed checkout:** [Run284](runs/2026-11-03-codex-damage-observation-review.md)
+contains actual light/medium/heavy pairs and a complete secondary F-CA mapping,
+with no drops/read errors and restored hooks. Reuse that evidence; another
+unchanged run is unnecessary for those relationships.
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\Project\SFC-Modernize Engine\tools\damage_probe\start_damage_session.ps1"
+```
+
+Separate copied-game observer, no Remix replacement. Familiar F-CA battle, hull
+damage and brief camera rotation, normal exit at two beeps after90tactical seconds.
+Records damage scalar/family, temporary material pair and same-process resource
+table, plus up to four original secondary mappings.16MiB metadata/four2MiB maps;
+no texture dumps or repeated primary hull export. The four-map limit is diagnostic
+capacity, not a functional scene limit. Identity/read/capacity/cleanup gaps remain
+explicit partial evidence. `-CheckOnly` starts no game.
+
+[Probe](reconnaissance/probes/DAMAGE-LAYER-001.md),
+[implementation/workflow](../tools/damage_probe/README.md),
+[decoder](../tools/damage_probe/damage_capture.py).
+Native/injected qualification is local under `artifacts/render-survey/damage-probe`.
+Damage's pure-black transparency is sponsor-established; do not use this tool to
+reopen that question or globally key out ordinary hull black.
 
 ## 1. Current gameplay timing and replacement records
 

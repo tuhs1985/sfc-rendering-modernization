@@ -20,6 +20,12 @@ Click the preview to watch on YouTube. The test shows the original FCA alongside
 
 **Video 2:** [Watch the next SFC rendering modernization demonstration](https://youtu.be/O-hdw14ai0E).
 
+[![SFC Rendering Modernization — RTX Remix Weapon Light Test](https://img.youtube.com/vi/0iGcIH7QHTo/hqdefault.jpg)](https://www.youtube.com/watch?v=0iGcIH7QHTo)
+
+**Weapon light test:** SFC's live weapon-light state drives lights in RTX Remix,
+illuminating the replacement ships inside the game. This demonstrates functional
+weapon lighting; brightness and source size remain adjustable for further tuning.
+
 ## What works today
 
 - **Semantic capture:** observe ship/model ownership before the engine reduces it to generic draw calls.

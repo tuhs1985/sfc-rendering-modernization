@@ -1,0 +1,281 @@
+{
+  "probe": "DAMAGE-TEXTURE-PATH-001",
+  "client_sha256": "4D65761D7DD69EF1504070261B81E9C200C0AF18105033E1C4D2222C62320C29",
+  "verified_instruction_count": 1729,
+  "textures": [
+    {
+      "name": "assets/textures/light damage.bmp",
+      "request_site": "0x0042DF3F",
+      "registry_call": "0x0042DF44",
+      "resource_slot": "0x008F581C",
+      "sha256": "12db68827f42f76134e35bdd7c5fbc92ef1f1c1da3031fa9d694509880504f63",
+      "bytes": 196664,
+      "dimensions": [
+        256,
+        256
+      ],
+      "bits_per_pixel": 24,
+      "compression": 0
+    },
+    {
+      "name": "assets/textures/medium damage.bmp",
+      "request_site": "0x0042DF57",
+      "registry_call": "0x0042DF5C",
+      "resource_slot": "0x008F5820",
+      "sha256": "c1e29099b4de1266b54fc71e2de77677a477e2f23c87dce9634aef2fc36059be",
+      "bytes": 196664,
+      "dimensions": [
+        256,
+        256
+      ],
+      "bits_per_pixel": 24,
+      "compression": 0
+    },
+    {
+      "name": "assets/textures/heavy damage.bmp",
+      "request_site": "0x0042DF6F",
+      "registry_call": "0x0042DF74",
+      "resource_slot": "0x008F5824",
+      "sha256": "2da69054e60e2fd4c5836ad0f301e1e1b8303d49653ae1af4ee5db6f7b4c86ba",
+      "bytes": 196664,
+      "dimensions": [
+        256,
+        256
+      ],
+      "bits_per_pixel": 24,
+      "compression": 0
+    },
+    {
+      "name": "assets/textures/light damage si.bmp",
+      "request_site": "0x0042DF87",
+      "registry_call": "0x0042DF8C",
+      "resource_slot": "0x008F57F8",
+      "sha256": "537986d47ae39b267c6fbd9eb14ab864d7df6f00ccdd512101efb536eae32c18",
+      "bytes": 196664,
+      "dimensions": [
+        256,
+        256
+      ],
+      "bits_per_pixel": 24,
+      "compression": 0
+    },
+    {
+      "name": "assets/textures/medium damage si.bmp",
+      "request_site": "0x0042DF9F",
+      "registry_call": "0x0042DFA4",
+      "resource_slot": "0x008F57FC",
+      "sha256": "7fcf534834d1f22406573ed06ade0329f608f934ca1dc57a16b893caf60a4951",
+      "bytes": 196664,
+      "dimensions": [
+        256,
+        256
+      ],
+      "bits_per_pixel": 24,
+      "compression": 0
+    },
+    {
+      "name": "assets/textures/heavy damage si.bmp",
+      "request_site": "0x0042DFB7",
+      "registry_call": "0x0042DFBC",
+      "resource_slot": "0x008F5800",
+      "sha256": "c63a0f530dd72847eaa2c1986ec215309fedf28d38c2b1dfdd9ab4bd942208c5",
+      "bytes": 196664,
+      "dimensions": [
+        256,
+        256
+      ],
+      "bits_per_pixel": 24,
+      "compression": 0
+    },
+    {
+      "name": "assets/textures/starbase damage light.bmp",
+      "request_site": "0x0042DFCF",
+      "registry_call": "0x0042DFD4",
+      "resource_slot": "0x008F5828",
+      "sha256": "88cbff14909bf4215ae529c4b619aeaff4cd09819f14e2f4301b636894134af1",
+      "bytes": 196664,
+      "dimensions": [
+        256,
+        256
+      ],
+      "bits_per_pixel": 24,
+      "compression": 0
+    },
+    {
+      "name": "assets/textures/starbase damage medium.bmp",
+      "request_site": "0x0042DFE7",
+      "registry_call": "0x0042DFEC",
+      "resource_slot": "0x008F582C",
+      "sha256": "3e468dfef33fe634ba8588c68c7efbe5b89252b56de920462d848f2f4fa0c847",
+      "bytes": 196664,
+      "dimensions": [
+        256,
+        256
+      ],
+      "bits_per_pixel": 24,
+      "compression": 0
+    },
+    {
+      "name": "assets/textures/starbase damage heavy.bmp",
+      "request_site": "0x0042DFFF",
+      "registry_call": "0x0042E004",
+      "resource_slot": "0x008F5830",
+      "sha256": "fa0cdd8a83013c8137779af25bedbe799012c9631a9f08943e3d5454508133bc",
+      "bytes": 196664,
+      "dimensions": [
+        256,
+        256
+      ],
+      "bits_per_pixel": 24,
+      "compression": 0
+    },
+    {
+      "name": "assets/textures/starbase damage lightSI.bmp",
+      "request_site": "0x0042E017",
+      "registry_call": "0x0042E01C",
+      "resource_slot": "0x008F5804",
+      "sha256": "0836a3442fc7484eca69d6ba260681a076cb350aedb05e4a9ed879a2491a3700",
+      "bytes": 196664,
+      "dimensions": [
+        256,
+        256
+      ],
+      "bits_per_pixel": 24,
+      "compression": 0
+    },
+    {
+      "name": "assets/textures/starbase damage mediumSI.bmp",
+      "request_site": "0x0042E02F",
+      "registry_call": "0x0042E034",
+      "resource_slot": "0x008F5808",
+      "sha256": "9468c2b9c0fef59fa3bb8c9107416fd0412e614412cc98d8ef41565b55171c8c",
+      "bytes": 196664,
+      "dimensions": [
+        256,
+        256
+      ],
+      "bits_per_pixel": 24,
+      "compression": 0
+    },
+    {
+      "name": "assets/textures/starbase damage heavySI.bmp",
+      "request_site": "0x0042E047",
+      "registry_call": "0x0042E04C",
+      "resource_slot": "0x008F580C",
+      "sha256": "2420bab284e2a0198d49ed1493852eb651f8805f0cab88a8fc7bc2f684aabcaf",
+      "bytes": 196664,
+      "dimensions": [
+        256,
+        256
+      ],
+      "bits_per_pixel": 24,
+      "compression": 0
+    },
+    {
+      "name": "assets/textures/organic damage light.bmp",
+      "request_site": "0x0042E05F",
+      "registry_call": "0x0042E064",
+      "resource_slot": "0x008F5834",
+      "sha256": "e5b63842a37e2162ea1b50a9f0790dadd4293d74f5a0a50c53879e09ac848fed",
+      "bytes": 196664,
+      "dimensions": [
+        256,
+        256
+      ],
+      "bits_per_pixel": 24,
+      "compression": 0
+    },
+    {
+      "name": "assets/textures/organic damage medium.bmp",
+      "request_site": "0x0042E077",
+      "registry_call": "0x0042E07C",
+      "resource_slot": "0x008F5838",
+      "sha256": "ac4219349f84c396fc509343721e0bfa35038c0a8d504e0ab9fdb11b670d2247",
+      "bytes": 196664,
+      "dimensions": [
+        256,
+        256
+      ],
+      "bits_per_pixel": 24,
+      "compression": 0
+    },
+    {
+      "name": "assets/textures/organic damage heavy.bmp",
+      "request_site": "0x0042E08F",
+      "registry_call": "0x0042E094",
+      "resource_slot": "0x008F583C",
+      "sha256": "891982a5b1216b82147da3be83a7acf089ea0cdf7c58eb09a6c7f38cce7a7347",
+      "bytes": 196664,
+      "dimensions": [
+        256,
+        256
+      ],
+      "bits_per_pixel": 24,
+      "compression": 0
+    },
+    {
+      "name": "assets/textures/organic damage lightSI.bmp",
+      "request_site": "0x0042E0A7",
+      "registry_call": "0x0042E0AC",
+      "resource_slot": "0x008F5810",
+      "sha256": "7a7d708bf3deee1f85997d6ff17bb34136ede63bee856f9a848c63d8de332190",
+      "bytes": 196664,
+      "dimensions": [
+        256,
+        256
+      ],
+      "bits_per_pixel": 24,
+      "compression": 0
+    },
+    {
+      "name": "assets/textures/organic damage mediumSI.bmp",
+      "request_site": "0x0042E0BF",
+      "registry_call": "0x0042E0C4",
+      "resource_slot": "0x008F5814",
+      "sha256": "2ecb54c8662d066f47f3c4f24d282f6edd0da7e2cb5133296966c9c70fef6ca2",
+      "bytes": 196664,
+      "dimensions": [
+        256,
+        256
+      ],
+      "bits_per_pixel": 24,
+      "compression": 0
+    },
+    {
+      "name": "assets/textures/organic damage heavySI.bmp",
+      "request_site": "0x0042E0D7",
+      "registry_call": "0x0042E0DC",
+      "resource_slot": "0x008F5818",
+      "sha256": "7ab19c614725ebab317665f1912b0f556d447c7f8ca60afe2235845d7b021acd",
+      "bytes": 196664,
+      "dimensions": [
+        256,
+        256
+      ],
+      "bits_per_pixel": 24,
+      "compression": 0
+    }
+  ],
+  "model_render": "0x0042E4B2",
+  "secondary_return": "0x0042E626",
+  "secondary_list": "model0+0x18",
+  "primary_list": "model0+0x14",
+  "polygon_count": "model0+0x10",
+  "lazy_uv_builder": "0x0042EB52",
+  "material_pointer": "manager+0x558",
+  "damage_selector": "model-render argument3; clamp upper tier2 after integer conversion(4*x+0.5)-1; negative tier skips damage",
+  "family_selector": "model-render argument4:0=standard,1=starbase,2=organic, by adjacent loaded filename groups; exact ship-class policy remains separate",
+  "captured_history": {
+    "files_with_model_records": 50,
+    "samples": 26365,
+    "nonzero_scalar_files": 0,
+    "secondary_records": 0
+  },
+  "limitations": [
+    "Static code proves relationships, not executed damage in a specific run.",
+    "Historical CSVs retain sampled observations; zero values do not prove battles had no damage.",
+    "Black transparency sponsor-observed; exact native key/alpha/blend formula not established.",
+    "Current retained assets omit secondary polygons and selected damage material.",
+    "No installed assets copied or altered; no runtime observer,hook or renderer changed."
+  ]
+}
