@@ -35,12 +35,13 @@ struct Vertex{float p[3],n[3],uv[2];};
 struct Group{uint32_t id,material,first,count;};
 struct Frame{uint32_t owner,revision,frame,active;float model[16],view[16],projection[16],viewport[4];};
 static_assert(sizeof(Vertex)==32&&sizeof(Group)==16&&sizeof(Frame)==224);
-struct Scene{uint32_t width=0,height=0;std::vector<Vertex> vertices;std::vector<uint32_t> indices;std::vector<Group> groups;std::vector<Frame> frames;};
+struct Scene{uint32_t width=0,height=0;std::vector<Vertex> vertices;std::vector<uint32_t> indices;std::vector<Group> groups;std::vector<Frame> frames;std::vector<std::array<float,2>> damageUV;};
 static Scene load_bytes(const std::vector<BYTE>& b){
  size_t at=0;auto h=take<std::array<uint32_t,8>>(b,at);
- require(h[0]==0x31534653&&h[1]==1&&h[2]>=3&&h[2]<=32768&&h[2]%3==0&&h[3]==h[2]&&h[4]&&h[4]<=256&&h[5]&&h[5]<=16&&h[6]&&h[6]<=1920&&h[7]&&h[7]<=1080,"scene schema");
+ require(h[0]==0x31534653&&(h[1]==1||h[1]==2)&&h[2]>=3&&h[2]<=32768&&h[2]%3==0&&h[3]==h[2]&&h[4]&&h[4]<=256&&h[5]&&h[5]<=16&&h[6]&&h[6]<=1920&&h[7]&&h[7]<=1080,"scene schema");
  Scene s;s.width=h[6];s.height=h[7];
- for(uint32_t i=0;i<h[2];++i){auto v=take<Vertex>(b,at);for(float x:v.p)require(std::isfinite(x),"position finite");for(float x:v.n)require(std::isfinite(x),"normal finite");for(float x:v.uv)require(std::isfinite(x),"UV finite");s.vertices.push_back(v);}
+ for(uint32_t i=0;i<h[2];++i){auto v=take<Vertex>(b,at);for(float x:v.p)require(std::isfinite(x),"position finite");for(float x:v.n)require(std::isfinite(x),"normal finite");for(float x:v.uv)require(std::isfinite(x),"UV finite");s.vertices.push_back(v);
+  if(h[1]==2){auto uv=take<std::array<float,2>>(b,at);for(float x:uv)require(std::isfinite(x),"damage UV finite");s.damageUV.push_back(uv);}}
  std::vector<bool> used(h[2]);for(uint32_t i=0;i<h[3];++i){auto index=take<uint32_t>(b,at);require(index<h[2]&&!used[index],"index coverage");used[index]=true;s.indices.push_back(index);}
  uint32_t cursor=0;std::set<uint32_t> ids;
  for(uint32_t i=0;i<h[4];++i){auto g=take<Group>(b,at);require(g.material<256&&g.first==cursor&&g.count&&g.count%3==0&&g.count<=h[3]-cursor&&ids.insert(g.id).second,"group coverage");cursor+=g.count;s.groups.push_back(g);}require(cursor==h[3],"complete groups");

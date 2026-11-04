@@ -19,6 +19,7 @@ static void apiok(remixapi_ErrorCode result,const char* why){if(result!=REMIXAPI
 #include "worker_gpu_fence.h"
 #include "camera_left.h"
 #include "deferred_diagnostics.h"
+#include "damage_layer.h"
 #include "multi_scene_runtime.h"
 #include "pipeline_mode.h"
 #include "warm_start.h"
@@ -122,6 +123,11 @@ int wmain(int argc,wchar_t** argv){
    startup.mark("environment_prepare_begin");
    environment.start(external,[&]{wait9(fence.Get(),renderPollWait,nullptr,0,[](void* value){static_cast<prepared_environment::Resource*>(value)->check();},&environment);});
    startup.mark("environment_prepare_complete");
+   DamageLayer damage;damage.start(device.Get(),root); // passive preparation, before live activation
+   wchar_t damageCaptureMode[2]{};const bool damageCapture=GetEnvironmentVariableW(L"SFC_DAMAGE_FIXTURE_SNAPSHOTS",damageCaptureMode,2)==1&&damageCaptureMode[0]==L'1';
+   require(!damageCapture||(damage.enabled&&prewarm&&native_gate::requested()),"damage snapshots require explicit standalone fixture");
+    unsigned damageCaptured=0,damageStageAge=0;int damageLastStage=-99;bool damageEverSeen=false;
+   if(damageCapture&&!outputs[0].staging){D3D11_TEXTURE2D_DESC desc{};outputs[0].image->GetDesc(&desc);desc.BindFlags=desc.MiscFlags=0;desc.Usage=D3D11_USAGE_STAGING;desc.CPUAccessFlags=D3D11_CPU_ACCESS_READ;ok(native->CreateTexture2D(&desc,nullptr,&outputs[0].staging),"damage fixture staging");}
    if(render_prewarm::requested()){require(prewarm,"render warm requires early-start workflow");render_prewarm::run(device.Get(),renderPollWait,startup);}
    OutputPeer peer;if(argc==5)peer.start(fs::absolute(argv[3]),root,argv[4],&startup,prewarm);
    startup.mark("receiver_started");
@@ -172,7 +178,7 @@ int wmain(int argc,wchar_t** argv){
    if(detailed)timing<<"sequence,source_frame,presents,draw_present_us,output_gpu_us,local_readback_us,peer_us,scheduled_us,completed_us,copy_submit_us,render_ready_wait_us,postprocess_us,query_polls,query_sleeps,query_sleep_us,query_last_pending_qpc,query_ready_qpc,input_empty_polls,input_sleep_us,input_validation_us\n";int64_t scheduleStart=0;
    wchar_t textureFlag[2]{};const auto texturePolicy=GetEnvironmentVariableW(L"SFC_D3D9_INITIAL_TEXTURE_DATA",textureFlag,2)==1&&textureFlag[0]==L'1'?TextureUpload::InitialData:TextureUpload::StagedLock;
    std::cout<<"TEXTURE_UPLOAD initial_data="<<(texturePolicy==TextureUpload::InitialData)<<" source_lifetime="<<(texturePolicy==TextureUpload::InitialData?"renderer":"staging_scope")<<'\n';
-   {Renderer renderer(device.Get(),scene,root,texture_memory::requested()?&initialTextures:nullptr,texturePolicy);auto bootstrapHull=hull.prepare(scene);DirectLights lights;lights.start();ScopedLights lightCleanup{lights,external};environment.transfer(lights.lights);MultiSceneRuntime cohort;cohort.start(root,device.Get(),scene,renderer,texturePolicy,&hull,&bootstrapHull);
+   {Renderer renderer(device.Get(),scene,root,texture_memory::requested()?&initialTextures:nullptr,texturePolicy);auto bootstrapHull=hull.prepare(scene);DirectLights lights;lights.start();ScopedLights lightCleanup{lights,external};environment.transfer(lights.lights);MultiSceneRuntime cohort;cohort.damage=&damage;cohort.start(root,device.Get(),scene,renderer,texturePolicy,&hull,&bootstrapHull);
     AssetService admission;wchar_t admissionFlag[2]{};
     admission.start(cohort.enabled&&GetEnvironmentVariableW(L"SFC_D3D9_ADMISSION_SERVICE",admissionFlag,2)==1&&admissionFlag[0]==L'1',
       [](void* p){static_cast<MultiSceneRuntime*>(p)->assets();},&cohort);
@@ -236,6 +242,15 @@ int wmain(int argc,wchar_t** argv){
       }
      }
      const auto outputDone=outputTicks();
+      if(damageCapture&&liveMode&&frame&&rawInput.row[2]>=200000){
+      const auto& observed=cohort.packet.damage[0];const int tier=sfc_damage::valid(observed)?sfc_damage::severity(observed.scalar):-1;
+      if(tier!=damageLastStage){damageLastStage=tier;damageStageAge=0;}++damageStageAge;
+      const unsigned sample=tier>=0&&!damageEverSeen?6:tier<0&&damageEverSeen?5:static_cast<unsigned>(tier+1);
+      if(tier>=0)damageEverSeen=true;
+      if((sample==6||sample==1||damageStageAge>=30)&&!(damageCaptured&(1u<<sample))&&(sample!=2)){
+       read11(context.Get(),consumerFence.Get(),outputs[0],root/(L"damage-frame-"+std::to_wstring(sample)+L".bgra"),scene.width,scene.height);damageCaptured|=1u<<sample;
+       std::cout<<"DAMAGE_FIXTURE_IMAGE tier="<<tier<<" sample="<<sample<<" stage_age="<<damageStageAge<<" source_frame="<<rawInput.row[2]<<" sequence="<<rawInput.sequence<<" owner="<<state.owner<<" path=damage-frame-"<<sample<<".bgra\n";
+      }}
      if(measureCohort)startup.mark("cohort_output_complete");
      if(frame<2)startup.mark("output_complete",static_cast<unsigned>(frame));
      if(!noReadback&&(!paced||frame==0||(frame+1)%output_wire::verification_stride==0))for(unsigned i=0;i<3;++i)read11(context.Get(),consumerFence.Get(),outputs[i],root/(L"returned-"+std::to_wstring(frame)+L"-"+std::to_wstring(i)+L".raw32"),scene.width,scene.height);

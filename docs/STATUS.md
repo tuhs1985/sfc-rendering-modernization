@@ -1,13 +1,53 @@
 ---
 title: SFC Modernization — Status Tracker
-updated: 2026-11-03
-checkpoint: Run284 actual damage selection and mapping captured
+updated: 2026-11-04
+checkpoint: Run290 damage transparency fix visually confirmed
 tags:
   - sfc-modernization
   - project-status
 ---
 
 # SFC Modernization — Status Tracker
+
+**Damage layer visually confirmed:** two corrected KDD/FCA runs show no first-use
+transparency; sponsor reports smoother damage blending/progression.733/1699damage
+draws with0unqualified source states or timing misses. Files restored and owned
+processes exited. Overall harness still marks process-exit summary limits partial;
+that is separate from this visual result. [Run290](runs/2026-11-04-codex-damage-live-confirmation.md).
+
+**Damage transparency correction prepared:** found a documented Remix mismatch:
+our decal draw had blending disabled. Corrected it;GPU output now shows discrete
+marks on a solid hull,including the first damage-bearing frame of an already
+visible scene. Repair still removes the layer. Live transparency/glitch recheck
+pending. All added diagnostic items are listed with disable routes in
+[diagnostic reference](DIAGNOSTICS.md). [Run289](runs/2026-11-04-codex-damage-decal-blending.md).
+
+**Workspace cleanup completed:** deleted23,722obsolete generated files and old
+output archives(7.56GBlogical;7.24GBmeasured disk space recovered). Current
+captures,dependencies,settings and source preserved. Launcher preflight and
+673Python tests pass. [Run288](runs/2026-11-03-codex-artifact-cleanup.md).
+
+**Damage checkout regression corrected:** both damage-enabled runs loaded assets
+but rejected every hull because the real SFC getter differed from the synthetic
+fixture. Added its pinned read-only accessor and separated optional decal
+qualification from enhanced-hull drawing. GPU regression now keeps all three
+hulls visible even with unavailable damage observations. Live retry pending.
+[Run287](runs/2026-11-03-codex-damage-source-regression.md).
+
+**Damage textures prepared for checkout:** separate original-image decals follow each
+ship's current damage state, including repairs/removal. Standalone rendered tests
+show undamaged→heavy→repaired; three-owner native insertion and damage-off
+regressions pass. Actual SFC source agreement and gameplay appearance are still
+pending. Default off; current lighting/material settings preserved.
+[Run286 record](runs/2026-11-03-codex-live-damage-layer.md).
+
+**Interface exposure reviewed:** geometry, ownership, persistent transforms,
+camera and native replacement are reusable foundations. Remix materials, light
+conversion and startup still have backend coupling; Windows GPU return needs
+its own adapter. Other developers have source and documented attachment points,
+but no stable drop-in SDK yet. Damage must expose per-owner state and future
+change triggers, rather than exist only as a Remix material switch. No runtime
+changes. [Run285 interface guide](reconnaissance/2026-11-03-renderer-interface-exposure-audit.md).
 
 **Damage capture succeeded:** the F-CA progressed through light, medium and heavy damage, each linked to its original damage/SI images. We captured the separate damage mapping: same hull geometry, different texture coordinates. One mapping served all three stages, so it can be reused while damage state changes. No drops/read errors; cleanup and client checks passed. Next: finish the narrow blend/companion and first-use ordering work before adding this layer to Remix. [Run284](runs/2026-11-03-codex-damage-observation-review.md).
 
@@ -183,7 +223,7 @@ Updated through **Run233,October31,2026**. Repository handoff and run records co
 **RECORDED / OPEN — release scope, not authorization to expand the current test.**
 
 - **Required:** ship replacement; weapon-generated lighting applied to replacements; damage textures read/applied; destruction/break model with fast loading.
-- Damage textures are not currently read by this path, per sponsor. Break-model transition and loading need qualification; no arbitrary timing number set.
+- Run290: standard-family damage source/application and transparency correction visually confirmed in two KDD/FCA skirmishes. Reversal/removal offline GPU-proven;live repairs/other families not yet confirmed. Damage remains opt-in. Break-model transition and loading need qualification;no arbitrary timing number set.
 - **Break-model finding:** `_brk.mod` exists and SFC already loaded FCA/KFF break assets during setup, before tactical rendering. We may prepare their fresh in-memory data while the ship is alive; breakup-piece movement and transition remain unqualified. [Run212](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-27-codex-break-model-inspection.md>).
 - **Optional:** LOD models. Their absence alone does not block alpha release.
 - Supported multi-ship replacement and visible weapon lighting are demonstrated. Damage-layer capture/application and fast break-model transitions remain open. No alpha readiness or formal milestone PASS claimed.
@@ -316,7 +356,7 @@ Evidence: [hiccup review](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-24-
 | SFC-04 | **Original-ship replacement — PARKED** | Current proof adds a returned ship; disabling original drawing needs reliable matching output and correct depth/coverage. | Delivery and camera alignment qualified; prove one stationary replacement, safe fallback, then motion. |
 | SFC-05 | **Grid, shields, weapons and overlapping objects — OPEN** | A ship image alone does not prove correct visibility against every retained game effect. | Before replacement acceptance: verify depth, grid crossing and effects layering, not just the ship's silhouette. |
 | SFC-06 | **Simpler image-return connection — PARKED** | Current ReShade compositor and owned receiver work, but serial copy/acknowledgment may add overhead. Their ownership safeguards cannot simply be deleted. | Measured transport bottleneck or next interface increment; qualify any replacement with synchronization and state-preservation tests. |
-| SFC-07 | **Renderer-independent interface / D3D12 — OPEN TECH GATE** | Run210 audit: reusable scene/identity foundations; live preparation/material/startup still assumes Remix, sharing assumes D3D11, coverage is a union mask. No refactor implemented. | Complete player-replacement checkout, then isolate renderer operations and explicit completed-picture semantics around existing code. D3D12 needs its own qualified transfer adapter. |
+| SFC-07 | **Renderer-independent interface / D3D12 — OPEN TECH GATE** | Run285: reusable capture/identity/camera/D3D9 foundation and per-owner replacement now demonstrated. Materials/lights/startup still partly Remix-specific; live source rows and D3D11 sharing need adapters. Current replacement has per-owner physical hull coverage; older union-mask-only claim is historical. | Package existing decoded scene/backend operations and completed-frame semantics for consumers; expose damage state independently when implemented. Document capabilities and validate an independent consumer. D3D12 needs its own qualified transfer adapter. |
 | SFC-08 | **Supersampling — PARKED** | You prefer a higher-resolution render reduced to the display size; tested AA looked too soft. | After stable replacement/delivery: qualify resolution, memory and performance. Keep quality controls independent within the shared rendering profile; lighting remains separate. |
 | SFC-09 | **Appearance tuning — PARKED for engineering** | Your latest accepted temporary settings remain the comparison baseline. More tweaking must not hide transport, camera or texture faults. | Once delivery/replacement is stable, resume lighting/material/image tuning against a fixed reference. |
 | SFC-10 | **Longer identity survey / larger stress mission — PARKED; initial survey now SFC-15** | The prepared90second metadata survey begins broader coverage, but does not establish a whole-mission or universal survey. | Review SFC-15 results, then justify a longer/broader bounded mission if needed. |
@@ -332,7 +372,7 @@ References: [interface audit](<C:/Project/SFC-Modernize Engine/docs/reconnaissan
 Sponsor reports SFC hangs for roughly20seconds on the first launch after a PC
 restart, occurring almost every time. Cause is unqualified; do not assume this
 is the earlier Defender wait or Remix initialization. Investigation explicitly
-deferred on November3,2026; current damage observation remains the active task.
+deferred on November3,2026; current damage integration remains the active task.
 
 Reopen when the sponsor is ready for a post-restart test. Exact next action:
 prepare timing observation before restarting, then compare the first SFC launch

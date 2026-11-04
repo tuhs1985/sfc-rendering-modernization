@@ -8,7 +8,36 @@ authority: Sponsor / Owner
 
 # Technical gate — renderer-independent scene boundary
 
-## Current review — 2026-10-27
+## Damage boundary update — 2026-11-04
+
+Run286–290 now carries neutral per-owner current damage scalar/family in coherent
+scene snapshots, with a separate derived native damage UV channel. The Remix
+adapter applies its own image-origin conversion, material policy and decal blend
+requirements. Standard-family live application is demonstrated; state-change
+callbacks for future effects and a stable public backend SDK remain open. The
+November3 statement below about damage not yet being implemented is historical.
+No per-hit position/weapon attribution is established.
+
+## Current review — 2026-11-03
+
+[Current interface/exposure audit](../reconnaissance/2026-11-03-renderer-interface-exposure-audit.md)
+maps reusable source assets/identity/camera, actual D3D9 draws, Remix-specific
+material/light side channels, and current per-owner physical-depth/coverage
+insertion. Multi-ship replacement is demonstrated; the old union-coverage-only
+finding below is historical for the earlier mode. Live asset preparation and
+startup remain partly Remix-oriented, source rows need SFC decoding, and native
+output sharing remains D3D11-specific. There is no stable public backend SDK.
+Gate stays **OPEN**. No interface/runtime refactor was made by this review.
+
+Sponsor wants sufficient exposure/documentation for other developers. The next
+small boundary increment should wrap existing decoded scene/backend operations
+and completed-frame meanings, retaining canonical content and source identities.
+Damage selector/family/mapping must become reusable per-owner state when added,
+with optional downstream state-change hooks for future damage effects. That
+production extension is not implemented; per-hit location/weapon attribution is
+not established by the damage evidence. Avoid creating a redundant scene format.
+
+## Previous review — 2026-10-27
 
 [Read-only boundary audit](../reconnaissance/2026-10-27-renderer-boundary-audit.md)
 confirms reusable capture/scene/transaction meanings, while live asset preparation,

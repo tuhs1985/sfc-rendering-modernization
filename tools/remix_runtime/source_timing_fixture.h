@@ -13,9 +13,10 @@
 struct SourceTimingFixture {
  sfc_calibration::Reader source;bool enabled=false;
  bool liveEnabled=false,rebindFixture=false,lateAssetFixture=false;live_owner::Source live;multi_scene::Source cohort;std::vector<live_owner::Row> rows;
- bool effectFixture=false;
+ bool effectFixture=false,damageFixture=false;
  SourceTimingFixture(){
   wchar_t effectMode[2]{};effectFixture=GetEnvironmentVariableW(L"SFC_EFFECT_LIGHT_FIXTURE",effectMode,2)==1&&effectMode[0]==L'1';
+  damageFixture=GetEnvironmentVariableW(L"SFC_DAMAGE_TEXTURES",effectMode,2)==1&&effectMode[0]==L'1';
   wchar_t mode[2]{};enabled=GetEnvironmentVariableW(L"SFC_D3D9_SOURCE_TIMING",mode,2)==1&&mode[0]==L'1';
   if(enabled){if(!source.prepare()||!source.requested)throw std::runtime_error("fixture source channel");source.mailbox->snapshot={};memcpy(source.mailbox->snapshot.session,source.session,16);InterlockedExchange(&source.mailbox->active,1);}
   wchar_t liveMode[2]{},path[1024]{};liveEnabled=GetEnvironmentVariableW(L"SFC_D3D9_LIVE_TIMING",liveMode,2)==1&&liveMode[0]==L'1';
@@ -48,7 +49,7 @@ struct SourceTimingFixture {
     for(DWORD i=0;i<rows.size();++i){
      if(lateAssetFixture&&i==2&&InterlockedCompareExchange(reinterpret_cast<LONG*>(base+11*1024*1024+128*1024+512),0,0)<120)continue;
      auto row=rows[i];row[2]=frame;row[45]=i;row[47]=GetCurrentThreadId();row[94]=row[95]=0;
-     if(native_gate::requested()){
+     if(native_gate::requested()&&!damageFixture){
       // Fixture-only changing rigid pose. Recompute the independently checked
       // engine-composed projection rather than pairing old pixels with a pose.
       sfc_scene::Matrix world{},view{},projection{};memcpy(world.data(),row.data()+8,64);memcpy(view.data(),row.data()+49,64);memcpy(projection.data(),row.data()+66,64);
@@ -59,7 +60,20 @@ struct SourceTimingFixture {
      }
      if(!native_gate::requested()&&replacement::requested()&&replacement::valid(replacementStore,source.session,GetCurrentProcessId()))replacement::suppress(*replacementStore,frame,row[1],row[7],row[5],row[6],GetCurrentThreadId(),true,replacement::now()); // SYNTHETIC source only; not an installed engine hook.
      LARGE_INTEGER q{};QueryPerformanceCounter(&q);sfc_calibration::stamp(row,static_cast<ULONGLONG>(q.QuadPart));if(live.prepare(row,anchor))prepared=true;
-     if(!sfc_calibration::offer(source.mailbox,i,row))live.reject(frame);cohort.offer(row);
+     if(!sfc_calibration::offer(source.mailbox,i,row))live.reject(frame);
+     sfc_damage::State damage{};wchar_t damageMode[2]{};
+     if(GetEnvironmentVariableW(L"SFC_DAMAGE_TEXTURES",damageMode,2)==1&&damageMode[0]==L'1'){
+      constexpr float stages[]{0,.2f,.5f,.9f,.5f,0};
+      // Start the damage progression after actual returned images, not while
+      // asset preparation is still advancing the native fixture frame count.
+      const auto delivered=InterlockedCompareExchange(reinterpret_cast<LONG*>(base+11*1024*1024+128*1024+512),0,0);
+      const unsigned stage=delivered<30?0:static_cast<unsigned>((delivered-30)/100)%6;
+      damage={row[1],row[7],sfc_damage::bits(stages[stage]),0,1};
+      // Negative case: an unavailable optional damage observation must still
+      // deliver the qualified base hull. Later stages resume valid damage.
+      if(i==0&&stage==0)damage.qualified=0;
+     }
+     cohort.offer(row,damage);
      auto* guard=reinterpret_cast<LONG*>(base+scene_capacity::StateOffset+i*512);InterlockedIncrement(guard);memcpy(base+scene_capacity::StateOffset+4+i*512,row.data(),sizeof(row));InterlockedIncrement(guard);InterlockedExchange(reinterpret_cast<LONG*>(base+128),LONG(i+1));}
     if(effectFixture){auto* effects=reinterpret_cast<sfc_effect_lights::Store*>(base+sfc_effect_lights::Offset);
      if(!sfc_effect_lights::valid(*effects,source.session,0))throw std::runtime_error("Synthetic effect bank not initialized");

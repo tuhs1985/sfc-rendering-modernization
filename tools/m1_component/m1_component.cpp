@@ -128,7 +128,7 @@ struct ThreadState {
     DWORD geometry_sample_frame = 0xFFFFFFFFu;
     DWORD geometry_samples_in_frame = 0;
     bool model_scope = false;
-    DWORD model_manager = 0, wrapper_pending = 0;
+    DWORD model_manager = 0, wrapper_pending = 0,damage_scalar=0,damage_family=0;
     DWORD copy_depth=0;
     DWORD copy_slot_pending=0;
     DWORD surface_pending=0;
@@ -858,7 +858,7 @@ void observe_mesh_export(ThreadState* state,const EventRecord& event,DWORD outco
             state->model0==id.model && state->source==id.source && validated_copy_owner(*state);
     };
     if(!g_config.live_channel.empty()){
-        if(g_live_scene_mode)g_live_scene.observe(id,read,live_valid);
+        if(g_live_scene_mode)g_live_scene.observe(id,read,live_valid,state->damage_scalar,state->damage_family);
         else g_live_bridge.observe(id,read,live_valid);
     }
     if(g_live_scene_mode || !g_mesh_budget.admit(id))return;
@@ -1295,6 +1295,7 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
                 state->source = event.source;
                 state->model_scope = true;
                 state->model_manager = event.manager;
+                state->damage_scalar=event.arg3;state->damage_family=event.arg4;
                 if (auto* slot = g_owners.find_by_id(event.owner_id)) {
                     event.ship = static_cast<DWORD>(slot->ship);
                     state->ship = event.ship;

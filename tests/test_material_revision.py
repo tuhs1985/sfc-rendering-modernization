@@ -32,7 +32,7 @@ class MaterialRevisionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory);target=root/'mod.usda';target.write_text('good')
             before=target.stat().st_mtime_ns
-            with patch.object(Path,'replace',side_effect=PermissionError('Busy')):
+            with patch('material_library.replace_material_file',side_effect=PermissionError('Busy')):
                 with self.assertRaises(PermissionError):publish_remix_revision(root,'next')
             self.assertEqual(target.read_text(),'good');self.assertEqual(target.stat().st_mtime_ns,before)
             publish_remix_revision(root,'next');self.assertEqual(target.read_text(),'next')

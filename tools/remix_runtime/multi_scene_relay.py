@@ -81,7 +81,11 @@ class Relay(SingleRelay):
         gpu=self.folder/'gpu';gpu.mkdir(exist_ok=True)
         # Do not ingest an empty library and immediately reload it. The native
         # host enables replacement assets only after the complete activation.
-        (gpu/'rtx.conf').write_text(CONFIG+'rtx.enableReplacementMaterials = True\nrtx.enableReplacementMeshes = False\n')
+        damage_config=''
+        if getattr(self,'damage_textures',False):
+            from damage_materials import prepare as prepare_damage
+            damage_config=prepare_damage(self.root,gpu)
+        (gpu/'rtx.conf').write_text(CONFIG+'rtx.enableReplacementMaterials = True\nrtx.enableReplacementMeshes = False\n'+damage_config)
         from image_controls import encode_current as image
         from quality_controls import encode as quality
         for name,encoder in (('image',image),('quality',quality)):
@@ -99,6 +103,8 @@ class Relay(SingleRelay):
              'SFC_D3D9_SHARED_LIGHTS':'1','SFC_D3D9_SYNC_BUFFER':'1','SFC_D3D9_MULTISCENE':'1',
              'SFC_PIPELINE_MODE':self.mode,'SFC_D3D9_OFFSET_X':str(camera_offset()[0])}
         env['SFC_D3D9_PLAYER_REPLACEMENT']='1' if self.player_replacement else '0'
+        env['SFC_DAMAGE_TEXTURES']='1' if getattr(self,'damage_textures',False) else '0'
+        env['SFC_DAMAGE_FIXTURE_SNAPSHOTS']='1' if getattr(self,'damage_textures',False) and self.offline_fixture else '0'
         env['SFC_D3D9_TEXTURE_MEMORY']='1' if getattr(self,'texture_memory',None) else '0'
         from environment_resources import publish as prepare_environment
         environment_receipt=prepare_environment(self.receiver.channel,pid,gpu)

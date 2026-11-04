@@ -83,7 +83,9 @@ def main():
     parser.add_argument('--with-depth',action='store_true',help='Bind known synthetic D24S8 descriptor, not actual scene depth')
     parser.add_argument('--observation-only',action='store_true',help='No Remix runtime/image; control channel and depth observations only')
     parser.add_argument('--legacy-startup-warmup',action='store_true',help='Opt-in old24Present startup workaround;default one Present')
+    parser.add_argument('--damage-textures',action='store_true',help='Synthetic reversible damage state through actual Remix decal output')
     args=parser.parse_args()
+    if args.damage_textures and not args.native_all_ships:parser.error('Damage fixture requires native multi-ship return')
     if args.effect_light_fixture and not args.native_all_ships:parser.error('Effect-light fixture requires native multi-ship return')
     if args.light_diagnostics and not args.native_all_ships:parser.error('Light diagnostics requires native multi-ship fixture')
     if args.native_all_ships and not args.native_insertion_policy:parser.error('Native cohort requires explicit timing policy')
@@ -214,6 +216,7 @@ def main():
         env.pop('SFC_D3D9_MULTISCENE',None)
         env['SFC_D3D9_PLAYER_REPLACEMENT']='1' if args.player_replacement or args.native_all_ships else '0'
         env['SFC_NATIVE_INSERTION_ALL_SHIPS']='1' if args.native_all_ships else '0'
+        env['SFC_DAMAGE_TEXTURES']='1' if args.damage_textures else '0'
         env['SFC_D3D9_NATIVE_FOREGROUND']='1' if args.native_foreground else '0'
         env['SFC_NATIVE_INSERTION_GATE']='1' if args.native_insertion_policy else '0'
         if args.native_insertion_policy:env['SFC_NATIVE_INSERTION_POLICY']=args.native_insertion_policy
@@ -241,6 +244,7 @@ def main():
             if args.async_material_checkout:mode_args['checkout_backend']=checkout_backend
             live_relay=Relay(work,semantic,TEST,additive=args.d3d9_additive,offline_fixture=args.d3d9_additive,persistent=args.persistent_scene,buffered=args.synchronized_buffer,**mode_args)
             live_relay.light_diagnostics=args.light_diagnostics
+            live_relay.damage_textures=args.damage_textures
             live_relay.completion_diagnostics=args.completion_diagnostics
             if args.native_insertion_policy:live_relay.native_gate_policy=args.native_insertion_policy
             live_relay.native_all_ships=args.native_all_ships
@@ -268,7 +272,7 @@ def main():
             if args.multi_ship:live_relay.overlap_texture_prefetch=args.overlap_texture_prefetch
             if args.multi_ship:
                 from multi_scene_fixture import rows_and_packets
-                live_rows=rows_and_packets(work,semantic.name,extended=args.multi_ship_resources,shared_owner=args.native_all_ships)
+                live_rows=rows_and_packets(work,semantic.name,extended=args.multi_ship_resources,shared_owner=args.native_all_ships,damage=args.damage_textures)
                 env.update(SFC_D3D9_LIVE_TIMING='1',SFC_D3D9_MULTISCENE='1',SFC_D3D9_FIXTURE_ROWS=str(work/'fixture-rows.bin'))
                 if args.multi_ship_late_asset:env['SFC_MULTISCENE_LATE_ASSET']='1'
             else:
@@ -311,7 +315,7 @@ def main():
             elapsed=time.monotonic()-start
             size=sum(capture_file_bytes(p) for p in work.rglob('*'))
             if args.d3d9_additive:
-                images=sum(capture_file_bytes(p) for p in (work/'gpu').rglob('*') if p.suffix.lower()=='.dds' or re.fullmatch(r'texture-\d+\.bin',p.name))
+                images=sum(capture_file_bytes(p) for p in (work/'gpu').rglob('*') if p.suffix.lower()=='.dds' or re.fullmatch(r'(?:texture-\d+\.bin|damage-texture-\d+\.bin|damage-frame-[01356]\.bgra)',p.name))
                 if not args.multi_ship and images>128*1024*1024:raise RuntimeError('Additive original/derived image128MiB cap')
                 size-=images # Separate established image budget;logs remain32MiB.
             if elapsed>100 or size>(broad_capture.HARD+32*1024*1024 if args.broad_capture else (96*1024*1024 if args.depth_snapshots else 32*1024*1024)):raise RuntimeError('Fixture time/output cap')
@@ -474,6 +478,7 @@ def main():
     receipt['render_prewarm']=args.render_prewarm
     receipt['effect_light_fixture']=args.effect_light_fixture
     receipt['light_diagnostics']=args.light_diagnostics
+    receipt['damage_textures']=args.damage_textures
     receipt['loading_policy']=args.loading_policy
     receipt['material_library']=args.material_library
     receipt['material_texture_loading']=args.material_texture_loading

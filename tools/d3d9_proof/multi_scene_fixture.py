@@ -25,7 +25,7 @@ def synthetic_instance(packet,references,owner):
     return bytes(raw),json.dumps(refs).encode()
 
 
-def rows_and_packets(work,session,extended=False,shared_owner=False):
+def rows_and_packets(work,session,extended=False,shared_owner=False,damage=False):
     gate=work/'gate';gate.mkdir()
     first=decode_mesh(CAPTURES[0].read_bytes(),CAPTURES[0].with_suffix('.json').read_bytes())
     updates=CAPTURES[0].parent/'LIVE-SCENE-001-updates.jsonl'
@@ -60,6 +60,16 @@ def rows_and_packets(work,session,extended=False,shared_owner=False):
         else:
             for extension in ('bin','json'):shutil.copyfile(path.with_suffix('.'+extension),gate/f'LIVE-SCENE-001-asset-{revision}.{extension}')
         proof.append(dict(source=str(path.relative_to(ROOT)),geometry=mesh['geometry_sha256'],model=mesh['refs']['model_filename']))
+        if damage:
+            target=gate/f'LIVE-SCENE-001-asset-{revision}.bin';raw=bytearray(target.read_bytes());references=json.loads(target.with_suffix('.json').read_text())
+            # Explicit synthetic accessor bounds for this offline fixture only.
+            # They select the projection branch proven by the actual FCA capture.
+            struct.pack_into('<2fI',raw,27*4,1.,0.,1)
+            value=2166136261
+            for i,byte in enumerate(raw):value=((value^(0 if 12<=i<16 else byte))*16777619)&0xffffffff
+            struct.pack_into('<I',raw,12,value);references['packet_fnv1a']=value
+            target.write_bytes(raw);target.with_suffix('.json').write_text(json.dumps(references))
+            proof[-1]['synthetic_damage_bounds']=[1,0]
     if len({p['geometry'] for p in proof})!=(3 if extended else 2) or len({r[1] for r in rows})!=len(sources):raise ValueError('Distinct captured assets and independent fixture owners required')
     (gate/'LIVE-SCENE-001-updates.jsonl').write_bytes(b'')
     (work/'manifest.json').write_text(json.dumps(dict(synthetic_source=True,source_assets=proof,

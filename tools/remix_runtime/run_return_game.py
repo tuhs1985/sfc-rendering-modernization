@@ -142,7 +142,9 @@ def main():
     parser.add_argument('--legacy-startup-warmup',action='store_true',help='Opt-in old24Present startup workaround;default is one Present')
     parser.add_argument('--completion-diagnostics',action='store_true',help='Default-off bounded slow renderer-completion records')
     parser.add_argument('--light-diagnostics',action='store_true',help='Optional bounded native-to-Remix transient light submission evidence')
+    parser.add_argument('--damage-textures',action='store_true',help='Qualified native damage state and Remix decal layer checkout')
     args=parser.parse_args()
+    if args.damage_textures and not args.native_all_ships:parser.error('Damage textures requires native multi-ship insertion')
     if args.native_all_ships and not args.native_insertion_policy:parser.error('Native multi-ship replacement requires explicit timing policy')
     if args.light_diagnostics and not args.native_all_ships:parser.error('Light diagnostics requires native multi-ship replacement')
     if args.native_insertion_policy:
@@ -370,7 +372,7 @@ def main():
         size=sum(p.stat().st_size for p in work.rglob('*') if p.is_file())
         other=sum(p.stat().st_size for p in work.rglob('*') if p.is_file() and p.name!='broad.bin')
         if args.d3d9_additive:
-            images=sum(p.stat().st_size for p in (work/'gpu').rglob('*') if p.is_file() and (p.suffix.lower()=='.dds' or re.fullmatch(r'texture-\d+\.bin',p.name)))
+            images=sum(p.stat().st_size for p in (work/'gpu').rglob('*') if p.is_file() and (p.suffix.lower()=='.dds' or re.fullmatch(r'(?:texture-\d+|damage-texture-\d+)\.bin',p.name)))
             if not args.multi_ship and images>128*1024*1024:raise RuntimeError('Additive image128MiB cap;original rendering retained')
             # Multi-ship asset worker checks authorized project/disk capacity
             # before/after preparation;never rescan the whole project each poll.
@@ -444,6 +446,7 @@ def main():
         if args.multi_ship:env['SFC_D3D9_MULTISCENE']='1'
         env['SFC_D3D9_PLAYER_REPLACEMENT']='1' if args.player_replacement or args.native_all_ships else '0'
         env['SFC_NATIVE_INSERTION_ALL_SHIPS']='1' if args.native_all_ships else '0'
+        env['SFC_DAMAGE_TEXTURES']='1' if args.damage_textures else '0'
         env['SFC_D3D9_NATIVE_FOREGROUND']='1' if args.native_foreground else '0'
         env['SFC_NATIVE_INSERTION_OBSERVE']='1' if args.native_insertion_observe else '0'
         env['SFC_NATIVE_INSERTION_GATE']='1' if args.native_insertion_policy else '0'
@@ -478,6 +481,7 @@ def main():
                 if args.async_material_checkout:mode_args['checkout_backend']=checkout_backend
                 timing_relay=Relay(work,receiver,TEST,additive=args.d3d9_additive,persistent=args.persistent_scene,buffered=args.synchronized_buffer,**mode_args)
                 timing_relay.light_diagnostics=args.light_diagnostics
+                timing_relay.damage_textures=args.damage_textures
                 timing_relay.completion_diagnostics=args.completion_diagnostics
                 timing_relay.live_tuning=d3d9_tuning
                 if args.native_insertion_policy:timing_relay.native_gate_policy=args.native_insertion_policy
@@ -878,6 +882,7 @@ def main():
                 error=(error+'; ' if error else '')+'Scene depth needs review; originals were retained'
                 result['error']=error;result['result']='PARTIAL'
         result['expanded_search']=search
+        result['damage_textures']=args.damage_textures
         result['broad_proxy_restored']=proxy_restored
         if args.depth_snapshots and not (user_exited and not capture_complete):
             try:

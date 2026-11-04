@@ -11,7 +11,8 @@
 #include <memory>
 #include <future>
 struct MultiSceneRuntime {
- struct Resident {Scene scene;std::unique_ptr<Renderer> renderer;Renderer* drawRenderer=nullptr;PhysicalHullDepth::Mesh hullMesh;uint64_t bytes=0;multi_scene::Asset provenance{};};
+ struct Resident {Scene scene;std::unique_ptr<Renderer> renderer;Renderer* drawRenderer=nullptr;PhysicalHullDepth::Mesh hullMesh;DamageLayer::Geometry damageMesh;uint64_t bytes=0;multi_scene::Asset provenance{};};
+ DamageLayer* damage=nullptr;
  PhysicalHullDepth* hull=nullptr;const PhysicalHullDepth::Mesh* initialHull=nullptr;
  sfc_calibration::Reader source;multi_scene::Store* store=nullptr;multi_scene::Frame packet{};
  std::array<multi_scene::Asset,multi_scene::Assets> entries{};std::array<std::shared_ptr<Resident>,multi_scene::Assets> bound{};
@@ -85,6 +86,7 @@ struct MultiSceneRuntime {
      else{item->renderer=std::make_unique<Renderer>(device,item->scene,folder,&prepared.textures,uploadPolicy);item->drawRenderer=item->renderer.get();}
      if(hull&&hull->enabled){if(a.path_id==1){require(initialHull!=nullptr,"physical hull bootstrap required");item->hullMesh=*initialHull;}else item->hullMesh=hull->prepare(item->scene);
       item->bytes+=item->hullMesh.bytes;require(bytes+item->bytes<=256ull*1024*1024,"physical hull retained256MiB cap");}
+     if(damage&&damage->enabled){item->damageMesh=damage->prepare(item->scene);item->bytes+=item->damageMesh.bytes+item->scene.damageUV.size()*8;require(bytes+item->bytes+damage->textureBytes<=256ull*1024*1024,"damage retained256MiB cap");}
      std::cout<<"MULTISCENE_ASSET_TIMING id="<<a.id<<" cpu_us="<<prepared.cpu_us<<" gpu_admit_us="<<clock()-gpuBegan<<" at_us="<<clock()<<'\n';
      const auto* uploader=item->drawRenderer;
      std::cout<<"MULTISCENE_UPLOAD id="<<a.id<<" initial="<<uploader->initialDataUploads<<" staged="<<uploader->stagedUploads<<" unsupported="<<uploader->initialDataUnsupported<<'\n';
@@ -109,13 +111,14 @@ struct MultiSceneRuntime {
    if(replacementOnly&&(row[1]!=packet.anchor||row[7]!=packet.revision))continue;
    for(unsigned i=0;i<multi_scene::Assets;++i)if(bound[i]&&multi_scene::matches(entries[i],row)){resident=bound[i];asset=i+1;break;}
    if(!resident){++omitted;continue;}live_owner::Packet p{};p.row=row;Frame frame{};
+   if(damage&&!damage->ready(packet.damage[n],resident->damageMesh)){++omitted;continue;}
    if(!live_owner::decode(p,frame)){++decode_rejected;++rejected;continue;}
    projectionDisagreements+=live_owner::audit_projection(p,frame,resident->scene.vertices,projectionAudit);
    for(unsigned axis=0;axis<3;++axis)frame.model[axis*4+3]+=displacement[axis];
    // Admit depth/owner coverage before colour or replacement authorization.
    // Capacity pressure leaves only this owner native; never stop the renderer.
    if(hull&&!hull->submit(resident->hullMesh,frame)){++omitted;continue;}
-   resident->drawRenderer->draw(frame,false,width,height,first);first=false;++count;++draws;
+   resident->drawRenderer->draw(frame,false,width,height,first);if(damage)damage->draw(resident->scene,*resident->drawRenderer,resident->damageMesh,packet.damage[n]);first=false;++count;++draws;
    if(insertion){require(rendered.count<multi_scene::Owners,"Native cohort rendered member capacity");auto& m=rendered.members[rendered.count++];m.owner=row[1];m.revision=row[7];m.model=row[5];m.source=row[6];m.asset=asset;memcpy(m.content,entries[asset-1].content,32);}
    ++ownerDraws[live_owner::selection(row[1],row[7])];
    if(frames<8||frames%60==0)std::cout<<"MULTISCENE_DRAW frame="<<packet.frame<<" owner="<<row[1]<<" revision="<<row[7]<<" asset="<<asset<<" set_hash="<<packet.checksum<<'\n';

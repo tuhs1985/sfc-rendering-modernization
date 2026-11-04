@@ -40,7 +40,7 @@ int main(){
  }
  const DWORD session[]{1,2,3,4};auto store=std::make_unique<multi_scene::Store>();auto& h=store->header;
  h.bytes=sizeof(*store);h.pid=GetCurrentProcessId();memcpy(h.session,session,16);
- test(sizeof(*store)==64+multi_scene::Frames*sizeof(multi_scene::FrameSlot)+multi_scene::Assets*sizeof(multi_scene::AssetSlot));test(sizeof(multi_scene::FrameSlot)==98368);test(sizeof(multi_scene::AssetSlot)==128);
+ test(sizeof(*store)==64+multi_scene::Frames*sizeof(multi_scene::FrameSlot)+multi_scene::Assets*sizeof(multi_scene::AssetSlot));test(sizeof(multi_scene::FrameSlot)==103488);test(sizeof(multi_scene::AssetSlot)==128);
  test(multi_scene::valid(h,session,GetCurrentProcessId()));test(!multi_scene::valid(h,session,GetCurrentProcessId()+1));
  test(!multi_scene::initial_resolved(*store,3));
  store->assets[0].ack=1;test(!multi_scene::initial_resolved(*store,3));
@@ -59,6 +59,11 @@ int main(){
  check=*frame;check.rows[1][49]++;check.checksum=multi_scene::checksum(check);test(!multi_scene::valid(check)); // different camera
  check=*frame;check.rows[1][2]++;check.checksum=multi_scene::checksum(check);test(!multi_scene::valid(check));
  check=*frame;check.rows[1][4]=3;check.checksum=multi_scene::checksum(check);test(!multi_scene::valid(check)); // retired
+ check=*frame;check.damage[0]={check.rows[0][1],check.rows[0][7],sfc_damage::bits(.9f),0,1};check.checksum=multi_scene::checksum(check);test(multi_scene::valid(check));
+ check.damage[0].scalar=sfc_damage::bits(.2f);test(!multi_scene::valid(check)); // damage belongs to frame checksum
+ check.checksum=multi_scene::checksum(check);test(multi_scene::valid(check)); // damage may decrease
+ check.damage[0].owner++;check.checksum=multi_scene::checksum(check);test(!multi_scene::valid(check)); // no wrong-owner damage
+ check=*frame;check.damage[1]={check.rows[1][1],check.rows[1][7]+1,sfc_damage::bits(.5f),0,1};check.checksum=multi_scene::checksum(check);test(!multi_scene::valid(check));
  test(!multi_scene::read(*store,10,4,*frame));test(!multi_scene::read(*store,11,3,*frame));
  auto& slot=store->frames[10%multi_scene::Frames];++slot.guard;test(!multi_scene::read(*store,10,3,*frame));++slot.guard;
  source.begin();source.offer(b);source.publish(live_owner::selection(7,1));test(h.dropped==1&&h.published==1);

@@ -4,13 +4,14 @@
 #include "live_owner_wire.h"
 #include "../scene_bridge/scene_capacity.h"
 #include "source_timing.h"
+#include "../scene_bridge/damage_state.h"
 namespace multi_scene {
 constexpr DWORD Offset=scene_capacity::SceneOffset,Magic=0x31534d53,Owners=scene_capacity::Owners,Assets=scene_capacity::Assets,Frames=8;
-constexpr DWORD Version=2;
+constexpr DWORD Version=3;
 struct Header {DWORD magic=Magic,version=Version,bytes=0,pid=0,session[4]{};
  volatile LONG stopped=0,frame=0,published=0,dropped=0,invalid=0,asset_ready=0,asset_rejected=0,closed_frame=0;};
 struct Frame {uint64_t sequence=0,offered=0;DWORD frame=0,anchor=0,revision=0,count=0;
- live_owner::Row rows[Owners]{};uint64_t checksum=0;};
+ live_owner::Row rows[Owners]{};sfc_damage::State damage[Owners]{};uint64_t checksum=0;};
 struct alignas(64) FrameSlot {volatile LONG guard=0;DWORD reserved=0;Frame packet{};BYTE padding[16]{};};
 struct Asset {DWORD id=0,path_id=0,owner=0,revision=0,model=0,source=0,geometry_bytes=0,image_bytes=0;
  BYTE content[32]{};uint64_t replay_hash=0,textures_hash=0,checksum=0;};
@@ -20,7 +21,7 @@ inline bool initial_resolved(Store& s,uint64_t mask){
  for(unsigned i=0;i<64;++i)if((mask&(uint64_t(1)<<i))&&!InterlockedCompareExchange(&s.assets[i].ack,0,0))return false;
  return true; // Negative ACK remains an explicit asset failure,not an infinite wait.
 }
-static_assert(sizeof(Header)==64&&sizeof(Frame)==40+384*Owners&&sizeof(Asset)==88&&Offset+sizeof(Store)<live_owner::Offset);
+static_assert(sizeof(Header)==64&&sizeof(Frame)==40+404*Owners&&sizeof(Asset)==88&&Offset+sizeof(Store)<live_owner::Offset);
 static_assert(Offset+sizeof(Store)<source_timing::Offset,"multi-scene must not overlap source timing evidence");
 inline bool valid(const Header& h,const DWORD* session,DWORD pid){return h.magic==Magic&&h.version==Version&&h.bytes==sizeof(Store)&&
  h.pid==pid&&pid&&live_owner::same_session(h.session,session)&&!frame_ingress::state(const_cast<volatile LONG*>(&h.stopped));}
@@ -33,6 +34,8 @@ inline bool valid(const Frame& f){
   if(r[1]==f.anchor&&r[7]==f.revision){if(live_owner::sequence(r)!=f.sequence)return false;anchor=true;}
   for(DWORD j=0;j<i;++j)if(f.rows[j][1]==r[1])return false;
   if(i&&memcmp(r.data()+49,f.rows[0].data()+49,40*sizeof(DWORD)))return false;
+  const auto& d=f.damage[i];if(d.qualified&&!sfc_damage::valid(d))return false;
+  if(d.qualified&&(d.owner!=r[1]||d.revision!=r[7]))return false;
  }
  return anchor;
 }
@@ -48,7 +51,7 @@ struct Source {Store* store=nullptr;Frame pending{};
  bool attach(BYTE* base,const DWORD* session){store=reinterpret_cast<Store*>(base+Offset);const auto pid=GetCurrentProcessId();
   if(store->header.pid==0)store->header.pid=pid;if(!valid(store->header,session,pid)){store=nullptr;return false;}return true;}
  void begin(){pending={};}
- void offer(const live_owner::Row& r){if(!store)return;if(pending.count<Owners)pending.rows[pending.count++]=r;else InterlockedIncrement(&store->header.dropped);}
+ void offer(const live_owner::Row& r,const sfc_damage::State& damage={}){if(!store)return;if(pending.count<Owners){pending.rows[pending.count]=r;pending.damage[pending.count]=damage;++pending.count;}else InterlockedIncrement(&store->header.dropped);}
  bool publish(uint64_t selected){if(!store||frame_ingress::state(&store->header.stopped))return false;
   pending.anchor=DWORD(selected);pending.revision=DWORD(selected>>32);
   for(DWORD i=0;i<pending.count;++i)if(pending.rows[i][1]==pending.anchor&&pending.rows[i][7]==pending.revision){

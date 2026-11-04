@@ -27,7 +27,7 @@ struct SceneOwner {
     MeshIdentity identity{};
     std::array<DWORD,3> lod{};
     DWORD revision=0,last_ms=0,sequence=0;
-    bool retired=false,failed=false;
+    bool retired=false,failed=false,damageVerified=false;
 };
 struct LiveScene {
     std::array<SceneAsset,kSceneAssets> assets{};
@@ -41,7 +41,8 @@ struct LiveScene {
     DWORD capture_attempts=0,capture_failures=0,owner_overflow=0,dropped=0,invalid=0;
     LONGLONG max_capture_ticks=0;LARGE_INTEGER frequency{};
     volatile LONG enabled=0;
-    bool lightTuning=false,sourceTiming=false,lifecycleCapture=false,performance=false;
+    bool lightTuning=false,sourceTiming=false,lifecycleCapture=false,performance=false,damageEnabled=false;
+    DWORD damageUnqualified=0,damageDisagreements=0;
     DWORD calibrationMisses=0;
     // Default-off diagnostic journal, protected by the existing nonwaiting mailbox.
     // Independent of the latest-state table: a retirement cannot be coalesced away.
@@ -62,6 +63,7 @@ struct LiveScene {
 #endif
     bool start(const std::wstring& name,const std::wstring& directory) {
         performance=pipeline_mode::performance();
+        wchar_t damageMode[2]{};damageEnabled=GetEnvironmentVariableW(L"SFC_DAMAGE_TEXTURES",damageMode,2)==1&&damageMode[0]==L'1';
         if(!LiveBridge::name_ok(name) || worker)return false;
         mapping=OpenFileMappingW(FILE_MAP_READ|FILE_MAP_WRITE,FALSE,name.c_str());
         if(!mapping)return false;
@@ -159,7 +161,7 @@ struct LiveScene {
             r[1]=owner;r[2]=frame;r[3]=elapsed;r[4]=2;r[7]=o.revision;offer(i,r);return;}
     }
     template<class Read,class Validate>
-    void observe(const MeshIdentity& id,Read read,Validate valid){
+    void observe(const MeshIdentity& id,Read read,Validate valid,DWORD damageScalar=0,DWORD damageFamily=0){
         if(!enabled || id.elapsed>(lightTuning?1800000u:90000u) || id.caller!=0x0042E55D)return;
         std::array<DWORD,3> lod{};
         if(!read(id.visual+0x11c,lod.data(),12)){++invalid;return;}
@@ -178,12 +180,17 @@ struct LiveScene {
 #ifdef SFC_NATIVE_LIGHT_DISCOVERY
         lights.observe(id,read,valid);
 #endif
-        if(!o.identity.same_epoch(id) || o.lod!=lod){o.identity=id;o.lod=lod;o.revision=0;o.failed=false;o.last_ms=0;}
+        if(!o.identity.same_epoch(id) || o.lod!=lod){o.identity=id;o.lod=lod;o.revision=0;o.failed=false;o.last_ms=0;o.damageVerified=false;}
+        if(damageEnabled){sfc_damage::Word scalar=0,family=0;
+            o.damageVerified=sfc_damage::source(id.ship,scalar,family,read)&&family==damageFamily&&
+                std::fabs(double(sfc_damage::value(scalar))-sfc_damage::value(damageScalar))<=1e-6;
+            if(!o.damageVerified)++damageDisagreements;
+        }
         if(!o.revision && !o.failed && id.frame!=last_capture_frame){
             if(revisions==((calibration&&!cohort.store)?8:kSceneRevisions)){o.failed=true;++capture_failures;}
             else for(auto& a:assets)if(InterlockedCompareExchange(&a.ready,0,0)==0){
                 last_capture_frame=id.frame;++capture_attempts;LARGE_INTEGER before{},after{};QueryPerformanceCounter(&before);
-                const auto result=capture_mesh(a.mesh,id,read,valid);
+                const auto result=capture_mesh(a.mesh,id,read,valid,damageEnabled);
                 bool triangles=result==MeshStatus::Complete;
                 if(triangles)for(DWORD p=0;p<a.mesh.header[MeshPolygons];++p)triangles &= a.mesh.polygons[p].header[0]==3;
                 if(triangles && std::memcmp(a.mesh.header.data()+MeshLodCount,lod.data(),12))triangles=false;
@@ -256,7 +263,12 @@ struct LiveScene {
             DWORD slot=0;for(;slot<owner_count;++slot)if(owners[slot].identity.owner==e.id.owner)break;
             if(slot==owner_count){directSource.reject(frame);continue;} // Functional registry association remains required.
             if(slot<sfc_calibration::Owners&&!sfc_calibration::offer(calibration,slot,r))++calibrationMisses;
-            cohort.offer(r);
+            sfc_damage::State damage{};
+            if(damageEnabled){damage.owner=e.id.owner;damage.revision=e.revision;
+                if(owners[slot].damageVerified&&sfc_damage::source(e.id.ship,damage.scalar,damage.family,read))damage.qualified=1;
+                else ++damageUnqualified;
+            }
+            cohort.offer(r,damage);
             // Only low-volume diagnostic state is rate limited;frame publication above isn't.
             if(elapsed-owners[slot].last_ms>=34){owners[slot].last_ms=elapsed;offer(slot,r);}
             ++persistentPublications;
@@ -379,7 +391,8 @@ struct LiveScene {
             persistent<<"{\"schema\":1,\"admitted\":"<<b.registry.admitted<<",\"destroyed\":"<<b.registry.destroyed
               <<",\"rejected\":"<<b.registry.rejected<<",\"pose_updates\":"<<b.registry.updated<<",\"offscreen_updates\":"<<b.registry.offscreen
               <<",\"publications\":"<<b.persistentPublications<<",\"failed_updates\":"<<b.persistentFailures<<",\"calibration_misses\":"<<b.calibrationMisses
-              <<",\"frames\":"<<b.persistentFrames<<",\"update_ticks\":"<<b.persistentTicks<<",\"max_update_ticks\":"<<b.persistentMaxTicks<<",\"qpc_frequency\":"<<b.frequency.QuadPart<<",\"stopped\":true}";}
+              <<",\"frames\":"<<b.persistentFrames<<",\"update_ticks\":"<<b.persistentTicks<<",\"max_update_ticks\":"<<b.persistentMaxTicks<<",\"qpc_frequency\":"<<b.frequency.QuadPart
+              <<",\"damage_enabled\":"<<b.damageEnabled<<",\"damage_source_disagreements\":"<<b.damageDisagreements<<",\"damage_unqualified\":"<<b.damageUnqualified<<",\"stopped\":true}";}
         InterlockedExchange(reinterpret_cast<LONG*>(b.view+12),failed?3:2);return 0;
     }
 };

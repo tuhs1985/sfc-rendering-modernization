@@ -93,7 +93,7 @@ def geometry_parts(mesh):
 
 
 def prepare(source,output,game_root,*,live_record=None,evidence_mode='test',qualified_mesh=None,
-            prepared_capture=None,prepared_images=None,prepared_geometry=None,output_extent=(960,540),identity_calculator=None,texture_sink=None,geometry_sink=None):
+            prepared_capture=None,prepared_images=None,prepared_geometry=None,output_extent=(960,540),identity_calculator=None,texture_sink=None,geometry_sink=None,damage_uv=None):
     """Read original runtime mesh;resolve original IMAGE files only,never MOD geometry."""
     if evidence_mode not in ('performance','test'):raise ValueError('Scene evidence mode')
     if evidence_mode=='performance' and live_record is None:raise ValueError('Performance preparation requires fresh live row')
@@ -158,7 +158,10 @@ def prepare(source,output,game_root,*,live_record=None,evidence_mode='test',qual
     vertices,vertex_bytes,_=prepared_geometry if prepared_geometry is not None else geometry_parts(mesh)
     width,height=output_extent
     if not 1<=width<=1920 or not 1<=height<=1080:raise ValueError('Output extent bound')
-    payload=struct.pack('<8I',MAGIC,1,len(vertices),len(indices),len(groups),len(frames),width,height)
+    if damage_uv is not None:
+        if len(damage_uv)!=len(vertices) or not all(len(uv)==2 and all(math.isfinite(x) for x in uv) for uv in damage_uv):raise ValueError('Damage UV layout/finite')
+        vertex_bytes=b''.join(vertex_bytes[i*32:(i+1)*32]+struct.pack('<2f',*uv) for i,uv in enumerate(damage_uv))
+    payload=struct.pack('<8I',MAGIC,2 if damage_uv is not None else 1,len(vertices),len(indices),len(groups),len(frames),width,height)
     payload+=vertex_bytes
     payload+=struct.pack('<%dI'%len(indices),*indices)
     payload+=b''.join(struct.pack('<4I',*g) for g in groups)
@@ -197,12 +200,13 @@ def read_replay(path):
     raw=Path(path).read_bytes()
     if not 32<=len(raw)<=2*1024*1024:raise ValueError('Replay byte cap')
     magic,version,nv,ni,ng,nf,w,h=struct.unpack_from('<8I',raw)
-    if (magic!=MAGIC or version!=1 or not 3<=nv<=32768 or nv%3 or ni!=nv or not 1<=ng<=256 or
+    stride=40 if version==2 else 32
+    if (magic!=MAGIC or version not in (1,2) or not 3<=nv<=32768 or nv%3 or ni!=nv or not 1<=ng<=256 or
         not 1<=nf<=16 or not 1<=w<=1920 or not 1<=h<=1080 or
-        len(raw)!=32+nv*32+ni*4+ng*16+nf*FRAME.size):raise ValueError('Replay schema')
-    offset=32;vertices=[struct.unpack_from('<8f',raw,offset+i*32) for i in range(nv)]
+        len(raw)!=32+nv*stride+ni*4+ng*16+nf*FRAME.size):raise ValueError('Replay schema')
+    offset=32;vertices=[struct.unpack_from('<10f' if version==2 else '<8f',raw,offset+i*stride) for i in range(nv)]
     if not all(math.isfinite(x) for v in vertices for x in v):raise ValueError('Replay finite vertices')
-    offset+=nv*32;indices=list(struct.unpack_from('<%dI'%ni,raw,offset));offset+=ni*4
+    offset+=nv*stride;indices=list(struct.unpack_from('<%dI'%ni,raw,offset));offset+=ni*4
     if sorted(indices)!=list(range(nv)):raise ValueError('Replay index coverage')
     groups=[struct.unpack_from('<4I',raw,offset+i*16) for i in range(ng)];offset+=ng*16
     cursor=0;identities=set()

@@ -1,5 +1,5 @@
 # Fresh supported ships,zero offset,owner-qualified native insertion.
-param([ValidateSet('Strict','ExtraFrame')][string]$TimingPolicy='ExtraFrame',[switch]$LegacyStartupWarmup,[switch]$CompletionDiagnostics,[switch]$LightDiagnostics)
+param([ValidateSet('Strict','ExtraFrame')][string]$TimingPolicy='ExtraFrame',[switch]$LegacyStartupWarmup,[switch]$CompletionDiagnostics,[switch]$LightDiagnostics,[switch]$DamageTextures)
 $ErrorActionPreference='Stop'
 $modern='C:\Users\rober\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\powershell\pwsh.exe'
 if($PSVersionTable.PSVersion.Major -lt 7){
@@ -7,6 +7,7 @@ if($PSVersionTable.PSVersion.Major -lt 7){
  if($LegacyStartupWarmup){$forward+='-LegacyStartupWarmup'}
  if($CompletionDiagnostics){$forward+='-CompletionDiagnostics'}
  if($LightDiagnostics){$forward+='-LightDiagnostics'}
+ if($DamageTextures){$forward+='-DamageTextures'}
  & $modern @forward
  if($LASTEXITCODE -ne 0){throw 'Native multi-ship replacement needs review;evidence retained'}
  return
@@ -20,5 +21,6 @@ $runArgs=@('-B',(Join-Path $root 'tools/remix_runtime/run_return_game.py'),'--ex
 if($LegacyStartupWarmup){$runArgs+='--legacy-startup-warmup'}
 if($CompletionDiagnostics){$runArgs+='--completion-diagnostics'}
 if($LightDiagnostics){$runArgs+='--light-diagnostics'}
+if($DamageTextures){$runArgs+='--damage-textures'}
 & $python @runArgs
 if($LASTEXITCODE -ne 0){throw 'Native multi-ship replacement needs review;copied-install recovery evidence retained'}

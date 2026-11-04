@@ -98,5 +98,5 @@ class RuntimeCandidateTests(TestCase):
 
     def test_fixture_reserves_parallel_preparation_before_start(self):
         text=(ROOT/'tools/remix_runtime/run_return_fixture.py').read_text()
-        self.assertIn('reserve_mib=1024 if args.multi_ship_resources else (768 if args.multi_ship else 192)',text)
+        self.assertIn('reserve_mib=1024 if args.multi_ship_resources else (544 if args.native_all_ships else 288 if args.native_insertion_policy else 768 if args.multi_ship else 192)',text)
         self.assertLess(text.index('reserve_mib=1024'),text.index('work.mkdir()'))

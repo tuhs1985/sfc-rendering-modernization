@@ -164,3 +164,26 @@ Broad discovery, screenshots, geometry dumps and repeated on/off demonstrations 
 - Every new diagnostic should record: question, tool/source/build identity, exact trigger, required permissions, scope, caps, timing perturbation, cleanup, evidence location, result and limitations. Link the result here and in the newest handoff. Mark obsolete launchers explicitly.
 
 This reference adds no runtime features or default diagnostics. No source or configuration changes accompany it.
+
+
+## Damage diagnostics register — Run289, November4,2026
+
+Sponsor asks that diagnostic checks remain identifiable and easy to disable.
+The following distinguishes observation from functional requirements;do not
+leave measurement work in gameplay merely because a checkout used it.
+
+| Item | Classification / normal gameplay | Cost and disable route | Source |
+| --- | --- | --- | --- |
+| Damage colour snapshots (before,first damage,light,heavy,repaired) | DIAGNOSTIC ONLY;OFF in gameplay | Up to5synchronous GPU readbacks/5BGRA files in standalone fixture;perturbs timing. `SFC_DAMAGE_FIXTURE_SNAPSHOTS=0` disables. Relay explicitly sets0 unless BOTH offline fixture and damage checkout. No gameplay switch enables it. | `tools/d3d9_proof/d3d9_direct_host.cpp`, `tools/remix_runtime/multi_scene_relay.py` |
+| Synthetic damage/repair stages and intentionally unavailable observation | TEST ONLY;never installed in SFC | Fixture publisher only;run fixture without `--damage-textures` to disable. Stage advancement waits for returned insertion activity;this is NOT a game refresh cap or wait. | `tools/remix_runtime/source_timing_fixture.h` |
+| Native depth/text pixel verification,wrong-ticket injection,deadline overruns | TEST ONLY;no normal gameplay readback | Existing standalone native insertion fixture. Omit fixture campaign;normal launcher never runs these pixel checks. Existing normal transport matching remains required. | `tools/remix_runtime/return_fixture.cpp` |
+| Snapshot inspection/comparison PNGs | DIAGNOSTIC ONLY;offline | No rendering-thread work. Do not run conversion/inspection during normal gameplay. Artifacts under `player-replacement/run289`. | Run289 record |
+| `DAMAGE_SUMMARY` counters | DIAGNOSTIC COUNTERS;damage checkout only | Integer increments per draw/unavailable observation,one shutdown summary;no per-frame disk logging. No separate counter toggle currently;can later gate/remove counters independently of layer behavior. Do not claim a switch already exists. | `tools/d3d9_proof/damage_layer.h` |
+| `damageDisagreements` / `damageUnqualified` counters | DIAGNOSTIC COUNTERS | Integer increments;existing worker summary output. Separately removable from the qualification decision. No independent switch yet. | `tools/m1_component/m1_live_scene.h` |
+| Compare derived scalar/family with native model arguments | SOURCE-QUALIFICATION CHECK,NOT currently diagnostic-only | Runs on observed models when damage mode enabled;controls damageVerified. Candidate to move to an opt-in validator AFTER live qualification;currently disabling it requires a code change and replacement trust policy. It must not block the base hull. | `m1_live_scene.h::observe` |
+| Read pinned accessor identity/tail,finite statistics,coherent duplicate statistics read | FUNCTIONAL source read/consistency in current implementation | Needed to identify/read current state without executing native getter. Only active with damage mode. Double read can be audited for later optimization;do not silently remove coherence. | `tools/scene_bridge/damage_state.h` |
+| Owner/revision/session matching,finite UVs,resource bounds,GPU ownership,opaque-state restoration | FUNCTIONAL | Remain in the pipeline;these are not measurement tools. Actual decal blending is required by Remix,not a diagnostic. | Damage state/wire/mapping/layer |
+
+No new gameplay callback,refresh cap,delay,wait loop,continuous image dump or
+material-setting change was added in Run289. Existing `-CompletionDiagnostics`
+and `-LightDiagnostics` remain opt-in and were not enabled for sponsor checkout.

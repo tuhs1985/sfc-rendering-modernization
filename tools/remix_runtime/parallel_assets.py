@@ -181,9 +181,21 @@ class Pipeline:
             [g['group'],g['flags'],images[resources[g['primary']]['filename']]['sha256'],
              resources.get(g['secondary'],{}).get('filename','').replace('\\','/').casefold() if g['flags']&0x20 else None]
             for g in mesh['groups']]]
+        if getattr(self.relay,'damage_textures',False):identity.append(['sfc.damage-mapping.v1',list(mesh['header'][27:30])])
         signature=hashlib.sha256(json.dumps(['sfc.base-asset.v2.remix-image-origin-v1',identity],sort_keys=True,separators=(',',':')).encode()).hexdigest()
         steps.append(dict(stage='base_identity',seconds=(time.perf_counter_ns()-started)/1e9));begin=time.perf_counter_ns()
         from remix_coordinates import base_image,POLICY
+        damage_uv=None
+        if getattr(self.relay,'damage_textures',False):
+            from damage_mapping import projected_uv,scale
+            h=mesh['header']
+            if h[29]!=1:raise ValueError('Fresh native damage mapping bounds missing')
+            factor=scale(*struct.unpack('<2f',struct.pack('<2I',*h[27:29])))
+            poly_offset=256+h[16]*12
+            damage_uv=[None]*len(mesh['corners'])
+            for i,(_,start) in enumerate(mesh['polygons']):
+                normal=struct.unpack_from('<3f',raw,poly_offset+i*36+8)
+                for c in range(start,start+3):damage_uv[c]=projected_uv(mesh['points'][mesh['corners'][c][0]],normal,factor)
         if sum(len(i['raw'])+2*len(i['bgra']) for i in images.values())+sum(len(images[n]['bgra']) for n in job['primary'])>IMAGE_BYTES:
             raise ValueError('Remix base adaptation256MiB working cap')
         upload_images={name:base_image(images[name]) for name in job['primary']}
@@ -193,7 +205,7 @@ class Pipeline:
             qualified_mesh=mesh,prepared_capture=(raw,refs),prepared_images=upload_images,
             prepared_geometry=self.graph.tasks[job['geometry_key']]['value'],output_extent=(1920,1080),identity_calculator=asset_identity,
             texture_sink=(lambda index,payload:memory.write(job['id'],index,payload)) if memory else None,
-            geometry_sink=(lambda payload:memory.write_geometry(job['id'],payload)) if memory else None)
+            geometry_sink=(lambda payload:memory.write_geometry(job['id'],payload)) if memory else None,damage_uv=damage_uv)
         steps.append(dict(stage='bundle_assembly_and_write',seconds=(time.perf_counter_ns()-begin)/1e9));begin=time.perf_counter_ns()
         packet=wire.prepared_packet(job['id'],job['id'],job['row'],signature,manifest['catalog_identity'])
         if memory:memory.seal(job['id'],packet)
@@ -305,6 +317,7 @@ class Pipeline:
                         parts=g['value'];mesh=job['capture'][3]
                         group_count=sum(bool(parts[2].get(group['group'])) for group in mesh['groups'])
                         scene_bytes=32+len(parts[1])+4*len(mesh['corners'])+16*group_count+FRAME.size
+                        if getattr(self.relay,'damage_textures',False):scene_bytes+=8*len(parts[0])
                         if not memory.reserve(job['id'],list(unique.values()),scene_bytes):continue
                     self.graph.add(key,lambda job=job:self._basic(job));job['phase']='basic'
                 if job['phase']=='basic':

@@ -10,7 +10,7 @@ enum MeshField : std::size_t {
     MeshFrame, MeshElapsed, MeshShip, MeshVisual, MeshModel, MeshManager,
     MeshSource, MeshCaller, MeshList, MeshVertexBase, MeshVertices, MeshPolygons,
     MeshCorners, MeshSources, MeshLodCount, MeshLodOverride, MeshLodSelected,
-    MeshActualChild, MeshDispatch = 24, MeshSupplied = 30, MeshComposed = 47
+    MeshActualChild, MeshDispatch = 24, MeshDamageUpper=27,MeshDamageLower=28,MeshDamageVersion=29,MeshSupplied = 30, MeshComposed = 47
 };
 struct MeshIdentity {
     std::uint32_t owner=0,thread=0,frame=0,elapsed=0,ship=0,visual=0,model=0,
@@ -82,7 +82,7 @@ static_assert(sizeof(MeshPacket)<1024*1024,"Mesh storage exceeds 1 MiB");
 // Read and Validate callbacks are guarded/live identity checks in production,
 // injectable offline. No native writes, allocations or logging in this function.
 template<class Packet,class Read,class Validate>
-MeshStatus capture_mesh(Packet& out,const MeshIdentity& id,Read read,Validate valid) {
+MeshStatus capture_mesh(Packet& out,const MeshIdentity& id,Read read,Validate valid,bool damage=false) {
     out.complete=false;out.header={};
     const auto block=[&](std::uint32_t base,std::uint32_t offset,void* dst,std::uint32_t n){
         std::uint32_t start=0,end=0;
@@ -109,6 +109,11 @@ MeshStatus capture_mesh(Packet& out,const MeshIdentity& id,Read read,Validate va
     h[MeshModel]=id.model;h[MeshManager]=id.manager;h[MeshSource]=id.source;h[MeshCaller]=id.caller;
     h[MeshList]=id.list;h[MeshVertexBase]=base;h[MeshVertices]=model[2];h[MeshPolygons]=model[4];
     h[MeshLodCount]=lod[0];h[MeshLodOverride]=lod[1];h[MeshLodSelected]=lod[2];h[MeshActualChild]=selected;
+    if(damage){
+        if(!word(id.model,0x24,h[MeshDamageUpper])||!word(id.model,0x28,h[MeshDamageLower]))return MeshStatus::Read;
+        if(!Packet::finite(h[MeshDamageUpper])||!Packet::finite(h[MeshDamageLower]))return MeshStatus::Nonfinite;
+        h[MeshDamageVersion]=1;
+    }
     if(!block(base,0,out.positions.data(),model[2]*12) ||
        !block(id.manager,0x6f4,h.data()+MeshSupplied,68) ||
        !block(id.manager,0x6b0,h.data()+MeshComposed,68) ||
