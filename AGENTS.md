@@ -8,6 +8,12 @@ These instructions apply to the entire repository.
 - Check `git status --short` before editing. Preserve existing user changes and keep the patch focused on the request. Stage, commit, or push only when the user requests it.
 - Put changing run results, limitations, and next steps in the handoff or a linked run record. Keep standing project rules here.
 
+## Obsidian project continuity
+
+- At the start of a new SFC engineering session, read the existing Status Tracker and latest Project Parking Note, if present, through the official Obsidian CLI. Reconcile them with Git status and the repository handoff before engineering work.
+- Update the existing Status Tracker after meaningful verified changes. Record user-deferred ideas in the existing Parking Lot. When the user parks or ends a session, write the Project Parking Note with exactly two substantive Restart Brief paragraphs followed by a compact Session Summary.
+- Use the installed Obsidian CLI and Markdown skills and the exact vault and note paths in [the Obsidian workflow](docs/OBSIDIAN.md). Limit writes to the existing SFC project folder. Git and the repository handoff govern implementation and evidence. Obsidian holds project context and restart information.
+
 ## Game installations and runtime
 
 - Treat the accepted SFC installation and original game assets as read-only. Use the verified test copy and the repository launchers for live integration work. Consult the [README](README.md) for setup and launch commands.
