@@ -105,6 +105,8 @@ class Relay(SingleRelay):
         env['SFC_D3D9_PLAYER_REPLACEMENT']='1' if self.player_replacement else '0'
         env['SFC_DAMAGE_TEXTURES']='1' if getattr(self,'damage_textures',False) else '0'
         env['SFC_DAMAGE_FIXTURE_SNAPSHOTS']='1' if getattr(self,'damage_textures',False) and self.offline_fixture else '0'
+        env['SFC_PLAY_SESSION']='1' if getattr(self,'play_session',False) else '0'
+        env['SFC_PLAY_PARENT_PID']=str(os.getpid()) if getattr(self,'play_session',False) else '0'
         env['SFC_D3D9_TEXTURE_MEMORY']='1' if getattr(self,'texture_memory',None) else '0'
         from environment_resources import publish as prepare_environment
         environment_receipt=prepare_environment(self.receiver.channel,pid,gpu)
@@ -154,7 +156,7 @@ class Relay(SingleRelay):
         self.prewarm_started_ns=time.perf_counter_ns();self.renderer_started_ns=self.prewarm_started_ns
         env.pop('SFC_D3D9_LIVE_TUNING',None)
         if getattr(self,'live_tuning',False):env['SFC_D3D9_LIVE_TUNING']='1'
-        self.prewarm_process=subprocess.Popen([str(GUARD),str(gpu),'1980' if getattr(self,'live_tuning',False) else '285',str(AGGREGATE_BYTES),str(2*1024*1024),str(EXE),str(gpu),str(RUNTIME),str(RECEIVER),'normal'],env=env,creationflags=subprocess.CREATE_NO_WINDOW)
+        self.prewarm_process=subprocess.Popen([str(GUARD),str(gpu),'0' if getattr(self,'play_session',False) else '1980' if getattr(self,'live_tuning',False) else '285',str(AGGREGATE_BYTES),str(2*1024*1024),str(EXE),str(gpu),str(RUNTIME),str(RECEIVER),'normal'],env=env,creationflags=subprocess.CREATE_NO_WINDOW)
 
     def poll(self,pid,from_service=False):
         if self.service and not from_service:self.service.check();return
@@ -219,15 +221,15 @@ class Relay(SingleRelay):
             if self.first_discovery is None:self.first_discovery=now
 
     def identify_asset(self,row):
-        from live_scene import decode_mesh
+        from break_scene import decode_runtime_mesh
         from owner_rebind import Content
         source=self.folder/'gate'/f'LIVE-SCENE-001-asset-{row[7]}.bin'
         if source.stat().st_size>2*1024*1024 or source.with_suffix('.json').stat().st_size>256*1024:raise ValueError('Fresh source bounds')
         packet=source.read_bytes();references=source.with_suffix('.json').read_bytes()
         if self.mode=='performance':
             from mesh_checksum import calculate
-            mesh=decode_mesh(packet,references,checksum=calculate)
-        else:mesh=decode_mesh(packet,references)
+            mesh=decode_runtime_mesh(packet,references,checksum=calculate,allow_break=getattr(self,'break_models',False))
+        else:mesh=decode_runtime_mesh(packet,references,allow_break=getattr(self,'break_models',False))
         mesh['_capture_refs_sha256']=hashlib.sha256(references).hexdigest()
         if (mesh['header'][4],mesh['header'][10],mesh['header'][12])!=(row[1],row[5],row[6]):raise ValueError('Fresh source identity mismatch')
         content=Content(self.root);signature=content.signature(mesh)
@@ -430,6 +432,7 @@ class Relay(SingleRelay):
             self.anchor_missing=0
             request(self.receiver.channel,self.binding_generation,row,int(self.content_signature[:16],16) or 1)
             self.binding_events.append(dict(generation=self.binding_generation,owner=row[1],revision=row[7],scheduling_anchor_only=True))
+            if getattr(self,'play_session',False) and len(self.binding_events)>120:del self.binding_events[0]
             break
 
     def stop(self):
@@ -448,6 +451,20 @@ class Relay(SingleRelay):
             if self.frame_log and not self.frame_log.closed:self.frame_log.close()
             if getattr(self,'effect_recorder',None):
                 self.effect_recording=self.effect_recorder.close();self.effect_recorder=None
+
+    def finish_play(self,pid):
+        """Small exit summary;no raw timing dump or parsed full-frame campaign."""
+        self.stop()
+        from native_cohort import save,OFFSET as cohort_offset
+        members=save(self.receiver.channel,self.folder) if struct.unpack('<I',self.receiver.channel.read(cohort_offset+12,4))[0] else None
+        from native_gate import header,OFFSET as gate_offset
+        raw=self.receiver.channel.read(gate_offset,256)
+        gate=header(raw) if struct.unpack_from('<I',raw)[0] else None
+        report=dict(result='PLAY_SESSION_ENDED',selected=self.selected or {},multi_scene=dict(state=wire.summary(self.receiver.channel),
+            qualified_assets=len(self.catalog),attempted_assets=len(self.attempts),image_bytes=self.image_bytes,
+            partial_assets=len(self.partial),recent_bindings=self.binding_events[-120:]),native_cohort=members,native_gate_summary=gate,
+            scope='Untimed play counters only;not diagnostic timing/coverage acceptance')
+        (self.folder/'play-session-summary.json').write_text(json.dumps(report,indent=2));return report
 
     def finish(self,pid):
         report=super().finish(pid)

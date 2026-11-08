@@ -17,6 +17,9 @@ early_model::Targets targets(){
   {0x004158C1,"\xB8\x13\xBB\x75\x00\xE8\x89\x09\x32\x00"}};
  if(reinterpret_cast<uintptr_t>(GetModuleHandleW(nullptr))!=0x400000)return {};
  for(const auto& c:checks){std::array<char,10> b{};if(!read(c.address,b.data(),b.size())||memcmp(b.data(),c.bytes,b.size()))return {};}
+#ifdef SFC_BREAK_PROBE
+ if(!bindBreakTargets())return {};
+#endif
 #ifdef SFC_DAMAGE_PROBE
  std::array<char,6> wrapper{};if(!read(0x006AC5A0,wrapper.data(),wrapper.size())||memcmp(wrapper.data(),"\x83\xEC\x08\x53\x56\x8B",6))return {};
  damageWrapper=reinterpret_cast<Three>(0x006AC5A0);
@@ -33,12 +36,16 @@ DWORD WINAPI worker(void*){
   state.gamePid=GetCurrentProcessId();state.startupRestored=1;state.startupVerified=1;
   Targets t{};wchar_t fixture[4]{};
   if(GetEnvironmentVariableW(L"SFC_EARLY_FIXTURE",fixture,4)==1&&fixture[0]==L'1'){
+#ifdef SFC_BREAK_PROBE
+   return_path::write(state.error,226);return 1;
+#else
    const std::wstring image(actual);if(image.find(L"\\artifacts\\remix-runtime\\runs\\")==std::wstring::npos||image.substr(image.find_last_of(L"\\/")+1)!=L"d3d11_return_fixture.exe"){return_path::write(state.error,225);return 1;}
    using Factory=BOOL(__cdecl*)(Targets*);const auto factory=reinterpret_cast<Factory>(GetProcAddress(GetModuleHandleW(nullptr),"EarlyFixtureConfig"));
    if(!factory||!factory(&t)){return_path::write(state.error,226);return 1;}fixtureMode=true;
 #ifdef SFC_DAMAGE_PROBE
    using DamageFactory=Three(__cdecl*)();const auto damageFactory=reinterpret_cast<DamageFactory>(GetProcAddress(GetModuleHandleW(nullptr),"DamageFixtureWrapper"));
    if(!damageFactory||(damageWrapper=damageFactory())==nullptr){return_path::write(state.error,227);return 1;}
+#endif
 #endif
   }else t=targets();
   if(!t.request){return_path::write(state.error,223);return 1;}

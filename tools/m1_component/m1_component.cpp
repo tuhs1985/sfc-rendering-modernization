@@ -332,6 +332,17 @@ void* g_tramp_wrapper = nullptr;
 void* g_tramp_prepare = nullptr;
 void* g_tramp_destroy = nullptr;
 bool g_persistent_requested=false;
+bool g_break_requested=false;
+struct BreakFactoryScope {DWORD parent=0,visual=0;};
+struct BreakDrawScope {DWORD child=0,manager=0;std::uint64_t epoch=0;};
+thread_local BreakFactoryScope g_break_factory_scope{};
+thread_local BreakDrawScope g_break_draw_scope{};
+void* g_tramp_break_factory=nullptr;void* g_tramp_break_child=nullptr;
+void* g_tramp_break_draw=nullptr;void* g_tramp_break_retire=nullptr;
+const BYTE kBreakFactoryBytes[]={0xb8,0x66,0xba,0x75,0x00};
+const BYTE kBreakChildBytes[]={0xb8,0x2c,0xbd,0x75,0x00};
+const BYTE kBreakDrawBytes[]={0x55,0x8b,0xec,0x51,0x51};
+const BYTE kBreakRetireBytes[]={0xb8,0x40,0xbd,0x75,0x00};
 const BYTE kDestroyBytes[]={0xb8,0x13,0xbb,0x75,0x00};
 
 const BYTE kSceneBytes[] = {0x53, 0x56, 0x8B, 0xF1, 0x57};
@@ -352,6 +363,10 @@ extern "C" void HookGeometry();
 extern "C" void HookWrapper();
 extern "C" void HookPrepare();
 extern "C" void HookDestroy();
+DWORD __cdecl HookBreakFactory(DWORD,DWORD);
+DWORD __fastcall HookBreakChild(void*,void*,DWORD,DWORD,DWORD,DWORD);
+void __fastcall HookBreakDraw(void*,void*,DWORD);
+DWORD __fastcall HookBreakRetire(void*,void*);
 
 #ifdef M1_GATE_ONLY
 std::array<Hook, 1> g_hooks = {{
@@ -359,7 +374,7 @@ std::array<Hook, 1> g_hooks = {{
         reinterpret_cast<void*>(&HookShip)},
 }};
 #else
-std::array<Hook, 9> g_hooks = {{
+std::array<Hook, 13> g_hooks = {{
     {"scene_begin", 0x0029E300, kSceneBytes, sizeof(kSceneBytes),
         reinterpret_cast<void*>(&HookScene)},
     {"ship_owner", 0x000162B9, kShipBytes, sizeof(kShipBytes),
@@ -377,6 +392,10 @@ std::array<Hook, 9> g_hooks = {{
     {"polygon_prepare",0x002ABFC0,kPrepareBytes,sizeof(kPrepareBytes),
         reinterpret_cast<void*>(&HookPrepare)},
     {"ship_destroy",0x000158C1,kDestroyBytes,sizeof(kDestroyBytes),reinterpret_cast<void*>(&HookDestroy)},
+    {"break_factory",0x0001455b,kBreakFactoryBytes,sizeof(kBreakFactoryBytes),reinterpret_cast<void*>(&HookBreakFactory)},
+    {"break_child",0x0001b657,kBreakChildBytes,sizeof(kBreakChildBytes),reinterpret_cast<void*>(&HookBreakChild)},
+    {"break_draw",0x0001b900,kBreakDrawBytes,sizeof(kBreakDrawBytes),reinterpret_cast<void*>(&HookBreakDraw)},
+    {"break_retire",0x0001b8b4,kBreakRetireBytes,sizeof(kBreakRetireBytes),reinterpret_cast<void*>(&HookBreakRetire)},
 }};
 #endif
 
@@ -551,6 +570,105 @@ bool safe_write32(DWORD address, DWORD value) {
         *reinterpret_cast<DWORD*>(address) = value;
         return true;
     } __except (EXCEPTION_EXECUTE_HANDLER) { return false; }
+}
+
+// Counter accounting belongs to the short naked entry/exit guards below. Their
+// entire post-decrement return path fits the existing128-byte unload EIP check.
+struct BreakHookError {
+    DWORD error=GetLastError();
+    void before(){SetLastError(error);}
+    void after(){error=GetLastError();}
+    ~BreakHookError(){SetLastError(error);}
+};
+__declspec(noinline) DWORD __cdecl BreakFactoryBody(DWORD ship,DWORD visual,DWORD caller){
+    BreakHookError span;
+    const auto old=g_break_factory_scope;g_break_factory_scope={};
+    if(g_running&&g_break_requested&&g_gate&&caller==0x00416754){
+        EnterCriticalSection(&g_lock);DWORD linked=0,vt=0;
+        const auto parent=g_owners.find_by_ship(ship);
+        if(parent&&safe_read32(ship+0x8c,linked)&&linked==visual&&safe_read32(visual,vt)&&vt==kVisualVtable){
+            g_break_factory_scope={parent,visual};
+            // Qualified native transition retires only the intact render instance.
+            // The simulation ship and its independently born children are untouched.
+            g_live_scene.retire(parent,static_cast<DWORD>(g_frame),static_cast<DWORD>(GetTickCount64()-g_gate_tick));
+        }
+        LeaveCriticalSection(&g_lock);
+    }
+    using Factory=DWORD(__cdecl*)(DWORD,DWORD);
+    span.before();const auto result=reinterpret_cast<Factory>(g_tramp_break_factory)(ship,visual);span.after();
+    g_break_factory_scope=old;return result;
+}
+__declspec(noinline) DWORD __fastcall BreakChildBody(void* self,void*,DWORD visual,DWORD index,DWORD initial,DWORD mode,DWORD caller){
+    BreakHookError span;
+    using Child=DWORD(__thiscall*)(void*,DWORD,DWORD,DWORD,DWORD);
+    span.before();const auto result=reinterpret_cast<Child>(g_tramp_break_child)(self,visual,index,initial,mode);span.after();
+    if(g_running&&g_break_requested&&caller==0x0041bafb&&result==reinterpret_cast<DWORD>(self)&&
+       g_break_factory_scope.parent&&g_break_factory_scope.visual==visual){
+        EnterCriticalSection(&g_lock);g_live_scene.breakBorn(result,g_break_factory_scope.parent,visual,index);LeaveCriticalSection(&g_lock);
+    }
+    return result;
+}
+__declspec(noinline) void __fastcall BreakDrawBody(void* self,void*,DWORD manager){
+    BreakHookError span;const auto old=g_break_draw_scope;g_break_draw_scope={};
+    if(g_running&&g_break_requested){
+        EnterCriticalSection(&g_lock);
+        for(const auto& e:g_live_scene.breaks.entries)if(e.live&&e.pointer==reinterpret_cast<DWORD>(self)){
+            g_break_draw_scope={e.pointer,manager,e.epoch};break;}
+        LeaveCriticalSection(&g_lock);
+    }
+    using Draw=void(__thiscall*)(void*,DWORD);
+    span.before();reinterpret_cast<Draw>(g_tramp_break_draw)(self,manager);span.after();g_break_draw_scope=old;
+}
+__declspec(noinline) DWORD __fastcall BreakRetireBody(void* self,void*){
+    BreakHookError span;
+    if(g_running&&g_break_requested){
+        EnterCriticalSection(&g_lock);g_live_scene.breakRetire(reinterpret_cast<DWORD>(self),static_cast<DWORD>(g_frame),
+            static_cast<DWORD>(GetTickCount64()-g_gate_tick));LeaveCriticalSection(&g_lock);
+    }
+    using Retire=DWORD(__thiscall*)(void*);
+    span.before();const auto result=reinterpret_cast<Retire>(g_tramp_break_retire)(self);span.after();return result;
+}
+__declspec(naked) DWORD __cdecl HookBreakFactory(DWORD,DWORD){
+    __asm {
+        lock inc dword ptr [g_in_hook_spans]
+        push dword ptr [esp]
+        push dword ptr [esp+12]
+        push dword ptr [esp+12]
+        call BreakFactoryBody
+        add esp,12
+        lock dec dword ptr [g_in_hook_spans]
+        ret
+    }
+}
+__declspec(naked) DWORD __fastcall HookBreakChild(void*,void*,DWORD,DWORD,DWORD,DWORD){
+    __asm {
+        lock inc dword ptr [g_in_hook_spans]
+        push dword ptr [esp]
+        push dword ptr [esp+20]
+        push dword ptr [esp+20]
+        push dword ptr [esp+20]
+        push dword ptr [esp+20]
+        call BreakChildBody
+        lock dec dword ptr [g_in_hook_spans]
+        ret 16
+    }
+}
+__declspec(naked) void __fastcall HookBreakDraw(void*,void*,DWORD){
+    __asm {
+        lock inc dword ptr [g_in_hook_spans]
+        push dword ptr [esp+4]
+        call BreakDrawBody
+        lock dec dword ptr [g_in_hook_spans]
+        ret 4
+    }
+}
+__declspec(naked) DWORD __fastcall HookBreakRetire(void*,void*){
+    __asm {
+        lock inc dword ptr [g_in_hook_spans]
+        call BreakRetireBody
+        lock dec dword ptr [g_in_hook_spans]
+        ret
+    }
 }
 
 DWORD snapshot_entry_esp(const DWORD* saved) {
@@ -992,6 +1110,20 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
 
     EnterCriticalSection(&g_lock);
     ThreadState* state = thread_state(thread_id);
+    if(kind==kWrapper&&g_break_requested&&g_break_draw_scope.child&&
+       (event.return_address==0x0042ea92||event.return_address==0x0042eb34)){
+        const auto read=[](std::uint32_t a,void* p,std::size_t n){
+            return a&&n<=UINT32_MAX-a&&safe_copy(a,p,static_cast<DWORD>(n));};
+        sfc_break::Layout layout{};
+        if(event.ecx==g_break_draw_scope.manager&&event.arg3==1&&
+           sfc_break::layout([&](){DWORD visual=0;safe_read32(g_break_draw_scope.child+0x9c,visual);return visual;}(),layout,read)&&
+           saved[0]==layout.model){
+            if(event.return_address==0x0042ea92)g_live_scene.observeBreak(g_break_draw_scope.child,event.ecx,
+                event.arg1,event.arg2,static_cast<DWORD>(g_frame),static_cast<DWORD>(GetTickCount64()-g_gate_tick),read);
+            g_live_scene.updatePersistent(event.ecx,static_cast<DWORD>(g_frame),static_cast<DWORD>(GetTickCount64()-g_gate_tick),read);
+        }
+        LeaveCriticalSection(&g_lock);InterlockedDecrement(&g_in_recorders);return;
+    }
     const IdentityContext identity_context{state?state->ship:0,state?state->visual:0,state?state->owner_id:0};
 
     if(kind==kDestroy) {
@@ -1408,18 +1540,29 @@ extern "C" void __cdecl CoordinateAfterCapture(DWORD kind,const DWORD* saved){
  struct Drain{~Drain(){InterlockedDecrement(&g_in_native_gate);}}drain;
  if(active!=1){native_gate::retry(*g_native_gate,native_gate::RetryReason::Overlap,0);return;}
  const DWORD thread=GetCurrentThreadId(),frame=static_cast<DWORD>(g_frame);
- native_gate::Ticket ticket{};bool selected=false,qualified=false,primary=false;DWORD observedOwner=0;NativeOwnerDecision* ownerDecision=nullptr;
+ native_gate::Ticket ticket{};bool selected=false,qualified=false,primary=false,indexed=false;DWORD observedOwner=0;NativeOwnerDecision* ownerDecision=nullptr;
  EnterCriticalSection(&g_lock);
  auto* state=thread_state(thread);
- if(state&&g_live_scene.directSource.store){const auto choice=static_cast<uint64_t>(InterlockedCompareExchange64(&g_live_scene.directSource.store->header.selected,0,0));
-  observedOwner=state->owner_id;const auto* retained=g_native_cohort_mode?g_live_scene.registry.find(state->owner_id):nullptr;
-  selected=g_native_cohort_mode?(retained&&retained->live&&retained->qualified&&retained->id.model==state->model0&&retained->id.source==state->source):(state->owner_id==DWORD(choice)&&state->owner_id!=0);
+ if((state||g_break_draw_scope.child)&&g_live_scene.directSource.store){const auto choice=static_cast<uint64_t>(InterlockedCompareExchange64(&g_live_scene.directSource.store->header.selected,0,0));
+  const auto read=[](std::uint32_t a,void* p,std::size_t n){return a&&n<=UINT32_MAX-a&&safe_copy(a,p,static_cast<DWORD>(n));};
+  sfc_m1::SceneOwner* debris=nullptr;
+  indexed=g_break_requested&&g_native_cohort_mode&&g_break_draw_scope.child;
+  if(indexed)debris=g_live_scene.breakSubmission(g_break_draw_scope.child,g_break_draw_scope.epoch,saved[6],ticket.count,ticket.primary,ticket.secondary,read);
+  observedOwner=debris?debris->identity.owner:(state?state->owner_id:0);
+  const auto* retained=g_native_cohort_mode&&state?g_live_scene.registry.find(state->owner_id):nullptr;
+  selected=indexed?debris!=nullptr:(state&&(g_native_cohort_mode?(retained&&retained->live&&retained->qualified&&retained->id.model==state->model0&&retained->id.source==state->source):(state->owner_id==DWORD(choice)&&state->owner_id!=0)));
   if(selected){
    const DWORD stack=snapshot_entry_esp(saved),manager=saved[6];DWORD caller=0,count=0,list=0,flag=0,vt=0;
-   safe_read32(stack,caller);primary=caller==0x0042e55d;
-   ticket.pid=GetCurrentProcessId();ticket.thread=thread;ticket.frame=frame;ticket.owner=state->owner_id;ticket.revision=g_native_cohort_mode?retained->revision:DWORD(choice>>32);
-   ticket.model=state->model0;ticket.source=state->source;ticket.manager=manager;memcpy(ticket.session,g_native_gate->header.session,16);
-   qualified=state->model_scope&&state->copy_depth==1&&validated_copy_owner(*state)&&manager==state->model_manager&&
+   safe_read32(stack,caller);primary=caller==(indexed?0x0042ea92u:0x0042e55du);
+   ticket.pid=GetCurrentProcessId();ticket.thread=thread;ticket.frame=frame;
+   ticket.owner=debris?debris->identity.owner:state->owner_id;ticket.revision=debris?debris->revision:(g_native_cohort_mode?retained->revision:DWORD(choice>>32));
+   ticket.model=debris?debris->identity.model:state->model0;ticket.source=debris?debris->identity.source:state->source;
+   ticket.manager=manager;memcpy(ticket.session,g_native_gate->header.session,16);
+   if(indexed)qualified=debris&&saved[0]==ticket.model&&manager==g_break_draw_scope.manager&&
+    safe_read32(manager,vt)&&vt==0x007b8d4c&&(primary||caller==0x0042eb34)&&
+    safe_read32(stack+4,count)&&safe_read32(stack+8,list)&&safe_read32(stack+12,flag)&&flag==1&&
+    count==ticket.count&&list==(primary?ticket.primary:ticket.secondary);
+   else qualified=state->model_scope&&state->copy_depth==1&&validated_copy_owner(*state)&&manager==state->model_manager&&
     safe_read32(manager,vt)&&vt==0x007b8d4c&&(primary||caller==0x0042e626)&&
     safe_read32(state->model0+0x10,ticket.count)&&ticket.count&&ticket.count<=8192&&
     safe_read32(state->model0+0x14,ticket.primary)&&ticket.primary&&safe_read32(state->model0+0x18,ticket.secondary)&&
@@ -1456,7 +1599,15 @@ extern "C" void __cdecl CoordinateAfterCapture(DWORD kind,const DWORD* saved){
   if(acquired!=DWORD(native_gate::Result::Acquired)||reply.result!=native_gate::Result::Acquired)return;
   // No selected list was forwarded yet. Flush only preceding queued primitives.
   DWORD currentCount=0,currentPrimary=0,currentSecondary=0;
-  const bool unchanged=g_running&&frame==DWORD(g_frame)&&safe_read32(ticket.model+0x10,currentCount)&&currentCount==ticket.count&&
+  bool unchanged=false;
+  if(indexed){
+   EnterCriticalSection(&g_lock);
+   const auto read=[](std::uint32_t a,void* p,std::size_t n){return a&&n<=UINT32_MAX-a&&safe_copy(a,p,static_cast<DWORD>(n));};
+   const auto* debris=g_live_scene.breakSubmission(g_break_draw_scope.child,g_break_draw_scope.epoch,ticket.manager,currentCount,currentPrimary,currentSecondary,read);
+   unchanged=g_running&&frame==DWORD(g_frame)&&debris&&debris->identity.owner==ticket.owner&&debris->revision==ticket.revision&&
+    currentCount==ticket.count&&currentPrimary==ticket.primary&&currentSecondary==ticket.secondary;
+   LeaveCriticalSection(&g_lock);
+  }else unchanged=g_running&&frame==DWORD(g_frame)&&safe_read32(ticket.model+0x10,currentCount)&&currentCount==ticket.count&&
     safe_read32(ticket.model+0x14,currentPrimary)&&currentPrimary==ticket.primary&&safe_read32(ticket.model+0x18,currentSecondary)&&currentSecondary==ticket.secondary;
   if(!unchanged||!close_native_batch(ticket.manager)){
    g_native_dispatch(DWORD(native_gate::Action::Cancel),&ticket,&reply);return;
@@ -1631,6 +1782,8 @@ void assign_trampolines() {
     g_tramp_wrapper = g_hooks[6].trampoline;
     g_tramp_prepare = g_hooks[7].trampoline;
     g_tramp_destroy = g_hooks[8].trampoline;
+    g_tramp_break_factory=g_hooks[9].trampoline;g_tramp_break_child=g_hooks[10].trampoline;
+    g_tramp_break_draw=g_hooks[11].trampoline;g_tramp_break_retire=g_hooks[12].trampoline;
 #endif
 }
 
@@ -2065,8 +2218,10 @@ extern "C" UINT WINAPI timeSetEvent(UINT delay, UINT resolution,
 extern "C" DWORD WINAPI M1StartW(void* parameter) {
     wchar_t persistentMode[2]{};
     g_persistent_requested=GetEnvironmentVariableW(L"SFC_PERSISTENT_SCENE",persistentMode,2)==1&&persistentMode[0]==L'1';
+    g_break_requested=g_persistent_requested&&GetEnvironmentVariableW(L"SFC_BREAK_SCENE",persistentMode,2)==1&&persistentMode[0]==L'1';
 #ifdef M1_GATE_ONLY
     g_persistent_requested=false;
+    g_break_requested=false;
 #endif
     if (InterlockedCompareExchange(&g_running, 0, 0)) return 10;
     g_foreground_notice=nullptr;
@@ -2110,6 +2265,7 @@ extern "C" DWORD WINAPI M1StartW(void* parameter) {
     }
 
     for (Hook& hook : g_hooks) {
+        if(!g_break_requested&&std::strncmp(hook.name,"break_",6)==0)continue;
         if(!g_persistent_requested&&std::strcmp(hook.name,"ship_destroy")==0)continue;
         if(!g_config.enable_private_copy && std::strcmp(hook.name,"polygon_prepare")==0) continue;
         if(!g_config.enable_wrapper_observation && std::strcmp(hook.name,"polygon_wrapper")==0) continue;
@@ -2161,6 +2317,7 @@ extern "C" DWORD WINAPI M1StartW(void* parameter) {
     if (!suspend_ok) { write_thread_failure("start"); stop_live(); return 5; }
     bool installed = true;
     for (Hook& hook : g_hooks) {
+        if(!g_break_requested&&std::strncmp(hook.name,"break_",6)==0)continue;
         if(!g_persistent_requested&&std::strcmp(hook.name,"ship_destroy")==0)continue;
         if(!g_config.enable_private_copy && std::strcmp(hook.name,"polygon_prepare")==0) continue;
         if(!g_config.enable_wrapper_observation && std::strcmp(hook.name,"polygon_wrapper")==0) continue;

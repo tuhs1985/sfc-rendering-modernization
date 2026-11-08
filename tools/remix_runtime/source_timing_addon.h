@@ -2,13 +2,15 @@
 #pragma once
 #include "../d3d9_proof/source_timing.h"
 #include "../d3d9_proof/live_owner_wire.h"
+#include "../d3d9_proof/pipeline_mode.h"
 namespace source_timing {
 class Observer {
  sfc_calibration::Reader source;sfc_calibration::Snapshot scratch{};Store* store=nullptr;
- live_owner::PresentObserver live;
+ live_owner::PresentObserver live;bool diagnostics=true;
 public:
  ~Observer(){source.close();}
  void prepare(){
+  diagnostics=!pipeline_mode::play_session();live.diagnostics=diagnostics;
   if(!source.prepare()||!source.requested)throw std::runtime_error("source timing mailbox required");
   auto* base=reinterpret_cast<BYTE*>(source.mailbox)-sfc_calibration::Offset;store=reinterpret_cast<Store*>(base+Offset);
   LARGE_INTEGER f{};if(!QueryPerformanceFrequency(&f))throw std::runtime_error("source timing QPC frequency");
@@ -24,7 +26,7 @@ public:
   if(GetCurrentThreadId()!=store->header.thread){InterlockedIncrement(reinterpret_cast<volatile LONG*>(&store->header.wrong_thread));return;}
   if(!sfc_calibration::read(source.mailbox,scratch)){++store->header.snapshot_miss;return;}
   LARGE_INTEGER now{};if(!QueryPerformanceCounter(&now)){++store->header.invalid;return;}
-  append(*store,scratch,stage,GetCurrentThreadId(),static_cast<uint64_t>(now.QuadPart));
+  if(diagnostics)append(*store,scratch,stage,GetCurrentThreadId(),static_cast<uint64_t>(now.QuadPart));
   if(stage==1&&live.store){const auto chosen=static_cast<uint64_t>(InterlockedCompareExchange64(&live.store->header.selected,0,0));
    const live_owner::Row* row=nullptr;for(const auto& r:scratch.owner)if(r[1]==static_cast<DWORD>(chosen)){row=&r;break;}
    live.observe(row,scratch.frame,GetCurrentThreadId(),static_cast<uint64_t>(now.QuadPart));}

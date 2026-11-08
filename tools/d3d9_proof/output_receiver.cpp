@@ -61,7 +61,7 @@ int wmain(int argc,wchar_t** argv){
   readyEvent=OpenEventW(SYNCHRONIZE,FALSE,(std::wstring(argv[1])+L".ready").c_str());doneEvent=OpenEventW(EVENT_MODIFY_STATE,FALSE,(std::wstring(argv[1])+L".done").c_str());check(readyEvent&&doneEvent,"open private notifications");
   channel=static_cast<output_wire::Channel*>(MapViewOfFile(mapping,FILE_MAP_READ|FILE_MAP_WRITE,0,0,sizeof(output_wire::Channel)));check(channel!=nullptr,"map wire");
   parent=OpenProcess(SYNCHRONIZE,FALSE,pid);check(parent!=nullptr,"open parent lifetime");
-  output_startup::Lifetime lifetime(GetTickCount64());const bool activated=activateReceiver(channel,pid,session,parent,readyEvent,doneEvent,game,lifetime);
+  output_startup::Lifetime lifetime(GetTickCount64(),pipeline_mode::play_session());const bool activated=activateReceiver(channel,pid,session,parent,readyEvent,doneEvent,game,lifetime);
   ComPtr<ID3D11Device> device;ComPtr<ID3D11DeviceContext> context;ComPtr<ID3D11Query> query;WorkerGpuFence copyFence;
   ComPtr<ID3D11Texture2D> textures[3],cache[3],staging[3];uint64_t last=0,epoch=0;output_wire::Packet previous{};unsigned received=0;
   wchar_t live[2]{};const bool liveMode=GetEnvironmentVariableW(L"SFC_D3D9_LIVE_TIMING",live,2)==1&&live[0]==L'1';

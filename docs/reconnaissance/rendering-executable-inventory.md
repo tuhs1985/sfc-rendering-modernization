@@ -1,5 +1,13 @@
 # SFC executable rendering inventory
 
+**Related contribution, November 7:** [nxreliant weapon/light review](nxreliant-weapon-light-research.md)
+preserves separately attributed upstream entity, colour and particle leads.
+Several effect addresses corroborate this inventory; two reported addresses
+fall inside local instructions and must not replace its qualified entries.
+The sponsor confirms nxreliant is updating his executable one revision ahead;
+address differences describe separate builds, not established research errors.
+External build identity and other unverified claims remain separate.
+
 Newest:2026-10-25 Run173. **Targeted static inventory complete; runtime behavior
 and exact effect/resource ownership remain partial.** No game launch, renderer
 change, asset extraction or milestone claim. API remains parked.

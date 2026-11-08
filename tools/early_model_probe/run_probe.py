@@ -73,7 +73,7 @@ def run(fixture=False, *, component=COMPONENT, output_name='early.bin', analyze_
             if any(f.upper()=='RUNASINVOKER' for f in flags):raise ValueError('Invoker override needs review')
             if flags:env['__COMPAT_LAYER']=' '.join(flags)
         env.update(SFC_REMIX_RETURN_SESSION=session,SFC_REMIX_EXPECTED_IMAGE=str(executable),SFC_EARLY_OUTPUT=str(work/output_name))
-        (work/'manifest.json').write_text(json.dumps(dict(probe=probe,fixture=fixture,locks=frozen,session=session,accepted_before=original,copied_before=copied,launcher_before=settings,geometry_payload=output_name!='early.bin',image_payload=False,proxy_changed=False,gate='Owned existing004162B9semantic anchor;no competing gate/controller hook'),indent=2))
+        (work/'manifest.json').write_text(json.dumps(dict(probe=probe,fixture=fixture,locks=frozen,session=session,accepted_before=original,copied_before=copied,launcher_before=settings,geometry_payload=probe=='DAMAGE-LAYER-001',image_payload=False,proxy_changed=False,gate='Owned existing004162B9semantic anchor;no competing gate/controller hook'),indent=2))
         launcher=sp.Popen([str(BIN/'return_launcher.exe'),'--fixture' if fixture else '--game',str(executable),str(work/'early_component.dll'),digest(executable),digest(work/'early_component.dll')],cwd=executable.parent,env=env,stdout=log('launcher.log'),stderr=sp.STDOUT,creationflags=sp.CREATE_NO_WINDOW)
         def verified():
             nonlocal pid

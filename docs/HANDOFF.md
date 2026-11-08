@@ -4,7 +4,286 @@ Sponsor-facing current work and parked items: [status tracker](STATUS.md).
 Diagnostic tools, triggers, limits and known pitfalls: [diagnostic reference](DIAGNOSTICS.md).
 The tracker is a sponsor-facing summary; the newest authoritative checkpoint below controls technical work.
 
-## NEWEST / AUTHORITATIVE CHECKPOINT — Run290 live damage confirmation
+**SFC-23 resolved locally and parked, November 6, 2026.** The post-reboot trace
+attributed 19.11 seconds of startup waits to Defender, including a corroborated
+file-filter wait during mission-script access. After the sponsor excluded only
+the controlled copy's `Assets\scripts` folder, its first launch following a fresh
+restart had no 20-second pause. Why those scans took so long remains unknown.
+See the [startup log](reconnaissance/sfc23-startup-capture.md).
+
+On resumption, check `git status --short` and continue from the engineering
+checkpoint below. Reopen SFC-23 only if the stall returns or release work needs
+it. The Obsidian tracker and parking note were updated and verified through the
+desktop-session CLI.
+
+**Break-model investigation, November 6, 2026.** Run259 confirms destruction
+hook activity but retained no owner-specific death or break-piece draw records.
+Offline inspection mapped the handoff from `ship+0x8C` through indexed child
+construction, independent updates and the indexed visual draw. The isolated
+break observer is built and passed copied-client preflight. Next run one visible
+destruction with the [break observer](../tools/break_probe/README.md) to check
+handoff identity and draw-time transforms. [Break-model record](runs/2026-10-27-codex-break-model-inspection.md).
+
+**Live break observation reviewed.** The November 6 run captured FCA_BRK handoff,
+four indexed children and eight distinct supplied poses per child without flags.
+The game exited normally but observer finalization failed; sponsor interrupted
+the probe and no SFC/return_host process remained on recheck. Preserve the raw
+capture and separate recovered review. Next resolve observer completion and
+qualify the backing-model piece geometry path using this captured identity.
+Another destruction run is not required to repeat the confirmed handoff/poses.
+
+**Piece extraction implementation started.** The updated default-off break
+observer captures the actual indexed polygon ranges and texture associations
+for four pieces, then requests early restoration once geometry and eight
+poses per piece are collected. Native range/packet checks (15), strict x86
+build and copied-client preflight pass. Live snapshot/early completion remains
+unverified. The previous log has no break geometry payload, so one focused
+FCA breakup capture is required before routing piece geometry through Remix.
+Normal replacement and appearance remain the current baseline.
+
+**Fresh break geometry verified, November 6.** Run
+`break-20261107-044811-246216` captured all four FCA pieces covering 6370
+triangles, shared 3497 positions and verified texture associations (84 unique
+existing image files). Finalized trace, zero decode issues, fourteen hooks
+restored and no active callbacks. Parent failed its separate 30-second
+normal-exit confirmation; client/settings checks passed and no owned helpers
+remained at review. Next implement dedicated break-origin conversion and
+independent piece lifetime/submission. The initial geometry blocker is resolved.
+
+## NEWEST / AUTHORITATIVE CHECKPOINT — November 8 FCA live BRK success
+
+Publication validation: full Python discovery suite705tests PASS before the
+sponsor-requested commit/push. Project source/tests, scoped probes, reviewed
+research and alpha delivery notes are included. Raw attachment staging and the
+unrelated Windows memory audit remain local; game assets, runtime binaries and
+generated captures remain excluded. Live BRK remains opt-in; no default change.
+
+[Successful live checkout](runs/2026-11-08-codex-live-break-success.md): run
+`20261108-054758-017705-in-game` confirms two FCA destructions, four independently
+identified fragments each, all eight inserted/suppressed in native rendering.
+Second breakup reuses prepared content. Sponsor confirms correct movement and
+normal controls/HUD/effects with no issues. Live first-set GPU admissions are
+about292–335msafter each capture source-frame start, not a pixel-display metric.
+
+No service error, deadline misses or invalid/partial gate commits. Normal game,
+renderer/receiver exit and restored copied proxy; original client unchanged,
+no helpers left. Historical report PARTIAL is controlled-unload unconfirmed:
+sponsor destroyed the remaining ship second, ending the session before that
+step. Treat this as expected test exit, not a BRK rendering failure. Preserve
+the original result; controlled live unload is a separate unproven action here.
+
+**Next:** alpha delivery work from [readiness assessment](releases/ALPHA_READINESS.md):
+inventory normal runtime dependencies and centralize installation roots, then
+stage a portable package and qualify clean-machine deployment. FCA destruction
+is demonstrated, broader break files/LOD remain unqualified, BRK still opt-in.
+No default/code changes, commits or pushes during this review.
+
+## Previous checkpoint — November 8 BRK receiver and worker connected
+
+[Second checkout and receiver correction](runs/2026-11-08-codex-break-receiver-fix.md):
+latest run `20261108-053954-509269-in-game` repeats the origin error. The service
+drains `present_calibration.Receiver` before polling the worker; that receiver
+was still intact-only. Previous worker defect/fix is real but did not establish
+the first live rejection. Both failed runs captured valid fragments; neither
+demonstrates debris renderer admission.
+
+Receiver now accepts explicit default-off BRK mode from the runner, preserves
+strict validation and ACK ordering. Actual native/shared-memory tests and mixed
+receiver-to-worker-to-material preparation pass;66targeted tests total. Latest
+run's seven actual captures now traverse both stages, completing all four
+pieces/6,370triangles plus intact/shared assets. Pinned build/source qualification
+refreshed and read-only BRK preflight PASS. No SFC/renderer launched for the fix.
+Latest run exited normally, proxy restored, no controller left; original client
+unchanged. No manual rollback needed.
+
+**Next:** same `tools/native_insertion/start_native_break_session.ps1` retry.
+Review fragment renderer admission, indexed suppression, motion and cleanup.
+Input fixes do not claim downstream live acceptance. Preserve both failed runs;
+no more discovery capture required. Changes remain unstaged/uncommitted.
+
+## Previous checkpoint — November 8 BRK worker fixed
+
+[Worker correction and verification](runs/2026-11-08-codex-break-worker-fix.md):
+the actual parallel preparer now calls strict opt-in debris-aware admission.
+All51targeted Python tests pass, including actual worker decode, mixed
+submit-to-material preparation and current-user native transport. Replaying
+the failed run's seven saved captures completes all four FCA pieces/6,370
+triangles, intact models and shared reuse. No originals/settings changed.
+
+Pinned candidate build/source receipt refreshed; existing successful600-frame
+Strict/ExtraFrame evidence revalidated, not rerun. Read-only BRK preflight PASS.
+The copied setup was already recovered after the failed run. No SFC launched.
+**Next:** sponsor reruns `tools/native_insertion/start_native_break_session.ps1`.
+Review live fragment admission, native suppression, motion and cleanup before
+accepting destruction or resuming alpha packaging. No new discovery run needed.
+Changes remain unstaged/uncommitted.
+
+## Previous checkpoint — November 8 live BRK failure reviewed
+
+[Latest BRK review](runs/2026-11-08-codex-live-break-failure-review.md) identifies
+the active parallel-preparation decoder as the confirmed blocker. Run
+`20261108-051449-466309-in-game` captures all four valid FCA pieces/6,370 triangles,
+but `parallel_assets.Pipeline.decode` still calls intact-only `decode_mesh`.
+The prior `multi_scene_relay.identify_asset` change is bypassed by the progressive
+preparer. Direct replay of all seven saved packets: three intact PASS; four
+pieces FAIL in the actual worker but PASS in the dedicated break decoder.
+
+No debris reached renderer admission. Do not call this a Remix incompatibility
+or repeat geometry/pose discovery. Original installation unchanged. After
+confirming all game/helpers exited, the documented exact-run recovery restored
+the copied proxy/config and wrote `recovery.json`; historical result retained.
+No production code changed during review.
+
+**Next:** use strict opt-in debris dispatch in the actual `Pipeline.decode` and
+test that worker boundary, not only an already-decoded mesh. Refresh appropriate
+qualification before another same-launcher BRK checkout. Live destruction is
+still unaccepted; alpha portability work remains documented below. Leave all
+changes unstaged/uncommitted.
+
+## Prior checkpoint — November 7 alpha delivery assessment
+
+Sponsor requested alpha-release preparation while deferring the BRK gameplay
+checkout. [Readiness and packaging assessment](releases/ALPHA_READINESS.md)
+reconciles approved feature scope, gameplay evidence, pending checks, actual
+runtime/build/deployment dependencies, package exclusions and release sequence.
+No runtime changed, game launched, dependency downloaded or release published.
+
+Replacement/lights/damage have scoped gameplay evidence; live debris remains
+pending. Main delivery gaps are machine-specific paths/Codex runtimes, local
+development receipts, legacy bootstrap dependencies, fixed1920x1080 assumptions,
+dependency/distribution review and clean-machine installation/recovery. Preserve
+ExtraFrame as standard and untimed normal play. Do not require Toolkit, build
+tools, full diagnostics or a settings GUI to use the proposed package.
+
+**Next engineering increment:** inventory the normal runtime dependency closure
+and introduce one installation configuration for game/copy/package/cache/settings
+roots, preserving exact-build checks and recovery. Keep the renderer and existing
+appearance unchanged. Release-manifest checks must replace development-source
+requirements only after staged-package regression. Sponsor will run BRK later;
+do not claim alpha-ready or publish until the concrete artifact is reviewed.
+Changes remain unstaged/uncommitted.
+
+## Prepared checkpoint — November 7 live debris
+
+**Research corpus supplement:** [nxreliant weapon/light notes reviewed](reconnaissance/nxreliant-weapon-light-research.md).
+Unmodified supplied document retained with attribution/hash. A narrow local
+98-instruction PE check corroborates entity-to-light descriptor and colour
+storage paths; version mismatch and two non-boundary addresses are documented.
+Unverified owner/gatherer/particle leads remain separate from confirmed corpus
+entries. Review is finalized with all fourteen source sections accounted for.
+Sponsor confirms nxreliant is updating his executable one revision ahead; the
+address differences are cross-build mapping concerns, not established errors.
+No runtime or engineering priority changed. Sponsor will run the pending live
+debris checkout later; no additional research capture is needed for ingestion.
+
+Default-off `-BreakModels` now connects independently retained debris to fresh
+scene transport, simulation poses, ordinary D3D9/Remix and synchronized native
+insertion. Four qualified lifecycle hooks preserve capture before owner-specific
+indexed suppression; original simulation/assets are untouched. Child epochs are
+independent of camera visibility and parent render retirement. Current normal
+appearance, damage and weapon lights remain intact. No gameplay run was launched.
+
+Focused native/shared-memory tests, 90 targeted Python tests, component
+coordinator 99 checks, physical hull/depth 801 checks and both 600-frame native
+insertion regressions PASS. Candidate build and read-only copied-game preflight
+PASS. Standalone regressions are not live debris acceptance. See the
+[implementation and checkout record](runs/2026-11-07-codex-live-break-prepared.md)
+for exact scope, protocol, diagnostic-only controls, evidence and limitations.
+
+**Next:** sponsor runs `tools/native_insertion/start_native_break_session.ps1`
+with F-CA and a surviving wingman, destroys the enhanced ship in view, observes
+fragments and switches cameras. Review output/cleanup and sponsor observations.
+Live destruction remains unverified; do not repeat discovery or expand universal
+break-model claims. Leave all changes unstaged/uncommitted.
+
+## Historical checkpoint — November 7 debris D3D9 replay
+
+All four fresh FCA pieces produce textured colour and physical hull depth through ordinary D3D9/Remix in independent standalone fixtures. Array read-back and32 camera compositions pass (worst0.000286pixel). Native tests29 and returned-pixel tests4 pass. No SFC launch or gameplay runtime/settings change. See [replay record](runs/2026-11-07-codex-break-d3d9-replay.md) for local evidence, asynchronous shader control and unresolved one-Present standalone teardown limitation. Successful fixtures used diagnostic24-Present startup; this is not a normal-path performance qualification.
+
+Next connect the independent debris registry/assets to normal scene transport/cohort, then qualify indexed suppression. Live debris remains unimplemented; normal replacement is unchanged. Do not repeat pose/lifetime discovery or infer simultaneous replacement from independent replays. Leave changes unstaged/uncommitted.
+
+## Historical checkpoint — November 7 independent debris state
+
+- Latest checkout `break-20261107-050659-161275` resolves the live
+  simulation-pose/retirement qualification blocker for FCA. All32 paired
+  predicted/native transforms are exactly equal across16floats. Four pieces
+  each have512different simulation states over8.515seconds and a destructor
+  receipt approximately30.015seconds after handoff. Fresh geometry again covers
+  6370triangles. [Review](runs/2026-11-07-codex-break-simulation-review.md).
+- Finalized trace, no issues, all16hooks restored, active0, normal game/host
+  exits, unchanged protected files/settings and no owned helpers at review.
+  Next connect piece registry/assets to scene transport and ordinary D3D9
+  submission. Indexed suppression and live Remix debris still need qualification.
+
+- Implemented independent piece epochs, immutable asset association, ordered
+  pose updates and explicit retirement in `tools/scene_bridge/break_registry.h`.
+  Parent-ship retirement does not remove children. Pointer reuse and stale
+  retirement cannot affect a new instance.
+- Implemented simulation-based pose reconstruction from the child initial
+  transform, position, pivot, native angular fields and native trigonometric
+  tables in `break_pose.h`. It reproduces the statically identified draw
+  arithmetic, including bias-plus-bitmask angle conversion. Live numerical
+  equivalence remains unverified.
+- Twenty-nine native tests pass. Strict x86 sixteen-hook observer build and
+  copied-client read-only preflight pass. New hooks observe update and destructor.
+  Raw simulation state, paired draw/camera state and predicted-pose comparisons
+  are bounded and default-off. Native debris remains enabled.
+- Earlier blocker before production submission was missing paired child-state
+  and native transform/retirement evidence. The current accepted FCA capture
+  contains final poses and geometry, but not those source fields. Use the
+  updated break launcher for one FCA self-destruct with a wingman; briefly
+  switch away and return while debris lives, exit at the normal cue. This
+  observation is now completed above; do not repeat it for the same relationship.
+- Retained registry is not yet connected to normal live submission or native
+  debris suppression. No ship-path or appearance change, commit or push.
+
+## PREVIOUS CHECKPOINT — Run296 player-name preference allowed
+
+- Sponsor correctly rejects campaign-saved PlayerName as a blocker. Startup,exit and interrupted-run recovery now allow changes only to `[Network] PlayerName` in copied sfc.ini. Preserve all other INI bytes and exact checks on client/proxies/graphics config;accepted installation remains fully unchanged-checked. No user INI value overwritten.
+- Frozen reference `artifacts/remix-runtime/test-install/sfc-baseline.ini` created once from the independently prepared source after full hash verification against source-copy-files.json;reference hash pinned by cohort qualification. Never derive the protected baseline from the mutable test INI. Local file/private values not versioned.
+- Per-run protected INI signature is recorded before launch. Exit and recovery compare it while allowing the game-owned preference. Older recovery may use the verified frozen reference when original expected full hash matches;no blind legacy bypass. Ambiguous duplicate Network/name entries rejected. [Run296](runs/2026-11-04-codex-player-preference-baseline.md).
+-694Python tests PASS,including8new preference cases and2actual recovery integration cases. Source/light/cohort qualifications refreshed;unchanged native/GPU binaries and prior600-frame rendering evidence reused. Untimed and timed preflights with sponsor's current saved name PASS. No game/config/material changes,staging,commit or push.
+- Run295 cleanup complete;Run294 gray-wing finding/dropout remain separate. Next normal launcher is ready for continued campaign play or optional damage-off comparison.
+
+## PREVIOUS CHECKPOINT — Run295 artifact cleanup;campaign INI freeze blocked next launch
+
+- Sponsor requested cleanup.8,926obsolete generated GPU inputs/per-run executable copies deleted from runtime runs before20261104:3,271,724,236logical bytes;disk free increased3,241,152,512bytes. No archives/raw captures/traces/current-day evidence or dependencies removed. [Run295 selection/ledger/verification](runs/2026-11-04-codex-artifact-cleanup.md).
+-1,499non-artifact source/user fingerprints unchanged during cleanup;684Python tests PASS on recheck after known transient ReplaceFileW1175. No rendering/appearance/source implementation changes,staging,commit or push.
+- Read-only preflight catches the PRE-EXISTING copied sfc.ini/PlayerName change from Run294. Cleanup did not touch the test installation or preferences. Next launch will reject it until campaign-safe preference handling or deliberate baseline restoration is addressed. Preserve user setting;do not silently overwrite it or drop general client verification. Original installation remains untouched.
+- Rendering findings remain Run294. Gray KFF wings vary with camera but sponsor reports they do not align with lighting;reflection is unproven. A damage-off comparison is the suggested small discriminator,not yet run. No settings were changed.
+
+## PREVIOUS CHECKPOINT — Run294 first three-mission untimed checkout
+
+- Sponsor reports stable play across3missions,one observed ship rendering dropout,and intermittent grayish overlay-like appearance on KFF flat wings. Run `20261104-060904-042345-in-game`,1265seconds(~21minutes). This is live evidence across multiple missions,not universal campaign support or a zero-dropout claim.
+-8fresh revisions admitted,0asset rejections/partial assets;renderer loaded4assetcontents/shared4,63027frames/123704ship draws. Damage20220draws/0unqualified. Native113481insertions,12misses,1355stale-output rejections,0invalid/terminal errors. These are counters,not duration or source attribution of the sponsor's one dropout;do not equate stale rejection with visible missing ship.
+- Renderer/receiver exit0;owned processes0;original critical files/launcher settings unchanged;copied proxy restored. Overall result PARTIAL solely because test-copy `sfc.ini` PlayerName changed. Current accepted versus test diff is that one preference key. Preserve user preference;do not silently restore it or label it renderer failure. No native cleanup/resource failure found.
+- Gray KFF wings unresolved:no images/per-frame damage records in minimal play mode. Candidates are damage-decal material blending/placement versus view-dependent reflection/roughness on flat wings. Damage source qualification0failures does not prove correct final pixels. No appearance/code/config changes;optional sponsor recollection requested before choosing smallest comparison.
+- [Run294 counters,storage and next action](runs/2026-11-04-codex-three-mission-play-review.md). Runtime retained124319681bytes(~118.6MiB),mostly functional asset inputs;GPU scratch peak116743966bytes/console234691bytes. Continuous frame/light trace disabled as intended. All current work remains uncommitted.
+
+## PREVIOUS CHECKPOINT — Run293 untimed controller startup fix
+
+- First sponsor play run `20261104-060301-556261-in-game` stopped before tactical capture:controller exit2/Usage. Root cause:the Python launcher passed `--max-seconds 0` but omitted `env=env` from the controller Popen. Controller inherited the supervisor's ordinary environment,so correctly rejected duration0without `SFC_PLAY_SESSION=1`. Renderer prewarm was not the failure.
+- Pass the same explicit session environment to the controller as to SFC. Added a regression executing the actual production Popen expression with the built controller and a guaranteed invalid PID:play+0passes argument admission,ordinary+0is rejected,ordinary+120passes. No injection/game launched.
+-684Python tests PASS;light/source/both-policy receipts refreshed using unchanged native/GPU binaries and Run292's two600-frame GPU proofs. Untimed/timed preflights checked. Failed run's copied proxy/config recovered only after game absence/hash verification;original installation unchanged. No live success claim yet;retry normal launcher. All work remains unstaged/uncommitted.
+- [Run293 details](runs/2026-11-04-codex-untimed-controller-startup-fix.md).
+
+## PREVIOUS CHECKPOINT — Run292 untimed minimal-recording play
+
+- Normal native multi-ship launcher now passes `--play-session` unless `-TimedTest`, completion diagnostics or light diagnostics is requested. ExtraFrame, current appearance, weapon lights and baseline damage remain unchanged. Exit SFC normally; no tactical/session/menu timer or timed exit cue. Timed diagnostic workflow remains separate.
+- Explicit environment `SFC_PLAY_SESSION=1` selects untimed lifetime in the control host, owned GPU job, renderer input, passive startup, output receiver, capture and native lights. Controller `MaxSeconds=0` is permitted only in this mode. Preserve exact session/asset startup tickets, parent handles, per-operation deadlines, native fallback and resource ownership.
+- No detailed native-gate ring writes/drain thread or source/audit timing arrays in play; functional Present/completion consumption stays active. Console capped at2MiB and discards excess without stopping rendering; last120five-second status samples plus compact exit counters. Functional new-asset caches remain bounded and necessary. Do not call this zero-disk or unlimited-asset mode.
+- [Run292 implementation, checks and remaining checkout](runs/2026-11-04-codex-untimed-play-session.md). Campaign entry/exit, identity retirement and later battles need sponsor live checkout; do not claim campaign compatibility from offline tests. No process reattachment if SFC exits/restarts.
+- Validation:683Python tests,7owned-job checks, native32/64-bit lifetime/transport/light cases, actual passive-helper cleanup, actual worker at simulated one-day elapsed time PASS. ExtraFrame055652and Strict055812both600frames/3owners,0pixel/state errors,exit0. Native-light and both-policy source receipts refreshed;untimed ON/timed damage-OFF preflights and launcher parse PASS. Appearance TOMLs unchanged. No SFC run performed.
+- Changes unstaged/uncommitted, including Run291. Preserve unrelated `windows-memory-audit.md`. Next sponsor action: normal native multi-ship launcher, no diagnostic flags, play campaign and exit SFC normally. Use subsequent narrowly targeted diagnostics only for observed problems.
+
+## PREVIOUS CHECKPOINT — Run291 damage baseline enabled
+
+- Sponsor requests accepted damage become baseline after89fc402was committed/pushed. Normal native multi-ship launcher now enables damage automatically;`-NoDamageTextures`/Python`--no-damage-textures` provide comparison;old explicit enable flag remains supported. Conflicting flags rejected;PS5→7forwarding preserved.
+- Direct production Python defaults damage ON only for native-all-ships;other workflows/standalone fixtures keep separate behavior. No native capture/render/material/image changes. All snapshots and completion/light diagnostics remainOFF unless explicitly using their existing diagnostic workflows. [Run291 details](runs/2026-11-04-codex-damage-baseline.md).
+-678Python tests PASS,including5actual-parser default/override/compatibility tests. Current renderer binary unchanged;build receipt and offline native-light/both-policy qualification refreshed. Default read-only preflight PASS/ON;disabled preflight PASS/OFF;PowerShell launcher parse and git diff --check PASS. Prior accepted live/GPU rendering evidence reused;no redundant gameplay run.
+- README/status/diagnostic reference updated. This increment uncommitted;preserve unrelated windows-memory-audit.md. Next normal launcher needs noDamageTexturesflag. Next alpha implementation remains break models after direction;other damage families/live repair not newly qualified. Cold-launch and exit-summary reporting limitations remain separately recorded.
+
+## PREVIOUS CHECKPOINT — Run290 live damage confirmation
 
 - Sponsor ran051513 and051734,confirms transparency fixed and damage-stage blending/progression looks better. Both KDD/FCA;733and1699damage draws,0unqualified states,0asset rejections,all normal requested-window exits. Native gate misses/stale/invalid/dropped0;GPU jobs exit0/no stop/no remaining owned processes;original client/launcher settings and copied critical baselines unchanged/proxy restored. [Run290 evidence/scope](runs/2026-11-04-codex-damage-live-confirmation.md).
 - Damage source agreement and visual application now demonstrated on this tested standard-family path. No new temporal crossfade:we select SFC's discrete current stage,blend its decal over hull. Live repairs/other families/universal coverage not newly proven. Do not claim every old occasional glitch individually resolved beyond sponsor's confirmation.

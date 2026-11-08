@@ -1,0 +1,504 @@
+# Star Trek: Starfleet Command II – Orion Pirates
+## Weapon Rendering & Dynamic Lighting — Technical Research Handover
+
+**Prepared for:** Tuhs  
+**Date:** November 7, 2026  
+**Game:** Star Trek: Starfleet Command II – Orion Pirates  
+**Executable version examined:** StarFleetOP.exe 2.5.6.5  
+**Research focus:** Weapon rendering, textures, lighting, visual effects, and executable architecture.
+
+---
+
+## 1. Overview
+
+This document consolidates technical findings from static reverse-engineering investigations of the SFCOP executable and associated game assets.
+
+Particular emphasis is placed on findings potentially useful for rendering modernization, RTX Remix integration, weapon illumination, texture replacement, and graphical improvements.
+
+The research identified several important characteristics of the original engine:
+
+- Weapon projectile rendering and dynamic lighting use distinct systems.
+- Standard and fighter photons share original rendering functions.
+- Heavy photons have separate rendering functions.
+- Weapon effects use RGB values supplied through graphics-interface calls.
+- Moving weapon entities can supply positional lights to the renderer.
+- Animated weapon textures contain multiple visual components.
+- Some rendering functions are shared between different weapon types.
+- Phaser effects retain RGB information in their effect objects.
+- Existing executable modifications must be checked for compatibility before integrating additional changes.
+
+All executable addresses in this document are specific to the inspected build and should be independently verified.
+
+## 2. Photon Torpedo Rendering
+
+Three photon visual-effect categories were identified.
+
+| Category | Visual effect ID |
+|---|---|
+| Standard photon | 15 |
+| Fighter photon | 16 |
+| Heavy photon | 17 |
+
+These are visual-effect dispatch identifiers, not universal weapon-stat identifiers.
+
+### Identified functions
+
+| Function | Standard / Fighter | Heavy |
+|---|---|---|
+| Dispatch | 0x0041C6A9 | 0x0041C6B3 |
+| Factory | 0x00500F26 | 0x004F66D9 |
+| Constructor | 0x00500872 | 0x004F610F |
+| Main renderer | 0x00500C30 | 0x004F63E3 |
+| Particle renderer | 0x00500976 | 0x004F6213 |
+
+Standard and fighter photons use the same original visual-effect implementation.
+
+Heavy photons use separate construction and drawing routines.
+
+Both original factories allocate 0x1C0 bytes for the visual-effect object.
+
+Sixteen particle records, each 0x18 bytes, occupy the region beginning at offset +0x40.
+
+The original allocation does not have confirmed unused space at its end.
+
+Any modification expanding these structures should first examine allocation, construction, copying, ownership, and destruction.
+
+## 3. Weapon Entity Structure
+
+Several useful fields were identified in the inspected weapon entity.
+
+| Offset | Function |
+|---|---|
+| +0x1BC | Weapon/effect visual type |
+| +0x1C4 | fFromID — source entity identifier |
+| +0x1F0 | Primary visual-effect reference |
+| +0x220 | Entity-light red component |
+| +0x224 | Entity-light green component |
+| +0x228 | Entity-light blue component |
+| +0x34 | Projectile X position |
+| +0x38 | Projectile Y position |
+| +0x3C | Projectile Z position |
+
+The distinction between the visual-effect object and the weapon entity is important.
+
+The visual-effect object handles projectile artwork and associated particles.
+
+The weapon entity can independently provide position and RGB values used for dynamic illumination.
+
+Consequently, projectile appearance and emitted light do not necessarily share the same color source.
+
+## 4. Graphics Renderer and RGB Handling
+
+The original engine exposes graphics-interface methods used to select textures and set RGB values.
+
+### Identified renderer functions
+
+| Address | Function |
+|---|---|
+| 0x006AD340 | RGB state setter |
+| 0x006AD3E0 | Texture-handle setter |
+| 0x006AD174–0x006AD1F0 | Vertex color processing |
+| 0x00500D87 | Standard photon main RGB call |
+| 0x00500A32 | Standard photon particle RGB call |
+| 0x004F653A | Heavy photon main RGB call |
+| 0x004F62CF | Heavy photon particle RGB call |
+
+Graphics-interface slot +0x130 leads to the RGB setter at 0x006AD340.
+
+This routine stores RGB floating-point values at renderer offsets:
+
+- +0x1F08
+- +0x1F0C
+- +0x1F10
+
+The renderer subsequently consumes these values during vertex processing.
+
+Graphics-interface slot +0x134 leads to texture selection at 0x006AD3E0.
+
+### Rendering implications
+
+Weapon textures and renderer RGB values interact.
+
+A strongly red texture cannot necessarily be made bright green simply by changing the renderer RGB multiplier.
+
+A neutral or grayscale source texture is better suited to broad RGB tinting.
+
+Main projectile rendering and particle rendering also have separate color-setting calls.
+
+Therefore, intercepting only one renderer call may not capture every component of a weapon's appearance.
+
+This distinction may be useful when investigating how external rendering systems interpret original weapon effects.
+
+## 5. Photon Textures and Animation
+
+Original texture references identified in the executable:
+
+**Standard and fighter photons:**
+
+`Assets\Textures\photons-2.bmp`
+
+**Heavy photons:**
+
+`Assets\Textures\heavy-photon.bmp`
+
+Additional references:
+
+| Item | Address |
+|---|---|
+| Normal texture pointer, file offset | 0x10085E |
+| Normal cached texture handle, VA | 0x00857FC4 |
+| Heavy texture pointer, file offset | 0xF60FB |
+| Heavy cached texture handle, VA | 0x00857B64 |
+
+Runtime type information includes:
+
+- tFx_Photon
+- tFx_HeavyPhoton
+
+### Texture atlas structure
+
+An examined photon atlas format uses:
+
+| Property | Value |
+|---|---|
+| Dimensions | 512 × 512 |
+| Format | 8-bit indexed Windows BMP |
+| Compression | BI_RGB |
+| Palette entries | 256 |
+| Pixel data offset | 1,078 bytes |
+| Total file size | 263,222 bytes |
+| Cell arrangement | 4 × 4 |
+| Individual cell size | 128 × 128 |
+
+The engine uses atlas coordinates for animation.
+
+Projectile artwork, particles, and flare components may occupy different regions.
+
+Replacing only the most visible projectile image may leave other components unchanged.
+
+Texture replacement should therefore preserve the original atlas layout, expected frame positions, and attachment points unless the relevant renderer has been modified accordingly.
+
+## 6. Dynamic Weapon Illumination
+
+This is one of the more significant findings for rendering modernization.
+
+The engine contains a positional-light system associated with moving weapon entities.
+
+This system is distinct from the texture and vertex-color operations described earlier.
+
+### Original photon light values
+
+In the inspected baseline:
+
+Standard/fighter photon entity lighting uses approximately:
+
+`RGB = (1.0, 0.25, 0.0)`
+
+Heavy photon entity lighting initializes approximately:
+
+`RGB = (1.0, 1.0, 0.0)`
+
+These are entity-light values, not necessarily the final visible projectile colors.
+
+### Seeker entity light export
+
+The identified tEntity_Seeker vtable is located at:
+
+`0x007978FC`
+
+Relevant virtual functions:
+
+| Slot | Function |
+|---|---|
+| +0x50 | 0x0042167B — reports one light |
+| +0x54 | 0x00420447 — constructs light descriptor |
+
+The light descriptor contains:
+
+| Offset | Value |
+|---|---|
+| +0x00 | Light type 5 |
+| +0x10 | X position |
+| +0x14 | Y position |
+| +0x18 | Z position |
+| +0x1C | Red component |
+| +0x20 | Green component |
+| +0x24 | Blue component |
+| +0x28 | Range/attenuation-related parameter |
+
+The positional values originate from the weapon entity.
+
+The RGB values originate from the entity's lighting fields.
+
+The examined seeker descriptor uses a value of 20.0 for its range/attenuation-related parameter.
+
+A drifting-seeker export path at 0x004209DA uses 5.0.
+
+These values should not be interpreted as screen pixels without further investigation.
+
+### Light gathering and submission
+
+The identified light-gathering routine is:
+
+`0x004BA357`
+
+Calls to this routine were identified at:
+
+- 0x004BA71F
+- 0x004BA7AB
+
+The gatherer walks entity light providers, checks spatial applicability, and submits light descriptors to the graphics interface.
+
+Relevant renderer functions:
+
+| Graphics slot | Address | Purpose |
+|---|---|---|
+| +0x80 | 0x006A9AB0 | Copies light descriptors into renderer state |
+| +0x98 | 0x006A9C40 | Controls light enable state |
+
+### Why this matters for RTX Remix
+
+The original game can supply moving light positions and RGB values independently of weapon bitmap textures.
+
+A travelling photon can therefore illuminate nearby ship hulls before reaching its target.
+
+This suggests two important areas for investigation:
+
+1. How RTX Remix or the graphics wrapper interprets the original light descriptors.
+2. Whether the original entity-light information can be reliably distinguished from additional lighting introduced by modern rendering tools.
+
+Investigating the entity-light submission path may provide more useful information than attempting to infer lighting solely from the projectile texture.
+
+## 7. Phaser Rendering and Color Handling
+
+The phaser system provides additional information about how the engine manages weapon colors.
+
+Identified functions:
+
+| Address | Function |
+|---|---|
+| 0x0041C271 | Weapon/effect initialization |
+| 0x0041C788 | RGB-byte to floating-point conversion |
+| 0x0050037B | Phaser factory |
+| 0x004FFE06 | Phaser constructor |
+| 0x004FFE40 | Phaser drawing routine |
+
+The phaser constructor copies RGB values into the effect object at:
+
+- +0x40
+- +0x44
+- +0x48
+
+The drawing routine subsequently consumes those values.
+
+### Source identity
+
+The weapon entity contains a source identifier at +0x1C4.
+
+The source can be resolved through the entity table, with validation around 0x004249C0.
+
+The resolved object's race/class-prefix information was identified at +0x86C.
+
+This establishes that the engine can recover information about the firing unit during weapon-effect processing.
+
+The precise behavior for all fighter ownership and carrier relationships remains unverified.
+
+### Historical editor compatibility
+
+Older SFC editor documentation describes a phaser-color table at file offset:
+
+`0x437600`
+
+However, in the inspected current executable, this region is used as a normalization lookup containing floating-point values corresponding to n/255.
+
+Older editor definitions should not automatically be applied to newer or modified executables.
+
+Even executables displaying the same version number may contain different code and data layouts.
+
+## 8. Other Weapon Rendering Leads
+
+Limited reconnaissance identified the following additional weapon rendering paths.
+
+These are useful investigation starting points, not complete reverse-engineering results.
+
+| Weapon family | Identified lead |
+|---|---|
+| Disruptor | Helper 0x004EE0D1, RGB call 0x004EE239 |
+| Fusion | Drawing routine 0x004F4719 |
+| Hellbore | Drawing routine 0x004F6F1D |
+| Plasma | Drawing routine 0x00501FED |
+
+### Disruptors
+
+A helper at 0x004EE0D1 supplies white RGB values through a graphics call at 0x004EE239.
+
+Further analysis is needed to determine the complete effect construction, texture selection, particle behavior, and lighting path.
+
+### Fusion beams
+
+The drawing routine at 0x004F4719 contains white and intensity-dependent RGB operations.
+
+This suggests that visible intensity is at least partly controlled through renderer color values.
+
+### Hellbores
+
+The drawing routine at 0x004F6F1D uses the same graphics RGB interface identified elsewhere.
+
+This provides a potential comparison point for investigating shared rendering infrastructure.
+
+### Plasma
+
+The drawing routine at 0x00501FED supplies equal intensity-dependent RGB components.
+
+The relationship between this path, plasma textures, particles, and entity lighting requires additional investigation.
+
+### Other weapons
+
+The retained research does not yet establish complete rendering paths for ESG, PPD, and other weapon systems.
+
+No universal weapon-color or lighting function has been demonstrated across all families.
+
+## 9. Impact Effects and Explosions
+
+Weapon impacts should not automatically be treated as extensions of projectile rendering.
+
+Potentially distinct components include:
+
+- Projectile termination
+- Shield contact visuals
+- Hull contact visuals
+- Explosion textures
+- Secondary particles
+- Impact-associated dynamic lighting
+- Damage-related flashes
+
+A candidate routine at 0x004204B2 was investigated.
+
+It creates an object through 0x0042135F.
+
+Runtime type information identifies the resulting object as:
+
+`tEntity_HellboreBlast`
+
+It should therefore not be identified as a normal-photon impact factory without additional evidence.
+
+A secondary proximity-related explosion was observed in association with `fx1.bmp`, but its complete caller-specific behavior has not been established.
+
+### Shared-effect warning
+
+Explosion textures and rendering routines may be used by multiple weapons.
+
+Replacing a shared resource without tracing all consumers can unintentionally change unrelated effects.
+
+Before modifying impact visuals, identify the creation path, effect type, texture references, and all callers.
+
+## 10. Weapon Audio References
+
+The game's sound configuration includes the following mappings:
+
+| Sound identifier | File |
+|---|---|
+| kSndPhotonFire | ptdisc1.wav |
+| kSndPhotonOverloadFire | ptodisc4.wav |
+| kSndHeavyPhotonFire | HPtDisc.wav |
+
+These are sound mappings rather than rendering functions.
+
+No complete independent sound-dispatch investigation is established in the retained research.
+
+## 11. Executable Compatibility
+
+The examined game executable is a native 32-bit PE executable.
+
+Its image base is:
+
+`0x00400000`
+
+The original executable contains several code and data regions that must be interpreted according to their PE section mappings.
+
+A virtual address should not automatically be treated as a file offset.
+
+### Important compatibility considerations
+
+1. Verify the executable's full SHA-256 hash before applying any binary modification.
+2. Compare actual instructions rather than relying solely on game version numbers.
+3. Identify existing hooks, jumps, expanded code sections, and relocated functions.
+4. Check whether proposed modifications share code paths with unrelated weapons.
+5. Avoid assuming that unused-looking bytes are safe code caves.
+6. Preserve original executable backups.
+7. Verify exact changed-byte ranges after modifications.
+8. Test graphics behavior separately from weapon mechanics.
+
+The existence of a known address in one executable does not guarantee that the same function occupies that address in another modified build.
+
+## 12. Rendering Modernization — Recommended Investigation Areas
+
+For RTX Remix and other graphics modernization work, the most useful next investigations would be:
+
+**A. Projectile rendering**
+
+Trace texture selection, vertex-color state, particle rendering, and animation timing independently.
+
+**B. Dynamic lighting**
+
+Instrument the entity-light provider, light gatherer, and graphics-interface submission paths.
+
+**C. Impact behavior**
+
+Separate shield impacts, hull impacts, explosions, and their associated lighting.
+
+**D. Graphics-wrapper interactions**
+
+Compare equivalent scenes under controlled graphics settings to distinguish original game lighting from wrapper or shader enhancements.
+
+**E. Shared renderer behavior**
+
+Compare the RGB-setting and texture-binding routines used by photons, phasers, disruptors, fusion, hellbores, and plasma.
+
+**F. Binary compatibility**
+
+Compare existing executable modifications using verified code signatures, control-flow analysis, and exact byte differences before integrating independent changes.
+
+## 13. Research Confidence and Limitations
+
+**Confirmed through static analysis:**
+
+- Original photon effect dispatch and drawing functions.
+- Separate normal/fighter and heavy photon visual implementations.
+- RGB renderer calls and texture-binding paths.
+- Seeker-entity positional-light descriptor structure.
+- Light-gathering and submission routines.
+- Phaser effect RGB storage.
+- Several preliminary rendering entry points for other weapons.
+
+**Supported by limited gameplay observations:**
+
+- Projectile appearance can differ from associated hull illumination.
+- Colored projectile-related lighting is visible on nearby ship hulls.
+
+**Not fully established:**
+
+- Complete shield-impact and hull-impact creation chains.
+- Every original weapon family's rendering architecture.
+- Exact behavior of all shared explosion resources.
+- Full lighting behavior under RTX Remix.
+- Whether observed brightness differences originate in the original engine, graphics wrappers, shaders, or combinations of these.
+- Compatibility of these addresses with independently modified executables.
+
+## 14. Conclusion
+
+The most significant finding is that SFCOP's original weapon-rendering architecture contains separate pathways for projectile graphics and positional dynamic lighting.
+
+The engine's weapon entities can provide position and RGB information through light descriptors, which are gathered and submitted to the graphics renderer independently of projectile texture drawing.
+
+For rendering modernization, particularly RTX Remix, this distinction provides a useful foundation for understanding how the original game illuminates ships during weapon flight and how those effects might interact with modern graphics systems.
+
+The identified functions, object fields, texture references, and renderer interfaces should provide practical starting points for further investigation.
+
+All addresses and behaviors should be validated against the exact executable being examined.
+
+---
+
+**End of Technical Research Handover**
+
+*Compiled from retained SFCOP reverse-engineering findings through November 2026. No new executable inspection was performed for this document.*

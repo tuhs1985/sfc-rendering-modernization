@@ -23,6 +23,7 @@ int main(){
  }
  // Preserve the 90s legacy/110s game-output window and exact deadline edge.
  for(uint64_t limit:{90000ull,110000ull}){
+  test(run_lifetime::within_window(86400000,1234,0));
   test(run_lifetime::within_window(1234,1234,limit));
   test(run_lifetime::within_window(1234+limit-1,1234,limit));
   test(!run_lifetime::within_window(1234+limit,1234,limit));

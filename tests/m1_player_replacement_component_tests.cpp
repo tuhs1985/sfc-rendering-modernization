@@ -2,7 +2,8 @@
 #include "../tools/m1_component/m1_component.cpp"
 #include <iostream>
 static unsigned checks=0;
-static void test(bool b){++checks;if(!b){std::cerr<<"component check "<<checks<<'\n';std::exit(1);}}
+static void testCheck(bool b,unsigned line){++checks;if(!b){std::cerr<<"component check "<<checks<<" at line "<<line<<'\n';std::exit(1);}}
+#define test(value) testCheck((value),__LINE__)
 static unsigned gateAcquires=0,gateCommits=0;static bool gateTimeout=false;
 static DWORD WINAPI fakeGate(DWORD action,const native_gate::Ticket* t,native_gate::Reply* r){
  test(g_lock.RecursionCount==0&&g_in_native_gate==1&&g_in_recorders==0);
@@ -88,7 +89,13 @@ int main(){
  state->owner_id=firstOwner;state->ship=reinterpret_cast<DWORD>(ship.data());state->visual=reinterpret_cast<DWORD>(visual.data());g_native_cohort_mode=false;g_native_cohort=nullptr;
  // Unload's conservative PC exclusion covers each complete naked hook stub.
  for(const auto& hook:g_hooks){const auto* bytes=reinterpret_cast<const BYTE*>(hook.destination);bool end=false;
-  for(unsigned j=0;j+6<=128;++j)if(bytes[j]==0xff&&bytes[j+1]==0x25){end=true;break;}test(end);}
+  if(!strncmp(hook.name,"break_",6)){
+   for(unsigned j=0;j+10<128;++j)if(bytes[j]==0xf0&&bytes[j+1]==0xff&&bytes[j+2]==0x0d){
+    DWORD counter=0;memcpy(&counter,bytes+j+3,4);
+    if(counter==reinterpret_cast<DWORD>(&g_in_hook_spans)&&(bytes[j+7]==0xc3||bytes[j+7]==0xc2)){end=true;break;}
+   }
+  }else for(unsigned j=0;j+6<=128;++j)if(bytes[j]==0xff&&bytes[j+1]==0x25){end=true;break;}
+  test(end);}
  // Changed/unknown later submissions remain native for this owner/frame only.
  start(105);
  stack[0]=0x0042e55d;stack[1]=1;CoordinateAfterCapture(kWrapper,saved.data());test(stack[1]==0);
@@ -96,10 +103,42 @@ int main(){
  stack[0]=0x0042e626;stack[1]=1;CoordinateAfterCapture(kWrapper,saved.data());test(stack[1]==1); // no further suppression in damaged decision
  start(106);stack[0]=0x0042e55d;stack[1]=1;const auto recovered=gateCommits;
  CoordinateAfterCapture(kWrapper,saved.data());test(stack[1]==0&&gateCommits==recovered+1&&!gate->header.stop);
+ // Actual indexed-piece coordinator: a separate child epoch selects only its
+ // native primary/secondary slices, with the same acquire/commit obligation.
+ std::array<DWORD,14> brokenModel{};std::array<DWORD,100> brokenVisual=visual;
+ std::array<DWORD,90> child{};std::array<DWORD,2> ends{1,2},pieceLists{list[0],list[0]};
+ brokenModel[0]=kModel0Vtable;brokenModel[2]=3;brokenModel[3]=reinterpret_cast<DWORD>(positions.data());
+ brokenModel[4]=2;brokenModel[5]=brokenModel[6]=reinterpret_cast<DWORD>(pieceLists.data());
+ brokenModel[11]=1;brokenModel[12]=reinterpret_cast<DWORD>(ends.data());brokenModel[13]=2;
+ brokenVisual[0x160/4]=reinterpret_cast<DWORD>(brokenModel.data());
+ child[0]=0x7972b4;child[0x24/4]=1;child[0x9c/4]=reinterpret_cast<DWORD>(brokenVisual.data());child[0xa0/4]=1;
+ const auto pieceEpoch=g_live_scene.breaks.born(reinterpret_cast<DWORD>(child.data()),firstOwner,reinterpret_cast<DWORD>(brokenVisual.data()),1);
+ const auto oldSceneOwner=g_live_scene.owners[0];const auto oldOwnerCount=g_live_scene.owner_count;
+ auto& pieceOwner=g_live_scene.owners[0];pieceOwner={};pieceOwner.breakPiece=true;pieceOwner.breakEpoch=pieceEpoch;pieceOwner.revision=5;
+ pieceOwner.identity={0x80000000u|DWORD(pieceEpoch),GetCurrentThreadId(),108,0,reinterpret_cast<DWORD>(child.data()),
+  reinterpret_cast<DWORD>(brokenVisual.data()),reinterpret_cast<DWORD>(brokenModel.data()),state->model_manager,state->source,
+  0x42ea92,reinterpret_cast<DWORD>(pieceLists.data()+1),1};g_live_scene.owner_count=1;
+ g_native_cohort_mode=true;g_native_cohort=cohort.get();
+ g_break_requested=true;g_break_draw_scope={reinterpret_cast<DWORD>(child.data()),state->model_manager,pieceEpoch};
+ auto pieceStart=[&](DWORD frame){start(frame);auto& p=g_live_scene.cohort.pending;p.anchor=pieceOwner.identity.owner;p.revision=5;p.count=1;p.rows[0]={};
+  p.rows[0][1]=pieceOwner.identity.owner;p.rows[0][7]=5;p.rows[0][5]=pieceOwner.identity.model;p.rows[0][6]=pieceOwner.identity.source;
+  stack={0x42ea92,1,pieceOwner.identity.list,1,0};saved[0]=pieceOwner.identity.model;};
+ const auto oldBrokenModel=brokenModel;const auto oldPieceLists=pieceLists;const auto oldChild=child;
+ pieceStart(108);const auto beforePieceCommits=gateCommits;CoordinateAfterCapture(kWrapper,saved.data());
+ test(stack[1]==0&&gateCommits==beforePieceCommits+1&&gate->current.primary==1);
+ stack[0]=0x42eb34;stack[1]=1;CoordinateAfterCapture(kWrapper,saved.data());
+ test(stack[1]==0&&gateCommits==beforePieceCommits+1&&gate->current.secondary==1);
+ test(brokenModel==oldBrokenModel&&pieceLists==oldPieceLists&&child==oldChild);
+ pieceStart(109);g_break_draw_scope.epoch=pieceEpoch+1;CoordinateAfterCapture(kWrapper,saved.data());test(stack[1]==1&&gateCommits==beforePieceCommits+1);
+ pieceStart(110);g_break_draw_scope.epoch=pieceEpoch;gateTimeout=true;CoordinateAfterCapture(kWrapper,saved.data());test(stack[1]==1&&gateCommits==beforePieceCommits+1);
+ stack[0]=0x42eb34;CoordinateAfterCapture(kWrapper,saved.data());test(stack[1]==1&&gateCommits==beforePieceCommits+1);
+ gateTimeout=false;g_break_requested=false;g_break_draw_scope={};g_native_cohort_mode=false;g_native_cohort=nullptr;g_live_scene.breaks.retire(reinterpret_cast<DWORD>(child.data()),pieceEpoch);
+ g_live_scene.owners[0]=oldSceneOwner;g_live_scene.owner_count=oldOwnerCount;saved[0]=0;
+ stack={0x42e55d,1,reinterpret_cast<DWORD>(list.data()),1,0};
  // Unwritable suppression arguments after insertion are a genuine terminal fault.
  auto* protectedStack=static_cast<DWORD*>(VirtualAlloc(nullptr,4096,MEM_COMMIT|MEM_RESERVE,PAGE_READWRITE));test(protectedStack!=nullptr);
  memcpy(protectedStack,stack.data(),sizeof(stack));protectedStack[1]=1;DWORD old=0;test(VirtualProtect(protectedStack,4096,PAGE_READONLY,&old)!=FALSE);
- start(107);saved[3]=reinterpret_cast<DWORD>(protectedStack)-4;CoordinateAfterCapture(kWrapper,saved.data());
+ start(111);saved[3]=reinterpret_cast<DWORD>(protectedStack)-4;CoordinateAfterCapture(kWrapper,saved.data());
  test(protectedStack[1]==1&&gate->header.stop&&gate->header.partial&&gate->header.recovery.terminalReason==LONG(native_gate::TerminalReason::SuppressionWrite));
  test(VirtualFree(protectedStack,0,MEM_RELEASE)!=FALSE);saved[3]=reinterpret_cast<DWORD>(stack.data())-4;
  g_native_gate=nullptr;g_native_gate_requested=false;g_native_dispatch=nullptr;g_live_scene.directSource.store=nullptr;

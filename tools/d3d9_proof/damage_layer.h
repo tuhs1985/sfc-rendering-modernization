@@ -23,6 +23,9 @@ struct DamageLayer {
   std::cout<<"DAMAGE_LIBRARY_READY textures=9 bytes="<<textureBytes<<" native_black_key=1 remix_decal=1\n";
  }
  Geometry prepare(const Scene& scene){Geometry out{};if(!enabled)return out;
+  // A mixed scene may contain qualified rigid debris with no intact-ship
+  // damage channel. Do not invent UVs or block its otherwise qualified hull.
+  if(scene.damageUV.empty())return out;
   require(scene.damageUV.size()==scene.vertices.size(),"fresh damage UV channel missing");
   std::vector<Vertex> vertices=scene.vertices;for(size_t i=0;i<vertices.size();++i)memcpy(vertices[i].uv,scene.damageUV[i].data(),8);
   out.bytes=vertices.size()*sizeof(Vertex);ok(device->CreateVertexBuffer(static_cast<UINT>(out.bytes),0,D3DFVF_XYZ|D3DFVF_NORMAL|D3DFVF_TEX1,D3DPOOL_DEFAULT,&out.vertices,nullptr),"damage vertex buffer");

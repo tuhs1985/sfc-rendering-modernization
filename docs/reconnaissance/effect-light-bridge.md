@@ -1,5 +1,14 @@
 # Game-driven transient lights — Run261
 
+**November 7 research supplement:** [nxreliant contribution review](nxreliant-weapon-light-research.md)
+adds an upstream entity-to-descriptor relationship corroborated in the pinned
+client: position `+0x34` and RGB `+0x220` feed the type-5 descriptor at
+`0x00420447`. Gatherer/source-owner leads remain incompletely qualified; they do
+not yet identify a live bank slot with a particular weapon. The external notes
+describe nxreliant's newer modified client, per sponsor clarification. Address
+mapping must be checked against our pinned build. Functional light mapping below
+is unchanged.
+
 ## Source and meaning
 
 Reuse the first qualified semantic wrapper of each native scene frame, immediately before persistent scene publication wakes the renderer. Read the confirmed manager light bank at+0x778, enable bytes at+0x1778 and global response gate at+0x1EB8. Double-copy into preallocated scratch and reject inconsistent reads. The game supplies all64records; slot0/1 remain on the accepted scene-light path. No new hook, setter detour, game-memory write, file read, allocation, wait or per-frame SDK call is added to SFC.

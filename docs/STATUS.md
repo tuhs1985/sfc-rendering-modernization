@@ -1,13 +1,120 @@
 ---
 title: SFC Modernization — Status Tracker
-updated: 2026-11-04
-checkpoint: Run290 damage transparency fix visually confirmed
+updated: 2026-11-08
+checkpoint: FCA destruction replacement demonstrated;two parents/eight pieces;alpha delivery next
 tags:
   - sfc-modernization
   - project-status
 ---
 
 # SFC Modernization — Status Tracker
+
+**November 8 — Live FCA break replacement works:** two separate FCA breakups,
+eight fragments with successful insertion/suppression, cached content reused for
+the second ship. Sponsor confirms correct motion and normal controls/HUD/effects.
+No service error or deadline misses. Original client unchanged, proxy restored
+and helpers exited. Controlled-unload PARTIAL reflects destroying the remaining
+ship and ending the session before that step, per sponsor; no rendering failure.
+Destruction feature demonstrated for FCA, BRK still opt-in. Alpha portability/
+packaging work is next; universal model coverage is not claimed.
+[Live result](runs/2026-11-08-codex-live-break-success.md).
+
+**November 8 — Second BRK rejection fixed at receiver:** service drained an
+intact-only receiver before reaching the corrected worker. Both now use explicit
+strict debris admission when enabled. 66 tests and latest-run actual captures
+pass through shared-memory reception and material preparation. Latest gameplay
+exit/cleanup were normal; no debris reached Remix before the error. Same launcher
+ready; downstream live rendering/suppression still needs checkout.
+[Receiver fix and revised diagnosis](runs/2026-11-08-codex-break-receiver-fix.md).
+
+**November 8 — BRK worker fixed:** production parallel preparation now uses the
+strict opt-in debris decoder. 51 targeted tests pass, including real decode and
+mixed submit-to-base/enhanced preparation. The failed run's actual captures now
+prepare all four fragments/6,370 triangles and intact ships with shared reuse.
+Build/qualification refreshed; read-only preflight PASS. Same BRK launcher is
+ready. No live retry performed; destruction acceptance remains pending.
+[Fix and verification](runs/2026-11-08-codex-break-worker-fix.md).
+
+**November 8 — BRK failure diagnosed:** all four valid FCA fragments were captured,
+but the active parallel worker still used intact-only mesh admission. Same saved
+packets pass the dedicated debris decoder and fail the actual worker; no debris
+reached Remix. This is our integration gap, not demonstrated renderer failure.
+After SFC exited, exact-run recovery restored the copied proxy/configuration.
+Next correct the active decoder and test its worker boundary; another discovery
+capture is unnecessary. No source fix or live acceptance yet.
+[Failure evidence and correction](runs/2026-11-08-codex-live-break-failure-review.md).
+
+**November 7 — Alpha delivery assessment prepared:** approved replacement,
+weapon-light, damage and fast-break scope retained. Live BRK checkout remains
+pending; no alpha readiness claim. The actual delivery gaps are local paths and
+Codex runtimes, development receipts, legacy bootstrap dependencies, fixed
+1920x1080 assumptions, dependency/distribution review and clean-machine setup.
+Next centralize installation roots and inventory the runtime dependency closure;
+then stage an allowlisted package and prove setup/recovery/removal. Standard
+ExtraFrame and untimed minimal-recording play stay the proposed baseline.
+[Release assessment and sequence](releases/ALPHA_READINESS.md).
+
+**November 7 — nxreliant research ingested:** original weapon/light handover
+preserved with attribution/hash and linked to our effect inventory/light map.
+Targeted 98-instruction checks corroborate upstream entity-light fields and RGB
+storage. External version differs; two supplied addresses are not local
+instruction boundaries. Owner/weapon attribution remains a lead, not proven
+integration. Review finalized across all fourteen source sections. Sponsor
+confirms nxreliant's client is his newer modified executable; address differences
+are mapping concerns, not established contributor errors. No runtime changes;
+live debris checkout awaits the sponsor's later run.
+[Contribution review](reconnaissance/nxreliant-weapon-light-research.md).
+
+**November 7 — Live debris checkout ready:** fresh indexed fragments now use
+independent persistent identities, simulation poses and cached geometry through
+ordinary D3D9/Remix and synchronized native insertion. Capture precedes precise
+fragment suppression. Original break textures are retained; no intact damage UVs
+are invented. Normal launcher/appearance are unchanged; break support is opt-in.
+Native/transport tests, 90 targeted Python tests and both 600-frame insertion
+regressions PASS; copied-game preflight PASS. Live gameplay remains unverified.
+Next run `tools/native_insertion/start_native_break_session.ps1` with F-CA and a
+surviving wingman, destroy the enhanced ship and check fragments/camera changes.
+[Implementation, evidence and limits](runs/2026-11-07-codex-live-break-prepared.md).
+
+**Player-name blocker removed:** saved names now survive startup,exit and
+interrupted-run recovery. Client,graphics files and remaining INI settings stay
+checked. Your current name is preserved;no game configuration overwritten.
+694tests PASS;normal launcher preflight passes with your saved preference.
+[Run296](runs/2026-11-04-codex-player-preference-baseline.md).
+
+**Folder cleanup complete:**3.27GBobsolete generated files removed(~3.24GBdisk
+reclaimed);current evidence,original captures,dependencies and settings retained.
+684tests PASS. Next launcher is blocked by the already-known campaign-saved
+player-name preference versus the frozen test INI check;neither preference nor
+verification rules changed during cleanup.
+[Run295](runs/2026-11-04-codex-artifact-cleanup.md).
+
+**Untimed play checked across three missions:** sponsor reports stable behavior
+with one ship-render dropout. About21minutes,8fresh revisions,0asset rejections,
+normal renderer/receiver exits and owned-process cleanup. Grayish KFF wing
+patches remain unresolved;damage blending and reflections are candidates,
+not diagnoses. No settings changed. Harness PARTIAL is from a saved test-copy
+player-name preference;original files unchanged and proxy restored.
+[Run294](runs/2026-11-04-codex-three-mission-play-review.md).
+
+**First untimed launch failure corrected:** the controller missed the session
+flag and rejected duration0before capture. Explicit environment forwarding is
+fixed and tested against the actual controller.684tests pass;copied setup
+restored. Same launcher;live retry pending.
+[Run293](runs/2026-11-04-codex-untimed-controller-startup-fix.md).
+
+**Normal play is now untimed:** run the usual native multi-ship launcher without
+diagnostic flags, enter battles when ready, and exit SFC normally when finished.
+Current appearance, weapon lights and damage remain enabled. No continuous frame
+trace or screenshots; required asset caches and compact records remain bounded.
+Use `-TimedTest` for the old short checkout. Campaign transitions are the next
+live checkout, not yet a demonstrated result.
+[Run292](runs/2026-11-04-codex-untimed-play-session.md).
+
+**Damage is now baseline:** the normal native multi-ship launcher enables it.
+No extra flag needed. Use `-NoDamageTextures` for an explicit comparison;old
+`-DamageTextures` still works. Diagnostics remain off by default.678tests pass.
+[Run291](runs/2026-11-04-codex-damage-baseline.md).
 
 **Damage layer visually confirmed:** two corrected KDD/FCA runs show no first-use
 transparency; sponsor reports smoother damage blending/progression.733/1699damage
@@ -223,7 +330,18 @@ Updated through **Run233,October31,2026**. Repository handoff and run records co
 **RECORDED / OPEN — release scope, not authorization to expand the current test.**
 
 - **Required:** ship replacement; weapon-generated lighting applied to replacements; damage textures read/applied; destruction/break model with fast loading.
-- Run290: standard-family damage source/application and transparency correction visually confirmed in two KDD/FCA skirmishes. Reversal/removal offline GPU-proven;live repairs/other families not yet confirmed. Damage remains opt-in. Break-model transition and loading need qualification;no arbitrary timing number set.
+- **November 8:** FCA destruction replacement demonstrated in live gameplay:
+  two parent lifetimes/eight pieces with cached geometry sharing and native
+  suppression. [Current result](runs/2026-11-08-codex-live-break-success.md).
+  Broader break files remain unqualified. All four required feature areas now
+  have scoped gameplay evidence; alpha deployment/packaging remains open.
+- **November 7 current status:** replacement, weapon lights and baseline damage
+  have scoped gameplay evidence. Live debris is implemented/offline-qualified;
+  sponsor checkout pending. Historical unqualified-destruction wording below
+  describes its earlier checkpoint, not a new discovery requirement. The
+  [alpha delivery assessment](releases/ALPHA_READINESS.md) tracks portability,
+  package membership, deployment checks and unresolved release decisions.
+- Run290: standard-family damage source/application and transparency correction visually confirmed in two KDD/FCA skirmishes. Reversal/removal offline GPU-proven;live repairs/other families not yet confirmed. Damage is baseline in native multi-ship replacement. Break-model transition and loading need qualification;no arbitrary timing number set.
 - **Break-model finding:** `_brk.mod` exists and SFC already loaded FCA/KFF break assets during setup, before tactical rendering. We may prepare their fresh in-memory data while the ship is alive; breakup-piece movement and transition remain unqualified. [Run212](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-27-codex-break-model-inspection.md>).
 - **Optional:** LOD models. Their absence alone does not block alpha release.
 - Supported multi-ship replacement and visible weapon lighting are demonstrated. Damage-layer capture/application and fast break-model transitions remain open. No alpha readiness or formal milestone PASS claimed.
@@ -367,19 +485,13 @@ Evidence: [hiccup review](<C:/Project/SFC-Modernize Engine/docs/runs/2026-10-24-
 
 References: [interface audit](<C:/Project/SFC-Modernize Engine/docs/reconnaissance/2026-10-24-live-interface-second-audit.md>), [future-renderer gate](<C:/Project/SFC-Modernize Engine/docs/decisions/2026-10-18-renderer-independent-boundary-gate.md>).
 
-### SFC-23 — First launch after PC restart — PARKED
+### SFC-23 — First launch after restart or long idle — RESOLVED LOCALLY, PARKED
 
-Sponsor reports SFC hangs for roughly20seconds on the first launch after a PC
-restart, occurring almost every time. Cause is unqualified; do not assume this
-is the earlier Defender wait or Remix initialization. Investigation explicitly
-deferred on November3,2026; current damage integration remains the active task.
-
-Reopen when the sponsor is ready for a post-restart test. Exact next action:
-prepare timing observation before restarting, then compare the first SFC launch
-with an immediate second launch using the same launcher/settings. Separate game
-startup, integration startup and renderer readiness so the delayed stage can be
-identified. Preserve Defender and existing settings. No restart, trace or test
-is authorized by this parked note alone.
+November 6, 2026. The post-reboot trace attributed 19.11 seconds of main-thread
+waits to Defender. The sponsor confirmed the usual pause was gone on the first
+launch after a fresh restart with a folder exclusion scoped to the test copy's
+mission scripts. The reason for the unusually long scan remains unknown.
+[Capture procedure and findings](reconnaissance/sfc23-startup-capture.md).
 
 ## Already demonstrated — do not rediscover blindly
 

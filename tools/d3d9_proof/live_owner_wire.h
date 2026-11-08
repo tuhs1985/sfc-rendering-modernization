@@ -73,10 +73,11 @@ struct Source {
  void close(){if(store)InterlockedExchange(&store->header.stopped,1);store=nullptr;}
 };
 struct PresentObserver {
- Store* store=nullptr;Completion latest{};uint64_t last=0;
+ Store* store=nullptr;Completion latest{};uint64_t last=0;bool diagnostics=true;
  void observe(const Row* row,DWORD frame,DWORD thread,uint64_t now){
   if(!store||frame_ingress::state(&store->header.stopped))return;auto& h=store->header;
   take(store->output,h,latest,last,h.completion_invalid);
+  if(!diagnostics)return; // Completion consumption is functional;the audit array isn't.
   if(!InterlockedCompareExchange64(&h.selected,0,0))return;
   if(h.audits>=AuditCapacity){++h.audit_dropped;return;}
   Audit a{};a.frame=frame;a.present=now;a.completed=latest.completed;a.completed_sequence=latest.sequence;a.offered=latest.offered;

@@ -45,7 +45,11 @@ class StartupSafetyTests(unittest.TestCase):
         self.recovery_case({'probe':'NATIVE-INSERTION-001','full_support_qualification':{'result':'qualified'}})
     def test_verified_replacement_recovery_and_live_game_refusal(self):
         self.recovery_case({'probe':'PLAYER-REPLACEMENT-001','full_support_qualification':{'result':'qualified'}})
-    def recovery_case(self,transaction):
+    def test_saved_player_name_survives_recovery_but_graphics_change_is_rejected(self):
+        self.recovery_case({'broad_capture':{'enabled':True}},preferences=True)
+    def test_legacy_recovery_uses_verified_reference_for_player_name(self):
+        self.recovery_case({'broad_capture':{'enabled':True}},preferences=True,legacy=True)
+    def recovery_case(self,transaction,preferences=False,legacy=False):
         with tempfile.TemporaryDirectory() as folder:
             root=Path(folder);run=root/'artifacts/remix-runtime/runs/test-in-game';run.mkdir(parents=True)
             test=root/'test';test.mkdir();(test/'dxgi.dll').write_bytes(b'full');(test/'ReShade.ini').write_bytes(b'changed')
@@ -53,13 +57,28 @@ class StartupSafetyTests(unittest.TestCase):
             (run/'dxgi-original.rollback').write_bytes(b'old');(run/'ReShade.original.ini').write_bytes(b'config')
             old=broad.digest(run/'dxgi-original.rollback');full=broad.digest(test/'dxgi.dll')
             expected={'dxgi.dll':old,'ReShade.ini':broad.digest(run/'ReShade.original.ini'),'StarFleetOP.exe':broad.digest(test/'StarFleetOP.exe')}
+            if preferences:
+                from copied_preferences import protected_ini_sha256
+                baseline=b'[Network]\r\nPlayerName=before\r\n[3D]\r\nWidth=1920\r\n'
+                current=baseline.replace(b'before',b'after')
+                (test/'sfc.ini').write_bytes(baseline);expected['sfc.ini']=broad.digest(test/'sfc.ini')
+                (test/'sfc.ini').write_bytes(current)
+                if legacy:
+                    ref=root/'artifacts/remix-runtime/test-install/sfc-baseline.ini';ref.parent.mkdir(parents=True);ref.write_bytes(baseline)
+                else:transaction={**transaction,'copied_sfc_protected_sha256':protected_ini_sha256(baseline)}
             (run/'manifest.json').write_text(json.dumps({**transaction,'copied_critical_before':expected}))
             with mock.patch.multiple(recovery,ROOT=root,TEST=test,OLD_SHA=old,FULL_SHA=full),mock.patch.multiple(broad,OLD_SHA=old,FULL_SHA=full):
                 with self.assertRaises(RuntimeError):recovery.recover(run,lambda:True)
                 self.assertEqual((test/'dxgi.dll').read_bytes(),b'full')
+                if preferences:
+                    (test/'sfc.ini').write_bytes(current.replace(b'1920',b'800'))
+                    with self.assertRaisesRegex(ValueError,'Unrelated copied baseline changed'):recovery.recover(run,lambda:False)
+                    self.assertEqual((test/'dxgi.dll').read_bytes(),b'full')
+                    (test/'sfc.ini').write_bytes(current)
                 self.assertIsNotNone(recovery.recover_pending(lambda:False))
                 self.assertEqual((test/'dxgi.dll').read_bytes(),b'old')
                 self.assertEqual((test/'ReShade.ini').read_bytes(),b'config')
+                if preferences:self.assertEqual((test/'sfc.ini').read_bytes(),current)
                 self.assertIsNone(recovery.recover_pending(lambda:False))
     def test_process_discovery_failure_is_not_absence(self):
         with mock.patch.object(windows_processes,'process_names',side_effect=OSError('denied')):

@@ -77,6 +77,10 @@ int wmain(int argc,wchar_t** argv){
         const auto old=scene.owners[1].sequence;
         scene.observe(id,read,[]{return true;});
         check_mesh(scene.owners[1].sequence>old,"tuning stream survives90seconds");}
+    if(scene.playSession){id.owner=2;id.elapsed=86400000;++id.frame;
+        const auto old=scene.owners[1].sequence;
+        scene.observe(id,read,[]{return true;});
+        check_mesh(scene.owners[1].sequence>old,"play stream survives simulated one-day elapsed time");}
     if(scene.lifecycleCapture){
         // More than the old100records, then coalesced retirement/reappearance.
         // No executable death flag is invented: these are observation epochs.

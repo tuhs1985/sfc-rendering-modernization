@@ -1,5 +1,10 @@
 # SFC rendering families — evidence map
 
+**Research supplement, November 7:** [nxreliant's weapon/light contribution](nxreliant-weapon-light-research.md)
+adds entity light/source-identity and core-versus-particle colour leads, with
+explicit external-build limits. This does not extend observed family coverage
+or change the qualified rendering paths below.
+
 ## Current shield clarification — Run217,2026-10-27
 
 [Run217](../runs/2026-10-27-codex-shield-boundary-characterization.md) supersedes

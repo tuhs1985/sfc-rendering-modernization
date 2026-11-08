@@ -1,6 +1,7 @@
 // External host only: initialize once, then sleep until a qualified scene arrives.
 #pragma once
 #include "startup_ticket.h"
+#include "pipeline_mode.h"
 namespace warm_start {
 constexpr uint32_t Magic=0x31524157;
 using Activation=startup_ticket::Activation;
@@ -26,13 +27,13 @@ template<class Pump,class Observe> inline void wait(const fs::path& root,Pump pu
  if(startup_ticket::load(&cell.state)==startup_ticket::Cancelled)throw Cancelled{};
  require(InterlockedCompareExchange(&cell.ready,-1,0)==0,"one startup host per session");
  LARGE_INTEGER now{};QueryPerformanceCounter(&now);cell.host=GetCurrentProcessId();cell.readyQpc=static_cast<uint64_t>(now.QuadPart);InterlockedExchange(&cell.ready,1);
- const auto limit=GetTickCount64()+180000;
+ const bool untimed=pipeline_mode::play_session();const auto limit=GetTickCount64()+180000;
  HANDLE liveness[]={game,producer};
  for(;;){
   const auto state=startup_ticket::load(&cell.state);
   if(state==startup_ticket::Cancelled||WaitForMultipleObjects(2,liveness,FALSE,0)!=WAIT_TIMEOUT)throw Cancelled{};
   require(state>=startup_ticket::Empty&&state<=startup_ticket::Published,"warm startup state");
-  require(GetTickCount64()<limit,"warm activation180s limit");
+  require(untimed||GetTickCount64()<limit,"warm activation180s limit");
   pump(); // Optional external-host work only;normal idle does no disk access.
   if(state==startup_ticket::Published){
    observe("activation_seen",0);
@@ -53,8 +54,8 @@ template<class Pump,class Observe> inline void wait(const fs::path& root,Pump pu
    bool any=false;for(unsigned i=0;i<32;++i){swprintf_s(hex+i*2,65-i*2,L"%02x",unsigned(a.asset[i]));any|=a.asset[i]!=0;}require(any,"warm asset identity");set(L"SFC_D3D9_ASSET_SHA256",hex);set(L"SFC_D3D9_OFFSET_X",std::to_wstring(a.offset));
    return;
   }
-  const auto tick=GetTickCount64();require(tick<limit,"warm activation180s limit");
-  const auto remaining=limit-tick;
+  const auto tick=GetTickCount64();require(untimed||tick<limit,"warm activation180s limit");
+  const auto remaining=untimed?10ull:limit-tick;
   if(WaitForMultipleObjects(2,liveness,FALSE,static_cast<DWORD>((std::min)(remaining,10ull)))!=WAIT_TIMEOUT)throw Cancelled{}; // Existing bounded idle cadence;never a game callback.
  }
 }

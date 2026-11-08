@@ -1,6 +1,7 @@
 #define WIN32_LEAN_AND_MEAN
 #define _WIN32_WINNT 0x0A00
 #include <windows.h>
+#include "../d3d9_proof/pipeline_mode.h"
 #include <filesystem>
 #include <fstream>
 #include <string>
@@ -34,10 +35,15 @@ int wmain(int argc,wchar_t** argv){
         const auto log_limit=std::stoull(argv[4]);
         // Offline entry still requests180; approved live workflow requests<=300.
         wchar_t tuning[2]{};const bool longTuning=GetEnvironmentVariableW(L"SFC_D3D9_LIVE_TUNING",tuning,2)==1&&tuning[0]==L'1';
-        if(seconds<1 || seconds>(longTuning?1980u:300u) || max_bytes<65536 || max_bytes>20000000000ull ||
+        const bool play=pipeline_mode::play_session();
+        if((!seconds&&!play) || seconds>(longTuning?1980u:300u) || max_bytes<65536 || max_bytes>20000000000ull ||
            log_limit<1024 || log_limit>8ull*1024*1024 || !fs::is_directory(work) || !fs::is_regular_file(argv[5]))return 2;
         const auto log_path=work/L"job-console.log",result_path=work/L"job-result.json";
         if(fs::exists(log_path) || fs::exists(result_path))return 2;
+        Handle supervisor;
+        if(play){wchar_t parent[16]{};GetEnvironmentVariableW(L"SFC_PLAY_PARENT_PID",parent,16);
+            const DWORD id=wcstoul(parent,nullptr,10);if(!id||id==GetCurrentProcessId())return 2;
+            supervisor.h=OpenProcess(SYNCHRONIZE,FALSE,id);if(!supervisor.h)return 3;}
         Handle job(CreateJobObjectW(nullptr,nullptr));if(!job.h)return 3;
         JOBOBJECT_EXTENDED_LIMIT_INFORMATION limits{};
         limits.BasicLimitInformation.LimitFlags=JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
@@ -68,13 +74,14 @@ int wmain(int argc,wchar_t** argv){
         if(!created){std::cerr<<"CreateProcess error "<<launch_error<<'\n';return 4;}
         Handle child(process.hProcess),thread(process.hThread);
         CloseHandle(writer.h);writer.h=nullptr;
-        std::atomic<unsigned> reason{0};std::atomic<unsigned long long> logged{0};
+        std::atomic<unsigned> reason{0};std::atomic<unsigned long long> logged{0},discarded{0};
         std::thread drain([&]{
             std::ofstream out(log_path,std::ios::binary);char buffer[4096];DWORD n=0;
             while(ReadFile(reader.h,buffer,sizeof(buffer),&n,nullptr) && n){
                 const auto keep=(std::min)(static_cast<unsigned long long>(n),log_limit-logged.load());
                 if(keep)out.write(buffer,static_cast<std::streamsize>(keep));logged+=keep;
-                if(!out || keep<n){unsigned expected=0;reason.compare_exchange_strong(expected,!out?24u:20u);TerminateJobObject(job.h,20);}
+                if(keep<n)discarded+=n-keep;
+                if(!out || (!play&&keep<n)){unsigned expected=0;reason.compare_exchange_strong(expected,!out?24u:20u);TerminateJobObject(job.h,20);}
             }
             out.flush();if(!out){unsigned expected=0;reason.compare_exchange_strong(expected,24);TerminateJobObject(job.h,24);}
         });
@@ -95,7 +102,8 @@ int wmain(int argc,wchar_t** argv){
             unsigned expected=0;
             if(bytes>max_bytes)reason.compare_exchange_strong(expected,21);
             expected=0;
-            if(GetTickCount64()-began>=seconds*1000ull)reason.compare_exchange_strong(expected,22);
+            if(seconds&&GetTickCount64()-began>=seconds*1000ull)reason.compare_exchange_strong(expected,22);
+            expected=0;if(play&&WaitForSingleObject(supervisor.h,0)!=WAIT_TIMEOUT)reason.compare_exchange_strong(expected,23);
             if(reason){TerminateJobObject(job.h,reason);break;}
             if(!accounting.ActiveProcesses)break;
             Sleep(25);
@@ -109,7 +117,7 @@ int wmain(int argc,wchar_t** argv){
         std::ofstream result(result_path);
         result<<"{\"schema\":\"remix.job.v1\",\"pid\":"<<process.dwProcessId
             <<",\"exit_code\":"<<code<<",\"stop_reason\":"<<reason.load()<<",\"elapsed_ms\":"<<GetTickCount64()-began
-            <<",\"console_bytes\":"<<logged.load()<<",\"peak_scratch_bytes\":"<<peak
+            <<",\"console_bytes\":"<<logged.load()<<",\"console_discarded_bytes\":"<<discarded.load()<<",\"peak_scratch_bytes\":"<<peak
             <<",\"scratch_warning\":"<<(warning?"true":"false")<<",\"remaining_owned_processes\":"<<final.ActiveProcesses<<"}";
         result.flush();return result.good() && !reason && code==0?0:1;
     }catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 2;}

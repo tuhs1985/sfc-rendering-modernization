@@ -12,6 +12,10 @@ The [player gameplay checkout](docs/runs/2026-10-31-codex-native-insertion-gamep
 
 This is a research/development workspace, not a ready-to-install graphics mod.
 
+Alpha packaging is being planned. The [release readiness assessment](docs/releases/ALPHA_READINESS.md)
+records required features, existing evidence, deployment gaps and the proposed
+test-package sequence. No downloadable alpha or portable installer is ready yet.
+
 ## Videos — in-game tests
 
 [![SFC Rendering Modernization — Live RTX Remix Rendering Test](https://img.youtube.com/vi/NCYvT6ypXLY/hqdefault.jpg)](https://youtu.be/NCYvT6ypXLY)
@@ -37,7 +41,7 @@ weapon lighting; brightness and source size remain adjustable for further tuning
 - **Standard graphics input:** a separate 64-bit host builds D3D9 vertex/index buffers and texture bindings from the captured data, then submits ordinary indexed triangle draws that Remix intercepts.
 - **In-game return:** a project ReShade add-on inserts matched output into the copied game's native colour/depth targets before later shields, effects and text. Per-owner coverage authorizes suppression only for supported ships included in that completed output. Older offset/buffered modes remain diagnostic references.
 - **Lighting and materials:** qualified native directional and weapon-effect light observations drive Remix lighting through separate light bindings. Editable configuration controls light types, brightness, source size, surface roughness and recovered illuminated markings.
-- **Damage layers:** opt-in damage decals follow SFC's current stage. Two KDD/FCA skirmishes visually confirmed application and corrected first-use transparency. Repair/removal is demonstrated offline; other families still need gameplay qualification.
+- **Damage layers:** baseline damage decals follow SFC's current stage. Two KDD/FCA skirmishes visually confirmed application and corrected first-use transparency. Repair/removal is demonstrated offline; other families still need gameplay qualification.
 - **Safety and evidence:** bounded capture, identity/lifetime checks, fallback to original rendering, executable-hash checks and documented test/cleanup procedures.
 
 These are demonstrated capabilities within the recorded test conditions—not claims of complete compatibility, visual parity or final renderer architecture. The semantic integration proof is established; that alone is not an overall TRL 4 or finished-modernization claim.
@@ -102,7 +106,7 @@ It maps captured assets/state, D3D9 submission, light/material side channels and
 native output integration to their source files. Geometry, owner tracking and
 camera work are reusable; enhanced materials/lights and output still have
 Remix/Windows-specific adapters. This is published experimental source, not a
-stable drop-in renderer SDK. An opt-in damage layer now carries reversible
+stable drop-in renderer SDK. The native replacement baseline carries reversible
 per-owner damage state through the live scene interface and submits cached
 original-image decals. The standard damage path is visually confirmed in tested
 skirmishes. See the [live damage results and limits](docs/runs/2026-11-04-codex-damage-live-confirmation.md).
@@ -184,11 +188,40 @@ The current prepared native multi-ship replacement checkout is:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\native_insertion\start_native_multiship_session.ps1
 ```
 
-It defaults to ExtraFrame and inserts supported ships in their normal positions. Use different models, change cameras, expose shields and briefly pause/unpause. Follow the normal exit cue. This is a prepared development checkout, not a general installer or a claim that every model is qualified. [Run228](docs/runs/2026-10-31-codex-native-multiship-replacement.md).
+It defaults to ExtraFrame and inserts supported ships in their normal positions.
 
-Add `-DamageTextures` to the native multi-ship command to exercise damage.
-It reuses captured geometry and original damage images; those assets are not
-distributed here. [Diagnostic checks and disable routes](docs/DIAGNOSTICS.md)
+Experimental destruction-piece checkout (verified F-CA fixture, with a surviving
+wingman):
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\native_insertion\start_native_break_session.ps1
+```
+
+This opt-in timed checkout adds retained break pieces; it does not change normal
+play defaults. Let the enhanced ship appear, destroy it while visible, watch the
+fragments and switch cameras, then exit at the cue. Live acceptance is pending;
+see the [implementation record](docs/runs/2026-11-07-codex-live-break-prepared.md).
+
+The normal multi-ship launcher without diagnostic flags runs **until you exit SFC normally**: no battle-selection,
+90-second tactical, or five-minute session deadline. This supports longer campaign
+checkouts in the same game process. There are no timed exit cues. Campaign
+transitions still need live qualification; this remains a development workflow,
+not a general installer or a claim that every model is supported.
+
+Use `-TimedTest` for the previous 90-second tactical checkout. Adding
+`-CompletionDiagnostics` or `-LightDiagnostics` also selects a timed test.
+Untimed play does not write continuous frame/light traces or screenshots; it
+keeps compact counters, capped console output and recent status samples. Fresh
+mesh/material caches are still required for rendering and remain capacity-bounded.
+Exit the whole game to trigger owned-process cleanup and copied-file restoration.
+Player-name changes saved by SFC are preserved and do not block startup or
+cleanup;protected graphics configuration and game/proxy binaries remain checked.
+[Untimed play details and limits](docs/runs/2026-11-04-codex-untimed-play-session.md).
+
+Damage is enabled by default in the native multi-ship command. Use
+`-NoDamageTextures` for a damage-off comparison; the older `-DamageTextures`
+flag remains supported. It reuses captured geometry and original damage images;
+those assets are not distributed here. [Diagnostic checks and disable routes](docs/DIAGNOSTICS.md)
 remain separate from normal rendering requirements.
 
 The older [`start_d3d9_player_replacement_session.ps1`](tools/d3d9_proof/start_d3d9_player_replacement_session.ps1) preserves the historical complete-picture comparison from [Run213](docs/runs/2026-10-27-codex-player-replacement-auto-recovery.md). It is not the current native insertion workflow. The background itself is **not** sent into Remix.

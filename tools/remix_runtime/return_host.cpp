@@ -8,6 +8,7 @@
 #include <iostream>
 #include <cmath>
 #include "return_wire.h"
+#include "../d3d9_proof/pipeline_mode.h"
 using Microsoft::WRL::ComPtr;
 static void check(HRESULT h,const char* s){if(FAILED(h))throw std::runtime_error(s);}
 static void check(remixapi_ErrorCode h,const char* s){if(h!=REMIXAPI_ERROR_CODE_SUCCESS)throw std::runtime_error(s);}
@@ -24,7 +25,13 @@ int wmain(int argc,wchar_t** argv){
       std::string name;for(const auto c:channel.name)name.push_back(static_cast<char>(c));
       std::cout<<"MODE OBSERVATION_ONLY no_runtime_loaded=1\nSESSION "<<name<<"\n";
       const auto begin=GetTickCount64();
-      while(!return_path::read(s.stop)&&GetTickCount64()-begin<(GetEnvironmentVariableW(L"SFC_LIGHT_TUNING",nullptr,0)?1980000ull:290000ull)){
+      const bool play=pipeline_mode::play_session();
+      struct Parent{HANDLE h=nullptr;~Parent(){if(h)CloseHandle(h);}} parent;
+      if(play){wchar_t text[16]{};GetEnvironmentVariableW(L"SFC_PLAY_PARENT_PID",text,16);
+        const DWORD pid=wcstoul(text,nullptr,10);if(!pid||pid==GetCurrentProcessId())throw std::runtime_error("play supervisor identity");
+        parent.h=OpenProcess(SYNCHRONIZE,FALSE,pid);if(!parent.h)throw std::runtime_error("play supervisor lifetime");}
+      while(!return_path::read(s.stop)&&(play||GetTickCount64()-begin<(GetEnvironmentVariableW(L"SFC_LIGHT_TUNING",nullptr,0)?1980000ull:290000ull))){
+        if(play&&WaitForSingleObject(parent.h,0)!=WAIT_TIMEOUT){return_path::write(s.stop,1);break;}
         if(!return_path::valid(s))throw std::runtime_error("observation channel invalid");Sleep(50);
       }
       const bool stopped=return_path::read(s.stop)!=0;

@@ -18,9 +18,9 @@ inline bool valid(const Control& c,DWORD parent,uint64_t session){return c.magic
 inline Control read(const output_wire::Channel& c){Control v{};memcpy(&v,&c.packet,sizeof(v));return v;}
 inline void write(output_wire::Channel& c,Control& v){seal(v);memcpy(&c.packet,&v,sizeof(v));}
 struct Lifetime {
- uint64_t passive=0,active=0;bool activated=false;
- explicit Lifetime(uint64_t now):passive(now+PassiveLifetime){}
- bool activate(uint64_t now,uint64_t duration){if(activated||now>=passive||!duration||now+duration<now)return false;active=now+duration;activated=true;return true;}
- bool expired(uint64_t now)const{return now>=(activated?active:passive);}
+ uint64_t passive=0,active=0;bool activated=false,untimed=false;
+ explicit Lifetime(uint64_t now,bool play=false):passive(now+PassiveLifetime),untimed(play){}
+ bool activate(uint64_t now,uint64_t duration){if(activated||(!untimed&&(now>=passive||!duration||now+duration<now)))return false;active=untimed?0:now+duration;activated=true;return true;}
+ bool expired(uint64_t now)const{return !untimed&&now>=(activated?active:passive);}
 };
 }

@@ -47,5 +47,14 @@ int main(){try{
  for(unsigned i=0;i<scene_capacity::Owners;++i){const unsigned x=(i%16)*6+3,y=(i/16)*4+2;uint32_t owner=0;
   memcpy(&owner,static_cast<BYTE*>(owners.pData)+y*owners.RowPitch+x*4,4);require(owner==0x3f800000u+i,"correct independent owner pixels through full capacity");}
  c->Unmap(ownerReadback.Get(),0);require(fleet.draws==scene_capacity::Owners&&fleet.geometryBytes==108,"fleet shares immutable geometry");
+ std::cout<<"FLEET_OWNER_PIXELS draws="<<fleet.draws<<" shared_geometry=1\n";
+ // Debris has an independent high-bit epoch namespace. R32_FLOAT is a raw
+ // identity carrier here: preserve signed/subnormal bit patterns exactly.
+ for(uint32_t identity:{0x80000001u,0x80000002u}){
+  auto debris=pose();debris.owner=identity;fleet.begin();require(fleet.submit(shared,debris),"debris hull admission");fleet.draw(c.Get());
+  c->CopyResource(ownerReadback.Get(),ownerImage.Get());ok(c->Map(ownerReadback.Get(),0,D3D11_MAP_READ,0,&owners),"debris owner readback");
+  uint32_t actual=0;memcpy(&actual,static_cast<BYTE*>(owners.pData)+32*owners.RowPitch+48*4,4);
+  c->Unmap(ownerReadback.Get(),0);require(actual==identity,"independent debris identity survives actual GPU output");
+ }
  std::cout<<"Physical hull GPU PASS translation rotation viewport clipping overlap order retirement capacity cache; checks="<<checks<<'\n';return 0;
  }catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}}

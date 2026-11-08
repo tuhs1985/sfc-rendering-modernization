@@ -56,10 +56,14 @@ class SceneChannel(Channel):
 
 
 def decode_mesh(packet,references,*,checksum=None):
+    return _decode_mesh(packet,references,checksum=checksum,origin=0x0042E55D)
+
+
+def _decode_mesh(packet,references,*,checksum,origin):
     if not 256<=len(packet)<=STRIDE or len(references)>256*1024:raise ValueError('Packet byte bound')
     h=struct.unpack_from('<64I',packet);nv,np,nc,ng=h[16:20]
     if h[:2]!=(0x314d4653,1) or h[2]!=len(packet):raise ValueError('Mesh header')
-    if not h[4] or h[13]!=0x0042E55D or any(h[24:27]):raise ValueError('Unsupported semantic origin/math dispatch')
+    if not h[4] or h[13]!=origin or any(h[24:27]):raise ValueError('Unsupported semantic origin/math dispatch')
     if not(1<=nv<=65536 and 1<=np<=8192 and np*3==nc<=32768 and 1<=ng<=256):raise ValueError('Mesh count/triangles')
     if len(packet)!=256+nv*12+np*36+nc*28+ng*40:raise ValueError('Mesh length')
     if checksum is None:

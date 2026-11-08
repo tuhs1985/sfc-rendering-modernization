@@ -1,5 +1,45 @@
 # Diagnostic tools reference
 
+## Live destruction checkout — November 7
+
+`tools/native_insertion/start_native_break_session.ps1` selects the optional
+`-BreakModels -TimedTest` path with standard ExtraFrame and current appearance.
+Use the verified F-CA plus a surviving wingman; destroy the enhanced ship while
+visible, observe its fragments, switch away/back, then exit at the normal cue.
+This is a 90-second tactical/285-second prepared checkout. Normal untimed play
+does not enable break hooks. Gameplay acceptance is pending.
+
+Focused implementation checks: `tools/native_insertion/build_break_tests.ps1`.
+They exercise real x86 callbacks, retained simulation state and native/Python
+current-user mapping/acknowledgement. Use the normal desktop session for mapping
+tests. Existing component/cohort and GPU depth/state tests remain applicable.
+Only bounded lifecycle/capture counters are added to gameplay, not frame dumps.
+
+The short standalone replay's blocking shader compilation and legacy 24-Present
+startup are **diagnostic only**. Do not enable either for live fragments or
+create a renderer per piece. Live mode reuses the retained prewarmed host and
+receiver. [Contract, verification and remaining limits](runs/2026-11-07-codex-live-break-prepared.md).
+
+## Untimed normal play versus timed diagnostics — Run292
+
+`start_native_multiship_session.ps1` without diagnostics now runs until normal
+SFC exit, including unlimited menu/battle-selection time. `-TimedTest` selects
+the previous90-second tactical/285-second prepared workflow. Existing
+`-CompletionDiagnostics` and `-LightDiagnostics` also retain timed behavior.
+Do not combine Python `--play-session` with diagnostic capture/tuning flags.
+
+Play disables native gate record publication/draining, source timing samples and
+completion audit arrays. Functional source identity, completion consumption,
+GPU synchronization, owner tracking and fallback remain active. Console output
+is capped at2MiB and excess discarded; keep only120recentfive-second status
+samples and compact exit counters. No screenshots or continuous light dumps.
+Fresh geometry/images/material caches are functional inputs, not diagnostics;
+their existing20GB aggregate allowance, asset/owner/residency limits remain.
+Session limits are removed across capture, lights, passive receiver/startup,
+renderer and controller; per-operation failure timeouts remain. Parent death
+reclaims owned helper/GPU processes. Normal game exit restores the copied setup.
+[Run292 details](runs/2026-11-04-codex-untimed-play-session.md).
+
 Last reviewed: **2026-11-03, Run284**. Start with the newest [handoff](HANDOFF.md) for current problems and permitted test scope. ExtraFrame is the accepted launcher default after stress checkout. Effect lights have passed the visible weapons-fire checkout. Focused damage observation captured all three standard F-CA damage stages; review that evidence before requesting more runs.
 
 ## Choose the smallest useful tool
@@ -178,7 +218,7 @@ leave measurement work in gameplay merely because a checkout used it.
 | Synthetic damage/repair stages and intentionally unavailable observation | TEST ONLY;never installed in SFC | Fixture publisher only;run fixture without `--damage-textures` to disable. Stage advancement waits for returned insertion activity;this is NOT a game refresh cap or wait. | `tools/remix_runtime/source_timing_fixture.h` |
 | Native depth/text pixel verification,wrong-ticket injection,deadline overruns | TEST ONLY;no normal gameplay readback | Existing standalone native insertion fixture. Omit fixture campaign;normal launcher never runs these pixel checks. Existing normal transport matching remains required. | `tools/remix_runtime/return_fixture.cpp` |
 | Snapshot inspection/comparison PNGs | DIAGNOSTIC ONLY;offline | No rendering-thread work. Do not run conversion/inspection during normal gameplay. Artifacts under `player-replacement/run289`. | Run289 record |
-| `DAMAGE_SUMMARY` counters | DIAGNOSTIC COUNTERS;damage checkout only | Integer increments per draw/unavailable observation,one shutdown summary;no per-frame disk logging. No separate counter toggle currently;can later gate/remove counters independently of layer behavior. Do not claim a switch already exists. | `tools/d3d9_proof/damage_layer.h` |
+| `DAMAGE_SUMMARY` counters | DIAGNOSTIC COUNTERS;damage-enabled modes | Integer increments per draw/unavailable observation,one shutdown summary;no per-frame disk logging. No separate counter toggle currently;can later gate/remove counters independently of layer behavior. Do not claim a switch already exists. | `tools/d3d9_proof/damage_layer.h` |
 | `damageDisagreements` / `damageUnqualified` counters | DIAGNOSTIC COUNTERS | Integer increments;existing worker summary output. Separately removable from the qualification decision. No independent switch yet. | `tools/m1_component/m1_live_scene.h` |
 | Compare derived scalar/family with native model arguments | SOURCE-QUALIFICATION CHECK,NOT currently diagnostic-only | Runs on observed models when damage mode enabled;controls damageVerified. Candidate to move to an opt-in validator AFTER live qualification;currently disabling it requires a code change and replacement trust policy. It must not block the base hull. | `m1_live_scene.h::observe` |
 | Read pinned accessor identity/tail,finite statistics,coherent duplicate statistics read | FUNCTIONAL source read/consistency in current implementation | Needed to identify/read current state without executing native getter. Only active with damage mode. Double read can be audited for later optimization;do not silently remove coherence. | `tools/scene_bridge/damage_state.h` |
@@ -187,3 +227,15 @@ leave measurement work in gameplay merely because a checkout used it.
 No new gameplay callback,refresh cap,delay,wait loop,continuous image dump or
 material-setting change was added in Run289. Existing `-CompletionDiagnostics`
 and `-LightDiagnostics` remain opt-in and were not enabled for sponsor checkout.
+
+
+### Baseline default update — Run291
+
+Normal native multi-ship replacement now enables damage without a flag.
+`-NoDamageTextures` disables the FEATURE for a comparison,not just diagnostics.
+The explicit `-DamageTextures` alias still works;both flags together are rejected.
+Direct Python equivalent:`--no-damage-textures`;default follows native-all-ships.
+Other workflows and standalone fixtures retain their separate explicit behavior.
+This does NOT enable pixel readbacks,completion/light diagnostics or synthetic
+stage injection in SFC. Normal snapshot environment remains0. Individual damage
+counter switches are still not implemented;the register above identifies them.

@@ -93,7 +93,7 @@ def geometry_parts(mesh):
 
 
 def prepare(source,output,game_root,*,live_record=None,evidence_mode='test',qualified_mesh=None,
-            prepared_capture=None,prepared_images=None,prepared_geometry=None,output_extent=(960,540),identity_calculator=None,texture_sink=None,geometry_sink=None,damage_uv=None):
+            prepared_capture=None,prepared_images=None,prepared_geometry=None,output_extent=(960,540),identity_calculator=None,texture_sink=None,geometry_sink=None,damage_uv=None,break_replay=None):
     """Read original runtime mesh;resolve original IMAGE files only,never MOD geometry."""
     if evidence_mode not in ('performance','test'):raise ValueError('Scene evidence mode')
     if evidence_mode=='performance' and live_record is None:raise ValueError('Performance preparation requires fresh live row')
@@ -111,15 +111,37 @@ def prepare(source,output,game_root,*,live_record=None,evidence_mode='test',qual
             raise ValueError('Qualified mesh packet/reference changed')
         mesh=qualified_mesh
     revision=int(source.stem.rsplit('-',1)[1])
+    if break_replay is not None:
+        revision=break_replay['revision']
+        if type(revision) is not int or not 1<=revision<=0xffffffff:
+            raise ValueError('Break replay asset revision')
     updates=source.parent/'LIVE-SCENE-001-updates.jsonl'
     capture_metadata_path=source.parent/'run-metadata.json'
-    if capture_metadata_path.is_file():
+    if break_replay is not None:
+        if not qualified_mesh or 'piece' not in qualified_mesh or mesh['header'][13]!=0x0042EA92 or live_record is not None:
+            raise ValueError('Break replay requires dedicated qualified geometry')
+        capture_metadata_path=Path(break_replay['metadata']).resolve()
+        capture_metadata_path.relative_to(ROOT/'artifacts')
+        source_session=json.loads(capture_metadata_path.read_text())['session']
+        if source_session!=break_replay['session']:
+            raise ValueError('Break replay session mismatch')
+        if not re.fullmatch(r'Local\\SFC-Remix-Return-\{[A-Fa-f0-9-]{36}\}',source_session):
+            raise ValueError('Break observation session')
+        frames=break_replay['frames']
+        if not 1<=len(frames)<=16:raise ValueError('Break replay frame bound')
+        for frame in frames:
+            if frame['owner']!=mesh['header'][4] or frame['revision']!=revision or not frame['frame'] or frame['active']!=1:
+                raise ValueError('Break replay frame identity')
+            if any(not finite_matrix(flatten(frame[key])) for key in ('model','view','projection')):
+                raise ValueError('Break replay matrix')
+    elif capture_metadata_path.is_file():
         source_session=json.loads(capture_metadata_path.read_text(encoding='utf-8-sig')).get('live_channel')
     else:
         capture_metadata_path=source.parent.parent/'manifest.json'
         source_session=json.loads(capture_metadata_path.read_text(encoding='utf-8-sig')).get('semantic_calibration',{}).get('scene_session')
-    if not isinstance(source_session,str) or not re.fullmatch(r'Local\\SFCBridge_[a-f0-9]{32}',source_session):raise ValueError('Source capture session missing/unqualified')
-    if live_record is None:frames=snapshots(mesh,updates,revision)
+    if break_replay is None and (not isinstance(source_session,str) or not re.fullmatch(r'Local\\SFCBridge_[a-f0-9]{32}',source_session)):raise ValueError('Source capture session missing/unqualified')
+    if break_replay is not None:pass
+    elif live_record is None:frames=snapshots(mesh,updates,revision)
     else:
         r=live_record
         if (len(r)!=96 or not r[2] or r[4]!=1 or (r[1],r[5],r[6],r[7])!=(mesh['header'][4],mesh['header'][10],mesh['header'][12],revision) or r[2]<mesh['header'][6]):raise ValueError('Fresh live asset/row mismatch')
@@ -176,7 +198,7 @@ def prepare(source,output,game_root,*,live_record=None,evidence_mode='test',qual
     result=dict(schema='SFC-neutral-offline-scene-1',source_packet=str(source.relative_to(ROOT)),
         source_session=source_session,source_metadata=str(capture_metadata_path.relative_to(ROOT)),source_metadata_sha256=sha(capture_metadata_path.read_bytes()),
         source_packet_sha256=sha(raw),source_references_sha256=sha(refs),updates=str(updates.relative_to(ROOT)),
-        updates_sha256=sha(updates.read_bytes()) if evidence_mode=='test' else None,
+        updates_sha256=sha(updates.read_bytes()) if evidence_mode=='test' and break_replay is None else None,
         evidence_mode=evidence_mode,model_name=mesh['refs']['model_filename'],
         geometry_sha256=mesh['geometry_sha256'],asset_sha256=sha(json.dumps(identity,sort_keys=True).encode()),
         replay_sha256=sha(payload),vertices=len(vertices),triangles=len(vertices)//3,groups=groups,
@@ -192,6 +214,8 @@ def prepare(source,output,game_root,*,live_record=None,evidence_mode='test',qual
         result.update(preparation='fresh contemporaneous owner table;no saved ship template',fresh_preparation_row=list(live_record),fresh_preparation_row_sha256=sha(struct.pack('<96I',*live_record)))
     if identity_calculator is not None:
         result['catalog_identity']=[len(payload),catalog_images,identity_calculator(payload),catalog_hash]
+    if 'piece' in mesh:
+        result['source_kind']='break_piece';result['piece']=mesh['piece']
     (output/'scene.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
     return result
 

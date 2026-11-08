@@ -6,6 +6,10 @@
 #include "../scene_bridge/persistent_scene.h"
 #include "../d3d9_proof/multi_scene_wire.h"
 #include "../d3d9_proof/pipeline_mode.h"
+#include "../scene_bridge/break_piece.h"
+#include "../scene_bridge/break_pose.h"
+#include "../scene_bridge/break_registry.h"
+#include "../scene_bridge/break_metadata.h"
 #ifdef SFC_NATIVE_LIGHT_DISCOVERY
 #include "native_light_observer.h"
 #include "m1_light_transport.h"
@@ -21,6 +25,7 @@ struct SceneAsset {
     LiveMeshPacket mesh;
     LiveTextureReferences refs;
     DWORD revision=0;
+    sfc_break::Metadata piece{};
     volatile LONG ready=0;
 };
 struct SceneOwner {
@@ -28,6 +33,8 @@ struct SceneOwner {
     std::array<DWORD,3> lod{};
     DWORD revision=0,last_ms=0,sequence=0;
     bool retired=false,failed=false,damageVerified=false;
+    bool breakPiece=false;
+    std::uint64_t breakEpoch=0;
 };
 struct LiveScene {
     std::array<SceneAsset,kSceneAssets> assets{};
@@ -41,7 +48,7 @@ struct LiveScene {
     DWORD capture_attempts=0,capture_failures=0,owner_overflow=0,dropped=0,invalid=0;
     LONGLONG max_capture_ticks=0;LARGE_INTEGER frequency{};
     volatile LONG enabled=0;
-    bool lightTuning=false,sourceTiming=false,lifecycleCapture=false,performance=false,damageEnabled=false;
+    bool lightTuning=false,sourceTiming=false,lifecycleCapture=false,performance=false,damageEnabled=false,playSession=false;
     DWORD damageUnqualified=0,damageDisagreements=0;
     DWORD calibrationMisses=0;
     // Default-off diagnostic journal, protected by the existing nonwaiting mailbox.
@@ -50,8 +57,10 @@ struct LiveScene {
     DWORD lifecycleRead=0,lifecycleWrite=0,lifecycleDropped=0;
     sfc_calibration::Mailbox* calibration=nullptr;
     live_owner::Source directSource;
-    bool persistent=false;
+    bool persistent=false,breakEnabled=false;
     sfc_scene::Registry registry;
+    sfc_break::Registry breaks;
+    DWORD breakBornCount=0,breakRetiredCount=0,breakRejected=0;
     multi_scene::Source cohort;
     DWORD persistentFrame=0,persistentPublications=0,persistentFailures=0;
     DWORD persistentFrames=0;LONGLONG persistentTicks=0,persistentMaxTicks=0;
@@ -63,6 +72,7 @@ struct LiveScene {
 #endif
     bool start(const std::wstring& name,const std::wstring& directory) {
         performance=pipeline_mode::performance();
+        playSession=pipeline_mode::play_session();
         wchar_t damageMode[2]{};damageEnabled=GetEnvironmentVariableW(L"SFC_DAMAGE_TEXTURES",damageMode,2)==1&&damageMode[0]==L'1';
         if(!LiveBridge::name_ok(name) || worker)return false;
         mapping=OpenFileMappingW(FILE_MAP_READ|FILE_MAP_WRITE,FALSE,name.c_str());
@@ -89,6 +99,8 @@ struct LiveScene {
             if(!calibration||!sourceTiming||!directSource.attach(view,h+4)){close();return false;}
         }
         persistent=GetEnvironmentVariableW(L"SFC_PERSISTENT_SCENE",liveMode,2)==1&&liveMode[0]==L'1';
+        breakEnabled=GetEnvironmentVariableW(L"SFC_BREAK_SCENE",liveMode,2)==1&&liveMode[0]==L'1';
+        if(breakEnabled)for(DWORD n=0;n<sizeof(breaks);n+=4096){auto* page=reinterpret_cast<volatile BYTE*>(&breaks)+n;*page=*page;}
         if(persistent&&(!directSource.store||directSource.store->header.version!=2)){close();return false;}
         if(GetEnvironmentVariableW(L"SFC_D3D9_MULTISCENE",liveMode,2)==1&&liveMode[0]==L'1'){
             if(!persistent||!cohort.attach(view,h+4)){close();return false;}
@@ -105,6 +117,7 @@ struct LiveScene {
             std::array<sfc_native_lights::Word,4> words{};
             std::memcpy(words.data(),h+4,16);lights.start(words.data());
             lights.tuning=lightTuning;
+            lights.playSession=playSession;
             wchar_t gameOutput[2]{};
             lights.followEpochs=directSource.store&&GetEnvironmentVariableW(L"SFC_D3D9_GAME_OUTPUT",gameOutput,2)==1&&gameOutput[0]==L'1';
             wchar_t sharedMode[2]{};
@@ -162,7 +175,7 @@ struct LiveScene {
     }
     template<class Read,class Validate>
     void observe(const MeshIdentity& id,Read read,Validate valid,DWORD damageScalar=0,DWORD damageFamily=0){
-        if(!enabled || id.elapsed>(lightTuning?1800000u:90000u) || id.caller!=0x0042E55D)return;
+        if(!enabled || (!playSession&&id.elapsed>(lightTuning?1800000u:90000u)) || id.caller!=0x0042E55D)return;
         std::array<DWORD,3> lod{};
         if(!read(id.visual+0x11c,lod.data(),12)){++invalid;return;}
         DWORD index=0;for(;index<owner_count;++index)if(owners[index].identity.owner==id.owner)break;
@@ -197,7 +210,7 @@ struct LiveScene {
                 if(triangles)capture_texture_references(a.refs,a.mesh,read,valid);
                 QueryPerformanceCounter(&after);if(after.QuadPart-before.QuadPart>max_capture_ticks)max_capture_ticks=after.QuadPart-before.QuadPart;
                 if(!triangles || a.refs.status!=1){o.failed=true;++capture_failures;break;}
-                a.revision=++revisions;o.revision=a.revision;MemoryBarrier();InterlockedExchange(&a.ready,1);break;
+                a.piece={};a.revision=++revisions;o.revision=a.revision;MemoryBarrier();InterlockedExchange(&a.ready,1);break;
             }
         }
         const bool sampled=o.sequence && id.elapsed-o.last_ms<34;
@@ -273,11 +286,13 @@ struct LiveScene {
             if(elapsed-owners[slot].last_ms>=34){owners[slot].last_ms=elapsed;offer(slot,r);}
             ++persistentPublications;
         }
+        appendBreakRows(camera,frame,elapsed,read,anchor,anchorPrepared);
         if(cohort.store){const bool ready=cohort.publish(static_cast<uint64_t>(InterlockedCompareExchange64(&directSource.store->header.selected,0,0)));
             if(ready&&anchorPrepared)directSource.commit(anchor);}
         LARGE_INTEGER finished{};QueryPerformanceCounter(&finished);const auto ticks=finished.QuadPart-started.QuadPart;
         ++persistentFrames;persistentTicks+=ticks;if(ticks>persistentMaxTicks)persistentMaxTicks=ticks;
     }
+#include "m1_break_scene_methods.h"
     static DWORD WINAPI run(void* raw){
         auto& b=*static_cast<LiveScene*>(raw);
         InterlockedExchange(reinterpret_cast<LONG*>(b.view+12),1);
@@ -314,7 +329,7 @@ struct LiveScene {
             drainLifecycle();
 #ifdef SFC_NATIVE_LIGHT_DISCOVERY
             if(lightRequested){
-                if(!b.lightTuning)b.lights.drain(lightFile);
+                if(!b.lightTuning&&!b.playSession)b.lights.drain(lightFile);
                 else {sfc_native_lights::Snapshot snapshot{};
                     ULONGLONG captured=0;
                     for(unsigned n=0;n<8&&b.lights.take(snapshot,&captured);++n){
@@ -336,7 +351,13 @@ struct LiveScene {
                     auto* d=reinterpret_cast<DWORD*>(b.view+256+slot*64);
                     if(InterlockedCompareExchange(reinterpret_cast<LONG*>(d+1),0,0)!=static_cast<LONG>(generations[slot]))continue;
                     std::ostringstream mesh(std::ios::binary),refs;
-                    const bool good=a.mesh.write(mesh) && write_texture_references(refs,a.refs,a.mesh,false);
+                    bool good=a.mesh.write(mesh) && write_texture_references(refs,a.refs,a.mesh,false);
+                    if(a.piece.owner){
+                        auto text=refs.str();const auto close=text.find_last_of('}');
+                        if(close==std::string::npos)good=false;
+                        else {text.resize(close);refs.str({});refs.clear();refs<<text<<",\"break_piece\":";
+                            good=a.piece.write(refs)&&good;refs<<"}\n";}
+                    }
                     const auto m=mesh.str(),r=refs.str();
                     if(!good || m.size()+r.size()>kSceneAssetBytes){failed=true;InterlockedExchange(&a.ready,0);break;}
                     auto* base=b.view+kSceneData+slot*kSceneAssetBytes;
@@ -383,6 +404,8 @@ struct LiveScene {
           <<",\"saturated\":"<<(saturated?"true":"false")<<",\"transfers\":"<<transfers<<",\"capture_attempts\":"<<b.capture_attempts
           <<",\"capture_failures\":"<<b.capture_failures<<",\"owner_overflow\":"<<b.owner_overflow<<",\"dropped\":"<<b.dropped
           <<",\"invalid\":"<<b.invalid<<",\"max_capture_ticks\":"<<b.max_capture_ticks<<",\"qpc_frequency\":"<<b.frequency.QuadPart
+          <<",\"break_enabled\":"<<(b.breakEnabled?"true":"false")<<",\"break_born\":"<<b.breakBornCount
+          <<",\"break_retired\":"<<b.breakRetiredCount<<",\"break_rejected\":"<<b.breakRejected
           <<",\"lifecycle_capture\":"<<(b.lifecycleCapture?"true":"false")<<",\"lifecycle_records\":"<<eventRecords
           <<",\"lifecycle_bytes\":"<<eventBytes<<",\"lifecycle_dropped\":"<<b.lifecycleDropped
           <<",\"lifecycle_omitted\":"<<eventOmitted<<",\"lifecycle_pending\":"<<(b.lifecycleWrite-b.lifecycleRead)

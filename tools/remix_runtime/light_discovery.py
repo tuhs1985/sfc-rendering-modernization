@@ -2,6 +2,7 @@
 from pathlib import Path
 import hashlib
 import json
+import re
 from native_light_state import decode, SIZE
 
 ROOT=Path(__file__).resolve().parents[2]
@@ -72,7 +73,7 @@ def qualify():
     from present_calibration import Receiver
     receiver=Receiver()
     directory=BIN/('scene-'+uuid.uuid4().hex);directory.mkdir()
-    env={**os.environ,'SFC_NATIVE_LIGHT_DISCOVERY':'1'}
+    env={**os.environ,'SFC_NATIVE_LIGHT_DISCOVERY':'1','SFC_PLAY_SESSION':'0'}
     env.pop('SFC_REMIX_CALIBRATION_SCENE',None)
     process=None
     try:
@@ -137,10 +138,26 @@ def qualify():
     finally:
         if process and process.poll() is None:process.terminate();process.wait(timeout=5)
         receiver.close()
+    # Actual worker in play mode: simulated day-long elapsed time, shared lights
+    # still live, and no diagnostic light files or frame JSONL accumulation.
+    play_dir=BIN/('play-'+uuid.uuid4().hex);play_dir.mkdir()
+    receiver=Receiver();init_owner(receiver.channel);init_lights(receiver.channel)
+    try:
+        play_env={**shared_env,'SFC_LIGHT_TUNING':'0','SFC_PLAY_SESSION':'1',
+                  'SFC_PIPELINE_MODE':'performance','SFC_REMIX_CALIBRATION_SCENE':receiver.name}
+        test=sp.run([str(BIN/'scene_observer.exe'),receiver.name,str(play_dir)],env=play_env,
+            stdout=sp.PIPE,stderr=sp.STDOUT,timeout=10,creationflags=sp.CREATE_NO_WINDOW)
+        (play_dir/'test.txt').write_bytes(test.stdout)
+        if test.returncode:raise ValueError('Untimed actual scene worker failed')
+        if list(play_dir.glob('native-light*.bin')) or any(p.stat().st_size for p in play_dir.glob('*.jsonl')):
+            raise ValueError('Untimed performance worker wrote diagnostic samples')
+        if receiver.channel.read(15*1024*1024+32,4)!=b'\x01\0\0\0':raise ValueError('Untimed worker not stopped before unmap')
+    finally:receiver.close()
     checks=[]
     for arch in ('32','64'):
         log=(BIN/f'observer{arch}.txt').read_text()
-        if 'NATIVE_LIGHT_OBSERVER_PASS checks=17' not in log:raise ValueError('Observer native tests missing')
+        marker=re.search(r'NATIVE_LIGHT_OBSERVER_PASS checks=(\d+)',log)
+        if not marker or int(marker[1])<20:raise ValueError('Observer native/play tests missing')
         evidence=analyze(BIN/f'observer{arch}.bin')
         if evidence['records']!=8 or evidence['owner_epochs']!=[1,2]:raise ValueError('Observer output decoder mismatch')
         checks.append(dict(arch=arch,output=evidence['sha256'],records=8))
@@ -148,6 +165,7 @@ def qualify():
         component_sha256=digest(BIN/'m1_light_component.dll'),checks=checks,
         scene_worker=dict(records=scene['records'],sha256=scene['sha256'],evidence=str(directory.relative_to(ROOT))),
         shared_worker=dict(owners=sorted(shared_seen),evidence=str(shared_dir.relative_to(ROOT)),stopped_before_unmap=True),
+        play_worker=dict(evidence=str(play_dir.relative_to(ROOT)),simulated_elapsed_ms=86400000,detailed_light_output=False),
         limits=dict(hz_per_owner=5,owners=2,records=900,bytes=900*SIZE),sfc_launched=False)
     RECEIPT.write_text(json.dumps(q,indent=2));require_qualification()
     print('Native light discovery native queue/decoder qualification PASS')

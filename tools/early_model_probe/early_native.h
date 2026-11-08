@@ -7,11 +7,16 @@
 #include <atomic>
 #include <cstring>
 #include <intrin.h>
-#ifdef SFC_DAMAGE_PROBE
+#if defined(SFC_DAMAGE_PROBE) || defined(SFC_BREAK_PROBE)
 #include <fstream>
 #include <string>
 #endif
 #include "early_core.h"
+#ifdef SFC_BREAK_PROBE
+#include "../scene_bridge/break_piece.h"
+#include "../scene_bridge/break_pose.h"
+#include "../m1_component/m1_texture_references.h"
+#endif
 namespace early_model {
 using Zero=Word(__thiscall*)(void*);using One=Word(__thiscall*)(void*,Word);
 using Four=Word(__thiscall*)(void*,Word,Word,Word,Word);using Loader=Word(__cdecl*)(Word);
@@ -125,6 +130,9 @@ inline Word __fastcall onRender(void* p,void*,Word manager){
 #ifdef SFC_DAMAGE_PROBE
 #include "../damage_probe/damage_hooks.inl"
 #endif
+#ifdef SFC_BREAK_PROBE
+#include "../break_probe/break_hooks.inl"
+#endif
 inline Word __fastcall onMesh(void* p,void*,Word manager,Word source,Word a,Word b){
  LastError last;Active activeCall;const auto c=stack.current();bool ok=true;const auto caller=ptr(_ReturnAddress());
 #ifdef SFC_DAMAGE_PROBE
@@ -149,8 +157,17 @@ inline LONG transaction(bool attach){
   if(!h){error=GetLastError();break;}handles[used++]=h;error=DetourUpdateThread(h);}
   more=Thread32Next(snapshot,&t)!=FALSE;if(!more&&GetLastError()!=ERROR_NO_MORE_FILES)error=GetLastError();}
  CloseHandle(snapshot);if(!error)error=DetourUpdateThread(GetCurrentThread());
-#define EARLY_HOOK(field,callback) if(!error)error=attach?DetourAttach(reinterpret_cast<PVOID*>(&native.field),reinterpret_cast<PVOID>(callback)):DetourDetach(reinterpret_cast<PVOID*>(&native.field),reinterpret_cast<PVOID>(callback))
- EARLY_HOOK(request,onRequest);EARLY_HOOK(load,onLoad);EARLY_HOOK(parse,onParse);EARLY_HOOK(attach,onAttach);EARLY_HOOK(render,onRender);EARLY_HOOK(mesh,onMesh);EARLY_HOOK(visualRetire,onVisualRetire);EARLY_HOOK(born,onBorn);EARLY_HOOK(retire,onRetire);
+#define EARLY_HOOK(target,callback) if(!error)error=attach?DetourAttach(reinterpret_cast<PVOID*>(&target),reinterpret_cast<PVOID>(callback)):DetourDetach(reinterpret_cast<PVOID*>(&target),reinterpret_cast<PVOID>(callback))
+ EARLY_HOOK(native.request,onRequest);EARLY_HOOK(native.load,onLoad);EARLY_HOOK(native.parse,onParse);EARLY_HOOK(native.attach,onAttach);EARLY_HOOK(native.render,onRender);EARLY_HOOK(native.mesh,onMesh);EARLY_HOOK(native.visualRetire,onVisualRetire);EARLY_HOOK(native.born,onBorn);EARLY_HOOK(native.retire,onRetire);
+#ifdef SFC_BREAK_PROBE
+ EARLY_HOOK(breakFactory,onBreakFactory);
+ EARLY_HOOK(breakChild,onBreakChild);
+ EARLY_HOOK(breakDraw,onBreakDraw);
+ EARLY_HOOK(breakVisual,onBreakVisual);
+ EARLY_HOOK(breakWrapper,onBreakWrapper);
+ EARLY_HOOK(breakUpdate,onBreakUpdate);
+ EARLY_HOOK(breakRetire,onBreakRetire);
+#endif
 #ifdef SFC_DAMAGE_PROBE
  if(!error)error=attach?DetourAttach(reinterpret_cast<PVOID*>(&damageWrapper),reinterpret_cast<PVOID>(onDamageWrapper)):DetourDetach(reinterpret_cast<PVOID*>(&damageWrapper),reinterpret_cast<PVOID>(onDamageWrapper));
 #endif

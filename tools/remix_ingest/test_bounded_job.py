@@ -5,6 +5,7 @@ from pathlib import Path
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -13,10 +14,12 @@ SCRATCH = ROOT / 'artifacts/m1/test-temp'
 
 
 class JobTests(unittest.TestCase):
-    def run_job(self, code, seconds=5, disk=1024*1024, log=65536):
+    def run_job(self, code, seconds=5, disk=1024*1024, log=65536, play=False, parent=None):
         with tempfile.TemporaryDirectory(dir=SCRATCH) as tmp:
+            env=dict(os.environ,SFC_PLAY_SESSION='1' if play else '0',
+                     SFC_PLAY_PARENT_PID=str(os.getpid() if parent is None else parent))
             result = subprocess.run([str(GUARD), tmp, str(seconds), str(disk), str(log),
-                                     sys.executable, '-c', code], timeout=15, capture_output=True)
+                                     sys.executable, '-c', code], timeout=15, capture_output=True,env=env)
             report = json.loads((Path(tmp)/'job-result.json').read_text())
             self.assertEqual(report['remaining_owned_processes'], 0, report)
             self.assertLessEqual((Path(tmp)/'job-console.log').stat().st_size, log)
@@ -32,6 +35,36 @@ class JobTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual(report['stop_reason'], 20)
         self.assertEqual(report['console_bytes'], 4096)
+
+    def test_play_console_limit_does_not_end_game_session(self):
+        result,report=self.run_job('import sys,time;sys.stdout.write("x"*2000000);sys.stdout.flush();time.sleep(.1)',
+                                   seconds=0,log=4096,play=True)
+        self.assertEqual(result.returncode,0,result.stderr)
+        self.assertEqual(report['stop_reason'],0)
+        self.assertEqual(report['console_bytes'],4096)
+        self.assertEqual(report['console_discarded_bytes'],2000000-4096)
+
+    def test_play_supervisor_death_reclaims_owned_jobs(self):
+        parent=subprocess.Popen([sys.executable,'-c','import time;time.sleep(30)'])
+        guard=None
+        try:
+            with tempfile.TemporaryDirectory(dir=SCRATCH) as tmp:
+                env=dict(os.environ,SFC_PLAY_SESSION='1',SFC_PLAY_PARENT_PID=str(parent.pid))
+                guard=subprocess.Popen([str(GUARD),tmp,'0','1048576','65536',sys.executable,
+                    '-c','import time;time.sleep(30)'],env=env,creationflags=subprocess.CREATE_NO_WINDOW)
+                until=time.monotonic()+10
+                while not (Path(tmp)/'job-console.log').exists() and guard.poll() is None and time.monotonic()<until:
+                    time.sleep(.01)
+                self.assertTrue((Path(tmp)/'job-console.log').exists(),'owned child must be created before supervisor exit')
+                parent.terminate();parent.wait(timeout=5)
+                guard.wait(timeout=5);self.assertNotEqual(guard.returncode,0)
+                report=json.loads((Path(tmp)/'job-result.json').read_text())
+                self.assertEqual(report['stop_reason'],23)
+                self.assertEqual(report['remaining_owned_processes'],0)
+        finally:
+            if parent.poll() is None:parent.terminate()
+            parent.wait(timeout=5)
+            if guard and guard.poll() is None:guard.terminate();guard.wait(timeout=5)
 
     def test_multi_ship_scratch_can_exceed_old_image_cap(self):
         # Sparse disposable file proves admission above128MiB without image dumps.

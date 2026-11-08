@@ -6,6 +6,13 @@ date: 2026-10-27
 
 # Alpha mod release — required additions
 
+**November 7 progress reference:** the table below preserves the original
+October27 decision and its then-current evidence. Current feature qualification
+and delivery gaps are tracked in the [alpha readiness assessment](../releases/ALPHA_READINESS.md)
+and newest [handoff](../HANDOFF.md). Replacement, weapon lights and damage have
+since received scoped gameplay evidence; live break support awaits sponsor
+checkout. No scope or formal requirements baseline is amended here.
+
 Sponsor direction: an alpha mod release needs the following in addition to
 replacement. This records release scope; it does not declare these features
 implemented, amend the preserved CDD snapshot or change formal TRL gates.

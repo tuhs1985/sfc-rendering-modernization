@@ -26,8 +26,9 @@ def require_qualification():
 
 
 class Receiver:
-    def __init__(self):
+    def __init__(self,*,break_models=False):
         self.channel=SceneChannel(create=True)
+        self.break_models=break_models
         self.revisions={}
         self.assets={}
         self.retain_assets=True # Legacy single-owner recovery consumes decoded packets.
@@ -41,7 +42,10 @@ class Receiver:
             if transfer is None:continue
             generation,revision,owner,mesh,refs=transfer
             if not 1<=revision<=ASSETS:raise ValueError('Asset revision outside session transport budget')
-            data=decode_mesh(mesh,refs)
+            if self.break_models:
+                from break_scene import decode_runtime_mesh
+                data=decode_runtime_mesh(mesh,refs,allow_break=True)
+            else:data=decode_mesh(mesh,refs)
             if data['header'][4]!=owner:raise ValueError('Asset transfer owner mismatch')
             identity=hashlib.sha256(mesh+refs).hexdigest()
             if revision in self.revisions and self.revisions[revision]!=identity:raise ValueError('Reused asset revision')

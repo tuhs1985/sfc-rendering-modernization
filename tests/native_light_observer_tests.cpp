@@ -32,5 +32,9 @@ int wmain(int argc,wchar_t** argv){
  check(observer.sequence==3&&observer.queue[2].header[8]==3);
  observer.busy=1;observer.retire(2);observer.busy=0;check(observer.owners[1]==2);
  id.owner=4;id.elapsed=1000;observer.observe(id,read,[]{return true;});check(observer.sequence==4&&observer.queue[3].header[8]==4);
+ observer.start(session);observer.tuning=false;observer.playSession=true;id.owner=1;id.elapsed=86400000;
+ observer.sequence=18000;observer.observe(id,read,[]{return true;});check(observer.sequence==18001);
+ Snapshot latest{};check(observer.take(latest)&&latest.header[3]==18001&&latest.header[10]==86400000);
+ InterlockedExchange(&observer.active,0);id.elapsed+=200;observer.observe(id,read,[]{return true;});check(observer.sequence==18001);
  std::cout<<"NATIVE_LIGHT_OBSERVER_PASS checks="<<checks<<"\n";
 }

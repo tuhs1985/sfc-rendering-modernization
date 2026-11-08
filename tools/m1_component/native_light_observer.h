@@ -12,7 +12,7 @@ struct Observer {
  std::array<Word,2> owners{},last{};std::array<bool,2> sampled{};
  Word head=0,tail=0,queued=0,sequence=0,written=0,dropped=0,rejected=0;
  bool ioFailed=false;
- bool tuning=false,followEpochs=false;
+ bool tuning=false,followEpochs=false,playSession=false;
  void start(const Word* words){
   for(unsigned i=0;i<4;++i)session[i]=words[i];
   queue={};captured={};a={};b={};owners={};last={};sampled={};
@@ -25,7 +25,7 @@ struct Observer {
   InterlockedExchange(&busy,0);
  }
  template<class Identity,class Read,class Valid> void observe(const Identity& id,Read read,Valid valid){
-  if(!InterlockedCompareExchange(&active,0,0)||id.elapsed>(tuning?1800000u:90000u))return;
+  if(!InterlockedCompareExchange(&active,0,0)||(!playSession&&id.elapsed>(tuning?1800000u:90000u)))return;
   if(InterlockedCompareExchange(&busy,1,0)!=0)return;
   struct Unlock{volatile LONG& lock;~Unlock(){InterlockedExchange(&lock,0);}} unlock{busy};
   unsigned i=0;for(;i<2;++i)if(owners[i]==id.owner||!owners[i])break;
@@ -35,7 +35,7 @@ struct Observer {
    // observation-slot reuse,NOT death detection; capture is fresh under new epoch.
    if(id.elapsed>=last[oldest]&&id.elapsed-last[oldest]>400){i=oldest;owners[i]=0;sampled[i]=false;}
   }
-  if(i==2||!id.owner||sequence>=(tuning?18000u:900u))return;
+  if(i==2||!id.owner||(!playSession&&sequence>=(tuning?18000u:900u)))return;
   if(sampled[i]&&id.elapsed-last[i]<200)return;
   owners[i]=id.owner;sampled[i]=true;last[i]=id.elapsed;
   if(queued==queue.size()){++dropped;return;}

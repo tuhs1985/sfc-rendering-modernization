@@ -26,6 +26,7 @@ struct LiveOwnerInput {
   replacementMode=replacement::requested();
   wchar_t game[2]{};if(GetEnvironmentVariableW(L"SFC_D3D9_GAME_OUTPUT",game,2)==1&&game[0]==L'1')limit=110000;
   if(GetEnvironmentVariableW(L"SFC_D3D9_LIVE_TUNING",game,2)==1&&game[0]==L'1')limit=1980000;
+  if(pipeline_mode::play_session())limit=0;
   require(source.prepare()&&source.requested,"live input explicit mapping");
   auto* base=reinterpret_cast<BYTE*>(source.mailbox)-sfc_calibration::Offset;store=reinterpret_cast<live_owner::Store*>(base+live_owner::Offset);
   wchar_t pidText[16]{};GetEnvironmentVariableW(L"SFC_D3D9_GAME_PID",pidText,16);const auto pid=static_cast<DWORD>(_wcstoui64(pidText,nullptr,10));

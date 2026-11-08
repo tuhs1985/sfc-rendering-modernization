@@ -131,12 +131,13 @@ class Pipeline:
         self.jobs[identity]=dict(id=identity,row=list(row),phase='waiting',discovered_ns=time.perf_counter_ns())
 
     def decode(self,job):
-        from live_scene import decode_mesh
+        from break_scene import decode_runtime_mesh
         from mesh_checksum import calculate
         source=self.relay.folder/'gate'/f"LIVE-SCENE-001-asset-{job['row'][7]}.bin"
         if source.stat().st_size>2*1024*1024 or source.with_suffix('.json').stat().st_size>256*1024:raise ValueError('Capture bounds')
         raw=source.read_bytes();refs=source.with_suffix('.json').read_bytes()
-        mesh=decode_mesh(raw,refs,checksum=calculate)
+        mesh=decode_runtime_mesh(raw,refs,checksum=calculate,
+                                 allow_break=getattr(self.relay,'break_models',False))
         row=job['row']
         if (mesh['header'][4],mesh['header'][10],mesh['header'][12])!=(row[1],row[5],row[6]):raise ValueError('Capture owner identity')
         mesh['_capture_refs_sha256']=hashlib.sha256(refs).hexdigest()
@@ -181,12 +182,13 @@ class Pipeline:
             [g['group'],g['flags'],images[resources[g['primary']]['filename']]['sha256'],
              resources.get(g['secondary'],{}).get('filename','').replace('\\','/').casefold() if g['flags']&0x20 else None]
             for g in mesh['groups']]]
-        if getattr(self.relay,'damage_textures',False):identity.append(['sfc.damage-mapping.v1',list(mesh['header'][27:30])])
+        damage_eligible=getattr(self.relay,'damage_textures',False) and mesh.get('source_kind')!='break_piece'
+        if damage_eligible:identity.append(['sfc.damage-mapping.v1',list(mesh['header'][27:30])])
         signature=hashlib.sha256(json.dumps(['sfc.base-asset.v2.remix-image-origin-v1',identity],sort_keys=True,separators=(',',':')).encode()).hexdigest()
         steps.append(dict(stage='base_identity',seconds=(time.perf_counter_ns()-started)/1e9));begin=time.perf_counter_ns()
         from remix_coordinates import base_image,POLICY
         damage_uv=None
-        if getattr(self.relay,'damage_textures',False):
+        if damage_eligible:
             from damage_mapping import projected_uv,scale
             h=mesh['header']
             if h[29]!=1:raise ValueError('Fresh native damage mapping bounds missing')
@@ -317,7 +319,7 @@ class Pipeline:
                         parts=g['value'];mesh=job['capture'][3]
                         group_count=sum(bool(parts[2].get(group['group'])) for group in mesh['groups'])
                         scene_bytes=32+len(parts[1])+4*len(mesh['corners'])+16*group_count+FRAME.size
-                        if getattr(self.relay,'damage_textures',False):scene_bytes+=8*len(parts[0])
+                        if getattr(self.relay,'damage_textures',False) and mesh.get('source_kind')!='break_piece':scene_bytes+=8*len(parts[0])
                         if not memory.reserve(job['id'],list(unique.values()),scene_bytes):continue
                     self.graph.add(key,lambda job=job:self._basic(job));job['phase']='basic'
                 if job['phase']=='basic':

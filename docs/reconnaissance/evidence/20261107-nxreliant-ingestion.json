@@ -1,0 +1,77 @@
+{
+  "date": "2026-11-07",
+  "scope": "read_only_targeted_static_cross_check_no_gameplay",
+  "contributor": "nxreliant (attributed by sponsor)",
+  "source_sha256": "3A4E40854EFBAF6BCA95202B15EB724E1E28E2A202FC3913F64EB5CBD1C7E150",
+  "source_reported_version": "2.5.6.5",
+  "review_status": "ingestion_and_relevance_review_finalized_not_universal_validation",
+  "sponsor_build_context": {
+    "reported_on": "2026-11-07",
+    "description": "nxreliant is updating his executable; his client is one revision ahead of the local client",
+    "provenance": "sponsor clarification, not independently inspected external binary",
+    "address_difference_interpretation": "cross-build mapping differences; not evidence of contributor error or a uniform relocation delta"
+  },
+  "source_executable_sha256": null,
+  "local_client_sha256": "4D65761D7DD69EF1504070261B81E9C200C0AF18105033E1C4D2222C62320C29",
+  "local_disassembly_sha256": "7DA8983A07628A67BF475BC5A27B273FC7A2C4E6C7F9F96578DC13AC4DFF4115",
+  "instruction_count": 98,
+  "ranges": {
+    "seeker_descriptor": {
+      "start": "0x00420447",
+      "end_exclusive": "0x00420493",
+      "instructions_checked": 24
+    },
+    "drifting_descriptor": {
+      "start": "0x004209DA",
+      "end_exclusive": "0x00420A26",
+      "instructions_checked": 24
+    },
+    "one_light_provider": {
+      "start": "0x0042167B",
+      "end_exclusive": "0x0042167F",
+      "instructions_checked": 3
+    },
+    "rgb_setter": {
+      "start": "0x006AD340",
+      "end_exclusive": "0x006AD36B",
+      "instructions_checked": 8
+    },
+    "phaser_rgb_constructor": {
+      "start": "0x004FFE06",
+      "end_exclusive": "0x004FFE39",
+      "instructions_checked": 18
+    },
+    "photon_dispatch": {
+      "start": "0x0041C6A9",
+      "end_exclusive": "0x0041C6D4",
+      "instructions_checked": 11
+    },
+    "phaser_entry_boundary": {
+      "start": "0x004FFE39",
+      "end_exclusive": "0x004FFE44",
+      "instructions_checked": 5
+    },
+    "reported_conversion_boundary": {
+      "start": "0x0041C784",
+      "end_exclusive": "0x0041C78F",
+      "instructions_checked": 5
+    }
+  },
+  "all_listed_instruction_bytes_match_local_pe": true,
+  "reported_addresses_not_local_instruction_starts": [
+    {
+      "reported": "0x004FFE40",
+      "local_instruction_start": "0x004FFE3C",
+      "local_function_entry": "0x004FFE39"
+    },
+    {
+      "reported": "0x0041C788",
+      "local_instruction_start": "0x0041C787"
+    }
+  ],
+  "limits": [
+    "Not full cross-build equivalence",
+    "No runtime ownership or physical light conversion proven",
+    "Other contributed claims remain external unless already qualified in corpus"
+  ]
+}

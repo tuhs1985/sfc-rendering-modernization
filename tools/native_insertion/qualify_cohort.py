@@ -62,7 +62,7 @@ def qualify(folders):
     if 'OK' not in p or 'FAILED' in p or 'Traceback' in p:raise ValueError('Python tests failed')
     for name in ('tools/remix_ingest/live_scene.py','artifacts/remix-runtime/return-bin/SFCRemixReturn.dll','artifacts/remix-runtime/return-bin/d3d11_return_fixture.exe','artifacts/remix-runtime/return-bin/return_launcher.exe','artifacts/remix-runtime/return-bin/return_host.exe','artifacts/remix-runtime/native-light-tests/m1_light_component.dll','artifacts/d3d9-proof/receiver-bin/output_receiver.exe','artifacts/m1/bin/m1_gate.dll','artifacts/m1/bin/m1_controller.exe','tools/remix_runtime/config/rendering.toml','tools/remix_runtime/config/lights.toml','tools/d3d9_proof/offset_ship.toml'):
         files[name]=digest(ROOT/name)
-    for path in (component,out/'wire32.txt',out/'wire64.txt',out/'python-tests.txt'):files[path.relative_to(ROOT).as_posix()]=digest(path)
+    for path in (component,out/'wire32.txt',out/'wire64.txt',out/'python-tests.txt',ROOT/'artifacts/remix-runtime/test-install/sfc-baseline.ini'):files[path.relative_to(ROOT).as_posix()]=digest(path)
     submission=ROOT/'artifacts/player-replacement/submission-tests'
     for arch in (32,64):
         for name,marker in ((f'd3d9_submission_policy_tests-{arch}.txt','Submission policy PASS 12 checks'),(f'remix_loaded_light_tests-{arch}.txt','Loaded light PASS ')):

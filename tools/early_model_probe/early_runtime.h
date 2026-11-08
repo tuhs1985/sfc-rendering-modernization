@@ -14,6 +14,8 @@ class Runtime {
  std::atomic<unsigned> head{0},tail{0};std::atomic<bool> accepting{false};
 #ifdef SFC_DAMAGE_PROBE
  static constexpr unsigned HookCount=10;
+#elif defined(SFC_BREAK_PROBE)
+ static constexpr unsigned HookCount=16;
 #else
  static constexpr unsigned HookCount=9;
 #endif
@@ -54,6 +56,14 @@ public:
   native=targets;entries={reinterpret_cast<void*>(targets.request),reinterpret_cast<void*>(targets.load),reinterpret_cast<void*>(targets.parse),reinterpret_cast<void*>(targets.attach),reinterpret_cast<void*>(targets.render),reinterpret_cast<void*>(targets.mesh),reinterpret_cast<void*>(targets.visualRetire),reinterpret_cast<void*>(targets.born),reinterpret_cast<void*>(targets.retire)};
 #ifdef SFC_DAMAGE_PROBE
   entries[9]=reinterpret_cast<void*>(damageWrapper);
+#elif defined(SFC_BREAK_PROBE)
+  entries[9]=reinterpret_cast<void*>(breakFactory);
+  entries[10]=reinterpret_cast<void*>(breakDraw);
+  entries[11]=reinterpret_cast<void*>(breakVisual);
+  entries[12]=reinterpret_cast<void*>(breakChild);
+  entries[13]=reinterpret_cast<void*>(breakWrapper);
+  entries[14]=reinterpret_cast<void*>(breakUpdate);
+  entries[15]=reinterpret_cast<void*>(breakRetire);
 #endif
   for(unsigned i=0;i<entries.size();++i)if(!read(ptr(entries[i]),originalBytes[i].data(),16))ok=false;
   accepting=true;const LONG error=ok?transaction(true):ERROR_WRITE_FAULT;hooked=!error;header->error=error;header->status=error?4:2;
@@ -75,6 +85,10 @@ public:
    tail.store(n,std::memory_order_release);header->queued=static_cast<LONG>(head.load()-n);header->fileBytes=size;if(size>=Hard/2)header->warning=1;
 #ifdef SFC_DAMAGE_PROBE
    if(!damageWriteSnapshots(path)) {header->error=ERROR_WRITE_FAULT;ok=false;}
+#endif
+#ifdef SFC_BREAK_PROBE
+   if(!breakWriteSnapshots(path)) {header->error=ERROR_WRITE_FAULT;ok=false;}
+   if(breakCaptureComplete()&&!header->reason)header->reason=7;
 #endif
    if(stopping&&n==head.load())break;if(!ok){header->error=ERROR_WRITE_FAULT;break;}Sleep(2);
   }

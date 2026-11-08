@@ -1,5 +1,6 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#include "../d3d9_proof/pipeline_mode.h"
 #include <tlhelp32.h>
 #include <wincrypt.h>
 
@@ -211,7 +212,7 @@ int wmain(int argc, wchar_t** argv) {
             gate_timeout_seconds = _wtoi(argv[++i]);
         else { usage(); return 2; }
     }
-    if (!pid || dll_path.empty() || config_path.empty() || gate_timeout_seconds > 900 || max_seconds < 1 ||
+    if (!pid || dll_path.empty() || config_path.empty() || gate_timeout_seconds > 900 || (!max_seconds&&!pipeline_mode::play_session()) ||
         max_seconds > 2100) {
         usage();
         return 2;
@@ -318,9 +319,9 @@ int wmain(int argc, wchar_t** argv) {
     }
     if (gate_ready && stop_on_burst && burst) {
         HANDLE waits[] = {process, burst};
-        wait_result = WaitForMultipleObjects(2, waits, FALSE, max_seconds * 1000);
+        wait_result = WaitForMultipleObjects(2, waits, FALSE, max_seconds?max_seconds*1000:INFINITE);
     } else if (gate_ready) {
-        wait_result = WaitForSingleObject(process, max_seconds * 1000);
+        wait_result = WaitForSingleObject(process, max_seconds?max_seconds*1000:INFINITE);
     }
     if (wait_result == WAIT_OBJECT_0) {
         std::cerr << "Target exited before controlled component removal.\n";

@@ -1,2 +1,5 @@
 # Preserve the approved CDD snapshot byte-for-byte, including original line endings.
 "docs/requirements/Starfleet Command Rendering Modernization Capability Requirements.md" -text
+
+# Keep contributed research byte-identical; original Markdown hard-break spaces are intentional.
+docs/reconnaissance/contributions/nxreliant/2026-11-07-Tuhs_SFCOP_Research.txt -text -whitespace

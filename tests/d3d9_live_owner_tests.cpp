@@ -56,6 +56,11 @@ int wmain(int argc,wchar_t** argv){
  test(!fresh_input(admission,store->header,999999,10000000));
  ++store->header.frame;test(!fresh_input(admission,store->header,1001000,10000000));--store->header.frame;
  store->header.bad_frame=admission.row[2];test(!fresh_input(admission,store->header,1001000,10000000));
+ const auto auditCount=store->header.audits;
+ observer.diagnostics=false;c.sequence=999;c.checksum=checksum(c);test(publish(store->output,c,replaced));
+ observer.observe(&r,5,GetCurrentThreadId(),p.offered+2);
+ test(observer.latest.sequence==999&&observer.last==999);
+ test(store->header.audits==auditCount);
  source.close();test(store->header.stopped==1);
  std::cout<<"Live owner PASS "<<checks<<" checks pointer_bits="<<sizeof(void*)*8<<" raw="<<sizeof(Packet)<<" store="<<sizeof(Store)<<'\n';
  if(argc==3){

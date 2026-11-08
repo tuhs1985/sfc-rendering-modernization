@@ -10,6 +10,7 @@
 #include "game_gpu_read_lease.h"
 #include "replacement_presentation.h"
 #include "../d3d9_proof/multi_scene_wire.h"
+#include "../d3d9_proof/pipeline_mode.h"
 #include "../native_foreground/shield_controller.h"
 #include "../native_insertion/observer.h"
 #include "../native_insertion/gate_wait.h"
@@ -27,7 +28,7 @@ class Receiver {
  struct Import {Microsoft::WRL::ComPtr<ID3D11Texture2D> textures[3];Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> views[3];Microsoft::WRL::ComPtr<ID3D11Query> query;game_gpu::ReadLease lease;output_wire::Packet identity{};std::atomic<bool> ready{false},held{false};bool pending=false;};
  Import imported[2];std::atomic<bool> stopping{false};std::thread worker;HANDLE receiver=nullptr;
  DWORD thread=GetCurrentThreadId();sfc_calibration::Snapshot snapshot{};
- bool buffered=false;std::unique_ptr<scene_frame_buffer::History> history;synchronized_frame::Store* bufferAudit=nullptr;
+ bool buffered=false;const bool diagnosticTiming=!pipeline_mode::play_session();std::unique_ptr<scene_frame_buffer::History> history;synchronized_frame::Store* bufferAudit=nullptr;
  Microsoft::WRL::ComPtr<ID3D11DeviceContext4> fencedContext;
  multi_scene::Store* cohort=nullptr;multi_scene::Frame cohortFrame{};
  bool replacementMode=false;replacement::Store* replacementLedger=nullptr;std::unique_ptr<replacement::Presentation> presentation;
@@ -369,7 +370,7 @@ public:
     auto* live=reinterpret_cast<live_owner::Store*>(reinterpret_cast<BYTE*>(source.mailbox)-sfc_calibration::Offset+live_owner::Offset);
     gateStore->current.reserved[0]=0;for(auto& slot:live->input)if(frame_ingress::state(&slot.state)!=frame_ingress::Free)++gateStore->current.reserved[0];
     gateStore->current.reserved[1]=static_cast<DWORD>(InterlockedCompareExchange(&pool->header.busy,0,0));
-    gateStore->current.presented=native_gate::now();native_gate::append(*gateStore);
+    gateStore->current.presented=native_gate::now();if(diagnosticTiming)native_gate::append(*gateStore);
     if(cohort)InterlockedExchange(&cohort->header.closed_frame,static_cast<LONG>(gateStore->current.frame));
    }
    return;}
