@@ -76,6 +76,12 @@ class StartupProfileTests(TestCase):
         self.assertLess(text.index('if(nativeSize){peer.start('),text.index('nativeTarget.wait('))
         relay=(root/'tools/remix_runtime/multi_scene_relay.py').read_text()
         self.assertIn("if not self.offline_fixture:env.pop('SFC_D3D9_RENDER_PREWARM',None)",relay)
+    def test_production_warmup_does_not_require_diagnostic_collection(self):
+        root=Path(__file__).resolve().parents[1]
+        text=(root/'tools/d3d9_proof/render_prewarm.h').read_text()
+        self.assertNotIn('require(profile.enabled',text)
+        self.assertIn('profile.mark("render_warm_begin")',text)
+        self.assertIn('profile.mark("render_warm_complete")',text)
     def test_diagnostics_cannot_qualify_normal_startup(self):
         from qualify_multiship import inspect
         root=Path(__file__).resolve().parents[1]

@@ -6,7 +6,7 @@ import json
 import shutil
 from broad_capture import ROOT,OLD_SHA,FULL_SHA,digest,restore_test_proxy
 from runtime_context import CONTEXT
-from run_return_fixture import TEST
+from runtime_files import TEST
 from copied_preferences import prepared_ini_signature,changed_protected_files
 
 def supported_transaction(manifest):

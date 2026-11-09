@@ -29,6 +29,13 @@ D3D12, new assets and appearance tuning remain outside this increment.
 
 ## Implemented so far
 
+- Production code now uses `tools/release/runtime_modules.json`, an explicit
+  59-module allowlist. Development tools stay in the source tree but are absent
+  from the alpha; the diagnostic placement/model profiles and old texture-hash
+  executable are no longer required. See the
+  [separation record](../runs/2026-11-09-codex-production-module-separation.md) for
+  offline proof, startup correction and sponsor gameplay confirmation.
+
 - `tools/remix_runtime/runtime_context.py` separates development paths from the
   explicit package root. Release game path is the package's parent, never the
   accepted developer installation. Session evidence/cache/baseline paths map to

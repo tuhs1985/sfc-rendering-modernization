@@ -16,7 +16,8 @@ FULL=CONTEXT.artifact('remix-runtime/deps/reshade-full-6.7.1/extracted/ReShade32
 FULL_SHA='A1BA732B5E31E0405CDE322CC5EC62CF972B3FBAEFBB6CBDC8A24DA00D58AE24'
 OLD_SHA='E35E4E2E47F4765F0799CB54C88E5ADE49B50CD7895C137B9D557F263344CAB7'
 HARD=2_000_000_000
-from evidence_budget import AGGREGATE_BYTES
+if CONTEXT.release:AGGREGATE_BYTES=0 # Capture budgets belong to development modes.
+else:from evidence_budget import AGGREGATE_BYTES
 OVERALL=AGGREGATE_BYTES
 NAMES=('unused','device','device_end','resource','resource_end','view','view_end',
        'command','command_end','command_reset','targets','draw','indexed',

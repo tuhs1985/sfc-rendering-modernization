@@ -1,9 +1,9 @@
 """Version1 actual-rendered membership and per-owner native insertion receipts."""
 import hashlib,json,struct
 from pathlib import Path
-from player_replacement import ROOT,OFFSET as BASE
 from runtime_context import CONTEXT
-from scene_capacity import COHORT_OFFSET,OWNERS
+from scene_capacity import COHORT_OFFSET,OWNERS,REPLACEMENT_OFFSET as BASE
+ROOT=CONTEXT.code_root
 OFFSET=COHORT_OFFSET
 MANIFEST_BYTES=64+52*OWNERS
 CELL_BYTES=MANIFEST_BYTES+64
@@ -47,6 +47,9 @@ def decode(raw):
         v=struct.unpack_from('<8I',raw,OWNER_BASE+i*32)
         if v[0]:owners.append(dict(zip(('owner','revision','model','source','inserted','suppressed','unavailable','last_frame'),v)))
     return dict(pid=h[3],session=list(h[4:8]),inserted=h[8],suppressed=h[9],unavailable=h[10],omitted=h[11],owners=owners)
+
+def snapshot(channel):return decode(channel.read(OFFSET,SIZE))
+
 
 def save(channel,folder):
     raw=channel.read(OFFSET,SIZE);value=decode(raw);folder=Path(folder)

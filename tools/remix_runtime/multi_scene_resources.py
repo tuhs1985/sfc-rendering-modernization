@@ -6,8 +6,9 @@ import shutil
 import threading
 from contextlib import contextmanager
 from pathlib import Path
-from evidence_budget import AGGREGATE_BYTES
 from runtime_context import CONTEXT
+if CONTEXT.release:AGGREGATE_BYTES=0
+else:from evidence_budget import AGGREGATE_BYTES
 
 
 def release_play():

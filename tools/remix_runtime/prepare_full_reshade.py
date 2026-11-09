@@ -10,7 +10,7 @@ from broad_capture import ROOT,FULL,FULL_SHA,digest
 URL='https://reshade.me/downloads/ReShade_Setup_6.7.1_Addon.exe'
 PACKAGE_SHA='FC55C5C62D0BC43BF02C40EC9AEF69E0B74F22A6017403AF1897EC32E5CD0E8F'
 SOURCES=('return_addon.cpp','broad_trace.h','broad_events.h','return_fixture.cpp','build_return_probe.ps1',
-         'broad_capture.py','run_return_game.py','run_return_fixture.py','prepare_full_reshade.py',
+         'broad_capture.py','run_return_game.py','run_return_fixture.py','runtime_files.py','prepare_full_reshade.py',
          'qualify_broad_rollback.py','archive_broad_evidence.py','start_return_image_session.ps1','recover_broad_session.py',
          '../m1_component/m1_controller.cpp','../m1_component/module_snapshot_retry.h','../m1_component/build_m1_controller.ps1','windows_processes.py',
          'depth_snapshot.h','depth_snapshot_analysis.py','qualify_depth_snapshots.py','../../tests/depth_snapshot_gpu_tests.cpp',

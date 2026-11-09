@@ -17,6 +17,7 @@ sys.path.insert(0,str(ROOT/'tools/remix_runtime'))
 from release_manifest import SCHEMA,digest,REQUIRED_ROLES
 from runtime_context import VERSION,CLIENT_SHA256,relative_name
 from package_layout import excluded
+from inventory_dependencies import production_files
 
 FORBIDDEN_PARTS={'.git','.codex','.codex-attachments','runs','archives','captures','saves','settings','data'}
 FORBIDDEN_SUFFIXES={'.mod','.bin','.raw32','.bmp','.dmp','.etl','.nsys-rep','.sqlite','.pdb','.obj','.lib','.exp','.log'}
@@ -29,12 +30,15 @@ def validate_recipe(recipe,source_root):
         raise ValueError('Reviewed release recipe/commit/license inventory required')
     records=recipe.get('files',[])
     if not 1<=len(records)<=20000:raise ValueError('Allowlist file count')
+    production_targets={'code/'+p for p in production_files()}
     items=[];seen=set();roles={}
     for item in records:
         source=source_root/relative_name(item['source'])
         name=relative_name(item['target']).as_posix()
         path=Path(name)
         if excluded(name):raise ValueError('Development or wrong-architecture payload: '+name)
+        if name.casefold().startswith('code/tools/') and name not in production_targets:
+            raise ValueError('Non-production application module: '+name)
         if (path.parts[0].casefold() in FORBIDDEN_PARTS or
                 (item.get('kind')!='vendor' and (any(p.casefold() in FORBIDDEN_PARTS for p in path.parts) or path.suffix.lower() in FORBIDDEN_SUFFIXES)) or
                 path.suffix.lower()=='.mod' or

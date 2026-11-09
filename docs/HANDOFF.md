@@ -52,6 +52,38 @@ independent piece lifetime/submission. The initial geometry blocker is resolved.
 
 ## NEWEST / AUTHORITATIVE CHECKPOINT — November 9 private-alpha cleanup
 
+**Latest / cleanup startup regression corrected:** sponsor's checkout rendered
+only native ships. Run `20261109-194448-097868-in-game` prepared the FCA but
+produced no replacement frames; passive receiver never activated. Cleanup turned
+startup profiling off while the bundled host's `render_prewarm::run` still
+required `profile.enabled`. Removed that diagnostic prerequisite; warm-up and
+its readiness handshake remain enabled. Rebuilt only the x64 renderer and
+transactionally updated the private alpha/manifest, preserving settings/profile.
+Actual GPU control: old host/profile off never ready, old host/profile on ready;
+fixed host/profile off ready, three matching bootstrap output planes delivered,
+normal host/receiver exit. Cancellation before first output also passes. All749
+regressions and installed EXE read-only preflight pass. No SFC launched by Codex.
+Bootstrap check alone is not appearance/gameplay acceptance. Sponsor subsequently
+confirmed enhancements work again; immediate relaunch/cleanup was not separately
+reported. Rollback `artifacts/alpha/prewarm-fix-rollback/20261109-195609`.
+[Correction and exact evidence](runs/2026-11-09-codex-production-module-separation.md#gameplay-regression-and-correction).
+
+**Reopened and implemented / production-file boundary:** sponsor requested commit
+then start the48-file work. Checkpoint `49373fd` committed; no push. New work is
+uncommitted. All48 audited files are absent from the private alpha after helper/
+import separation, with one new runtime helper: own payload118→71,59production
+Python modules,3,848immutable inputs. Developer tools remain in the repository.
+Explicit production allowlist replaces all-branch staging. Removed displaced
+preparation queue, diagnostic profile prerequisites and old hash EXE dependency;
+installed startup profiling/task spans/cohort dumps disabled. Current wire,
+identity, controls, geometry/material behavior and recovery checks preserved.
+748tests, moved Unicode reduced-package preflight and actual captured-geometry/
+base+enhanced material/light CPU production pass. Private copy updated with
+transactional rollback; settings/game profile unchanged. **No game/renderer
+launched; native activation/gameplay and exit/relaunch still need sponsor check
+using the same EXE/CMD.** Internal legacy methods remain in shared modules;
+no full-source-minimality claim. [Record](runs/2026-11-09-codex-production-module-separation.md).
+
 **Latest / our-files audit continued:** sponsor narrowed priority to our118 files;
 no further vendor pruning or refactor authorized. Static review now flags48 files
 for exclusion/separation, with70 provisionally retained (not a proven minimum).

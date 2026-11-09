@@ -10,10 +10,9 @@ MANIFEST = 'package.json'
 REQUIRED_ROLES = frozenset({
     'coordinator', 'python', 'launcher', 'restore', 'return_launcher', 'return_host',
     'return_addon', 'startup_gate', 'semantic_component', 'semantic_controller', 'renderer',
-    'output_receiver', 'job_guard', 'mesh_checksum', 'texture_hash',
+    'output_receiver', 'job_guard', 'mesh_checksum',
     'remix_runtime', 'reshade_proxy', 'default_rendering', 'default_lights',
     'project_license', 'third_party_notices',
-    'scene_placement', 'owner_selection',
     'troubleshooting_launcher',
 })
 

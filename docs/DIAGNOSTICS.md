@@ -20,6 +20,7 @@ These tools never launch SFC and are not normal-play overhead.
 | `tools/release/prepare_python.py` | Checksum-pinned upstream application-local Python/wheels | No Codex-runtime copy or machine-wide installation |
 | `tools/release/inventory_dependencies.py` | PE imports and99-module static Python superset | Includes inactive branches; not normal-play loaded-module proof |
 | `tools/release/stage_preflight_fixture.py` | Private fixture; actual WinPS5.1/app-local-Python preflight, Unicode/spaces/move | Incomplete/not distributable; no gameplay or second-machine claim |
+| `tools/release/qualify_production_prewarm.py` | Real installed Remix startup, late ticket activation, bootstrap output/receiver comparison or pre-output cancellation, with profiling on/off | Standalone synthetic target/ticket; never launches SFC.45s owned job,128MiB scratch. Bootstrap is not an appearance/gameplay oracle. Not shipped in the alpha |
 | `tools/release/run_extent_probe.py --extent W H` | Candidate1.6.1 synthetic ray-traced output/x86 receiver | Current parser bounds; isolated24Present diagnostic toggle, not normal startup |
 | `tools/release/shared_layout_probe.cpp` + `run_shared_layout_probe.py --extent W H` | GPU quadrants, independent D3D9/native-D3D11 readbacks |45second owned-job bound;32MiB scratch/2MiB console; teardown currently partial |
 | `tools/release/build_zip.py` | Reviewed-commit allowlist ZIP/checksums | Requires license/role review and exact hashes; never uploads. Test ZIPs are synthetic |

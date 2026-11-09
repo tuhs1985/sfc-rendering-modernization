@@ -1,13 +1,32 @@
 ---
 title: SFC Modernization — Status Tracker
 updated: 2026-11-09
-checkpoint: Our118-file audit continued;48 separation candidates; measurement-only leftovers identified; refactor parked
+checkpoint: Production payload71files;profiling-independent startup fix gameplay-confirmed;no push
 tags:
   - sfc-modernization
   - project-status
 ---
 
 # SFC Modernization — Status Tracker
+
+**November9 — Cleanup startup regression fixed:** the profiling-off change hit
+an old native warm-up requirement for profiling to be on. Removed that coupling,
+rebuilt the renderer and updated the private alpha with rollback. Old-host off/on
+control confirms the cause; corrected host starts with profiling off, transfers
+three matching bootstrap GPU planes and exits cleanly. Passive cancellation,
+749regressions and installed read-only preflight pass. Settings preserved; no SFC
+launched. Sponsor confirmed enhancements work after the fix; immediate relaunch
+was not separately reported.
+[Evidence](runs/2026-11-09-codex-production-module-separation.md#gameplay-regression-and-correction).
+
+**November9 — Production separation implemented:** sponsor reopened the work.
+Committed checkpoint49373fd (not pushed). New uncommitted changes exclude all48
+audited files from the alpha while keeping developer tools in Git. One helper
+added: own files118→71, production Python59. Fresh reduced-package preflight,
+real captured-asset/material/light CPU preparation and748tests pass. Private
+checkout updated with rollback; original settings/game profile preserved.
+Same EXE/CMD gameplay/exit/relaunch check remains.
+[Record](runs/2026-11-09-codex-production-module-separation.md).
 
 **November9 — Audit narrowed to our code:** all118 authored payload files reviewed;
 48now flagged for exclusion/dependency separation,70provisionally retained.

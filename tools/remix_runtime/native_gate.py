@@ -1,7 +1,9 @@
 """Version1 native pre-suppression gate evidence;renderer-independent frame timing."""
 import hashlib,json,struct,threading,math
 from pathlib import Path
-from player_replacement import ROOT,OFFSET as BASE
+from runtime_context import CONTEXT
+from scene_capacity import REPLACEMENT_OFFSET as BASE
+ROOT=CONTEXT.code_root
 OFFSET=BASE+50176
 CAPACITY=64
 SIZE=8576

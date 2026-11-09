@@ -15,12 +15,11 @@ import winreg
 import winsound
 from return_channel import Channel,valid_name,visibility_result
 import run_report
-import depth_search_channel
 import broad_capture
 from session_exit import Monitor,NormalGameExit,retire_controller,early_without_output,partial_live_result
 from copied_preferences import protected_ini_sha256,prepared_ini_signature,changed_protected_files
 from native_config import write as write_native_config
-from run_return_fixture import ROOT,BIN,DLL,TEST,ENV,digest,capture_file_bytes
+from runtime_files import ROOT,BIN,DLL,TEST,ENV,digest,capture_file_bytes
 import sys
 sys.path.insert(0,str(ROOT/'tools/remix_runtime'))
 from runtime_context import CONTEXT
@@ -168,6 +167,9 @@ def main():
         args.native_insertion_observe,args.broad_capture,args.depth_snapshots,args.capture_native_lights,
         args.inspect_early_depth,args.search_depth,args.observation_only,args.source_timing))):
         parser.error('Play session requires native multi-ship/performance without diagnostic captures or tuning')
+    if args.search_depth:
+        global depth_search_channel
+        import depth_search_channel
     if args.native_resolution and not args.native_all_ships:parser.error('--native-resolution requires --native-all-ships')
     os.environ['SFC_NATIVE_RESOLUTION']='1' if args.native_resolution else '0'
     if args.damage_textures and not args.native_all_ships:parser.error('Damage textures requires native multi-ship insertion')
@@ -196,13 +198,15 @@ def main():
     if args.synchronized_buffer:
         if not args.d3d9_additive:parser.error('--synchronized-buffer requires --d3d9-additive')
         args.persistent_scene=True
-        from qualify_synchronized_buffer import require_qualification as buffer_qualified
-        if not args.multi_ship:buffer_qualified()
+        if not args.multi_ship:
+            from qualify_synchronized_buffer import require_qualification as buffer_qualified
+            buffer_qualified()
     if args.persistent_scene:
         if not args.d3d9_additive or args.offscreen_position:parser.error('--persistent-scene requires additive and excludes diagnostic external reader')
         args.camera_recovery=True
-        from qualify_persistent_scene import require_qualification as persistent_qualified
-        if not args.multi_ship:persistent_qualified()
+        if not args.multi_ship:
+            from qualify_persistent_scene import require_qualification as persistent_qualified
+            persistent_qualified()
     if args.scene_depth:
         if args.light_tuning or args.capture_ship_image:parser.error('--scene-depth is a bounded standalone test,not tuning/image capture')
         args.light_wiring=True
@@ -271,12 +275,18 @@ def main():
         json.dumps(q)
         import sys
         sys.path.insert(0,str(ROOT/'tools/d3d9_proof'))
-        from run_offline import storage,AGGREGATE_BYTES
-        reserve=(544 if args.native_all_ships else 288 if args.native_insertion_policy else 192 if args.d3d9_additive else 128 if args.live_owner_timing else 64)*1024*1024
-        if not (CONTEXT.release and args.play_session) and storage()+reserve>AGGREGATE_BYTES:raise RuntimeError('Source timing reservation exceeds20GB evidence allowance')
+        if not (CONTEXT.release and args.play_session):
+            from run_offline import storage,AGGREGATE_BYTES
+            reserve=(544 if args.native_all_ships else 288 if args.native_insertion_policy else 192 if args.d3d9_additive else 128 if args.live_owner_timing else 64)*1024*1024
+            if storage()+reserve>AGGREGATE_BYTES:raise RuntimeError('Source timing reservation exceeds20GB evidence allowance')
     if args.capture_native_lights:
-        from light_discovery import require_qualification as require_light_qualification
-        light_qualification=require_light_qualification()
+        if CONTEXT.release:
+            from release_manifest import load,verified_role
+            light_manifest=load(CONTEXT.package_root)
+            light_qualification=dict(result='RELEASE_MANIFEST_INPUTS',component_sha256=digest(verified_role(CONTEXT,light_manifest,'semantic_component')))
+        else:
+            from light_discovery import require_qualification as require_light_qualification
+            light_qualification=require_light_qualification()
     if args.private_ship:
         from live_return import require_qualification as require_private_qualification
         require_private_qualification(visible=args.visible_ship,textured=args.textured_ship,capture_image=args.capture_ship_image,light_wiring=args.light_wiring)
@@ -364,7 +374,7 @@ def main():
     if args.broad_capture:
         metadata['limits_bytes']=broad_capture.HARD+32*1024*1024
         metadata['ancillary_limit_bytes']=32*1024*1024
-    metadata['expanded_search']={'enabled':args.search_depth,'phases':depth_search_channel.PHASES,'resource_limit':32,'duration_seconds':90,'mapping_extension_bytes':2304}
+    metadata['expanded_search']={'enabled':args.search_depth,'phases':depth_search_channel.PHASES if args.search_depth else [],'resource_limit':32,'duration_seconds':90,'mapping_extension_bytes':2304}
     if args.observation_only:metadata['scene']='No Remix runtime started; read-only early depth-binding observation'
     if args.source_timing:metadata['scene']='Semantic source/Present timing,no game drawing'
     if args.live_owner_timing:metadata['scene']='Fresh semantic owner to separate ordinary-D3D9/Remix GPU receiver;current Present audit only,no game drawing'

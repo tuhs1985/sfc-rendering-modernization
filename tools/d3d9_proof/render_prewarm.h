@@ -1,10 +1,11 @@
-// Experimental external-host-only warm-up. Never publish these empty frames.
+// External-host-only warm-up. Never publish these private frames.
 #pragma once
 namespace render_prewarm {
 inline bool requested(){wchar_t text[16]{};const auto n=GetEnvironmentVariableW(L"SFC_D3D9_RENDER_PREWARM",text,16);
  if(!n)return false;require(n<16&&(!wcscmp(text,L"empty")||!wcscmp(text,L"triangle")),"render prewarm mode");return true;}
 inline void run(IDirect3DDevice9Ex* device,WorkerPoll& poll,StartupProfile& profile){
- require(profile.enabled,"experimental render prewarm requires startup measurement");
+ // Warm-up is part of production startup. Profiling only observes it; disabling
+ // diagnostic collection must not prevent startup or its readiness handshake.
  ComPtr<IDirect3DStateBlock9> saved;ok(device->CreateStateBlock(D3DSBT_ALL,&saved),"warm state capture");
  ComPtr<IDirect3DQuery9> fence;ok(device->CreateQuery(D3DQUERYTYPE_EVENT,&fence),"warm completion query");
  wchar_t mode[16]{};GetEnvironmentVariableW(L"SFC_D3D9_RENDER_PREWARM",mode,16);const bool triangle=!wcscmp(mode,L"triangle");

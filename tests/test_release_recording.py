@@ -88,7 +88,7 @@ class RecordingTests(unittest.TestCase):
                 output=io.StringIO()
                 with patch.object(bootstrap,'CONTEXT',context),patch.object(bootstrap,'CODE',context.code_root),\
                      patch.object(bootstrap,'verify',return_value={}),patch.object(bootstrap,'verify_game_profile'),\
-                     patch.object(bootstrap,'check_scene_profiles'),patch.object(bootstrap,'check_native_launcher'),\
+                     patch.object(bootstrap,'check_native_launcher'),\
                      patch.object(bootstrap,'prepare'),patch('windows_processes.game_running',return_value=False),\
                      patch('recover_broad_session.recover_pending',return_value=None),patch('run_return_game.main',side_effect=play),\
                      patch.dict(os.environ),patch.object(sys,'argv',['bootstrap',*(['--troubleshoot'] if mode=='minimal' else [])]),\
@@ -104,15 +104,15 @@ GUARD=ROOT/'artifacts/remix-ingest/bin/bounded_job.exe'
 @unittest.skipUnless(os.name=='nt' and GUARD.exists(),'Built Windows job guard required')
 class RecordingGuardTests(unittest.TestCase):
     def test_actual_guard_does_not_end_release_play_at_recording_quota(self):
-        for release,expected in ((True,0),(False,1)):
-            with self.subTest(release=release),tempfile.TemporaryDirectory() as tmp:
+        for release,quota,expected in ((True,65536,0),(True,0,0),(False,65536,1)):
+            with self.subTest(release=release,quota=quota),tempfile.TemporaryDirectory() as tmp:
                 work=Path(tmp)
                 script=work/'child.py'
                 script.write_text('import pathlib,time\npathlib.Path("working.bin").write_bytes(bytes(200000))\nprint("x"*10000)\ntime.sleep(0.4)\n')
                 env={**os.environ,'SFC_PLAY_SESSION':'1','SFC_PLAY_PARENT_PID':str(os.getpid())}
                 env.pop('SFC_RELEASE_ROOT',None)
                 if release:env['SFC_RELEASE_ROOT']=str(work/'SFCRemix')
-                result=subprocess.run([str(GUARD),str(work),'0','65536','1024',sys.executable,str(script)],
+                result=subprocess.run([str(GUARD),str(work),'0',str(quota),'1024',sys.executable,str(script)],
                     env=env,cwd=work,capture_output=True,text=True,timeout=15)
                 self.assertEqual(result.returncode,expected,result.stdout+result.stderr)
                 report=json.loads((work/'job-result.json').read_text())

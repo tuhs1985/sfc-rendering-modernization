@@ -18,7 +18,7 @@ def configure_child(backend,environment):
     # Exercise the existing private renderer startup once. Its completion precedes
     # shared startup readiness; afterward warm_start waits without further Presents.
     environment['SFC_D3D9_RENDER_PREWARM']='triangle'
-    environment['SFC_D3D9_STARTUP_PROFILE']='1'
+    environment['SFC_D3D9_STARTUP_PROFILE']='0' if environment.get('SFC_RELEASE_ROOT') else '1'
     return ('rtx.initializer.asyncAssetLoading = True\n'
             'rtx.enableReplacementAssets = True\n'),dict(
         release='1.6.1',material_library='flat',complete_asset_stages=True,

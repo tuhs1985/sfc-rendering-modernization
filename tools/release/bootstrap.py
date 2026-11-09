@@ -27,20 +27,6 @@ def check_native_launcher(context,manifest):
         raise ValueError('Native launcher preflight failed: '+(result.stdout+result.stderr).strip())
 
 
-def check_scene_profiles(context,manifest):
-    """Exercise the non-Python startup inputs before launching or switching files."""
-    from multi_scene import camera_offset
-    from owner_selection import selected_model
-    for role,name,parse in (
-        ('scene_placement','multi_ship.toml',camera_offset),
-        ('owner_selection','offset_ship.toml',selected_model),
-    ):
-        path=verified_role(context,manifest,role)
-        if path != context.code_root/'tools/d3d9_proof'/name:
-            raise ValueError('Unexpected installed scene profile: '+role)
-        parse(path.read_bytes())
-
-
 def prepare(context, manifest):
     """Explicit first-launch writes only after package/game/profile validation."""
     seed_settings(context, manifest)
@@ -67,7 +53,6 @@ def main():
     if not CONTEXT.release or CONTEXT.code_root != CODE:
         raise ValueError('Use the launcher from the extracted SFCRemix package')
     manifest = verify(CONTEXT)
-    check_scene_profiles(CONTEXT,manifest)
     if manifest.get('fixture_only') and not args.preflight:
         raise ValueError('This private preflight fixture cannot launch SFC or restore a real installation')
     from windows_processes import game_running

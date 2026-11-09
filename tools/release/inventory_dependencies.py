@@ -8,12 +8,21 @@ import sys
 ROOT=Path(__file__).resolve().parents[2]
 # Non-Python inputs are invisible to the import walk. Keep this allowlist
 # explicit: never copy arbitrary neighboring files (including game assets).
-RUNTIME_RESOURCES={
-    'scene_placement':'tools/d3d9_proof/multi_ship.toml',
-    'owner_selection':'tools/d3d9_proof/offset_ship.toml',
-}
+RUNTIME_RESOURCES={} # Appearance defaults are separately explicit manifest roles.
 sys.path.insert(0,str(ROOT/'tools/recon'))
 from inspect_pe import inspect
+
+
+def production_files():
+    value=json.loads(Path(__file__).with_name('runtime_modules.json').read_text())
+    if value.get('schema')!='sfc.alpha.production-modules.v1':raise ValueError('Unknown production module list')
+    names=value.get('files',[])
+    if not names or len(names)!=len(set(names)):raise ValueError('Invalid production module list')
+    for name in names:
+        path=Path(name)
+        if not name.startswith('tools/') or path.suffix!='.py' or '..' in path.parts or not (ROOT/path).is_file():
+            raise ValueError('Invalid production module: '+name)
+    return names
 
 
 def python_closure(entry):

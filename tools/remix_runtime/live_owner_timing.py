@@ -216,16 +216,18 @@ class Relay:
                 self.content=Content(self.root);self.content_signature=self.content.signature(decode_mesh(packet.read_bytes(),packet.with_suffix('.json').read_bytes()))
             from scene_bundle import read_replay
             vertices=read_replay(gpu/'scene.bin')['vertices'];span=max(max(v[axis] for v in vertices)-min(v[axis] for v in vertices) for axis in range(3))
-            from owner_selection import camera_left_offset
             if self.multi_scene:
-                from multi_scene import camera_offset,CONFIG as placement_config
-                self.selected['camera_offset']=camera_offset()
                 if getattr(self,'player_replacement',False) or getattr(self,'native_all_ships',False):self.selected['camera_offset']=[0,0,0]
+                else:
+                    from multi_scene import camera_offset,CONFIG as placement_config
+                    self.selected['camera_offset']=camera_offset()
+                    (self.folder/'multi-ship-config-accepted.toml').write_bytes(placement_config.read_bytes())
                 self.selected['placement']='common camera-left diagnostic translation;no original suppression'
                 if getattr(self,'player_replacement',False):self.selected['placement']='Zero-offset player replacement with complete-frame transaction'
                 if getattr(self,'native_all_ships',False):self.selected['placement']='Zero-offset retained ships;owner-specific native insertion from one verified scene output'
-                (self.folder/'multi-ship-config-accepted.toml').write_bytes(placement_config.read_bytes())
-            else:self.selected['camera_offset']=camera_left_offset(span)
+            else:
+                from owner_selection import camera_left_offset
+                self.selected['camera_offset']=camera_left_offset(span)
             env.update(SFC_D3D9_ASSET_SHA256=manifest['asset_sha256'],SFC_D3D9_OFFSET_X=str(self.selected['camera_offset'][0]))
             env['SFC_D3D9_PLAYER_REPLACEMENT']='1' if getattr(self,'player_replacement',False) or getattr(self,'native_all_ships',False) else '0'
             env['SFC_NATIVE_INSERTION_ALL_SHIPS']='1' if getattr(self,'native_all_ships',False) else '0'
@@ -236,8 +238,10 @@ class Relay:
             cookie=int(self.content_signature[:16],16) or 1
             init_binding(self.receiver.channel,pid);request(self.receiver.channel,1,row,cookie)
             env['SFC_D3D9_REBIND_COOKIE']=f'{cookie:x}'
-        from evidence_budget import AGGREGATE_BYTES
-        scratch_limit=AGGREGATE_BYTES if self.multi_scene else 128*1024*1024
+        if CONTEXT.release:scratch_limit=0
+        else:
+            from evidence_budget import AGGREGATE_BYTES
+            scratch_limit=AGGREGATE_BYTES if self.multi_scene else 128*1024*1024
         backend=getattr(self,'renderer_backend',None)
         renderer_exe,renderer_runtime=(backend['exe'],backend['runtime']) if backend else (EXE,RUNTIME)
         if backend and not getattr(self,'prewarm_process',None):raise ValueError('Async material checkout requires its prepared renderer')

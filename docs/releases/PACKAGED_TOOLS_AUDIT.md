@@ -1,5 +1,10 @@
 # Packaged tools audit — November 9, 2026
 
+**Implemented after sponsor reopening:** explicit production list now ships59
+Python modules; all48 total audited exclusion candidates have been removed from
+the product after dependency separation. This document is the earlier audit
+snapshot. [Current implementation](../runs/2026-11-09-codex-production-module-separation.md).
+
 **Latest sponsor priority: our files, not vendor trimming.** The
 [continued project-payload audit](PROJECT_PAYLOAD_AUDIT.md) covers all118 of our
 files, expands the exclusion/separation review set to48 (not ready deletions),

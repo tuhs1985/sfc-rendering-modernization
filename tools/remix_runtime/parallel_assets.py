@@ -12,6 +12,7 @@ import struct
 import threading
 import time
 from scene_capacity import ASSETS
+from runtime_context import CONTEXT
 
 WORKERS=4
 ACTIVE_ASSETS=4
@@ -19,10 +20,11 @@ IMAGE_BYTES=256*1024*1024  # Working RGBA+BGRA+encoded originals; output limits 
 
 
 class Tasks:
-    def __init__(self,workers=WORKERS):
+    def __init__(self,workers=WORKERS,record_timings=True):
         if not 1<=workers<=WORKERS:raise ValueError('Task worker bound')
         self.pool=ThreadPoolExecutor(max_workers=workers,thread_name_prefix='SFC-parts')
         self.tasks={};self.spans=[];self.closed=False;self.workers=workers
+        self.record_timings=record_timings
 
     def add(self,key,fn,deps=(),priority=None):
         if self.closed:raise ValueError('Preparation closed')
@@ -35,9 +37,11 @@ class Tasks:
         self.tasks[key]=dict(fn=fn,deps=tuple(deps),state='queued',future=None,priority=priority)
 
     def _run(self,key,fn,args):
-        begin=time.perf_counter_ns()
-        try:return dict(value=fn(*args),begin_ns=begin,end_ns=time.perf_counter_ns(),thread=threading.get_ident())
-        except Exception as e:return dict(error=str(e),begin_ns=begin,end_ns=time.perf_counter_ns(),thread=threading.get_ident())
+        begin=time.perf_counter_ns() if self.record_timings else 0
+        try:r=dict(value=fn(*args))
+        except Exception as e:r=dict(error=str(e))
+        if self.record_timings:r.update(begin_ns=begin,end_ns=time.perf_counter_ns(),thread=threading.get_ident())
+        return r
 
     def pump(self):
         done=[]
@@ -47,7 +51,8 @@ class Tasks:
             if t['state']=='running' and t['future'].done():
                 r=t.pop('future').result();t.update(r,state='failed' if 'error' in r else 'done')
                 t['fn']=None
-                self.spans.append(dict(task=list(key),**{k:v for k,v in r.items() if k!='value'}));done.append(key)
+                if self.record_timings:self.spans.append(dict(task=list(key),**{k:v for k,v in r.items() if k!='value'}))
+                done.append(key)
         active=sum(t['state']=='running' for t in self.tasks.values())
         for key,t in sorted(list(self.tasks.items()),key=order):
             if t['state']!='queued':continue
@@ -66,7 +71,7 @@ class Tasks:
                 future=t.pop('future',None)
                 if future is not None and not future.cancelled():
                     result=future.result()
-                    self.spans.append(dict(task=list(key),shutdown=True,**{k:v for k,v in result.items() if k!='value'}))
+                    if self.record_timings:self.spans.append(dict(task=list(key),shutdown=True,**{k:v for k,v in result.items() if k!='value'}))
             if t['state'] in ('running','queued'):t.update(state='cancelled',fn=None)
 
 
@@ -120,7 +125,7 @@ class Pipeline:
     Geometry/textures are immutable. Material pieces are published only by pump.
     """
     def __init__(self,relay):
-        self.relay=relay;self.graph=Tasks();self.jobs={};self.contents={}
+        self.relay=relay;self.graph=Tasks(record_timings=not CONTEXT.release);self.jobs={};self.contents={}
         self.spans=self.graph.spans;self.closed=False;self.events=[];self.image_users={}
         from material_controls import encode
         self.values=struct.unpack('<2I10fQ',encode(relay.material_config))[2:12]

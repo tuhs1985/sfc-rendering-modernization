@@ -19,13 +19,13 @@ from live_owner_timing import Relay as SingleRelay,ROOT,CONFIG,OFFSET
 import sys
 sys.path.insert(0,str(ROOT/'tools/remix_runtime'))
 from runtime_context import CONTEXT
-from asset_preparation import PreparationQueue
 from multi_scene_resources import Reservations
 import multi_scene as wire
 
 
 class Relay(SingleRelay):
     def __init__(self,*args,**kwargs):
+        preparation_factory=kwargs.pop('preparation_factory',None)
         self.player_replacement=kwargs.pop('player_replacement',False)
         from pipeline_mode import validate
         self.mode=validate(kwargs.pop('pipeline_mode','performance'))
@@ -46,7 +46,6 @@ class Relay(SingleRelay):
         from owner_rebind import Content
         self.content=Content(self.root)
         self.output_reservations=Reservations()
-        self.preparer=PreparationQueue(self.identify_asset,self.prepare_asset)
         self.initial_ids=None;self.first_discovery=None;self.last_discovery=None
         self.initial_context=None;self.renderer_started_ns=None;self.initial_published_ns=None
         self.published_paths=set();self.stopping=False
@@ -67,6 +66,10 @@ class Relay(SingleRelay):
         self.api_texture_prefetch=False
         self.overlap_texture_prefetch=False;self.prefetch_requests=0
         self.prewarm_process=None;self.prewarm_started_ns=None;self.renderer_activation_ns=None
+        if preparation_factory is None:
+            from asset_preparation import PreparationQueue
+            self.preparer=PreparationQueue(self.identify_asset,self.prepare_asset)
+        else:self.preparer=preparation_factory(self)
 
     def start_on_launch(self,pid):
         """Start the real renderer/device, without a ship or dummy scene template."""
@@ -77,8 +80,11 @@ class Relay(SingleRelay):
         from live_owner_timing import EXE,RUNTIME,RECEIVER,GUARD
         backend=getattr(self,'renderer_backend',None)
         if backend:EXE,RUNTIME=backend['exe'],backend['runtime']
-        from evidence_budget import AGGREGATE_BYTES
-        from multi_scene import camera_offset
+        if CONTEXT.release:scratch_limit=0 # No recording quota in installed play.
+        else:
+            from evidence_budget import AGGREGATE_BYTES
+            scratch_limit=AGGREGATE_BYTES
+        camera_offset_x=0 if self.player_replacement or getattr(self,'native_all_ships',False) else wire.camera_offset()[0]
         from warm_start import initialize
         initialize(self.receiver.channel,pid)
         gpu=self.folder/'gpu';gpu.mkdir(exist_ok=True)
@@ -104,7 +110,7 @@ class Relay(SingleRelay):
              'SFC_DIRECT64_SINGLE_PRESENT':'1','SFC_DIRECT64_INJECT_LAG_MS':'0','SFC_D3D9_PREWARM':'1',
              'SFC_D3D9_GAME_OUTPUT':'1','SFC_D3D9_VISUAL_SETTINGS':'1','SFC_D3D9_LIGHT_SETTINGS':'1',
              'SFC_D3D9_SHARED_LIGHTS':'1','SFC_D3D9_SYNC_BUFFER':'1','SFC_D3D9_MULTISCENE':'1',
-             'SFC_PIPELINE_MODE':self.mode,'SFC_D3D9_OFFSET_X':str(camera_offset()[0])}
+             'SFC_PIPELINE_MODE':self.mode,'SFC_D3D9_OFFSET_X':str(camera_offset_x)}
         env['SFC_D3D9_PLAYER_REPLACEMENT']='1' if self.player_replacement else '0'
         env['SFC_DAMAGE_TEXTURES']='1' if getattr(self,'damage_textures',False) else '0'
         env['SFC_DAMAGE_FIXTURE_SNAPSHOTS']='1' if getattr(self,'damage_textures',False) and self.offline_fixture else '0'
@@ -136,8 +142,12 @@ class Relay(SingleRelay):
             if not self.offline_fixture:raise ValueError('Public API texture prefetch experiment is offline only')
             env['SFC_D3D9_API_PREFETCH']='1'
             if self.overlap_texture_prefetch:env['SFC_D3D9_API_PREFETCH_OVERLAP']='1'
-        from loading_policy import configure
-        extra,self.loading_receipt=configure(self.loading_policy,env,offline=self.offline_fixture)
+        if CONTEXT.release:
+            if self.loading_policy!='inherit':raise ValueError('Installed alpha uses the pinned loading configuration')
+            extra='';self.loading_receipt={'mode':'inherit'}
+        else:
+            from loading_policy import configure
+            extra,self.loading_receipt=configure(self.loading_policy,env,offline=self.offline_fixture)
         if getattr(self,'async_material_checkout',False):
             from async_material_checkout import configure_child
             selected,receipt=configure_child(backend,env)
@@ -159,7 +169,7 @@ class Relay(SingleRelay):
         self.prewarm_started_ns=time.perf_counter_ns();self.renderer_started_ns=self.prewarm_started_ns
         env.pop('SFC_D3D9_LIVE_TUNING',None)
         if getattr(self,'live_tuning',False):env['SFC_D3D9_LIVE_TUNING']='1'
-        self.prewarm_process=subprocess.Popen([str(GUARD),str(gpu),'0' if getattr(self,'play_session',False) else '1980' if getattr(self,'live_tuning',False) else '285',str(AGGREGATE_BYTES),str(2*1024*1024),str(EXE),str(gpu),str(RUNTIME),str(RECEIVER),'normal'],env=env,creationflags=subprocess.CREATE_NO_WINDOW)
+        self.prewarm_process=subprocess.Popen([str(GUARD),str(gpu),'0' if getattr(self,'play_session',False) else '1980' if getattr(self,'live_tuning',False) else '285',str(scratch_limit),str(2*1024*1024),str(EXE),str(gpu),str(RUNTIME),str(RECEIVER),'normal'],env=env,creationflags=subprocess.CREATE_NO_WINDOW)
 
     def poll(self,pid,from_service=False):
         if self.service and not from_service:self.service.check();return
@@ -458,8 +468,8 @@ class Relay(SingleRelay):
     def finish_play(self,pid):
         """Small exit summary;no raw timing dump or parsed full-frame campaign."""
         self.stop()
-        from native_cohort import save,OFFSET as cohort_offset
-        members=save(self.receiver.channel,self.folder) if struct.unpack('<I',self.receiver.channel.read(cohort_offset+12,4))[0] else None
+        from native_cohort import snapshot,OFFSET as cohort_offset
+        members=snapshot(self.receiver.channel) if struct.unpack('<I',self.receiver.channel.read(cohort_offset+12,4))[0] else None
         from native_gate import header,OFFSET as gate_offset
         raw=self.receiver.channel.read(gate_offset,256)
         gate=header(raw) if struct.unpack_from('<I',raw)[0] else None
@@ -467,7 +477,8 @@ class Relay(SingleRelay):
             qualified_assets=len(self.catalog),attempted_assets=len(self.attempts),image_bytes=self.image_bytes,
             partial_assets=len(self.partial),recent_bindings=self.binding_events[-120:]),native_cohort=members,native_gate_summary=gate,
             scope='Untimed play counters only;not diagnostic timing/coverage acceptance')
-        (self.folder/'play-session-summary.json').write_text(json.dumps(report,indent=2));return report
+        if not CONTEXT.release:(self.folder/'play-session-summary.json').write_text(json.dumps(report,indent=2))
+        return report
 
     def finish(self,pid):
         report=super().finish(pid)

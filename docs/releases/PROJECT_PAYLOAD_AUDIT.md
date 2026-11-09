@@ -1,5 +1,13 @@
 # Our alpha payload — continued audit, November 9, 2026
 
+**Implementation update:** sponsor reopened this work after checkpoint49373fd.
+All48 audited files are now excluded from the alpha, with one shared helper
+added (own payload118→71). Developer tools stay in the repository. 749tests and
+reduced-package CPU asset/light and corrected GPU-startup checks pass; sponsor
+confirmed enhancements work after the startup correction.
+[Implementation record](../runs/2026-11-09-codex-production-module-separation.md).
+The counts/findings below describe the pre-separation audit snapshot.
+
 Sponsor priority: focus on excessive **project-authored** files/dependencies, not
 vendor package trimming. This continues [the tools audit](PACKAGED_TOOLS_AUDIT.md).
 **Static review only. No production changes, deletion, game/renderer launch or

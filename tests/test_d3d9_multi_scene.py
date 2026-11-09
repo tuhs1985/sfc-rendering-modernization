@@ -77,7 +77,7 @@ class MultiSceneTests(unittest.TestCase):
     def test_live_workflow_is_explicit_and_preserves_legacy(self):
         source=(ROOT/'tools/remix_runtime/run_return_game.py').read_text()
         self.assertIn("if args.multi_ship:from multi_scene_relay import Relay",source)
-        self.assertIn("if not args.multi_ship:buffer_qualified()",source)
+        self.assertIn("if not args.multi_ship:\n            from qualify_synchronized_buffer import",source)
         self.assertIn('original_ship_suppressed=False',source)
         self.assertIn("if self.additive and not self.multi_scene:",(ROOT/'tools/remix_runtime/live_owner_timing.py').read_text())
 

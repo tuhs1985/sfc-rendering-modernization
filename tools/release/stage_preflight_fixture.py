@@ -18,7 +18,7 @@ sys.path.insert(0,str(ROOT/'tools/remix_runtime'))
 from runtime_context import CONTEXT,CLIENT_SHA256,VERSION
 from release_manifest import digest,SCHEMA,REQUIRED_ROLES
 from copied_preferences import protected_ini_sha256
-from inventory_dependencies import python_closure,RUNTIME_RESOURCES
+from inventory_dependencies import production_files
 from game_profile import signature as dimension_signature
 from runtime_candidate import COMMIT,HEADER_SHA
 from package_layout import copy_python,copy_remix
@@ -41,14 +41,12 @@ def stage(*,functional=False):
     # never from Codex. Ignore compiled caches so -B imports create no mutable
     # writes outside data and immutable manifests remain stable across moves.
     copy_python(ROOT/'artifacts/alpha/python-3.12.14',package/'python')
-    closure=python_closure(ROOT/'tools/release/bootstrap.py')
-    for name in [*closure['files'],*closure['resources'].values()]:
+    for name in production_files():
         target=package/'code'/name;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/name,target)
     shutil.copyfile(ROOT/'artifacts/alpha/launcher-bin/launcher.exe',package/'launcher.exe')
     shutil.copyfile(ROOT/'tools/release/Troubleshoot.cmd',package/'Troubleshoot.cmd')
     roles=dict(coordinator='code/tools/release/bootstrap.py',python='python/python.exe',launcher='launcher.exe',restore='launcher.exe',
                project_license='LICENSE',third_party_notices='FIXTURE-NOT-FOR-DISTRIBUTION.txt',troubleshooting_launcher='Troubleshoot.cmd')
-    roles.update({role:'code/'+name for role,name in RUNTIME_RESOURCES.items()})
     shutil.copyfile(ROOT/'LICENSE',package/'LICENSE')
     (package/roles['third_party_notices']).write_text('Private entry-point fixture only. Vendor notices/complete dependency closure still under review. Do not distribute this directory.')
     binaries={
@@ -62,7 +60,6 @@ def stage(*,functional=False):
         'output_receiver':'d3d9-proof/receiver-bin/output_receiver.exe',
         'job_guard':'remix-ingest/bin/bounded_job.exe',
         'mesh_checksum':'d3d9-proof/mesh-checksum/mesh_checksum.dll',
-        'texture_hash':'d3d9-proof/material-bin/texture_hash.exe',
         'remix_runtime':'remix-runtime/deps/candidate-1.6.1/runtime/d3d9_x64.dll',
         'reshade_proxy':'remix-runtime/deps/reshade-full-6.7.1/extracted/ReShade32.dll',
     }

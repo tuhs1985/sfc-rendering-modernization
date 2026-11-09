@@ -20,6 +20,7 @@ import multi_scene as wire
 class Relay(Baseline):
     def __init__(self,*args,**kwargs):
         experimental=kwargs.pop('experimental_live_checkout',False)
+        kwargs['preparation_factory']=Pipeline
         super().__init__(*args,**kwargs)
         if not self.offline_fixture and not experimental:
             self.preparer.close()
@@ -27,7 +28,6 @@ class Relay(Baseline):
         self.experimental_live_checkout=experimental
         self.admission_service=True
         self.initial_texture_data=True
-        self.preparer.close();self.preparer=Pipeline(self)
         from texture_memory import Pool
         self.texture_memory=Pool(self.receiver.name)
         self.anchor_id=None;self.path_count=0;self.material_pieces={};self.progressive_events=[];self.pending_enhancements=deque()
