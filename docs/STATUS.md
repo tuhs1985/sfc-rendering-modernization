@@ -1,13 +1,47 @@
 ---
 title: SFC Modernization — Status Tracker
 updated: 2026-11-09
-checkpoint: Runtime baseline35fda1b committed;OpenSpec setup separate;foundation14tasks pending;no push
+checkpoint: Reviewed foundation checkpoint on codex/organize-repository-foundation;14tasks complete;no merge or push;runtime unchanged
 tags:
   - sfc-modernization
   - project-status
 ---
 
 # SFC Modernization — Status Tracker
+
+## Current — repository foundation, November 9
+
+The sponsor authorized a scoped work branch from pushed `fe17b8d` and application
+of `organize-repository-foundation`. Delivered
+[contributor/Git conventions](../CONTRIBUTING.md), the
+[repository map](REPOSITORY_MAP.md) and [migration roadmap](REPOSITORY_MIGRATION.md).
+Documentation ownership and current-vs-historical entry points are explicit.
+The sponsor's parent-folder clarification is accounted for in the
+[external workspace inventory](REPOSITORY_MAP.md#project-workspace-outside-this-repository):
+test copies, old publishing clone, backups, RemixJobs and Toolkit archives are
+classified separately from Git branches. No external folders were moved/deleted.
+The [task list](../openspec/changes/organize-repository-foundation/tasks.md) records
+completion and verification. The sponsor reviewed the foundation and requested
+a local commit on `codex/organize-repository-foundation`; no merge, push or release.
+
+Focused checks pass: 76 links, 12 tracked root classifications, 784 source/build/test
+files and 10 checked private package/settings/game inputs unchanged; strict OpenSpec
+validation and whitespace checks pass. No new runtime/GPU/gameplay tests were
+needed or claimed. All 14 tasks are complete; archival remains a separate action.
+
+The runtime baseline remains `35fda1b`, with sponsor-confirmed restored
+enhancements; `fe17b8d` records OpenSpec setup. Source/asset paths and the private
+alpha are unchanged by this foundation. Prior tests are not being rerun or
+claimed as new results of documentation work. Vendor/VC++ closure, clean-machine
+and second-machine package checks, and candidate approval remain release gaps.
+
+Next: review this foundation before a separate `separate-release-tooling` change.
+No file relocation, deletion, CI implementation or rendering changes are included.
+
+## Historical updates
+
+The entries below preserve their dated status. Read the current handoff and the
+section above before treating an older "pending", "parked" or "latest" as current.
 
 **November9 — OpenSpec installed:** CLI1.16.1 with six local Codex core workflows;
 SFC context and artifact rules configured. AGENTS.md preserved, telemetry off,

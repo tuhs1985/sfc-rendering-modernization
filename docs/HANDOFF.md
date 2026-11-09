@@ -4,6 +4,56 @@ Sponsor-facing current work and parked items: [status tracker](STATUS.md).
 Diagnostic tools, triggers, limits and known pitfalls: [diagnostic reference](DIAGNOSTICS.md).
 The tracker is a sponsor-facing summary; the newest authoritative checkpoint below controls technical work.
 
+## Current checkpoint — November 9 repository foundation
+
+Work branch: `codex/organize-repository-foundation`, created with sponsor
+authorization at pushed checkpoint `fe17b8d`. A live remote check confirmed
+GitHub `master` at the same commit before branching. Runtime/package fixes are
+recorded in `35fda1b`; OpenSpec setup and the foundation plan are in `fe17b8d`.
+Unrelated local attachments and the memory audit remain untracked and untouched.
+
+Sponsor clarified that organization includes the SFC-related workspace outside
+Git. The map now inventories both test game copies, the old independent publishing
+clone, backups with pre-sanitization history, historical RemixJobs and standalone
+Toolkit downloads/rollback records. Those directories are not branches or linked
+worktrees. Future consolidation must preserve settings, recovery and provenance;
+none were changed or deleted. See the
+[workspace inventory](REPOSITORY_MAP.md#project-workspace-outside-this-repository).
+
+The documentation-only foundation now provides [contributor conventions](../CONTRIBUTING.md),
+[current file classification](REPOSITORY_MAP.md) and a
+[staged migration roadmap](REPOSITORY_MIGRATION.md), with entry links from README,
+AGENTS and the OpenSpec guide. Source locations, build inputs, package manifests,
+game files and settings are unchanged. No commits, pushes, merges or
+release actions were part of implementation. The sponsor subsequently reviewed
+the foundation and requested a local checkpoint only; no merge or push.
+Verification/completion is
+tracked in the [change tasks](../openspec/changes/organize-repository-foundation/tasks.md).
+
+Focused verification passes: 76 new/document-entry Markdown links, all 12 tracked
+root classifications, 784 source/build/test inputs unchanged, and 10 checked private
+package/settings/critical game inputs unchanged. Strict OpenSpec validation and
+`git diff --check` pass; HEAD/index content remains at the branch baseline.
+Local check receipt: `artifacts/repository-foundation/verification.json`.
+No game/renderer process was started and no runtime regression campaign was
+repeated. All 14 tasks are complete; the foundation was reviewed and checkpointing
+requested. Source relocation remains a separate change; archival is not performed.
+
+Current runtime baseline: sponsor confirmed enhancements work after the
+profiling-independent startup correction. Its 749-regression and standalone GPU
+results are prior evidence, not new tests of this documentation change. Public
+release readiness still needs vendor/VC++ dependency closure, clean/second-machine
+checkout and exact candidate approval. No public alpha ZIP/tag was published.
+
+Next separately scoped implementation: review the foundation, then prepare
+`separate-release-tooling` around the portable entry point's build/runtime split.
+Use the roadmap's consumer/build/manifest checks before proposing source moves;
+do not move the entire `tools/` tree or restart a rendering investigation merely
+to reorganize files. The older sections below retain dated findings and may use
+words such as "latest" or "pending" relative to their historical run.
+
+## Historical checkpoints — superseded by the current section above
+
 **SFC-23 resolved locally and parked, November 6, 2026.** The post-reboot trace
 attributed 19.11 seconds of startup waits to Defender, including a corroborated
 file-filter wait during mission-script access. After the sponsor excluded only
@@ -50,7 +100,7 @@ normal-exit confirmation; client/settings checks passed and no owned helpers
 remained at review. Next implement dedicated break-origin conversion and
 independent piece lifetime/submission. The initial geometry blocker is resolved.
 
-## NEWEST / AUTHORITATIVE CHECKPOINT — November 9 private-alpha cleanup
+## Historical checkpoint — November 9 private-alpha cleanup
 
 **Latest / OpenSpec installed:** official checksum-verified standalone CLI1.16.1,
 core Codex profile with six repository-local skills under `.agents/skills/`.

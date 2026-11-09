@@ -14,7 +14,8 @@ Anonymous CLI telemetry is disabled in the local OpenSpec configuration.
 - Six generated Codex workflows: `.agents/skills/openspec-*/SKILL.md`.
 
 The first change, [organize-repository-foundation](../openspec/changes/organize-repository-foundation/proposal.md),
-has a proposal, design and14pending implementation tasks. It deliberately skips
+has a proposal, design and 14 tracked implementation tasks; see its task list for
+current completion. It deliberately skips
 behavior specs because its scope is documentation/process only. No standing
 specifications have been generated. Existing research, requirements, plans and
 evidence have not been migrated or rewritten.
@@ -59,6 +60,12 @@ holds detailed behavior contracts and scoped changes. AGENTS.md holds standing
 contributor instructions. The handoff holds the current engineering checkpoint;
 run records hold evidence, and Obsidian remains the sponsor-facing dashboard and
 parking lot. Link these records rather than maintaining competing requirements.
+
+The [contributor guide](../CONTRIBUTING.md#documentation-responsibilities) assigns
+each record's responsibility; the [repository map](REPOSITORY_MAP.md) classifies
+current files, and the [migration roadmap](REPOSITORY_MIGRATION.md) orders later
+changes. Use those guides without treating the foundation plan as authorization
+to move runtime code.
 
 Initialize future capability specs from verified current behavior and approved
 requirements; retain unknowns explicitly. Do not convert every historical run to

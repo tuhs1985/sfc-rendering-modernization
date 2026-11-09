@@ -2,6 +2,12 @@
 
 An experimental rendering-modernization project for **Starfleet Command: Orion Pirates**, tested against the Community Edition client **2.5.6.4**.
 
+For development, start with [contributing](CONTRIBUTING.md), the
+[current checkpoint](docs/HANDOFF.md), the [repository map](docs/REPOSITORY_MAP.md)
+and the [staged migration roadmap](docs/REPOSITORY_MIGRATION.md). The overview and
+videos below include dated demonstrations; the current handoff and linked
+evidence distinguish today's baseline from historical experiments.
+
 The aim is to improve tactical 3D rendering while preserving gameplay, controls, tactical information, missions, campaigns and save continuity. This is not a rebuild of the game engine.
 
 **Current result:** we capture fresh ship geometry and scene state from the running game, submit it through our own **ordinary Direct3D 9 adapter**, and let NVIDIA RTX Remix render it. GPU-shared output returns to SFC's actual colour/depth targets before later native shields, effects and text. Supported multi-ship replacement has passed gameplay checkout, including shared-model instances. The latest aggressive camera-switch checkout showed no visible native/enhanced swaps; small startup/admission exceptions and the earlier cloaked Romulan's upstream admission remain documented. Full-scene replacement is not established. See the [latest gameplay review](docs/runs/2026-10-31-codex-native-camera-stability-checkout.md).
@@ -262,6 +268,10 @@ restoration and the remaining sponsor gameplay check.
 
 ## Repository map
 
+The [full repository map](docs/REPOSITORY_MAP.md) classifies production components,
+development tools and historical evidence in place. The table below is an overview;
+folder names alone do not determine what ships in the alpha.
+
 For troubleshooting tools, timing captures and trace limitations, see the [diagnostic tools reference](docs/DIAGNOSTICS.md). Normal gameplay does not require enabling these tools.
 
 | Location | Purpose |
@@ -270,13 +280,15 @@ For troubleshooting tools, timing captures and trace limitations, see the [diagn
 | `tools/scene_bridge/` | Renderer-neutral scene representations, persistent identity and simulation pose |
 | `tools/d3d9_proof/` | Ordinary D3D9 adapter, live host, GPU output receiver and diagnostic launchers |
 | `tools/remix_runtime/` | Remix runtime host, GPU return/compositor, preparation, analysis and controls |
-| `tools/remix_ingest/` | Earlier offline/Toolkit inspection workflow |
+| `tools/remix_ingest/` | Active live/break capture decoding and camera helpers alongside earlier offline/Toolkit inspection tools |
+| `tools/release/` | Portable runtime bootstrap plus separate build/packaging tools; only explicit inputs ship |
 | `tools/recon/` | Focused inspection and publication-audit helpers |
 | `tests/` | Python/native regression and protocol fixtures |
 | `docs/m0/`, `docs/m1/` | Milestone plans, contracts and evidence |
 | `docs/reconnaissance/` | Focused investigations, render/transport contracts and curated results |
 | `docs/runs/` | Reproducible execution records |
 | `docs/HANDOFF.md` | Current checkpoint and historical handoffs |
+| `openspec/`, `.agents/skills/` | Development planning and generated workflows; excluded from the alpha |
 
 Game files, reference originals, SDK/runtime downloads, compiled binaries, extracted assets and bulk captures are excluded from Git. Generated evidence belongs under ignored `artifacts/` or other documented local work areas. A clone is source and documentation—not a game distribution.
 
@@ -286,7 +298,10 @@ Keep experiments small, reversible and evidence-backed. Separate **CONFIRMED**, 
 
 For a new development session, read the handoff, choose one bounded task, run the relevant tests and leave a durable run record/handoff. Future contributors should propose a focused change rather than assume every historical experiment is current.
 
-The existing development workstation uses `codex/github-sanitized` to publish to GitHub `master`; fresh GitHub clones use remote `master` normally. Follow the [publication safeguards](docs/decisions/2026-10-18-private-github-publication.md); never merge or publish local-only recovery history.
+GitHub `master` is the integration line. Use scoped `codex/<change-name>` work
+branches under the [contributor conventions](CONTRIBUTING.md#git-conventions).
+The historical local `master` and recovery branches are not automatic merge
+sources. Follow the [publication safeguards](docs/decisions/2026-10-18-private-github-publication.md).
 
 This is an independent, unofficial project. Project-authored code is available
 under the [MIT license](LICENSE). Game assets, third-party dependencies and
