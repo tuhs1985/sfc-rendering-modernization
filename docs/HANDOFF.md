@@ -52,6 +52,22 @@ independent piece lifetime/submission. The initial geometry blocker is resolved.
 
 ## NEWEST / AUTHORITATIVE CHECKPOINT — November 9 private-alpha cleanup
 
+**Latest / OpenSpec installed:** official checksum-verified standalone CLI1.16.1,
+core Codex profile with six repository-local skills under `.agents/skills/`.
+`openspec/config.yaml` carries concise SFC context/rules; AGENTS.md unchanged.
+Anonymous telemetry disabled. Doctor reports a healthy project root; templates
+resolve and update dry-run is empty. The scoped
+[repository-foundation proposal](../openspec/changes/organize-repository-foundation/proposal.md)
+has a design and14pending implementation tasks; strict change validation passes.
+Behavior specs are explicitly skipped for this documentation/process-only change.
+No foundation implementation, historical migration or production payload change.
+[Usage and responsibilities](OPENSPEC.md). No push.
+
+**Commit checkpoint:** `35fda1b` records the reviewed production separation and
+gameplay-confirmed profiling-off startup correction. OpenSpec setup and this
+foundation plan are recorded separately. The14foundation implementation tasks
+remain pending; no branch/file relocation is authorized by these commits.
+
 **Latest / cleanup startup regression corrected:** sponsor's checkout rendered
 only native ships. Run `20261109-194448-097868-in-game` prepared the FCA but
 produced no replacement frames; passive receiver never activated. Cleanup turned

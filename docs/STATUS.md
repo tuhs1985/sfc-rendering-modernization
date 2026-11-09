@@ -1,13 +1,22 @@
 ---
 title: SFC Modernization — Status Tracker
 updated: 2026-11-09
-checkpoint: Production payload71files;profiling-independent startup fix gameplay-confirmed;no push
+checkpoint: Runtime baseline35fda1b committed;OpenSpec setup separate;foundation14tasks pending;no push
 tags:
   - sfc-modernization
   - project-status
 ---
 
 # SFC Modernization — Status Tracker
+
+**November9 — OpenSpec installed:** CLI1.16.1 with six local Codex core workflows;
+SFC context and artifact rules configured. AGENTS.md preserved, telemetry off,
+project health/templates/update dry-run verified. The repository-foundation
+proposal/design/task list passes strict validation;14implementation tasks remain.
+No game-behavior specs or historical migration. Development-only; alpha package
+unchanged. [OpenSpec guide](OPENSPEC.md) and
+[foundation proposal](../openspec/changes/organize-repository-foundation/proposal.md).
+No foundation implementation or push.
 
 **November9 — Cleanup startup regression fixed:** the profiling-off change hit
 an old native warm-up requirement for profiling to be on. Removed that coupling,

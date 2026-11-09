@@ -1,0 +1,38 @@
+schema: spec-driven
+
+context: |
+  This is the existing SFC: Orion Pirates rendering-modernization project.
+  Follow AGENTS.md and the latest authoritative checkpoint in docs/HANDOFF.md.
+  The capability requirements in docs/requirements/ govern overall scope and milestones.
+  OpenSpec organizes behavior contracts and changes; run records remain evidence,
+  the handoff holds the implementation checkpoint, and Obsidian holds human-facing context.
+  Preserve the accepted installation and original assets; use the verified test copy.
+  Preserve user appearance settings and untimed normal play with recording off by default.
+  Keep renderer-independent data separate from Remix-specific conversions and controls.
+  OpenSpec and its workflows are development-only and must not enter the alpha package.
+
+rules:
+  proposal:
+    - State the user-visible problem, scope, non-goals, and affected interfaces concisely.
+    - Distinguish approved requirements, verified findings, assumptions, and open questions.
+  specs:
+    - Describe observable behavior; keep implementation details in design artifacts.
+    - Reference existing capability requirements and evidence rather than duplicating historical plans.
+  design:
+    - Reuse documented upstream facilities and existing qualified interfaces before adding mechanisms.
+    - Identify performance impact and separate optional diagnostics from functional prerequisites.
+    - Describe relevant compatibility, cleanup, recovery, and release-package boundaries.
+  tasks:
+    - Use focused checks appropriate to the change, exercising actual process or file boundaries when relevant.
+    - Distinguish offline, standalone GPU, packaged execution, and sponsor gameplay verification.
+    - Keep pending human verification explicit; a checked task is not proof of universal compatibility.
+
+operations:
+  apply:
+    guidance:
+      - Preserve uncommitted work and existing user authorization; do not stage, commit, or push unless requested.
+      - Keep changes focused and report results in plain language with material limitations.
+  archive:
+    guidance:
+      - Link supporting evidence and retain unresolved limitations and next actions.
+      - Update the repository handoff and existing Obsidian tracker without duplicating the full change history.
