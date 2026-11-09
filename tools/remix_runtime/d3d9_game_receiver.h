@@ -2,6 +2,7 @@
 // Imports happen on an owned worker;immediate context is render-thread-only.
 #pragma once
 #include "../d3d9_proof/game_output_wire.h"
+#include "../d3d9_proof/output_target.h"
 #include "../d3d9_proof/live_owner_wire.h"
 #include "../d3d9_proof/camera_left.h"
 #include "ship_triplet_compositor.h"
@@ -28,6 +29,8 @@ class Receiver {
  struct Import {Microsoft::WRL::ComPtr<ID3D11Texture2D> textures[3];Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> views[3];Microsoft::WRL::ComPtr<ID3D11Query> query;game_gpu::ReadLease lease;output_wire::Packet identity{};std::atomic<bool> ready{false},held{false};bool pending=false;};
  Import imported[2];std::atomic<bool> stopping{false};std::thread worker;HANDLE receiver=nullptr;
  DWORD thread=GetCurrentThreadId();sfc_calibration::Snapshot snapshot{};
+ const bool nativeSize=output_target::requested();DWORD targetWidth=1920,targetHeight=1080,targetGeneration=0;
+ output_target::Store* targetStore=nullptr;output_target::Notice targetNotice{};
  bool buffered=false;const bool diagnosticTiming=!pipeline_mode::play_session();std::unique_ptr<scene_frame_buffer::History> history;synchronized_frame::Store* bufferAudit=nullptr;
  Microsoft::WRL::ComPtr<ID3D11DeviceContext4> fencedContext;
  multi_scene::Store* cohort=nullptr;multi_scene::Frame cohortFrame{};
@@ -54,7 +57,7 @@ class Receiver {
    const auto p=wire.packet;const auto meta=game_output::metadata(wire);
    const bool joined=cohortGate?(game_output::valid(meta,source.session)&&meta.source_sequence==t.sequence&&p.owner==cohortFrame.anchor&&p.revision==cohortFrame.revision&&p.source_frame==t.frame&&p.source_state_hash==t.hash&&
        native_cohort::read(cohortProof->slots[i],cohortMembers)&&cohortMembers.output==p.sequence&&native_cohort::qualifies(cohortMembers,*cohort,cohortFrame)):game_output::matches(p,meta,gateRow.data(),source.session,t.hash,t.sequence);
-   const bool identity=output_wire::valid(p,p.session,pool->header.receiver_pid)&&p.width==1920&&p.height==1080&&p.resource_epoch==i+1&&
+   const bool identity=output_wire::valid(p,p.session,pool->header.receiver_pid)&&p.width==targetWidth&&p.height==targetHeight&&pool->reserved[1]==targetGeneration&&p.resource_epoch==game_output::slot_epoch(targetGeneration,i)&&
        !memcmp(p.handles,item.identity.handles,sizeof(p.handles))&&joined&&
        gateStore->header.ready[i].sequence==p.sequence&&gateStore->header.ready[i].qpc>=t.offered;
    if(identity){gateSlot=static_cast<int>(i);gateToken=++nextGateToken;gateTicket=t;if(cohortGate)item.held.store(true,std::memory_order_release);
@@ -198,6 +201,7 @@ class Receiver {
  void audit(synchronized_frame::Audit a){if(bufferAudit)synchronized_frame::append(*bufferAudit,a);}
  void imports(){
   try{while(!stopping.load()){
+   if(nativeSize&&pool->reserved[1]!=targetGeneration){Sleep(1);continue;}
    if(InterlockedCompareExchange(&pool->header.ready,0,0)&&game_output::valid(pool->header,source.session,GetCurrentProcessId())){
     if(!receiver){receiver=OpenProcess(SYNCHRONIZE,FALSE,pool->header.receiver_pid);if(!receiver)throw std::runtime_error("D3D9 receiver lifetime");gatePeer.store(receiver,std::memory_order_release);}
     if(InterlockedCompareExchange(&pool->header.stopped,0,0))break;
@@ -209,7 +213,7 @@ class Receiver {
      }
      if(InterlockedCompareExchange(&wire.state,output_wire::acquired,output_wire::ready)!=output_wire::ready)continue;
      try{const auto p=wire.packet;
-      if(!output_wire::valid(p,p.session,pool->header.receiver_pid)||p.width!=1920||p.height!=1080||p.resource_epoch!=slot+1)throw std::runtime_error("D3D9 imported descriptor");
+      if(!output_wire::valid(p,p.session,pool->header.receiver_pid)||p.width!=targetWidth||p.height!=targetHeight||p.resource_epoch!=game_output::slot_epoch(targetGeneration,slot))throw std::runtime_error("D3D9 imported descriptor/generation");
       Microsoft::WRL::ComPtr<IDXGIDevice> dx;Microsoft::WRL::ComPtr<IDXGIAdapter> adapter;DXGI_ADAPTER_DESC desc{};
       ship_triplet::checked(device.As(&dx),"game GPU interface");ship_triplet::checked(dx->GetAdapter(&adapter),"game GPU");ship_triplet::checked(adapter->GetDesc(&desc),"game GPU identity");
       if(desc.AdapterLuid.LowPart!=p.luid_low||desc.AdapterLuid.HighPart!=p.luid_high)throw std::runtime_error("D3D9/game GPU mismatch");
@@ -249,6 +253,16 @@ public:
   if(d->GetCreationFlags()&D3D11_CREATE_DEVICE_SINGLETHREADED)throw std::runtime_error("Game device disallows worker imports");
   if(!source.prepare()||!source.requested)throw std::runtime_error("Explicit semantic source required for D3D9 insertion");
   pool=reinterpret_cast<game_output::Pool*>(reinterpret_cast<BYTE*>(source.mailbox)-sfc_calibration::Offset+game_output::Offset);d->GetImmediateContext(&context);
+  if(nativeSize){
+   if(!back)throw std::runtime_error("Native output requires an actual game target");
+   D3D11_TEXTURE2D_DESC shape{};back->GetDesc(&shape);targetWidth=shape.Width;targetHeight=shape.Height;
+   targetGeneration=static_cast<DWORD>(return_path::read(mapping.state->epoch)+1);
+   if(!targetGeneration||targetGeneration>INT32_MAX)throw std::runtime_error("Native target generation exhausted");
+   auto* base=reinterpret_cast<BYTE*>(source.mailbox)-sfc_calibration::Offset;targetStore=reinterpret_cast<output_target::Store*>(base+output_target::Offset);
+   targetNotice.pid=GetCurrentProcessId();memcpy(targetNotice.session,source.session,16);targetNotice.observed=native_gate::now();
+   targetNotice.width=targetWidth;targetNotice.height=targetHeight;targetNotice.device=targetNotice.generation=targetGeneration;
+   output_target::publish(*targetStore,targetNotice);
+  }
   nativeGateMode=native_gate::requested();replacementMode=replacement::requested()&&!native_insertion::requested()&&!nativeGateMode;buffered=wantsBuffer();if(buffered){
    ship_triplet::checked(context.As(&fencedContext),"Buffered game context fence support");
    if(!back)throw std::runtime_error("Buffered scene requires explicit game target");
@@ -290,18 +304,30 @@ public:
   }
   if(nativeGateMode){
    auto* base=reinterpret_cast<BYTE*>(source.mailbox)-sfc_calibration::Offset;
-   if(!buffered||!cohort||!native_insertion::preparePassiveLedger(base,source.session,GetCurrentProcessId()))throw std::runtime_error("Native gate passive ledger");
    nativePassiveLedger=reinterpret_cast<replacement::Store*>(base+replacement::Offset);
    gateStore=reinterpret_cast<native_gate::Store*>(base+native_gate::Offset);
-   if(gateStore->header.magic)throw std::runtime_error("Native gate fresh device/session required");
-   native_gate::initialize(*gateStore,source.session,GetCurrentProcessId(),native_gate::policy());
+   if(!buffered||!cohort)throw std::runtime_error("Native gate requires paired cohort");
+   if(gateStore->header.magic){auto& h=gateStore->header;
+    if(!nativeSize||!native_gate::valid(h,source.session,GetCurrentProcessId())||!h.stop||h.error||h.partial||h.active)throw std::runtime_error("Native gate prior device not drained");
+    // A live session's receipt counters are deliberately nonzero after the
+    // first target. Preserve them; a fully drained gate is the resize permit.
+    if(!replacement::valid(nativePassiveLedger,source.session,GetCurrentProcessId()))throw std::runtime_error("Native target ledger identity");
+    ++h.generation;h.thread=0;h.frame=0;h.ready[0]={};h.ready[1]={};
+   }else {
+    if(!native_insertion::preparePassiveLedger(base,source.session,GetCurrentProcessId()))throw std::runtime_error("Native gate passive ledger");
+    native_gate::initialize(*gateStore,source.session,GetCurrentProcessId(),native_gate::policy());
+   }
    gateEvents.create(source.session);nativeCompositor=std::make_unique<ship_replacement::DepthCompositor>(d);
-   cohortGate=native_cohort::requested();if(cohortGate){cohortProof=reinterpret_cast<native_cohort::Store*>(base+native_cohort::Offset);if(cohortProof->header.magic)throw std::runtime_error("Native cohort fresh session required");native_cohort::initialize(*cohortProof,source.session,GetCurrentProcessId());}
+   if(nativeSize){ResetEvent(gateEvents.stop);InterlockedExchange(&gateStore->header.stop,0);}
+   cohortGate=native_cohort::requested();if(cohortGate){cohortProof=reinterpret_cast<native_cohort::Store*>(base+native_cohort::Offset);
+    if(cohortProof->header.magic){if(!nativeSize||!native_cohort::valid(cohortProof->header,source.session,GetCurrentProcessId()))throw std::runtime_error("Native cohort session mismatch on target change");}
+    else native_cohort::initialize(*cohortProof,source.session,GetCurrentProcessId());}
   }
   worker=std::thread([this]{imports();});
  }
  ~Receiver(){stop();source.close();if(receiver)CloseHandle(receiver);}
  void stop(){if(stopping.exchange(true))return;
+  if(targetStore){targetNotice.width=targetNotice.height=0;targetNotice.observed=native_gate::now();output_target::publish(*targetStore,targetNotice);}
   if(gateStore){InterlockedExchange(&gateStore->header.stop,1);SetEvent(gateEvents.stop);}
   replacementControl(replacement::Recovering,nullptr,0,replacement::Shutdown|replacement::Terminal);if(worker.joinable())worker.join();
   // Stop, publish the final ACK and destroy while the source mapping is valid.
@@ -337,9 +363,9 @@ public:
   Microsoft::WRL::ComPtr<ID3D11RenderTargetView> target;Microsoft::WRL::ComPtr<ID3D11DepthStencilView> z;context->OMGetRenderTargets(1,&target,&z);
   ship_triplet::Key key{};memcpy(key.session,source.session,16);memcpy(key.sourceSession,source.session,16);memcpy(key.asset,pool->asset,32);
   key.owner=key.objectId=ticket->owner;key.revision=ticket->revision;key.frame=ticket->frame;key.pose=key.camera=ticket->hash;
-  key.width=1920;key.height=1080;key.resourceEpoch=DWORD(packet.resource_epoch);key.depthConvention=1;key.sourcePid=GetCurrentProcessId();
+  key.width=packet.width;key.height=packet.height;key.resourceEpoch=DWORD(packet.resource_epoch);key.depthConvention=1;key.sourcePid=GetCurrentProcessId();
   float viewport[4]{};memcpy(viewport,gateRow.data()+83,16);bool good=true;
-  for(unsigned i=0;i<4;++i){good&=std::isfinite(viewport[i])&&viewport[i]>=0&&viewport[i]<=1920&&fabs(viewport[i]-round(viewport[i]))<.001f;if(good)key.viewport[i]=DWORD(viewport[i]);}
+  for(unsigned i=0;i<4;++i){good&=std::isfinite(viewport[i])&&viewport[i]>=0&&viewport[i]<=(i%2?key.height:key.width)&&fabs(viewport[i]-round(viewport[i]))<.001f;if(good)key.viewport[i]=DWORD(viewport[i]);}
   ID3D11ShaderResourceView* views[]{item.views[0].Get(),item.views[1].Get(),item.views[2].Get()};
   if(!good||!nativeCompositor->draw(target.Get(),z.Get(),views,key)){if(!cohortGate)gateCancel();gateStore->current.outcome=DWORD(Result::Original);gateStore->current.ended=now();reply->result=Result::Original;return DWORD(reply->result);}
   // From this point submission is committed:retain ownership through GPU use.

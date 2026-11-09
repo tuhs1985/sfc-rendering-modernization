@@ -213,9 +213,15 @@ int wmain(){
     window=CreateWindowW(wc.lpszClassName,L"Offline returned-image fixture — NOT SFC",WS_POPUP,100,100,800,600,nullptr,nullptr,wc.hInstance,nullptr);if(!window)throw std::runtime_error("fixture window");ShowWindow(window,SW_SHOWNOACTIVATE);
     {
       const bool gameOutput=GetEnvironmentVariableW(L"SFC_D3D9_GAME_OUTPUT",nullptr,0)!=0;bool imageSample=false;unsigned resizedFrame=0,imageStartFrame=0,multiReadyAt=0;LONG imageStartDraws=0;
-      SourceTimingFixture sourceTiming;Scene scene;if(gameOutput){scene.width=1920;scene.height=1080;}scene.init(window);const auto start=GetTickCount64();bool enabled=false,disabled=false,resized=false,recreated=false,afterResize=false,afterRecreate=false,disconnected=false;unsigned frames=0,stateErrors=0;
+      SourceTimingFixture sourceTiming;Scene scene;if(gameOutput){scene.width=1920;scene.height=1080;}
+      wchar_t extentValue[16]{};
+      if(output_target::requested()&&GetEnvironmentVariableW(L"SFC_NATIVE_FIXTURE_WIDTH",extentValue,16)){
+        scene.width=wcstoul(extentValue,nullptr,10);GetEnvironmentVariableW(L"SFC_NATIVE_FIXTURE_HEIGHT",extentValue,16);scene.height=wcstoul(extentValue,nullptr,10);
+        if(!output_extent::alpha_supported(scene.width,scene.height))throw std::runtime_error("Unsupported native fixture extent");
+      }
+      scene.init(window);const auto start=GetTickCount64();bool enabled=false,disabled=false,resized=false,recreated=false,afterResize=false,afterRecreate=false,disconnected=false;unsigned frames=0,stateErrors=0;
       const bool nativeGate=native_gate::requested();native_gate::Fixture nativeFixture;
-      if(nativeGate)nativeFixture.init(scene.device.Get(),scene.context.Get(),reinterpret_cast<BYTE*>(sourceTiming.source.mailbox)-sfc_calibration::Offset,sourceTiming.source.session,component);
+      if(nativeGate){nativeFixture.w=scene.width;nativeFixture.h=scene.height;nativeFixture.init(scene.device.Get(),scene.context.Get(),reinterpret_cast<BYTE*>(sourceTiming.source.mailbox)-sfc_calibration::Offset,sourceTiming.source.session,component);}
       const bool nativeForeground=native_foreground::source_notice::requested();
       if(nativeForeground){if(!gameOutput||!replacement::requested()||!scene.fixtureDepth)throw std::runtime_error("Native foreground fixture requires replacement and native depth");
         foreground_fixture::initialize(scene.device.Get(),scene.context.Get(),scene.fixtureDepth.Get());}
@@ -262,7 +268,8 @@ int wmain(){
         bool insertedNative=false;
         if(nativeGate){
           if(imageSample)nativeFixture.store->current.flags|=16;
-          const bool verify=nativeFixture.verified<2&&(!imageSample||frames>=imageStartFrame+500);
+          wchar_t resizeMode[2]{};const bool resizeQualification=GetEnvironmentVariableW(L"SFC_NATIVE_FIXTURE_RESIZE",resizeMode,2)==1&&resizeMode[0]==L'1';
+          const bool verify=nativeFixture.verified<2&&(!imageSample||frames>=imageStartFrame+(resizeQualification&&nativeFixture.verified==0?100:500));
           insertedNative=nativeFixture.frame(sourceTiming.cohort.pending,scene.fixtureDepth.Get(),scene.target.Get(),verify);
           scene.restoreState();auto* rt=scene.target.Get();scene.context->OMSetRenderTargets(1,&rt,nullptr);
           const auto target=nativeFixture.store->header.frameStart+(nativeFixture.store->header.frequency+59)/60;
@@ -272,6 +279,23 @@ int wmain(){
         if(nativeGate){
           if(insertedNative&&nativeFixture.armedVerification)nativeFixture.verify(sourceTiming.cohort.pending.anchor);
           if(!imageSample&&(nativeFixture.draws||(nativeFixture.baseline&&nativeFixture.pool->header.published))){imageSample=true;imageStartFrame=frames;}
+          wchar_t resizeMode[2]{};
+          if(imageSample&&!resized&&frames>=imageStartFrame+300&&GetEnvironmentVariableW(L"SFC_NATIVE_FIXTURE_RESIZE",resizeMode,2)==1&&resizeMode[0]==L'1'){
+            const auto verified=nativeFixture.verified,draws=nativeFixture.draws;
+            nativeFixture=native_gate::Fixture{};scene.resize();
+            nativeFixture.w=scene.width;nativeFixture.h=scene.height;
+            nativeFixture.init(scene.device.Get(),scene.context.Get(),reinterpret_cast<BYTE*>(sourceTiming.source.mailbox)-sfc_calibration::Offset,sourceTiming.source.session,component);
+            nativeFixture.verified=verified;nativeFixture.draws=draws;resized=true;
+            std::cout<<"NATIVE_TARGET_RESIZE_REQUEST width="<<scene.width<<" height="<<scene.height<<"\n";
+          }
+          if(imageSample&&!recreated&&frames>=imageStartFrame+450&&GetEnvironmentVariableW(L"SFC_NATIVE_FIXTURE_RECREATE",resizeMode,2)==1&&resizeMode[0]==L'1'){
+            const auto verified=nativeFixture.verified,draws=nativeFixture.draws;
+            nativeFixture=native_gate::Fixture{};scene.reset();scene.init(window);
+            nativeFixture.w=scene.width;nativeFixture.h=scene.height;
+            nativeFixture.init(scene.device.Get(),scene.context.Get(),reinterpret_cast<BYTE*>(sourceTiming.source.mailbox)-sfc_calibration::Offset,sourceTiming.source.session,component);
+            nativeFixture.verified=verified;nativeFixture.draws=draws;recreated=true;
+            std::cout<<"NATIVE_TARGET_DEVICE_RECREATE width="<<scene.width<<" height="<<scene.height<<"\n";
+          }
           if(imageSample&&frames>=imageStartFrame+600){
             std::cout<<"NATIVE_GATE_END frames="<<frames-imageStartFrame<<" draws="<<nativeFixture.draws<<" verified="<<nativeFixture.verified<<" baseline="<<nativeFixture.baseline<<" state_errors="<<stateErrors<<'\n';
             if(native_cohort::requested()){std::cout<<"NATIVE_COHORT_END owners="<<nativeFixture.seenOwnerCount<<'\n';if(!nativeFixture.baseline&&nativeFixture.seenOwnerCount<2)throw std::runtime_error("Native cohort multiple owners missing");}

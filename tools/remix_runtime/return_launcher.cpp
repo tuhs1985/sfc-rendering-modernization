@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 #include <stdexcept>
+#include "launch_paths.h"
+#include "../d3d9_proof/pipeline_mode.h"
 static std::wstring full(const wchar_t* input){wchar_t value[1024]{};const auto n=GetFullPathNameW(input,1024,value,nullptr);if(!n||n>=1024)throw std::runtime_error("launcher path bound");return value;}
 static std::string sha256(const std::wstring& path){
   HANDLE file=CreateFileW(path.c_str(),GENERIC_READ,FILE_SHARE_READ,nullptr,OPEN_EXISTING,FILE_FLAG_SEQUENTIAL_SCAN,nullptr);
@@ -29,14 +31,20 @@ int wmain(int argc,wchar_t** argv){
   PROCESS_INFORMATION child{};HANDLE job=nullptr;bool resumed=false;int result=1;
   try{
     const bool fixture=!wcscmp(argv[1],L"--fixture");
-    if(!fixture&&wcscmp(argv[1],L"--game"))throw std::runtime_error("launcher mode");
+    const bool checkOnly=!wcscmp(argv[1],L"--check-game");
+    if(!fixture&&!checkOnly&&wcscmp(argv[1],L"--game"))throw std::runtime_error("launcher mode");
     const auto client=full(argv[2]),component=full(argv[3]);
     const auto slash=client.find_last_of(L"\\/");if(slash==std::wstring::npos)throw std::runtime_error("launcher directory");const auto directory=client.substr(0,slash);
-    if(fixture){if(client.substr(slash+1)!=L"d3d11_return_fixture.exe"||client.find(L"\\artifacts\\remix-runtime\\runs\\")==std::wstring::npos)throw std::runtime_error("not an owned fixture");}
-    else if(CompareStringOrdinal(client.c_str(),-1,L"C:\\Project\\SFC-Remix-Return-Test\\StarFleetOP.exe",-1,TRUE)!=CSTR_EQUAL)throw std::runtime_error("not the approved copied client");
+    wchar_t root[1024]{},self[1024]{};const auto rootSize=GetEnvironmentVariableW(L"SFC_RELEASE_ROOT",root,1024);
+    if(rootSize>=1024||!GetModuleFileNameW(nullptr,self,1024))throw std::runtime_error("launcher package path bound");
+    launch_paths::validate(client,component,self,root,fixture);
     const auto expectedClient=ascii(argv[4]),expectedComponent=ascii(argv[5]);
     if(expectedClient.size()!=64||expectedComponent.size()!=64||sha256(client)!=expectedClient||sha256(component)!=expectedComponent)throw std::runtime_error("launcher SHA mismatch");
-    auto command=L"\""+client+L"\"";const auto dll=ascii(component.c_str());STARTUPINFOW startup{};startup.cb=sizeof(startup);
+    if(!fixture&&expectedClient!="4D65761D7DD69EF1504070261B81E9C200C0AF18105033E1C4D2222C62320C29")throw std::runtime_error("unsupported SFC executable pin");
+    if(rootSize&&!fixture&&sha256(full((std::wstring(root)+L"/runtime/remix-runtime/return-bin/SFCRemixReturn.dll").c_str()))!=expectedComponent)throw std::runtime_error("mutable component differs from package input");
+    const auto dll=launch_paths::preload_name(component,directory);
+    if(checkOnly){std::cout<<"LAUNCH_PREFLIGHT_PASS no_process_created=1 package_bound="<<bool(rootSize)<<"\n";return 0;}
+    auto command=L"\""+client+L"\"";STARTUPINFOW startup{};startup.cb=sizeof(startup);
     startup.dwFlags=STARTF_USESTDHANDLES;startup.hStdInput=GetStdHandle(STD_INPUT_HANDLE);startup.hStdOutput=GetStdHandle(STD_OUTPUT_HANDLE);startup.hStdError=GetStdHandle(STD_ERROR_HANDLE);
     if(!DetourCreateProcessWithDllExW(client.c_str(),command.data(),nullptr,nullptr,TRUE,CREATE_SUSPENDED,nullptr,directory.c_str(),&startup,&child,dll.c_str(),nullptr))throw std::runtime_error("startup component preload");
     wchar_t observed[1024]{};DWORD count=1024;
@@ -52,7 +60,7 @@ int wmain(int argc,wchar_t** argv){
     // Only the explicit standalone menu-idle experiment needs a longer fixture
     // watchdog. Never extend the game or ordinary fixture deadline implicitly.
     wchar_t idle[16]{};const bool idleExperiment=fixture&&GetEnvironmentVariableW(L"SFC_FIXTURE_MENU_IDLE_MS",idle,16)&&!wcscmp(idle,L"60000");
-    const auto waited=WaitForSingleObject(child.hProcess,fixture?(idleExperiment?100000:60000):lightTuning?1980000:300000);
+    const auto waited=WaitForSingleObject(child.hProcess,launch_paths::wait_limit(fixture,idleExperiment,lightTuning,pipeline_mode::play_session()));
     if(waited==WAIT_OBJECT_0){DWORD code=1;GetExitCodeProcess(child.hProcess,&code);std::cout<<"CHILD_EXIT code="<<code<<"\n";result=static_cast<int>(code);}
     else{std::cout<<"CHILD_WAIT_LIMIT original_game_left_running="<<!fixture<<"\n";result=120;}
   }catch(const std::exception& e){std::cout<<"LAUNCH_FAILED "<<e.what()<<" win32="<<GetLastError()<<"\n";if(child.hProcess&&!resumed)TerminateProcess(child.hProcess,97);}

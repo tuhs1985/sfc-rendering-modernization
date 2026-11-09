@@ -10,6 +10,8 @@ import recover_broad_session as recovery
 import broad_capture as broad
 import windows_processes
 
+from runtime_context import development,packaged
+
 class StartupSafetyTests(unittest.TestCase):
     def state(self,**fields):
         return dict(gamePid=1,startupVerified=1,startupRestored=1,ready=0,error=0,**fields)
@@ -49,10 +51,15 @@ class StartupSafetyTests(unittest.TestCase):
         self.recovery_case({'broad_capture':{'enabled':True}},preferences=True)
     def test_legacy_recovery_uses_verified_reference_for_player_name(self):
         self.recovery_case({'broad_capture':{'enabled':True}},preferences=True,legacy=True)
-    def recovery_case(self,transaction,preferences=False,legacy=False):
+    def test_packaged_recovery_uses_only_selected_game_copy_and_data(self):
+        self.recovery_case({'probe':'NATIVE-COHORT-001','full_support_qualification':{'result':'RELEASE_MANIFEST_INPUTS'}},preferences=True,portable=True)
+    def recovery_case(self,transaction,preferences=False,legacy=False,portable=False):
         with tempfile.TemporaryDirectory() as folder:
-            root=Path(folder);run=root/'artifacts/remix-runtime/runs/test-in-game';run.mkdir(parents=True)
-            test=root/'test';test.mkdir();(test/'dxgi.dll').write_bytes(b'full');(test/'ReShade.ini').write_bytes(b'changed')
+            root=Path(folder)
+            context=packaged(root/'Game é space/SFCRemix') if portable else development(root)
+            run=context.artifact('remix-runtime/runs')/'test-in-game';run.mkdir(parents=True)
+            test=context.game_root if portable else root/'test';test.mkdir(exist_ok=True)
+            (test/'dxgi.dll').write_bytes(b'full');(test/'ReShade.ini').write_bytes(b'changed')
             (test/'StarFleetOP.exe').write_bytes(b'client')
             (run/'dxgi-original.rollback').write_bytes(b'old');(run/'ReShade.original.ini').write_bytes(b'config')
             old=broad.digest(run/'dxgi-original.rollback');full=broad.digest(test/'dxgi.dll')
@@ -67,7 +74,7 @@ class StartupSafetyTests(unittest.TestCase):
                     ref=root/'artifacts/remix-runtime/test-install/sfc-baseline.ini';ref.parent.mkdir(parents=True);ref.write_bytes(baseline)
                 else:transaction={**transaction,'copied_sfc_protected_sha256':protected_ini_sha256(baseline)}
             (run/'manifest.json').write_text(json.dumps({**transaction,'copied_critical_before':expected}))
-            with mock.patch.multiple(recovery,ROOT=root,TEST=test,OLD_SHA=old,FULL_SHA=full),mock.patch.multiple(broad,OLD_SHA=old,FULL_SHA=full):
+            with mock.patch.multiple(recovery,ROOT=root,CONTEXT=context,TEST=test,OLD_SHA=old,FULL_SHA=full),mock.patch.multiple(broad,OLD_SHA=old,FULL_SHA=full):
                 with self.assertRaises(RuntimeError):recovery.recover(run,lambda:True)
                 self.assertEqual((test/'dxgi.dll').read_bytes(),b'full')
                 if preferences:
@@ -93,7 +100,7 @@ class StartupSafetyTests(unittest.TestCase):
                 run=root/'artifacts/remix-runtime/runs'/name;run.mkdir(parents=True)
                 (run/'dxgi-original.rollback').write_bytes(b'backup')
                 (run/'manifest.json').write_text(json.dumps({'broad_capture':{'enabled':True}}))
-            with mock.patch.object(recovery,'ROOT',root),self.assertRaisesRegex(RuntimeError,'Multiple unfinished'):
+            with mock.patch.multiple(recovery,ROOT=root,CONTEXT=development(root)),self.assertRaisesRegex(RuntimeError,'Multiple unfinished'):
                 recovery.recover_pending(lambda:False)
 
 if __name__=='__main__':unittest.main()

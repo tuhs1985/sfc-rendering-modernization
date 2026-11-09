@@ -37,7 +37,8 @@ class DamageLaunchDefaults(unittest.TestCase):
         self.assertTrue(parsed)
         body.append(ast.Return(value=ast.Name(id='args',ctx=ast.Load())))
         fn=ast.FunctionDef(name='options',args=ast.arguments(posonlyargs=[],args=[],kwonlyargs=[],kw_defaults=[],defaults=[]),body=body,decorator_list=[])
-        module=ast.fix_missing_locations(ast.Module(body=[fn],type_ignores=[]));scope={'argparse':argparse}
+        from runtime_context import CONTEXT
+        module=ast.fix_missing_locations(ast.Module(body=[fn],type_ignores=[]));scope={'argparse':argparse,'CONTEXT':CONTEXT}
         exec(compile(module,str(path),'exec'),scope)
         with patch.object(sys,'argv',['runner',*arguments]):return scope['options']()
 

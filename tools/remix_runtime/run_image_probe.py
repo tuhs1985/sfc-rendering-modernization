@@ -8,6 +8,9 @@ import re
 import subprocess as sp
 import time
 from run_return_fixture import ROOT,DLL,ENV,digest
+import sys
+sys.path.insert(0,str(ROOT/'tools/remix_runtime'))
+from runtime_context import CONTEXT
 
 def analyze(text):
     cases={m[1]:[float(m[i]) for i in (2,3,4)] for m in re.finditer(r'IMAGE_CASE (\w+) rgb=([\d.]+),([\d.]+),([\d.]+) samples=16',text)}
@@ -32,12 +35,12 @@ def main():
     if a.candidate and not a.native_emission_bloom:p.error('Candidate probe restricted to native emission/bloom control')
     if not a.execute:print('Offline only. --execute starts owned GPU probe, never SFC.');return
     if digest(DLL)!='F7C310821AA98BCDFDEC120330B0A89457B7C5EBA58D21464AF32639611C809F':raise ValueError('Pinned runtime mismatch')
-    work=ROOT/'artifacts/remix-runtime/runs'/dt.datetime.now(dt.timezone.utc).strftime('%Y%m%d-%H%M%S-%f-image-controls');work.mkdir()
-    exe=ROOT/'artifacts/remix-runtime/live-return-bin/image_controls_probe.exe'
+    work=CONTEXT.artifact('remix-runtime/runs')/dt.datetime.now(dt.timezone.utc).strftime('%Y%m%d-%H%M%S-%f-image-controls');work.mkdir()
+    exe=CONTEXT.artifact('remix-runtime/live-return-bin/image_controls_probe.exe')
     runtime=DLL
     if a.candidate:
         from runtime_candidate import verify
-        runtime=verify()['runtime'];exe=ROOT/'artifacts/remix-runtime/candidate-1.6.1-bin/native_emission_bloom_probe.exe'
+        runtime=verify()['runtime'];exe=CONTEXT.artifact('remix-runtime/candidate-1.6.1-bin/native_emission_bloom_probe.exe')
     sources={n:digest(Path(__file__).parent/n) for n in ('image_controls_probe.cpp','remix_image_adjust.h','remix_image_controls.h','remix_quality_controls.h','image_controls.py','quality_controls.py','run_image_probe.py')}
     result=dict(probe='REMIX-IMAGE-CONTROLS-001',source_hashes=sources,executable_sha256=digest(exe),runtime_sha256=digest(DLL),sfc_launched=False,limits=dict(seconds=75,warning_bytes=16*1024*1024,hard_bytes=32*1024*1024),environment=ENV)
     started=time.monotonic();error=None;child=None

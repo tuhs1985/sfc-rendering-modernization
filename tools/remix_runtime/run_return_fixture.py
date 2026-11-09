@@ -15,9 +15,12 @@ import depth_search_channel
 import broad_capture
 
 ROOT=Path(__file__).resolve().parents[2]
-DLL=ROOT/'artifacts/remix-runtime/deps/remix-1.5.2/.trex/d3d9.dll'
-BIN=ROOT/'artifacts/remix-runtime/return-bin'
-TEST=Path(r'C:\Project\SFC-Remix-Return-Test')
+import sys
+sys.path.insert(0,str(ROOT/'tools/remix_runtime'))
+from runtime_context import CONTEXT
+DLL=CONTEXT.artifact('remix-runtime/deps/remix-1.5.2/.trex/d3d9.dll')
+BIN=CONTEXT.artifact('remix-runtime/return-bin')
+TEST=CONTEXT.game_root
 ENV={'DXVK_LOG_LEVEL':'error','DXVK_GRAPHICS_PRESET_TYPE':'4','RTX_INTEGRATE_INDIRECT_MODE':'0','DXVK_UPSCALER_TYPE':'0','DXVK_RAY_RECONSTRUCTION':'False','RTX_DLSS_PRESET':'0','RTX_ENABLE_ASYNC_COMPILATION':'False'}
 def digest(p):
     with open(p,'rb') as stream:
@@ -52,6 +55,12 @@ def main():
     parser.add_argument('--player-replacement',action='store_true',help='Offline synthetic-source transactional player replacement;never launches SFC')
     parser.add_argument('--native-insertion-policy',choices=('Strict','ExtraFrame'),help='Offline native early insertion comparison;never launches SFC')
     parser.add_argument('--native-all-ships',action='store_true',help='Owner-labelled native replacement of all supported retained fixture ships')
+    parser.add_argument('--native-resolution',action='store_true',help='Qualify actual target dimensions/generations through the normal retained path')
+    parser.add_argument('--native-extent',nargs=2,type=int,metavar=('WIDTH','HEIGHT'),help='Standalone native-resolution fixture size; supported SFC sizes only')
+    parser.add_argument('--native-resize',action='store_true',help='Standalone native-resolution fixture: retire active GPU output and resize to1024x768')
+    parser.add_argument('--native-recreate',action='store_true',help='Standalone native-resolution fixture: replace the game device while retaining renderer assets')
+    parser.add_argument('--portable-reshade',action='store_true',help='Standalone test of release ReShade config/log/cache relocation')
+    parser.add_argument('--unicode-launcher',action='store_true',help='Standalone actual preload/renderer path test in an accented directory')
     parser.add_argument('--native-insertion-baseline',action='store_true',help='Native fixture/source/renderer baseline without gate admission or insertion')
     parser.add_argument('--native-foreground',action='store_true',help='Offline original-shader shield retention and same-frame composition')
     parser.add_argument('--replacement-faults',action='store_true',help='Standalone fixture only: withhold shared output for one then two presentations')
@@ -85,6 +94,18 @@ def main():
     parser.add_argument('--legacy-startup-warmup',action='store_true',help='Opt-in old24Present startup workaround;default one Present')
     parser.add_argument('--damage-textures',action='store_true',help='Synthetic reversible damage state through actual Remix decal output')
     args=parser.parse_args()
+    if args.native_resolution and not args.native_all_ships:parser.error('--native-resolution requires --native-all-ships')
+    os.environ['SFC_NATIVE_RESOLUTION']='1' if args.native_resolution else '0'
+    if args.native_resize and not args.native_resolution:parser.error('--native-resize requires --native-resolution')
+    os.environ['SFC_NATIVE_FIXTURE_RESIZE']='1' if args.native_resize else '0'
+    if args.native_recreate and not args.native_resolution:parser.error('--native-recreate requires --native-resolution')
+    os.environ['SFC_NATIVE_FIXTURE_RECREATE']='1' if args.native_recreate else '0'
+    if args.native_extent:
+        if not args.native_resolution or tuple(args.native_extent) not in ((1024,768),(1280,720),(1366,768),(1440,900),(1600,900),(1920,1080)):
+            parser.error('--native-extent requires native-resolution and a supported SFC size')
+        os.environ['SFC_NATIVE_FIXTURE_WIDTH'],os.environ['SFC_NATIVE_FIXTURE_HEIGHT']=map(str,args.native_extent)
+    else:
+        os.environ.pop('SFC_NATIVE_FIXTURE_WIDTH',None);os.environ.pop('SFC_NATIVE_FIXTURE_HEIGHT',None)
     if args.damage_textures and not args.native_all_ships:parser.error('Damage fixture requires native multi-ship return')
     if args.effect_light_fixture and not args.native_all_ships:parser.error('Effect-light fixture requires native multi-ship return')
     if args.light_diagnostics and not args.native_all_ships:parser.error('Light diagnostics requires native multi-ship fixture')
@@ -185,11 +206,17 @@ def main():
                                host_sha256=digest(candidate['exe']),runtime_path=str(candidate['runtime']),
                                initial_replacements_enabled=args.candidate_initial_replacements)
         candidate_receipt['asset_loading']=args.candidate_asset_loading
-    work=ROOT/'artifacts/remix-runtime/runs'/dt.datetime.now(dt.timezone.utc).strftime('%Y%m%d-%H%M%S-%f-return-fixture');work.mkdir()
+    work=CONTEXT.artifact('remix-runtime/runs')/dt.datetime.now(dt.timezone.utc).strftime('%Y%m%d-%H%M%S-%f-return-fixture')
+    if args.unicode_launcher:work=work.with_name(work.name.replace('-return-fixture','-é-return-fixture'))
+    work.mkdir()
     for source,name in [(broad_capture.qualified_full() if args.broad_capture or args.depth_snapshots or args.d3d9_additive else TEST/'dxgi.dll','dxgi.dll'),(BIN/'d3d11_return_fixture.exe','d3d11_return_fixture.exe'),(BIN/'SFCRemixReturn.dll','SFCRemixReturn.dll')]:shutil.copyfile(source,work/name)
     # No existing game config changed. Disable fixture menu/input capture only.
     (work/'ReShade.ini').write_text('[GENERAL]\nEffectSearchPaths=./no-effects\nPresetPath=./fixture.ini\n[OVERLAY]\nTutorialProgress=4\nShowFPS=0\nShowFrameTime=0\n[INPUT]\nInputProcessing=0\n')
     env={**os.environ,**ENV,'DXVK_LOG_PATH':str(work)}
+    if args.portable_reshade:
+        from types import SimpleNamespace
+        from portable_reshade import prepare
+        env.update(prepare(SimpleNamespace(release=True,game_root=work,data_root=work),work))
     env['SFC_EFFECT_LIGHT_FIXTURE']='1' if args.effect_light_fixture else '0'
     env.pop('SFC_FIXTURE_SHIP_SNAPSHOT',None)
     if args.startup_profile:env['SFC_FIXTURE_SHIP_SNAPSHOT']='1'
@@ -467,6 +494,12 @@ def main():
     receipt['native_insertion_policy']=args.native_insertion_policy
     receipt['native_insertion_baseline']=args.native_insertion_baseline
     receipt['native_all_ships']=args.native_all_ships
+    receipt['native_resolution']=args.native_resolution
+    receipt['native_extent']=args.native_extent or ([1920,1080] if args.native_resolution else None)
+    receipt['native_resize']=args.native_resize
+    receipt['native_recreate']=args.native_recreate
+    receipt['portable_reshade']=args.portable_reshade
+    receipt['unicode_launcher']=args.unicode_launcher
     receipt['legacy_startup_warmup']=args.legacy_startup_warmup
     receipt['native_gate']=native_result
     receipt['native_foreground_fixture']=args.native_foreground

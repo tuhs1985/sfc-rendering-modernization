@@ -14,6 +14,7 @@ struct PhysicalHullDepth {
  ComPtr<ID3D11DepthStencilState> zstate;ComPtr<ID3D11BlendState> opaque;
  std::array<Submission,scene_capacity::Owners> submissions{};unsigned count=0;UINT width=0,height=0;
  bool enabled=false;uint64_t batches=0,draws=0,geometryBytes=0,omitted=0;
+ void releaseTarget(){target.Reset();owners.Reset();depth.Reset();width=height=0;}
  void start(ID3D11Device* d,ID3D11Texture2D* output,bool active,ID3D11Texture2D* picking=nullptr){
   enabled=active;if(!enabled)return;device=d;D3D11_TEXTURE2D_DESC desc{};output->GetDesc(&desc);
   require(desc.Format==DXGI_FORMAT_R32_FLOAT&&desc.SampleDesc.Count==1&&desc.ArraySize==1&&desc.MipLevels==1,"physical hull output layout");

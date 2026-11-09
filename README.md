@@ -288,4 +288,8 @@ For a new development session, read the handoff, choose one bounded task, run th
 
 The existing development workstation uses `codex/github-sanitized` to publish to GitHub `master`; fresh GitHub clones use remote `master` normally. Follow the [publication safeguards](docs/decisions/2026-10-18-private-github-publication.md); never merge or publish local-only recovery history.
 
-This is an independent, unofficial project. Game assets and third-party dependencies remain subject to their owners' terms. Their omission from this repository is intentional; no redistribution rights or project source license are granted by this README.
+This is an independent, unofficial project. Project-authored code is available
+under the [MIT license](LICENSE). Game assets, third-party dependencies and
+contributed research retain their respective owners' terms; MIT does not
+relicense those materials. Proprietary game assets and runtime binaries remain
+excluded from this repository.

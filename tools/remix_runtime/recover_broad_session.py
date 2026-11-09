@@ -5,6 +5,7 @@ import datetime as dt
 import json
 import shutil
 from broad_capture import ROOT,OLD_SHA,FULL_SHA,digest,restore_test_proxy
+from runtime_context import CONTEXT
 from run_return_fixture import TEST
 from copied_preferences import prepared_ini_signature,changed_protected_files
 
@@ -17,7 +18,7 @@ def supported_transaction(manifest):
 
 def recover(run,game_running):
     run=Path(run).resolve()
-    if run.parent!=(ROOT/'artifacts/remix-runtime/runs').resolve() or not run.name.endswith('-in-game'):
+    if run.parent!=(CONTEXT.artifact('remix-runtime/runs')).resolve() or not run.name.endswith('-in-game'):
         raise ValueError('Recovery requires one exact isolated in-game run')
     if game_running():raise RuntimeError('SFC is still running; exit normally before recovery')
     manifest=json.loads((run/'manifest.json').read_text())
@@ -29,7 +30,7 @@ def recover(run,game_running):
     # Preserve game-saved player preferences while checking all protected inputs.
     signature=manifest.get('copied_sfc_protected_sha256')
     if not signature and 'sfc.ini' in expected and digest(TEST/'sfc.ini')!=expected['sfc.ini']:
-        signature=prepared_ini_signature(ROOT/'artifacts/remix-runtime/test-install/sfc-baseline.ini',expected['sfc.ini'])
+        signature=prepared_ini_signature(CONTEXT.artifact('remix-runtime/test-install/sfc-baseline.ini'),expected['sfc.ini'])
     stable={name:sha for name,sha in expected.items() if name not in ('dxgi.dll','ReShade.ini')}
     ini_raw=(TEST/'sfc.ini').read_bytes() if 'sfc.ini' in expected else b''
     changed=changed_protected_files(stable,{name:digest(TEST/name) for name in stable},ini_raw,signature)
@@ -51,7 +52,7 @@ def recover(run,game_running):
 
 def recover_pending(game_running):
     pending=[]
-    for run in (ROOT/'artifacts/remix-runtime/runs').glob('*-in-game'):
+    for run in (CONTEXT.artifact('remix-runtime/runs')).glob('*-in-game'):
         if not (run/'dxgi-original.rollback').exists() or (run/'recovery.json').exists():continue
         manifest=json.loads((run/'manifest.json').read_text())
         if not supported_transaction(manifest):continue

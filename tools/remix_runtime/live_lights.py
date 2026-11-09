@@ -12,7 +12,8 @@ from native_light_state import decode,SIZE
 
 REGISTRY={f'native_directional_{i}':dict(kind='directional') for i in range(2)}
 REGISTRY['project_fill']=dict(kind='directional',origin='project')
-DEFAULT=Path(__file__).parent/'config/lights.toml'
+from runtime_context import CONTEXT
+DEFAULT=CONTEXT.setting('lights.toml')
 
 
 def read_latest(path):

@@ -19,9 +19,13 @@ import depth_search_channel
 import broad_capture
 from session_exit import Monitor,NormalGameExit,retire_controller,early_without_output,partial_live_result
 from copied_preferences import protected_ini_sha256,prepared_ini_signature,changed_protected_files
+from native_config import write as write_native_config
 from run_return_fixture import ROOT,BIN,DLL,TEST,ENV,digest,capture_file_bytes
+import sys
+sys.path.insert(0,str(ROOT/'tools/remix_runtime'))
+from runtime_context import CONTEXT
 
-SOURCE=Path(r'C:\Games\Taldren Software Inc\Starfleet Command Orion Pirates')
+SOURCE=CONTEXT.accepted_root
 CLIENT='4D65761D7DD69EF1504070261B81E9C200C0AF18105033E1C4D2222C62320C29'
 CRITICAL=('StarFleetOP.exe','DDraw.dll','D3DImm.dll','dxgi.dll','dgVoodoo.conf','ReShade.ini','sfc.ini')
 
@@ -93,18 +97,22 @@ def wait_live_gate(pid,controller,enforce,timeout=90):
     finally:
         if event:k.CloseHandle(event)
 def preflight():
+    if CONTEXT.release:
+        from release_manifest import verify,verify_game_profile
+        verify_game_profile(CONTEXT,verify(CONTEXT))
+        return
     if digest(SOURCE/'StarFleetOP.exe')!=CLIENT or digest(TEST/'StarFleetOP.exe')!=CLIENT:raise RuntimeError('Original/copied client hash mismatch')
     if digest(DLL)!='F7C310821AA98BCDFDEC120330B0A89457B7C5EBA58D21464AF32639611C809F':raise RuntimeError('Pinned runtime mismatch')
     if digest(TEST/'dxgi.dll')!='E35E4E2E47F4765F0799CB54C88E5ADE49B50CD7895C137B9D557F263344CAB7':raise RuntimeError('Copied proxy mismatch')
-    for p in (BIN/'return_launcher.exe',BIN/'return_host.exe',BIN/'SFCRemixReturn.dll',ROOT/'artifacts/m1/bin/m1_gate.dll',ROOT/'artifacts/m1/bin/m1_controller.exe'):
+    for p in (BIN/'return_launcher.exe',BIN/'return_host.exe',BIN/'SFCRemixReturn.dll',CONTEXT.artifact('m1/bin/m1_gate.dll'),CONTEXT.artifact('m1/bin/m1_controller.exe')):
         if not p.is_file():raise RuntimeError('Prepared build missing: '+str(p))
     # PlayerName is a game-owned preference. All remaining INI bytes and other
     # critical copied files still match independent preparation.
-    manifest=json.loads((ROOT/'artifacts/remix-runtime/test-install/source-copy-files.json').read_text(encoding='utf-8-sig'))
+    manifest=json.loads((CONTEXT.artifact('remix-runtime/test-install/source-copy-files.json')).read_text(encoding='utf-8-sig'))
     expected={v['path'].lower():v['copy_sha256'] for v in manifest}
     actual=critical_hashes(TEST)
     baseline={name:expected.get(name.lower()) for name in actual}
-    signature=prepared_ini_signature(ROOT/'artifacts/remix-runtime/test-install/sfc-baseline.ini',expected['sfc.ini'])
+    signature=prepared_ini_signature(CONTEXT.artifact('remix-runtime/test-install/sfc-baseline.ini'),expected['sfc.ini'])
     changed=changed_protected_files(baseline,actual,(TEST/'sfc.ini').read_bytes(),signature)
     if changed:raise RuntimeError('Copied baseline changed: '+', '.join(changed))
 
@@ -125,6 +133,7 @@ def main():
     parser.add_argument('--native-insertion-observe',action='store_true',help='Read-only native model/draw/output timing;no suppression or returned image')
     parser.add_argument('--native-insertion-policy',choices=('Strict','ExtraFrame'),help='Qualified pre-effects native player insertion;explicit absolute deadline policy')
     parser.add_argument('--native-all-ships',action='store_true',help='Qualified native replacement for all supported retained ships;not just player fixture')
+    parser.add_argument('--native-resolution',action='store_true',default=CONTEXT.release,help='Use actual game-target extent/generation;alpha uses the six stable SFC sizes')
     parser.add_argument('--break-models',action='store_true',help='Default-off fresh indexed debris through retained native insertion')
     parser.add_argument('--lifecycle-capture',action='store_true',help='Separate bounded camera-gap/destruction observations;no native death inference')
     parser.add_argument('--camera-recovery',action='store_true',help='Two alive camera-away/back checks;no destruction requested')
@@ -159,6 +168,8 @@ def main():
         args.native_insertion_observe,args.broad_capture,args.depth_snapshots,args.capture_native_lights,
         args.inspect_early_depth,args.search_depth,args.observation_only,args.source_timing))):
         parser.error('Play session requires native multi-ship/performance without diagnostic captures or tuning')
+    if args.native_resolution and not args.native_all_ships:parser.error('--native-resolution requires --native-all-ships')
+    os.environ['SFC_NATIVE_RESOLUTION']='1' if args.native_resolution else '0'
     if args.damage_textures and not args.native_all_ships:parser.error('Damage textures requires native multi-ship insertion')
     if args.break_models and not args.native_all_ships:parser.error('Break models requires native multi-ship insertion')
     if args.native_all_ships and not args.native_insertion_policy:parser.error('Native multi-ship replacement requires explicit timing policy')
@@ -220,7 +231,7 @@ def main():
     if args.private_ship and (args.calibration or args.observation_only):parser.error('--private-ship is separate from calibration/observation-only')
     semantic_enabled=args.calibration or args.private_ship or args.source_timing
     if args.live_owner_timing and not(args.source_timing and args.observation_only):parser.error('--live-owner-timing requires --source-timing --observation-only')
-    live_bin=ROOT/'artifacts/remix-runtime/live-return-bin'
+    live_bin=CONTEXT.artifact('remix-runtime/live-return-bin')
     if args.calibration and not (args.depth_snapshots and args.observation_only):parser.error('--calibration requires --depth-snapshots --observation-only')
     if args.observation_only and not (args.inspect_early_depth or args.search_depth or args.broad_capture or args.depth_snapshots or args.source_timing):parser.error('--observation-only requires --inspect-early-depth or --search-depth or --broad-capture or --depth-snapshots or --source-timing')
     if args.source_timing and (not args.observation_only or args.private_ship or args.calibration):parser.error('--source-timing requires observation-only and excludes private/calibration render modes')
@@ -262,7 +273,7 @@ def main():
         sys.path.insert(0,str(ROOT/'tools/d3d9_proof'))
         from run_offline import storage,AGGREGATE_BYTES
         reserve=(544 if args.native_all_ships else 288 if args.native_insertion_policy else 192 if args.d3d9_additive else 128 if args.live_owner_timing else 64)*1024*1024
-        if storage()+reserve>AGGREGATE_BYTES:raise RuntimeError('Source timing reservation exceeds20GB evidence allowance')
+        if not (CONTEXT.release and args.play_session) and storage()+reserve>AGGREGATE_BYTES:raise RuntimeError('Source timing reservation exceeds20GB evidence allowance')
     if args.capture_native_lights:
         from light_discovery import require_qualification as require_light_qualification
         light_qualification=require_light_qualification()
@@ -271,9 +282,9 @@ def main():
         require_private_qualification(visible=args.visible_ship,textured=args.textured_ship,capture_image=args.capture_ship_image,light_wiring=args.light_wiring)
         for path in (live_bin/'ship_live_host.exe',live_bin/'SFCRemixReturn.dll'):
             if not path.is_file():raise RuntimeError('Private return build missing: '+str(path))
-        q=json.loads((ROOT/'artifacts/remix-runtime/deps/present-calibration-qualification.json').read_text())
-        if q['component_sha256']!=digest(ROOT/'artifacts/m1/bin/m1_component.dll'):raise RuntimeError('Accepted semantic component changed; requalify ABI before private test')
-    if args.calibration and not (ROOT/'artifacts/m1/bin/m1_component.dll').is_file():raise RuntimeError('Full semantic component build required')
+        q=json.loads((CONTEXT.artifact('remix-runtime/deps/present-calibration-qualification.json')).read_text())
+        if q['component_sha256']!=digest(CONTEXT.artifact('m1/bin/m1_component.dll')):raise RuntimeError('Accepted semantic component changed; requalify ABI before private test')
+    if args.calibration and not (CONTEXT.artifact('m1/bin/m1_component.dll')).is_file():raise RuntimeError('Full semantic component build required')
     if args.calibration:
         from present_calibration import require_qualification as require_calibration
         require_calibration()
@@ -283,7 +294,7 @@ def main():
     if full_support and not args.scene_depth and not args.d3d9_additive:
         broad_capture.qualified_full()
         broad_capture.reserve_capture_budget()
-        qualification=ROOT/'artifacts/remix-runtime/deps/reshade-full-6.7.1/qualification.json'
+        qualification=CONTEXT.artifact('remix-runtime/deps/reshade-full-6.7.1/qualification.json')
         q=json.loads(qualification.read_text())
         if q.get('proxy_sha256')!=broad_capture.FULL_SHA or q.get('result')!='OFFLINE_EVENT_AND_STATE_PASS':raise RuntimeError('Full-support offline qualification missing')
         from prepare_full_reshade import source_hashes
@@ -303,7 +314,10 @@ def main():
     if args.textured_ship:
         reserve=384*1024*1024 #128MiB images+32MiB evidence,plus worst-case archive coexistence
         if broad_capture.storage_bytes()+reserve>broad_capture.OVERALL or shutil.disk_usage(ROOT).free<reserve:raise RuntimeError('Textured run/archive exceeds available20GB allowance or disk space')
-    work=ROOT/'artifacts/remix-runtime/runs'/dt.datetime.now(dt.timezone.utc).strftime('%Y%m%d-%H%M%S-%f-in-game');work.mkdir()
+    work=CONTEXT.artifact('remix-runtime/runs')/dt.datetime.now(dt.timezone.utc).strftime('%Y%m%d-%H%M%S-%f-in-game');work.mkdir()
+    if CONTEXT.release and args.play_session:
+        from session_recording import mark
+        mark(work,os.environ.get('SFC_RELEASE_RECORDING','off'))
     run_report.save(work,dict(result='IN_PROGRESS',probe='REMIX-RETURN-001',stage='prepared',
                               light_wiring=args.light_wiring,final_report_complete=False))
     start=time.monotonic();deadline=float('inf') if args.play_session else start+(1980 if args.light_tuning else args.budget_seconds)
@@ -311,7 +325,12 @@ def main():
     host_exe=live_bin/'ship_live_host.exe' if args.private_ship else BIN/'return_host.exe'
     addon=live_bin/'SFCRemixReturn.dll' if args.private_ship else BIN/'SFCRemixReturn.dll'
     for src,name in [(host_exe,'renderer-host.bin'),(BIN/'return_launcher.exe','startup-launcher.bin'),(addon,'SFCRemixReturn.dll')]:shutil.copyfile(src,work/name)
-    metadata={'probe':'REMIX-RETURN-001','utc':dt.datetime.now(dt.timezone.utc).isoformat(),'accepted_critical_before':original,'copied_critical_before':critical_hashes(TEST),'launcher_settings_before':paths,'source_compatibility':compat,'scene':'SDK default-material triangle with green sphere light; no SFC draw suppression','output_resources_bytes':2*256*256*4,'capture_seconds':90,'workflow_seconds':args.budget_seconds,'limits_bytes':32*1024*1024,'build_hashes':{p.name:digest(p) for p in (BIN/'return_host.exe',BIN/'return_launcher.exe',BIN/'SFCRemixReturn.dll',DLL)}}
+    build_files=(BIN/'return_host.exe',BIN/'return_launcher.exe',BIN/'SFCRemixReturn.dll')
+    # The retained control host's --observe-only branch never loads Remix.
+    # Release native insertion uses the separately pinned1.6.1 renderer; do not
+    # ship1.5.2 merely to hash an unused development diagnostic dependency.
+    if not (CONTEXT.release and args.observation_only):build_files+=(DLL,)
+    metadata={'probe':'REMIX-RETURN-001','utc':dt.datetime.now(dt.timezone.utc).isoformat(),'accepted_critical_before':original,'copied_critical_before':critical_hashes(TEST),'launcher_settings_before':paths,'source_compatibility':compat,'scene':'SDK default-material triangle with green sphere light; no SFC draw suppression','output_resources_bytes':2*256*256*4,'capture_seconds':90,'workflow_seconds':args.budget_seconds,'limits_bytes':32*1024*1024,'build_hashes':{p.name:digest(p) for p in build_files}}
     metadata['visibility_probe']={'enabled':inspect_requested,'scope':'early-present' if args.inspect_early_depth else 'late-overlay','max_samples':8,'minimum_interval_ms':1000,'read_only':True,'qualified_scene_depth':False}
     metadata['observation_only']=args.observation_only
     metadata['scene_depth_test']=args.scene_depth
@@ -393,6 +412,7 @@ def main():
             if now-last_output_check<(5 if args.play_session else 1):return
             last_output_check=now
         if args.play_session:
+            if CONTEXT.release:return # Report retention must never stop installed play.
             # Working meshes/images are bounded functional cache inputs,not a
             # continuous recording. Asset preparation owns their reservations.
             logs=sum(capture_file_bytes(p) for p in work.rglob('*') if p.suffix.lower() in ('.log','.csv','.jsonl'))
@@ -482,6 +502,9 @@ def main():
         env['SFC_D3D9_NATIVE_FOREGROUND']='1' if args.native_foreground else '0'
         env['SFC_NATIVE_INSERTION_OBSERVE']='1' if args.native_insertion_observe else '0'
         env['SFC_NATIVE_INSERTION_GATE']='1' if args.native_insertion_policy else '0'
+        if CONTEXT.release:
+            from portable_reshade import prepare as prepare_portable_reshade
+            env.update(prepare_portable_reshade(CONTEXT,work))
         env.pop('SFC_NATIVE_GATE_BASELINE',None)
         env.pop('SFC_NATIVE_GATE_FIXTURE_DELAYS',None)
         if args.native_insertion_policy:env['SFC_NATIVE_INSERTION_POLICY']=args.native_insertion_policy
@@ -527,7 +550,7 @@ def main():
             if args.private_ship:env['SFC_REMIX_PRIVATE_SHIP']='1'
             if args.visible_ship:env['SFC_REMIX_VISIBLE_SHIP']='1'
             if args.textured_ship:env['SFC_REMIX_TEXTURED_SHIP']='1'
-            component_path=ROOT/('artifacts/remix-runtime/native-light-tests/m1_light_component.dll' if args.capture_native_lights else 'artifacts/m1/bin/m1_component.dll')
+            component_path=CONTEXT.artifact('remix-runtime/native-light-tests/m1_light_component.dll' if args.capture_native_lights else 'm1/bin/m1_component.dll')
             metadata['semantic_calibration']={'probe':'REMIX-CALIBRATION-001','scene_session':receiver.name,'maximum_asset_revisions':ASSETS if args.multi_ship else 8,'geometry_hook':False,'same_process_render_thread_required':True,'component_sha256':digest(component_path)}
             if args.multi_ship:
                 from multi_scene_resources import policy
@@ -571,7 +594,7 @@ def main():
         wait_component_ready(channel.snapshot,pid,launcher.poll,enforce)
         metadata['graphics_ready_wait_seconds']=time.monotonic()-ready_at
         session_stage='mission_selection'
-        metadata['gate_build_hashes']={p.name:digest(p) for p in (ROOT/'artifacts/m1/bin/m1_controller.exe',ROOT/'artifacts/m1/bin/m1_gate.dll')}
+        metadata['gate_build_hashes']={p.name:digest(p) for p in (CONTEXT.artifact('m1/bin/m1_controller.exe'),CONTEXT.artifact('m1/bin/m1_gate.dll'))}
         (work/'manifest.json').write_text(json.dumps(metadata,indent=2))
         print('Start your campaign or skirmish when ready. No session or battle-selection timer.' if args.play_session else 'Enter the usual two-ship skirmish. Ships should look normal.',flush=True)
         if args.break_models:
@@ -592,18 +615,18 @@ def main():
         elif args.d3d9_additive:print('Live D3D9 tuning: textured copies use your current settings. Save rendering.toml or lights.toml to update them. Exit SFC normally when finished.' if d3d9_tuning else 'Look for a fully textured extra ship beside one original. Original ships stay visible. Your existing light/material/image settings are frozen for this short test;no magenta or on/off cycle.',flush=True)
         elif not args.textured_ship:print('Look for a MAGENTA ship copy BESIDE the selected original ship,usually to its left at the starting view;it may flash. This is NOT a corner window. Original ships stay normal.' if args.visible_ship else ('No visible change expected;fresh ship output is tested privately,originals stay normal.' if args.private_ship else ('No triangle or ship changes expected; this is a read-only check.' if args.observation_only else 'A small green animated triangle will appear in a black square at upper right. It turns off/on/off automatically.')),flush=True)
         if not args.play_session:print('Exit SFC normally whenever finished. An early exit immediately starts cleanup and saves a shortened run;the two-beep cue marks the planned full test.',flush=True)
-        controller_exe=ROOT/'artifacts/m1/bin/m1_controller.exe';gate=ROOT/'artifacts/m1/bin/m1_gate.dll'
+        controller_exe=CONTEXT.artifact('m1/bin/m1_controller.exe');gate=CONTEXT.artifact('m1/bin/m1_gate.dll')
         gate_dir=work/'gate';gate_dir.mkdir();config=gate_dir/'component.ini'
-        config.write_text('[m1]\nOutputDirectory='+str(gate_dir)+'\nControllerPath='+str(controller_exe)+'\nMaxSeconds=90\nStopOnBurst=1\nMaxFrames=1\nMaxEvents=1\nMaxOwners=1\nWarningBytes=16777216\nHardBytes=33554432\n',encoding='ascii')
+        write_native_config(config,'[m1]\nOutputDirectory='+str(gate_dir)+'\nControllerPath='+str(controller_exe)+'\nMaxSeconds=90\nStopOnBurst=1\nMaxFrames=1\nMaxEvents=1\nMaxOwners=1\nWarningBytes=16777216\nHardBytes=33554432\n')
         if semantic_enabled:
-            gate=ROOT/'artifacts/m1/bin/m1_component.dll'
+            gate=CONTEXT.artifact('m1/bin/m1_component.dll')
             if args.capture_native_lights:
-                gate=ROOT/'artifacts/remix-runtime/native-light-tests/m1_light_component.dll'
+                gate=CONTEXT.artifact('remix-runtime/native-light-tests/m1_light_component.dll')
                 metadata['native_lights']={'probe':'NATIVE-LIGHTS-001','qualification':light_qualification,'hypothesis':'three lights and/or global illumination;UNCONFIRMED'}
                 (work/'manifest.json').write_text(json.dumps(metadata,indent=2))
-            config.write_text('[m1]\nOutputDirectory='+str(gate_dir)+'\nControllerPath='+str(controller_exe)+
+            write_native_config(config,'[m1]\nOutputDirectory='+str(gate_dir)+'\nControllerPath='+str(controller_exe)+
                 '\nMaxSeconds='+('0' if args.play_session else '1800' if args.light_tuning else '120' if args.d3d9_additive else '90' if args.private_ship or args.source_timing else '24')+'\nStopOnBurst=0\nMaxFrames=120\nMaxEvents=10000\nMaxOwners='+str(OWNERS)+'\nWarningBytes=16777216\nHardBytes=33554432'+
-                '\nEnableGeometryHook=0\nEnableWrapperObservation=1\nEnableMeshExport=1\nEnableTextureReferences=1\nEnablePrivateCopy=0\nLiveChannel='+receiver.name+'\n',encoding='ascii')
+                '\nEnableGeometryHook=0\nEnableWrapperObservation=1\nEnableMeshExport=1\nEnableTextureReferences=1\nEnablePrivateCopy=0\nLiveChannel='+receiver.name+'\n')
         controller_args=[str(controller_exe),'--pid',str(pid),'--dll',str(gate),'--config',str(config),'--max-seconds','24' if args.calibration else '90','--stop-on-burst','0' if semantic_enabled else '1','--already-loaded','0','--unload-after-stop','1']
         if args.light_tuning:controller_args[controller_args.index('--max-seconds')+1]='1800'
         if args.d3d9_additive and not d3d9_tuning:controller_args[controller_args.index('--max-seconds')+1]='120'
@@ -845,11 +868,13 @@ def main():
             else:receiver.close()
         for f in streams:f.close()
         after=critical_hashes(SOURCE);paths_after=launcher_paths();copy_after=critical_hashes(TEST)
-        if after!=original or paths_after!=paths:error=(error+'; ' if error else '')+'Accepted installation or launcher settings changed'
+        original_changed=(bool(changed_protected_files(original,after,(SOURCE/'sfc.ini').read_bytes(),metadata['copied_sfc_protected_sha256']))
+                          if CONTEXT.release else after!=original)
+        if original_changed or paths_after!=paths:error=(error+'; ' if error else '')+'Accepted installation or launcher settings changed'
         if copy_after['StarFleetOP.exe']!=CLIENT:error=(error+'; ' if error else '')+'Copied client hash changed'
         copy_protected_changes=changed_protected_files(metadata['copied_critical_before'],copy_after,(TEST/'sfc.ini').read_bytes(),metadata['copied_sfc_protected_sha256'])
         if full_support and copy_protected_changes:error=(error+'; ' if error else '')+'Copied critical baseline not fully restored'
-        result={'probe':'REMIX-RETURN-001','error':error,'seconds':time.monotonic()-start,'target_pid':pid,'normal_game_exit':normal,'gate_clean_unloaded':gate_clean,'gate_controller_pid':controller.pid if controller else None,'gate_controller_exit':controller.poll() if controller else None,'gate_controller_left_running':controller is not None and controller.poll() is None,'renderer_exit':host.returncode if host else None,'original_critical_unchanged':after==original,'launcher_settings_unchanged':paths_after==paths,'accepted_critical_after':after,'copied_critical_after':copy_after,'history':history,'phases':phase_results,'final':final,'sponsor_visible_behavior':'PENDING sponsor report','result':'RUNTIME_REVIEW_REQUIRED' if not error else 'PARTIAL'}
+        result={'probe':'REMIX-RETURN-001','error':error,'seconds':time.monotonic()-start,'target_pid':pid,'normal_game_exit':normal,'gate_clean_unloaded':gate_clean,'gate_controller_pid':controller.pid if controller else None,'gate_controller_exit':controller.poll() if controller else None,'gate_controller_left_running':controller is not None and controller.poll() is None,'renderer_exit':host.returncode if host else None,'original_critical_unchanged':not original_changed,'launcher_settings_unchanged':paths_after==paths,'accepted_critical_after':after,'copied_critical_after':copy_after,'history':history,'phases':phase_results,'final':final,'sponsor_visible_behavior':'PENDING sponsor report','result':'RUNTIME_REVIEW_REQUIRED' if not error else 'PARTIAL'}
         if args.private_ship:
             result.update(probe='REMIX-LIVE-RETURN-001',private_return=private_stats,fresh_asset=receiver.selected if receiver else None,
                   backbuffer_ship_drawing=bool(args.visible_ship),original_ship_suppressed=False)

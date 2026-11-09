@@ -1,0 +1,123 @@
+{
+  "schema": "sfc.alpha.native-resolution-qualification.v1",
+  "scope": "Standalone GPU and private installed preflight only;no packaged gameplay/second-machine or public release claim",
+  "sizes": [
+    {
+      "width": 1024,
+      "height": 768,
+      "run": "artifacts/remix-runtime/runs/20261108-152917-808291-return-fixture",
+      "pixel_checks": 2,
+      "mismatches": 0,
+      "owners": 3,
+      "frames": 600,
+      "job_elapsed_ms": 20625,
+      "source_files": {
+        "return_host.exe": "E54B496176037D57E831D197A31BE6CB70FA56AC6CE8F19457370BDAB0B57277",
+        "SFCRemixReturn.dll": "14395BD582858AADF406C35771D460E576F229404C942F20262826E1CC7C36EE",
+        "d3d11_return_fixture.exe": "3DC20568D2EC3926FB00B4D21E8F14EA7E75FADCFD1C8CDF306D5E69A73D3E96",
+        "return_launcher.exe": "2FDD7BE0BD77BBAD1C0CB0DE0A956FC13A38FC166181EAF257E0F1905C36D3AE"
+      }
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "run": "artifacts/remix-runtime/runs/20261108-152946-576213-return-fixture",
+      "pixel_checks": 2,
+      "mismatches": 0,
+      "owners": 3,
+      "frames": 600,
+      "job_elapsed_ms": 20391,
+      "source_files": {
+        "return_host.exe": "E54B496176037D57E831D197A31BE6CB70FA56AC6CE8F19457370BDAB0B57277",
+        "SFCRemixReturn.dll": "14395BD582858AADF406C35771D460E576F229404C942F20262826E1CC7C36EE",
+        "d3d11_return_fixture.exe": "3DC20568D2EC3926FB00B4D21E8F14EA7E75FADCFD1C8CDF306D5E69A73D3E96",
+        "return_launcher.exe": "2FDD7BE0BD77BBAD1C0CB0DE0A956FC13A38FC166181EAF257E0F1905C36D3AE"
+      }
+    },
+    {
+      "width": 1366,
+      "height": 768,
+      "run": "artifacts/remix-runtime/runs/20261108-152838-036916-return-fixture",
+      "pixel_checks": 2,
+      "mismatches": 0,
+      "owners": 3,
+      "frames": 600,
+      "job_elapsed_ms": 20485,
+      "source_files": {
+        "return_host.exe": "E54B496176037D57E831D197A31BE6CB70FA56AC6CE8F19457370BDAB0B57277",
+        "SFCRemixReturn.dll": "14395BD582858AADF406C35771D460E576F229404C942F20262826E1CC7C36EE",
+        "d3d11_return_fixture.exe": "3DC20568D2EC3926FB00B4D21E8F14EA7E75FADCFD1C8CDF306D5E69A73D3E96",
+        "return_launcher.exe": "2FDD7BE0BD77BBAD1C0CB0DE0A956FC13A38FC166181EAF257E0F1905C36D3AE"
+      }
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "run": "artifacts/remix-runtime/runs/20261108-154055-817423-return-fixture",
+      "pixel_checks": 2,
+      "mismatches": 0,
+      "owners": 3,
+      "frames": 600,
+      "job_elapsed_ms": 20578,
+      "source_files": {
+        "return_host.exe": "7F57F9424E18C1252330A5748AD7D29AD2F58CDDB7BCB395ED9907836F635004",
+        "SFCRemixReturn.dll": "99F89D916721F1741B899F555F294C7E88EA27A0FE955CE2EFF08E4B371438A9",
+        "d3d11_return_fixture.exe": "8549774F0732E9287B77A530C0D1657EA085938ADB157723B7BBA7CA60E37BA5",
+        "return_launcher.exe": "257F0A4D8D209FED094E78EA4B0A4207FE663ED1B0D0B82AEF13961B632E6F37"
+      }
+    },
+    {
+      "width": 1600,
+      "height": 900,
+      "run": "artifacts/remix-runtime/runs/20261108-154124-458470-return-fixture",
+      "pixel_checks": 2,
+      "mismatches": 0,
+      "owners": 3,
+      "frames": 600,
+      "job_elapsed_ms": 20047,
+      "source_files": {
+        "return_host.exe": "7F57F9424E18C1252330A5748AD7D29AD2F58CDDB7BCB395ED9907836F635004",
+        "SFCRemixReturn.dll": "99F89D916721F1741B899F555F294C7E88EA27A0FE955CE2EFF08E4B371438A9",
+        "d3d11_return_fixture.exe": "8549774F0732E9287B77A530C0D1657EA085938ADB157723B7BBA7CA60E37BA5",
+        "return_launcher.exe": "257F0A4D8D209FED094E78EA4B0A4207FE663ED1B0D0B82AEF13961B632E6F37"
+      }
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "run": "artifacts/remix-runtime/runs/20261108-154152-448433-return-fixture",
+      "pixel_checks": 2,
+      "mismatches": 0,
+      "owners": 3,
+      "frames": 600,
+      "job_elapsed_ms": 20093,
+      "source_files": {
+        "return_host.exe": "7F57F9424E18C1252330A5748AD7D29AD2F58CDDB7BCB395ED9907836F635004",
+        "SFCRemixReturn.dll": "99F89D916721F1741B899F555F294C7E88EA27A0FE955CE2EFF08E4B371438A9",
+        "d3d11_return_fixture.exe": "8549774F0732E9287B77A530C0D1657EA085938ADB157723B7BBA7CA60E37BA5",
+        "return_launcher.exe": "257F0A4D8D209FED094E78EA4B0A4207FE663ED1B0D0B82AEF13961B632E6F37"
+      }
+    }
+  ],
+  "generation_test": {
+    "run": "artifacts/remix-runtime/runs/20261108-154634-686443-return-fixture",
+    "generations": 3,
+    "resize": [
+      1920,
+      1080,
+      1024,
+      768
+    ],
+    "device_recreation": true,
+    "assets_loaded": 2,
+    "shared_instances": 1,
+    "pixel_mismatches": 0,
+    "shutdown": 0
+  },
+  "portable_reshade_gpu": "artifacts/remix-runtime/runs/20261108-154220-844710-return-fixture",
+  "installed_preflight": "artifacts/alpha/private-checkout-moved-preflight.txt",
+  "python_tests": 729,
+  "private_checkout": "C:/Project/SFC-Alpha-Checkout",
+  "native_1440p_4k_deferred": true,
+  "historical_1280x360_not_alpha_blocker": true
+}

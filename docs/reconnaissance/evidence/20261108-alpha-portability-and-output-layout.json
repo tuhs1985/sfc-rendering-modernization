@@ -1,0 +1,261 @@
+{
+  "schema": "sfc.alpha.preparation-evidence.v1",
+  "date": "2026-11-08",
+  "status": "PARTIAL_NOT_RELEASE_READY",
+  "baseline_commit": "b08ad8ed143fd291d7236a6b889bf0b49f7f6c31",
+  "python_tests": {
+    "count": 723,
+    "result": "PASS",
+    "log": "artifacts/alpha/python-regressions-5.txt",
+    "runtime": "upstream CPython3.12.14 numpy2.3.5 Pillow12.3.0"
+  },
+  "native_contract_tests": {
+    "x86": {
+      "extent": 15,
+      "target": 12
+    },
+    "x64": {
+      "extent": 15,
+      "target": 12
+    },
+    "live_dimension_path_connected": false
+  },
+  "preflight": {
+    "run": "artifacts/alpha/preflight-fixtures/20261108-071030-799694",
+    "result": "PORTABLE_READ_ONLY_PREFLIGHT_ONLY",
+    "moved_and_unicode_path": true,
+    "game_copy_unchanged": true,
+    "full_runtime_gameplay": false
+  },
+  "transfer_layouts": [
+    {
+      "run": "artifacts/alpha/share-probe/verified-source-1031x517",
+      "source": {
+        "width": 1031,
+        "height": 517,
+        "row_pitch": 4124,
+        "mismatches": 0
+      },
+      "native": {
+        "width": 1031,
+        "height": 517,
+        "row_pitch": 4224,
+        "mismatches": 0
+      },
+      "job": {
+        "schema": "remix.job.v1",
+        "pid": 11112,
+        "exit_code": 22,
+        "stop_reason": 22,
+        "elapsed_ms": 45157,
+        "console_bytes": 15307,
+        "console_discarded_bytes": 0,
+        "peak_scratch_bytes": 3103,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      }
+    },
+    {
+      "run": "artifacts/alpha/share-probe/verified-source-1280x360",
+      "source": {
+        "width": 1280,
+        "height": 360,
+        "row_pitch": 5120,
+        "mismatches": 0
+      },
+      "native": {
+        "width": 1280,
+        "height": 360,
+        "row_pitch": 5120,
+        "mismatches": 271360
+      },
+      "job": {
+        "schema": "remix.job.v1",
+        "pid": 5424,
+        "exit_code": 22,
+        "stop_reason": 22,
+        "elapsed_ms": 60140,
+        "console_bytes": 15312,
+        "console_discarded_bytes": 0,
+        "peak_scratch_bytes": 15386,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      }
+    },
+    {
+      "run": "artifacts/alpha/share-probe/verified-source-2560x1440",
+      "source": {
+        "width": 2560,
+        "height": 1440,
+        "row_pitch": 10240,
+        "mismatches": 0
+      },
+      "native": {
+        "width": 2560,
+        "height": 1440,
+        "row_pitch": 10240,
+        "mismatches": 0
+      },
+      "job": {
+        "schema": "remix.job.v1",
+        "pid": 43296,
+        "exit_code": 22,
+        "stop_reason": 22,
+        "elapsed_ms": 45172,
+        "console_bytes": 15315,
+        "console_discarded_bytes": 0,
+        "peak_scratch_bytes": 3105,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      }
+    },
+    {
+      "run": "artifacts/alpha/share-probe/verified-source-3840x2160",
+      "source": {
+        "width": 3840,
+        "height": 2160,
+        "row_pitch": 15360,
+        "mismatches": 0
+      },
+      "native": {
+        "width": 3840,
+        "height": 2160,
+        "row_pitch": 15360,
+        "mismatches": 0
+      },
+      "job": {
+        "schema": "remix.job.v1",
+        "pid": 38040,
+        "exit_code": 22,
+        "stop_reason": 22,
+        "elapsed_ms": 45141,
+        "console_bytes": 15315,
+        "console_discarded_bytes": 0,
+        "peak_scratch_bytes": 3105,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      }
+    },
+    {
+      "run": "artifacts/alpha/share-probe/verified-source-960x540",
+      "source": {
+        "width": 960,
+        "height": 540,
+        "row_pitch": 3840,
+        "mismatches": 0
+      },
+      "native": {
+        "width": 960,
+        "height": 540,
+        "row_pitch": 3840,
+        "mismatches": 0
+      },
+      "job": {
+        "schema": "remix.job.v1",
+        "pid": 6344,
+        "exit_code": 22,
+        "stop_reason": 22,
+        "elapsed_ms": 60141,
+        "console_bytes": 15302,
+        "console_discarded_bytes": 0,
+        "peak_scratch_bytes": 15384,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      }
+    }
+  ],
+  "final_source_replays": [
+    {
+      "scope": "GPU sharing only;not Remix scene rendering,resize or gameplay",
+      "extent": [
+        960,
+        540
+      ],
+      "host_sha256": "e8cc7ad90ce88bb5c2c72f806d51a10631b1398a5622a5238fe92589282da0c9",
+      "runtime_sha256": "c05c552e3f44597960891eff6c8482efcbde8573b15c2b900d3dc360e6cc1ad9",
+      "source_sha256": "75f5e035c47156727aee7ff0385073345e5e1ad20cf4d06b363101e3768c5407",
+      "header_sha256": "26a5607a07e8718298c35519e53bbc71d526186a947e5a2a5b613a0d6db04f3a",
+      "sfc_launched": false,
+      "source": {
+        "width": 960,
+        "height": 540,
+        "row_pitch": 3840,
+        "mismatches": 0
+      },
+      "native": {
+        "width": 960,
+        "height": 540,
+        "row_pitch": 3840,
+        "mismatches": 0
+      },
+      "process_exit": 1,
+      "job": {
+        "schema": "remix.job.v1",
+        "pid": 9092,
+        "exit_code": 22,
+        "stop_reason": 22,
+        "elapsed_ms": 45172,
+        "console_bytes": 15302,
+        "console_discarded_bytes": 0,
+        "peak_scratch_bytes": 3598,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      },
+      "result": "GPU_SHARED_PIXELS_MATCH_TEARDOWN_PARTIAL",
+      "run": "artifacts/alpha/share-probe/20261108-071236-808996-960x540"
+    },
+    {
+      "scope": "GPU sharing only;not Remix scene rendering,resize or gameplay",
+      "extent": [
+        1280,
+        360
+      ],
+      "host_sha256": "e8cc7ad90ce88bb5c2c72f806d51a10631b1398a5622a5238fe92589282da0c9",
+      "runtime_sha256": "c05c552e3f44597960891eff6c8482efcbde8573b15c2b900d3dc360e6cc1ad9",
+      "source_sha256": "75f5e035c47156727aee7ff0385073345e5e1ad20cf4d06b363101e3768c5407",
+      "header_sha256": "26a5607a07e8718298c35519e53bbc71d526186a947e5a2a5b613a0d6db04f3a",
+      "sfc_launched": false,
+      "source": {
+        "width": 1280,
+        "height": 360,
+        "row_pitch": 5120,
+        "mismatches": 0
+      },
+      "native": {
+        "width": 1280,
+        "height": 360,
+        "row_pitch": 5120,
+        "mismatches": 271360
+      },
+      "process_exit": 1,
+      "job": {
+        "schema": "remix.job.v1",
+        "pid": 44016,
+        "exit_code": 22,
+        "stop_reason": 22,
+        "elapsed_ms": 45156,
+        "console_bytes": 15312,
+        "console_discarded_bytes": 0,
+        "peak_scratch_bytes": 3601,
+        "scratch_warning": false,
+        "remaining_owned_processes": 0
+      },
+      "result": "GPU_SHARED_LAYOUT_CORRUPTION_REPRODUCED",
+      "run": "artifacts/alpha/share-probe/20261108-071322-232612-1280x360"
+    }
+  ],
+  "inference": {
+    "supported": "Dimension-dependent discrepancy is between Remix D3D9 image view and native D3D11 shared view, not camera, ship data, materials or CPU row packing.",
+    "unproven": "Exact runtime/driver cause; public source uses opaque KMT import while Vulkan distinguishes D3D11_TEXTURE_KMT. No instruction-level binary/source parity or causal patch test.",
+    "source": "https://github.com/NVIDIAGameWorks/dxvk-remix/blob/0a6cd5b1ee814ec390c358e0c9c32ece8895ddc0/src/d3d9/d3d9_common_texture.cpp",
+    "spec": "https://docs.vulkan.org/refpages/latest/refpages/source/VkExternalMemoryHandleTypeFlagBits.html"
+  },
+  "development_preflight": {
+    "result": "PASS",
+    "native_host_rebuilt_hash_unchanged": true,
+    "old_600_frame_gpu_evidence_revalidated_not_rerun": true,
+    "new_gameplay_run": false
+  },
+  "release_published": false,
+  "changes_committed": false
+}

@@ -2,6 +2,7 @@
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <windows.h>
+#include "output_target.h"
 #include <d3d9.h>
 #include <tlhelp32.h>
 #include <wrl/client.h>
@@ -136,8 +137,9 @@ struct Renderer{
   auto* d=device.Get();ok(d->SetVertexShader(nullptr),"fixed VS");ok(d->SetPixelShader(nullptr),"fixed PS");ok(d->SetFVF(D3DFVF_XYZ|D3DFVF_NORMAL|D3DFVF_TEX1),"FVF");
   ok(d->SetStreamSource(0,vb.Get(),0,sizeof(Vertex)),"stream");ok(d->SetIndices(ib.Get()),"indices");
   auto w=matrix(f.model),v=matrix(f.view),p=matrix(f.projection);ok(d->SetTransform(D3DTS_WORLD,&w),"world");ok(d->SetTransform(D3DTS_VIEW,&v),"view");ok(d->SetTransform(D3DTS_PROJECTION,&p),"projection");
-  D3DVIEWPORT9 viewport{static_cast<DWORD>(std::lround(f.viewport[0]*width/1920)),static_cast<DWORD>(std::lround(f.viewport[1]*height/1080)),
-   static_cast<DWORD>(std::lround(f.viewport[2]*width/1920)),static_cast<DWORD>(std::lround(f.viewport[3]*height/1080)),0,1};
+  const auto sourceWidth=output_target::requested()?width:1920u,sourceHeight=output_target::requested()?height:1080u;
+  D3DVIEWPORT9 viewport{static_cast<DWORD>(std::lround(f.viewport[0]*width/sourceWidth)),static_cast<DWORD>(std::lround(f.viewport[1]*height/sourceHeight)),
+   static_cast<DWORD>(std::lround(f.viewport[2]*width/sourceWidth)),static_cast<DWORD>(std::lround(f.viewport[3]*height/sourceHeight)),0,1};
   ok(d->SetViewport(&viewport),"viewport");ok(d->SetRenderState(D3DRS_LIGHTING,FALSE),"unlit primary");ok(d->SetRenderState(D3DRS_CULLMODE,D3DCULL_NONE),"two sided baseline");
   ok(d->SetRenderState(D3DRS_ZENABLE,TRUE),"Z enable");ok(d->SetRenderState(D3DRS_ZWRITEENABLE,TRUE),"Z write");ok(d->SetRenderState(D3DRS_ZFUNC,D3DCMP_LESSEQUAL),"Z compare");
   ok(d->SetRenderState(D3DRS_ALPHABLENDENABLE,FALSE),"opaque");ok(d->SetRenderState(D3DRS_ALPHATESTENABLE,FALSE),"alpha test off");ok(d->SetRenderState(D3DRS_SRGBWRITEENABLE,FALSE),"encoded output baseline");

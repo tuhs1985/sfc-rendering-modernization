@@ -11,7 +11,10 @@ import tomllib
 import uuid
 
 ROOT=Path(__file__).resolve().parents[2]
-CACHE=ROOT/'artifacts/d3d9-proof/environment-cache'
+import sys
+sys.path.insert(0,str(ROOT/'tools/remix_runtime'))
+from runtime_context import CONTEXT
+CACHE=CONTEXT.artifact('d3d9-proof/environment-cache')
 OFFSET=8192
 PACKET=struct.Struct('<10I32s1024s808sQ')
 STORE_BYTES=8+PACKET.size
@@ -64,7 +67,7 @@ def publish(channel,pid,folder,config_path=None,cache=None):
     from light_controls import validate
     from live_lights import REGISTRY
     from light_shapes import build
-    config_path=Path(config_path or ROOT/'tools/remix_runtime/config/lights.toml')
+    config_path=Path(config_path or CONTEXT.setting('lights.toml'))
     cache=Path(cache or CACHE).resolve();folder=Path(folder)
     if channel.read(OFFSET,STORE_BYTES)!=bytes(STORE_BYTES):raise ValueError('Prepared environment already published')
     raw=config_path.read_bytes()

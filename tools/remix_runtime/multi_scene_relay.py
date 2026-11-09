@@ -16,6 +16,9 @@ import time
 import os
 
 from live_owner_timing import Relay as SingleRelay,ROOT,CONFIG,OFFSET
+import sys
+sys.path.insert(0,str(ROOT/'tools/remix_runtime'))
+from runtime_context import CONTEXT
 from asset_preparation import PreparationQueue
 from multi_scene_resources import Reservations
 import multi_scene as wire
@@ -48,7 +51,7 @@ class Relay(SingleRelay):
         self.initial_context=None;self.renderer_started_ns=None;self.initial_published_ns=None
         self.published_paths=set();self.stopping=False
         from rendering_config import scoped
-        self.material_config=scoped((ROOT/'tools/remix_runtime/config/rendering.toml').read_bytes(),'material')
+        self.material_config=scoped((CONTEXT.setting('rendering.toml')).read_bytes(),'material')
         self.material_keys={};self.layers=[];self.image_bytes=0;self.original_images=set();self.partial=[];self.anchor_missing=0
         self.frame_log=(self.folder/'D3D9-MULTISCENE-001.frames.bin').open('wb') if self.mode=='test' else None
         self.frame_samples=0;self.frame_sample_dropped=0;self.last_sample=0;self.sample_identity=None
@@ -89,7 +92,7 @@ class Relay(SingleRelay):
         from image_controls import encode_current as image
         from quality_controls import encode as quality
         for name,encoder in (('image',image),('quality',quality)):
-            raw=(ROOT/'tools/remix_runtime/config/rendering.toml').read_bytes()
+            raw=(CONTEXT.setting('rendering.toml')).read_bytes()
             (gpu/f'{name}-controls.bin').write_bytes(encoder(raw));(gpu/f'{name}-config-accepted.toml').write_bytes(raw)
         library=gpu/'rtx-remix/mods/sfc-policy/mod.usda';library.parent.mkdir(parents=True,exist_ok=True)
         library.write_text('#usda 1.0\n(defaultPrim = "RootNode")\ndef Xform "RootNode" {}\n')
@@ -286,7 +289,7 @@ class Relay(SingleRelay):
         from image_controls import encode_current as encode_image
         from quality_controls import encode as encode_quality
         for name,encoder in [('image',encode_image),('quality',encode_quality)]:
-            raw=(ROOT/'tools/remix_runtime/config/rendering.toml').read_bytes()
+            raw=(CONTEXT.setting('rendering.toml')).read_bytes()
             if self.prewarm_process and not getattr(self,'live_tuning',False) and (gpu/f'{name}-config-accepted.toml').read_bytes()!=raw:
                 raise ValueError('Image/quality baseline changed during early startup;restart with one baseline')
             (gpu/f'{name}-controls.bin').write_bytes(encoder(raw));(gpu/f'{name}-config-accepted.toml').write_bytes(raw)
@@ -342,7 +345,7 @@ class Relay(SingleRelay):
                 raise ValueError('Cross-asset ordinary texture hash has conflicting material policy')
         if facts is not None:original=facts['original'];generated=facts['generated']
         else:
-            source=ROOT/manifest['source_packet'];refs=json.loads(source.with_suffix('.json').read_text())
+            source=CONTEXT.reference(manifest['source_packet']);refs=json.loads(source.with_suffix('.json').read_text())
             for resource in refs['resources']:
                 sha=self.content.image(resource['filename']);original[sha]=resolve_image(self.root,resource['filename']).stat().st_size
             generated=sum(p.stat().st_size for p in gpu.rglob('*') if p.is_file() and

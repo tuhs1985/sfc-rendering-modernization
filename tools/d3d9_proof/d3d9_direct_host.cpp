@@ -23,6 +23,7 @@ static void apiok(remixapi_ErrorCode result,const char* why){if(result!=REMIXAPI
 #include "multi_scene_runtime.h"
 #include "pipeline_mode.h"
 #include "warm_start.h"
+#include "native_target_reader.h"
 #include "startup_profile.h"
 #include "startup_policy.h"
 #include "slow_completion.h"
@@ -67,7 +68,12 @@ int wmain(int argc,wchar_t** argv){
  StartupProfile startup;
  try{
   require(argc==3||argc==5,"replay directory,runtime and optional receiver/mode required");const fs::path root=fs::absolute(argv[1]),library=fs::absolute(argv[2]);
-  const bool prewarm=warm_start::requested();require(!texture_memory::requested()||prewarm,"asset memory requires existing startup handshake");Scene scene;if(prewarm){scene.width=1920;scene.height=1080;}else scene=load(root);
+  const bool prewarm=warm_start::requested(),nativeSize=output_target::requested();require(!texture_memory::requested()||prewarm,"asset memory requires existing startup handshake");
+  require(!nativeSize||(prewarm&&argc==5),"Native target requires passive host and output receiver");
+  OutputPeer peer;NativeTargetReader nativeTarget;
+  if(nativeSize){peer.start(fs::absolute(argv[3]),root,argv[4],&startup,true);nativeTarget.wait([&]{peer.check_alive();});peer.resourceEpoch=nativeTarget.current.generation;
+   std::cout<<"NATIVE_TARGET_READY width="<<nativeTarget.current.width<<" height="<<nativeTarget.current.height<<" generation="<<nativeTarget.current.generation<<" before_assets=1\n";}
+  Scene scene;if(prewarm){scene.width=nativeSize?nativeTarget.current.width:1920;scene.height=nativeSize?nativeTarget.current.height:1080;}else scene=load(root);
   wchar_t investigate[2]{};require(output_wire::qualified_extent(scene.width,scene.height)||(GetEnvironmentVariableW(L"SFC_DIRECT64_INVESTIGATE_EXTENT",investigate,2)==1&&investigate[0]==L'1'),"unqualified output extent;explicit offline investigation required");
   module.value=LoadLibraryExW(library.c_str(),nullptr,LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR|LOAD_LIBRARY_SEARCH_SYSTEM32);require(module.value!=nullptr,"direct runtime load");
   wchar_t actual[MAX_PATH]{};require(GetModuleFileNameW(module.value,actual,MAX_PATH)>0&&fs::equivalent(library,actual),"loaded runtime differs");
@@ -97,12 +103,14 @@ int wmain(int argc,wchar_t** argv){
    require(level>=D3D_FEATURE_LEVEL_11_0,"consumer feature level");
    wchar_t stagingFlag[2]{};const bool allocateStaging=!(GetEnvironmentVariableW(L"SFC_DIRECT64_TIMING_ONLY",stagingFlag,2)==1&&stagingFlag[0]==L'1');
    std::array<SharedOutput,3> outputs;std::array<uint64_t,3> sharedHandles{};const remixapi_dxvk_CopyRenderingOutputType types[]={REMIXAPI_DXVK_COPY_RENDERING_OUTPUT_TYPE_FINAL_COLOR,REMIXAPI_DXVK_COPY_RENDERING_OUTPUT_TYPE_DEPTH,REMIXAPI_DXVK_COPY_RENDERING_OUTPUT_TYPE_OBJECT_PICKING};
+   const auto allocateOutputs=[&](){
    for(unsigned i=0;i<3;++i){D3D11_TEXTURE2D_DESC desc{};desc.Width=scene.width;desc.Height=scene.height;desc.MipLevels=desc.ArraySize=desc.SampleDesc.Count=1;desc.Format=i?DXGI_FORMAT_R32_FLOAT:DXGI_FORMAT_B8G8R8A8_UNORM;desc.BindFlags=D3D11_BIND_RENDER_TARGET|D3D11_BIND_SHADER_RESOURCE;desc.MiscFlags=D3D11_RESOURCE_MISC_SHARED;
     ok(native->CreateTexture2D(&desc,nullptr,&outputs[i].image),"consumer shared image");ComPtr<IDXGIResource> resource;ok(outputs[i].image.As(&resource),"shared resource interface");HANDLE shared=nullptr;ok(resource->GetSharedHandle(&shared),"native shared handle");
     ok(device->CreateTexture(scene.width,scene.height,1,D3DUSAGE_RENDERTARGET,i?D3DFMT_R32F:D3DFMT_A8R8G8B8,D3DPOOL_DEFAULT,&outputs[i].imported,&shared),"ordinary device imports consumer image");ok(outputs[i].imported->GetSurfaceLevel(0,&outputs[i].surface),"shared output surface");
     sharedHandles[i]=reinterpret_cast<uintptr_t>(shared);
     if(allocateStaging){desc.BindFlags=desc.MiscFlags=0;desc.Usage=D3D11_USAGE_STAGING;desc.CPUAccessFlags=D3D11_CPU_ACCESS_READ;ok(native->CreateTexture2D(&desc,nullptr,&outputs[i].staging),"offline readback staging");}
    }
+   };allocateOutputs();
    require(uint64_t(scene.width)*scene.height*12<=128ull*1024*1024,"shared output resource limit");
    WorkerPoll renderPollWait;std::cout<<"WORKER_POLL microseconds="<<renderPollWait.microseconds<<" bounded_diagnostics="<<bufferedDiagnostics<<'\n';
    ComPtr<IDirect3DQuery9> fence;ok(device->CreateQuery(D3DQUERYTYPE_EVENT,&fence),"renderer completion query");ComPtr<ID3D11Query> consumerFence;D3D11_QUERY_DESC query{D3D11_QUERY_EVENT,0};ok(native->CreateQuery(&query,&consumerFence),"consumer completion query");
@@ -129,7 +137,7 @@ int wmain(int argc,wchar_t** argv){
     unsigned damageCaptured=0,damageStageAge=0;int damageLastStage=-99;bool damageEverSeen=false;
    if(damageCapture&&!outputs[0].staging){D3D11_TEXTURE2D_DESC desc{};outputs[0].image->GetDesc(&desc);desc.BindFlags=desc.MiscFlags=0;desc.Usage=D3D11_USAGE_STAGING;desc.CPUAccessFlags=D3D11_CPU_ACCESS_READ;ok(native->CreateTexture2D(&desc,nullptr,&outputs[0].staging),"damage fixture staging");}
    if(render_prewarm::requested()){require(prewarm,"render warm requires early-start workflow");render_prewarm::run(device.Get(),renderPollWait,startup);}
-   OutputPeer peer;if(argc==5)peer.start(fs::absolute(argv[3]),root,argv[4],&startup,prewarm);
+   if(argc==5&&!nativeSize)peer.start(fs::absolute(argv[3]),root,argv[4],&startup,prewarm);
    startup.mark("receiver_started");
    ApiTexturePrefetch texturePrefetch;
    std::vector<BYTE> memoryScene;std::vector<std::vector<BYTE>> initialTextures;
@@ -153,7 +161,8 @@ int wmain(int argc,wchar_t** argv){
      require(count==initialTextures.size(),"initial asset scene/image association");
      std::cout<<"ASSET_MEMORY initial=1 geometry_bytes="<<memoryScene.size()<<" images="<<count<<" image_bytes="<<initial.image_bytes<<'\n';
     }else scene=load(root);
-    require(scene.width==1920&&scene.height==1080,"warm output extent unchanged");
+    if(nativeSize){scene.width=nativeTarget.current.width;scene.height=nativeTarget.current.height;}
+    else require(scene.width==1920&&scene.height==1080,"warm output extent unchanged");
     startup.mark("scene_loaded");
     if(ApiTexturePrefetch::requested())texturePrefetch.run(root,external,fence.Get(),renderPollWait,startup);
     apiok(external.SetConfigVariable("rtx.enableReplacementAssets","True"),"enable complete initial material library");
@@ -190,6 +199,28 @@ int wmain(int argc,wchar_t** argv){
     // Live input supplies source-stop and elapsed watchdogs in next(); skipped
     // submissions must not consume a proof-era frame-count lifetime budget.
     for(size_t frame=0;run_lifetime::iteration(liveMode,frame,paced?paced+(latest?1u:0u):scene.frames.size());++frame){
+     // A retiring target invalidates its notice before the source stops. Do not
+     // bypass source cancellation/deadlines while waiting for the next target.
+     if(liveMode&&ownerInput.store&&(frame_ingress::state(&ownerInput.store->header.stopped)||
+        !run_lifetime::within_window(GetTickCount64(),ownerInput.started,ownerInput.limit)))break;
+     if(nativeSize){output_target::Notice next{};
+      if(!nativeTarget.latest(next)){peer.check_alive();Sleep(1);continue;}
+      const auto& old=nativeTarget.current;
+      require(next.generation>=old.generation,"Native target generation went backwards");
+      if(next.generation==old.generation)require(next.width==old.width&&next.height==old.height&&next.device==old.device,"Target changed without a generation");
+      else {
+       peer.retire_generation(next.generation);wait9(fence.Get(),renderPollWait);if(coverage.enabled)postFence.wait();context->ClearState();context->Flush();
+       visuals.grade=RemixImageAdjust{};coverage=NormalCoverage{};hull.releaseTarget();outputs={};sharedHandles={};
+       auto resized=pp;resized.BackBufferWidth=next.width;resized.BackBufferHeight=next.height;resized.BackBufferCount=1;resized.BackBufferFormat=D3DFMT_A8R8G8B8;
+       require(SetWindowPos(window.value,nullptr,0,0,int(next.width),int(next.height),SWP_NOMOVE|SWP_NOZORDER|SWP_NOACTIVATE)!=FALSE,"Resize owned renderer window");
+       ok(device->ResetEx(&resized,nullptr),"Native-sized retained-device reset");scene.width=next.width;scene.height=next.height;
+       allocateOutputs();if(visuals.enabled)visuals.grade.prepare(native.Get(),outputs[0].image.Get());
+       coverage.start(native.Get(),outputs[1].image.Get(),outputs[2].image.Get());hull.start(native.Get(),outputs[1].image.Get(),coverage.enabled,outputs[2].image.Get());
+       if(combinedPost)visuals.grade.prepareCoverage(native.Get(),outputs[1].image.Get(),outputs[2].image.Get());
+       nativeTarget.current=next;
+       std::cout<<"NATIVE_TARGET_RECREATED width="<<next.width<<" height="<<next.height<<" generation="<<next.generation<<" retained_assets=1 slots=2\n";
+      }
+     }
      visuals.poll(external);
      if(frame<2)startup.mark("frame_begin",static_cast<unsigned>(frame));
      admission.tick(AssetService::Boundary);

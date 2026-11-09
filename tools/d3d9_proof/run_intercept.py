@@ -11,14 +11,16 @@ import sys
 import time
 import zipfile
 from run_offline import ROOT,CAPTURE,GAME,storage,digest,AGGREGATE_BYTES
+sys.path.insert(0,str(ROOT/'tools/remix_runtime'))
+from runtime_context import CONTEXT
 from scene_bundle import prepare
 
-BASE=ROOT/'artifacts/d3d9-intercept'
+BASE=CONTEXT.artifact('d3d9-intercept')
 RUNTIME=BASE/'deps/remix-1.5.2'
-ARCHIVE=ROOT/'artifacts/remix-runtime/deps/remix-1.5.2-release.zip'
+ARCHIVE=CONTEXT.artifact('remix-runtime/deps/remix-1.5.2-release.zip')
 ARCHIVE_SHA='cc424be4dd1a0c6fd922bc6a7f8e5f6582baea7043a38afa6686d8b6faabad01'
-EXE=ROOT/'artifacts/d3d9-proof/intercept-bin/d3d9_intercept.exe'
-GUARD=ROOT/'artifacts/remix-ingest/bin/bounded_job.exe'
+EXE=CONTEXT.artifact('d3d9-proof/intercept-bin/d3d9_intercept.exe')
+GUARD=CONTEXT.artifact('remix-ingest/bin/bounded_job.exe')
 
 
 def freeze_runtime():

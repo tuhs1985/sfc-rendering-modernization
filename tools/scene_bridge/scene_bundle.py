@@ -13,6 +13,8 @@ import struct
 import sys
 
 ROOT=Path(__file__).resolve().parents[2]
+sys.path.insert(0,str(ROOT/'tools/remix_runtime'))
+from runtime_context import CONTEXT
 sys.path.insert(0,str(ROOT/'tools/remix_ingest'))
 sys.path.insert(0,str(ROOT/'tools/m1_component'))
 from live_scene import decode_mesh
@@ -97,8 +99,8 @@ def prepare(source,output,game_root,*,live_record=None,evidence_mode='test',qual
     """Read original runtime mesh;resolve original IMAGE files only,never MOD geometry."""
     if evidence_mode not in ('performance','test'):raise ValueError('Scene evidence mode')
     if evidence_mode=='performance' and live_record is None:raise ValueError('Performance preparation requires fresh live row')
-    source=Path(source).resolve();source.relative_to(ROOT/'artifacts')
-    output=Path(output).resolve();output.relative_to(ROOT/'artifacts')
+    source=Path(source).resolve();source.relative_to(CONTEXT.artifact_root)
+    output=Path(output).resolve();output.relative_to(CONTEXT.artifact_root)
     if output.exists():raise ValueError('Refuse to overwrite replay evidence')
     if source.stat().st_size>2*1024*1024 or source.with_suffix('.json').stat().st_size>256*1024:raise ValueError('Source packet/reference cap')
     raw,refs=prepared_capture if prepared_capture is not None else (source.read_bytes(),source.with_suffix('.json').read_bytes())
@@ -121,7 +123,7 @@ def prepare(source,output,game_root,*,live_record=None,evidence_mode='test',qual
         if not qualified_mesh or 'piece' not in qualified_mesh or mesh['header'][13]!=0x0042EA92 or live_record is not None:
             raise ValueError('Break replay requires dedicated qualified geometry')
         capture_metadata_path=Path(break_replay['metadata']).resolve()
-        capture_metadata_path.relative_to(ROOT/'artifacts')
+        capture_metadata_path.relative_to(CONTEXT.artifact_root)
         source_session=json.loads(capture_metadata_path.read_text())['session']
         if source_session!=break_replay['session']:
             raise ValueError('Break replay session mismatch')
@@ -195,9 +197,9 @@ def prepare(source,output,game_root,*,live_record=None,evidence_mode='test',qual
     (output/'scene.bin').write_bytes(payload)
     # Content identity contains no renderer handles or native pointer IDs.
     identity=dict(geometry=mesh['geometry_sha256'],groups=[(g[0],textures[g[1]]['original_sha256'],g[2],g[3]) for g in groups])
-    result=dict(schema='SFC-neutral-offline-scene-1',source_packet=str(source.relative_to(ROOT)),
-        source_session=source_session,source_metadata=str(capture_metadata_path.relative_to(ROOT)),source_metadata_sha256=sha(capture_metadata_path.read_bytes()),
-        source_packet_sha256=sha(raw),source_references_sha256=sha(refs),updates=str(updates.relative_to(ROOT)),
+    result=dict(schema='SFC-neutral-offline-scene-1',source_packet=str(CONTEXT.relative(source)),
+        source_session=source_session,source_metadata=str(CONTEXT.relative(capture_metadata_path)),source_metadata_sha256=sha(capture_metadata_path.read_bytes()),
+        source_packet_sha256=sha(raw),source_references_sha256=sha(refs),updates=str(CONTEXT.relative(updates)),
         updates_sha256=sha(updates.read_bytes()) if evidence_mode=='test' and break_replay is None else None,
         evidence_mode=evidence_mode,model_name=mesh['refs']['model_filename'],
         geometry_sha256=mesh['geometry_sha256'],asset_sha256=sha(json.dumps(identity,sort_keys=True).encode()),

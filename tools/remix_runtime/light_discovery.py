@@ -6,7 +6,8 @@ import re
 from native_light_state import decode, SIZE
 
 ROOT=Path(__file__).resolve().parents[2]
-BIN=ROOT/'artifacts/remix-runtime/native-light-tests'
+from runtime_context import CONTEXT
+BIN=CONTEXT.artifact('remix-runtime/native-light-tests')
 RECEIPT=BIN/'qualification.json'
 
 
@@ -27,6 +28,10 @@ def sources():
 
 
 def require_qualification():
+    if CONTEXT.release:
+        from release_manifest import load
+        manifest=load(CONTEXT.package_root)
+        return dict(result='RELEASE_MANIFEST_INPUTS',version=manifest['version'])
     q=json.loads(RECEIPT.read_text())
     if q.get('result')!='OFFLINE_NATIVE_LIGHT_DISCOVERY_QUALIFIED' or q.get('sources')!=sources() or q.get('component_sha256')!=digest(BIN/'m1_light_component.dll'):
         raise ValueError('Native light discovery qualification stale/missing')

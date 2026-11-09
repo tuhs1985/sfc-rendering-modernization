@@ -48,7 +48,7 @@ int main(){
  ComPtr<ID3D11DepthStencilState> state;ok(d->CreateDepthStencilState(&zd,&state));c->OMSetDepthStencilState(state.Get(),13);
  ID3D11RenderTargetView* r=target.Get();c->OMSetRenderTargets(1,&r,depth.Get());float blue[]{0,0,1,1};c->ClearRenderTargetView(target.Get(),blue);
  game_output::Pool pool{};pool.header={game_output::Magic,game_output::Version,sizeof(pool),pid,{11,22,33,44},pid,pid};
- auto& slot=pool.slots[0];auto& p=slot.packet;p.magic_value=output_wire::magic;p.version_value=1;p.bytes=sizeof(p);p.producer_pid=pid;
+ auto& slot=pool.slots[0];auto& p=slot.packet;p.magic_value=output_wire::magic;p.version_value=output_wire::version;p.bytes=sizeof(p);p.producer_pid=pid;
  p.session=55;p.resource_epoch=1;p.sequence=9;p.source_frame=20;p.owner=7;p.revision=4;p.width=64;p.height=32;
  p.handles[0]=1;p.handles[1]=2;p.handles[2]=3;p.source_state_hash=4;p.scene_hash=5;p.published_qpc=6;p.checksum=output_wire::checksum(p);
  game_output::Metadata m{1,{11,22,33,44},0};m.checksum=game_output::checksum(m);game_output::metadata(slot,m);slot.state=output_wire::ready;

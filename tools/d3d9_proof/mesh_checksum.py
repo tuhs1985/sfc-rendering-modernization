@@ -6,7 +6,10 @@ from pathlib import Path
 import threading
 
 ROOT=Path(__file__).resolve().parents[2]
-BIN=ROOT/'artifacts/d3d9-proof/mesh-checksum'
+import sys
+sys.path.insert(0,str(ROOT/'tools/remix_runtime'))
+from runtime_context import CONTEXT
+BIN=CONTEXT.artifact('d3d9-proof/mesh-checksum')
 _lock=threading.Lock()
 _function=None
 _library=None
@@ -18,13 +21,22 @@ def _load():
     global _function,_library,_asset_function,_texture_function
     with _lock:
         if _function is None:
-            receipt=json.loads((BIN/'build.json').read_text(encoding='utf-8-sig'))
-            source=ROOT/'tools/d3d9_proof/mesh_checksum.cpp'
             dll=BIN/'mesh_checksum.dll'
-            sha=lambda path:hashlib.sha256(path.read_bytes()).hexdigest()
-            if (receipt['source_sha256']!=sha(source) or receipt['dll_sha256']!=sha(dll)
-                    or receipt.get('xxhash_header_sha256')!=sha(ROOT/'artifacts/remix-runtime/deps/xxhash.h')
-                    or receipt['architecture']!='x64' or ctypes.sizeof(ctypes.c_void_p)!=8):
+            if CONTEXT.release:
+                from release_manifest import load,verified_role,digest
+                manifest=load(CONTEXT.package_root)
+                dll=verified_role(CONTEXT,manifest,'mesh_checksum')
+                if digest(dll)!=manifest['files'][manifest['roles']['mesh_checksum']]['sha256']:
+                    raise ValueError('Packaged checksum library changed')
+            else:
+                receipt=json.loads((BIN/'build.json').read_text(encoding='utf-8-sig'))
+                source=ROOT/'tools/d3d9_proof/mesh_checksum.cpp'
+                sha=lambda path:hashlib.sha256(path.read_bytes()).hexdigest()
+                if (receipt['source_sha256']!=sha(source) or receipt['dll_sha256']!=sha(dll)
+                        or receipt.get('xxhash_header_sha256')!=sha(CONTEXT.artifact('remix-runtime/deps/xxhash.h'))
+                        or receipt['architecture']!='x64'):
+                    raise ValueError('Native mesh checksum build/source/architecture mismatch')
+            if ctypes.sizeof(ctypes.c_void_p)!=8:
                 raise ValueError('Native mesh checksum build/source/architecture mismatch')
             _library=ctypes.CDLL(str(dll))
             function=_library.sfc_mesh_checksum

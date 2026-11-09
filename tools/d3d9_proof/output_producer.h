@@ -9,7 +9,7 @@
 #include "output_startup.h"
 #include "receiver_activation.h"
 struct OutputPeer {
- HANDLE mapping=nullptr,process=nullptr,readyEvent=nullptr,doneEvent=nullptr;output_wire::Channel* channel=nullptr;uint64_t session=0;bool disconnected=false,passive=false;DWORD receiverPid=0;std::wstring mode;
+ HANDLE mapping=nullptr,process=nullptr,readyEvent=nullptr,doneEvent=nullptr;output_wire::Channel* channel=nullptr;uint64_t session=0,resourceEpoch=1;bool disconnected=false,passive=false;DWORD receiverPid=0;std::wstring mode;
  ~OutputPeer(){
   if(channel)InterlockedExchange(&channel->state,output_wire::stopped);
   if(readyEvent)SetEvent(readyEvent);
@@ -59,7 +59,7 @@ struct OutputPeer {
   if(disconnected)return false;
   require(output_wire::state(channel)==output_wire::idle,"surface is still owned by receiver");
   if(WaitForSingleObject(process,0)!=WAIT_TIMEOUT){disconnected=true;std::cout<<"OUTPUT_PEER_DISCONNECTED before_publish=1\n";return false;}
-  p.magic_value=output_wire::magic;p.version_value=output_wire::version;p.bytes=sizeof(p);p.producer_pid=GetCurrentProcessId();p.session=session;p.resource_epoch=1;
+  p.magic_value=output_wire::magic;p.version_value=output_wire::version;p.bytes=sizeof(p);p.producer_pid=GetCurrentProcessId();p.session=session;p.resource_epoch=resourceEpoch;
   if(mode==L"invalid")p.width=1921;
   LARGE_INTEGER q{};QueryPerformanceCounter(&q);p.published_qpc=static_cast<uint64_t>(q.QuadPart);p.checksum=output_wire::checksum(p);channel->packet=p;InterlockedExchange(&channel->state,output_wire::ready);require(SetEvent(readyEvent)!=FALSE,"notify receiver");
   const auto deadline=GetTickCount64()+10000;const auto began=GetTickCount64();
@@ -74,6 +74,19 @@ struct OutputPeer {
   }
   // Receiver death/rejection:retire this generation;never re-use its textures.
   InterlockedExchange(&channel->state,output_wire::stopped);SetEvent(readyEvent);require(WaitForSingleObject(process,5000)==WAIT_OBJECT_0,"receiver must retire before surface release");return false;
+ }
+ void retire_generation(uint64_t next){
+  require(next>resourceEpoch&&next<=INT32_MAX&&output_wire::state(channel)==output_wire::idle,"Output generation retirement requires idle previous epoch");
+  if(channel->packet.magic_value!=output_wire::magic){resourceEpoch=next;return;} // no GPU output has ever been published
+  const auto sequence=channel->packet.sequence;
+  channel->reserved=static_cast<LONG>(next);InterlockedExchange(&channel->state,output_wire::retiring);SetEvent(readyEvent);
+  const auto deadline=GetTickCount64()+5000;
+  for(;;){check_alive();const auto state=output_wire::state(channel);
+   if(state==output_wire::retired){require(channel->ack_session==session&&channel->ack_epoch==next&&channel->ack_sequence==sequence,"Retirement acknowledgement identity");break;}
+   require(state!=output_wire::rejected&&state!=output_wire::stopped&&GetTickCount64()<deadline,"Output generation drain5s limit");
+   HANDLE waits[]={process,doneEvent};require(WaitForMultipleObjects(2,waits,FALSE,100)!=WAIT_FAILED,"Output retirement notification");
+  }
+  resourceEpoch=next;InterlockedExchange(&channel->state,output_wire::idle);
  }
  void finish(){
   if(!process)return;InterlockedExchange(&channel->state,output_wire::stopped);SetEvent(readyEvent);require(WaitForSingleObject(process,5000)==WAIT_OBJECT_0,"receiver shutdown5s");DWORD code=0;require(GetExitCodeProcess(process,&code)!=0,"receiver exit receipt");

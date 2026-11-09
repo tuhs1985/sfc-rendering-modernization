@@ -12,6 +12,8 @@ import sys
 import time
 
 ROOT=Path(__file__).resolve().parents[2]
+sys.path.insert(0,str(ROOT/'tools/remix_runtime'))
+from runtime_context import CONTEXT
 sys.path.insert(0,str(ROOT/'tools/d3d9_proof'))
 sys.path.insert(0,str(ROOT/'tools/scene_bridge'))
 OFFSET=10*1024*1024
@@ -20,11 +22,11 @@ AUDIT=struct.Struct('<4I7Q4I8s')
 CAPACITY=12000
 STORE_BYTES=2688+CAPACITY*AUDIT.size
 MAGIC=0x314f4c53
-QUALIFICATION=ROOT/'artifacts/d3d9-proof/live-owner-qualification.json'
-EXE=ROOT/'artifacts/d3d9-proof/direct64-bin/d3d9_direct_host.exe'
-RECEIVER=ROOT/'artifacts/d3d9-proof/receiver-bin/output_receiver.exe'
-RUNTIME=ROOT/'artifacts/d3d9-intercept/deps/remix-1.5.2/.trex/d3d9.dll'
-GUARD=ROOT/'artifacts/remix-ingest/bin/bounded_job.exe'
+QUALIFICATION=CONTEXT.artifact('d3d9-proof/live-owner-qualification.json')
+EXE=CONTEXT.artifact('d3d9-proof/direct64-bin/d3d9_direct_host.exe')
+RECEIVER=CONTEXT.artifact('d3d9-proof/receiver-bin/output_receiver.exe')
+RUNTIME=CONTEXT.artifact('d3d9-intercept/deps/remix-1.5.2/.trex/d3d9.dll')
+GUARD=CONTEXT.artifact('remix-ingest/bin/bounded_job.exe')
 CONFIG='''rtx.enableReplacementAssets = False
 rtx.enableRaytracing = True
 rtx.captureInstances = True
@@ -57,8 +59,8 @@ def source_hashes():
 
 def binary_hashes():
     from source_timing import BINARIES
-    names=(*BINARIES,str(EXE.relative_to(ROOT)),str(RECEIVER.relative_to(ROOT)),str(RUNTIME.relative_to(ROOT)),
-           str(GUARD.relative_to(ROOT)),'artifacts/m1/bin/m1_gate.dll',
+    names=(*BINARIES,str(CONTEXT.relative(EXE)),str(CONTEXT.relative(RECEIVER)),str(CONTEXT.relative(RUNTIME)),
+           str(CONTEXT.relative(GUARD)),'artifacts/m1/bin/m1_gate.dll',
            'artifacts/remix-runtime/deps/remix_c.h','artifacts/d3d9-proof/ingress-x86/live_owner_tests.exe','artifacts/d3d9-proof/ingress-x64/live_owner_tests.exe')
     return {p:digest(ROOT/p) for p in names}
 
@@ -168,7 +170,7 @@ class Relay:
                 from image_controls import encode_current as encode_image
                 from quality_controls import encode as encode_quality
                 for name,encoder in [('image',encode_image),('quality',encode_quality)]:
-                    raw=(ROOT/'tools/remix_runtime/config/rendering.toml').read_bytes();(gpu/f'{name}-controls.bin').write_bytes(encoder(raw));(gpu/f'{name}-config-accepted.toml').write_bytes(raw)
+                    raw=(CONTEXT.setting('rendering.toml')).read_bytes();(gpu/f'{name}-controls.bin').write_bytes(encoder(raw));(gpu/f'{name}-config-accepted.toml').write_bytes(raw)
                 if self.offline_fixture:
                     from light_fixture import Replay
                     self.light_replay=Replay(gpu,manifest,self.receiver)
@@ -334,7 +336,7 @@ class Relay:
             (self.folder/'D3D9-ADDITIVE-001.pool.bin').write_bytes(pool_raw)
             fields=struct.unpack_from('<16I',pool_raw)
             expected=tuple(int(self.receiver.name[-32:][i:i+8],16) for i in range(0,32,8))
-            if fields[:4]!=(0x314f4753,2,576,pid) or fields[4:8]!=expected:raise ValueError('Additive pool session/process/layout')
+            if fields[:4]!=(0x314f4753,3,576,pid) or fields[4:8]!=expected:raise ValueError('Additive pool session/process/layout')
             stats=struct.unpack_from('<9I',pool_raw,512)
             pool_result=dict(published=fields[12],overwritten=fields[13],busy=fields[14],error=fields[15],
                              **dict(zip(('drawn','stale','invalid','not_ready','retired','gpu_busy','resource_failed','depth_missing','last_frame'),stats)),

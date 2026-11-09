@@ -7,6 +7,12 @@ import threading
 from contextlib import contextmanager
 from pathlib import Path
 from evidence_budget import AGGREGATE_BYTES
+from runtime_context import CONTEXT
+
+
+def release_play():
+    import os
+    return CONTEXT.release and os.environ.get('SFC_PLAY_SESSION')=='1'
 
 ROOT=Path(__file__).resolve().parents[2]
 EVIDENCE_RESERVE=32*1024*1024
@@ -17,8 +23,10 @@ class Reservations:
         # One snapshot BEFORE tactical loading. Never enumerate history under
         # the admission lock. All concurrent asset writers use this session ledger.
         if inventory is None:
-            from run_offline import storage
-            inventory=storage()
+            if release_play():inventory=0
+            else:
+                from run_offline import storage
+                inventory=storage()
         require_capacity(0,inventory=inventory)
         self.lock=threading.Lock();self.bytes=0;self.inventory=inventory;self.committed=0
 
@@ -47,15 +55,18 @@ class Reservations:
 def require_capacity(additional=0,*,inventory=None,free=None):
     if type(additional) is not int or additional<0:raise ValueError('Invalid image output reservation')
     if inventory is None:
-        from run_offline import storage
-        inventory=storage()
-    if free is None:free=shutil.disk_usage(ROOT).free
-    if inventory+additional+EVIDENCE_RESERVE>AGGREGATE_BYTES:
+        if release_play():inventory=0
+        else:
+            from run_offline import storage
+            inventory=storage()
+    if free is None:free=shutil.disk_usage(CONTEXT.data_root if CONTEXT.release else ROOT).free
+    if not release_play() and inventory+additional+EVIDENCE_RESERVE>AGGREGATE_BYTES:
         raise ValueError('Authorized20GB project output allowance;asset postponed')
-    if free<additional+EVIDENCE_RESERVE:raise ValueError('Insufficient disk space;asset postponed')
+    reserve=0 if release_play() else EVIDENCE_RESERVE
+    if free<additional+reserve:raise ValueError('Insufficient disk space;asset postponed')
 
 
 def policy():
-    return dict(legacy_scene_image_cap_removed=True,aggregate_cap_bytes=AGGREGATE_BYTES,
-                evidence_reserve_bytes=EVIDENCE_RESERVE,per_asset_decode_bytes=128*1024*1024,
+    return dict(legacy_scene_image_cap_removed=True,aggregate_cap_bytes=None if release_play() else AGGREGATE_BYTES,
+                evidence_reserve_bytes=0 if release_play() else EVIDENCE_RESERVE,per_asset_decode_bytes=128*1024*1024,
                 image_dimension_max=4096,per_asset_images=256,resident_backing_bytes=256*1024*1024)

@@ -1,5 +1,36 @@
 # Diagnostic tools reference
 
+## Installed alpha reporting
+
+Default CMD/native-EXE play retains no run history. Required session working files
+are deleted after game exit and verified graphics restoration. Interrupted
+recovery inputs remain until safely restored. `SFCRemix/Troubleshoot.cmd` opts in
+to five small JSON summaries, at most 64KiB each/320KiB total, under
+`data/troubleshooting`. No model/texture payloads, screenshots or frame traces.
+No upload. Report rotation never stops play; development capture limits remain
+separate. See [recording contract](runs/2026-11-08-codex-alpha-recording-options.md).
+
+## Portable-alpha tools — development only
+
+Current findings and limits: [portable alpha record](releases/PORTABLE_ALPHA.md).
+These tools never launch SFC and are not normal-play overhead.
+
+| Tool | Purpose / output | Important limit |
+| --- | --- | --- |
+| `tools/release/prepare_python.py` | Checksum-pinned upstream application-local Python/wheels | No Codex-runtime copy or machine-wide installation |
+| `tools/release/inventory_dependencies.py` | PE imports and99-module static Python superset | Includes inactive branches; not normal-play loaded-module proof |
+| `tools/release/stage_preflight_fixture.py` | Private fixture; actual WinPS5.1/app-local-Python preflight, Unicode/spaces/move | Incomplete/not distributable; no gameplay or second-machine claim |
+| `tools/release/run_extent_probe.py --extent W H` | Candidate1.6.1 synthetic ray-traced output/x86 receiver | Current parser bounds; isolated24Present diagnostic toggle, not normal startup |
+| `tools/release/shared_layout_probe.cpp` + `run_shared_layout_probe.py --extent W H` | GPU quadrants, independent D3D9/native-D3D11 readbacks |45second owned-job bound;32MiB scratch/2MiB console; teardown currently partial |
+| `tools/release/build_zip.py` | Reviewed-commit allowlist ZIP/checksums | Requires license/role review and exact hashes; never uploads. Test ZIPs are synthetic |
+
+Shared-layout probe: x64 `/std:c++20 /EHsc /W4 /WX`, exact candidate1.6.1 SDK
+header, user32/d3d11/dxgi. Tools/runs stay in ignored `artifacts/alpha/`.
+Correct source/incorrect native pixels at1280×360 identify the interop boundary;
+matching cross-process hashes alone do not establish correctness. No game assets
+or continuous images. Preserve1080p native guards until generation/size resources
+are wired and actually qualified. See the alpha record for build and run evidence.
+
 ## Live destruction checkout — November 7
 
 `tools/native_insertion/start_native_break_session.ps1` selects the optional

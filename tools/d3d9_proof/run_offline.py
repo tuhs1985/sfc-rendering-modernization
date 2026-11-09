@@ -13,13 +13,14 @@ import numpy as np
 from PIL import Image
 
 ROOT=Path(__file__).resolve().parents[2]
-sys.path.insert(0,str(ROOT/'tools/scene_bridge'))
 sys.path.insert(0,str(ROOT/'tools/remix_runtime'))
+from runtime_context import CONTEXT
+sys.path.insert(0,str(ROOT/'tools/scene_bridge'))
 from evidence_budget import AGGREGATE_BYTES
 from scene_bundle import prepare,read_replay
 
-EXE=ROOT/'artifacts/d3d9-proof/bin/d3d9_replay.exe'
-CAPTURE=ROOT/'artifacts/m1/runs/20261016-223535-enabled'
+EXE=CONTEXT.artifact('d3d9-proof/bin/d3d9_replay.exe')
+CAPTURE=CONTEXT.artifact('m1/runs/20261016-223535-enabled')
 GAME=Path(r'C:\Project\SFC-Remix-Return-Test')
 SOURCES=('tools/scene_bridge/scene_bundle.py','tools/d3d9_proof/d3d9_replay.cpp',
     'tools/d3d9_proof/build.ps1','tools/d3d9_proof/run_offline.py','tools/d3d9_proof/synthetic.py',
@@ -139,8 +140,14 @@ def compare(folder):
 
 def storage():
     total=0
+    if CONTEXT.release:
+        for p in CONTEXT.data_root.rglob('*'):
+            try:
+                if p.is_file():total+=p.stat().st_size
+            except FileNotFoundError:pass
+        return total
     for sub in ('remix-runtime/runs','remix-runtime/archives','d3d9-proof','d3d9-intercept/runs','d3d9-intercept/reference','d3d9-intercept/capabilities','d3d9-intercept/direct64-runs','player-replacement'):
-        for p in (ROOT/'artifacts'/sub).rglob('*'):
+        for p in (CONTEXT.artifact_root/sub).rglob('*'):
             try:
                 if p.is_file():total+=p.stat().st_size
             except FileNotFoundError:pass # Native latest-light packets are atomically renamed.
@@ -180,11 +187,11 @@ def main():
     parser=argparse.ArgumentParser();parser.add_argument('--execute',action='store_true');args=parser.parse_args()
     if not args.execute:print('Offline D3D9 proof prepared;--execute required;no SFC/Remix launch');return
     if storage()+128*1024*1024>AGGREGATE_BYTES:raise ValueError('20GB aggregate evidence cap lacks128MiB reservation')
-    folder=ROOT/'artifacts/d3d9-proof/runs'/dt.datetime.now(dt.timezone.utc).strftime('%Y%m%d-%H%M%S-%f')
+    folder=CONTEXT.artifact('d3d9-proof/runs')/dt.datetime.now(dt.timezone.utc).strftime('%Y%m%d-%H%M%S-%f')
     folder.mkdir(parents=True);start=time.monotonic()
     capture_files=[p for p in CAPTURE.glob('LIVE-SCENE-001-*') if p.is_file()]
     capture_files += [CAPTURE/'run-metadata.json',CAPTURE/'run-result.json']
-    inputs={str(p.relative_to(ROOT)):digest(p) for p in capture_files}
+    inputs={str(CONTEXT.relative(p)):digest(p) for p in capture_files}
     result=dict(result='PARTIAL',sfc_launched=False,remix_loaded=False,exe_sha256=digest(EXE),inputs=inputs,cases=[])
     result['sources']={name:digest(ROOT/name) for name in SOURCES}
     result['system_d3d9_x86_sha256']=digest(Path(os.environ['SystemRoot'])/'SysWOW64/d3d9.dll')
@@ -207,7 +214,7 @@ def main():
             if code:raise ValueError(f'D3D9 native case{revision} failed:{code};see native.log')
             comparisons=compare(case)
             result['cases'].append(dict(model=manifest['model_name'],geometry_sha256=manifest['geometry_sha256'],
-                replay_sha256=manifest['replay_sha256'],folder=str(case.relative_to(ROOT)),frames=comparisons))
+                replay_sha256=manifest['replay_sha256'],folder=str(CONTEXT.relative(case)),frames=comparisons))
             if time.monotonic()-start>180:raise ValueError('Offline prepared workflow180s limit')
         if len({c['geometry_sha256'] for c in result['cases']})!=2:raise ValueError('Two distinct assets required')
         if any(digest(ROOT/p)!=h for p,h in inputs.items()):raise ValueError('Original capture changed')

@@ -36,6 +36,7 @@ int wmain(int argc,wchar_t** argv){
         // Offline entry still requests180; approved live workflow requests<=300.
         wchar_t tuning[2]{};const bool longTuning=GetEnvironmentVariableW(L"SFC_D3D9_LIVE_TUNING",tuning,2)==1&&tuning[0]==L'1';
         const bool play=pipeline_mode::play_session();
+        const bool recordingQuota=!(play&&GetEnvironmentVariableW(L"SFC_RELEASE_ROOT",nullptr,0)>0);
         if((!seconds&&!play) || seconds>(longTuning?1980u:300u) || max_bytes<65536 || max_bytes>20000000000ull ||
            log_limit<1024 || log_limit>8ull*1024*1024 || !fs::is_directory(work) || !fs::is_regular_file(argv[5]))return 2;
         const auto log_path=work/L"job-console.log",result_path=work/L"job-result.json";
@@ -93,14 +94,14 @@ int wmain(int argc,wchar_t** argv){
             }
             unsigned long long bytes=0;
             try{
-                for(const auto& entry:fs::recursive_directory_iterator(work)){
+                if(recordingQuota)for(const auto& entry:fs::recursive_directory_iterator(work)){
                     if(entry.is_symlink())throw std::runtime_error("scratch symlink");
                     if(entry.is_regular_file())bytes+=entry.file_size();
                 }
             }catch(...){reason=24;TerminateJobObject(job.h,24);break;}
             peak=(std::max)(peak,bytes);warning|=bytes>=max_bytes*4/5;
             unsigned expected=0;
-            if(bytes>max_bytes)reason.compare_exchange_strong(expected,21);
+            if(recordingQuota&&bytes>max_bytes)reason.compare_exchange_strong(expected,21);
             expected=0;
             if(seconds&&GetTickCount64()-began>=seconds*1000ull)reason.compare_exchange_strong(expected,22);
             expected=0;if(play&&WaitForSingleObject(supervisor.h,0)!=WAIT_TIMEOUT)reason.compare_exchange_strong(expected,23);

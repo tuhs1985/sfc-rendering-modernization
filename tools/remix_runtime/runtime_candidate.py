@@ -8,7 +8,10 @@ import urllib.request
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
-BASE = ROOT / 'artifacts/remix-runtime/deps/candidate-1.6.1'
+import sys
+sys.path.insert(0,str(ROOT/'tools/remix_runtime'))
+from runtime_context import CONTEXT
+BASE = CONTEXT.artifact('remix-runtime/deps/candidate-1.6.1')
 COMMIT = '0a6cd5b1ee814ec390c358e0c9c32ece8895ddc0'
 NAME = 'rtx-remix-for-x64-games-release-remix-1.6.1.zip'
 ARCHIVE_BYTES = 557087446
@@ -112,6 +115,15 @@ def fetch():
 
 
 def verify(*, require_host=False):
+    if CONTEXT.release:
+        from release_manifest import load,verified_role
+        manifest=load(CONTEXT.package_root)
+        pin=manifest.get('remix',{})
+        if pin!={'release':'1.6.1','source_commit':COMMIT,'api_version':[0,6,5],'header_sha256':HEADER_SHA}:
+            raise ValueError('Release runtime/SDK pair differs from the qualified pin')
+        return dict(runtime=verified_role(CONTEXT,manifest,'remix_runtime'),
+                    exe=verified_role(CONTEXT,manifest,'renderer'),
+                    manifest=dict(source_commit=COMMIT,api_version=[0,6,5],header_sha256=HEADER_SHA))
     manifest = json.loads((BASE / 'manifest.json').read_text())
     if (manifest['source_commit'] != COMMIT or manifest['archive_sha256'] != ARCHIVE_SHA
             or manifest['api_version'] != [0, 6, 5] or manifest['runtime'] != 'runtime/d3d9_x64.dll'):
@@ -123,7 +135,7 @@ def verify(*, require_host=False):
         path.relative_to((BASE / 'runtime').resolve())
         if path.stat().st_size != receipt['bytes'] or digest(path) != receipt['sha256']:
             raise ValueError('Candidate dependency changed: ' + name)
-    exe = ROOT / 'artifacts/remix-runtime/candidate-1.6.1-bin/d3d9_direct_host.exe'
+    exe = CONTEXT.artifact('remix-runtime/candidate-1.6.1-bin/d3d9_direct_host.exe')
     if require_host:
         build = json.loads((exe.parent / 'build.json').read_text())
         from additive_qualification import sources

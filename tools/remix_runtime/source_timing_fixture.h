@@ -1,4 +1,5 @@
 // Synthetic source rows for the standalone D3D11 fixture ONLY,never SFC.
+#include "../d3d9_proof/output_target.h"
 #pragma once
 #include "../m1_component/m1_present_calibration.h"
 #include "../d3d9_proof/live_owner_wire.h"
@@ -49,6 +50,19 @@ struct SourceTimingFixture {
     for(DWORD i=0;i<rows.size();++i){
      if(lateAssetFixture&&i==2&&InterlockedCompareExchange(reinterpret_cast<LONG*>(base+11*1024*1024+128*1024+512),0,0)<120)continue;
      auto row=rows[i];row[2]=frame;row[45]=i;row[47]=GetCurrentThreadId();row[94]=row[95]=0;
+     if(output_target::requested()){
+      auto& target=*reinterpret_cast<output_target::Store*>(base+output_target::Offset);output_target::Notice notice{};
+      if(output_target::read(target,notice)&&output_target::valid(notice,source.session,GetCurrentProcessId())){
+       float viewport[6]{};memcpy(viewport,row.data()+83,24);
+       for(unsigned k=0;k<4;++k)viewport[k]=roundf(viewport[k]*(k%2?float(notice.height)/1080.f:float(notice.width)/1920.f));
+       viewport[4]=viewport[2]/2;viewport[5]=viewport[3]/2;
+       memcpy(row.data()+83,viewport,24);
+       sfc_scene::Matrix world{},view{},projection{};memcpy(world.data(),row.data()+8,64);memcpy(view.data(),row.data()+49,64);memcpy(projection.data(),row.data()+66,64);
+       projection[0]=projection[5]*viewport[3]/viewport[2];memcpy(row.data()+66,projection.data(),64);
+       auto screen=sfc_scene::identity();screen[0]=viewport[4];screen[5]=-viewport[5];screen[3]=viewport[0]+viewport[4];screen[7]=viewport[1]+viewport[5];
+       const auto composed=sfc_scene::multiply(screen,sfc_scene::multiply(projection,sfc_scene::multiply(view,world)));memcpy(row.data()+25,composed.data(),64);
+      }
+     }
      if(native_gate::requested()&&!damageFixture){
       // Fixture-only changing rigid pose. Recompute the independently checked
       // engine-composed projection rather than pairing old pixels with a pose.

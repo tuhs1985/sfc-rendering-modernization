@@ -9,6 +9,7 @@ import struct
 import sys
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/'tools/remix_runtime'))
+from runtime_context import CONTEXT
 sys.path.insert(0,str(ROOT/'tools/scene_bridge'))
 
 PAIRS=(('light damage.bmp','light damage si.bmp'),('medium damage.bmp','medium damage si.bmp'),('heavy damage.bmp','heavy damage si.bmp'),
@@ -29,7 +30,7 @@ def prepare(root,gpu):
     from remix_coordinates import bgra
     from mesh_checksum import texture_identity,asset_identity
     gpu=Path(gpu);stage=gpu/'rtx-remix/mods/sfc-damage';stage.mkdir(parents=True,exist_ok=True)
-    raw=(ROOT/'tools/remix_runtime/config/rendering.toml').read_bytes();values=struct.unpack('<2I10fQ',encode(raw))[2:12]
+    raw=(CONTEXT.setting('rendering.toml')).read_bytes();values=struct.unpack('<2I10fQ',encode(raw))[2:12]
     entries=[];reports=[];blocks=[];hashes=[];total=0
     for i,(primary_name,secondary_name) in enumerate(PAIRS):
         primary=load_image(root,'assets/textures/'+primary_name);secondary=load_image(root,'assets/textures/'+secondary_name)

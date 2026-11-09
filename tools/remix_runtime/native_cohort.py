@@ -2,6 +2,7 @@
 import hashlib,json,struct
 from pathlib import Path
 from player_replacement import ROOT,OFFSET as BASE
+from runtime_context import CONTEXT
 from scene_capacity import COHORT_OFFSET,OWNERS
 OFFSET=COHORT_OFFSET
 MANIFEST_BYTES=64+52*OWNERS
@@ -9,7 +10,7 @@ CELL_BYTES=MANIFEST_BYTES+64
 OWNER_BASE=64+3*CELL_BYTES
 SIZE=OWNER_BASE+OWNERS*32
 MAGIC=0x31434e53
-RECEIPT=ROOT/'artifacts/player-replacement/native-cohort-tests/qualification.json'
+RECEIPT=CONTEXT.artifact('player-replacement/native-cohort-tests/qualification.json')
 EDITABLE_VISUALS=frozenset({'tools/remix_runtime/config/lights.toml','tools/remix_runtime/config/rendering.toml'})
 
 
@@ -28,7 +29,7 @@ def current_visual_inputs():
     result={}
     for name in sorted(EDITABLE_VISUALS):
         cap=65536 if name.endswith('/lights.toml') else 16384
-        with (ROOT/name).open('rb') as stream:raw=stream.read(cap+1)
+        with (CONTEXT.setting(Path(name).name) if CONTEXT.release else ROOT/name).open('rb') as stream:raw=stream.read(cap+1)
         if len(raw)>cap:raise ValueError('Visual config byte limit: '+name)
         if name.endswith('/lights.toml'):
             controls=validate(tomllib.loads(raw.decode('utf-8')),REGISTRY)
@@ -52,6 +53,13 @@ def save(channel,folder):
     (folder/'NATIVE-COHORT-001.bin').write_bytes(raw);(folder/'NATIVE-COHORT-001.json').write_text(json.dumps(value,indent=2));return value
 
 def require_qualification(policy):
+    if CONTEXT.release:
+        from release_manifest import load
+        from async_material_checkout import backend_inputs,receipt
+        manifest=load(CONTEXT.package_root)
+        if policy!='ExtraFrame':raise ValueError('Alpha release uses the qualified ExtraFrame policy')
+        return dict(result='RELEASE_MANIFEST_INPUTS',version=manifest['version'],
+                    backend_inputs=receipt(backend_inputs()),active_visual_inputs=current_visual_inputs())
     q=json.loads(RECEIPT.read_text())
     if q['result']!='NATIVE_COHORT_PREPARED' or policy not in q['policies']:raise ValueError('Native cohort not qualified')
     for name,sha in q['files'].items():

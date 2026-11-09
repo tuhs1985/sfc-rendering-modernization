@@ -63,12 +63,20 @@ int wmain(int argc,wchar_t** argv){
   parent=OpenProcess(SYNCHRONIZE,FALSE,pid);check(parent!=nullptr,"open parent lifetime");
   output_startup::Lifetime lifetime(GetTickCount64(),pipeline_mode::play_session());const bool activated=activateReceiver(channel,pid,session,parent,readyEvent,doneEvent,game,lifetime);
   ComPtr<ID3D11Device> device;ComPtr<ID3D11DeviceContext> context;ComPtr<ID3D11Query> query;WorkerGpuFence copyFence;
-  ComPtr<ID3D11Texture2D> textures[3],cache[3],staging[3];uint64_t last=0,epoch=0;output_wire::Packet previous{};unsigned received=0;
+    ComPtr<ID3D11Texture2D> textures[3],cache[3],staging[3];uint64_t last=0,epoch=0,expectedEpoch=0;output_wire::Packet previous{};unsigned received=0;
   wchar_t live[2]{};const bool liveMode=GetEnvironmentVariableW(L"SFC_D3D9_LIVE_TIMING",live,2)==1&&live[0]==L'1';
   if(!activated)result=0;
   for(;activated;){
    check(!lifetime.expired(GetTickCount64()),game.enabled?"receiver130s additive timeout":liveMode?"receiver110s live timeout":"receiver60s timeout");check(WaitForSingleObject(parent,0)==WAIT_TIMEOUT,"producer disconnected");
    const auto state=output_wire::state(channel);if(state==output_wire::stopped){result=0;break;}
+   if(state==output_wire::retiring){
+    check(epoch&&channel->reserved>0&&uint64_t(channel->reserved)>epoch,"Retirement epoch must advance");
+    if(!game.retire()){const HANDLE waits[]={parent,readyEvent};check(WaitForMultipleObjects(2,waits,FALSE,100)!=WAIT_FAILED,"Game generation drain notification");continue;}
+    if(context){context->ClearState();context->Flush();}
+    for(unsigned i=0;i<3;++i){textures[i].Reset();cache[i].Reset();staging[i].Reset();}
+      expectedEpoch=uint64_t(channel->reserved);epoch=0;previous={};channel->ack_session=session;channel->ack_epoch=expectedEpoch;channel->ack_sequence=last;
+    InterlockedExchange(&channel->state,output_wire::retired);check(SetEvent(doneEvent)!=FALSE,"Retirement notification");continue;
+   }
    if(state!=output_wire::ready){const HANDLE waits[]={parent,readyEvent};check(WaitForMultipleObjects(2,waits,FALSE,100)!=WAIT_FAILED,"producer notification wait");continue;}
    if(InterlockedCompareExchange(&channel->state,output_wire::acquired,output_wire::ready)!=output_wire::ready)continue;
    const auto p=channel->packet;
@@ -82,7 +90,8 @@ int wmain(int argc,wchar_t** argv){
     D3D11_QUERY_DESC q{D3D11_QUERY_EVENT,0};hr(device->CreateQuery(&q,&query),"receiver query");
     if(game.enabled)copyFence.start(device.Get(),context.Get());
    }
-   if(!epoch){
+    if(!epoch){
+     check(!expectedEpoch||p.resource_epoch==expectedEpoch,"First output must match acknowledged target generation");
     for(unsigned i=0;i<3;++i){hr(device->OpenSharedResource(reinterpret_cast<HANDLE>(static_cast<uintptr_t>(p.handles[i])),IID_PPV_ARGS(&textures[i])),"open shared GPU image");
      D3D11_TEXTURE2D_DESC d{};textures[i]->GetDesc(&d);check(d.Width==p.width&&d.Height==p.height&&d.Format==(i?DXGI_FORMAT_R32_FLOAT:DXGI_FORMAT_B8G8R8A8_UNORM)&&d.MipLevels==1&&d.ArraySize==1&&d.SampleDesc.Count==1,"shared texture descriptor");
      if(!game.enabled){d.MiscFlags=0;hr(device->CreateTexture2D(&d,nullptr,&cache[i]),"receiver private GPU cache");}

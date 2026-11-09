@@ -1,5 +1,13 @@
 # Alpha release preparation
 
+**Approved implementation supersedes the delivery suggestions below:** see
+[portable ZIP implementation and current evidence](PORTABLE_ALPHA.md). Target is
+v0.1.0-alpha.1, tester-created game copy, application-local runtimes, no installer,
+MIT project code, and the six sponsor-confirmed stable native resolutions through
+1920×1080 (native1440p/4K deferred by scope correction). Implementation
+has begun; no distributable or package acceptance is claimed. Older assessment
+paragraphs below retain historical context, not the current delivery specification.
+
 **Current November 8 checkpoint:** [live FCA destruction succeeded](../runs/2026-11-08-codex-live-break-success.md).
 Two parent lifetimes/eight pieces rendered and suppressed correctly, with cached
 sharing and normal gameplay by sponsor report. All four required alpha feature

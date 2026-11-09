@@ -6,6 +6,8 @@ import struct
 import sys
 
 ROOT=Path(__file__).resolve().parents[2]
+sys.path.insert(0,str(ROOT/'tools/remix_runtime'))
+from runtime_context import CONTEXT
 sys.path.insert(0,str(ROOT/'tools/remix_ingest'))
 from live_scene import SceneChannel,decode_mesh,ASSETS
 
@@ -17,7 +19,7 @@ SIZE=STAMP.size+HEADER.size+ROWS*384
 def require_qualification():
     from prepare_full_reshade import source_hashes
     from depth_snapshot_analysis import digest
-    p=ROOT/'artifacts/remix-runtime/deps/present-calibration-qualification.json'
+    p=CONTEXT.artifact('remix-runtime/deps/present-calibration-qualification.json')
     q=json.loads(p.read_text())
     if q.get('result')!='OFFLINE_CALIBRATION_SIDECAR_PASS' or q.get('source_hashes')!=source_hashes():raise ValueError('Calibration offline source qualification required')
     for key,path in [('addon_sha256','artifacts/remix-runtime/return-bin/SFCRemixReturn.dll'),('component_sha256','artifacts/m1/bin/m1_component.dll')]:

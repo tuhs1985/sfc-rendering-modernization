@@ -1,3 +1,4 @@
+from runtime_context import CONTEXT
 """Live controls for the existing async D3D9 path; never called inside SFC."""
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -91,7 +92,7 @@ class Controls:
                 if job.get('phase')!='ready' or not pieces or job['id'] in self.relay.pending_complete_ids:continue
                 scene=json.loads((job['gpu']/'scene.json').read_text())
                 from live_owner_timing import ROOT
-                jobs.append(dict(id=job['id'],packet=str(ROOT/scene['source_packet']),base=str(job['gpu']/'rtx-remix/mods/sfc-policy'),pieces=list(pieces.values())))
+                jobs.append(dict(id=job['id'],packet=str(CONTEXT.reference(scene['source_packet'])),base=str(job['gpu']/'rtx-remix/mods/sfc-policy'),pieces=list(pieces.values())))
             if not jobs:return
             key=(hashlib.sha256(raw).hexdigest(),tuple((j['id'],len(j['pieces'])) for j in jobs))
             if key in (self.accepted_key,self.rejected_key):return

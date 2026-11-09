@@ -1,13 +1,136 @@
 ---
 title: SFC Modernization — Status Tracker
-updated: 2026-11-08
-checkpoint: FCA destruction replacement demonstrated;two parents/eight pieces;alpha delivery next
+updated: 2026-11-09
+checkpoint: Our118-file audit continued;48 separation candidates; measurement-only leftovers identified; refactor parked
 tags:
   - sfc-modernization
   - project-status
 ---
 
 # SFC Modernization — Status Tracker
+
+**November9 — Audit narrowed to our code:** all118 authored payload files reviewed;
+48now flagged for exclusion/dependency separation,70provisionally retained.
+New findings: displaced old preparation queue, diagnostic-only Python buffer
+recorder, loading experiments and development evidence-budget module. Startup
+profiling/task spans/cohort dump writing still happen internally with reports off;
+diagnostic-only cleanup identified separately from synchronization/integrity.
+[Detailed audit](releases/PROJECT_PAYLOAD_AUDIT.md). No refactor/deletion/runtime
+change; implementation remains parked.
+
+**November9 — Whole-package relevance review:** read-only inventory of3,901files.
+Added2,555 candidates/about29MiB beyond tools; no deletion/refactor. Proven direct
+Remix dependencies stay. Standard-name MSVCP140.dll is absent despite the native
+import contract: resolve this packaging gap before clean-machine release checks.
+[Expanded list](releases/PACKAGE_FILE_RELEVANCE_AUDIT.md).
+
+**November9 — Parked by sponsor:** production-runtime/development-tool separation.
+Preserve the working integration; no implementation until reopened. Scope and
+restart action are in the existing Obsidian Parking Lot; the
+[tools audit](releases/PACKAGED_TOOLS_AUDIT.md) is its technical starting point.
+
+**November9 — Packaged tools audit (no deletions):** 105files/about785KiB.
+34development-only module candidates, seven mixed modules and two diagnostic
+profiles identified for staged removal from the distribution. Runtime helpers
+are entangled with fixtures/qualification modules; do not delete whole folders
+or remove the two profiles before correcting imports/reads.
+[Exact list](releases/PACKAGED_TOOLS_AUDIT.md). Static audit only; package unchanged.
+
+**November9 — Product folder cleanup:** removed unused data directories, old
+restored runs, Python build folders and an unselected Remix build. About543MiB
+removed; settings/game files preserved. New staging/ZIP rules prevent recurrence.
+746 tests, installed preflight and asset/light initialization pass. Real trimmed
+runtime renders/transfers; its standalone coverage oracle remains partial exactly
+as in the untouched control. No SFC launched. Normal launcher unchanged.
+[Record](runs/2026-11-09-codex-alpha-layout-cleanup.md).
+
+**November8 — Private rendering confirmed; release recording controls added:**
+normal launch now saves no run history; optional `SFCRemix/Troubleshoot.cmd` keeps
+at most five 64KiB summaries (320KiB total). Temporary rendering/recovery files
+clean after safe shutdown; incomplete recovery stays protected. Recording quotas
+no longer terminate installed untimed play. Messages simplified; settings intact.
+742 regressions plus final eight focused retention tests, actual guard quota
+test and installed/moved-package checks pass. Gameplay cleanup/relaunch after
+this change still needs confirmation. Changes remain uncommitted.
+[Record](runs/2026-11-08-codex-alpha-recording-options.md).
+
+**November8 — Latest private retry:** reached tactical asset preparation, then
+failed on a development-only light config path. Corrected to package settings;
+normal game exit/rollback confirmed. Expanded installed smoke through real
+captured-asset initialization and light binding passes; 735 tests and exact CMD
+preflight pass. Same CMD retry needed; gameplay rendering still unverified.
+[Record](runs/2026-11-08-codex-alpha-light-context-fix.md).
+
+**November8 — Private alpha scene startup repaired:** latest run failed before
+capture because `multi_ship.toml` was absent. Added both scene profiles to the
+explicit package inputs and parse them before launch. Generated environment
+cache now stays under data. Interrupted graphics transaction recovered after game
+exit; private package updated with rollback. Exact CMD preflight, installed scene
+preparation through the process-launch boundary and 734 desktop tests pass.
+Retry the same CMD; actual packaged enhancement rendering remains unverified.
+[Record](runs/2026-11-08-codex-alpha-scene-startup-fix.md).
+
+**November8 — Normal alpha launch uses CMD/native Windows:** private checkout's
+`SFCRemix-Launch.cmd` directly invokes the native launcher and bundled runtime;
+PowerShell removed from this launch path. Current administrator policy unchanged.
+731tests, installed exact-CMD preflight and moved Unicode/spaced package checks
+pass. Sponsor can double-click the same CMD file; gameplay retry remains pending.
+[Entry-point record](runs/2026-11-08-codex-native-alpha-entrypoint.md).
+
+**November8 — Normal-play elevation appears removable:** source audit identifies
+our wrapper/Python checks as the enforced requirement. The actual controller's
+operations pass against an owned unelevated child, and private game-copy file
+access/replacement passes as a standard user. Full non-admin SFC gameplay remains
+unqualified; current launcher unchanged. Recommend a scoped standard-user checkout
+before making it the alpha default. [Assessment](releases/PRIVILEGE_ASSESSMENT.md).
+
+**November8 — Packaged-launch failure corrected:** the first private launch was
+rejected before game creation by a leftover native development-path restriction.
+The package now validates its own game/launcher/add-on paths and hashes; installed
+preflight invokes the same native check. Cleanup was confirmed,730Python tests
+and14native checks pass, and actual Unicode Detours/GPU rendering passes600frames.
+Private package updated with rollback copies; retry the same command. No packaged
+gameplay or public release success claimed. [Review](runs/2026-11-08-codex-alpha-launcher-portability-fix.md).
+
+**November8 — Private functional alpha checkout ready:** all six supported
+native sizes pass600-frame multi-ship GPU tests. Resize plus device recreation
+retains geometry and correct depth/text across three output generations.729Python
+tests and both development timing policies pass; untimed BRK preflight is restored.
+Installed package preflight passes after moving to `C:\Project\SFC-Alpha-Checkout`,
+using bundled Python and pinned Remix, without Toolkit/Codex runtimes or test
+receipts. Sponsor gameplay requested; no result yet. Final vendor/profile review,
+reviewed-commit ZIP, second-machine checks and publication approval remain open.
+No release ZIP/tag/commit/push. [Checkout command and evidence](releases/PORTABLE_ALPHA.md).
+
+**November8 — Native-resolution alpha integration:** target dimensions/generations
+now drive the existing renderer→receiver→native insertion path. Standalone tests
+pass1024×768,1280×720,1366×768,1920×1080 and a live-output resize to1024×768,
+including native depth/text and retained assets. Remaining sizes and portable
+ReShade base relocation are being checked.727Python regressions passed before
+the new shared-asset-order test. A discovered alias-first admission race is fixed
+and under actual GPU validation. Alpha scope is the six supported SFC sizes
+through1080p;1280×360 is a negative diagnostic, native1440p/4K deferred. No release
+ZIP/tag exists; package closure and clean-directory/second-machine play remain.
+[Details](releases/PORTABLE_ALPHA.md). Earlier entries below are historical.
+
+**November 8 — Alpha transfer gate needs resolution:**723testsPASS; actual
+application-local/WinPS5.1 read-only preflight passes Unicode/spaces and a moved
+package. Existing development BRK/untimed preflight restored/passes; unchanged
+native host hash. Isolated GPU tests identify1280×360shared-image corruption
+between correct Remix D3D9 pixels and native D3D11 pixels.1440p/4Kquadrants match,
+but full native-resolution output/resize/gameplay remain unqualified. No alpha
+ZIP/tag/publication. No runtime patch or architecture change introduced.
+[Details and remaining gates](releases/PORTABLE_ALPHA.md).
+
+**November 8 — Portable alpha implementation started:** approved self-contained
+ZIP/no installer, tester's game copy, native dimensions through4K. App-local
+upstream Python and pinned packages work; shared path context, manifest/profile
+checks, settings preservation, launch/recovery entry points and allowlist ZIP
+builder implemented.718 tests pass; extent/target-contract native tests15/12pass.
+The contracts are not yet connected to live output; no package, tag, gameplay
+qualification or release published. Continue runtime closure, output generations
+and actual GPU dimension tests before clean-directory/second-machine checkout.
+[Current implementation record](releases/PORTABLE_ALPHA.md).
 
 **November 8 — Live FCA break replacement works:** two separate FCA breakups,
 eight fragments with successful insertion/suppression, cached content reused for

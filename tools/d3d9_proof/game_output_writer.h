@@ -4,6 +4,7 @@
 #include "../native_insertion/gate_events.h"
 #include "../native_insertion/cohort_contract.h"
 #include "game_output_wire.h"
+#include "output_target.h"
 #include "live_owner_wire.h"
 #include <cmath>
 #include "../m1_component/m1_present_calibration.h"
@@ -12,17 +13,17 @@ struct GameOutputWriter {
  native_cohort::Store* cohortStore=nullptr;native_cohort::Manifest members{};
  sfc_calibration::Reader source;game_output::Pool* pool=nullptr;
  Microsoft::WRL::ComPtr<ID3D11Texture2D> textures[2][3];uint64_t handles[2][3]{};
- bool enabled=false,retainReady=false,replacementMode=false;uint64_t session=0;
+ bool enabled=false,retainReady=false,replacementMode=false,prepared=false;uint64_t session=0;
  BYTE activatedAsset[32]{};float activatedOffset=0;bool identityBound=false;
  void bind(const BYTE (&asset)[32],float offset){check(!identityBound&&std::isfinite(offset),"one late output identity");memcpy(activatedAsset,asset,32);activatedOffset=offset;identityBound=true;}
  ~GameOutputWriter(){if(pool){InterlockedExchange(&pool->header.stopped,1);InterlockedExchange(&pool->header.ready,0);}source.close();}
  void start(){wchar_t mode[2]{};enabled=GetEnvironmentVariableW(L"SFC_D3D9_GAME_OUTPUT",mode,2)==1&&mode[0]==L'1';replacementMode=replacement::requested();
   retainReady=GetEnvironmentVariableW(L"SFC_D3D9_SYNC_BUFFER",mode,2)==1&&mode[0]==L'1';}
  void prepare(ID3D11Device* device,const output_wire::Packet& input){
-  if(!enabled||pool)return;
-  check(source.prepare()&&source.requested,"game pool explicit semantic mapping");
+  if(!enabled||prepared)return;
+  check((source.mailbox||source.prepare())&&source.requested,"game pool explicit semantic mapping");
   auto* base=reinterpret_cast<BYTE*>(source.mailbox)-sfc_calibration::Offset;
-  if(native_gate::requested()){
+  if(native_gate::requested()&&!gateStore){
    gateStore=reinterpret_cast<native_gate::Store*>(base+native_gate::Offset);
    check(native_gate::valid(gateStore->header,source.session,reinterpret_cast<live_owner::Store*>(base+live_owner::Offset)->header.pid),"native gate pool session");
    gateEvents.open(source.session);
@@ -31,7 +32,7 @@ struct GameOutputWriter {
   const auto& live=reinterpret_cast<live_owner::Store*>(base+live_owner::Offset)->header;
   const auto game=live.pid;check(game&&live_owner::header_valid(live,source.session),"game pool source PID/session");
   pool=reinterpret_cast<game_output::Pool*>(base+game_output::Offset);
-  check(pool->header.magic==0,"game pool must be fresh");
+  check(pool->header.magic==0||(output_target::requested()&&game_output::valid(pool->header,source.session,game)&&pool->header.stopped&&!pool->header.error),"game pool fresh or fully retired generation required");
   for(unsigned slot=0;slot<2;++slot)for(unsigned i=0;i<3;++i){
    D3D11_TEXTURE2D_DESC d{};d.Width=input.width;d.Height=input.height;d.MipLevels=d.ArraySize=d.SampleDesc.Count=1;
    d.Format=i?DXGI_FORMAT_R32_FLOAT:DXGI_FORMAT_B8G8R8A8_UNORM;d.BindFlags=D3D11_BIND_RENDER_TARGET|D3D11_BIND_SHADER_RESOURCE;d.MiscFlags=D3D11_RESOURCE_MISC_SHARED;
@@ -48,12 +49,22 @@ struct GameOutputWriter {
   check(std::isfinite(pool->camera_offset[0])&&(cohort?(pool->camera_offset[0]<=0&&pool->camera_offset[0]>=-1e6f):(pool->camera_offset[0]<-1e-5f&&pool->camera_offset[0]>=-1e6f)),"explicit aligned-cohort or camera-left diagnostic offset");
   pool->diagnostic_mode=pool->camera_offset[0]==0?0u:1u;pool->reserved[2]=cohort?1u:0u; // Union coverage,not a native per-owner picking map.
   pool->reserved[3]=retainReady?1u:0u;
+  pool->reserved[1]=output_target::requested()?static_cast<DWORD>(input.resource_epoch):0;
   memcpy(h.session,source.session,16);h.receiver_pid=GetCurrentProcessId();h.host_pid=input.producer_pid;session=input.session;
   if(replacementMode){
    auto* r=reinterpret_cast<replacement::Store*>(base+replacement::Offset);
    check(replacement::valid(r,source.session,game),"replacement ledger capability");InterlockedExchange(&r->renderer_capable,1);
   }
-  check(game_output::valid(h,source.session,game),"game pool header");InterlockedExchange(&h.ready,1);
+  check(game_output::valid(h,source.session,game),"game pool header");prepared=true;InterlockedExchange(&h.ready,1);
+ }
+ bool retire(){
+  if(!enabled||!pool)return true;
+  check(output_target::requested(),"Fixed-target game pool cannot change generations");
+  if(!InterlockedCompareExchange(&pool->header.stopped,0,0))return false;
+  check(!pool->header.error,"Failed GPU read drain cannot retire output resources");
+  InterlockedExchange(&pool->header.ready,0);
+  for(auto& slot:textures)for(auto& image:slot)image.Reset();
+  memset(handles,0,sizeof(handles));pool=nullptr;prepared=false;return true;
  }
  int copy(ID3D11Device* device,ID3D11DeviceContext* context,const output_wire::Packet& input,const game_output::Metadata& metadata,ID3D11Texture2D* const (&images)[3]){
   prepare(device,input);
@@ -77,7 +88,7 @@ struct GameOutputWriter {
   if(native_gate::requested()&&GetEnvironmentVariableW(L"SFC_NATIVE_GATE_FIXTURE_DELAYS",fixtureDelay,2)==1&&fixtureDelay[0]==L'1'){
    if(packet.source_frame%37==0)Sleep(32);else if(packet.source_frame%19==0)Sleep(12);
   }
-  auto& out=pool->slots[slot];packet.producer_pid=GetCurrentProcessId();packet.resource_epoch=static_cast<uint64_t>(slot+1);
+  auto& out=pool->slots[slot];packet.producer_pid=GetCurrentProcessId();packet.resource_epoch=game_output::slot_epoch(pool->reserved[1],static_cast<unsigned>(slot));
   memcpy(packet.handles,handles[slot],sizeof(packet.handles));packet.checksum=output_wire::checksum(packet);
   if(replacementMode){
    auto* base=reinterpret_cast<BYTE*>(source.mailbox)-sfc_calibration::Offset;

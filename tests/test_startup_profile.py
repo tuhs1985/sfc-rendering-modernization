@@ -72,7 +72,8 @@ class StartupProfileTests(TestCase):
     def test_experiment_isolated_before_receiver(self):
         root=Path(__file__).resolve().parents[1]
         text=(root/'tools/d3d9_proof/d3d9_direct_host.cpp').read_text()
-        self.assertLess(text.index('render_prewarm::run('),text.index('peer.start('))
+        self.assertLess(text.index('render_prewarm::run('),text.index('if(argc==5&&!nativeSize)peer.start('))
+        self.assertLess(text.index('if(nativeSize){peer.start('),text.index('nativeTarget.wait('))
         relay=(root/'tools/remix_runtime/multi_scene_relay.py').read_text()
         self.assertIn("if not self.offline_fixture:env.pop('SFC_D3D9_RENDER_PREWARM',None)",relay)
     def test_diagnostics_cannot_qualify_normal_startup(self):

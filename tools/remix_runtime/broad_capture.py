@@ -9,7 +9,10 @@ import shutil
 import os
 
 ROOT=Path(__file__).resolve().parents[2]
-FULL=ROOT/'artifacts/remix-runtime/deps/reshade-full-6.7.1/extracted/ReShade32.dll'
+import sys
+sys.path.insert(0,str(ROOT/'tools/remix_runtime'))
+from runtime_context import CONTEXT
+FULL=CONTEXT.artifact('remix-runtime/deps/reshade-full-6.7.1/extracted/ReShade32.dll')
 FULL_SHA='A1BA732B5E31E0405CDE322CC5EC62CF972B3FBAEFBB6CBDC8A24DA00D58AE24'
 OLD_SHA='E35E4E2E47F4765F0799CB54C88E5ADE49B50CD7895C137B9D557F263344CAB7'
 HARD=2_000_000_000
@@ -30,7 +33,7 @@ def qualified_full():
     return FULL
 def storage_bytes():
     return sum(p.stat().st_size for name in ('runs','archives')
-               for p in (ROOT/'artifacts/remix-runtime'/name).rglob('*') if p.is_file())
+               for p in CONTEXT.artifact('remix-runtime/'+name).rglob('*') if p.is_file())
 def reserve_capture_budget():
     # Include previous runtime outputs, not just this run. Reserve worst-case ZIP
     # coexistence plus ancillary/rollback/ZIP overhead; dependencies are inputs.

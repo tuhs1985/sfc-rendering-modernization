@@ -16,6 +16,8 @@ sys.path.insert(0,str(ROOT/'tools/d3d9_proof'))
 import material_binding as binding
 
 
+from runtime_context import development
+
 class NormalMaterialBinding(unittest.TestCase):
     values=[.4,5,.2,.5,1,.9,0,1,0,.4]
 
@@ -39,7 +41,7 @@ class NormalMaterialBinding(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             root=pathlib.Path(temp);a=root/'a';b=root/'b'
             self.fixture(root,a);self.fixture(root,b)
-            with patch.object(binding,'ROOT',root),patch.object(binding.subprocess,'run',return_value=SimpleNamespace(stdout='1\n')):
+            with patch.multiple(binding,ROOT=root,CONTEXT=development(root)),patch.object(binding.subprocess,'run',return_value=SimpleNamespace(stdout='1\n')):
                 with patch.object(binding,'encode_remix_material_dds',wraps=binding.encode_remix_material_dds) as encode:
                     fast=binding.prepare(a,root,config,evidence_mode='performance')
                     self.assertEqual(encode.call_count,3)
@@ -54,7 +56,7 @@ class NormalMaterialBinding(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             root=pathlib.Path(temp);a=root/'a';b=root/'b';self.fixture(root,a);self.fixture(root,b)
             (root/'capture.bin').write_bytes(b'changed after upstream preparation')
-            with patch.object(binding,'ROOT',root),patch.object(binding.subprocess,'run',return_value=SimpleNamespace(stdout='1\n')):
+            with patch.multiple(binding,ROOT=root,CONTEXT=development(root)),patch.object(binding.subprocess,'run',return_value=SimpleNamespace(stdout='1\n')):
                 with self.assertRaisesRegex(ValueError,'association changed'):binding.prepare(b,root,config,evidence_mode='test')
                 binding.prepare(a,root,config,evidence_mode='performance')
 
@@ -62,14 +64,14 @@ class NormalMaterialBinding(unittest.TestCase):
         config=(ROOT/'tools/remix_runtime/config/rendering.toml').read_bytes()
         with tempfile.TemporaryDirectory() as temp:
             root=pathlib.Path(temp);folder=root/'a';self.fixture(root,folder,secondary_change=True)
-            with patch.object(binding,'ROOT',root),patch.object(binding.subprocess,'run',return_value=SimpleNamespace(stdout='1\n')):
+            with patch.multiple(binding,ROOT=root,CONTEXT=development(root)),patch.object(binding.subprocess,'run',return_value=SimpleNamespace(stdout='1\n')):
                 with self.assertRaisesRegex(ValueError,'conflicting image pairs'):binding.prepare(folder,root,config,evidence_mode='performance')
 
     def test_small_decode_cache_eviction_preserves_output(self):
         config=(ROOT/'tools/remix_runtime/config/rendering.toml').read_bytes()
         with tempfile.TemporaryDirectory() as temp:
             root=pathlib.Path(temp);a=root/'a';b=root/'b';self.fixture(root,a);self.fixture(root,b)
-            with patch.object(binding,'ROOT',root),patch.object(binding.subprocess,'run',return_value=SimpleNamespace(stdout='1\n')):
+            with patch.multiple(binding,ROOT=root,CONTEXT=development(root)),patch.object(binding.subprocess,'run',return_value=SimpleNamespace(stdout='1\n')):
                 normal=binding.prepare(a,root,config,evidence_mode='performance')
                 with patch.object(binding,'DECODE_CACHE_BYTES',24):small=binding.prepare(b,root,config,evidence_mode='performance')
             self.assertEqual(normal['images'],small['images']);self.assertEqual(normal['mod_sha256'],small['mod_sha256'])

@@ -15,12 +15,13 @@ from collections import OrderedDict
 
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/'tools/remix_runtime'))
+from runtime_context import CONTEXT
 sys.path.insert(0,str(ROOT/'tools/scene_bridge'))
 from material_controls import encode
 from roughness_maps import pixels
 from scene_bundle import resolve_image,texture
 LIMIT=128*1024*1024
-HASHER=ROOT/'artifacts/d3d9-proof/material-bin/texture_hash.exe'
+HASHER=CONTEXT.artifact('d3d9-proof/material-bin/texture_hash.exe')
 DECODE_CACHE_BYTES=32*1024*1024  # Per preparation worker; no session-long image cache.
 
 
@@ -93,13 +94,13 @@ def prepare(folder,game_root,config=None,*,evidence_mode='test'):
     from PIL import Image
     import numpy as np
     folder=Path(folder);scene=json.loads((folder/'scene.json').read_text())
-    source=ROOT/scene['source_packet']
+    source=CONTEXT.reference(scene['source_packet'])
     refs=json.loads(source.with_suffix('.json').read_text())
     if refs.get('textures_enabled')!=1:raise ValueError('Native textured path not enabled;no guessed appearance')
     if evidence_mode=='test' and (hashlib.sha256(source.read_bytes()).hexdigest()!=scene['source_packet_sha256'] or hashlib.sha256(source.with_suffix('.json').read_bytes()).hexdigest()!=scene['source_references_sha256']):
         raise ValueError('Fresh source association changed')
     from rendering_config import scoped
-    raw=scoped(config or (ROOT/'tools/remix_runtime/config/rendering.toml').read_bytes(),'material')
+    raw=scoped(config or (CONTEXT.setting('rendering.toml')).read_bytes(),'material')
     packet=encode(raw);values=struct.unpack('<2I10fQ',packet)[2:12]
     if not 1<=len(scene['textures'])<=256:raise ValueError('Ordinary material image count')
     hashes=subprocess.run([str(HASHER),'--batch',str(folder),str(len(scene['textures']))],capture_output=True,text=True,timeout=10,check=True,

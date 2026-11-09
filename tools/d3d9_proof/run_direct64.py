@@ -7,10 +7,13 @@ import subprocess as sp
 import time
 import struct
 from run_offline import ROOT,CAPTURE,GAME,storage,digest,AGGREGATE_BYTES
+import sys
+sys.path.insert(0,str(ROOT/'tools/remix_runtime'))
+from runtime_context import CONTEXT
 from run_intercept import BASE,RUNTIME,GUARD,freeze_runtime,generated_bytes
 from scene_bundle import prepare
 
-EXE=ROOT/'artifacts/d3d9-proof/direct64-bin/d3d9_direct_host.exe'
+EXE=CONTEXT.artifact('d3d9-proof/direct64-bin/d3d9_direct_host.exe')
 
 
 def main():
@@ -52,8 +55,8 @@ rtx.dlssPreset = 0
 rtx.upscalerType = 0
 rtx.resolutionScale = 1.0
 ''')
-    header=json.loads((ROOT/'artifacts/remix-runtime/deps/manifest.json').read_text())
-    if digest(ROOT/'artifacts/remix-runtime/deps/remix_c.h').upper()!=header['header_sha256'].upper():raise ValueError('Pinned header changed')
+    header=json.loads((CONTEXT.artifact('remix-runtime/deps/manifest.json')).read_text())
+    if digest(CONTEXT.artifact('remix-runtime/deps/remix_c.h')).upper()!=header['header_sha256'].upper():raise ValueError('Pinned header changed')
     report=dict(result='PARTIAL',sfc_launched=False,sdk_mesh_calls=0,output_api_device_registration=True,single_present_after_startup=args.single_present,paced_frames=args.paced_frames,timing_only=args.timing_only,
         model=manifest.get('model_name','SYNTHETIC asymmetric control'),synthetic=args.synthetic,backbuffer_diagnostic=args.backbuffer_diagnostic,exe_sha256=digest(EXE),runtime_sha256=digest(RUNTIME/'.trex/d3d9.dll'),
         replay_sha256=digest(folder/'scene.bin'),header_sha256=header['header_sha256'],
@@ -63,7 +66,7 @@ rtx.resolutionScale = 1.0
     if args.latest_input:
         report['sources'].update({p:digest(ROOT/p) for p in ('tools/d3d9_proof/frame_ingress.h','tools/d3d9_proof/ingress_replay.h')})
     if args.receiver:
-        receiver=ROOT/'artifacts/d3d9-proof/receiver-bin/output_receiver.exe'
+        receiver=CONTEXT.artifact('d3d9-proof/receiver-bin/output_receiver.exe')
         report.update(receiver_mode=args.receiver,receiver_sha256=digest(receiver))
         report['sources'].update({name:digest(ROOT/name) for name in ('tools/d3d9_proof/output_channel.h','tools/d3d9_proof/output_producer.h','tools/d3d9_proof/output_receiver.cpp','tools/d3d9_proof/build_receiver.ps1')})
     process=None

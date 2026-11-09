@@ -13,6 +13,7 @@ from light_controls import validate,scales
 from light_shapes import build
 from live_lights import REGISTRY,read_latest,packet
 from native_light_state import decode
+from runtime_context import CONTEXT
 
 def world_light_context(snapshot,row):
     if any(snapshot['slots'][i]['native_type']!=0 for i in range(2)):
@@ -24,7 +25,7 @@ class Binding:
     def __init__(self,folder,gpu,receiver,row,persistent=False):
         self.folder=Path(folder);self.gpu=Path(gpu);self.receiver=receiver;self.row=list(row)
         self.last=0;self.ready=False;self.generation=0;self.busy=0;self.invalid=0;self.latest=None
-        config=Path(__file__).resolve().parents[1]/'remix_runtime/config/lights.toml'
+        config=CONTEXT.setting('lights.toml')
         self.config=config;self.tuning=False;self.config_polled=0;self.config_revision=1;self.messages=0
         raw=config.read_bytes()
         if len(raw)>65536:raise ValueError('Light config64KiB cap')

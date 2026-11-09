@@ -55,7 +55,8 @@ class Relay(Baseline):
             return
         self.discover(self.current_rows());self.collect_prepared()
         if not self.process:
-            if self.first_discovery is not None and time.monotonic()-self.first_discovery>25:raise ValueError('No supported diffuse-ready asset within25s')
+            if self.first_discovery is not None and time.monotonic()-self.first_discovery>25:
+                raise ValueError('No supported diffuse-ready asset within25s; preparation: '+str(self.partial[-3:]))
             if self.anchor_id is None:return
             if self.initial_context is None:self.prepare_initial_context(pid)
             if self.lights and not self.lights.ready:return
@@ -195,6 +196,11 @@ class Relay(Baseline):
         # No material-library work here. Assets do not wait for enhanced maps.
         ready=[j for j in self.preparer.jobs.values() if 'wire' in j and 'path_id' in j and not j.get('published')]
         for job in ready:
+            # Alias storage is intentionally released by the CPU preparer. The
+            # renderer must admit its canonical residency before seeing an alias,
+            # including when a lower catalog index finished identification later.
+            if job['phase']=='alias' and wire.acknowledgement(self.receiver.channel,job['canonical'])!=1:
+                continue
             row=job['row'];wire.publish(self.receiver.channel,job['id'],job['wire']);job['published']=True
             self.catalog.append(dict(id=job['id'],path_id=job['path_id'],owner=row[1],revision=row[7],model=job['manifest']['model_name'],
                 signature=job['signature'],manifest=job['manifest'],packet=job['wire'].hex(),initial=job['id'] in (self.initial_ids or set()),published_ns=time.perf_counter_ns()))

@@ -24,7 +24,7 @@ class AsyncMaterialTests(unittest.TestCase):
     def test_base_catalog_publishes_before_priming_readiness(self):
         r=object.__new__(Relay);r.material_prime_ready=None;r.catalog=[];r.initial_ids={1}
         row=[0]*96;row[1]=2;row[7]=3
-        job=dict(id=1,path_id=1,wire=b'base packet',row=row,signature='content',
+        job=dict(id=1,path_id=1,wire=b'base packet',row=row,signature='content',phase='ready',
                  manifest={'model_name':'fresh.mod'})
         r.preparer=SimpleNamespace(jobs={1:job});r.receiver=SimpleNamespace(channel=object())
         with patch('progressive_scene_relay.wire.publish') as publish:

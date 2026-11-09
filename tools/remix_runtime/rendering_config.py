@@ -3,7 +3,8 @@ from pathlib import Path
 import json
 import tomllib
 
-DEFAULT=Path(__file__).parent/'config/rendering.toml'
+from runtime_context import CONTEXT
+DEFAULT=CONTEXT.setting('rendering.toml')
 EXAMPLE=DEFAULT.with_name('rendering.example.toml')
 SECTIONS={'material','image','quality','remix'}
 

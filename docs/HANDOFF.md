@@ -50,7 +50,295 @@ normal-exit confirmation; client/settings checks passed and no owned helpers
 remained at review. Next implement dedicated break-origin conversion and
 independent piece lifetime/submission. The initial geometry blocker is resolved.
 
-## NEWEST / AUTHORITATIVE CHECKPOINT — November 8 FCA live BRK success
+## NEWEST / AUTHORITATIVE CHECKPOINT — November 9 private-alpha cleanup
+
+**Latest / our-files audit continued:** sponsor narrowed priority to our118 files;
+no further vendor pruning or refactor authorized. Static review now flags48 files
+for exclusion/separation, with70 provisionally retained (not a proven minimum).
+Four newly identified modules: displaced `asset_preparation`, Python diagnostic
+`synchronized_buffer`, offline `loading_policy`, development `evidence_budget`.
+Do not delete before fixing constructor/import seams. Found startup profiling
+still forced on by `configure_child`, always-collected task spans, and full
+cohort dumps serialized at untimed exit before off-mode deletion. Separate these
+diagnostics from actual timestamps/identity/lifetime checks. Eleven current
+native components have distinct roles; texture_hash.exe remains the one legacy
+native candidate. Exact findings: [our payload audit](releases/PROJECT_PAYLOAD_AUDIT.md).
+Per-file CSV/JSON: ignored `artifacts/alpha/project-payload-audit.*`. No product,
+settings or runtime-source changes; no game/renderer launched. Refactor parked.
+
+**Latest / whole-package relevance audit (read-only):** sponsor resumed only the
+scrub/list work; runtime refactor remains parked. Categorized all3,901 current
+files and added2,555 non-tool candidate files/about29.02MiB: pip/environment
+builders, Tk/editor support, library tests/debugging and NumPy build interfaces.
+No product/runtime changes. Exact per-file CSV/JSON remain under ignored
+`artifacts/alpha/package-file-relevance-audit.*`; versioned summary:
+[whole-package audit](releases/PACKAGE_FILE_RELEVANCE_AUDIT.md). Normal PE imports
+prove NRC/XeSS/Aftermath dependencies must stay with this pinned binary even when
+features are off. Four DLSS DLLs/crash helpers remain unqualified removal
+candidates, not claimed savings. Also found no standard-name MSVCP140.dll in the
+package despite the pinned Remix import/search contract: resolve app-local VC
+dependency closure before clean-machine/public-release approval. No downloads,
+installations, game/renderer execution, or deletions for this audit.
+
+**Session parked for the night, November9.** No SFC or owned integration helper
+was running on the final process check. Existing source/build/package changes
+remain unstaged/uncommitted; no tag, push or public prerelease. Resume with Git
+status and this checkpoint, then installed `launcher.exe --preflight`. Next
+sponsor checkout is normal default-off launch, ordinary play, exit and immediate
+relaunch to verify the new cleanup policy after payload pruning. Do not begin
+the parked tools/runtime refactor. The existing Obsidian Project Parking Note
+contains the current two-paragraph restart brief and session summary.
+
+**Sponsor parked the runtime/development refactor on November9.** Exact scope,
+reason, reopening trigger and first action are recorded in the existing Obsidian
+Parking Lot under “Separate production runtime from development tools.” Keep the
+packaged tools audit as the restart input; do not implement its separation/removal
+recommendations until reopened. This does not itself block the current alpha
+checkout or authorize a renderer rewrite.
+
+**Read-only packaged tools audit completed:** 105 files (103Python+2TOML), about
+785KiB. Identified 34 development/offline/retired-mode module candidates, seven
+mixed helper/launcher modules needing dependency separation, and two diagnostic
+profiles currently required unnecessarily by normal preflight. Provisional
+remainder62files is not a proven minimum. No product/source runtime deleted or
+changed. Concrete eager qualification imports and fixture-supplied runtime
+constants explain the excess; disconnect imports/extract retained helpers before
+allowlisting production modules. No whole shipped tools subfolder is disposable.
+[Exact file list and evidence](releases/PACKAGED_TOOLS_AUDIT.md). Audit is static;
+optional execution audit was blocked and not retried. No SFC/renderer launched.
+
+**Alpha folder cleanup complete:** removed three unused empty development data
+folders, four old restored runs, Python root headers/link libraries/build tools
+and the unselected Remix hybrid DLL. About543MiB removed from product; useful
+compact evidence and one FCA qualification input retained outside it. Bootstrap,
+stager and ZIP rules prevent recreating/shipping the excess. 3,895 immutable
+files; settings/game profile preserved. 746 tests, installed preflight and actual
+asset/light initialization pass. Trimmed real runtime loads/renders/transfers;
+untrimmed control has identical depth/owner and the same partial coverage-oracle
+result (0.965399), documented without renderer changes. No SFC launched by Codex.
+Normal launcher unchanged; gameplay cleanup/pruning checkout still pending.
+[Record](runs/2026-11-09-codex-alpha-layout-cleanup.md). No commit/push.
+
+**Current private package / recording options:** sponsor confirms rendering works;
+reviewed latest pre-change run exits cleanly with restored proxy. Player messages
+now simple; default normal CMD/EXE launch saves no run history after verified
+restoration. Optional `SFCRemix/Troubleshoot.cmd` keeps only five summaries,
+64KiB each/320KiB total; rotation never stops play. Working files are removed
+after shutdown/restoration; interrupted recovery inputs, settings, reusable caches
+and old unmarked evidence are preserved. Removed installed untimed-play evidence
+quota termination from coordinator, asset reservations and actual x86 job guard.
+742 full regressions, final eight retention tests, real guard overflow control,
+fresh moved Unicode staging, installed preflight and asset/light smoke pass.
+No gameplay after retention change yet; retry normal launcher and check exit/
+relaunch. Private package updated with rollback. No commit/push.
+[Record](runs/2026-11-08-codex-alpha-recording-options.md).
+
+**Latest private retry / light context corrected:** run `20261108-191427-451898-in-game`
+prepared FCA assets but failed during light binding on a remaining development
+config path. Game exited normally and proxy rollback passed. Binding now uses
+shared runtime settings; private package updated with rollback. Expanded installed
+smoke through actual captured-asset `prepare_initial_context` and real light
+binding/shared policy publication: PASS. 735 desktop Python tests and exact CMD
+preflight PASS. No new SFC/renderer launched by Codex; same CMD gameplay retry
+needed. The earlier passive-only check did not cover this phase.
+[Record](runs/2026-11-08-codex-alpha-light-context-fix.md).
+
+**Sponsor process direction:** ground ongoing work in repeatable development-to-
+release practices. Capture dependency/data closure, explicit runtime context,
+opt-in diagnostics, installed startup/recovery checks and reproducible candidate
+identity as part of normal development. Formalize the shared candidate workflow
+after the current private-alpha startup checkout; do not derail that fix.
+[Process note](releases/DEVELOPMENT_TO_RELEASE.md); follow-up also recorded in the
+existing Obsidian Parking Lot. No new automation is claimed.
+
+**Private alpha scene startup fixed:** CMD launched SFC but scene setup failed
+because the import-only package closure omitted `multi_ship.toml`. Both existing
+scene profiles are now explicit hashed inputs, parsed before launch. A deeper
+installed preparation check also found the generated environment cache under
+immutable runtime; it now lives in `data/cache/environment`. Interrupted graphics
+transaction recovered after confirming game exit; package updated with rollback,
+preserving settings/assets. Exact CMD preflight and installed scene preparation
+up to the process-launch boundary pass; 734 desktop Python tests pass. No game
+or renderer launched by Codex. Retry the same CMD; gameplay acceptance remains
+open. [Record](runs/2026-11-08-codex-alpha-scene-startup-fix.md).
+
+**Current entry point changed at sponsor request:** double-click
+`C:\Project\SFC-Alpha-Checkout\SFCRemix-Launch.cmd`. It now starts native
+`SFCRemix/launcher.exe`→bundled Python directly, with no PowerShell in that chain.
+Old release/private `launch.ps1` removed; manifest/stager/guide updated. Existing
+elevation/recovery/untimed behavior preserved; no non-admin-default change.
+731Python tests, installed exact-CMD preflight and moved Unicode/spaced native
+entry/coordinator fixtures pass. No game launched by Codex. Sponsor retries this
+entry rather than the historical PowerShell command. Changes uncommitted;
+[entry-point record](runs/2026-11-08-codex-native-alpha-entrypoint.md).
+
+**Administrator requirement assessed:** normal elevation is currently enforced
+by wrapper/coordinator policy inherited from the early observer workflow. The
+actual controller's exact process-access/remote-load/unload helpers pass against
+an owned x86 child with both tokens unelevated; private-copy file write/replace
+rights also pass. No RUNASADMIN compatibility entries on either test copy.
+[Assessment/evidence](releases/PRIVILEGE_ASSESSMENT.md) recommends a distinct
+standard-user SFC checkout before removing the normal-play requirement. User
+requested assessment, so launch defaults/private package remain unchanged. No
+game launch, security-policy change or administrative service was introduced.
+
+**Latest sponsor run / launcher fix:** private run172602 failed before game
+creation because the native launcher retained its exact development-folder
+restriction. No target PID; critical files restored/unchanged. The extracted
+package is now bound to its own canonical launcher/game/add-on locations and
+pinned hashes, retaining the developer restriction outside release mode. New
+native `--check-game` runs during installed preflight without creating SFC.
+Unicode add-on preload uses a contained ASCII relative import; actual Detours/
+600-frame Unicode GPU test passes.14native path/policy checks and730Python tests
+pass. Untimed play now also bypasses the native launcher's inherited wait cap;
+timed fixture limits stay intact. Updated private bootstrap/launcher and manifest
+with rollback copies; installed preflight passes. Sponsor should retry the same
+command. [Failure/fix record](runs/2026-11-08-codex-alpha-launcher-portability-fix.md).
+All work stays unstaged/uncommitted; no alpha gameplay acceptance yet.
+
+**Final verified update for this checkpoint:** all six600-frame size tests pass,
+including1440/1600 after fixing canonical-before-alias admission. Resize and full
+game-device recreation pass in the same600-frame run: output generations1→2→3,
+two geometry loads/one shared instance retained, correct pixels/depth/text,
+shutdown0 and no remaining owned helpers. ReShade's portable base override passes
+actual GPU rendering, including the generation campaign.729Python tests pass;
+current-source Strict/ExtraFrame development fixtures and normal untimed BRK
+read-only preflight pass. [Exact evidence](reconnaissance/evidence/20261108-alpha-native-resolution-qualification.json).
+
+The private functional checkout is ready at `C:\Project\SFC-Alpha-Checkout`.
+Its installed WinPS5.1 launcher preflight passes after moving, with4143 checked
+immutable files; app-local CPython/NumPy/Pillow and complete pinned Remix1.6.1
+runtime are included. The actual packaged normal coordinator preflight passes
+without the old1.5.2 runtime or developer receipts. Source/control host remain
+the established architecture. A missing metadata dependency on m1_gate is now
+explicitly packaged; a recognized optional D3D8 wrapper is byte-matched to its
+preserved upstream archive rather than accepting unknown proxies. Native INI
+configuration is UTF-16 with BOM, tested through GetPrivateProfileStringW for
+Unicode paths. Private checkout has independent copied game assets outside
+SFCRemix; never distribute the whole directory. Sponsor test command is in the
+[portable record](releases/PORTABLE_ALPHA.md). User was asked asynchronously to
+play this copy; no packaged gameplay result yet. Do not modify it during a run.
+
+Eight upstream notice files are collected with provenance; final distribution
+terms/file allowlist/profile coverage review is open. No public ZIP/tag/release
+or commit/push. [Dependency closure](releases/DEPENDENCY_CLOSURE.md) and intended
+package user guide `tools/release/ALPHA-README.md` document the boundaries.
+The in-progress paragraphs below preserve the work's earlier state, superseded
+by this verified update.
+
+Continue the approved portable alpha implementation; no releasable ZIP/tag exists.
+**Sponsor resolution correction supersedes the earlier4K requirement:** only
+1024×768,1280×720,1366×768,1440×900,1600×900,1920×1080 are alpha candidates.
+1280×360 is a retained negative diagnostic, not an alpha blocker. Native1440p/4K
+are deferred; supersampling remains separate.
+
+Native target notice is now connected through passive receiver/host startup,
+dynamic output allocation, transfer and native insertion. Output wire2/pool3 keep
+their original sizes and two slots. Target changes drain old leases, acknowledge
+the new generation and use same-thread D3D9Ex ResetEx while retaining scene assets.
+No source geometry, UV, images, appearance settings or original game files change.
+Standalone600-frame multi-ship tests pass1024,1280,1366 and1920 sizes; resize
+1920×1080→1024×768 passes pixel/depth/text checks before/after with retained owners
+and clean shutdown. Remaining sizes and portable ReShade override are in testing.
+
+Resize fixes: honor source stop/deadline before waiting for a valid target; reuse
+the existing receipt ledger only after validating/draining the prior native gate,
+preserving counters. An intermittent alias-first publication exposed CPU alias
+storage already released; `progressive_scene_relay` now waits nonblockingly for
+canonical renderer admission before publishing that alias. This is not a global
+asset barrier. A regression covers the lower-index alias/canonical ordering.
+
+Portable profile validation permits only the six dimension changes, retaining
+hash protection of all other bytes. Release-only ReShade path relocation uses the
+pinned upstream base override, preserving game-copy shader/preset inputs and
+moving generated config/log/cache/screenshots into package data.727Python tests
+passed before the latest alias regression; final rerun and GPU receipts pending.
+All changes remain unstaged/uncommitted. Preserve unrelated untracked attachments
+and windows-memory-audit.md. See [portable implementation](releases/PORTABLE_ALPHA.md).
+
+**Next action:** review the sponsor's private-package gameplay/cleanup result,
+resolve any missing normal-play dependencies, and finish the vendor/profile
+allowlist before a reviewed-commit ZIP; do not repeat1280×360 discovery or publish
+without exact-candidate approval.
+
+## Historical checkpoint — November8 portable alpha foundation
+
+User approved the self-contained `v0.1.0-alpha.1` ZIP plan, including native game
+dimensions through4K. See [portable alpha implementation](releases/PORTABLE_ALPHA.md)
+for the accepted scope, completed scaffolding, dependency findings and exact
+remaining gates. HEAD remains b08ad8e; changes are unstaged/uncommitted. Preserve
+unrelated `.codex-attachments/` and `windows-memory-audit.md`.
+
+Implemented shared runtime path context, release manifest/profile validation,
+settings seeding, portable WinPS5.1 wrapper/bootstrap, context migration through
+normal coordinator/preparation/recovery modules, MIT project license, and strict
+allowlist ZIP builder. Exact upstream app-local CPython3.12.14/NumPy2.3.5/Pillow12.3.0
+works at `artifacts/alpha/python-3.12.14/python.exe`; no Codex runtime copied.
+718 Python tests passed under that interpreter in the normal desktop session,
+before the new extent/target tests were added. Native x64 extent/target notice
+checks passed15/12; wrapper parses. Later final suite results must supersede this
+count. These are not portable gameplay or 4K acceptance.
+
+The target-notice contract occupies4352..4479 in the existing scene mapping,
+distinct from startup-ticket4096..4351 and environment8192+. It carries dimensions,
+session/PID/device/target generation independently of assets. Checked output
+accounting retains2slots and16four-byte planes:132710400B1080p,235929600B1440p,
+530841600B4K. **These new contracts are isolated, not wired into live output yet.**
+Do not advertise resolution support or run a packaged checkout yet.
+
+dgVoodoo ProductVersion2.8.6.5 verified. A preserved original archive at
+`artifacts/alpha/dependencies/dgVoodoo2_86_5-preserved.zip`, SHA256
+76b6893a0be81e3905a03f30f25202d6dc6128c3b8f7a21f2c33bcfabfa75ddf,
+has x86 DDraw/D3DImm bytes matching the qualified install. It came from the
+masterotaku preservation repository, not an official currently available release
+asset. Archive Readme links to official online terms. Record provenance and
+complete vendor/VC-runtime notices before redistribution; no DLL installed.
+
+Standalone1280×360 exploratory candidate1.6.1 run
+`artifacts/alpha/extent-investigation/20261108-065124-1280x360` transferred matching
+planes but all were zero on the single startup output. Job timed out after SDK
+Shutdown0 was printed; receiver exit0, owned remaining0. This is **partial**, not
+a layout or cleanup PASS. Default startup is1Present; a repeat uses the existing
+diagnostic24-Present toggle via `tools/release/run_extent_probe.py`, not a normal
+startup change. Review its evidence before drawing a runtime limitation claim.
+
+Next: finish dependency/normal-path closure and portable recovery tests, then
+connect dimension/generation notices, allocations, producer/receiver/pool leases
+and insertion consistently. Fixed1080p checks still exist. Qualify actual GPU
+path/intact/debris/resize/odd layouts, build from a reviewed commit and test clean
+directory/second machine. Only then present the exact candidate for sponsor
+approval before tag/publication. No ZIP or GitHub release was published. Source
+qualification fingerprints are changed by this work; refresh them before offering
+an existing development gameplay launcher. Accepted game/assets/settings untouched.
+
+### Follow-up verified results for the current alpha checkpoint
+
+- Final Python regressions:723PASS using app-local upstream Python. Target and
+  extent contracts15/12checks pass on both x86/x64. WinPS wrapper parses.
+- Actual portable read-only preflight passed3939immutablefiles with spaces/é and
+  after a folder move. Source game-copy hashes unchanged; no Toolkit or installed
+  Python dependency. Private fixture, not a distributable or gameplay checkout.
+- Candidate native host rebuilt to **identical SHA256**. Native-light worker
+  qualification passed, existing successful600-frame Strict/ExtraFrame evidence
+  was revalidated, and normal development BRK/ExtraFrame/untimed preflight PASS.
+  The old source-fingerprint warning above is resolved for that entry point.
+- GPU quadrant probes show source/native0mismatches at960×540,2560×1440,
+  3840×2160 and1031×517;1280×360 source0/native271360mismatches. Correct D3D9
+  readback and wrong native D3D11 readback identify the sharing boundary, not
+  camera/material/cross-process transport. Full ray-traced1280×360 synthetic
+  output also scrambles;byte-identical cross-process copies do not fix it.
+- Final-source control/failure probes preserve code/binary/runtime hashes.
+  Small standalone sharing probes need watchdog teardown after Shutdown0,
+  including passing sizes. No full lifecycle/4K rendering PASS. All owned helper
+  processes end. Normal game path was not launched or changed at native level.
+- Pinned public source uses opaque Win32 KMT while Vulkan distinguishes D3D11
+  texture KMT. This is a standards-backed candidate explanation, not a verified
+  runtime binary cause or tested patch. No vendor patch/new architecture/CPU
+  transfer or unsupported extent silently enabled. Native-resolution gate and
+  full dependency/packaged gameplay acceptance remain open. No actual alpha ZIP,
+  tag, commit or push. [Curated preparation evidence](reconnaissance/evidence/20261108-alpha-portability-and-output-layout.json).
+
+## Previous checkpoint — November 8 FCA live BRK success
 
 Publication validation: full Python discovery suite705tests PASS before the
 sponsor-requested commit/push. Project source/tests, scoped probes, reviewed
