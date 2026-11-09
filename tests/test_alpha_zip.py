@@ -48,7 +48,9 @@ class AlphaZipTests(unittest.TestCase):
             root=Path(tmp);recipe=self.fixture(root)
             for name in ('StarFleetOP.exe','model.mod','data/capture.bin','settings/lights.toml','captures/fresh.png','evidence.raw32','../outside',
                          'python/include/Python.h','python/Scripts/f2py.exe','runtime/remix-runtime/deps/candidate-1.6.1/runtime/d3d9_a64ec.dll',
-                         'code/tools/remix_runtime/qualify_multiship.py','CODE/TOOLS/remix_runtime/qualify_multiship.py'):
+                         'code/tools/remix_runtime/qualify_multiship.py','CODE/TOOLS/remix_runtime/qualify_multiship.py',
+                         'code/tools/release/bootstrap.py','code/tools/release/build_zip.py',
+                         'code/src/launcher/build_launcher.py','code/src/launcher/launcher.cpp'):
                 value=json.loads(json.dumps(recipe));value['files'][0]['target']=name
                 with self.subTest(name=name),self.assertRaises(ValueError):builder.validate_recipe(value,root)
             recipe['files'][0]['sha256']='0'*64

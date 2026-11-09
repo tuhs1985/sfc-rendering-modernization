@@ -8,7 +8,8 @@ import subprocess
 from contextlib import redirect_stdout,redirect_stderr
 
 CODE = Path(__file__).resolve().parents[2]
-for directory in ('release', 'remix_runtime', 'd3d9_proof', 'scene_bridge', 'remix_ingest', 'm1_component'):
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+for directory in ('remix_runtime', 'd3d9_proof', 'scene_bridge', 'remix_ingest', 'm1_component'):
     sys.path.insert(0, str(CODE / 'tools' / directory))
 from runtime_context import CONTEXT
 from release_manifest import contained, verify, verify_game_profile, seed_settings

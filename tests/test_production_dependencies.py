@@ -41,6 +41,10 @@ class ProductionDependencyTests(unittest.TestCase):
         finally:tasks.close()
 
     def test_production_list_keeps_wire_camera_settings_and_excludes_standalone_toolchains(self):
+        files=set(production_files())
+        self.assertEqual({p for p in files if p.startswith('src/')},
+                         {'src/launcher/bootstrap.py','src/launcher/session_recording.py'})
+        self.assertFalse(any(p.startswith('tools/release/') for p in files))
         names={Path(p).stem for p in production_files()}
         self.assertTrue({'native_gate','native_cohort','live_camera','break_scene','effect_lights',
             'release_manifest','recover_broad_session','session_recording','runtime_files'}<=names)

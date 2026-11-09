@@ -9,7 +9,7 @@ import io
 import unittest
 
 ROOT=Path(__file__).resolve().parents[1]
-sys.path[:0]=[str(ROOT/'tools/release'),str(ROOT/'tools/remix_runtime')]
+sys.path[:0]=[str(ROOT/'src/launcher'),str(ROOT/'tools/remix_runtime')]
 from runtime_context import packaged
 from session_recording import mark,finish,REPORT_COUNT,REPORT_BYTES
 import multi_scene_resources as resources

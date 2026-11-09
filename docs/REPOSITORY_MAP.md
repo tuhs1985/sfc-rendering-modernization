@@ -93,7 +93,7 @@ untracked working files; they are not the alpha's dependency counts or disk size
 | `artifacts/` | 1 | Only its policy README is tracked; generated contents are ignored |
 | `docs/` | 821 | Current guidance, requirements, decisions and dated evidence |
 | `openspec/` | 8 | Project workflow configuration, initial change and placeholders |
-| `src/` | 1 | Historical placeholder README, not the current implementation directory |
+| `src/` | 1 at foundation | Now owns the first migrated component: portable launcher; see the relocation note below |
 | `tests/` | 209 | Python/native tests, test documentation and legally trackable fixtures |
 | `tools/` | 571 | Mixed production sources, shared interfaces, diagnostics and build tools |
 
@@ -134,6 +134,13 @@ rules need explicit classification; do not silently classify them as disposable.
 
 ## Production islands inside `tools/`
 
+The first physical migration on November 9 moved the five portable-launcher
+inputs to `src/launcher`. Build tools stay in `tools/release`. New packages use
+`code/src/launcher`; existing packages retain their paired old launcher/layout.
+Historical run records still name their original paths. The root counts above
+are the foundation inventory, not a fresh count after this move. See the
+[separation record](runs/2026-11-09-codex-release-tooling-separation.md).
+
 These Python counts come directly from the current allowlist, not a new manifest:
 
 | Area | Listed Python modules | Production responsibility / important exception |
@@ -142,14 +149,15 @@ These Python counts come directly from the current allowlist, not a new manifest
 | `tools/d3d9_proof/` | 9 | D3D9-side material/light helpers, identity/recovery, coordinate conversion and checksums; not all proof fixtures ship |
 | `tools/remix_ingest/` | 4 | Active break/live capture decoding and camera conversion coexist with historical Toolkit/OBJ utilities |
 | `tools/scene_bridge/` | 2 | Scene bundle preparation and damage mapping; other neutral protocols/tests support development |
-| `tools/release/` | 2 | `bootstrap.py` and `session_recording.py` are shipped runtime inputs, unlike the ZIP builder and dependency inventory |
+| `src/launcher/` | 2 | `bootstrap.py` and `session_recording.py`; native entry source and CMD wrappers share this application boundary |
+| `tools/release/` | 0 | Build/packaging tools, allowlist, qualification and release-document inputs only |
 | `tools/m1_component/` | 1 | `analyze_live_camera.py` is retained despite its analysis name; this area also owns native observation sources |
 
 Native components have distinct lifetimes. Current source/build anchors:
 
 | Component / role | Source and build anchor |
 | --- | --- |
-| Player-facing Windows launcher | [launcher.cpp](../tools/release/launcher.cpp), [build_launcher.py](../tools/release/build_launcher.py) |
+| Player-facing Windows launcher | [launcher.cpp](../src/launcher/launcher.cpp), [build_launcher.py](../tools/release/build_launcher.py) |
 | Verified game launch, legacy observation host, return add-on | [return_launcher.cpp](../tools/remix_runtime/return_launcher.cpp), [return_host.cpp](../tools/remix_runtime/return_host.cpp), [return_addon.cpp](../tools/remix_runtime/return_addon.cpp); [build_return_probe.ps1](../tools/remix_runtime/build_return_probe.ps1) also builds fixtures/tests |
 | Native startup gate and semantic observer | [m1_component.cpp](../tools/m1_component/m1_component.cpp); [build_m1_component.ps1](../tools/m1_component/build_m1_component.ps1) and [build_light_discovery.ps1](../tools/m1_component/build_light_discovery.ps1) use different defines/exports |
 | Observation controller | [m1_controller.cpp](../tools/m1_component/m1_controller.cpp), [build_m1_controller.ps1](../tools/m1_component/build_m1_controller.ps1) |

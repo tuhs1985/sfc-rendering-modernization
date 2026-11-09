@@ -35,7 +35,13 @@ ZIP. A documentation branch does not upgrade its release-readiness status.
 | 3. Relocate one production component | Later component-specific changes move source and update consumers together | Focused native/Python and actual affected package/process checks; equivalent behavior and rollback |
 | 4. Improve historical navigation | Indexes and supersession links; physical evidence moves only if justified | Verify provenance and links; dated conclusions remain intact, useful raw inputs remain available |
 
-**Recommended next change:** scope `separate-release-tooling` around the portable
+**First concrete separation:** `separate-release-tooling` now moves the five
+launcher inputs to `src/launcher`, leaving release/build tools behind. See its
+[design](../openspec/changes/separate-release-tooling/design.md) and
+[verification record](runs/2026-11-09-codex-release-tooling-separation.md).
+The remaining runtime source islands are still separate future changes.
+
+**Original recommendation:** scope `separate-release-tooling` around the portable
 entry point and its build-time/runtime split. `tools/release/` has 20 tracked
 files at the baseline, but only two of its Python modules are shipped. This is a
 smaller boundary than relocating the coordinator, asset pipeline and GPU adapter

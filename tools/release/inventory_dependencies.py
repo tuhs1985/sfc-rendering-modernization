@@ -20,14 +20,15 @@ def production_files():
     if not names or len(names)!=len(set(names)):raise ValueError('Invalid production module list')
     for name in names:
         path=Path(name)
-        if not name.startswith('tools/') or path.suffix!='.py' or '..' in path.parts or not (ROOT/path).is_file():
+        if (not (name.startswith('tools/') or name in ('src/launcher/bootstrap.py','src/launcher/session_recording.py'))
+                or path.suffix!='.py' or '..' in path.parts or not (ROOT/path).is_file()):
             raise ValueError('Invalid production module: '+name)
     return names
 
 
 def python_closure(entry):
     modules={};ambiguous=set()
-    for path in (ROOT/'tools').rglob('*.py'):
+    for path in [*(ROOT/'tools').rglob('*.py'), *(ROOT/'src/launcher').glob('*.py')]:
         if path.stem in modules and modules[path.stem]!=path:ambiguous.add(path.stem)
         modules[path.stem]=path
     queue=[Path(entry)];seen=set();external=set()
@@ -71,6 +72,6 @@ if __name__=='__main__':
         'artifacts/alpha/python-3.12.14/python.exe',
         'artifacts/alpha/launcher-bin/launcher.exe')]
     output=ROOT/'artifacts/alpha/dependency-inventory.json'
-    output.write_text(json.dumps(dict(python=python_closure(ROOT/'tools/release/bootstrap.py'),
+    output.write_text(json.dumps(dict(python=python_closure(ROOT/'src/launcher/bootstrap.py'),
                                      native=native_inventory(binaries)),indent=2))
     print(output)

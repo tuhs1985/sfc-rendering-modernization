@@ -281,7 +281,8 @@ For troubleshooting tools, timing captures and trace limitations, see the [diagn
 | `tools/d3d9_proof/` | Ordinary D3D9 adapter, live host, GPU output receiver and diagnostic launchers |
 | `tools/remix_runtime/` | Remix runtime host, GPU return/compositor, preparation, analysis and controls |
 | `tools/remix_ingest/` | Active live/break capture decoding and camera helpers alongside earlier offline/Toolkit inspection tools |
-| `tools/release/` | Portable runtime bootstrap plus separate build/packaging tools; only explicit inputs ship |
+| `src/launcher/` | Portable Windows launcher, bootstrap and recording cleanup policy |
+| `tools/release/` | Development-only build, packaging, dependency review and qualification inputs |
 | `tools/recon/` | Focused inspection and publication-audit helpers |
 | `tests/` | Python/native regression and protocol fixtures |
 | `docs/m0/`, `docs/m1/` | Milestone plans, contracts and evidence |

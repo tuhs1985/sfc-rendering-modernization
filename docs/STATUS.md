@@ -1,7 +1,7 @@
 ---
 title: SFC Modernization — Status Tracker
 updated: 2026-11-09
-checkpoint: Reviewed foundation checkpoint on codex/organize-repository-foundation;14tasks complete;no merge or push;runtime unchanged
+checkpoint: Launcher/release separation implemented after f12b6fd;749 tests and moved-package preflight pass;unstaged
 tags:
   - sfc-modernization
   - project-status
@@ -9,7 +9,22 @@ tags:
 
 # SFC Modernization — Status Tracker
 
-## Current — repository foundation, November 9
+## Current — first physical separation, November 9
+
+Five application launcher inputs moved to `src/launcher`; development-only
+release/build tools remain in `tools/release`. Updated native build, installed
+Python paths, manifest/staging roles, source allowlist, ZIP rules and tests.
+The production Python count remains 59. Strict native build and all 749
+regressions pass, plus real bundled-launcher preflight before and after moving
+a reduced package through space/Unicode paths and installed coordinator preflight.
+See the [verification record](runs/2026-11-09-codex-release-tooling-separation.md).
+
+Existing alpha/game copies and settings remain unchanged. New layout and native
+launcher must ship together; this is source organization, not a new rendering
+feature or public alpha. No SFC/GPU gameplay validation claimed. Unstaged and
+uncommitted on `codex/organize-repository-foundation`; no push/merge/archive.
+
+## Previous — repository foundation, November 9
 
 The sponsor authorized a scoped work branch from pushed `fe17b8d` and application
 of `organize-repository-foundation`. Delivered

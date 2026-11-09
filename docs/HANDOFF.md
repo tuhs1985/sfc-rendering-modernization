@@ -4,7 +4,31 @@ Sponsor-facing current work and parked items: [status tracker](STATUS.md).
 Diagnostic tools, triggers, limits and known pitfalls: [diagnostic reference](DIAGNOSTICS.md).
 The tracker is a sponsor-facing summary; the newest authoritative checkpoint below controls technical work.
 
-## Current checkpoint — November 9 repository foundation
+## Current checkpoint — November 9 launcher/release separation
+
+On `codex/organize-repository-foundation`, parent `f12b6fd`, sponsor authorized
+planning and carrying out the first physical separation. Five portable-launcher
+inputs now live in `src/launcher`; `tools/release` retains development-only
+build/packaging/qualification inputs. New installed layout is
+`code/src/launcher`, paired with the rebuilt native launcher. Build, bootstrap
+imports, production inventory, manifest role, staging and ZIP consumers agree.
+See the [run record](runs/2026-11-09-codex-release-tooling-separation.md) and
+[tracked change](../openspec/changes/separate-release-tooling/tasks.md).
+
+Strict launcher build, all 749 regressions and actual installed preflight pass.
+The fresh reduced package passes at a space/Unicode path, after moving, and
+through prepared coordinator read-only preflight. No SFC/GPU run was started or
+new gameplay claim made. Renderer behavior is unchanged. Existing private alpha,
+appearance and external folders remain untouched; don't install the new launcher
+alone into its old layout. The exact Python payload remains 59 modules, none in
+`code/tools/release`. Changes remain unstaged/uncommitted; unrelated attachments
+and memory audit preserved. No merge/push/archive/publication.
+
+Next: review this bounded migration, then select the next production component
+separately. Future package builds must pair the new launcher and layout, generate
+a new manifest and retain existing release qualification gates.
+
+## Previous checkpoint — November 9 repository foundation
 
 Work branch: `codex/organize-repository-foundation`, created with sponsor
 authorization at pushed checkpoint `fe17b8d`. A live remote check confirmed

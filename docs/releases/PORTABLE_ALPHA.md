@@ -29,6 +29,12 @@ D3D12, new assets and appearance tuning remain outside this increment.
 
 ## Implemented so far
 
+- The portable entry point now lives in `src/launcher`; new packages install its
+  Python files under `code/src/launcher`. `tools/release` contains only build,
+  packaging and qualification inputs. Native launcher and package layout must
+  update together. The existing private alpha checkout is unchanged by this
+  relocation; see the [boundary qualification](../runs/2026-11-09-codex-release-tooling-separation.md).
+
 - Production code now uses `tools/release/runtime_modules.json`, an explicit
   59-module allowlist. Development tools stay in the source tree but are absent
   from the alpha; the diagnostic placement/model profiles and old texture-hash
