@@ -1,13 +1,29 @@
 ---
 title: SFC Modernization — Status Tracker
 updated: 2026-11-09
-checkpoint: Organized build gameplay qualified by sponsor;repository organization active;tester preparation parked
+checkpoint: Diagnostic separation gameplay accepted;758 regressions and package GPU checks pass
 tags:
   - sfc-modernization
   - project-status
 ---
 
 # SFC Modernization — Status Tracker
+
+## November 9 — diagnostic separation gameplay accepted
+
+Committed prior acceptance as `4a0ce1e`, then separated normal native play from
+optional capture/test/tuning orchestration. Startup, fallback, recovery and cleanup
+remain shared application behavior. Sponsor confirms the new checkout passes
+and requests its commit; no push requested.
+758 regressions, existing command preflights, Strict/ExtraFrame GPU fixtures,
+actual light-worker tests, guarded installed imports, CPU material preparation,
+portable-path checks and installed GPU output/cancellation pass.
+
+New private playable copy: `artifacts/alpha/diagnostic-split-game`; launch root
+`SFCRemix-Launch.cmd`. Recording off, accepted appearance preserved. Sponsor
+accepts this refactor as passing; previous organized
+checkout is preserved. [Ownership, evidence and launch command](runs/2026-11-09-codex-session-diagnostic-separation.md).
+Tester graphics preparation remains parked until repository organization finishes.
 
 ## Current priority — finish repository organization
 

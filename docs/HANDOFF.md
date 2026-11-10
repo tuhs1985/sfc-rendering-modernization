@@ -4,6 +4,40 @@ Sponsor-facing current work and parked items: [status tracker](STATUS.md).
 Diagnostic tools, triggers, limits and known pitfalls: [diagnostic reference](DIAGNOSTICS.md).
 The tracker is a sponsor-facing summary; the newest authoritative checkpoint below controls technical work.
 
+## Current checkpoint — November 9 diagnostic modes separated
+
+Committed the prior accepted checkpoint as `4a0ce1e` on sponsor request, then
+implemented `separate-session-diagnostics`. Sponsor now reports this checkout
+passes and requests its commit. No push or merge authorized. Normal native play now uses a narrow `src/session/coordinator`
+path. Optional capture/test/tuning mode selection, timed cues and analysis live
+in `tools/session_diagnostics/modes.py`; existing developer commands dispatch
+there. Verified startup, fallback, proxy restoration and map/process cleanup
+remain shared application methods. Extracted functional graphics transaction and
+component qualification helpers; installed list is 60 modules, excludes broad
+capture and diagnostic orchestration.
+
+758 regressions pass, including actual temporary-file rollback on normal exit
+and failure, mode configuration, probe entry points and forbidden-import checks.
+Actual native-light worker and 600-frame Strict/ExtraFrame multi-owner GPU
+fixtures pass; source qualification renewed through existing procedures. Normal
+and completion/light diagnostic read-only preflights pass. New private package
+passes original/moved/final-path preflight, guarded installed imports and actual
+receiver creation/closure, CPU captured F-CA asset/material/light preparation,
+profiling-off GPU colour/depth/owner transfer and pre-output cancellation, with
+no owned processes remaining. Standalone startup readiness 3.219s is not
+first-ship gameplay timing. Renderer binary matches the accepted fixed alpha.
+
+Separate playable checkout: `artifacts/alpha/diagnostic-split-game`, root
+`SFCRemix-Launch.cmd`, recording off, current appearance retained. Accepted game,
+original alpha, developer game and prior sponsor-qualified organized checkout
+remain unchanged. **Sponsor accepts this new checkout as passing.** This is
+gameplay acceptance, not a new instrumented timing or cleanup measurement.
+Commit this increment, then continue scoped repository organization when directed.
+Tester graphics preparation remains parked; other historical diagnostic receipts
+are not blanket renewed.
+
+See [implementation, ownership and exact launch command](runs/2026-11-09-codex-session-diagnostic-separation.md).
+
 ## Current direction — finish organization; tester preparation parked
 
 **Gameplay qualification accepted November 9:** sponsor ran the organized

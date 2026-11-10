@@ -19,7 +19,6 @@
     "tools/remix_ingest/live_camera.py",
     "tools/remix_ingest/live_scene.py",
     "tools/remix_runtime/async_material_checkout.py",
-    "tools/remix_runtime/broad_capture.py",
     "tools/remix_runtime/controller_shutdown.py",
     "tools/remix_runtime/copied_preferences.py",
     "tools/remix_runtime/effect_lights.py",
@@ -60,6 +59,8 @@
     "tools/remix_runtime/warm_start.py",
     "tools/remix_runtime/windows_processes.py",
     "tools/scene_bridge/damage_mapping.py",
-    "tools/scene_bridge/scene_bundle.py"
+    "tools/scene_bridge/scene_bundle.py",
+    "src/session/graphics_transaction.py",
+    "src/session/component_qualification.py"
   ]
 }

@@ -52,7 +52,9 @@ class WarmStartTests(TestCase):
         with self.assertRaises(ValueError):activate(c,self.env(),c.name)
     def test_bootstrap_and_no_file_ticket(self):
         text=(ROOT/'src/session/coordinator.py').read_text()
-        self.assertLess(text.index('timing_relay.start_on_launch(pid)'),text.index('wait_component_ready(channel.snapshot'))
+        self.assertLess(text.index('self._after_launch()'),text.index('self._await_device()'))
+        self.assertIn('self.timing_relay.start_on_launch(self.pid)',text)
+        self.assertIn('wait_component_ready(self.channel.snapshot',text)
         native=(ROOT/'tools/d3d9_proof/d3d9_direct_host.cpp').read_text()
         self.assertLess(native.index('CreateDeviceEx('),native.index('warm_start::wait(root'))
         self.assertLess(native.index('warm_start::wait(root'),native.index('Renderer renderer('))

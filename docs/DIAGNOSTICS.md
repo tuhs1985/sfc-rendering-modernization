@@ -1,5 +1,23 @@
 # Diagnostic tools reference
 
+## Session mode boundary
+
+Normal untimed native play runs `src/session/coordinator.py`. Optional broad/depth
+captures, source/owner tests, image/offscreen readers, historical SDK/offset
+experiments, timed instructions and tuning orchestration run
+`tools/session_diagnostics/modes.py`. Existing development PowerShell launchers
+and `tools/remix_runtime/run_return_game.py` commands keep their public arguments;
+the compatibility entry point dispatches the requested mode. It is not shipped.
+The installed `Troubleshoot.cmd` still opts into short reports only, not those
+development captures.
+
+Both runners use the application's verified launch, graphics transaction and
+worker/mapping teardown. Normal source/light timing IPC is functional input, not
+an instruction to enable detailed captures. Specialized diagnostic qualification
+receipts can still be stale and must be renewed through their existing procedures.
+See the [separation record](runs/2026-11-09-codex-session-diagnostic-separation.md)
+for current command/preflight, import exclusion, lifecycle and GPU evidence.
+
 ## Installed alpha reporting
 
 Default CMD/native-EXE play retains no run history. Required session working files

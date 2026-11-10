@@ -5,19 +5,12 @@ from pathlib import Path
 import re
 import os
 from live_owner_timing import ROOT,binary_hashes
+from source_inventory import sources,digest
 QUALIFICATION=ROOT/'artifacts/d3d9-proof/additive-qualification.json'
 
 
-def digest(path):
-    with Path(path).open('rb') as f:return hashlib.file_digest(f,'sha256').hexdigest().upper()
 
 
-def sources():
-    result={}
-    for directory in ('tools/d3d9_proof','tools/remix_runtime','tools/scene_bridge','tools/m1_component','tools/native_foreground','tools/native_insertion','src/session','tests'):
-        for p in (ROOT/directory).iterdir():
-            if p.is_file() and p.suffix in ('.h','.cpp','.py','.ps1','.def'):result[str(p.relative_to(ROOT)).replace('\\','/')]=digest(p)
-    return result
 
 
 def binaries():

@@ -25,22 +25,23 @@ class DamageLaunchDefaults(unittest.TestCase):
     def options(self,*arguments):
         # Run the actual production argument setup, stopping before any game,
         # registry, qualification, process or filesystem preparation calls.
-        path=p.parents[2]/'src/session/coordinator.py'
-        main=next(n for n in ast.parse(path.read_text()).body if isinstance(n,ast.FunctionDef) and n.name=='main')
+        path=p.parents[2]/'tools/session_diagnostics/modes.py'
+        main=next(n for n in ast.walk(ast.parse(path.read_text())) if isinstance(n,ast.FunctionDef) and n.name=='_prepare')
         body=[];parsed=False;after_parse=0
         for node in main.body:
             body.append(node)
             if parsed:
                 after_parse+=1
                 if after_parse==2:break # default resolution and play-session admission
-            if isinstance(node,ast.Assign) and any(isinstance(t,ast.Name) and t.id=='args' for t in node.targets):parsed=True
+            if isinstance(node,ast.Assign) and any(isinstance(t,ast.Attribute) and t.attr=='args' for t in node.targets):parsed=True
         self.assertTrue(parsed)
-        body.append(ast.Return(value=ast.Name(id='args',ctx=ast.Load())))
-        fn=ast.FunctionDef(name='options',args=ast.arguments(posonlyargs=[],args=[],kwonlyargs=[],kw_defaults=[],defaults=[]),body=body,decorator_list=[])
+        body.append(ast.Return(value=ast.Attribute(ast.Name(id='self',ctx=ast.Load()),'args',ast.Load())))
+        fn=ast.FunctionDef(name='options',args=ast.arguments(posonlyargs=[],args=[ast.arg('self')],kwonlyargs=[],kw_defaults=[],defaults=[]),body=body,decorator_list=[])
         from runtime_context import CONTEXT
         module=ast.fix_missing_locations(ast.Module(body=[fn],type_ignores=[]));scope={'argparse':argparse,'CONTEXT':CONTEXT}
         exec(compile(module,str(path),'exec'),scope)
-        with patch.object(sys,'argv',['runner',*arguments]):return scope['options']()
+        from types import SimpleNamespace
+        return scope['options'](SimpleNamespace(argv=list(arguments)))
 
     def test_native_default_enables_damage(self):
         self.assertTrue(self.options('--native-all-ships').damage_textures)

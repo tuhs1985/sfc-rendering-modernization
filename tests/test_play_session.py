@@ -25,7 +25,7 @@ class PlaySessionTests(unittest.TestCase):
         # invalid PID. This reaches argument admission only, never injection.
         tree=ast.parse((ROOT/'src/session/coordinator.py').read_text())
         launch=next(node.value for node in ast.walk(tree) if isinstance(node,ast.Assign)
-                    and any(isinstance(t,ast.Name) and t.id=='controller' for t in node.targets)
+                    and any(isinstance(t,ast.Attribute) and t.attr=='controller' for t in node.targets)
                     and isinstance(node.value,ast.Call))
         expression=compile(ast.Expression(launch),'production controller launch','eval')
         for play,seconds,expected in ((True,0,3),(False,0,2),(False,120,3)):
@@ -33,8 +33,8 @@ class PlaySessionTests(unittest.TestCase):
                 env=dict(os.environ,SFC_PLAY_SESSION='1' if play else '0')
                 command=[str(ROOT/'artifacts/m1/bin/m1_controller.exe'),'--pid','4294967294',
                          '--dll','unused.dll','--config','unused.ini','--max-seconds',str(seconds)]
-                child=eval(expression,dict(sp=subprocess,ROOT=ROOT,env=env,controller_args=command,
-                                           out=lambda _:subprocess.PIPE))
+                state=SimpleNamespace(env=env,controller_args=command,out=lambda _:subprocess.PIPE)
+                child=eval(expression,dict(sp=subprocess,ROOT=ROOT,self=state))
                 output=child.communicate(timeout=5)[0].decode(errors='replace')
                 self.assertEqual(child.returncode,expected,output)
                 self.assertIn('OpenProcess failed' if expected==3 else 'Usage:',output)

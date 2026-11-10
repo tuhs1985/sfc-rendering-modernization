@@ -268,14 +268,14 @@ class ParallelAssetTests(unittest.TestCase):
             self.assertEqual(begin.call_count,1)
 
     def test_experimental_switch_is_explicit_forwarded_and_recorded(self):
-        source=(ROOT/'src/session/coordinator.py').read_text()
+        source=(ROOT/'tools/session_diagnostics/modes.py').read_text()
         launcher=(ROOT/'tools/d3d9_proof/start_d3d9_multiship_session.ps1').read_text()
         self.assertIn("[switch]$ExperimentalParallelAssets",launcher)
         self.assertIn("$forward+='-ExperimentalParallelAssets'",launcher)
         self.assertIn("$runArguments+='--experimental-parallel-assets'",launcher)
-        self.assertIn("mode_args['experimental_live_checkout']=True",source)
-        self.assertIn("metadata['experimental_parallel_assets']=args.experimental_parallel_assets",source)
-        self.assertIn("result['experimental_parallel_assets']=args.experimental_parallel_assets",source)
+        self.assertIn("self.mode_args['experimental_live_checkout'] = True",source)
+        self.assertIn("self.metadata['experimental_parallel_assets'] = self.args.experimental_parallel_assets",source)
+        self.assertIn("self.result['experimental_parallel_assets'] = self.args.experimental_parallel_assets",source)
 
     def test_renderer_admission_service_is_explicit_and_reported(self):
         progressive=(ROOT/'tools/remix_runtime/progressive_scene_relay.py').read_text()

@@ -68,13 +68,13 @@ class SessionExitTests(unittest.TestCase):
         calls=lambda node,name:[n.lineno for n in ast.walk(node) if isinstance(n,ast.Call)
             and isinstance(n.func,ast.Attribute) and ast.unparse(n.func)==name]
         enforce=next(n for n in ast.walk(tree) if isinstance(n,ast.FunctionDef) and n.name=='enforce')
-        self.assertLess(calls(enforce,'exit_monitor.check')[0],calls(enforce,'timing_relay.poll')[0])
+        self.assertLess(calls(enforce,'self.exit_monitor.check')[0],calls(enforce,'self.timing_relay.poll')[0])
         block=next(n for n in ast.walk(tree) if isinstance(n,ast.Try)
             and any(isinstance(h.type,ast.Name) and h.type.id=='NormalGameExit' for h in n.handlers))
         final=ast.Module(body=block.finalbody,type_ignores=[])
-        self.assertTrue(calls(final,'timing_relay.stop'))
-        self.assertLess(calls(final,'timing_relay.stop')[0],calls(final,'timing_relay.finish')[0])
-        self.assertLess(calls(final,'timing_relay.finish')[0],calls(final,'receiver.close')[0])
+        self.assertTrue(calls(final,'self._stop_workers'))
+        self.assertLess(calls(final,'self._stop_workers')[0],calls(final,'self._collect')[0])
+        self.assertLess(calls(final,'self._collect')[0],calls(final,'self._close_mappings')[0])
 
     def test_no_output_is_partial_but_cleanup_failures_still_fail(self):
         with tempfile.TemporaryDirectory() as temp:

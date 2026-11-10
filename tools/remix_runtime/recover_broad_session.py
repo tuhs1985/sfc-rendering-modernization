@@ -4,8 +4,10 @@ import argparse
 import datetime as dt
 import json
 import shutil
-from broad_capture import ROOT,OLD_SHA,FULL_SHA,digest,restore_test_proxy
 from runtime_context import CONTEXT
+import sys
+sys.path.insert(0,str(CONTEXT.code_root/'src/session'))
+from graphics_transaction import ROOT,OLD_SHA,FULL_SHA,digest,restore_test_proxy
 from runtime_files import TEST
 from copied_preferences import prepared_ini_signature,changed_protected_files
 

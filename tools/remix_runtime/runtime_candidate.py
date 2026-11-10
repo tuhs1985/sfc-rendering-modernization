@@ -138,7 +138,7 @@ def verify(*, require_host=False):
     exe = CONTEXT.artifact('remix-runtime/candidate-1.6.1-bin/d3d9_direct_host.exe')
     if require_host:
         build = json.loads((exe.parent / 'build.json').read_text())
-        from additive_qualification import sources
+        from source_inventory import sources
         if (build['host_sha256'] != digest(exe) or build['sources'] != sources()
                 or build['header_sha256'] != HEADER_SHA):
             raise ValueError('Candidate host build/source/header qualification stale')
@@ -152,7 +152,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     result = fetch() if args.fetch else verify()
     if args.record_build:
-        from additive_qualification import sources
+        from source_inventory import sources
         (result['exe'].parent / 'build.json').write_text(json.dumps(dict(
             host_sha256=digest(result['exe']), header_sha256=HEADER_SHA, sources=sources(),
             architecture='x64', flags='/O2 /fp:precise /W4 /WX',

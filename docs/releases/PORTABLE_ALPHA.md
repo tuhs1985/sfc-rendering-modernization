@@ -29,6 +29,16 @@ D3D12, new assets and appearance tuning remain outside this increment.
 
 ## Implemented so far
 
+- Normal native play now has a narrow application coordinator; optional captures,
+  timed tests and tuning orchestration live in development-only
+  `tools/session_diagnostics`. Startup, fallback, graphics transactions and
+  cleanup remain shared application behavior. The current allowlist is **60**
+  Python modules: the broad-capture analyzer is removed and two functional app
+  helpers replace its required transaction/qualification dependencies. See the
+  [boundary and new private checkout](../runs/2026-11-09-codex-session-diagnostic-separation.md).
+  Sponsor accepts the new refactor checkout as passing. The previous organized
+  build also passed an approximately six-minute sponsor checkout.
+
 - New source packages also install the canonical coordinator, exit monitor and
   report module under `code/src/session`. The bootstrap imports them directly;
   the three compatibility tools retained in the development tree are not shipped.
@@ -42,7 +52,7 @@ D3D12, new assets and appearance tuning remain outside this increment.
   relocation; see the [boundary qualification](../runs/2026-11-09-codex-release-tooling-separation.md).
 
 - Production code now uses `tools/release/runtime_modules.json`, an explicit
-  59-module allowlist. Development tools stay in the source tree but are absent
+  allowlist (originally 59 modules; current count above). Development tools stay in the source tree but are absent
   from the alpha; the diagnostic placement/model profiles and old texture-hash
   executable are no longer required. See the
   [separation record](../runs/2026-11-09-codex-production-module-separation.md) for

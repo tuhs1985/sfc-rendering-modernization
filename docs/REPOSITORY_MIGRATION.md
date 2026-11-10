@@ -46,6 +46,14 @@ separate from physical source ownership. See its
 [record](runs/2026-11-09-codex-session-coordinator-separation.md).
 The remaining runtime source islands are still separate future changes.
 
+**Next concrete separation:** `separate-session-diagnostics` extracts the
+coordinator's optional modes into development tools while keeping one shared
+application startup, fallback and cleanup lifecycle. Normal installed imports
+are guarded against diagnostic modules. See the
+[implementation and qualification record](runs/2026-11-09-codex-session-diagnostic-separation.md).
+The sponsor accepts the new playable checkout as passing; the prior six-minute
+acceptance remains separate evidence for the previous organized build.
+
 **Original recommendation:** scope `separate-release-tooling` around the portable
 entry point and its build-time/runtime split. `tools/release/` has 20 tracked
 files at the baseline, but only two of its Python modules are shipped. This is a

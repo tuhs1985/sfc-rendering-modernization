@@ -27,8 +27,8 @@ class LightDiscoveryTests(unittest.TestCase):
                 with self.assertRaises(ValueError):light_discovery.analyze(path)
 
     def test_runner_uses_dedicated_binary_and_resets_environment(self):
-        source=(Path(__file__).resolve().parents[1]/'src/session/coordinator.py').read_text()
-        self.assertIn("env.pop('SFC_NATIVE_LIGHT_DISCOVERY',None)",source)
+        source=(Path(__file__).resolve().parents[1]/'tools/session_diagnostics/modes.py').read_text()
+        self.assertIn("self.env.pop('SFC_NATIVE_LIGHT_DISCOVERY', None)",source)
         self.assertIn("native-light-tests/m1_light_component.dll",source)
         self.assertIn('require_light_qualification()',source)
 

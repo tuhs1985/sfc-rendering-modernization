@@ -23,8 +23,8 @@ class MultiSceneResourceTests(unittest.TestCase):
         with self.assertRaises(ValueError):require_capacity(11,inventory=AGGREGATE_BYTES-EVIDENCE_RESERVE-10,free=EVIDENCE_RESERVE+10)
 
     def test_all_multiship_callers_remove_scene_cap_not_legacy_guards(self):
-        source=(ROOT/'src/session/coordinator.py').read_text()
-        self.assertIn('if not args.multi_ship and images>128*1024*1024',source)
+        source=(ROOT/'tools/session_diagnostics/modes.py').read_text()
+        self.assertIn('if not self.args.multi_ship and self.images > 128 * 1024 * 1024',source)
         source=(ROOT/'tools/remix_runtime/run_return_fixture.py').read_text()
         self.assertIn('if not args.multi_ship and images>128*1024*1024',source)
         source=(ROOT/'tools/remix_runtime/live_owner_timing.py').read_text()

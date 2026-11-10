@@ -23,7 +23,7 @@ root=Path({str(ROOT)!r})
 sys.path.insert(0,str(root/'tools/remix_runtime'))
 import run_return_game,session_exit,run_report
 import coordinator,exit_monitor,reports
-assert run_return_game is coordinator
+assert run_return_game.DiagnosticSession.__base__ is coordinator.Session
 assert session_exit is exit_monitor
 assert run_report is reports
 assert coordinator.run_report is reports
@@ -51,7 +51,7 @@ print('SHARED_CANONICAL_MODULES_PASS')
     def test_package_manifest_lists_application_modules_not_compatibility_tools(self):
         value=json.loads((ROOT/'tools/release/runtime_modules.json').read_text())
         names=set(value['files'])
-        self.assertEqual(len(names),59)
+        self.assertEqual(len(names),60)
         self.assertTrue({'src/session/coordinator.py','src/session/exit_monitor.py','src/session/reports.py'}<=names)
         for name in ('run_return_game','session_exit','run_report'):
             self.assertNotIn('tools/remix_runtime/'+name+'.py',names)

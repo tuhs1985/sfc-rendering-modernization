@@ -11,7 +11,8 @@ ROOT=Path(__file__).resolve().parents[2]
 RUNTIME_RESOURCES={} # Appearance defaults are separately explicit manifest roles.
 APPLICATION_MODULES=frozenset({
     'src/launcher/bootstrap.py','src/launcher/session_recording.py',
-    'src/session/coordinator.py','src/session/exit_monitor.py','src/session/reports.py'})
+    'src/session/coordinator.py','src/session/exit_monitor.py','src/session/reports.py',
+    'src/session/graphics_transaction.py','src/session/component_qualification.py'})
 sys.path.insert(0,str(ROOT/'tools/recon'))
 from inspect_pe import inspect
 
