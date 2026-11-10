@@ -141,15 +141,23 @@ Historical run records still name their original paths. The root counts above
 are the foundation inventory, not a fresh count after this move. See the
 [separation record](runs/2026-11-09-codex-release-tooling-separation.md).
 
+The following session migration moves `run_return_game.py`, `session_exit.py`
+and `run_report.py` implementations to `src/session/coordinator.py`,
+`exit_monitor.py` and `reports.py`. Old tool paths retain development-only
+forwarders; installed bootstrap imports the new modules directly. Diagnostic
+branches are still in the canonical coordinator, not yet separately extracted.
+See the [session record](runs/2026-11-09-codex-session-coordinator-separation.md).
+
 These Python counts come directly from the current allowlist, not a new manifest:
 
 | Area | Listed Python modules | Production responsibility / important exception |
 | --- | ---: | --- |
-| `tools/remix_runtime/` | 41 | Coordinator, preparation, appearance controls, recovery, IPC and runtime selection; also contains many development-only paths |
+| `tools/remix_runtime/` | 38 | Preparation, appearance controls, recovery, IPC and runtime selection; also contains development-only paths and unshipped session compatibility wrappers |
 | `tools/d3d9_proof/` | 9 | D3D9-side material/light helpers, identity/recovery, coordinate conversion and checksums; not all proof fixtures ship |
 | `tools/remix_ingest/` | 4 | Active break/live capture decoding and camera conversion coexist with historical Toolkit/OBJ utilities |
 | `tools/scene_bridge/` | 2 | Scene bundle preparation and damage mapping; other neutral protocols/tests support development |
 | `src/launcher/` | 2 | `bootstrap.py` and `session_recording.py`; native entry source and CMD wrappers share this application boundary |
+| `src/session/` | 3 | Canonical coordinator, verified game-exit monitor and bounded report state; existing developer entry paths forward here |
 | `tools/release/` | 0 | Build/packaging tools, allowlist, qualification and release-document inputs only |
 | `tools/m1_component/` | 1 | `analyze_live_camera.py` is retained despite its analysis name; this area also owns native observation sources |
 

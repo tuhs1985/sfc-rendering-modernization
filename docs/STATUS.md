@@ -1,7 +1,7 @@
 ---
 title: SFC Modernization — Status Tracker
 updated: 2026-11-09
-checkpoint: Launcher/release separation implemented after f12b6fd;749 tests and moved-package preflight pass;unstaged
+checkpoint: Launcher separation committed 8e69c93;session separation implemented unstaged;752 tests and package preflight pass
 tags:
   - sfc-modernization
   - project-status
@@ -9,7 +9,26 @@ tags:
 
 # SFC Modernization — Status Tracker
 
-## Current — first physical separation, November 9
+## Current — session coordinator separated, November 9
+
+Committed the first launcher/build separation as `8e69c93`, without pushing or
+merging. The next bounded source move is implemented: `src/session` now owns the
+coordinator, exit monitor and reports; old developer paths forward to the same
+modules. Shipped bootstrap imports the application modules directly. Python
+payload remains 59 files, excluding compatibility wrappers. Diagnostic branches
+remain in the coordinator for a separately scoped extraction.
+
+All 752 regressions, canonical/legacy CLI and state checks, source-body equivalence
+and actual installed preflight before/after moving the reduced package pass.
+[Record](runs/2026-11-09-codex-session-coordinator-separation.md). No new SFC/GPU
+run. Existing alpha and settings untouched; no playable new package yet.
+
+Developer source preflight already had a stale native-cohort receipt for
+`live_light_binding.py` before this move. Do not disable or silently refresh it.
+Next: review this increment and refresh qualification through the documented path
+before a newly assembled gameplay checkout. Session changes remain unstaged.
+
+## Previous — first physical separation, November 9
 
 Five application launcher inputs moved to `src/launcher`; development-only
 release/build tools remain in `tools/release`. Updated native build, installed

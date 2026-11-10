@@ -282,6 +282,7 @@ For troubleshooting tools, timing captures and trace limitations, see the [diagn
 | `tools/remix_runtime/` | Remix runtime host, GPU return/compositor, preparation, analysis and controls |
 | `tools/remix_ingest/` | Active live/break capture decoding and camera helpers alongside earlier offline/Toolkit inspection tools |
 | `src/launcher/` | Portable Windows launcher, bootstrap and recording cleanup policy |
+| `src/session/` | Application session coordinator, game-exit monitoring and atomic result reporting |
 | `tools/release/` | Development-only build, packaging, dependency review and qualification inputs |
 | `tools/recon/` | Focused inspection and publication-audit helpers |
 | `tests/` | Python/native regression and protocol fixtures |

@@ -4,7 +4,37 @@ Sponsor-facing current work and parked items: [status tracker](STATUS.md).
 Diagnostic tools, triggers, limits and known pitfalls: [diagnostic reference](DIAGNOSTICS.md).
 The tracker is a sponsor-facing summary; the newest authoritative checkpoint below controls technical work.
 
-## Current checkpoint — November 9 launcher/release separation
+## Current checkpoint — November 9 session coordinator separation
+
+Sponsor requested commit and continuation. Launcher/release separation committed
+as `8e69c93` on `codex/organize-repository-foundation`; no push or merge. The next
+increment is implemented but unstaged: session coordinator, exit handling and
+report state now live in `src/session`. The installed bootstrap imports those
+modules directly; old development command/import paths retain thin aliases to the
+same canonical modules. Production remains 59 Python files; aliases are excluded.
+Diagnostic branches are preserved inside the coordinator, not yet extracted.
+
+All 752 regressions pass. Direct/legacy isolated CLI, shared state, unchanged
+function/class ASTs and fresh installed preflight (original/moved Unicode path
+plus coordinator) pass. No SFC/GPU launch or gameplay validation. Current private
+alpha, settings, native binaries and external folders untouched. See the
+[run record](runs/2026-11-09-codex-session-coordinator-separation.md) and
+[task list](../openspec/changes/separate-session-coordinator/tasks.md).
+
+Important existing limitation: before this move the developer normal preflight
+already rejected `live_light_binding.py` against an old native-cohort source
+receipt. New wrapper/source paths also change qualification inputs. No receipt
+was renewed or verification weakened. The unchanged installed alpha is separate;
+source-package preflight passes under its new manifest. No playable package was
+assembled and no hands-on game command is ready for this new source layout.
+
+Next: review this bounded source increment, resolve development source receipts
+through established qualification, then assemble a matching playable package for
+sponsor validation. Keep diagnostic extraction and remaining shared-runtime
+source moves separately scoped. New work remains uncommitted; attachments and
+memory audit excluded. Nothing pushed/merged/archived/published.
+
+## Previous checkpoint — November 9 launcher/release separation
 
 On `codex/organize-repository-foundation`, parent `f12b6fd`, sponsor authorized
 planning and carrying out the first physical separation. Five portable-launcher

@@ -33,7 +33,7 @@ class TuningTests(unittest.TestCase):
         self.assertIn('-Tuning',launcher)
         for name in ['tools/d3d9_proof/live_owner_input.h','tools/d3d9_proof/output_channel.h','tools/remix_ingest/bounded_job.cpp','tools/remix_runtime/multi_scene_relay.py']:
             self.assertIn('1980',(ROOT/name).read_text())
-        runner=(ROOT/'tools/remix_runtime/run_return_game.py').read_text()
+        runner=(ROOT/'src/session/coordinator.py').read_text()
         self.assertIn('args.d3d9_additive and not d3d9_tuning',runner)
         self.assertIn('timing_relay.live_tuning=d3d9_tuning',runner)
 

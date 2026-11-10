@@ -9,6 +9,7 @@ from contextlib import redirect_stdout,redirect_stderr
 
 CODE = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(CODE / 'src/session'))
 for directory in ('remix_runtime', 'd3d9_proof', 'scene_bridge', 'remix_ingest', 'm1_component'):
     sys.path.insert(0, str(CODE / 'tools' / directory))
 from runtime_context import CONTEXT
@@ -82,10 +83,10 @@ def main():
     os.environ['SFC_PLAY_SESSION']='1'
     # Reuse the current native coordinator, source tracking, retained meshes,
     # materials and graphics transaction. No separate release renderer.
-    sys.argv = [str(CODE / 'tools/remix_runtime/run_return_game.py'), '--execute',
+    sys.argv = [str(CODE / 'src/session/coordinator.py'), '--execute',
                 '--play-session', '--native-insertion-policy', 'ExtraFrame',
                 '--native-all-ships', '--break-models', '--damage-textures']
-    from run_return_game import main as play
+    from coordinator import main as play
     print('Starting SFC. Exit the game normally when finished.',flush=True)
     print('Troubleshooting on: keeps up to 5 short reports, 320 KiB total.' if args.troubleshoot
           else 'Troubleshooting off. No run history will be saved.',flush=True)

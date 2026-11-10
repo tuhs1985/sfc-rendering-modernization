@@ -12,7 +12,8 @@ live in [src/launcher](../../src/launcher/README.md).
 | User-document build input | `ALPHA-README.md` |
 
 `runtime_modules.json` is the reviewed source allowlist, not an installed
-dependency. It selects 59 Python modules, including the two under `src/launcher`.
+dependency. It selects 59 Python modules, including two under `src/launcher`
+and three under `src/session`. Legacy session forwarding tools are excluded.
 The private staging fixture exercises the installed entry point without starting
 SFC; it is not a public distributable or permission to redistribute vendor files.
 

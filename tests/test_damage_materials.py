@@ -25,7 +25,7 @@ class DamageLaunchDefaults(unittest.TestCase):
     def options(self,*arguments):
         # Run the actual production argument setup, stopping before any game,
         # registry, qualification, process or filesystem preparation calls.
-        path=p.parents[1]/'remix_runtime/run_return_game.py'
+        path=p.parents[2]/'src/session/coordinator.py'
         main=next(n for n in ast.parse(path.read_text()).body if isinstance(n,ast.FunctionDef) and n.name=='main')
         body=[];parsed=False;after_parse=0
         for node in main.body:

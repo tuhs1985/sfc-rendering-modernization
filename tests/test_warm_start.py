@@ -51,7 +51,7 @@ class WarmStartTests(TestCase):
         cancel(c)
         with self.assertRaises(ValueError):activate(c,self.env(),c.name)
     def test_bootstrap_and_no_file_ticket(self):
-        text=(ROOT/'tools/remix_runtime/run_return_game.py').read_text()
+        text=(ROOT/'src/session/coordinator.py').read_text()
         self.assertLess(text.index('timing_relay.start_on_launch(pid)'),text.index('wait_component_ready(channel.snapshot'))
         native=(ROOT/'tools/d3d9_proof/d3d9_direct_host.cpp').read_text()
         self.assertLess(native.index('CreateDeviceEx('),native.index('warm_start::wait(root'))

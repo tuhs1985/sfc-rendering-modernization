@@ -106,7 +106,7 @@ import bootstrap
 m=bootstrap.verify(bootstrap.CONTEXT)
 bootstrap.prepare(bootstrap.CONTEXT,m)
 sys.argv=['installed-preflight','--play-session','--native-insertion-policy','ExtraFrame','--native-all-ships','--break-models','--damage-textures']
-from run_return_game import main
+from coordinator import main
 main()
 """
     check=subprocess.run([str(package/'python/python.exe'),'-I','-B','-c',code],cwd=fixture,

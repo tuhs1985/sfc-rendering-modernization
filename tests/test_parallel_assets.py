@@ -268,7 +268,7 @@ class ParallelAssetTests(unittest.TestCase):
             self.assertEqual(begin.call_count,1)
 
     def test_experimental_switch_is_explicit_forwarded_and_recorded(self):
-        source=(ROOT/'tools/remix_runtime/run_return_game.py').read_text()
+        source=(ROOT/'src/session/coordinator.py').read_text()
         launcher=(ROOT/'tools/d3d9_proof/start_d3d9_multiship_session.ps1').read_text()
         self.assertIn("[switch]$ExperimentalParallelAssets",launcher)
         self.assertIn("$forward+='-ExperimentalParallelAssets'",launcher)

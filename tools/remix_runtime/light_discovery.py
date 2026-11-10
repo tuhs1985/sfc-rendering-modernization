@@ -24,6 +24,7 @@ def sources():
               ROOT/'tools/remix_runtime/run_return_game.py',
               ROOT/'tools/remix_runtime/start_return_image_session.ps1',
               ROOT/'tools/remix_runtime/start_light_discovery_session.ps1']
+    paths += list((ROOT/'src/session').glob('*.py'))
     return {str(p.relative_to(ROOT)):digest(p) for p in sorted(set(paths))}
 
 

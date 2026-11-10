@@ -64,7 +64,7 @@ class SessionExitTests(unittest.TestCase):
         # Check orchestration, not just the monitor: cleanup must run even when
         # collection exits before the tactical observation loop has completed.
         import ast
-        tree=ast.parse((ROOT/'tools/remix_runtime/run_return_game.py').read_text())
+        tree=ast.parse((ROOT/'src/session/coordinator.py').read_text())
         calls=lambda node,name:[n.lineno for n in ast.walk(node) if isinstance(n,ast.Call)
             and isinstance(n.func,ast.Attribute) and ast.unparse(n.func)==name]
         enforce=next(n for n in ast.walk(tree) if isinstance(n,ast.FunctionDef) and n.name=='enforce')

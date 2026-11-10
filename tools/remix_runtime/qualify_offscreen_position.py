@@ -11,6 +11,7 @@ NAMES=('tools/remix_runtime/offscreen_position.py','tools/remix_runtime/qualify_
     'tools/remix_runtime/run_return_game.py','tools/remix_runtime/start_return_image_session.ps1',
     'tools/d3d9_proof/start_d3d9_offscreen_position_session.ps1',
     'tests/test_offscreen_position.py','tests/offscreen_position_child.py')
+NAMES+=('src/session/coordinator.py','src/session/exit_monitor.py','src/session/reports.py')
 
 
 def hashes():return {n:hashlib.sha256((ROOT/n).read_bytes()).hexdigest() for n in NAMES}

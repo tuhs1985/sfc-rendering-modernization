@@ -1,7 +1,8 @@
 # Application source
 
-The first migrated component is [launcher](launcher/README.md): the portable
-Windows entry point, Python bootstrap and recording cleanup policy.
+The migrated components are [launcher](launcher/README.md), the portable Windows
+entry point/bootstrap/recording policy, and [session](session/README.md), the
+shared game-session coordinator, exit monitor and result reporting.
 
 The remaining implementation still lives in the documented production islands
 under `tools/`. See the [repository map](../docs/REPOSITORY_MAP.md) and

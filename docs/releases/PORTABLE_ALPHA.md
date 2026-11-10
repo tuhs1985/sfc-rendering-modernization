@@ -29,6 +29,12 @@ D3D12, new assets and appearance tuning remain outside this increment.
 
 ## Implemented so far
 
+- New source packages also install the canonical coordinator, exit monitor and
+  report module under `code/src/session`. The bootstrap imports them directly;
+  the three compatibility tools retained in the development tree are not shipped.
+  Existing alpha checkout remains unchanged. This is a source/package-path
+  qualification, not a newly assembled playable package or gameplay acceptance.
+
 - The portable entry point now lives in `src/launcher`; new packages install its
   Python files under `code/src/launcher`. `tools/release` contains only build,
   packaging and qualification inputs. Native launcher and package layout must

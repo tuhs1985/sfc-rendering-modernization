@@ -23,7 +23,7 @@ class PlaySessionTests(unittest.TestCase):
     def test_production_controller_launch_receives_session_environment(self):
         # Execute the actual production Popen expression against a guaranteed
         # invalid PID. This reaches argument admission only, never injection.
-        tree=ast.parse((ROOT/'tools/remix_runtime/run_return_game.py').read_text())
+        tree=ast.parse((ROOT/'src/session/coordinator.py').read_text())
         launch=next(node.value for node in ast.walk(tree) if isinstance(node,ast.Assign)
                     and any(isinstance(t,ast.Name) and t.id=='controller' for t in node.targets)
                     and isinstance(node.value,ast.Call))

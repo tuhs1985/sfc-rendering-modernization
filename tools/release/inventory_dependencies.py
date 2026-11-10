@@ -9,6 +9,9 @@ ROOT=Path(__file__).resolve().parents[2]
 # Non-Python inputs are invisible to the import walk. Keep this allowlist
 # explicit: never copy arbitrary neighboring files (including game assets).
 RUNTIME_RESOURCES={} # Appearance defaults are separately explicit manifest roles.
+APPLICATION_MODULES=frozenset({
+    'src/launcher/bootstrap.py','src/launcher/session_recording.py',
+    'src/session/coordinator.py','src/session/exit_monitor.py','src/session/reports.py'})
 sys.path.insert(0,str(ROOT/'tools/recon'))
 from inspect_pe import inspect
 
@@ -20,7 +23,7 @@ def production_files():
     if not names or len(names)!=len(set(names)):raise ValueError('Invalid production module list')
     for name in names:
         path=Path(name)
-        if (not (name.startswith('tools/') or name in ('src/launcher/bootstrap.py','src/launcher/session_recording.py'))
+        if (not (name.startswith('tools/') or name in APPLICATION_MODULES)
                 or path.suffix!='.py' or '..' in path.parts or not (ROOT/path).is_file()):
             raise ValueError('Invalid production module: '+name)
     return names
@@ -28,7 +31,7 @@ def production_files():
 
 def python_closure(entry):
     modules={};ambiguous=set()
-    for path in [*(ROOT/'tools').rglob('*.py'), *(ROOT/'src/launcher').glob('*.py')]:
+    for path in [*(ROOT/'tools').rglob('*.py'), *(ROOT/'src').rglob('*.py')]:
         if path.stem in modules and modules[path.stem]!=path:ambiguous.add(path.stem)
         modules[path.stem]=path
     queue=[Path(entry)];seen=set();external=set()
