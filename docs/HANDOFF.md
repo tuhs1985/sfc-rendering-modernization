@@ -4,7 +4,70 @@ Sponsor-facing current work and parked items: [status tracker](STATUS.md).
 Diagnostic tools, triggers, limits and known pitfalls: [diagnostic reference](DIAGNOSTICS.md).
 The tracker is a sponsor-facing summary; the newest authoritative checkpoint below controls technical work.
 
-## Current checkpoint — November 9 session coordinator separation
+## Current direction — finish organization; tester preparation parked
+
+**Gameplay qualification accepted November 9:** sponsor ran the organized
+checkout for approximately six minutes, reports stable play with correct damage,
+ship destruction and lighting, and accepts the qualification. The first two
+source separations now have both offline/package checks and sponsor gameplay
+regression acceptance. See the [updated run record](runs/2026-11-09-codex-organized-playable-checkout.md).
+No new instrumented performance/cleanup claim or repeat run is required.
+
+Sponsor explicitly deferred the tester graphics-baseline/preparation fix until
+repository organization is finished. Recorded in the existing Obsidian Parking
+Lot under "Portable tester graphics preparation", with evidence, reopening
+condition and first action. Keep the audit below as evidence; do not start the
+preparation implementation or change runtime checks as part of organization.
+
+## Parked finding — tester graphics baseline, November 9
+
+Tester reports matching executable but rejected custom working graphics stack.
+Read-only audit confirms exact dgVoodoo x86 2.86.5 DDraw/D3DImm and baseline
+ReShade32 6.7.1.2133 pins. The supplied runtime uses a different full-add-on
+ReShade 6.7.1.2131 file during its transaction. Config checks are broader than
+essential compatibility: ReShade.ini is exact bytes and contains a developer
+cache path/overlay layout; changing only cache or FPS display is rejected.
+SFC/dgVoodoo allow PlayerName and paired supported dimensions only; other bytes
+including unrelated preferences/comments remain protected. Eight disposable
+real-validator checks confirm behavior; originals unchanged, no game launched.
+
+See [graphics baseline audit](releases/GRAPHICS_BASELINE_AUDIT.md) for exact DLL
+hashes, actual exceptions, meaningful D3D11/8xMSAA/D32 constraints and missing
+setup/dependency closure. No tester-facing profile-preparation command exists;
+the development copy script is not portable. Referenced ReShade preset/shaders
+also are not checked by this gate. The tester's actual files were not inspected.
+No runtime checks modified or profile compatibility newly claimed. This is a
+packaging/preparation gap to resolve before general external setup; don't advise
+hash bypasses or sending unsanitized developer configs.
+
+## Current playable checkpoint — November 9 organized checkout ready
+
+Sponsor requested commit and continuation. Session separation committed as
+`0df894b` on `codex/organize-repository-foundation`; no push or merge. Restored
+normal developer qualification through actual existing tests, not hash bypass:
+rebuilt candidate host matches accepted fixed alpha SHA `1bf0045d...16b` exactly;
+600-frame Strict and ExtraFrame native cohort fixtures with lights/damage and
+light-worker tests pass. Renewed receipts validate 662/35 inputs without mismatch.
+Normal read-only developer preflight now passes. Other diagnostic receipts retain
+their own stale/current status; no blanket renewal.
+
+Prepared an actual private playable game/package at
+`artifacts/alpha/organized-game`, with root `SFCRemix-Launch.cmd`. It uses committed
+new source layout, matching launcher, 59 Python modules/3,848 immutable files and
+unchanged current appearance. Existing alpha and accepted game are untouched.
+Original/moved/final-path package and coordinator preflights, installed CPU asset
+preparation, profiling-off actual GPU output/cancellation and 21 release tests
+pass. Standalone initialization readiness was 3.046s, not first-ship timing.
+No game launched by Codex during preparation. Sponsor has since accepted the
+six-minute gameplay checkout as recorded above.
+
+See [record and launch command](runs/2026-11-09-codex-organized-playable-checkout.md).
+Next: continue the bounded repository-organization work from this accepted
+source/package baseline; the sponsor gameplay checkout is complete.
+Recording is off by default. New stager/records/OpenSpec work remains unstaged;
+no new push/commit/archive/publication. Public vendor/clean-machine gates remain.
+
+## Previous checkpoint — November 9 session coordinator separation
 
 Sponsor requested commit and continuation. Launcher/release separation committed
 as `8e69c93` on `codex/organize-repository-foundation`; no push or merge. The next

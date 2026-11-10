@@ -21,3 +21,8 @@ Use the Windows Python environment in the project README to run
 `tools/release/build_launcher.py` and `tools/release/stage_preflight_fixture.py`.
 The build writes ignored `artifacts/alpha/launcher-bin`; staging creates a fresh
 ignored fixture. It does not update the existing private alpha game copy.
+
+The stager's `--functional` option makes a private full game copy, includes the
+root double-click CMD and runs preflight only. It is not a public ZIP or gameplay
+acceptance. Before offering it for play, qualify the matching renderer and actual
+installed startup; a default reduced preflight fixture cannot launch a game.

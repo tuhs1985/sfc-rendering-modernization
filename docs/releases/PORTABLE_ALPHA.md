@@ -215,6 +215,12 @@ memory. No queue, asset or image budget increase has been enabled.
 
 ## Dependency review still open
 
+The November 9 [external-tester graphics baseline audit](GRAPHICS_BASELINE_AUDIT.md)
+confirms that a matching EXE alone is insufficient: pre-existing wrapper DLLs and
+broad config signatures are required. The ReShade signature includes developer
+cache/UI state, and no portable tester-preparation command is supplied yet.
+Resolve this setup gap before treating arbitrary supported-EXE copies as ready.
+
 | Component | Identified source / pin | Remaining closure |
 | --- | --- | --- |
 | CPython/NumPy/Pillow | Exact upstream distributions in dependency lock; isolated runtime works | Package all required original notices, audit PE imports/application-local VC runtime, test clean environment |

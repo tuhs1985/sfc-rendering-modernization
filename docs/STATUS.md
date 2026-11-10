@@ -1,7 +1,7 @@
 ---
 title: SFC Modernization — Status Tracker
 updated: 2026-11-09
-checkpoint: Launcher separation committed 8e69c93;session separation implemented unstaged;752 tests and package preflight pass
+checkpoint: Organized build gameplay qualified by sponsor;repository organization active;tester preparation parked
 tags:
   - sfc-modernization
   - project-status
@@ -9,7 +9,54 @@ tags:
 
 # SFC Modernization — Status Tracker
 
-## Current — session coordinator separated, November 9
+## Current priority — finish repository organization
+
+**Latest verified result, November 9:** sponsor accepts the reorganized build's
+gameplay checkout after approximately six minutes of stable play, with damage,
+ship destruction and lights behaving correctly. This completes the hands-on
+regression check for the two source separations. Normal recording was off;
+no new instrumented timing or cleanup measurement is claimed.
+
+Sponsor parked the verified external-tester graphics preparation issue until
+organization is complete. Its reopening condition and first action are recorded
+in the existing Obsidian Parking Lot, entry "Portable tester graphics preparation".
+Keep that work deferred; preserve the audit and current runtime checks.
+
+## Parked finding — external tester setup gap, November 9
+
+Verified tester's graphics-profile rejection against actual alpha code and
+manifest. DLL requirements exist beyond the supported EXE: dgVoodoo x86 2.86.5
+and exact original ReShade32 6.7.1.2133. Whole-file ReShade configuration pin
+includes a developer-specific cache path and UI state. Eight actual disposable
+validator checks confirm incidental changes are rejected; PlayerName and matched
+supported dimensions are the narrow exceptions. No tester-facing preparation
+command exists. Referenced ReShade preset/shaders are not checked by this gate.
+[Evidence and exact baseline](releases/GRAPHICS_BASELINE_AUDIT.md).
+
+No runtime/game/profile changes. Required follow-up: reversible, documented
+game-copy graphics preparation with portable profiles and qualified dependencies;
+do not bypass checks or assume a different working stack is supported.
+
+## Current playable checkout — November 9
+
+Session separation committed as `0df894b`, without push/merge. Rebuilt candidate
+matches the accepted fixed renderer exactly. Actual 600-frame native cohort GPU
+fixtures under both policies and light-worker qualification pass; source receipts
+renewed through existing tools, zero mismatches. Normal development preflight
+works again. No guard weakened or unrelated old diagnostic receipt renewed.
+
+Fresh actual playable checkout: `artifacts/alpha/organized-game`, root
+`SFCRemix-Launch.cmd`. It has the new source layout and current appearance;
+existing alpha and accepted game untouched. Installed asset prep, package and
+coordinator preflight, real profiling-off GPU output/cancellation and 21 focused
+release tests pass. [Details/launch](runs/2026-11-09-codex-organized-playable-checkout.md).
+
+Sponsor has now accepted the six-minute gameplay checkout, as recorded above.
+Continue repository organization. Untimed normal play, recording off; no SFC
+was launched by Codex during preparation. New stager and documentation work
+remains unstaged/uncommitted. No public release/push.
+
+## Previous — session coordinator separated, November 9
 
 Committed the first launcher/build separation as `8e69c93`, without pushing or
 merging. The next bounded source move is implemented: `src/session` now owns the
