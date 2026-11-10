@@ -21,7 +21,8 @@ SOURCES=('return_addon.cpp','broad_trace.h','broad_events.h','return_fixture.cpp
          '../../tests/m1_live_scene_tests.cpp')
 SOURCES+=('../../src/session/coordinator.py','../../src/session/exit_monitor.py','../../src/session/reports.py',
     '../../src/session/graphics_transaction.py','../../src/session/component_qualification.py',
-    '../session_diagnostics/modes.py')
+    '../session_diagnostics/modes.py',
+    '../../src/runtime/runtime_context.py','../../src/runtime/release_manifest.py','../../src/runtime/windows_processes.py','../../src/runtime/runtime_files.py','../../src/runtime/copied_preferences.py','../../src/runtime/session_recovery.py')
 def source_hashes():return {n:digest(Path(__file__).parent/n) for n in SOURCES}
 def prepare():
     folder=FULL.parent.parent;folder.mkdir(parents=True,exist_ok=True)

@@ -54,6 +54,13 @@ are guarded against diagnostic modules. See the
 The sponsor accepts the new playable checkout as passing; the prior six-minute
 acceptance remains separate evidence for the previous organized build.
 
+**Shared runtime support:** `separate-runtime-support` moves six functional
+helpers to `src/runtime`, preserving unshipped developer compatibility and a
+60-module production list. Startup, restore and installed dependency checks pass;
+sponsor accepts the separate gameplay checkout, noting perceptible loading stages. See the
+[record](runs/2026-11-10-codex-runtime-support-separation.md). Remaining asset and
+renderer support islands are separate future work; no wholesale relocation.
+
 **Original recommendation:** scope `separate-release-tooling` around the portable
 entry point and its build-time/runtime split. `tools/release/` has 20 tracked
 files at the baseline, but only two of its Python modules are shipped. This is a

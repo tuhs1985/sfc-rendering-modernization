@@ -45,11 +45,12 @@ class ProductionDependencyTests(unittest.TestCase):
         self.assertEqual({p for p in files if p.startswith('src/')},
                          {'src/launcher/bootstrap.py','src/launcher/session_recording.py',
                           'src/session/coordinator.py','src/session/exit_monitor.py','src/session/reports.py',
-                          'src/session/graphics_transaction.py','src/session/component_qualification.py'})
+                          'src/session/graphics_transaction.py','src/session/component_qualification.py',
+                          'src/runtime/runtime_context.py','src/runtime/release_manifest.py','src/runtime/windows_processes.py','src/runtime/runtime_files.py','src/runtime/copied_preferences.py','src/runtime/session_recovery.py'})
         self.assertFalse(any(p.startswith('tools/release/') for p in files))
         names={Path(p).stem for p in production_files()}
         self.assertTrue({'native_gate','native_cohort','live_camera','break_scene','effect_lights',
-            'release_manifest','recover_broad_session','session_recording','runtime_files',
+            'release_manifest','session_recovery','session_recording','runtime_files',
             'coordinator','exit_monitor','reports'}<=names)
         self.assertFalse(names.intersection({'run_return_game','session_exit','run_report','broad_capture','modes'}))
         self.assertFalse(names.intersection({'run_offline','run_direct64','run_intercept','run_return_fixture',

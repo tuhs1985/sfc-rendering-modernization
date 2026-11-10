@@ -12,7 +12,8 @@ RUNTIME_RESOURCES={} # Appearance defaults are separately explicit manifest role
 APPLICATION_MODULES=frozenset({
     'src/launcher/bootstrap.py','src/launcher/session_recording.py',
     'src/session/coordinator.py','src/session/exit_monitor.py','src/session/reports.py',
-    'src/session/graphics_transaction.py','src/session/component_qualification.py'})
+    'src/session/graphics_transaction.py','src/session/component_qualification.py',
+    'src/runtime/runtime_context.py','src/runtime/release_manifest.py','src/runtime/windows_processes.py','src/runtime/runtime_files.py','src/runtime/copied_preferences.py','src/runtime/session_recovery.py'})
 sys.path.insert(0,str(ROOT/'tools/recon'))
 from inspect_pe import inspect
 
@@ -35,6 +36,12 @@ def python_closure(entry):
     for path in [*(ROOT/'tools').rglob('*.py'), *(ROOT/'src').rglob('*.py')]:
         if path.stem in modules and modules[path.stem]!=path:ambiguous.add(path.stem)
         modules[path.stem]=path
+    # Explicit application ownership resolves intentional developer forwarders.
+    # Other duplicate stems remain errors rather than guesses about search order.
+    for name in APPLICATION_MODULES:
+        path=ROOT/name
+        modules[path.stem]=path
+        ambiguous.discard(path.stem)
     queue=[Path(entry)];seen=set();external=set()
     while queue:
         path=queue.pop()

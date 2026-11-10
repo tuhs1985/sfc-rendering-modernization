@@ -1,13 +1,39 @@
 ---
 title: SFC Modernization — Status Tracker
-updated: 2026-11-09
-checkpoint: Diagnostic separation gameplay accepted;758 regressions and package GPU checks pass
+updated: 2026-11-10
+checkpoint: Runtime support gameplay accepted and authorized for commit;startup investigation parked
 tags:
   - sfc-modernization
   - project-status
 ---
 
 # SFC Modernization — Status Tracker
+
+## November 10 — shared runtime support gameplay accepted
+
+Moved six functional helpers into `src/runtime`, preserving developer entry
+points and keeping 60 shipped Python modules. Fixed an interrupted-recovery-only
+dependency on the excluded broad-capture module using the existing transaction
+helper. Rendering, settings and timing unchanged. 761 regressions, actual file
+recovery/restore, immediate relaunch fixture/preflights, native workers, both GPU
+policies, installed import guard and CPU/GPU checks pass.
+
+New private gameplay copy: `artifacts/alpha/runtime-support-game`, root
+`SFCRemix-Launch.cmd`. Sponsor reports it looks good. Visible original → base
+replacement → enhanced materials sequence completes within roughly three seconds
+by observation, not a measured timing. No loading changes made. Previous accepted
+copy is preserved. Sponsor requests this accepted increment be committed; no push.
+Tester preparation remains
+parked. [Evidence and command](runs/2026-11-10-codex-runtime-support-separation.md).
+
+**Parked follow-up, requested November 10:** investigate why the startup stages
+remain visibly separated. Reopen when reviewing startup performance after this
+organization increment. First correlate existing capture/base-ready, first
+replacement presentation, enhancement publication/consumption and presentation
+timing before choosing a change. No cause or regression is established by the
+approximately three-second visual observation. Recorded in Obsidian Parking Lot
+as "Visible original/base/enhanced startup transitions"; distinct from SFC-23's
+historical first-launch Defender stall. No new capture or loader change now.
 
 ## November 9 — diagnostic separation gameplay accepted
 

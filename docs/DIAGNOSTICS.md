@@ -1,5 +1,14 @@
 # Diagnostic tools reference
 
+## Interrupted recovery ownership
+
+`src/runtime/session_recovery.py` owns application recovery. The legacy
+`tools/remix_runtime/recover_broad_session.py <run>` command remains a development
+forwarder; installed users use `launcher.exe --restore`. Both retain game-absence,
+provenance, hash and protected-file checks. Atomic copying comes directly from
+`src/session/graphics_transaction.py`; no broad-capture analyzer is required.
+See [actual installed interruption/restore evidence](runs/2026-11-10-codex-runtime-support-separation.md).
+
 ## Session mode boundary
 
 Normal untimed native play runs `src/session/coordinator.py`. Optional broad/depth

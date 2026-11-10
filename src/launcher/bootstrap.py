@@ -12,6 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(CODE / 'src/session'))
 for directory in ('remix_runtime', 'd3d9_proof', 'scene_bridge', 'remix_ingest', 'm1_component'):
     sys.path.insert(0, str(CODE / 'tools' / directory))
+sys.path.insert(0,str(CODE/'src/runtime'))
 from runtime_context import CONTEXT
 from release_manifest import contained, verify, verify_game_profile, seed_settings
 from release_manifest import verified_role,digest
@@ -60,7 +61,7 @@ def main():
     from windows_processes import game_running
     if not args.preflight and game_running():
         raise ValueError('Exit SFC normally before starting or restoring this copy')
-    from recover_broad_session import recover_pending
+    from session_recovery import recover_pending
     if args.restore:
         recovered = recover_pending(game_running)
         verify_game_profile(CONTEXT, manifest)

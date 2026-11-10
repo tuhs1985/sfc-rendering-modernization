@@ -32,6 +32,7 @@ def main():
     os.environ['SFC_RELEASE_ROOT']=str(package)
     for name in ('release','remix_runtime','d3d9_proof','scene_bridge','remix_ingest'):
         sys.path.insert(0,str(package/'code/tools'/name))
+    sys.path.insert(0,str(package/'code/src/runtime'))
     from runtime_context import CONTEXT
     from release_manifest import load,verified_role
     from present_calibration import Receiver

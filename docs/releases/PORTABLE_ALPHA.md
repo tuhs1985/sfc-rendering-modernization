@@ -29,6 +29,14 @@ D3D12, new assets and appearance tuning remain outside this increment.
 
 ## Implemented so far
 
+- Shared runtime support now resides in `src/runtime`: paths, integrity/profile
+  checks, process inventory, protected preferences, file helpers and interrupted
+  recovery. Installed modules use that application location; developer forwarders
+  are excluded. Production remains 60 Python modules. Actual native restore and
+  package checks pass; [new gameplay checkout](../runs/2026-11-10-codex-runtime-support-separation.md)
+  is accepted by the sponsor, with perceptible startup stages noted. No
+  graphics/timing behavior changed.
+
 - Normal native play now has a narrow application coordinator; optional captures,
   timed tests and tuning orchestration live in development-only
   `tools/session_diagnostics`. Startup, fallback, graphics transactions and

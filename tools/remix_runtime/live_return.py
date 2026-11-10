@@ -34,7 +34,8 @@ LIVE_SOURCES+=('rendering_config.py',)
 LIVE_SOURCES+=('ship_scene_depth.h','scene_depth.py','qualify_scene_depth.py')
 LIVE_SOURCES+=('../../src/session/coordinator.py','../../src/session/exit_monitor.py','../../src/session/reports.py',
     '../../src/session/graphics_transaction.py','../../src/session/component_qualification.py',
-    '../session_diagnostics/modes.py')
+    '../session_diagnostics/modes.py',
+    '../../src/runtime/runtime_context.py','../../src/runtime/release_manifest.py','../../src/runtime/windows_processes.py','../../src/runtime/runtime_files.py','../../src/runtime/copied_preferences.py','../../src/runtime/session_recovery.py')
 QUALIFICATION=ROOT/'artifacts/remix-runtime/deps/live-return-qualification.json'
 def source_hashes():return {n:digest(Path(__file__).parent/n) for n in LIVE_SOURCES}
 def binary_hashes():

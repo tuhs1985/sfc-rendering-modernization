@@ -4,6 +4,44 @@ Sponsor-facing current work and parked items: [status tracker](STATUS.md).
 Diagnostic tools, triggers, limits and known pitfalls: [diagnostic reference](DIAGNOSTICS.md).
 The tracker is a sponsor-facing summary; the newest authoritative checkpoint below controls technical work.
 
+## Current checkpoint — November 10 shared runtime support separated
+
+Parent `09bbeea` records sponsor-accepted diagnostic separation. The next change,
+`separate-runtime-support`, is gameplay-accepted and authorized for commit. Six helpers
+now live in `src/runtime`: context, manifest, process inventory, runtime files,
+protected preferences and session recovery. Five bodies are unchanged; recovery
+uses the existing application atomic-copy helper instead of the excluded
+broad-capture module. Bootstrap/coordinator and installed paths updated; legacy
+developer imports/CLI remain compatible. Production stays at 60 Python modules.
+No rendering, material, timing, appearance or native source changes.
+
+761 regressions, actual file rollback/recovery, early-exit/immediate-relaunch
+fixture, isolated import identity/exclusion, native light workers, 600-frame
+Strict/ExtraFrame GPU fixtures, normal/diagnostic preflights and new package
+original/moved/final-path checks pass. Installed actual native restore after a
+simulated interruption restores protected files/removes working data; two
+immediate preflights pass. Installed CPU materials and profiling-off GPU
+output/cancellation pass with zero owned processes remaining. Standalone 3.141s
+readiness is not gameplay latency. Fixed renderer hash and settings unchanged.
+
+**Sponsor gameplay checkout accepted November 10:** reports it looks good in
+`artifacts/alpha/runtime-support-game`. Notes a visible startup sequence: original
+ship, base replacement, then enhanced materials; all appear within roughly three
+seconds by observation. Treat this as approximate visual timing, not instrumented
+latency or a regression attribution. No new loader change authorized by this
+observation. Sponsor explicitly requests a parked follow-up to determine why the
+stages remain visibly separated: correlate existing asset readiness, first
+replacement presentation and enhancement publication/consumption before changing
+the pipeline. This is separate from the historical first-launch Defender stall.
+Specific early-exit/relaunch gameplay coverage was not reported;
+existing automated fixture/preflight results remain separate evidence.
+
+Sponsor requests committing this accepted increment. No push requested.
+Previous accepted checkouts and game copies remain untouched. Tester preparation
+stays parked; historical diagnostic receipts retain their qualification status.
+
+See [ownership, evidence and exact command](runs/2026-11-10-codex-runtime-support-separation.md).
+
 ## Current checkpoint — November 9 diagnostic modes separated
 
 Committed the prior accepted checkpoint as `4a0ce1e` on sponsor request, then

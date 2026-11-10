@@ -6,6 +6,7 @@ CODE=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(Path(__file__).resolve().parent))
 sys.path.insert(0,str(CODE/'tools/remix_runtime'))
 
+sys.path.insert(0,str(CODE/'src/runtime'))
 from scene_capacity import OWNERS,ASSETS
 import argparse
 import ctypes as C
@@ -193,7 +194,7 @@ class Session:
             if not C.windll.shell32.IsUserAnAdmin():
                 raise RuntimeError('Use the established elevated testing parent. No automatic UAC requested.')
             if game_running():raise RuntimeError('Exit the existing SFC game normally before starting or recovering the isolated test.')
-            from recover_broad_session import recover_pending
+            from session_recovery import recover_pending
             recovered=recover_pending(game_running)
             if recovered:print('Recovered prior interrupted test: '+recovered,flush=True)
         preflight()

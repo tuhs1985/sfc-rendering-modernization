@@ -102,7 +102,14 @@ class SessionModesTests(unittest.TestCase):
                 stack.enter_context(redirect_stdout(io.StringIO()))
                 if fail:
                     with self.assertRaisesRegex(RuntimeError,'fixture renderer failed'):session.run()
-                else:session.run()
+                else:
+                    session.run()
+                    first_work=session.work
+                    # Exit before first output, then immediately run the same
+                    # entry again against the restored game/files, not a new copy.
+                    processes.clear();events.clear();checks=0
+                    session=Prepared();session.run()
+                    self.assertNotEqual(session.work,first_work)
                 self.assertEqual({n:(game/n).read_bytes() for n in app.CRITICAL},original)
                 self.assertEqual(len(processes),3)
                 self.assertLess(events.index('prewarm'),events.index('device.ready'))
