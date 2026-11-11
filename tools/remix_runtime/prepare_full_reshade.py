@@ -22,7 +22,8 @@ SOURCES=('return_addon.cpp','broad_trace.h','broad_events.h','return_fixture.cpp
 SOURCES+=('../../src/session/coordinator.py','../../src/session/exit_monitor.py','../../src/session/reports.py',
     '../../src/session/graphics_transaction.py','../../src/session/component_qualification.py',
     '../session_diagnostics/modes.py',
-    '../../src/runtime/runtime_context.py','../../src/runtime/release_manifest.py','../../src/runtime/windows_processes.py','../../src/runtime/runtime_files.py','../../src/runtime/copied_preferences.py','../../src/runtime/session_recovery.py')
+    '../../src/runtime/runtime_context.py','../../src/runtime/release_manifest.py','../../src/runtime/windows_processes.py','../../src/runtime/runtime_files.py','../../src/runtime/copied_preferences.py','../../src/runtime/session_recovery.py',
+    '../../src/assets/parallel_assets.py','../../src/assets/scene_bundle.py','../../src/assets/material_binding.py','../../src/assets/material_library.py','../../src/assets/roughness_maps.py','../../src/assets/mesh_checksum.py','../../src/assets/damage_materials.py','../../src/assets/damage_mapping.py','../../src/assets/break_scene.py','../../src/assets/mesh_decode.py','../../tools/asset_diagnostics/asset_capture_review.py')
 def source_hashes():return {n:digest(Path(__file__).parent/n) for n in SOURCES}
 def prepare():
     folder=FULL.parent.parent;folder.mkdir(parents=True,exist_ok=True)

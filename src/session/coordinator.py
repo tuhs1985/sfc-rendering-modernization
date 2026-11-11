@@ -7,6 +7,7 @@ sys.path.insert(0,str(Path(__file__).resolve().parent))
 sys.path.insert(0,str(CODE/'tools/remix_runtime'))
 
 sys.path.insert(0,str(CODE/'src/runtime'))
+sys.path.insert(0,str(CODE/'src/assets'))
 from scene_capacity import OWNERS,ASSETS
 import argparse
 import ctypes as C

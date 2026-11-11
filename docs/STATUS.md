@@ -1,13 +1,28 @@
 ---
 title: SFC Modernization — Status Tracker
 updated: 2026-11-10
-checkpoint: Runtime support gameplay accepted and authorized for commit;startup investigation parked
+checkpoint: Asset separation checkout complete;ownership reviewed;commit requested
 tags:
   - sfc-modernization
   - project-status
 ---
 
 # SFC Modernization — Status Tracker
+
+## November 10 — asset preparation and renderer/transfer review complete
+
+Parent `7ae2c35`. Application preparation now lives in `src/assets`; capture
+review/comparisons stay in developer tools. Neutral decoder separated from
+transport; 61 shipped Python modules. 764 regressions, four review tests,
+standalone workers/GPU, package/import and actual CPU material checks pass.
+Renderer, settings, scheduling and loading order unchanged.
+
+New private checkout: `artifacts/alpha/asset-preparation-game`, root
+`SFCRemix-Launch.cmd`, recording off. Sponsor checkout complete; commit requested. [Evidence and command](runs/2026-11-10-codex-asset-preparation-separation.md).
+[Renderer/transfer review](reconnaissance/2026-11-10-renderer-transfer-ownership.md)
+recommends scene receipt/input transport as the next contained separation, then
+normal renderer orchestration. No transfer redesign. Visible startup stages and
+tester graphics preparation remain parked.
 
 ## November 10 — shared runtime support gameplay accepted
 

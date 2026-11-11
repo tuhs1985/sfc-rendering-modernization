@@ -29,6 +29,14 @@ D3D12, new assets and appearance tuning remain outside this increment.
 
 ## Implemented so far
 
+- Asset preparation now has application ownership in `src/assets`. Capture review,
+  offline comparisons and streaming experiments remain developer-only. Production
+  is **61 Python modules**, including a neutral decoder extracted from transport.
+  Rendering, settings, cache/scheduling and publication order are unchanged.
+  [New private checkout and qualification](../runs/2026-11-10-codex-asset-preparation-separation.md)
+  passed package checks and completed sponsor checkout. Renderer/transfer
+  ownership is reviewed but not relocated in this increment.
+
 - Shared runtime support now resides in `src/runtime`: paths, integrity/profile
   checks, process inventory, protected preferences, file helpers and interrupted
   recovery. Installed modules use that application location; developer forwarders

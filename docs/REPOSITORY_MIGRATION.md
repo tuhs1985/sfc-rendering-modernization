@@ -61,6 +61,16 @@ sponsor accepts the separate gameplay checkout, noting perceptible loading stage
 [record](runs/2026-11-10-codex-runtime-support-separation.md). Remaining asset and
 renderer support islands are separate future work; no wholesale relocation.
 
+**Asset preparation:** `separate-asset-preparation` moves nine helpers and extracts
+neutral mesh decoding into `src/assets`, separating explicit review/comparison
+tools and retaining existing behavior. Package/standalone checks pass; sponsor
+reports gameplay checkout complete and requests the commit. [Record](runs/2026-11-10-codex-asset-preparation-separation.md).
+The requested [renderer/transfer ownership review](reconnaissance/2026-11-10-renderer-transfer-ownership.md)
+is complete. Next scoped candidate is functional scene receipt/input transport,
+then normal renderer orchestration/backend selection, preserving native paired
+contracts and shared teardown. No renderer/transfer migration is authorized by
+the review alone.
+
 **Original recommendation:** scope `separate-release-tooling` around the portable
 entry point and its build-time/runtime split. `tools/release/` has 20 tracked
 files at the baseline, but only two of its Python modules are shipped. This is a

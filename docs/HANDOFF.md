@@ -4,6 +4,43 @@ Sponsor-facing current work and parked items: [status tracker](STATUS.md).
 Diagnostic tools, triggers, limits and known pitfalls: [diagnostic reference](DIAGNOSTICS.md).
 The tracker is a sponsor-facing summary; the newest authoritative checkpoint below controls technical work.
 
+## Current checkpoint — November 10 asset preparation separated; ownership reviewed
+
+Parent `7ae2c35` is the accepted runtime-support commit. New
+`separate-asset-preparation` work has completed sponsor checkout and is authorized for commit. Nine
+preparation helpers move to `src/assets`; neutral mesh decoding is extracted
+there as a tenth module. Capture review, old preview classes, break observation
+analysis, streaming experiments and test-only source/upload comparisons move to
+`tools/asset_diagnostics`. Legacy developer imports remain supported. Normal
+installed play never imports review tools; production is 61 Python modules.
+No native source, appearance, task scheduling, cache rules or timing policy changes.
+
+764 regressions plus four existing review tests pass. 45 function/class ASTs are
+unchanged; three adaptations delegate review or import the relocated decoder.
+Native workers, 600-frame Strict/ExtraFrame GPU fixtures, original/moved/final
+package preflight, installed import guard/receiver lifecycle, actual CPU captured
+F-CA base/enhanced preparation and profiling-off GPU output/cancellation pass.
+Zero owned processes remain; fixed renderer hash and settings unchanged.
+Standalone 3.422s readiness is not gameplay or startup-optimization evidence.
+
+**Sponsor checkout complete:** sponsor reports completion in the separate
+`artifacts/alpha/asset-preparation-game` copy and requests the commit. Specific
+gameplay scenarios and measured timings were not reported. Previous accepted
+copies remain untouched.
+Startup-stage investigation and tester preparation remain parked.
+
+Renderer/transfer ownership review is complete: normal Relay orchestration is
+still mixed with historical timing/fixture helpers, and required IPC receiver and
+input-payload lifetime must not be discarded as diagnostics. Smallest next move:
+functional scene receipt/input transport out of calibration/review tools, then
+normal renderer/backend orchestration, with paired contracts/teardown preserved.
+No renderer/transfer relocation or redesign in this increment. No SFC launch,
+push or release by Codex. One optional source CLI preflight was rejected
+as a possible game launch; no execution or bypass, package checks completed.
+
+See [implementation and command](runs/2026-11-10-codex-asset-preparation-separation.md)
+and [ownership audit](reconnaissance/2026-11-10-renderer-transfer-ownership.md).
+
 ## Current checkpoint — November 10 shared runtime support separated
 
 Parent `09bbeea` records sponsor-accepted diagnostic separation. The next change,

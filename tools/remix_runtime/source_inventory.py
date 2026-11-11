@@ -9,7 +9,7 @@ def digest(path):
 
 def sources():
     result={}
-    for directory in ('tools/d3d9_proof','tools/remix_runtime','tools/scene_bridge','tools/m1_component','tools/native_foreground','tools/native_insertion','src/session','src/runtime','tools/session_diagnostics','tests'):
+    for directory in ('tools/d3d9_proof','tools/remix_runtime','tools/scene_bridge','tools/m1_component','tools/native_foreground','tools/native_insertion','src/session','src/runtime','src/assets','tools/asset_diagnostics','tools/session_diagnostics','tests'):
         for p in (ROOT/directory).iterdir():
             if p.is_file() and p.suffix in ('.h','.cpp','.py','.ps1','.def'):result[str(p.relative_to(ROOT)).replace('\\','/')]=digest(p)
     return result

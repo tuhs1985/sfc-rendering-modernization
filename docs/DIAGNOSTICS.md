@@ -1,5 +1,16 @@
 # Diagnostic tools reference
 
+## Asset preparation and review
+
+Normal geometry/image/material preparation and working caches live in
+`src/assets`. `tools/asset_diagnostics/asset_capture_review.py` owns explicit
+capture snapshot selection, old preview/capture consumers, break-capture analysis,
+material streaming experiments and test source/upload comparisons. Existing
+developer APIs request those functions lazily; normal installed play does not
+import or include the review module. The scene packet reader remains functional
+runtime code despite its historical `read_replay` name. See the
+[asset boundary and verification](runs/2026-11-10-codex-asset-preparation-separation.md).
+
 ## Interrupted recovery ownership
 
 `src/runtime/session_recovery.py` owns application recovery. The legacy
@@ -45,7 +56,7 @@ These tools never launch SFC and are not normal-play overhead.
 | Tool | Purpose / output | Important limit |
 | --- | --- | --- |
 | `tools/release/prepare_python.py` | Checksum-pinned upstream application-local Python/wheels | No Codex-runtime copy or machine-wide installation |
-| `tools/release/inventory_dependencies.py` | PE imports and99-module static Python superset | Includes inactive branches; not normal-play loaded-module proof |
+| `tools/release/inventory_dependencies.py` | PE imports and static Python dependency superset | Includes inactive branches; not normal-play loaded-module proof |
 | `tools/release/stage_preflight_fixture.py` | Private fixture; actual WinPS5.1/app-local-Python preflight, Unicode/spaces/move | Incomplete/not distributable; no gameplay or second-machine claim |
 | `tools/release/qualify_production_prewarm.py` | Real installed Remix startup, late ticket activation, bootstrap output/receiver comparison or pre-output cancellation, with profiling on/off | Standalone synthetic target/ticket; never launches SFC.45s owned job,128MiB scratch. Bootstrap is not an appearance/gameplay oracle. Not shipped in the alpha |
 | `tools/release/run_extent_probe.py --extent W H` | Candidate1.6.1 synthetic ray-traced output/x86 receiver | Current parser bounds; isolated24Present diagnostic toggle, not normal startup |

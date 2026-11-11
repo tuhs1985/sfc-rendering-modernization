@@ -106,7 +106,7 @@ rules need explicit classification; do not silently classify them as disposable.
 
 1. **Shipping status comes from manifests.** The
    [production Python allowlist](../tools/release/runtime_modules.json) selects
-   60 modules, not every import branch. Native role mappings and required default
+   61 modules, not every import branch. Native role mappings and required default
    profiles come from [release staging](../tools/release/stage_preflight_fixture.py)
    and the installed immutable manifest. Staging is a private fixture, not an
    approved release builder. Vendor closure remains separately qualified.
@@ -158,17 +158,26 @@ Application entry points use them directly; old tool imports/restore CLI retain
 unshipped forwarders. See the
 [runtime support record](runs/2026-11-10-codex-runtime-support-separation.md).
 
+Asset task graph, geometry/image/material preparation and associated caches now
+have application ownership under `src/assets`. Capture review, old preview/capture
+consumption and test comparisons stay in `tools/asset_diagnostics`; compatibility
+entry files remain unshipped. The neutral mesh decoder is separate from transport.
+See [the asset record](runs/2026-11-10-codex-asset-preparation-separation.md) and
+[remaining renderer/transfer ownership](reconnaissance/2026-11-10-renderer-transfer-ownership.md).
+
 These Python counts come directly from the current allowlist, not a new manifest:
 
 | Area | Listed Python modules | Production responsibility / important exception |
 | --- | ---: | --- |
-| `tools/remix_runtime/` | 31 | Preparation, appearance controls, IPC and runtime selection; also contains development-only paths and unshipped compatibility wrappers |
-| `tools/d3d9_proof/` | 9 | D3D9-side material/light helpers, identity/recovery, coordinate conversion and checksums; not all proof fixtures ship |
-| `tools/remix_ingest/` | 4 | Active break/live capture decoding and camera conversion coexist with historical Toolkit/OBJ utilities |
-| `tools/scene_bridge/` | 2 | Scene bundle preparation and damage mapping; other neutral protocols/tests support development |
+| `tools/remix_runtime/` | 28 | Appearance controls, IPC, scene/renderer orchestration and runtime selection; development paths/compatibility wrappers remain unshipped |
+| `tools/d3d9_proof/` | 6 | Light transfer, scene/catalog and owner identity/control, worker lifecycle and Remix coordinate conversion; not all proof fixtures ship |
+| `tools/remix_ingest/` | 3 | Shared channel/scene transport and camera conversion coexist with historical Toolkit/OBJ utilities |
+| `tools/scene_bridge/` | 0 | Legacy asset-preparation forwarders plus neutral protocol/tests; no files from this area ship |
 | `src/launcher/` | 2 | `bootstrap.py` and `session_recording.py`; native entry source and CMD wrappers share this application boundary |
 | `src/session/` | 5 | Normal coordinator, verified game-exit monitor, bounded report state, graphics transaction and component qualification; shared application lifetime is inherited by diagnostics |
 | `src/runtime/` | 6 | Path context, package manifest validation, process inventory, runtime file helpers, protected preferences and interrupted graphics recovery |
+| `src/assets/` | 10 | Neutral mesh decoding, geometry/image/material preparation, task/working caches, damage/break decoding and material publication |
+| `tools/asset_diagnostics/` | 0 | Capture/preview review, streaming experiments and explicit test comparisons; never normal-play imports |
 | `tools/session_diagnostics/` | 0 | Optional capture/test/tuning orchestration and analysis; developer CLI dispatch only, not installed |
 | `tools/release/` | 0 | Build/packaging tools, allowlist, qualification and release-document inputs only |
 | `tools/m1_component/` | 1 | `analyze_live_camera.py` is retained despite its analysis name; this area also owns native observation sources |
