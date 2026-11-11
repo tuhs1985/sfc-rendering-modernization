@@ -99,39 +99,85 @@ def verified_role(context, manifest, role):
     return contained(context.package_root, manifest['roles'][role])
 
 
-def verify_game_profile(context, manifest):
-    """Recognize a graphics stack before transaction code may touch the copy.
-
-    Package hashes alone say nothing about graphics files already in the game.
-    Do not enroll an arbitrary local stack as a trusted first-launch baseline.
-    """
+def game_profile_issues(context, manifest):
+    """Read-only checks shared by launch admission and the tester report."""
     from copied_preferences import protected_ini_sha256
+
     profile = manifest.get('game_profile', {})
     hashes = profile.get('files', {})
     required = {'DDraw.dll', 'D3DImm.dll', 'dxgi.dll', 'dgVoodoo.conf', 'ReShade.ini'}
     if set(hashes) != required or not isinstance(profile.get('sfc_protected_sha256'), str):
         raise ValueError('Package lacks a qualified game graphics profile')
+    versions = {
+        'DDraw.dll': 'the qualified dgVoodoo 2.86.5 x86 DDraw.dll',
+        'D3DImm.dll': 'the qualified dgVoodoo 2.86.5 x86 D3DImm.dll',
+        'dxgi.dll': 'the qualified baseline ReShade 6.7.1.2133 x86 dxgi.dll',
+    }
+    dimensions = profile.get('dimension_profile')
     for name, expected in hashes.items():
-        path = context.game_root / name
-        if name=='dgVoodoo.conf' and profile.get('dimension_profile'):
+        if name == 'dgVoodoo.conf' and dimensions:
             continue
-        if not path.is_file() or digest(path).upper() != expected.upper():
-            raise ValueError('Unsupported graphics file: ' + name +
-                             '. Restore the supported game-copy profile; no files were changed.')
-    if profile.get('dimension_profile'):
-        from game_profile import signature
-        if signature((context.game_root/'sfc.ini').read_bytes(),(context.game_root/'dgVoodoo.conf').read_bytes())!=profile['dimension_profile']:
-            raise ValueError('Unsupported protected game graphics settings; no files were changed')
-    elif protected_ini_sha256((context.game_root / 'sfc.ini').read_bytes()) != profile['sfc_protected_sha256']:
-        raise ValueError('Unsupported protected game settings; no files were changed')
+        path = context.game_root / name
+        if not path.is_file():
+            yield f'Missing graphics file: {name}. The game copy needs {versions.get(name, "the qualified " + name)}.'
+        elif digest(path).upper() != expected.upper():
+            yield f'Unsupported graphics file: {name}. The game copy needs {versions.get(name, "the qualified " + name)}.'
+
+    def inspect(name, parser):
+        path = context.game_root / name
+        if not path.is_file():
+            raise ValueError('Missing file')
+        with path.open('rb') as stream:
+            return parser(stream.read(1024 * 1024 + 1))
+
+    if dimensions:
+        from game_profile import SIZES, matching_dimensions, sfc_profile, wrapper_profile
+
+        if (set(dimensions) != {'schema', 'sfc_sha256', 'dg_sha256'} or
+                dimensions['schema'] != 'sfc.alpha.graphics-dimensions.v1'):
+            raise ValueError('Package lacks a qualified resolution profile')
+        supported = ', '.join(f'{w}x{h}' for w, h in SIZES)
+        native = wrapper = None
+        try:
+            native = inspect('sfc.ini', sfc_profile)
+        except ValueError as exc:
+            yield f'sfc.ini: {exc}. Use one supported [3D] Width/Height pair: {supported}.'
+        if native and native[0] != dimensions['sfc_sha256']:
+            yield 'sfc.ini: settings outside the player name and resolution differ from the qualified profile.'
+        try:
+            wrapper = inspect('dgVoodoo.conf', wrapper_profile)
+        except ValueError as exc:
+            yield f'dgVoodoo.conf: {exc}. The qualified profile requires DesktopResolution and Resolution.'
+        if wrapper and wrapper[0] != dimensions['dg_sha256']:
+            yield 'dgVoodoo.conf: settings outside the resolution differ from the qualified profile.'
+        if native and wrapper and not matching_dimensions(native[1], *wrapper[1:]):
+            w, h = native[1]
+            yield (f'dgVoodoo.conf: resolution does not match sfc.ini ({w}x{h}). '
+                   f'Set DesktopResolution={w}x{h} and Resolution=h:{w}, v:{h}.')
+    else:
+        try:
+            actual = inspect('sfc.ini', protected_ini_sha256)
+        except ValueError as exc:
+            yield f'sfc.ini: {exc}. The game copy needs the qualified settings.'
+        else:
+            if actual != profile['sfc_protected_sha256']:
+                yield 'sfc.ini: settings outside the player name differ from the qualified profile.'
+
     for name in ('ddraw.dll', 'd3d8.dll', 'd3d9.dll', 'winmm.dll', 'version.dll'):
         if name.casefold() not in {n.casefold() for n in hashes} and (context.game_root / name).exists():
             # This distribution also contains a pinned, unused dgVoodoo D3D8
             # component. Recognize only its independently identified bytes.
             if name=='d3d8.dll' and digest(context.game_root/name).upper()=='72BD6B84FACE40B928DFD5D1EE6D30F2CE8671919D0264B24513E25A2C647FD3':
                 continue
-            raise ValueError('Unrecognized proxy conflict: ' + name + '; no files were changed')
-    return profile
+            yield f'Unrecognized proxy conflict: {name}. Use a separate game copy with the qualified graphics stack.'
+
+
+def verify_game_profile(context, manifest):
+    """Require the qualified profile before touching graphics files."""
+    issue = next(game_profile_issues(context, manifest), None)
+    if issue:
+        raise ValueError(issue + ' No files were changed.')
+    return manifest['game_profile']
 
 
 def seed_settings(context, manifest):

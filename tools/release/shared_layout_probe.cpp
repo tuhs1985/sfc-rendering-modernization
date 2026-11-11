@@ -35,6 +35,7 @@ int wmain(int argc,wchar_t** argv){
    hr(d9->CreateDeviceEx(0,D3DDEVTYPE_HAL,window,D3DCREATE_HARDWARE_VERTEXPROCESSING,&pp,nullptr,&owner),"D3D9 device");
    api(remix.dxvk_RegisterD3D9Device(owner.Get()),"register device");auto* device=owner.Detach(); // same SDK-owned lifetime as existing output probe
    LUID luid{};hr(d9->GetAdapterLUID(0,&luid),"LUID");
+   std::cout<<"REMIX_D3D9_ADAPTER luid="<<luid.HighPart<<':'<<luid.LowPart<<'\n';
    ComPtr<IDXGIFactory1> factory;hr(CreateDXGIFactory1(IID_PPV_ARGS(&factory)),"DXGI factory");ComPtr<IDXGIAdapter1> selected;
    for(UINT i=0;i<16;++i){ComPtr<IDXGIAdapter1> a;if(factory->EnumAdapters1(i,&a)==DXGI_ERROR_NOT_FOUND)break;DXGI_ADAPTER_DESC1 desc{};hr(a->GetDesc1(&desc),"adapter");if(desc.AdapterLuid.LowPart==luid.LowPart&&desc.AdapterLuid.HighPart==luid.HighPart){selected=a;break;}}
    require(bool(selected),"same GPU");ComPtr<ID3D11Device> native;ComPtr<ID3D11DeviceContext> context;

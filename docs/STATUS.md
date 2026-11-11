@@ -1,13 +1,30 @@
 ---
 title: SFC Modernization — Status Tracker
-updated: 2026-11-10
-checkpoint: Main source reorganization complete. Sponsor completed the gameplay checkout.
+updated: 2026-11-11
+checkpoint: Cache-only checkout complete. Hybrid adapter qualification and reversible setup pending.
 tags:
   - sfc-modernization
   - project-status
 ---
 
 # SFC Modernization — Status Tracker
+
+## November 11 — portable graphics candidate
+
+Cache-only ReShade comparison preserved the generated profile and all 128
+appearance inputs. Both dgVoodoo policies matched Remix's adapter on the
+single-physical-GPU workstation. The sponsor completed the private cache-only checkout.
+Hybrid selection, standard ReShade sourcing, reversible setup and clean-machine
+qualification remain open.
+[Evidence and checkout command](runs/2026-11-11-codex-portable-graphics-profile.md).
+
+## November 11 — tester graphics preflight verified
+
+The reorganization merged as `e324e5c`. Installed `--preflight` now lists
+graphics mismatches together. 765 regressions passed, and the packaged launcher
+reported five simultaneous issues without changing any files. The qualified
+profile still passes. Portable preparation, rollback and clean-machine gameplay
+are the next gates. [Test record](runs/2026-11-11-codex-tester-graphics-preflight.md).
 
 ## November 10 — main source reorganization implemented
 

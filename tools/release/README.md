@@ -12,8 +12,7 @@ live in [src/launcher](../../src/launcher/README.md).
 | User-document build input | `ALPHA-README.md` |
 
 `runtime_modules.json` is the reviewed source allowlist, not an installed
-dependency. It selects 59 Python modules, including two under `src/launcher`
-and three under `src/session`. Legacy session forwarding tools are excluded.
+dependency. Legacy session forwarding tools are excluded.
 The private staging fixture exercises the installed entry point without starting
 SFC; it is not a public distributable or permission to redistribute vendor files.
 
@@ -22,7 +21,26 @@ Use the Windows Python environment in the project README to run
 The build writes ignored `artifacts/alpha/launcher-bin`; staging creates a fresh
 ignored fixture. It does not update the existing private alpha game copy.
 
+The default reduced fixture also runs the packaged launcher with five deliberate
+graphics mismatches. It checks the failure report, verifies file hashes before
+and after, restores the fixture and checks it passes again. The result is in the
+fixture's `result.json`. Run this check after changing launch admission or how
+the graphics profile is reported.
+
 The stager's `--functional` option makes a private full game copy, includes the
 root double-click CMD and runs preflight only. It is not a public ZIP or gameplay
 acceptance. Before offering it for play, qualify the matching renderer and actual
 installed startup; a default reduced preflight fixture cannot launch a game.
+
+Use `stage_preflight_fixture.py --functional --portable-cache` to qualify the
+cache-only ReShade profile. It makes a new private copy, changes only the cache
+path, and compares the installed helper's generated settings against the
+accepted profile. The test hashes the existing preset, shader and texture files.
+
+For a separate GPU selection check, pass the staged `SFCRemix` folder to
+`qualify_graphics_adapter.py`. The x86 DirectDraw fixture tests the two dgVoodoo
+adapter settings and records the D3D11 adapter identifiers in `result.json`.
+Compare them with `remix_adapter_luid` from the existing
+`run_shared_layout_probe.py --extent 128 128` GPU fixture on the same machine
+and boot. Check on both single- and hybrid-GPU machines before adopting a new
+adapter policy. Both tools are standalone development checks.

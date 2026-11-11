@@ -30,6 +30,8 @@ def run(width,height):
     command=[str(ROOT/'artifacts/remix-ingest/bin/bounded_job.exe'),str(folder),'45',str(32*1024*1024),str(2*1024*1024),str(host),str(runtime),str(width),str(height)]
     process=subprocess.run(command,env=env,timeout=60,creationflags=subprocess.CREATE_NO_WINDOW)
     text=(folder/'job-console.log').read_text(errors='replace')
+    adapter=re.search(r'^REMIX_D3D9_ADAPTER luid=(-?\d+:\d+)$',text,re.M)
+    if adapter:record['remix_adapter_luid']=adapter[1]
     for name,pattern in (
         ('source',r'GPU_SOURCE_LAYOUT width=(\d+) height=(\d+) row_pitch=(\d+) mismatches=(\d+)'),
         ('native',r'GPU_SHARED_LAYOUT width=(\d+) height=(\d+) row_pitch=(\d+) mismatches=(\d+)')):

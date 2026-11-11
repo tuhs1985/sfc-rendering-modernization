@@ -9,6 +9,7 @@ import argparse
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -24,8 +25,66 @@ from runtime_candidate import COMMIT,HEADER_SHA
 from package_layout import copy_python,copy_remix
 
 
-def stage(*,functional=False):
+def launcher_preflight(game, cwd):
+    return subprocess.run([str(game/'SFCRemix/launcher.exe'),'--preflight'],
+                          cwd=cwd,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,timeout=180)
+
+
+def check_profile_mismatches(game, fixture):
+    """Exercise the packaged failure path in the freshly staged, minimal copy."""
+    def snapshot():
+        return {path.relative_to(game).as_posix(): digest(path)
+                for path in game.rglob('*') if path.is_file()}
+
+    original = snapshot()
+    files = {name: (game/name).read_bytes()
+             for name in ('DDraw.dll', 'dxgi.dll', 'sfc.ini', 'dgVoodoo.conf')}
+    conflict = game/'d3d9.dll'
+    if conflict.exists():
+        raise ValueError('Mismatch fixture already contains a D3D9 proxy')
+    wrong_dimensions, count = re.subn(
+        rb'(?im)^(DesktopResolution[ \t]*=[ \t]*)([0-9]+x[0-9]+)',
+        lambda match: match[1] + (b'1600x900' if match[2] != b'1600x900' else b'1280x720'),
+        files['dgVoodoo.conf'],
+    )
+    if count != 1:
+        raise ValueError('Cannot set a mismatched desktop resolution in the fixture')
+    try:
+        (game/'DDraw.dll').unlink()
+        (game/'dxgi.dll').write_bytes(b'fixture wrong baseline')
+        (game/'sfc.ini').write_bytes(files['sfc.ini'] + b'\r\n; fixture changed protected setting\r\n')
+        (game/'dgVoodoo.conf').write_bytes(wrong_dimensions)
+        conflict.write_bytes(b'fixture conflicting proxy')
+        broken = snapshot()
+        run = launcher_preflight(game, fixture)
+        expected = (
+            'Missing graphics file: DDraw.dll',
+            'Unsupported graphics file: dxgi.dll',
+            'sfc.ini: settings outside',
+            'resolution does not match sfc.ini',
+            'Unrecognized proxy conflict: d3d9.dll',
+            'No game or package files were changed.',
+        )
+        if run.returncode != 1 or any(message not in run.stdout for message in expected):
+            raise ValueError('Packaged mismatch report failed\n' + run.stdout)
+        if broken != snapshot() or any((game/'SFCRemix'/name).exists() for name in ('data', 'settings')):
+            raise ValueError('Packaged mismatch check wrote to the fixture')
+    finally:
+        for name, raw in files.items():
+            (game/name).write_bytes(raw)
+        conflict.unlink(missing_ok=True)
+
+    restored = launcher_preflight(game, fixture)
+    if restored.returncode or 'READ_ONLY_PACKAGE_PREFLIGHT_PASS' not in restored.stdout or original != snapshot():
+        raise ValueError('Restored fixture did not pass unchanged\n' + restored.stdout)
+    return dict(profile_mismatch_test=True, exit_code=0, checker_exit_code=run.returncode,
+                files_unchanged=True, restored_fixture_passed=True, console=run.stdout)
+
+
+def stage(*,functional=False,portable_cache=False):
     if CONTEXT.release:raise ValueError('This is a development-only fixture')
+    if portable_cache and not functional:
+        raise ValueError('Portable cache qualification requires the private functional fixture')
     fixture=ROOT/'artifacts/alpha/preflight-fixtures'/dt.datetime.now(dt.timezone.utc).strftime('%Y%m%d-%H%M%S-%f')
     game=fixture/'Game é space';package=game/'SFCRemix';package.mkdir(parents=True)
     if functional:
@@ -37,6 +96,10 @@ def stage(*,functional=False):
     protected=('StarFleetOP.exe','DDraw.dll','D3DImm.dll','dxgi.dll','dgVoodoo.conf','ReShade.ini','sfc.ini')
     before={n:digest(CONTEXT.game_root/n) for n in protected}
     for name in protected:shutil.copyfile(CONTEXT.game_root/name,game/name)
+    if portable_cache:
+        from qualify_reshade_cache import candidate_profile
+        original_reshade=(game/'ReShade.ini').read_bytes()
+        (game/'ReShade.ini').write_bytes(candidate_profile(original_reshade))
     if functional:
         shutil.copyfile(ROOT/'src/launcher/SFCRemix-Launch.cmd',game/'SFCRemix-Launch.cmd')
     # This runtime was obtained from the identified upstream distribution,
@@ -82,7 +145,7 @@ def stage(*,functional=False):
     value=dict(schema=SCHEMA,version=VERSION,client_sha256=CLIENT_SHA256,platform='windows-x64',
                roles=roles,files=files,fixture_only=not functional,private_checkout=functional,
                remix=dict(release='1.6.1',source_commit=COMMIT,api_version=[0,6,5],header_sha256=HEADER_SHA),
-               game_profile=dict(files={n:before[n] for n in protected if n not in ('StarFleetOP.exe','sfc.ini')},
+               game_profile=dict(files={n:digest(game/n) for n in protected if n not in ('StarFleetOP.exe','sfc.ini')},
                                  sfc_protected_sha256=protected_ini_sha256((game/'sfc.ini').read_bytes()),
                                  dimension_profile=dimension_signature((game/'sfc.ini').read_bytes(),(game/'dgVoodoo.conf').read_bytes())))
     (package/'package.json').write_text(json.dumps(value,indent=2))
@@ -92,11 +155,12 @@ def stage(*,functional=False):
             moved=fixture/'Moved portable game é'
             if not moved.resolve().is_relative_to(fixture.resolve()):raise ValueError('Fixture move escaped its verified root')
             game.rename(moved);game=moved;package=game/'SFCRemix'
-        run=subprocess.run([str(package/'launcher.exe'),'--preflight'],
-                           cwd=fixture,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,timeout=180)
+        run=launcher_preflight(game,fixture)
         results.append(dict(moved=bool(index),exit_code=run.returncode,console=run.stdout))
         if run.returncode:break
         if (package/'data').exists() or (package/'settings').exists():raise ValueError('Read-only preflight wrote mutable data')
+    if not functional and all(result['exit_code']==0 for result in results):
+        results.append(check_profile_mismatches(game,fixture))
     # Exercise the actual installed normal coordinator's non-executing preflight,
     # after explicit preparation in this disposable fixture. The old1.5.2 DLL,
     # test receipts and developer source tree are deliberately absent.
@@ -114,6 +178,12 @@ main()
     check=subprocess.run([str(package/'python/python.exe'),'-I','-B','-c',code],cwd=fixture,
                          env={**os.environ,'SFC_RELEASE_ROOT':str(package)},stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,timeout=180)
     results.append(dict(prepared_native_coordinator=True,exit_code=check.returncode,console=check.stdout))
+    if portable_cache and all(result['exit_code']==0 for result in results):
+        check=subprocess.run([str(package/'python/python.exe'),'-I','-B',
+                              str(ROOT/'tools/release/qualify_reshade_cache.py'),str(package)],
+                             input=original_reshade,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,timeout=180)
+        results.append(dict(portable_cache_profile=True,exit_code=check.returncode,
+                            console=check.stdout.decode('utf-8',errors='replace')))
     after={n:digest(CONTEXT.game_root/n) for n in protected}
     record=dict(result='PORTABLE_READ_ONLY_PREFLIGHT_ONLY' if all(x['exit_code']==0 for x in results) else 'PARTIAL',
                 no_sfc_launch=True,original_copy_unchanged=before==after,fixture_not_distributable=True,
@@ -121,7 +191,7 @@ main()
     if functional:
         record.update(private_functional_checkout=str(package),not_for_distribution=True,
                       launcher=str(game/'SFCRemix-Launch.cmd'),native_launcher=str(package/'launcher.exe'),
-                      no_gameplay_acceptance=True)
+                      no_gameplay_acceptance=True,portable_cache=portable_cache)
         (game/'PRIVATE-CHECKOUT-NOT-FOR-DISTRIBUTION.txt').write_text('Private functional checkout of uncommitted source. No game assets belong in a release ZIP. Vendor notice/packaging review and sponsor gameplay acceptance remain open. Do not distribute this directory.\n')
     (fixture/'result.json').write_text(json.dumps(record,indent=2))
     print(fixture);print(json.dumps(record,indent=2))
@@ -130,4 +200,6 @@ main()
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser();parser.add_argument('--functional',action='store_true')
-    stage(functional=parser.parse_args().functional)
+    parser.add_argument('--portable-cache',action='store_true',help='qualify a cache-only ReShade change in the private game copy')
+    args=parser.parse_args()
+    stage(functional=args.functional,portable_cache=args.portable_cache)

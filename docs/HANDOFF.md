@@ -4,6 +4,40 @@ Sponsor-facing current work and parked items: [status tracker](STATUS.md).
 Diagnostic tools, triggers, limits and known pitfalls: [diagnostic reference](DIAGNOSTICS.md).
 The tracker is a sponsor-facing summary; the newest authoritative checkpoint below controls technical work.
 
+## Current checkpoint — November 11 portable graphics candidate
+
+The cache-only ReShade candidate passed the installed configuration comparison,
+128 appearance file hash checks, packaged preflight and standalone production
+GPU transfer. Both dgVoodoo settings selected the same device as Remix on the
+single-physical-GPU workstation. The standalone sharing fixture matched pixels
+and timed out in SDK teardown. The production-host check exited normally.
+
+The sponsor reports the private cache-only gameplay checkout complete. Hybrid GPU qualification,
+independent sourcing of the exact standard ReShade baseline, reversible
+setup and clean-machine checkout remain open. The normal graphics profile and
+adapter policy carry forward.
+[Evidence and checkout command](runs/2026-11-11-codex-portable-graphics-profile.md).
+
+## Current checkpoint — November 11 tester graphics preflight
+
+The reorganization merged into GitHub master as `e324e5c`. The first tester
+setup increment is on `codex/tester-graphics-setup`.
+Installed `--preflight` reports all detected graphics mismatches for an
+intact package and supported executable. It identifies missing or wrong
+files, protected settings differences, incompatible dimensions and conflicting
+proxies. Normal launch still requires the existing qualified profile.
+
+765 Python regressions passed. The real packaged launcher rejected five
+simultaneous mismatches on a disposable copy, left every file byte-for-byte
+unchanged and accepted the restored fixture. Portable-path checks also passed.
+The default package fixture now repeats that failure and recovery check and
+writes the receipt to `result.json`.
+No SFC gameplay was launched. Reversible setup and clean-machine qualification
+remain open. The next step is qualifying clean graphics configuration and
+exact local vendor inputs before adding a write-capable preparation command.
+
+See the [tester preflight record and command](runs/2026-11-11-codex-tester-graphics-preflight.md).
+
 ## Current checkpoint — November 10 scene transport and renderer checkout complete
 
 Parent `48b3766` is the accepted asset-preparation commit. The main source

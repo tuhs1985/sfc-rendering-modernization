@@ -110,5 +110,44 @@ class ReleaseManifestTests(unittest.TestCase):
                 rm.verify_game_profile(context,value)
             self.assertFalse(context.data_root.exists())
 
+    def test_preflight_reports_all_graphics_issues_without_writing(self):
+        from copied_preferences import protected_ini_sha256
+        from game_profile import signature
+
+        with tempfile.TemporaryDirectory() as tmp:
+            context, value = self.stage(tmp)
+            game = context.game_root
+            names = ('DDraw.dll', 'D3DImm.dll', 'dxgi.dll', 'dgVoodoo.conf', 'ReShade.ini')
+            for name in names:
+                (game / name).write_bytes(name.encode())
+            native = b'[3D]\r\nWidth=1280\r\nHeight=720\r\n[Network]\r\nPlayerName=test\r\n'
+            wrapper = b'[GeneralExt]\r\nDesktopResolution=1280x720\r\n[DirectX]\r\nResolution=h:1280, v:720\r\n'
+            (game / 'dgVoodoo.conf').write_bytes(wrapper)
+            (game / 'sfc.ini').write_bytes(native)
+            value['game_profile'] = dict(
+                files={name: rm.digest(game / name) for name in names},
+                sfc_protected_sha256=protected_ini_sha256(native),
+                dimension_profile=signature(native, wrapper),
+            )
+            self.assertEqual(list(rm.game_profile_issues(context, value)), [])
+            (game / 'DDraw.dll').unlink()
+            (game / 'dxgi.dll').write_bytes(b'other proxy')
+            (game / 'dgVoodoo.conf').write_bytes(wrapper.replace(b'1280x720', b'1920x1080'))
+            (game / 'sfc.ini').write_bytes(native + b';changed setting\r\n')
+            (game / 'd3d9.dll').write_bytes(b'conflicting proxy')
+            before = {path: path.read_bytes() for path in game.rglob('*') if path.is_file()}
+
+            issues = list(rm.game_profile_issues(context, value))
+            for expected in ('Missing graphics file: DDraw.dll', 'Unsupported graphics file: dxgi.dll',
+                             'sfc.ini: settings outside', 'resolution does not match sfc.ini (1280x720)',
+                             'Unrecognized proxy conflict: d3d9.dll'):
+                self.assertTrue(any(expected in issue for issue in issues), issues)
+            self.assertEqual(len(issues), 5)
+            with self.assertRaisesRegex(ValueError, 'Missing graphics file: DDraw.dll'):
+                rm.verify_game_profile(context, value)
+            self.assertEqual({path: path.read_bytes() for path in game.rglob('*') if path.is_file()}, before)
+            self.assertFalse(context.settings_root.exists())
+            self.assertFalse(context.data_root.exists())
+
 
 if __name__ == '__main__': unittest.main()
