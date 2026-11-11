@@ -17,7 +17,7 @@ class MultiSceneTests(unittest.TestCase):
     def test_material_reload_isolation_cannot_qualify_normal_workflow(self):
         source=(ROOT/'tools/remix_runtime/qualify_multiship.py').read_text()
         self.assertIn("if result.get('diagnostic_skip_late_material_reload')",source)
-        source=(ROOT/'tools/remix_runtime/multi_scene_relay.py').read_text()
+        source=(ROOT/'src/rendering/multi_scene_relay.py').read_text()
         self.assertIn("if not self.offline_fixture:raise ValueError('Material-reload isolation is offline diagnosis only')",source)
 
     def test_previous_diagnostic_distance_and_aligned_option(self):
@@ -75,11 +75,11 @@ class MultiSceneTests(unittest.TestCase):
         self.assertEqual(fields[8:],wire.ASSET.unpack(raw)[8:11]+(wire.fnv(alias[:-8]),))
 
     def test_live_workflow_is_explicit_and_preserves_legacy(self):
-        source=(ROOT/'tools/remix_runtime/run_return_game.py').read_text()
-        self.assertIn("if args.multi_ship:from multi_scene_relay import Relay",source)
-        self.assertIn("if not args.multi_ship:\n            from qualify_synchronized_buffer import",source)
+        source=(ROOT/'tools/session_diagnostics/modes.py').read_text()
+        self.assertIn("elif self.args.multi_ship:\n                    from multi_scene_relay import Relay",source)
+        self.assertIn("if not self.args.multi_ship:\n                from qualify_synchronized_buffer import",source)
         self.assertIn('original_ship_suppressed=False',source)
-        self.assertIn("if self.additive and not self.multi_scene:",(ROOT/'tools/remix_runtime/live_owner_timing.py').read_text())
+        self.assertIn("if self.additive and not self.multi_scene:",(ROOT/'src/rendering/live_owner_timing.py').read_text())
 
 
 if __name__=='__main__':unittest.main()

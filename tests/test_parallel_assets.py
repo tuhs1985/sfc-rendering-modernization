@@ -268,29 +268,31 @@ class ParallelAssetTests(unittest.TestCase):
             self.assertEqual(begin.call_count,1)
 
     def test_experimental_switch_is_explicit_forwarded_and_recorded(self):
-        source=(ROOT/'tools/remix_runtime/run_return_game.py').read_text()
+        source=(ROOT/'tools/session_diagnostics/modes.py').read_text()
         launcher=(ROOT/'tools/d3d9_proof/start_d3d9_multiship_session.ps1').read_text()
         self.assertIn("[switch]$ExperimentalParallelAssets",launcher)
         self.assertIn("$forward+='-ExperimentalParallelAssets'",launcher)
         self.assertIn("$runArguments+='--experimental-parallel-assets'",launcher)
-        self.assertIn("mode_args['experimental_live_checkout']=True",source)
-        self.assertIn("metadata['experimental_parallel_assets']=args.experimental_parallel_assets",source)
-        self.assertIn("result['experimental_parallel_assets']=args.experimental_parallel_assets",source)
+        self.assertIn("self.mode_args['experimental_live_checkout'] = True",source)
+        self.assertIn("self.metadata['experimental_parallel_assets'] = self.args.experimental_parallel_assets",source)
+        self.assertIn("self.result['experimental_parallel_assets'] = self.args.experimental_parallel_assets",source)
 
     def test_renderer_admission_service_is_explicit_and_reported(self):
-        progressive=(ROOT/'tools/remix_runtime/progressive_scene_relay.py').read_text()
-        launch=(ROOT/'tools/remix_runtime/multi_scene_relay.py').read_text()
+        progressive=(ROOT/'src/rendering/progressive_scene_relay.py').read_text()
+        launch=(ROOT/'src/rendering/multi_scene_relay.py').read_text()
         self.assertIn('self.admission_service=True',progressive)
         self.assertIn("env['SFC_D3D9_ADMISSION_SERVICE']='1' if getattr(self,'admission_service',False) else '0'",launch)
-        self.assertIn("['native_admission_service']",progressive)
-        self.assertIn("['output_stage_timings']",progressive)
+        reports=(ROOT/'tools/renderer_diagnostics/renderer_reports.py').read_text()
+        self.assertIn("['native_admission_service']",reports)
+        self.assertIn("['output_stage_timings']",reports)
 
     def test_initial_texture_data_is_opted_in_and_actual_activation_reported(self):
-        progressive=(ROOT/'tools/remix_runtime/progressive_scene_relay.py').read_text()
+        progressive=(ROOT/'src/rendering/progressive_scene_relay.py').read_text()
         self.assertIn('self.initial_texture_data=True',progressive)
-        self.assertIn("['native_initial_texture_data']",progressive)
+        reports=(ROOT/'tools/renderer_diagnostics/renderer_reports.py').read_text()
+        self.assertIn("['native_initial_texture_data']",reports)
         for name in ('live_owner_timing.py','multi_scene_relay.py'):
-            launch=(ROOT/'tools/remix_runtime'/name).read_text()
+            launch=(ROOT/'src/rendering'/name).read_text()
             self.assertIn("env['SFC_D3D9_INITIAL_TEXTURE_DATA']='1' if getattr(self,'initial_texture_data',False) else '0'",launch)
 
     def test_texture_upload_override_rejects_unrelated_fixture_before_startup(self):

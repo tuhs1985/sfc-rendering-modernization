@@ -37,6 +37,8 @@ def stage(*,functional=False):
     protected=('StarFleetOP.exe','DDraw.dll','D3DImm.dll','dxgi.dll','dgVoodoo.conf','ReShade.ini','sfc.ini')
     before={n:digest(CONTEXT.game_root/n) for n in protected}
     for name in protected:shutil.copyfile(CONTEXT.game_root/name,game/name)
+    if functional:
+        shutil.copyfile(ROOT/'src/launcher/SFCRemix-Launch.cmd',game/'SFCRemix-Launch.cmd')
     # This runtime was obtained from the identified upstream distribution,
     # never from Codex. Ignore compiled caches so -B imports create no mutable
     # writes outside data and immutable manifests remain stable across moves.
@@ -44,8 +46,8 @@ def stage(*,functional=False):
     for name in production_files():
         target=package/'code'/name;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/name,target)
     shutil.copyfile(ROOT/'artifacts/alpha/launcher-bin/launcher.exe',package/'launcher.exe')
-    shutil.copyfile(ROOT/'tools/release/Troubleshoot.cmd',package/'Troubleshoot.cmd')
-    roles=dict(coordinator='code/tools/release/bootstrap.py',python='python/python.exe',launcher='launcher.exe',restore='launcher.exe',
+    shutil.copyfile(ROOT/'src/launcher/Troubleshoot.cmd',package/'Troubleshoot.cmd')
+    roles=dict(coordinator='code/src/launcher/bootstrap.py',python='python/python.exe',launcher='launcher.exe',restore='launcher.exe',
                project_license='LICENSE',third_party_notices='FIXTURE-NOT-FOR-DISTRIBUTION.txt',troubleshooting_launcher='Troubleshoot.cmd')
     shutil.copyfile(ROOT/'LICENSE',package/'LICENSE')
     (package/roles['third_party_notices']).write_text('Private entry-point fixture only. Vendor notices/complete dependency closure still under review. Do not distribute this directory.')
@@ -101,12 +103,12 @@ def stage(*,functional=False):
     code="""import os,sys
 from pathlib import Path
 p=Path(os.environ['SFC_RELEASE_ROOT'])
-sys.path.insert(0,str(p/'code/tools/release'))
+sys.path.insert(0,str(p/'code/src/launcher'))
 import bootstrap
 m=bootstrap.verify(bootstrap.CONTEXT)
 bootstrap.prepare(bootstrap.CONTEXT,m)
 sys.argv=['installed-preflight','--play-session','--native-insertion-policy','ExtraFrame','--native-all-ships','--break-models','--damage-textures']
-from run_return_game import main
+from coordinator import main
 main()
 """
     check=subprocess.run([str(package/'python/python.exe'),'-I','-B','-c',code],cwd=fixture,
@@ -118,7 +120,8 @@ main()
                 independent_upstream_python=True,toolkit_required=False,results=results)
     if functional:
         record.update(private_functional_checkout=str(package),not_for_distribution=True,
-                      launcher=str(package/'launcher.exe'),no_gameplay_acceptance=True)
+                      launcher=str(game/'SFCRemix-Launch.cmd'),native_launcher=str(package/'launcher.exe'),
+                      no_gameplay_acceptance=True)
         (game/'PRIVATE-CHECKOUT-NOT-FOR-DISTRIBUTION.txt').write_text('Private functional checkout of uncommitted source. No game assets belong in a release ZIP. Vendor notice/packaging review and sponsor gameplay acceptance remain open. Do not distribute this directory.\n')
     (fixture/'result.json').write_text(json.dumps(record,indent=2))
     print(fixture);print(json.dumps(record,indent=2))

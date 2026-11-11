@@ -23,13 +23,13 @@ class MultiSceneResourceTests(unittest.TestCase):
         with self.assertRaises(ValueError):require_capacity(11,inventory=AGGREGATE_BYTES-EVIDENCE_RESERVE-10,free=EVIDENCE_RESERVE+10)
 
     def test_all_multiship_callers_remove_scene_cap_not_legacy_guards(self):
-        source=(ROOT/'tools/remix_runtime/run_return_game.py').read_text()
-        self.assertIn('if not args.multi_ship and images>128*1024*1024',source)
+        source=(ROOT/'tools/session_diagnostics/modes.py').read_text()
+        self.assertIn('if not self.args.multi_ship and self.images > 128 * 1024 * 1024',source)
         source=(ROOT/'tools/remix_runtime/run_return_fixture.py').read_text()
         self.assertIn('if not args.multi_ship and images>128*1024*1024',source)
-        source=(ROOT/'tools/remix_runtime/live_owner_timing.py').read_text()
+        source=(ROOT/'src/rendering/live_owner_timing.py').read_text()
         self.assertIn('scratch_limit=AGGREGATE_BYTES if self.multi_scene',source)
-        source=(ROOT/'tools/remix_runtime/multi_scene_relay.py').read_text()
+        source=(ROOT/'src/rendering/multi_scene_relay.py').read_text()
         self.assertNotIn('self.image_bytes+estimate>128',source)
         self.assertNotIn('len(self.original_images|original.keys())>256',source)
 
@@ -45,7 +45,7 @@ class MultiSceneResourceTests(unittest.TestCase):
         self.assertEqual(before['corners'],after['corners'])
 
     def test_gameplay_worker_excludes_inherited_fixture_switches(self):
-        source=(ROOT/'tools/remix_runtime/live_owner_timing.py').read_text()
+        source=(ROOT/'src/rendering/live_owner_timing.py').read_text()
         self.assertIn('if not self.offline_fixture:',source)
         for key in ('SFC_DIRECT64_BACKBUFFER_DIAGNOSTIC','SFC_D3D9_REBIND_FIXTURE','SFC_D3D9_FIXTURE_ROWS','SFC_SYNC_FIXTURE_SHORT_LEAD'):
             self.assertIn(key,source)

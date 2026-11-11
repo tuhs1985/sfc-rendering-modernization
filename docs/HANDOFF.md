@@ -4,6 +4,308 @@ Sponsor-facing current work and parked items: [status tracker](STATUS.md).
 Diagnostic tools, triggers, limits and known pitfalls: [diagnostic reference](DIAGNOSTICS.md).
 The tracker is a sponsor-facing summary; the newest authoritative checkpoint below controls technical work.
 
+## Current checkpoint — November 10 scene transport and renderer checkout complete
+
+Parent `48b3766` is the accepted asset-preparation commit. The main source
+reorganization is complete. `src/transport` owns scene
+receipt, shared data, catalog acknowledgements, payload leases and shutdown.
+`src/assets` owns content identity. `src/rendering` owns renderer startup, backend
+verification and process orchestration. Development calibration, renderer
+reports and runtime acquisition stay in tools. Legacy developer imports still
+work. The private package ships 62 project Python modules.
+
+The shared-memory checkout rejected the wrong owner, acknowledged a valid
+scene and held exact geometry and texture data until catalog acknowledgement.
+Shutdown joined the worker and closed both mappings. 764 regressions and
+600-frame Strict and ExtraFrame standalone GPU fixtures passed, including
+three owners with zero pixel mismatches. The runtime pin, native binaries,
+appearance settings and timing policies carry forward.
+Installed GPU output matched on all three planes. Cancellation before first
+output and ordinary fixture teardown both left zero owned processes.
+
+The sponsor reports the private gameplay checkout complete and requests the
+commit. No detailed scenario results or timings were reported. The accepted
+game copies are preserved. The visible startup-stage investigation and
+external tester graphics preparation remain parked.
+
+See the [implementation, evidence and checkout command](runs/2026-11-10-codex-transport-renderer-separation.md).
+
+## Current checkpoint — November 10 asset preparation separated; ownership reviewed
+
+Parent `7ae2c35` is the accepted runtime-support commit. New
+`separate-asset-preparation` work has completed sponsor checkout and is authorized for commit. Nine
+preparation helpers move to `src/assets`; neutral mesh decoding is extracted
+there as a tenth module. Capture review, old preview classes, break observation
+analysis, streaming experiments and test-only source/upload comparisons move to
+`tools/asset_diagnostics`. Legacy developer imports remain supported. Normal
+installed play never imports review tools; production is 61 Python modules.
+No native source, appearance, task scheduling, cache rules or timing policy changes.
+
+764 regressions plus four existing review tests pass. 45 function/class ASTs are
+unchanged; three adaptations delegate review or import the relocated decoder.
+Native workers, 600-frame Strict/ExtraFrame GPU fixtures, original/moved/final
+package preflight, installed import guard/receiver lifecycle, actual CPU captured
+F-CA base/enhanced preparation and profiling-off GPU output/cancellation pass.
+Zero owned processes remain; fixed renderer hash and settings unchanged.
+Standalone 3.422s readiness is not gameplay or startup-optimization evidence.
+
+**Sponsor checkout complete:** sponsor reports completion in the separate
+`artifacts/alpha/asset-preparation-game` copy and requests the commit. Specific
+gameplay scenarios and measured timings were not reported. Previous accepted
+copies remain untouched.
+Startup-stage investigation and tester preparation remain parked.
+
+Renderer/transfer ownership review is complete: normal Relay orchestration is
+still mixed with historical timing/fixture helpers, and required IPC receiver and
+input-payload lifetime must not be discarded as diagnostics. Smallest next move:
+functional scene receipt/input transport out of calibration/review tools, then
+normal renderer/backend orchestration, with paired contracts/teardown preserved.
+No renderer/transfer relocation or redesign in this increment. No SFC launch,
+push or release by Codex. One optional source CLI preflight was rejected
+as a possible game launch; no execution or bypass, package checks completed.
+
+See [implementation and command](runs/2026-11-10-codex-asset-preparation-separation.md)
+and [ownership audit](reconnaissance/2026-11-10-renderer-transfer-ownership.md).
+
+## Current checkpoint — November 10 shared runtime support separated
+
+Parent `09bbeea` records sponsor-accepted diagnostic separation. The next change,
+`separate-runtime-support`, is gameplay-accepted and authorized for commit. Six helpers
+now live in `src/runtime`: context, manifest, process inventory, runtime files,
+protected preferences and session recovery. Five bodies are unchanged; recovery
+uses the existing application atomic-copy helper instead of the excluded
+broad-capture module. Bootstrap/coordinator and installed paths updated; legacy
+developer imports/CLI remain compatible. Production stays at 60 Python modules.
+No rendering, material, timing, appearance or native source changes.
+
+761 regressions, actual file rollback/recovery, early-exit/immediate-relaunch
+fixture, isolated import identity/exclusion, native light workers, 600-frame
+Strict/ExtraFrame GPU fixtures, normal/diagnostic preflights and new package
+original/moved/final-path checks pass. Installed actual native restore after a
+simulated interruption restores protected files/removes working data; two
+immediate preflights pass. Installed CPU materials and profiling-off GPU
+output/cancellation pass with zero owned processes remaining. Standalone 3.141s
+readiness is not gameplay latency. Fixed renderer hash and settings unchanged.
+
+**Sponsor gameplay checkout accepted November 10:** reports it looks good in
+`artifacts/alpha/runtime-support-game`. Notes a visible startup sequence: original
+ship, base replacement, then enhanced materials; all appear within roughly three
+seconds by observation. Treat this as approximate visual timing, not instrumented
+latency or a regression attribution. No new loader change authorized by this
+observation. Sponsor explicitly requests a parked follow-up to determine why the
+stages remain visibly separated: correlate existing asset readiness, first
+replacement presentation and enhancement publication/consumption before changing
+the pipeline. This is separate from the historical first-launch Defender stall.
+Specific early-exit/relaunch gameplay coverage was not reported;
+existing automated fixture/preflight results remain separate evidence.
+
+Sponsor requests committing this accepted increment. No push requested.
+Previous accepted checkouts and game copies remain untouched. Tester preparation
+stays parked; historical diagnostic receipts retain their qualification status.
+
+See [ownership, evidence and exact command](runs/2026-11-10-codex-runtime-support-separation.md).
+
+## Current checkpoint — November 9 diagnostic modes separated
+
+Committed the prior accepted checkpoint as `4a0ce1e` on sponsor request, then
+implemented `separate-session-diagnostics`. Sponsor now reports this checkout
+passes and requests its commit. No push or merge authorized. Normal native play now uses a narrow `src/session/coordinator`
+path. Optional capture/test/tuning mode selection, timed cues and analysis live
+in `tools/session_diagnostics/modes.py`; existing developer commands dispatch
+there. Verified startup, fallback, proxy restoration and map/process cleanup
+remain shared application methods. Extracted functional graphics transaction and
+component qualification helpers; installed list is 60 modules, excludes broad
+capture and diagnostic orchestration.
+
+758 regressions pass, including actual temporary-file rollback on normal exit
+and failure, mode configuration, probe entry points and forbidden-import checks.
+Actual native-light worker and 600-frame Strict/ExtraFrame multi-owner GPU
+fixtures pass; source qualification renewed through existing procedures. Normal
+and completion/light diagnostic read-only preflights pass. New private package
+passes original/moved/final-path preflight, guarded installed imports and actual
+receiver creation/closure, CPU captured F-CA asset/material/light preparation,
+profiling-off GPU colour/depth/owner transfer and pre-output cancellation, with
+no owned processes remaining. Standalone startup readiness 3.219s is not
+first-ship gameplay timing. Renderer binary matches the accepted fixed alpha.
+
+Separate playable checkout: `artifacts/alpha/diagnostic-split-game`, root
+`SFCRemix-Launch.cmd`, recording off, current appearance retained. Accepted game,
+original alpha, developer game and prior sponsor-qualified organized checkout
+remain unchanged. **Sponsor accepts this new checkout as passing.** This is
+gameplay acceptance, not a new instrumented timing or cleanup measurement.
+Commit this increment, then continue scoped repository organization when directed.
+Tester graphics preparation remains parked; other historical diagnostic receipts
+are not blanket renewed.
+
+See [implementation, ownership and exact launch command](runs/2026-11-09-codex-session-diagnostic-separation.md).
+
+## Current direction — finish organization; tester preparation parked
+
+**Gameplay qualification accepted November 9:** sponsor ran the organized
+checkout for approximately six minutes, reports stable play with correct damage,
+ship destruction and lighting, and accepts the qualification. The first two
+source separations now have both offline/package checks and sponsor gameplay
+regression acceptance. See the [updated run record](runs/2026-11-09-codex-organized-playable-checkout.md).
+No new instrumented performance/cleanup claim or repeat run is required.
+
+Sponsor explicitly deferred the tester graphics-baseline/preparation fix until
+repository organization is finished. Recorded in the existing Obsidian Parking
+Lot under "Portable tester graphics preparation", with evidence, reopening
+condition and first action. Keep the audit below as evidence; do not start the
+preparation implementation or change runtime checks as part of organization.
+
+## Parked finding — tester graphics baseline, November 9
+
+Tester reports matching executable but rejected custom working graphics stack.
+Read-only audit confirms exact dgVoodoo x86 2.86.5 DDraw/D3DImm and baseline
+ReShade32 6.7.1.2133 pins. The supplied runtime uses a different full-add-on
+ReShade 6.7.1.2131 file during its transaction. Config checks are broader than
+essential compatibility: ReShade.ini is exact bytes and contains a developer
+cache path/overlay layout; changing only cache or FPS display is rejected.
+SFC/dgVoodoo allow PlayerName and paired supported dimensions only; other bytes
+including unrelated preferences/comments remain protected. Eight disposable
+real-validator checks confirm behavior; originals unchanged, no game launched.
+
+See [graphics baseline audit](releases/GRAPHICS_BASELINE_AUDIT.md) for exact DLL
+hashes, actual exceptions, meaningful D3D11/8xMSAA/D32 constraints and missing
+setup/dependency closure. No tester-facing profile-preparation command exists;
+the development copy script is not portable. Referenced ReShade preset/shaders
+also are not checked by this gate. The tester's actual files were not inspected.
+No runtime checks modified or profile compatibility newly claimed. This is a
+packaging/preparation gap to resolve before general external setup; don't advise
+hash bypasses or sending unsanitized developer configs.
+
+## Current playable checkpoint — November 9 organized checkout ready
+
+Sponsor requested commit and continuation. Session separation committed as
+`0df894b` on `codex/organize-repository-foundation`; no push or merge. Restored
+normal developer qualification through actual existing tests, not hash bypass:
+rebuilt candidate host matches accepted fixed alpha SHA `1bf0045d...16b` exactly;
+600-frame Strict and ExtraFrame native cohort fixtures with lights/damage and
+light-worker tests pass. Renewed receipts validate 662/35 inputs without mismatch.
+Normal read-only developer preflight now passes. Other diagnostic receipts retain
+their own stale/current status; no blanket renewal.
+
+Prepared an actual private playable game/package at
+`artifacts/alpha/organized-game`, with root `SFCRemix-Launch.cmd`. It uses committed
+new source layout, matching launcher, 59 Python modules/3,848 immutable files and
+unchanged current appearance. Existing alpha and accepted game are untouched.
+Original/moved/final-path package and coordinator preflights, installed CPU asset
+preparation, profiling-off actual GPU output/cancellation and 21 release tests
+pass. Standalone initialization readiness was 3.046s, not first-ship timing.
+No game launched by Codex during preparation. Sponsor has since accepted the
+six-minute gameplay checkout as recorded above.
+
+See [record and launch command](runs/2026-11-09-codex-organized-playable-checkout.md).
+Next: continue the bounded repository-organization work from this accepted
+source/package baseline; the sponsor gameplay checkout is complete.
+Recording is off by default. New stager/records/OpenSpec work remains unstaged;
+no new push/commit/archive/publication. Public vendor/clean-machine gates remain.
+
+## Previous checkpoint — November 9 session coordinator separation
+
+Sponsor requested commit and continuation. Launcher/release separation committed
+as `8e69c93` on `codex/organize-repository-foundation`; no push or merge. The next
+increment is implemented but unstaged: session coordinator, exit handling and
+report state now live in `src/session`. The installed bootstrap imports those
+modules directly; old development command/import paths retain thin aliases to the
+same canonical modules. Production remains 59 Python files; aliases are excluded.
+Diagnostic branches are preserved inside the coordinator, not yet extracted.
+
+All 752 regressions pass. Direct/legacy isolated CLI, shared state, unchanged
+function/class ASTs and fresh installed preflight (original/moved Unicode path
+plus coordinator) pass. No SFC/GPU launch or gameplay validation. Current private
+alpha, settings, native binaries and external folders untouched. See the
+[run record](runs/2026-11-09-codex-session-coordinator-separation.md) and
+[task list](../openspec/changes/separate-session-coordinator/tasks.md).
+
+Important existing limitation: before this move the developer normal preflight
+already rejected `live_light_binding.py` against an old native-cohort source
+receipt. New wrapper/source paths also change qualification inputs. No receipt
+was renewed or verification weakened. The unchanged installed alpha is separate;
+source-package preflight passes under its new manifest. No playable package was
+assembled and no hands-on game command is ready for this new source layout.
+
+Next: review this bounded source increment, resolve development source receipts
+through established qualification, then assemble a matching playable package for
+sponsor validation. Keep diagnostic extraction and remaining shared-runtime
+source moves separately scoped. New work remains uncommitted; attachments and
+memory audit excluded. Nothing pushed/merged/archived/published.
+
+## Previous checkpoint — November 9 launcher/release separation
+
+On `codex/organize-repository-foundation`, parent `f12b6fd`, sponsor authorized
+planning and carrying out the first physical separation. Five portable-launcher
+inputs now live in `src/launcher`; `tools/release` retains development-only
+build/packaging/qualification inputs. New installed layout is
+`code/src/launcher`, paired with the rebuilt native launcher. Build, bootstrap
+imports, production inventory, manifest role, staging and ZIP consumers agree.
+See the [run record](runs/2026-11-09-codex-release-tooling-separation.md) and
+[tracked change](../openspec/changes/separate-release-tooling/tasks.md).
+
+Strict launcher build, all 749 regressions and actual installed preflight pass.
+The fresh reduced package passes at a space/Unicode path, after moving, and
+through prepared coordinator read-only preflight. No SFC/GPU run was started or
+new gameplay claim made. Renderer behavior is unchanged. Existing private alpha,
+appearance and external folders remain untouched; don't install the new launcher
+alone into its old layout. The exact Python payload remains 59 modules, none in
+`code/tools/release`. Changes remain unstaged/uncommitted; unrelated attachments
+and memory audit preserved. No merge/push/archive/publication.
+
+Next: review this bounded migration, then select the next production component
+separately. Future package builds must pair the new launcher and layout, generate
+a new manifest and retain existing release qualification gates.
+
+## Previous checkpoint — November 9 repository foundation
+
+Work branch: `codex/organize-repository-foundation`, created with sponsor
+authorization at pushed checkpoint `fe17b8d`. A live remote check confirmed
+GitHub `master` at the same commit before branching. Runtime/package fixes are
+recorded in `35fda1b`; OpenSpec setup and the foundation plan are in `fe17b8d`.
+Unrelated local attachments and the memory audit remain untracked and untouched.
+
+Sponsor clarified that organization includes the SFC-related workspace outside
+Git. The map now inventories both test game copies, the old independent publishing
+clone, backups with pre-sanitization history, historical RemixJobs and standalone
+Toolkit downloads/rollback records. Those directories are not branches or linked
+worktrees. Future consolidation must preserve settings, recovery and provenance;
+none were changed or deleted. See the
+[workspace inventory](REPOSITORY_MAP.md#project-workspace-outside-this-repository).
+
+The documentation-only foundation now provides [contributor conventions](../CONTRIBUTING.md),
+[current file classification](REPOSITORY_MAP.md) and a
+[staged migration roadmap](REPOSITORY_MIGRATION.md), with entry links from README,
+AGENTS and the OpenSpec guide. Source locations, build inputs, package manifests,
+game files and settings are unchanged. No commits, pushes, merges or
+release actions were part of implementation. The sponsor subsequently reviewed
+the foundation and requested a local checkpoint only; no merge or push.
+Verification/completion is
+tracked in the [change tasks](../openspec/changes/organize-repository-foundation/tasks.md).
+
+Focused verification passes: 76 new/document-entry Markdown links, all 12 tracked
+root classifications, 784 source/build/test inputs unchanged, and 10 checked private
+package/settings/critical game inputs unchanged. Strict OpenSpec validation and
+`git diff --check` pass; HEAD/index content remains at the branch baseline.
+Local check receipt: `artifacts/repository-foundation/verification.json`.
+No game/renderer process was started and no runtime regression campaign was
+repeated. All 14 tasks are complete; the foundation was reviewed and checkpointing
+requested. Source relocation remains a separate change; archival is not performed.
+
+Current runtime baseline: sponsor confirmed enhancements work after the
+profiling-independent startup correction. Its 749-regression and standalone GPU
+results are prior evidence, not new tests of this documentation change. Public
+release readiness still needs vendor/VC++ dependency closure, clean/second-machine
+checkout and exact candidate approval. No public alpha ZIP/tag was published.
+
+Next separately scoped implementation: review the foundation, then prepare
+`separate-release-tooling` around the portable entry point's build/runtime split.
+Use the roadmap's consumer/build/manifest checks before proposing source moves;
+do not move the entire `tools/` tree or restart a rendering investigation merely
+to reorganize files. The older sections below retain dated findings and may use
+words such as "latest" or "pending" relative to their historical run.
+
+## Historical checkpoints — superseded by the current section above
+
 **SFC-23 resolved locally and parked, November 6, 2026.** The post-reboot trace
 attributed 19.11 seconds of startup waits to Defender, including a corroborated
 file-filter wait during mission-script access. After the sponsor excluded only
@@ -50,7 +352,7 @@ normal-exit confirmation; client/settings checks passed and no owned helpers
 remained at review. Next implement dedicated break-origin conversion and
 independent piece lifetime/submission. The initial geometry blocker is resolved.
 
-## NEWEST / AUTHORITATIVE CHECKPOINT — November 9 private-alpha cleanup
+## Historical checkpoint — November 9 private-alpha cleanup
 
 **Latest / OpenSpec installed:** official checksum-verified standalone CLI1.16.1,
 core Codex profile with six repository-local skills under `.agents/skills/`.

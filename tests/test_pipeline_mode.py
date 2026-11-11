@@ -20,7 +20,7 @@ class PipelineModeTests(TestCase):
         with self.assertRaises(ValueError):validate('unsafe')
 
     def test_inventory_scanned_once_before_workers(self):
-        with mock.patch('run_offline.storage',return_value=0) as inventory:
+        with mock.patch('evidence_storage.storage',return_value=0) as inventory:
             ledger=Reservations()
             for _ in range(5):
                 with ledger.asset():pass

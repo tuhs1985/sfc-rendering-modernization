@@ -25,6 +25,7 @@ def locks():
     paths += [ROOT/'tools/remix_runtime'/name for name in ('return_wire.h','return_channel.py','run_return_game.py','broad_capture.py')]
     paths += [ROOT/'docs/reconnaissance/evidence/20261103-damage-texture-path.json']
     paths += [ROOT/'artifacts/remix-runtime/deps/detours/Detours-e4bfd6b03e50de46b47abfbd1e46b384f0c5f833'/name for name in ('include/detours.h','lib.X86/detours.lib')]
+    paths += list((ROOT/'src/session').glob('*.py'))
     return {p.relative_to(ROOT).as_posix():digest(p) for p in paths}
 
 def observe(fixture=False):

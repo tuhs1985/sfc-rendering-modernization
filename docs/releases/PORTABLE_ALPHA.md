@@ -29,8 +29,46 @@ D3D12, new assets and appearance tuning remain outside this increment.
 
 ## Implemented so far
 
+- Asset preparation now has application ownership in `src/assets`. Capture review,
+  offline comparisons and streaming experiments remain developer-only. Production
+  is **61 Python modules**, including a neutral decoder extracted from transport.
+  Rendering, settings, cache/scheduling and publication order are unchanged.
+  [New private checkout and qualification](../runs/2026-11-10-codex-asset-preparation-separation.md)
+  passed package checks and completed sponsor checkout. Renderer/transfer
+  ownership is reviewed but not relocated in this increment.
+
+- Shared runtime support now resides in `src/runtime`: paths, integrity/profile
+  checks, process inventory, protected preferences, file helpers and interrupted
+  recovery. Installed modules use that application location; developer forwarders
+  are excluded. Production remains 60 Python modules. Actual native restore and
+  package checks pass; [new gameplay checkout](../runs/2026-11-10-codex-runtime-support-separation.md)
+  is accepted by the sponsor, with perceptible startup stages noted. No
+  graphics/timing behavior changed.
+
+- Normal native play now has a narrow application coordinator; optional captures,
+  timed tests and tuning orchestration live in development-only
+  `tools/session_diagnostics`. Startup, fallback, graphics transactions and
+  cleanup remain shared application behavior. The current allowlist is **60**
+  Python modules: the broad-capture analyzer is removed and two functional app
+  helpers replace its required transaction/qualification dependencies. See the
+  [boundary and new private checkout](../runs/2026-11-09-codex-session-diagnostic-separation.md).
+  Sponsor accepts the new refactor checkout as passing. The previous organized
+  build also passed an approximately six-minute sponsor checkout.
+
+- New source packages also install the canonical coordinator, exit monitor and
+  report module under `code/src/session`. The bootstrap imports them directly;
+  the three compatibility tools retained in the development tree are not shipped.
+  Existing alpha checkout remains unchanged. This is a source/package-path
+  qualification, not a newly assembled playable package or gameplay acceptance.
+
+- The portable entry point now lives in `src/launcher`; new packages install its
+  Python files under `code/src/launcher`. `tools/release` contains only build,
+  packaging and qualification inputs. Native launcher and package layout must
+  update together. The existing private alpha checkout is unchanged by this
+  relocation; see the [boundary qualification](../runs/2026-11-09-codex-release-tooling-separation.md).
+
 - Production code now uses `tools/release/runtime_modules.json`, an explicit
-  59-module allowlist. Development tools stay in the source tree but are absent
+  allowlist (originally 59 modules; current count above). Development tools stay in the source tree but are absent
   from the alpha; the diagnostic placement/model profiles and old texture-hash
   executable are no longer required. See the
   [separation record](../runs/2026-11-09-codex-production-module-separation.md) for
@@ -202,6 +240,12 @@ numbers document future work only; these exclude native SFC and internal Remix
 memory. No queue, asset or image budget increase has been enabled.
 
 ## Dependency review still open
+
+The November 9 [external-tester graphics baseline audit](GRAPHICS_BASELINE_AUDIT.md)
+confirms that a matching EXE alone is insufficient: pre-existing wrapper DLLs and
+broad config signatures are required. The ReShade signature includes developer
+cache/UI state, and no portable tester-preparation command is supplied yet.
+Resolve this setup gap before treating arbitrary supported-EXE copies as ready.
 
 | Component | Identified source / pin | Remaining closure |
 | --- | --- | --- |

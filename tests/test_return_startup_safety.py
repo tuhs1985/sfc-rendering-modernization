@@ -7,7 +7,7 @@ from unittest import mock
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools/remix_runtime'))
 import run_return_game as runner
 import recover_broad_session as recovery
-import broad_capture as broad
+import graphics_transaction as broad
 import windows_processes
 
 from runtime_context import development,packaged

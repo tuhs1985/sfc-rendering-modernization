@@ -6,7 +6,7 @@ from unittest.mock import patch
 import unittest
 
 ROOT=Path(__file__).resolve().parents[1]
-sys.path[:0]=[str(ROOT/'tools/release'),str(ROOT/'tools/remix_runtime')]
+sys.path[:0]=[str(ROOT/'src/launcher'),str(ROOT/'tools/release'),str(ROOT/'tools/remix_runtime')]
 from package_layout import copy_python,copy_remix,excluded,ARM_RUNTIME
 from runtime_context import packaged
 from bootstrap import prepare

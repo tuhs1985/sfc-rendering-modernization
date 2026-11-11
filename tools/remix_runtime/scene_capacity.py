@@ -1,12 +1,15 @@
-"""Byte-budgeted protocol4 transport layout; mirrored by scene_capacity.h."""
-STATE_BYTES=128*1024
-STATE_STRIDE=512
-CATALOG_BYTES=128*1024
-CATALOG_STRIDE=128
-OWNERS=STATE_BYTES//STATE_STRIDE
-ASSETS=CATALOG_BYTES//CATALOG_STRIDE
-STATE_OFFSET=8*1024*1024+65536
-COHORT_OFFSET=8*1024*1024+256*1024
-SCENE_OFFSET=9*1024*1024
-VERSION=4
-REPLACEMENT_OFFSET=12*1024*1024-64*1024
+"""Compatibility import for application transport code."""
+import importlib.util
+from pathlib import Path
+import sys
+
+root = Path(__file__).resolve().parents[2]
+for area in ('runtime', 'assets', 'transport'):
+    directory = str(root / 'src' / area)
+    if directory not in sys.path:
+        sys.path.insert(0, directory)
+spec = importlib.util.spec_from_file_location(__name__, root / 'src/transport/scene_capacity.py')
+module = importlib.util.module_from_spec(spec)
+sys.modules[__name__] = module
+spec.loader.exec_module(module)
+globals().update(module.__dict__)

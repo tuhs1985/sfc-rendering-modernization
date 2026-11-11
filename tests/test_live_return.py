@@ -89,7 +89,7 @@ class LiveReturnTests(unittest.TestCase):
             name='Local\\SFCBridge_'+'a'*32
             def asset_transfer(self,slot):return None
             def sample_owner(self,index):return None
-        with tempfile.TemporaryDirectory() as folder,mock.patch('present_calibration.SceneChannel',return_value=Empty()):
+        with tempfile.TemporaryDirectory() as folder,mock.patch('scene_receiver.SceneChannel',return_value=Empty()):
             receiver=live.FreshReceiver(folder);receiver.context('return',55);receiver.drain()
             self.assertIsNone(receiver.selected);self.assertFalse((Path(folder)/'live-asset.seed').exists())
 

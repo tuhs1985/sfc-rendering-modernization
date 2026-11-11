@@ -1,22 +1,15 @@
-"""One bounded owner of receiver drain/light/rebind work; never runs in SFC."""
-import threading
+"""Compatibility import for application transport code."""
+import importlib.util
+from pathlib import Path
+import sys
 
-
-class Service:
-    def __init__(self,step):
-        self.stop_event=threading.Event();self.error=None;self.steps=0
-        def run():
-            try:
-                while not self.stop_event.is_set():
-                    step();self.steps+=1
-                    if self.stop_event.wait(.002):break
-            except Exception as exc:self.error=exc
-        self.thread=threading.Thread(target=run,name='SFC-recovery',daemon=False)
-        self.thread.start()
-
-    def check(self):
-        if self.error:raise RuntimeError('Recovery service: '+str(self.error))
-
-    def close(self):
-        self.stop_event.set();self.thread.join(timeout=5)
-        if self.thread.is_alive():raise RuntimeError('Recovery service did not join;do not release mapping')
+root = Path(__file__).resolve().parents[2]
+for area in ('runtime', 'assets', 'transport'):
+    directory = str(root / 'src' / area)
+    if directory not in sys.path:
+        sys.path.insert(0, directory)
+spec = importlib.util.spec_from_file_location(__name__, root / 'src/transport/recovery_service.py')
+module = importlib.util.module_from_spec(spec)
+sys.modules[__name__] = module
+spec.loader.exec_module(module)
+globals().update(module.__dict__)

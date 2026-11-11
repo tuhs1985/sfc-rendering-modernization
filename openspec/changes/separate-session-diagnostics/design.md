@@ -1,0 +1,9 @@
+# Design
+
+Normal play is the qualified native multi-ship/performance/untimed path. Its functional dependencies include source identity, receiver/renderer setup, fresh assets, lights, damage/debris, native insertion, recovery and bounded working-file finalization. Diagnostic-only dependencies include broad-event analysis, depth search/snapshots, image readers, external offscreen readers, historical offset/SDK modes and guided timed observation.
+
+Split the supervisor into explicit lifecycle phases. Application Session owns shared verified process launch, device readiness, controller lifetime, worker stop, graphics restoration, mapping closure and protected-file checks. A development DiagnosticSession overrides mode-specific preparation, observation and analysis, inheriting those common lifecycle operations. Normal CLI accepts only normal native-play options; legacy tool entry dispatches explicit diagnostics to the development runner without importing it for normal CLI play. Avoid an alternate copy of shared cleanup or runtime-generated code.
+
+Use an application graphics-transaction helper for proxy integrity, backup, atomic switch and restoration. Broad-capture inspection remains in development and reuses those operations. Preserve source data, GPU ownership and current synchronization; no per-frame disk inventory is added to normal play. Mixed existing IPC/runtime modules remain shared; this increment does not claim that all dormant analysis functions in every dependency have been removed.
+
+Verify existing CLI rejection behavior, shared lifecycle and module state, normal startup/exit/error cleanup with deterministic process doubles, real installed import exclusion, current native/transport regressions and affected GPU/package boundaries. Keep human gameplay acceptance separate; do not present an unchanged old checkout as testing the new coordinator. Changes after the requested checkpoint remain uncommitted.

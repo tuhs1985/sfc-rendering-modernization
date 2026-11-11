@@ -7,6 +7,7 @@ from unittest.mock import Mock,patch
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'tools/remix_runtime'))
 import present_calibration as pc
+import scene_receiver
 
 class CalibrationTests(unittest.TestCase):
     def test_actual_ninth_transfer_ack_and_owner_above_hundred(self):
@@ -27,11 +28,11 @@ class CalibrationTests(unittest.TestCase):
 
     def test_transport_receiver_accepts_ninth_and_large_fleet_revisions(self):
         channel=Mock();channel.asset_transfer.return_value=None
-        with patch.object(pc,'SceneChannel',return_value=channel):receiver=pc.Receiver()
+        with patch.object(scene_receiver,'SceneChannel',return_value=channel):receiver=pc.Receiver()
         for revision in (*range(1,161),pc.ASSETS):
             channel.asset_transfer.side_effect=lambda slot,r=revision: (r,r,r,b'mesh'+str(r).encode(),b'refs') if slot==0 else None
             header=[0]*5;header[4]=revision
-            with patch.object(pc,'decode_mesh',return_value={'header':header}):receiver.drain()
+            with patch.object(scene_receiver,'decode_mesh',return_value={'header':header}):receiver.drain()
             channel.acknowledge.assert_called_with(0,revision)
         self.assertEqual(len(receiver.revisions),161)
         channel.asset_transfer.side_effect=lambda slot:(1,pc.ASSETS+1,1,b'mesh',b'refs') if slot==0 else None
@@ -40,9 +41,9 @@ class CalibrationTests(unittest.TestCase):
 
     def test_multiscene_receiver_keeps_identities_without_duplicate_decoded_assets(self):
         channel=Mock();channel.asset_transfer.side_effect=lambda slot:(1,9,1,b'mesh',b'refs') if slot==0 else None
-        with patch.object(pc,'SceneChannel',return_value=channel):receiver=pc.Receiver()
+        with patch.object(scene_receiver,'SceneChannel',return_value=channel):receiver=pc.Receiver()
         receiver.retain_assets=False
-        with patch.object(pc,'decode_mesh',return_value={'header':[0,0,0,0,1]}):receiver.drain()
+        with patch.object(scene_receiver,'decode_mesh',return_value={'header':[0,0,0,0,1]}):receiver.drain()
         self.assertIn(9,receiver.revisions);self.assertEqual(receiver.assets,{})
         channel.acknowledge.assert_called_once_with(0,1)
 

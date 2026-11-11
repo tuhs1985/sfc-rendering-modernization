@@ -26,7 +26,7 @@ class Reservations:
         if inventory is None:
             if release_play():inventory=0
             else:
-                from run_offline import storage
+                from evidence_storage import storage
                 inventory=storage()
         require_capacity(0,inventory=inventory)
         self.lock=threading.Lock();self.bytes=0;self.inventory=inventory;self.committed=0
@@ -58,7 +58,7 @@ def require_capacity(additional=0,*,inventory=None,free=None):
     if inventory is None:
         if release_play():inventory=0
         else:
-            from run_offline import storage
+            from evidence_storage import storage
             inventory=storage()
     if free is None:free=shutil.disk_usage(CONTEXT.data_root if CONTEXT.release else ROOT).free
     if not release_play() and inventory+additional+EVIDENCE_RESERVE>AGGREGATE_BYTES:

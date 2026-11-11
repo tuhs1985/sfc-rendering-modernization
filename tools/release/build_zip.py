@@ -37,7 +37,7 @@ def validate_recipe(recipe,source_root):
         name=relative_name(item['target']).as_posix()
         path=Path(name)
         if excluded(name):raise ValueError('Development or wrong-architecture payload: '+name)
-        if name.casefold().startswith('code/tools/') and name not in production_targets:
+        if name.casefold().startswith('code/') and name not in production_targets:
             raise ValueError('Non-production application module: '+name)
         if (path.parts[0].casefold() in FORBIDDEN_PARTS or
                 (item.get('kind')!='vendor' and (any(p.casefold() in FORBIDDEN_PARTS for p in path.parts) or path.suffix.lower() in FORBIDDEN_SUFFIXES)) or
@@ -95,7 +95,7 @@ def build(recipe,source_root,output,*,check_commit=True):
                   files={name:dict(bytes=source.stat().st_size,sha256=item['sha256']) for item,source,name in items},
                   provenance={name:{k:item[k] for k in ('kind','upstream','notice') if k in item} for item,_,name in items})
     payload=json.dumps(manifest,indent=2,sort_keys=True).encode('utf-8')
-    launcher=ROOT/'tools/release/SFCRemix-Launch.cmd'
+    launcher=ROOT/'src/launcher/SFCRemix-Launch.cmd'
     output.parent.mkdir(parents=True,exist_ok=True)
     temporary=output.with_suffix('.zip.pending')
     if temporary.exists():raise ValueError('Interrupted candidate build exists; review it before retrying')

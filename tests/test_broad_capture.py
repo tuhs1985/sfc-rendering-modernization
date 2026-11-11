@@ -7,6 +7,7 @@ from unittest import mock
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools/remix_runtime'))
 import broad_capture as b
 import archive_broad_evidence as archive
+import graphics_transaction as graphics
 
 class BroadTests(unittest.TestCase):
     def trace(self,events,**values):
@@ -50,7 +51,7 @@ class BroadTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             root=Path(d);target=root/'dxgi.dll';full=root/'full.dll';backup=root/'rollback'
             target.write_bytes(b'original');full.write_bytes(b'full')
-            with mock.patch.multiple(b,FULL=full,FULL_SHA=b.digest(full),OLD_SHA=b.digest(target)):
+            with mock.patch.multiple(graphics,FULL=full,FULL_SHA=b.digest(full),OLD_SHA=b.digest(target)):
                 b.install_test_proxy(target,backup);self.assertEqual(target.read_bytes(),b'full')
                 b.restore_test_proxy(target,backup);self.assertEqual(target.read_bytes(),b'original')
                 target.write_bytes(b'independent')

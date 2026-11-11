@@ -75,11 +75,11 @@ class SceneBundleTests(unittest.TestCase):
 
     def test_neutral_module_has_no_backend_import(self):
         import ast
-        tree=ast.parse((ROOT/'tools/scene_bridge/scene_bundle.py').read_text())
+        tree=ast.parse((ROOT/'src/assets/scene_bundle.py').read_text())
         modules=[n.module or '' for n in ast.walk(tree) if isinstance(n,ast.ImportFrom)]
         self.assertFalse(any('remix_runtime' in n or 'pxr' in n for n in modules))
         # Existing captured-format validator is reused,not a renderer dependency.
-        self.assertIn('live_scene',modules)
+        self.assertIn('mesh_decode',modules)
 
     def test_prepare_keeps_capture_session_and_original_provenance(self):
         import numpy as np

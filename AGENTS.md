@@ -4,6 +4,7 @@ These instructions apply to the entire repository.
 
 ## Start here
 
+- Use [CONTRIBUTING.md](CONTRIBUTING.md) for Git/documentation conventions, [the repository map](docs/REPOSITORY_MAP.md) for current file ownership, and [the migration roadmap](docs/REPOSITORY_MIGRATION.md) for separately scoped future moves. Classification does not authorize relocation or deletion.
 - Read the newest checkpoint in [docs/HANDOFF.md](docs/HANDOFF.md) when resuming integration work or investigating a prior run. Use [docs/STATUS.md](docs/STATUS.md) for open and parked items and [docs/DIAGNOSTICS.md](docs/DIAGNOSTICS.md) for capture and troubleshooting procedures.
 - Check `git status --short` before editing. Preserve existing user changes and keep the patch focused on the request. Stage, commit, or push only when the user requests it.
 - Put changing run results, limitations, and next steps in the handoff or a linked run record. Keep standing project rules here.

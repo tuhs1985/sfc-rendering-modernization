@@ -1,5 +1,43 @@
 # Diagnostic tools reference
 
+## Asset preparation and review
+
+Normal geometry/image/material preparation and working caches live in
+`src/assets`. `tools/asset_diagnostics/asset_capture_review.py` owns explicit
+capture snapshot selection, old preview/capture consumers, break-capture analysis,
+material streaming experiments and test source/upload comparisons. Existing
+developer APIs request those functions lazily; normal installed play does not
+import or include the review module. The scene packet reader remains functional
+runtime code despite its historical `read_replay` name. See the
+[asset boundary and verification](runs/2026-11-10-codex-asset-preparation-separation.md).
+
+## Interrupted recovery ownership
+
+`src/runtime/session_recovery.py` owns application recovery. The legacy
+`tools/remix_runtime/recover_broad_session.py <run>` command remains a development
+forwarder; installed users use `launcher.exe --restore`. Both retain game-absence,
+provenance, hash and protected-file checks. Atomic copying comes directly from
+`src/session/graphics_transaction.py`; no broad-capture analyzer is required.
+See [actual installed interruption/restore evidence](runs/2026-11-10-codex-runtime-support-separation.md).
+
+## Session mode boundary
+
+Normal untimed native play runs `src/session/coordinator.py`. Optional broad/depth
+captures, source/owner tests, image/offscreen readers, historical SDK/offset
+experiments, timed instructions and tuning orchestration run
+`tools/session_diagnostics/modes.py`. Existing development PowerShell launchers
+and `tools/remix_runtime/run_return_game.py` commands keep their public arguments;
+the compatibility entry point dispatches the requested mode. It is not shipped.
+The installed `Troubleshoot.cmd` still opts into short reports only, not those
+development captures.
+
+Both runners use the application's verified launch, graphics transaction and
+worker/mapping teardown. Normal source/light timing IPC is functional input, not
+an instruction to enable detailed captures. Specialized diagnostic qualification
+receipts can still be stale and must be renewed through their existing procedures.
+See the [separation record](runs/2026-11-09-codex-session-diagnostic-separation.md)
+for current command/preflight, import exclusion, lifecycle and GPU evidence.
+
 ## Installed alpha reporting
 
 Default CMD/native-EXE play retains no run history. Required session working files
@@ -18,7 +56,7 @@ These tools never launch SFC and are not normal-play overhead.
 | Tool | Purpose / output | Important limit |
 | --- | --- | --- |
 | `tools/release/prepare_python.py` | Checksum-pinned upstream application-local Python/wheels | No Codex-runtime copy or machine-wide installation |
-| `tools/release/inventory_dependencies.py` | PE imports and99-module static Python superset | Includes inactive branches; not normal-play loaded-module proof |
+| `tools/release/inventory_dependencies.py` | PE imports and static Python dependency superset | Includes inactive branches; not normal-play loaded-module proof |
 | `tools/release/stage_preflight_fixture.py` | Private fixture; actual WinPS5.1/app-local-Python preflight, Unicode/spaces/move | Incomplete/not distributable; no gameplay or second-machine claim |
 | `tools/release/qualify_production_prewarm.py` | Real installed Remix startup, late ticket activation, bootstrap output/receiver comparison or pre-output cancellation, with profiling on/off | Standalone synthetic target/ticket; never launches SFC.45s owned job,128MiB scratch. Bootstrap is not an appearance/gameplay oracle. Not shipped in the alpha |
 | `tools/release/run_extent_probe.py --extent W H` | Candidate1.6.1 synthetic ray-traced output/x86 receiver | Current parser bounds; isolated24Present diagnostic toggle, not normal startup |

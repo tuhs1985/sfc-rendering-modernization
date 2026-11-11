@@ -32,10 +32,14 @@ def main():
     os.environ['SFC_RELEASE_ROOT']=str(package)
     for name in ('release','remix_runtime','d3d9_proof','scene_bridge','remix_ingest'):
         sys.path.insert(0,str(package/'code/tools'/name))
+    sys.path.insert(0,str(package/'code/src/runtime'))
+    sys.path.insert(0,str(package/'code/src/assets'))
+    sys.path.insert(0,str(package/'code/src/transport'))
+    sys.path.insert(0,str(package/'code/src/rendering'))
     from runtime_context import CONTEXT
     from release_manifest import load,verified_role
-    from present_calibration import Receiver
-    from async_material_checkout import configure_child,backend_inputs
+    from scene_receiver import Receiver
+    from renderer_backend import configure_child,backend_inputs
     # Test producer for the version1 native-target contract (output_target.h).
     NOTICE=struct.Struct('<8IQ4IQ');OFFSET=4352
     from owner_rebind import fnv

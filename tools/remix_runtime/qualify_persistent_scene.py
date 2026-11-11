@@ -17,6 +17,7 @@ SOURCES=('tools/scene_bridge/persistent_scene.h','tools/scene_bridge/simulation_
     'tools/remix_runtime/run_return_game.py','tools/remix_runtime/start_return_image_session.ps1',
     'tools/d3d9_proof/start_d3d9_persistent_scene_session.ps1','tests/m1_persistent_scene_tests.cpp',
     'tests/persistent_scene_tests.cpp','tests/test_simulation_pose.py','tools/remix_runtime/qualify_persistent_scene.py')
+SOURCES+=('src/session/coordinator.py','src/session/exit_monitor.py','src/session/reports.py')
 BINS=('artifacts/remix-runtime/native-light-tests/m1_light_component.dll','artifacts/d3d9-proof/direct64-bin/d3d9_direct_host.exe',
     'artifacts/remix-runtime/return-bin/SFCRemixReturn.dll','artifacts/d3d9-proof/persistent-tests/native_scene.exe')
 def hashes(names):return {n:hashlib.sha256((ROOT/n).read_bytes()).hexdigest() for n in names}

@@ -9,7 +9,7 @@ import io
 import unittest
 
 ROOT=Path(__file__).resolve().parents[1]
-sys.path[:0]=[str(ROOT/'tools/release'),str(ROOT/'tools/remix_runtime')]
+sys.path[:0]=[str(ROOT/'src/launcher'),str(ROOT/'tools/remix_runtime')]
 from runtime_context import packaged
 from session_recording import mark,finish,REPORT_COUNT,REPORT_BYTES
 import multi_scene_resources as resources
@@ -90,7 +90,7 @@ class RecordingTests(unittest.TestCase):
                      patch.object(bootstrap,'verify',return_value={}),patch.object(bootstrap,'verify_game_profile'),\
                      patch.object(bootstrap,'check_native_launcher'),\
                      patch.object(bootstrap,'prepare'),patch('windows_processes.game_running',return_value=False),\
-                     patch('recover_broad_session.recover_pending',return_value=None),patch('run_return_game.main',side_effect=play),\
+                     patch('recover_broad_session.recover_pending',return_value=None),patch('coordinator.main',side_effect=play),\
                      patch.dict(os.environ),patch.object(sys,'argv',['bootstrap',*(['--troubleshoot'] if mode=='minimal' else [])]),\
                      patch('sys.stdout',output):
                     bootstrap.main()

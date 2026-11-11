@@ -1,19 +1,11 @@
-"""Production paths and file helpers, independent of offline launchers."""
-import hashlib
-from runtime_context import CONTEXT
+"""Development compatibility; the implementation lives in application source."""
+from pathlib import Path
+import importlib.util
+import sys
 
-ROOT=CONTEXT.code_root
-BIN=CONTEXT.artifact('remix-runtime/return-bin')
-TEST=CONTEXT.game_root
-DLL=CONTEXT.artifact('remix-runtime/deps/remix-1.5.2/.trex/d3d9.dll') # Development modes only.
-ENV={'DXVK_LOG_LEVEL':'error','DXVK_GRAPHICS_PRESET_TYPE':'4','RTX_INTEGRATE_INDIRECT_MODE':'0',
-     'DXVK_UPSCALER_TYPE':'0','DXVK_RAY_RECONSTRUCTION':'False','RTX_DLSS_PRESET':'0','RTX_ENABLE_ASYNC_COMPILATION':'False'}
-
-
-def digest(path):
-    with open(path,'rb') as stream:return hashlib.file_digest(stream,'sha256').hexdigest().upper()
-
-
-def capture_file_bytes(path):
-    try:return path.stat().st_size if path.is_file() else 0
-    except FileNotFoundError:return 0 # Producer may atomically rename a packet.
+application=Path(__file__).resolve().parents[2]/'src/runtime'
+sys.path.insert(0,str(application))
+spec=importlib.util.spec_from_file_location(__name__,application/'runtime_files.py')
+module=importlib.util.module_from_spec(spec)
+sys.modules[__name__]=module
+spec.loader.exec_module(module)

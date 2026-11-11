@@ -13,6 +13,7 @@ def locks():
     paths += [BIN/n for n in ('return_launcher.exe','return_host.exe')]+[ROOT/'artifacts/m1/bin'/n for n in ('m1_gate.dll','m1_controller.exe')]
     detours=ROOT/'artifacts/remix-runtime/deps/detours/Detours-e4bfd6b03e50de46b47abfbd1e46b384f0c5f833'
     paths += [detours/'include/detours.h',detours/'lib.X86/detours.lib']
+    paths += list((ROOT/'src/session').glob('*.py'))
     return {p.relative_to(ROOT).as_posix():digest(p) for p in paths}
 def budget():
     sys.path.insert(0,str(ROOT/'tools/d3d9_proof'));from run_offline import storage

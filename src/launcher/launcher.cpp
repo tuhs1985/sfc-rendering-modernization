@@ -21,7 +21,7 @@ int wmain(int argc,wchar_t** argv){
   if(!count||count>=32768)throw std::runtime_error("Cannot locate launcher.");
   namespace fs=std::filesystem;const auto package=fs::path(self).parent_path();
   if(CompareStringOrdinal(package.filename().c_str(),-1,L"SFCRemix",-1,TRUE)!=CSTR_EQUAL)throw std::runtime_error("Extract the complete SFCRemix folder beside StarFleetOP.exe.");
-  const auto python=package/L"python/python.exe",entry=package/L"code/tools/release/bootstrap.py";
+  const auto python=package/L"python/python.exe",entry=package/L"code/src/launcher/bootstrap.py";
   if(!fs::is_regular_file(python)||!fs::is_regular_file(entry))throw std::runtime_error("Incomplete package. Extract the complete release again.");
   if(option!=L"--preflight"&&!IsUserAnAdmin()){
    SHELLEXECUTEINFOW elevated{};elevated.cbSize=sizeof(elevated);elevated.fMask=SEE_MASK_NOCLOSEPROCESS|SEE_MASK_NOASYNC|SEE_MASK_FLAG_NO_UI;
