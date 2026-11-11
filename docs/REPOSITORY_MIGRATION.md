@@ -65,11 +65,15 @@ renderer support islands are separate future work; no wholesale relocation.
 neutral mesh decoding into `src/assets`, separating explicit review/comparison
 tools and retaining existing behavior. Package/standalone checks pass; sponsor
 reports gameplay checkout complete and requests the commit. [Record](runs/2026-11-10-codex-asset-preparation-separation.md).
-The requested [renderer/transfer ownership review](reconnaissance/2026-11-10-renderer-transfer-ownership.md)
-is complete. Next scoped candidate is functional scene receipt/input transport,
-then normal renderer orchestration/backend selection, preserving native paired
-contracts and shared teardown. No renderer/transfer migration is authorized by
-the review alone.
+The [renderer/transfer ownership review](reconnaissance/2026-11-10-renderer-transfer-ownership.md)
+identified the two remaining application boundaries in the main reorganization.
+
+**Scene transport and renderer startup:** `separate-scene-transport-and-renderer`
+moves scene receipt, shared data and buffer ownership to `src/transport`, then
+renderer startup and backend selection to `src/rendering`. Detailed renderer
+reports remain developer tooling. The sponsor completed the private gameplay
+checkout for the source separation. See the
+[record](runs/2026-11-10-codex-transport-renderer-separation.md).
 
 **Original recommendation:** scope `separate-release-tooling` around the portable
 entry point and its build-time/runtime split. `tools/release/` has 20 tracked
@@ -79,10 +83,9 @@ at once. Exact source/destination paths and compatibility entry points belong in
 that change's design before moves begin; no wholesale new source layout is
 prescribed here.
 
-The runtime/shared protocols, observer/controller, D3D9 adapter/receiver and
-appearance/preparation modules are later candidates. Choose one by dependency
-ownership, not by how old its folder looks. Do not combine their relocation with
-new rendering behavior, D3D12 work, appearance tuning or vendor pruning.
+The native observer/controller, D3D9 adapter and output receiver retain their
+existing source and build locations. Further relocation, D3D12 work, appearance
+tuning and vendor pruning are outside the main source reorganization.
 
 ## Checklist for each later source migration
 

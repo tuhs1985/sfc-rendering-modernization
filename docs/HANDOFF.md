@@ -4,6 +4,32 @@ Sponsor-facing current work and parked items: [status tracker](STATUS.md).
 Diagnostic tools, triggers, limits and known pitfalls: [diagnostic reference](DIAGNOSTICS.md).
 The tracker is a sponsor-facing summary; the newest authoritative checkpoint below controls technical work.
 
+## Current checkpoint — November 10 scene transport and renderer checkout complete
+
+Parent `48b3766` is the accepted asset-preparation commit. The main source
+reorganization is complete. `src/transport` owns scene
+receipt, shared data, catalog acknowledgements, payload leases and shutdown.
+`src/assets` owns content identity. `src/rendering` owns renderer startup, backend
+verification and process orchestration. Development calibration, renderer
+reports and runtime acquisition stay in tools. Legacy developer imports still
+work. The private package ships 62 project Python modules.
+
+The shared-memory checkout rejected the wrong owner, acknowledged a valid
+scene and held exact geometry and texture data until catalog acknowledgement.
+Shutdown joined the worker and closed both mappings. 764 regressions and
+600-frame Strict and ExtraFrame standalone GPU fixtures passed, including
+three owners with zero pixel mismatches. The runtime pin, native binaries,
+appearance settings and timing policies carry forward.
+Installed GPU output matched on all three planes. Cancellation before first
+output and ordinary fixture teardown both left zero owned processes.
+
+The sponsor reports the private gameplay checkout complete and requests the
+commit. No detailed scenario results or timings were reported. The accepted
+game copies are preserved. The visible startup-stage investigation and
+external tester graphics preparation remain parked.
+
+See the [implementation, evidence and checkout command](runs/2026-11-10-codex-transport-renderer-separation.md).
+
 ## Current checkpoint — November 10 asset preparation separated; ownership reviewed
 
 Parent `7ae2c35` is the accepted runtime-support commit. New

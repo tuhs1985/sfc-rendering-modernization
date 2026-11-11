@@ -14,6 +14,8 @@ for directory in ('remix_runtime', 'd3d9_proof', 'scene_bridge', 'remix_ingest',
     sys.path.insert(0, str(CODE / 'tools' / directory))
 sys.path.insert(0,str(CODE/'src/runtime'))
 sys.path.insert(0,str(CODE/'src/assets'))
+sys.path.insert(0,str(CODE/'src/transport'))
+sys.path.insert(0,str(CODE/'src/rendering'))
 from runtime_context import CONTEXT
 from release_manifest import contained, verify, verify_game_profile, seed_settings
 from release_manifest import verified_role,digest

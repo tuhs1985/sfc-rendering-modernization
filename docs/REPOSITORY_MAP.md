@@ -106,7 +106,7 @@ rules need explicit classification; do not silently classify them as disposable.
 
 1. **Shipping status comes from manifests.** The
    [production Python allowlist](../tools/release/runtime_modules.json) selects
-   61 modules, not every import branch. Native role mappings and required default
+   62 modules. Native role mappings and required default
    profiles come from [release staging](../tools/release/stage_preflight_fixture.py)
    and the installed immutable manifest. Staging is a private fixture, not an
    approved release builder. Vendor closure remains separately qualified.
@@ -162,23 +162,33 @@ Asset task graph, geometry/image/material preparation and associated caches now
 have application ownership under `src/assets`. Capture review, old preview/capture
 consumption and test comparisons stay in `tools/asset_diagnostics`; compatibility
 entry files remain unshipped. The neutral mesh decoder is separate from transport.
-See [the asset record](runs/2026-11-10-codex-asset-preparation-separation.md) and
-[remaining renderer/transfer ownership](reconnaissance/2026-11-10-renderer-transfer-ownership.md).
+See [the asset record](runs/2026-11-10-codex-asset-preparation-separation.md).
+
+Scene receipt, shared channels, catalog acknowledgements, texture-buffer leases,
+startup tickets and the worker lifecycle now live in `src/transport`. Asset
+content identity belongs to `src/assets`. Renderer startup, process orchestration
+and backend pin selection live in `src/rendering`. Historical calibration,
+detailed renderer reports and runtime acquisition stay in development tools.
+Legacy developer import paths forward to the application implementations.
+See the [transport and renderer record](runs/2026-11-10-codex-transport-renderer-separation.md).
 
 These Python counts come directly from the current allowlist, not a new manifest:
 
 | Area | Listed Python modules | Production responsibility / important exception |
 | --- | ---: | --- |
-| `tools/remix_runtime/` | 28 | Appearance controls, IPC, scene/renderer orchestration and runtime selection; development paths/compatibility wrappers remain unshipped |
-| `tools/d3d9_proof/` | 6 | Light transfer, scene/catalog and owner identity/control, worker lifecycle and Remix coordinate conversion; not all proof fixtures ship |
-| `tools/remix_ingest/` | 3 | Shared channel/scene transport and camera conversion coexist with historical Toolkit/OBJ utilities |
+| `tools/remix_runtime/` | 19 | Appearance controls, native gate and other qualified application helpers alongside unshipped development tools |
+| `tools/d3d9_proof/` | 2 | Live light binding and Remix coordinate conversion |
+| `tools/remix_ingest/` | 1 | Shared camera conversion |
 | `tools/scene_bridge/` | 0 | Legacy asset-preparation forwarders plus neutral protocol/tests; no files from this area ship |
 | `src/launcher/` | 2 | `bootstrap.py` and `session_recording.py`; native entry source and CMD wrappers share this application boundary |
 | `src/session/` | 5 | Normal coordinator, verified game-exit monitor, bounded report state, graphics transaction and component qualification; shared application lifetime is inherited by diagnostics |
 | `src/runtime/` | 6 | Path context, package manifest validation, process inventory, runtime file helpers, protected preferences and interrupted graphics recovery |
-| `src/assets/` | 10 | Neutral mesh decoding, geometry/image/material preparation, task/working caches, damage/break decoding and material publication |
+| `src/assets/` | 11 | Neutral mesh decoding, content identity, geometry/image/material preparation, task/working caches, damage/break decoding and material publication |
+| `src/transport/` | 10 | Scene receipt, shared channels and catalog, buffer leases, startup tickets, owner rebind, light transfer and worker shutdown |
+| `src/rendering/` | 5 | Renderer startup, backend verification, process lifecycle and prepared-scene submission |
 | `tools/asset_diagnostics/` | 0 | Capture/preview review, streaming experiments and explicit test comparisons; never normal-play imports |
 | `tools/session_diagnostics/` | 0 | Optional capture/test/tuning orchestration and analysis; developer CLI dispatch only, not installed |
+| `tools/renderer_diagnostics/` | 0 | Detailed renderer evidence and audit parsing |
 | `tools/release/` | 0 | Build/packaging tools, allowlist, qualification and release-document inputs only |
 | `tools/m1_component/` | 1 | `analyze_live_camera.py` is retained despite its analysis name; this area also owns native observation sources |
 

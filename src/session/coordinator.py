@@ -8,6 +8,8 @@ sys.path.insert(0,str(CODE/'tools/remix_runtime'))
 
 sys.path.insert(0,str(CODE/'src/runtime'))
 sys.path.insert(0,str(CODE/'src/assets'))
+sys.path.insert(0,str(CODE/'src/transport'))
+sys.path.insert(0,str(CODE/'src/rendering'))
 from scene_capacity import OWNERS,ASSETS
 import argparse
 import ctypes as C
@@ -236,7 +238,7 @@ class Session:
         build_files=(BIN/'return_host.exe',BIN/'return_launcher.exe',BIN/'SFCRemixReturn.dll')
         if not CONTEXT.release:build_files+=(DLL,)
         from pipeline_mode import policy
-        from async_material_checkout import receipt
+        from renderer_backend import receipt
         self.metadata=dict(probe='NATIVE-COHORT-001',utc=dt.datetime.now(dt.timezone.utc).isoformat(),
             accepted_critical_before=self.original,copied_critical_before=critical_hashes(TEST),
             copied_sfc_protected_sha256=protected_ini_sha256((TEST/'sfc.ini').read_bytes()),
@@ -357,7 +359,7 @@ class Session:
         self.env['SFC_PERSISTENT_SCENE'] = '1'
         self.env['SFC_D3D9_SHARED_LIGHTS'] = '1'
         self.env['SFC_NATIVE_LIGHT_DISCOVERY'] = '1'
-        from present_calibration import Receiver
+        from scene_receiver import Receiver
         self.Receiver = Receiver
         if self.receiver is None:
             self.receiver = self.Receiver(break_models=self.args.break_models)

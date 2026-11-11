@@ -97,7 +97,7 @@ class SessionModesTests(unittest.TestCase):
                 stack.enter_context(patch.object(graphics,'FULL',replacement))
                 stack.enter_context(patch.object(graphics,'FULL_SHA',app.digest(replacement)))
                 stack.enter_context(patch.object(graphics,'OLD_SHA',app.digest(game/'dxgi.dll')))
-                stack.enter_context(patch('present_calibration.Receiver',return_value=receiver))
+                stack.enter_context(patch('scene_receiver.Receiver',return_value=receiver))
                 stack.enter_context(patch('async_material_checkout.Relay',return_value=relay))
                 stack.enter_context(redirect_stdout(io.StringIO()))
                 if fail:
@@ -131,13 +131,13 @@ import sys,importlib.abc
 from pathlib import Path
 root=Path(sys.argv[1])
 sys.path[:0]=[str(root/'src/session'),str(root/'src/launcher'),str(root/'tools/remix_runtime'),str(root/'tools/d3d9_proof')]
-blocked={'modes','broad_capture','light_discovery','depth_snapshot_analysis','run_offline','offscreen_position','native_insertion_capture'}
+blocked={'modes','broad_capture','light_discovery','depth_snapshot_analysis','run_offline','offscreen_position','native_insertion_capture','renderer_reports','present_calibration','runtime_candidate','live_bridge_review'}
 class Guard(importlib.abc.MetaPathFinder):
     def find_spec(self,fullname,path=None,target=None):
         if fullname.split('.')[0] in blocked:raise AssertionError('Diagnostic import: '+fullname)
 sys.meta_path.insert(0,Guard())
 import coordinator,component_qualification,graphics_transaction,recover_broad_session
-import async_material_checkout,present_calibration,multi_scene_resources,runtime_candidate
+import async_material_checkout,scene_receiver,multi_scene_resources,renderer_backend
 assert not blocked.intersection(sys.modules)
 print('NORMAL_IMPORT_BOUNDARY_PASS')
 '''

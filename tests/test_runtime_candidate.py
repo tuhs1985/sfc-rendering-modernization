@@ -94,7 +94,7 @@ class RuntimeCandidateTests(TestCase):
         self.assertIn('--candidate-initial-replacements requires --runtime-candidate',fixture)
         production=(ROOT/'tools/session_diagnostics/modes.py').read_text()
         self.assertNotIn('--runtime-candidate',production)
-        self.assertNotIn('candidate-1.6.1',(ROOT/'tools/remix_runtime/live_owner_timing.py').read_text())
+        self.assertNotIn('candidate-1.6.1',(ROOT/'src/rendering/live_owner_timing.py').read_text())
 
     def test_fixture_reserves_parallel_preparation_before_start(self):
         text=(ROOT/'tools/remix_runtime/run_return_fixture.py').read_text()

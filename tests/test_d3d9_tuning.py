@@ -31,7 +31,7 @@ class TuningTests(unittest.TestCase):
         launcher=(ROOT/'tools/remix_runtime/start_light_tuning_session.ps1').read_text()
         self.assertIn('start_d3d9_multiship_session.ps1',launcher)
         self.assertIn('-Tuning',launcher)
-        for name in ['tools/d3d9_proof/live_owner_input.h','tools/d3d9_proof/output_channel.h','tools/remix_ingest/bounded_job.cpp','tools/remix_runtime/multi_scene_relay.py']:
+        for name in ['tools/d3d9_proof/live_owner_input.h','tools/d3d9_proof/output_channel.h','tools/remix_ingest/bounded_job.cpp','src/rendering/multi_scene_relay.py']:
             self.assertIn('1980',(ROOT/name).read_text())
         runner=(ROOT/'tools/session_diagnostics/modes.py').read_text()
         self.assertIn('self.args.d3d9_additive and (not self.d3d9_tuning)',runner)

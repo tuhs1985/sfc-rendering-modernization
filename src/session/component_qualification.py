@@ -20,6 +20,8 @@ def sources():
     paths += list((ROOT/'src/session').glob('*.py'))
     paths += list((ROOT/'src/runtime').glob('*.py'))
     paths += list((ROOT/'src/assets').glob('*.py'))
+    paths += list((ROOT/'src/transport').glob('*.py'))
+    paths += list((ROOT/'src/rendering').glob('*.py'))
     paths += list((ROOT/'tools/asset_diagnostics').glob('*.py'))
     paths += list((ROOT/'tools/session_diagnostics').glob('*.py'))
     return {str(p.relative_to(ROOT)):digest(p) for p in sorted(set(paths))}

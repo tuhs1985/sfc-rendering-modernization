@@ -1,13 +1,27 @@
 ---
 title: SFC Modernization — Status Tracker
 updated: 2026-11-10
-checkpoint: Asset separation checkout complete;ownership reviewed;commit requested
+checkpoint: Main source reorganization complete. Sponsor completed the gameplay checkout.
 tags:
   - sfc-modernization
   - project-status
 ---
 
 # SFC Modernization — Status Tracker
+
+## November 10 — main source reorganization implemented
+
+Scene receipt, shared data, buffer ownership and shutdown now live under
+`src/transport`. Renderer startup, backend selection and process lifecycle live
+under `src/rendering`. Calibration, detailed renderer reports and runtime
+acquisition remain in development tools. The private package ships 62 project
+Python modules.
+
+Fresh-package scene and catalog acknowledgements, payload lifetime and shutdown
+passed. 764 Python regressions and both 600-frame native GPU policies passed.
+The sponsor reports the gameplay checkout complete under
+`artifacts/alpha/renderer-transport-game` and requests the commit.
+[Verification and launch command](runs/2026-11-10-codex-transport-renderer-separation.md).
 
 ## November 10 — asset preparation and renderer/transfer review complete
 

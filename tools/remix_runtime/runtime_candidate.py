@@ -11,14 +11,12 @@ ROOT = Path(__file__).resolve().parents[2]
 import sys
 sys.path.insert(0,str(ROOT/'tools/remix_runtime'))
 from runtime_context import CONTEXT
-BASE = CONTEXT.artifact('remix-runtime/deps/candidate-1.6.1')
-COMMIT = '0a6cd5b1ee814ec390c358e0c9c32ece8895ddc0'
+sys.path.insert(0,str(ROOT/'src/rendering'))
+from renderer_backend import BASE, COMMIT, ARCHIVE_SHA, HEADER_SHA, digest, verify as verify_backend
 NAME = 'rtx-remix-for-x64-games-release-remix-1.6.1.zip'
 ARCHIVE_BYTES = 557087446
-ARCHIVE_SHA = '7dd1d44492a609050e44b0e3581cec31135d1ed88b4a91123b4faae91955716a'
 URL = 'https://github.com/NVIDIAGameWorks/rtx-remix/releases/download/remix-1.6.1/' + NAME
 HEADER_URL = f'https://raw.githubusercontent.com/NVIDIAGameWorks/dxvk-remix/{COMMIT}/public/include/remix/remix_c.h'
-HEADER_SHA = '26a5607a07e8718298c35519e53bbc71d526186a947e5a2a5b613a0d6db04f3a'
 
 
 def configure_initialization(policy, environment, *, offline, release):
@@ -36,11 +34,6 @@ def configure_initialization(policy, environment, *, offline, release):
         policy=policy, release=release, inherited_async_asset_loading=before,
         supplied_async_asset_loading=environment.get('DXVK_ASYNC_ASSET_LOADING'),
         supplied_config=options, scope='Candidate child only;not GPU residency or runtime promotion')
-
-
-def digest(path):
-    with Path(path).open('rb') as stream:
-        return hashlib.file_digest(stream, 'sha256').hexdigest()
 
 
 def download(url, path, limit, expected=None):
@@ -115,34 +108,7 @@ def fetch():
 
 
 def verify(*, require_host=False):
-    if CONTEXT.release:
-        from release_manifest import load,verified_role
-        manifest=load(CONTEXT.package_root)
-        pin=manifest.get('remix',{})
-        if pin!={'release':'1.6.1','source_commit':COMMIT,'api_version':[0,6,5],'header_sha256':HEADER_SHA}:
-            raise ValueError('Release runtime/SDK pair differs from the qualified pin')
-        return dict(runtime=verified_role(CONTEXT,manifest,'remix_runtime'),
-                    exe=verified_role(CONTEXT,manifest,'renderer'),
-                    manifest=dict(source_commit=COMMIT,api_version=[0,6,5],header_sha256=HEADER_SHA))
-    manifest = json.loads((BASE / 'manifest.json').read_text())
-    if (manifest['source_commit'] != COMMIT or manifest['archive_sha256'] != ARCHIVE_SHA
-            or manifest['api_version'] != [0, 6, 5] or manifest['runtime'] != 'runtime/d3d9_x64.dll'):
-        raise ValueError('Candidate manifest pin mismatch')
-    if manifest['header_sha256'] != HEADER_SHA or digest(BASE / 'remix_c.h') != HEADER_SHA:
-        raise ValueError('Candidate header changed')
-    for name, receipt in manifest['files'].items():
-        path = (BASE / name).resolve()
-        path.relative_to((BASE / 'runtime').resolve())
-        if path.stat().st_size != receipt['bytes'] or digest(path) != receipt['sha256']:
-            raise ValueError('Candidate dependency changed: ' + name)
-    exe = CONTEXT.artifact('remix-runtime/candidate-1.6.1-bin/d3d9_direct_host.exe')
-    if require_host:
-        build = json.loads((exe.parent / 'build.json').read_text())
-        from source_inventory import sources
-        if (build['host_sha256'] != digest(exe) or build['sources'] != sources()
-                or build['header_sha256'] != HEADER_SHA):
-            raise ValueError('Candidate host build/source/header qualification stale')
-    return dict(runtime=BASE / manifest['runtime'], exe=exe, manifest=manifest)
+    return verify_backend(require_host=require_host, base=BASE)
 
 
 if __name__ == '__main__':
