@@ -40,7 +40,7 @@ accepted profile. The test hashes the existing preset, shader and texture files.
 For a separate GPU selection check, pass the staged `SFCRemix` folder to
 `qualify_graphics_adapter.py`. The x86 DirectDraw fixture tests the two dgVoodoo
 adapter settings and records the D3D11 adapter identifiers in `result.json`.
-Compare them with `remix_adapter_luid` from the existing
-`run_shared_layout_probe.py --extent 128 128` GPU fixture on the same machine
-and boot. Check on both single- and hybrid-GPU machines before adopting a new
-adapter policy. Both tools are standalone development checks.
+Add `--match` to run the pinned Remix adapter probe automatically, try the
+current setting first, and stage `matched-dgVoodoo.conf` only on an exact
+device match. The game copy stays read-only. A hybrid-GPU checkout remains
+a compatibility test for the resulting setup.

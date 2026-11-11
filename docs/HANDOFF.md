@@ -4,6 +4,21 @@ Sponsor-facing current work and parked items: [status tracker](STATUS.md).
 Diagnostic tools, triggers, limits and known pitfalls: [diagnostic reference](DIAGNOSTICS.md).
 The tracker is a sponsor-facing summary; the newest authoritative checkpoint below controls technical work.
 
+## Current checkpoint — November 11 automatic GPU matching
+
+The setup-time development probe now opens the pinned Remix device and finds
+a dgVoodoo setting by observed adapter LUID. It keeps the existing setting on
+the first exact match and stages only the matched config. The real device
+probes agreed with `Adapters=1` on this workstation. The resulting config
+matched the input hash. All 769 regressions passed, including reordered lists,
+duplicate names and no-match rejection. The existing game-side GPU check
+carries forward.
+
+Wire the matching step into reversible first-run preparation for the alpha ZIP.
+Hybrid gameplay remains a compatibility check. No game files were changed
+and no game was launched.
+[Verification and command](runs/2026-11-11-codex-graphics-adapter-matching.md).
+
 ## Current checkpoint — November 11 portable graphics candidate
 
 The cache-only ReShade candidate passed the installed configuration comparison,
@@ -12,10 +27,18 @@ GPU transfer. Both dgVoodoo settings selected the same device as Remix on the
 single-physical-GPU workstation. The standalone sharing fixture matched pixels
 and timed out in SDK teardown. The production-host check exited normally.
 
-The sponsor reports the private cache-only gameplay checkout complete. Hybrid GPU qualification,
-independent sourcing of the exact standard ReShade baseline, reversible
-setup and clean-machine checkout remain open. The normal graphics profile and
-adapter policy carry forward.
+The sponsor reports the private cache-only gameplay checkout complete. The
+official standard ReShade 6.7.1 installer is now verified to contain the exact
+6.7.1.2133 x86 baseline. See the [download and hash procedure](releases/GRAPHICS_BASELINE_AUDIT.md#verified-source-for-the-standard-reshade-x86-dll).
+That procedure is a release-maintainer check. The supplied project OP copy
+matches the standard ReShade and dgVoodoo pins. The tester workflow is to
+extract the alpha ZIP into a separate game copy and double-click its launcher.
+First-run preparation will check local graphics files and use the verified
+bundled standard and full-add-on ReShade DLLs where each belongs. The packaged
+notice matches the ReShade 6.7.1 license.
+Reversible setup and clean-machine checkout remain open. GPU matching can be
+implemented and checked here. A physical hybrid checkout remains unverified.
+The normal graphics profile and adapter policy carry forward.
 [Evidence and checkout command](runs/2026-11-11-codex-portable-graphics-profile.md).
 
 ## Current checkpoint — November 11 tester graphics preflight

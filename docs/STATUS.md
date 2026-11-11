@@ -1,13 +1,28 @@
 ---
 title: SFC Modernization — Status Tracker
 updated: 2026-11-11
-checkpoint: Cache-only checkout complete. Hybrid adapter qualification and reversible setup pending.
+checkpoint: Automatic GPU matching verified on development hardware. Reversible setup pending.
 tags:
   - sfc-modernization
   - project-status
 ---
 
 # SFC Modernization — Status Tracker
+
+## November 11 — setup-time GPU matching verified
+
+The pinned Remix and dgVoodoo device probes reported the same LUID using the
+existing setting. The candidate config was byte-identical to the input.
+769 regressions passed. Reversible launcher preparation and hybrid gameplay
+qualification remain open.
+[Verification record](runs/2026-11-11-codex-graphics-adapter-matching.md).
+
+## November 11 — standard ReShade x86 source verified
+
+Both official endpoints supplied the same standard 6.7.1 installer. Its
+embedded 6.7.1.2133 x86 DLL matches the pinned baseline hash. The
+[download, extraction and hash procedure](releases/GRAPHICS_BASELINE_AUDIT.md#verified-source-for-the-standard-reshade-x86-dll)
+is verified. Reversible preparation and clean-machine checkout remain open.
 
 ## November 11 — portable graphics candidate
 

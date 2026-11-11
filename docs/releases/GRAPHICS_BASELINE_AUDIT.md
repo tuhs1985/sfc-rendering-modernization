@@ -21,6 +21,45 @@ will start. These requirements are distinct from the libraries bundled inside
 | `D3DImm.dll` | dgVoodoo 2.86.5, x86; ProductVersion 2.8.6.5 | `F51507ACBB1C5510AB72881EEFDE5E4DFE6376667546E86DDCF62E6A9EE4923F` |
 | `dxgi.dll` | ReShade32 6.7.1, file version 6.7.1.2133 | `E35E4E2E47F4765F0799CB54C88E5ADE49B50CD7895C137B9D557F263344CAB7` |
 
+### Verified source for the standard ReShade x86 DLL
+
+This extraction and verification procedure is for release maintainers. Tester
+preparation should check the shared OP files automatically, reuse an exact
+match, and obtain any required replacement from the reviewed package.
+
+The supplied project OP test copy has the exact standard ReShade baseline,
+both pinned dgVoodoo x86 DLLs, and the expected ReShade preset and shader folder.
+Keep the standard and full-add-on ReShade DLLs as separate verified inputs in
+the alpha ZIP. ReShade's [6.7.1 license](https://github.com/crosire/reshade/blob/v6.7.1/LICENSE.md)
+permits binary redistribution with its copyright notice, conditions and
+disclaimer. The local packaging notice matches the versioned upstream license.
+This check covers the ReShade DLLs. Presets, shaders and other vendor components
+have their own provenance and notice checks.
+
+Use the [official standard ReShade 6.7.1 installer](https://www.reshade.me/downloads/ReShade_Setup_6.7.1.exe).
+Both the `www.reshade.me` and `reshade.me` endpoints returned the same
+3,982,560-byte installer on the verification run. Its SHA-256 is
+`4D7C19A5C08849E3A83C2824CF93636349A4A605C009812ADB682720D984FA4D`.
+
+Open the EXE as a ZIP archive with 7-Zip and extract just `ReShade32.dll`
+into a separate staging folder. The installer does not need to run.
+
+```powershell
+Get-FileHash -Algorithm SHA256 -LiteralPath .\ReShade_Setup_6.7.1.exe
+& 'C:\Program Files\7-Zip\7z.exe' e -tzip .\ReShade_Setup_6.7.1.exe ReShade32.dll '-o.\ReShade-x86' -aos
+Get-FileHash -Algorithm SHA256 -LiteralPath .\ReShade-x86\ReShade32.dll
+```
+
+Compare the installer hash above and the DLL hash in the table. The extracted
+DLL was verified as a 32-bit PE DLL, file version 6.7.1.2133, byte-identical to
+the required baseline. Windows reported the ReShade signer and returned
+`UnknownError` for Authenticode verification, so the verification here is the
+official HTTPS download and matching byte hashes. 7-Zip extracted it successfully despite archive offset
+and trailing-data warnings. Windows' built-in .NET ZIP reader failed on the
+embedded archive. The developer check also passed using Python's `zipfile`,
+which is available in the application-local Python for future preparation.
+Setup will stage the verified DLL as `dxgi.dll` for a separate game copy.
+
 The package separately supplies full-add-on ReShade32 6.7.1.2131, SHA256
 `A1BA732B5E31E0405CDE322CC5EC62CF972B3FBAEFBB6CBDC8A24DA00D58AE24`,
 for the temporary graphics transaction. Supplying that runtime component does

@@ -11,6 +11,7 @@
 #include <remix_c.h>
 #include <iostream>
 #include <stdexcept>
+#include <string_view>
 #include "../d3d9_proof/output_extent.h"
 using Microsoft::WRL::ComPtr;
 static void require(bool value,const char* why){if(!value)throw std::runtime_error(why);}
@@ -18,8 +19,11 @@ static void hr(HRESULT value,const char* why){if(FAILED(value)){std::cout<<why<<
 static void api(remixapi_ErrorCode value,const char* why){require(value==REMIXAPI_ERROR_CODE_SUCCESS,why);}
 static LRESULT CALLBACK proc(HWND h,UINT m,WPARAM w,LPARAM l){return DefWindowProcW(h,m,w,l);}
 int wmain(int argc,wchar_t** argv){
- std::cout.setf(std::ios::unitbuf);if(argc!=4)return 2;
- const UINT width=static_cast<UINT>(_wtoi(argv[2])),height=static_cast<UINT>(_wtoi(argv[3]));
+ std::cout.setf(std::ios::unitbuf);
+ const bool adapterOnly=argc==3&&std::wstring_view(argv[2])==L"--adapter-only";
+ if(!adapterOnly&&argc!=4)return 2;
+ const UINT width=adapterOnly?128:static_cast<UINT>(_wtoi(argv[2]));
+ const UINT height=adapterOnly?128:static_cast<UINT>(_wtoi(argv[3]));
  if(!output_extent::valid(width,height)||width<2||height<2)return 2;
  HMODULE module=nullptr;HWND window=nullptr;remixapi_Interface remix{};int result=1;
  try{
@@ -30,12 +34,20 @@ int wmain(int argc,wchar_t** argv){
   remixapi_InitializeLibraryInfo info{};info.sType=REMIXAPI_STRUCT_TYPE_INITIALIZE_LIBRARY_INFO;info.version=REMIXAPI_VERSION_MAKE(REMIXAPI_VERSION_MAJOR,REMIXAPI_VERSION_MINOR,REMIXAPI_VERSION_PATCH);api(init(&info,&remix),"API init");
   {
    ComPtr<IDirect3D9Ex> d9;ComPtr<IDirect3DDevice9Ex> owner;
-   api(remix.dxvk_CreateD3D9(FALSE,&d9),"D3D9 factory");
+   if(adapterOnly){
+    const auto create=reinterpret_cast<decltype(&Direct3DCreate9Ex)>(GetProcAddress(module,"Direct3DCreate9Ex"));
+    require(create!=nullptr,"ordinary D3D9Ex export");
+    hr(create(D3D_SDK_VERSION,&d9),"ordinary D3D9Ex factory");
+   }else api(remix.dxvk_CreateD3D9(FALSE,&d9),"D3D9 factory");
    D3DPRESENT_PARAMETERS pp{};pp.BackBufferWidth=width;pp.BackBufferHeight=height;pp.BackBufferFormat=D3DFMT_A8R8G8B8;pp.BackBufferCount=1;pp.Windowed=TRUE;pp.hDeviceWindow=window;pp.SwapEffect=D3DSWAPEFFECT_DISCARD;pp.PresentationInterval=D3DPRESENT_INTERVAL_IMMEDIATE;
-   hr(d9->CreateDeviceEx(0,D3DDEVTYPE_HAL,window,D3DCREATE_HARDWARE_VERTEXPROCESSING,&pp,nullptr,&owner),"D3D9 device");
-   api(remix.dxvk_RegisterD3D9Device(owner.Get()),"register device");auto* device=owner.Detach(); // same SDK-owned lifetime as existing output probe
+   if(adapterOnly){pp.EnableAutoDepthStencil=TRUE;pp.AutoDepthStencilFormat=D3DFMT_D24S8;}
+   const DWORD flags=D3DCREATE_HARDWARE_VERTEXPROCESSING|(adapterOnly?D3DCREATE_FPU_PRESERVE:0);
+   hr(d9->CreateDeviceEx(0,D3DDEVTYPE_HAL,window,flags,&pp,nullptr,&owner),"D3D9 device");
    LUID luid{};hr(d9->GetAdapterLUID(0,&luid),"LUID");
    std::cout<<"REMIX_D3D9_ADAPTER luid="<<luid.HighPart<<':'<<luid.LowPart<<'\n';
+   if(adapterOnly)result=0;
+   else{
+   api(remix.dxvk_RegisterD3D9Device(owner.Get()),"register device");auto* device=owner.Detach(); // same SDK-owned lifetime as existing output probe
    ComPtr<IDXGIFactory1> factory;hr(CreateDXGIFactory1(IID_PPV_ARGS(&factory)),"DXGI factory");ComPtr<IDXGIAdapter1> selected;
    for(UINT i=0;i<16;++i){ComPtr<IDXGIAdapter1> a;if(factory->EnumAdapters1(i,&a)==DXGI_ERROR_NOT_FOUND)break;DXGI_ADAPTER_DESC1 desc{};hr(a->GetDesc1(&desc),"adapter");if(desc.AdapterLuid.LowPart==luid.LowPart&&desc.AdapterLuid.HighPart==luid.HighPart){selected=a;break;}}
    require(bool(selected),"same GPU");ComPtr<ID3D11Device> native;ComPtr<ID3D11DeviceContext> context;
@@ -56,9 +68,17 @@ int wmain(int argc,wchar_t** argv){
    D3D11_MAPPED_SUBRESOURCE mapped{};hr(context->Map(staging.Get(),0,D3D11_MAP_READ,0,&mapped),"verification map");uint64_t mismatches=0;
    for(UINT y=0;y<height;++y){const auto* row=reinterpret_cast<const DWORD*>(static_cast<const BYTE*>(mapped.pData)+size_t(y)*mapped.RowPitch);for(UINT x=0;x<width;++x)mismatches+=row[x]!=colors[(y>=UINT(halfH)?2:0)+(x>=UINT(halfW)?1:0)];}
    context->Unmap(staging.Get(),0);std::cout<<"GPU_SHARED_LAYOUT width="<<width<<" height="<<height<<" row_pitch="<<mapped.RowPitch<<" mismatches="<<mismatches<<" pixels="<<uint64_t(width)*height<<"\n";result=(sourceMismatches||mismatches)?1:0;
+   }
   }
  }catch(const std::exception& e){std::cout<<"PARTIAL "<<e.what()<<'\n';}
  if(window)SetWindowLongPtrW(window,GWLP_WNDPROC,reinterpret_cast<LONG_PTR>(proc));
- if(remix.Shutdown)std::cout<<"SHUTDOWN "<<unsigned(remix.Shutdown())<<'\n';
+ if(remix.Shutdown){
+  const auto status=remix.Shutdown();
+  std::cout<<"SHUTDOWN "<<unsigned(status)<<'\n';
+  if(adapterOnly&&status!=REMIXAPI_ERROR_CODE_SUCCESS)result=1;
+ }
+ // The one-shot helper exits after releasing its device and shutting down
+ // the SDK. Keep the module loaded until process exit.
+ if(adapterOnly)return result;
  if(window)DestroyWindow(window);if(module)FreeLibrary(module);return result;
 }
