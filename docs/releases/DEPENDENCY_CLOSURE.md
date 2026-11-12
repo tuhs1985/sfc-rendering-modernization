@@ -194,6 +194,45 @@ Official references: [Remix release](https://github.com/NVIDIAGameWorks/rtx-remi
 [dgVoodoo redistribution](https://dege.freeweb.hu/dgVoodoo2/ReadmeGeneral/),
 [Microsoft redistribution guidance](https://learn.microsoft.com/en-us/cpp/windows/redistributing-visual-cpp-files).
 
+## Committed alpha tester ZIP
+
+Built `SFCRemix-v0.1.0-alpha.1.zip` from `4d41a31b97a776a7ccbe50be3d75a3d461252ce9`
+using a detached source checkout. Rebuilt the 13 native endpoints from that
+commit and archived Git's exact application source bytes. The recipe retains
+the full previously qualified x64 Remix payload. It excludes game assets,
+saved preferences, captures, developer receipts and unrelated workspace files.
+
+The notice index links the exact upstream sources and preserves their separate
+terms. The pinned [NVIDIA build list](https://github.com/NVIDIAGameWorks/dxvk-remix/blob/0a6cd5b1ee814ec390c358e0c9c32ece8895ddc0/packman-external.xml)
+confirms OpenUSD 25.11 and Sentry Native 0.15.3. oneTBB 2021.12 matches the
+included DLL's version metadata. The supplemental XeSS license text matches
+[Intel's pinned submodule notice](https://github.com/intel/xess/blob/677aeb1ebe8fe1250ab98180bcdc8e5fda4a7628/LICENSE.txt)
+after line ending normalization. The original Remix, NVIDIA SDK and Aftermath
+notices remain bundled. The index identifies the CUDA terms and preserved
+dgVoodoo archive. The Microsoft files come from the matching x64 REDIST
+directory.
+
+The archive has 3,884 manifest inputs and is 510,879,148 bytes.
+SHA-256 is `c222118593df64b11e24af79b3c805781fcfc0450aa2abb970900bc7034bbf55`.
+Local ZIP, checksum, input recipe and build logs are in
+`artifacts/alpha/candidate`. There is no tag, upload or publication.
+
+The exact ZIP was freshly extracted into the existing disposable game copy.
+Native preflight, installed GPU preparation, restore, and repeat native
+preflight passed with the game executable and graphics files unchanged.
+Windows temporarily held the empty GPU scratch directory during fixture
+cleanup. The archive was re-extracted and final native preflight passed with
+a Windows-only PATH. The prior package backup was removed after merging
+the existing mutable settings and data. The independent PC gameplay and
+restore test is pending. See `alpha-release-local-checkout.json` and
+`alpha-release-installed-final.txt`.
+
+The shipped standalone GPU transfer probe also matched all 2,073,600
+pixels at 1920×1080. The helper hit its 45-second exit deadline after
+reporting successful SDK shutdown, reproducing the prior 1080p probe's
+teardown limitation. The job left zero owned processes. This evidence
+qualifies pixel transfer and leaves live-game shutdown for the tester run.
+
 ## Exit gate
 
 Complete private gameplay and interrupted-restoration checks, resolve any missing

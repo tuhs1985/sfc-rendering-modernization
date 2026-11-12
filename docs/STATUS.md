@@ -1,13 +1,20 @@
 ---
 title: SFC Modernization — Status Tracker
 updated: 2026-11-11
-checkpoint: Private ZIP gameplay passed with tester-owned graphics settings.
+checkpoint: Committed alpha tester ZIP built and checked locally. First external checkout pending.
 tags:
   - sfc-modernization
   - project-status
 ---
 
 # SFC Modernization — Status Tracker
+
+## Committed alpha tester ZIP
+
+The package built from `4d41a31` passed local extraction, preflight,
+graphics setup and restoration. The existing test copy has been updated.
+Next verify gameplay and restoration on a tester's PC.
+[Build and qualification record](releases/DEPENDENCY_CLOSURE.md#committed-alpha-tester-zip).
 
 ## November 11 — tester-owned SFC and dgVoodoo settings
 

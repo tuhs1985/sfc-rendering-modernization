@@ -4,6 +4,17 @@ Sponsor-facing current work and parked items: [status tracker](STATUS.md).
 Diagnostic tools, triggers, limits and known pitfalls: [diagnostic reference](DIAGNOSTICS.md).
 The tracker is a sponsor-facing summary; the newest authoritative checkpoint below controls technical work.
 
+## Current checkpoint — committed alpha tester ZIP
+
+Built the allowlisted `SFCRemix-v0.1.0-alpha.1.zip` from `4d41a31` with
+13 freshly built native binaries, the complete qualified x64 Remix payload
+and reviewed vendor notice sources. Fresh package extraction, installed
+GPU setup and restoration passed on this workstation. The existing
+`artifacts/alpha/candidate/game` checkout now runs the exact committed ZIP.
+The next step is a tester's gameplay and restoration checkout on another
+PC. No tag, upload or publication was made.
+[Build and qualification record](releases/DEPENDENCY_CLOSURE.md#committed-alpha-tester-zip).
+
 ## Current checkpoint — November 11 tester-owned graphics settings
 
 The alpha launcher accepts customized SFC and dgVoodoo settings and checks
