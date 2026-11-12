@@ -15,6 +15,14 @@ REQUIRED_ROLES = frozenset({
     'project_license', 'third_party_notices',
     'troubleshooting_launcher',
 })
+SETUP_ROLES = frozenset({'setup_ddraw', 'setup_d3dimm',
+                         'setup_remix_probe', 'setup_wrapper_probe', 'reshade_baseline_proxy'})
+SETUP_INPUT_ROLES = SETUP_ROLES - {'reshade_baseline_proxy'} | {'setup_dgvoodoo', 'setup_reshade'}
+PROFILE_FILES = frozenset({'DDraw.dll', 'D3DImm.dll', 'dxgi.dll'})
+
+
+def setup_enabled(manifest):
+    return SETUP_ROLES <= manifest.get('roles', {}).keys()
 
 
 def digest(path):
@@ -67,6 +75,8 @@ def load(root):
             raise ValueError('Malformed package file receipt')
     if any(not isinstance(name, str) or name not in files for name in roles.values()):
         raise ValueError('Package role names an unlisted file')
+    if SETUP_INPUT_ROLES & roles.keys() and not setup_enabled(value):
+        raise ValueError('Incomplete graphics setup inputs')
     return value
 
 
@@ -105,8 +115,8 @@ def game_profile_issues(context, manifest):
 
     profile = manifest.get('game_profile', {})
     hashes = profile.get('files', {})
-    required = {'DDraw.dll', 'D3DImm.dll', 'dxgi.dll', 'dgVoodoo.conf', 'ReShade.ini'}
-    if set(hashes) != required or not isinstance(profile.get('sfc_protected_sha256'), str):
+    # Older packages included a ReShade.ini hash. It is user configuration.
+    if set(hashes) - {'ReShade.ini', 'dgVoodoo.conf'} != PROFILE_FILES:
         raise ValueError('Package lacks a qualified game graphics profile')
     versions = {
         'DDraw.dll': 'the qualified dgVoodoo 2.86.5 x86 DDraw.dll',
@@ -115,6 +125,8 @@ def game_profile_issues(context, manifest):
     }
     dimensions = profile.get('dimension_profile')
     for name, expected in hashes.items():
+        if name == 'ReShade.ini':
+            continue
         if name == 'dgVoodoo.conf' and dimensions:
             continue
         path = context.game_root / name
@@ -131,7 +143,7 @@ def game_profile_issues(context, manifest):
             return parser(stream.read(1024 * 1024 + 1))
 
     if dimensions:
-        from game_profile import SIZES, matching_dimensions, sfc_profile, wrapper_profile
+        from game_profile import SIZES, matching_dimensions, sfc_profile, wrapper_profile, wrapper_requirements
 
         if (set(dimensions) != {'schema', 'sfc_sha256', 'dg_sha256'} or
                 dimensions['schema'] != 'sfc.alpha.graphics-dimensions.v1'):
@@ -142,14 +154,17 @@ def game_profile_issues(context, manifest):
             native = inspect('sfc.ini', sfc_profile)
         except ValueError as exc:
             yield f'sfc.ini: {exc}. Use one supported [3D] Width/Height pair: {supported}.'
-        if native and native[0] != dimensions['sfc_sha256']:
-            yield 'sfc.ini: settings outside the player name and resolution differ from the qualified profile.'
+        def inspect_wrapper(raw):
+            wrapper_requirements(raw)
+            if setup_enabled(manifest):
+                from setup_adapter import current_setting
+                current_setting(raw)
+            return wrapper_profile(raw)
+
         try:
-            wrapper = inspect('dgVoodoo.conf', wrapper_profile)
+            wrapper = inspect('dgVoodoo.conf', inspect_wrapper)
         except ValueError as exc:
             yield f'dgVoodoo.conf: {exc}. The qualified profile requires DesktopResolution and Resolution.'
-        if wrapper and wrapper[0] != dimensions['dg_sha256']:
-            yield 'dgVoodoo.conf: settings outside the resolution differ from the qualified profile.'
         if native and wrapper and not matching_dimensions(native[1], *wrapper[1:]):
             w, h = native[1]
             yield (f'dgVoodoo.conf: resolution does not match sfc.ini ({w}x{h}). '

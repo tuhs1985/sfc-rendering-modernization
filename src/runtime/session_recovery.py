@@ -25,10 +25,16 @@ def recover(run,game_running):
     if game_running():raise RuntimeError('SFC is still running; exit normally before recovery')
     manifest=json.loads((run/'manifest.json').read_text())
     if not supported_transaction(manifest):raise ValueError('Not a full-support capture transaction')
-    expected=manifest['copied_critical_before']
+    isolated = manifest.get('reshade_config_isolated') is True
+    expected=dict(manifest['copied_critical_before'])
+    if isolated:
+        expected.pop('ReShade.ini', None)
+    if manifest.get('tester_config_owned') is True:
+        expected.pop('sfc.ini', None)
+        expected.pop('dgVoodoo.conf', None)
     if expected['dxgi.dll']!=OLD_SHA:raise ValueError('Rollback provenance mismatch')
     backup=run/'dxgi-original.rollback';config=run/'ReShade.original.ini'
-    if digest(backup)!=OLD_SHA or digest(config)!=expected['ReShade.ini']:raise ValueError('Rollback file hash mismatch')
+    if digest(backup)!=OLD_SHA or (not isolated and digest(config)!=expected['ReShade.ini']):raise ValueError('Rollback file hash mismatch')
     # Preserve game-saved player preferences while checking all protected inputs.
     signature=manifest.get('copied_sfc_protected_sha256')
     if not signature and 'sfc.ini' in expected and digest(TEST/'sfc.ini')!=expected['sfc.ini']:
@@ -43,12 +49,14 @@ def recover(run,game_running):
     if (TEST/'ReShade.log').exists():
         if (TEST/'ReShade.log').stat().st_size>16*1024*1024:raise ValueError('Recovery log exceeds bounded-copy limit')
         shutil.copyfile(TEST/'ReShade.log',run/'ReShade.recovery.log')
-    shutil.copyfile(TEST/'ReShade.ini',run/'ReShade.before-recovery.ini')
+    if not isolated:
+        shutil.copyfile(TEST/'ReShade.ini',run/'ReShade.before-recovery.ini')
     restore_test_proxy(TEST/'dxgi.dll',backup)
-    atomic_copy(config,TEST/'ReShade.ini',expected['ReShade.ini'])
+    if not isolated:
+        atomic_copy(config,TEST/'ReShade.ini',expected['ReShade.ini'])
     after={name:digest(TEST/name) for name in expected}
     if changed_protected_files(expected,after,ini_raw,signature):raise ValueError('Recovery did not restore complete baseline')
-    record.write_text(json.dumps({'utc':dt.datetime.now(dt.timezone.utc).isoformat(),'proxy_restored':True,'config_restored':True,'game_absent_verified':True,'critical_after':after,'historical_result_unchanged':True},indent=2))
+    record.write_text(json.dumps({'utc':dt.datetime.now(dt.timezone.utc).isoformat(),'proxy_restored':True,'config_restored':not isolated,'game_absent_verified':True,'critical_after':after,'historical_result_unchanged':True},indent=2))
     return str(record)
 
 def recover_pending(game_running):

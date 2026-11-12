@@ -13,7 +13,9 @@ private checkout is not an approved public release.
    out of that folder into the game directory.
 3. Double-click `SFCRemix-Launch.cmd`. It starts the native Windows launcher.
    Accept the single Windows elevation prompt when
-   requested. Select your campaign or skirmish normally.
+   requested. On first launch, the launcher checks that SFC and Remix can use
+   the same GPU. If graphics files need changes, it lists them and asks before
+   applying them. Select your campaign or skirmish normally.
 4. Exit SFC normally when finished and let the launcher finish cleanup.
 
 Replacement, weapon lights, damage and qualified break models are enabled.
@@ -28,6 +30,15 @@ The initial alpha supports the pinned Community Edition executable, SHA256
 Other executable revisions are unsupported. Preflight also checks the recognized
 graphics profile and refuses unknown conflicting proxies before changing files.
 Profile compatibility must pass; do not work around a rejection by deleting DLLs.
+
+Keep your existing SFC and dgVoodoo settings. First-run preparation may propose
+the qualified graphics DLLs. If the game and Remix use different GPUs, the
+launcher reports the verified dgVoodoo adapter setting for your game copy.
+The current compositor requires hardware Direct3D 11 and 8x multisampling.
+
+The launcher uses your ReShade settings to create a session configuration under
+`SFCRemix/data`. Keep your shaders, textures and presets inside the game copy.
+ReShade's session cache and screenshot outputs use the package data directory.
 
 Known stable native sizes are1024×768,1280×720,1366×768,1440×900,1600×900 and
 1920×1080. The game and its wrapper must use matching supported dimensions.
@@ -49,8 +60,8 @@ then launch again. Do not edit immutable files in `SFCRemix/runtime`, `code` or
 ## Recovery and removal
 
 After an interrupted run, close SFC before starting the launcher again. It checks
-the saved recovery journal and restores the supported graphics transaction.
-To request restoration explicitly, run:
+the saved recovery journal and restores the graphics files. To undo the first-run
+graphics preparation and recover the files you had before setup, close SFC and run:
 
 ```cmd
 SFCRemix-Launch.cmd --restore

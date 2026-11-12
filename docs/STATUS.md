@@ -1,13 +1,44 @@
 ---
 title: SFC Modernization — Status Tracker
 updated: 2026-11-11
-checkpoint: Automatic GPU matching verified on development hardware. Reversible setup pending.
+checkpoint: Private ZIP gameplay passed with tester-owned graphics settings.
 tags:
   - sfc-modernization
   - project-status
 ---
 
 # SFC Modernization — Status Tracker
+
+## November 11 — tester-owned SFC and dgVoodoo settings
+
+The updated private ZIP checks graphics compatibility and leaves the tester's
+settings in place. The installed GPU, preflight, and restore checks preserved
+all three config files. The sponsor confirmed revised-package gameplay.
+Clean-machine and hybrid-GPU qualification remain open.
+[Evidence](releases/DEPENDENCY_CLOSURE.md#tester-owned-game-and-wrapper-settings).
+
+## November 11 — tester ReShade preferences
+
+The sponsor confirmed the private ZIP worked in a separate SFC copy. The
+revised ZIP preserves the original ReShade INI through first-run preparation,
+session configuration generation and restoration. Gameplay of the revised
+ZIP is open.
+[Evidence](releases/DEPENDENCY_CLOSURE.md#tester-reshade-configuration).
+
+## November 11 — private ZIP extraction verified
+
+The allowlisted ZIP passed fresh extraction, first-run setup, preflight and
+restoration on this workstation. Enhanced gameplay from that ZIP is the next
+checkout. [ZIP evidence](releases/DEPENDENCY_CLOSURE.md#exact-zip-extraction-checkout).
+
+## November 11 — reversible first-run graphics setup
+
+The private package passed GPU matching, setup preview, declined and approved
+preparation, and restoration on this workstation. The sponsor confirmed the
+normal CMD launcher worked in gameplay, and preflight passed after exit.
+Rapid camera panning reproduced the earlier gray-wing issue. Ship and mask
+synchronization remains a hypothesis.
+[Verification record](runs/2026-11-11-codex-reversible-graphics-setup.md).
 
 ## November 11 — setup-time GPU matching verified
 

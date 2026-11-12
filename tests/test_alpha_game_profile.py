@@ -65,7 +65,7 @@ class GraphicsAdapterMatchTests(unittest.TestCase):
     def test_config_preserves_other_bytes_and_rejects_ambiguous_input(self):
         original = b'; Adapters=1\r\n[General]\r\nAdapters=1\r\nOutputAPI=d3d11_fl10_1\r\n'
         self.assertEqual(wrapper_config(original, '2'), original.replace(b'\nAdapters=1', b'\nAdapters=2'))
-        with self.assertRaisesRegex(ValueError, 'exactly one'):
+        with self.assertRaisesRegex(ValueError, 'Ambiguous'):
             wrapper_config(original + b'Adapters=all\r\n', '2')
 
 

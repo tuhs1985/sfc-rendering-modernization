@@ -1,7 +1,4 @@
-"""Recognize the qualified graphics profile with only its output size varied.
-
-All other bytes remain protected. This does not edit a user's game settings.
-"""
+"""Read the SFC and dgVoodoo settings needed by the graphics integration."""
 import hashlib
 import re
 
@@ -37,6 +34,16 @@ def sfc_profile(raw):
 def wrapper_profile(raw):
     graphics,values=canonical(raw,{(b'generalext',b'desktopresolution'):b'<desktop>',(b'directx',b'resolution'):b'<output>'})
     return hashlib.sha256(graphics).hexdigest().upper(),values[b'generalext',b'desktopresolution'],values[b'directx',b'resolution']
+
+
+def wrapper_requirements(raw):
+    backend = (b'general', b'outputapi')
+    samples = (b'directx', b'antialiasing')
+    _, values = canonical(raw, {backend: b'', samples: b''})
+    if values[backend].lower() not in (b'd3d11_fl10_1', b'd3d11_fl11_0', b'd3d11_fl11_1'):
+        raise ValueError('OutputAPI must select hardware Direct3D 11 at feature level 10.1 or higher')
+    if values[samples].lower() != b'8x':
+        raise ValueError('DirectX Antialiasing must be 8x for native ship insertion')
 
 
 def matching_dimensions(size,desktop,output):

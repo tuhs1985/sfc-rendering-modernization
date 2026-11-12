@@ -4,6 +4,92 @@ Sponsor-facing current work and parked items: [status tracker](STATUS.md).
 Diagnostic tools, triggers, limits and known pitfalls: [diagnostic reference](DIAGNOSTICS.md).
 The tracker is a sponsor-facing summary; the newest authoritative checkpoint below controls technical work.
 
+## Current checkpoint — November 11 tester-owned graphics settings
+
+The alpha launcher accepts customized SFC and dgVoodoo settings and checks
+supported dimensions, hardware D3D11, 8x multisampling and the observed GPU
+match. Setup manages only qualified graphics DLLs. It suggests an adapter
+setting when needed and leaves the tester's configuration files in place.
+New session recovery preserves tester configuration changes. Legacy journals
+remain recoverable. The sponsor confirmed gameplay from the revised private
+checkout. Next finalize vendor review and build the release ZIP from the
+reviewed commit. Clean-machine and hybrid-GPU qualification remain open.
+[Configuration policy](releases/DEPENDENCY_CLOSURE.md#tester-owned-game-and-wrapper-settings).
+
+## Current checkpoint — November 11 tester ReShade configuration preserved
+
+The sponsor confirmed the original private ZIP worked in a separate SFC
+folder. The next package treats the tester's `ReShade.ini` as input to a
+session-local copy. Preflight accepts customized settings, and current
+first-run setup, normal play, and new-session recovery leave the original
+INI alone. Legacy rollback remains available for older transactions.
+[Configuration and verification](releases/DEPENDENCY_CLOSURE.md#tester-reshade-configuration).
+
+## Current checkpoint — November 11 extracted game asset repair
+
+The first extracted gameplay checkout was invalid because its local game
+copy script recursively skipped BMP files. The retained session stopped on
+`Original image missing/bound` and deferred graphics rollback while SFC
+was still running. Restored the missing assets in the same copy and fixed
+the local copy script to exclude only root screenshot outputs. The ZIP and
+its checksum remain the same. Repeat the gameplay checkout using the same
+CMD path. [Failure and repair](releases/DEPENDENCY_CLOSURE.md#extracted-game-asset-repair).
+
+## Current checkpoint — November 11 private ZIP checkout
+
+The exact allowlisted private ZIP and checksum are in
+`artifacts/alpha/candidate`. Fresh extraction, GPU setup, native preflight
+and byte-for-byte restore passed. The extracted checkout is back in its
+original graphics state and ready for the sponsor's CMD gameplay run.
+The public candidate still needs the version-specific vendor review and
+committed build provenance. [ZIP evidence](releases/DEPENDENCY_CLOSURE.md#exact-zip-extraction-checkout).
+
+## Current checkpoint — November 11 alpha release inputs
+
+Rehashed the private checkout's 3,860 immutable inputs and inventoried 141
+PE binaries. Pinned the three application-local x64 VC runtime DLLs required
+by Remix, verified the preserved dgVoodoo source, and gathered supplemental
+notices from NVIDIA's integration. The standalone Remix adapter probe
+passed with the staged CRT. The alpha ZIP needs finalized per-component
+notices and a reviewed commit with matching binaries before assembly.
+Nothing was tagged or published.
+[Dependency closure review](releases/DEPENDENCY_CLOSURE.md#november-11-release-input-review).
+
+## Current checkpoint — November 11 reversible first-run graphics setup
+
+The private ZIP launcher can qualify the GPU match, preview first-run changes,
+and apply the bundled profile to a supported game copy after confirmation.
+The preparation journal is separate from per-session recovery. `--restore`
+restores verified originals and removes files the setup added. The installer
+leaves the game's resolution, preferences, shaders and preset in place.
+
+The installed preparation and restoration checks passed on this workstation.
+The sponsor reported normal gameplay through the private CMD launcher on the
+already-qualified profile. Native preflight passed after exit. Clean-machine
+gameplay and recovery, hybrid GPU behavior, and public release assembly
+remain open. [Verification record](runs/2026-11-11-codex-reversible-graphics-setup.md).
+
+The sponsor also reproduced the prior gray-wing effect during rapid camera
+panning. A mismatch between the ship image and its coverage mask is a
+candidate explanation. Use rapid pans as the reproduction and compare the
+camera and frame identities of colour, depth and coverage at native insertion
+if investigating. [Original observation](runs/2026-11-04-codex-three-mission-play-review.md).
+
+## Current checkpoint — November 11 reversible setup ZIP inputs
+
+GPU matching and verified ReShade sourcing are committed locally as
+`513ceea`. The next working-tree increment adds the standard and full-add-on
+ReShade DLLs and license as separately verified ZIP build inputs.
+`tools/release/prepare_reshade_payloads.py` emits repeatable recipe entries.
+The ZIP builder checks both role paths, DLL pins, provenance and the exact
+notice. A fresh functional fixture staged both real DLLs and passed
+3,852-file preflight before and after moving. All 770 regressions passed.
+
+Next wire the verified setup inputs and GPU matching into the launcher,
+with a setup journal distinct from the per-run ReShade swap. Preparation,
+rollback and clean-machine gameplay remain unverified.
+[Build-input verification](runs/2026-11-11-codex-reshade-zip-inputs.md).
+
 ## Current checkpoint — November 11 automatic GPU matching
 
 The setup-time development probe now opens the pinned Remix device and finds

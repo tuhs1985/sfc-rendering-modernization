@@ -43,10 +43,10 @@ class ProductionDependencyTests(unittest.TestCase):
     def test_production_list_keeps_wire_camera_settings_and_excludes_standalone_toolchains(self):
         files=set(production_files())
         self.assertEqual({p for p in files if p.startswith('src/')},
-                         {'src/launcher/bootstrap.py','src/launcher/session_recording.py',
+                         {'src/launcher/bootstrap.py','src/launcher/session_recording.py','src/launcher/graphics_setup.py',
                           'src/session/coordinator.py','src/session/exit_monitor.py','src/session/reports.py',
                           'src/session/graphics_transaction.py','src/session/component_qualification.py',
-                          'src/runtime/runtime_context.py','src/runtime/release_manifest.py','src/runtime/windows_processes.py','src/runtime/runtime_files.py','src/runtime/copied_preferences.py','src/runtime/session_recovery.py',
+                          'src/runtime/runtime_context.py','src/runtime/release_manifest.py','src/runtime/windows_processes.py','src/runtime/runtime_files.py','src/runtime/copied_preferences.py','src/runtime/session_recovery.py','src/runtime/setup_adapter.py',
                           'src/assets/parallel_assets.py','src/assets/scene_bundle.py','src/assets/material_binding.py','src/assets/material_library.py','src/assets/roughness_maps.py','src/assets/mesh_checksum.py','src/assets/damage_materials.py','src/assets/damage_mapping.py','src/assets/break_scene.py','src/assets/mesh_decode.py',
     'src/transport/live_bridge.py',
     'src/transport/live_scene.py',

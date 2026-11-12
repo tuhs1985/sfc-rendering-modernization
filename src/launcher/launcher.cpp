@@ -13,8 +13,9 @@ int wmain(int argc,wchar_t** argv){
   if(argc==2){
    if(!_wcsicmp(argv[1],L"-Preflight")||!wcscmp(argv[1],L"--preflight"))option=L"--preflight";
    else if(!_wcsicmp(argv[1],L"-Restore")||!wcscmp(argv[1],L"--restore"))option=L"--restore";
+   else if(!wcscmp(argv[1],L"--prepare"))option=L"--prepare";
    else if(!wcscmp(argv[1],L"--troubleshoot"))option=L"--troubleshoot";
-   else if(!_wcsicmp(argv[1],L"--help")){std::cout<<"SFCRemix-Launch.cmd [--preflight | --restore | --troubleshoot]\nDefault: no saved run history. Troubleshooting: up to 5 short reports, 320 KiB total.\n";return 0;}
+   else if(!_wcsicmp(argv[1],L"--help")){std::cout<<"SFCRemix-Launch.cmd [--preflight | --prepare | --restore | --troubleshoot]\nDefault: no saved run history. Troubleshooting: up to 5 short reports, 320 KiB total.\n";return 0;}
    else throw std::runtime_error("Unknown option. Use --help for launch options.");
   }else if(argc!=1)throw std::runtime_error("Only one launcher option is supported.");
   wchar_t self[32768]{};const auto count=GetModuleFileNameW(nullptr,self,32768);

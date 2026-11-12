@@ -11,6 +11,6 @@
 - [x] Verify the standard ReShade x86 installer source and extraction against the pinned DLL hash.
 - [ ] Finish verifying the remaining portable profile inputs and vendor notices.
 - [x] Verify the ReShade and dgVoodoo DLL pins in the supplied project OP copy and check the ReShade notice.
-- [ ] Include both verified ReShade variants and the notice as distinct ZIP build inputs.
-- [ ] Implement first-run game-copy preparation through the ZIP's launcher, with automatic verification, packaged inputs and rollback.
+- [x] Include both verified ReShade variants and the notice as distinct ZIP build inputs.
+- [x] Implement first-run game-copy preparation through the ZIP's launcher, with automatic verification, packaged inputs and rollback.
 - [ ] Qualify gameplay and recovery on a clean machine.
