@@ -4,6 +4,15 @@ Sponsor-facing current work and parked items: [status tracker](STATUS.md).
 Diagnostic tools, triggers, limits and known pitfalls: [diagnostic reference](DIAGNOSTICS.md).
 The tracker is a sponsor-facing summary; the newest authoritative checkpoint below controls technical work.
 
+## Current checkpoint — November 12 rapid camera pans
+
+The standalone Bird-of-Prey replay reproduced a one-frame spatial lag in returned
+Remix colour relative to current hull depth and owner coverage. The mismatch is
+already present in the host outputs before SFC insertion. Disabling the denoiser
+did not resolve it. The exact in-game gray patch remains unverified. Next qualify
+the post-Present colour capture point with a distinguishable frame marker, then
+retest in gameplay. [Replay and evidence](runs/2026-11-12-codex-rapid-pan-colour-lag.md).
+
 ## Current checkpoint — committed alpha tester ZIP
 
 Built the allowlisted `SFCRemix-v0.1.0-alpha.1.zip` from `4d41a31` with

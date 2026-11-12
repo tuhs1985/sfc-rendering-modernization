@@ -1,13 +1,20 @@
 ---
 title: SFC Modernization — Status Tracker
-updated: 2026-11-11
-checkpoint: Committed alpha tester ZIP built and checked locally. First external checkout pending.
+updated: 2026-11-12
+checkpoint: Rapid-pan colour lag reproduced in standalone replay. Investigate the Remix capture point next.
 tags:
   - sfc-modernization
   - project-status
 ---
 
 # SFC Modernization — Status Tracker
+
+## November 12 — rapid camera pans
+
+The Bird-of-Prey replay showed that Remix colour could follow the previous
+camera pose while the hull mask and depth already followed the current pose.
+Next verify which frame the Remix output copy reads. The alpha ZIP is unchanged.
+[Replay and evidence](runs/2026-11-12-codex-rapid-pan-colour-lag.md).
 
 ## Committed alpha tester ZIP
 
