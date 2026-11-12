@@ -1,7 +1,7 @@
 ---
 title: SFC Modernization — Status Tracker
 updated: 2026-11-12
-checkpoint: Rapid-pan colour lag reproduced in standalone replay. Investigate the Remix capture point next.
+checkpoint: Remix backbuffer lag verified with frame markers. Live rapid-pan checkout pending.
 tags:
   - sfc-modernization
   - project-status
@@ -13,7 +13,8 @@ tags:
 
 The Bird-of-Prey replay showed that Remix colour could follow the previous
 camera pose while the hull mask and depth already followed the current pose.
-Next verify which frame the Remix output copy reads. The alpha ZIP is unchanged.
+Frame markers verified that the post-Present copy reads the previous image with
+the default swap chain. Next check the exact symptom in game. The alpha ZIP is unchanged.
 [Replay and evidence](runs/2026-11-12-codex-rapid-pan-colour-lag.md).
 
 ## Committed alpha tester ZIP

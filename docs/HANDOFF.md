@@ -8,10 +8,12 @@ The tracker is a sponsor-facing summary; the newest authoritative checkpoint bel
 
 The standalone Bird-of-Prey replay reproduced a one-frame spatial lag in returned
 Remix colour relative to current hull depth and owner coverage. The mismatch is
-already present in the host outputs before SFC insertion. Disabling the denoiser
-did not resolve it. The exact in-game gray patch remains unverified. Next qualify
-the post-Present colour capture point with a distinguishable frame marker, then
-retest in gameplay. [Replay and evidence](runs/2026-11-12-codex-rapid-pan-colour-lag.md).
+already present in the host outputs before SFC insertion. Six full-frame colour
+markers verified that `FINAL_COLOR` reads the previous image after the default
+swap-chain rotation. Removing the explicit front image in a standalone test
+returned every current marker. The exact in-game gray patch remains to be
+rechecked using the preflighted copied alpha installation.
+[Replay and evidence](runs/2026-11-12-codex-rapid-pan-colour-lag.md).
 
 ## Current checkpoint — committed alpha tester ZIP
 

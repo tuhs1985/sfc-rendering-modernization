@@ -27,3 +27,21 @@ The host presents the D3D9 scene, requests Remix `FINAL_COLOR`, then independent
 The pinned `FINAL_COLOR` implementation gets swap-chain backbuffer 0 at the time of the request and enqueues a blit from that image. It returns no source-frame ID. The host uses `D3DSWAPEFFECT_DISCARD` and requests the copy after `PresentEx`. The next experiment should use alternating, distinguishable poses or frame markers to test whether the post-Present backbuffer selection accounts for the lag and qualify a capture point that returns the matching frame. Keep the native exact-cohort check and current fallback. Confirm colour, depth and coverage alignment in replay before an in-game rapid-pan checkout. [Pinned Remix output-copy implementation](https://github.com/NVIDIAGameWorks/dxvk-remix/blob/0a6cd5b1ee814ec390c358e0c9c32ece8895ddc0/src/dxvk/rtx_render/rtx_remix_api.cpp#L1394-L1447).
 
 No implementation, appearance profile, or alpha package changed during this investigation.
+
+## Backbuffer identity verified
+
+The pinned runtime creates an extra front-buffer image by default, even though the host requests one D3D9 backbuffer. At the end of presentation, it swaps the underlying images so the just-presented image becomes the front image. `FINAL_COLOR` then resolves backbuffer index 0. In this configuration that index contains the old front image, which is the previous frame after the first present. [Buffer allocation and front-buffer option](https://github.com/NVIDIAGameWorks/dxvk-remix/blob/0a6cd5b1ee814ec390c358e0c9c32ece8895ddc0/src/d3d9/d3d9_swapchain.cpp#L1378-L1437) · [Buffer rotation](https://github.com/NVIDIAGameWorks/dxvk-remix/blob/0a6cd5b1ee814ec390c358e0c9c32ece8895ddc0/src/d3d9/d3d9_swapchain.cpp#L1149-L1157) · [Output copy](https://github.com/NVIDIAGameWorks/dxvk-remix/blob/0a6cd5b1ee814ec390c358e0c9c32ece8895ddc0/src/dxvk/rtx_render/rtx_remix_api.cpp#L1394-L1413).
+
+Verified with the packaged RTX Remix 1.6.1 DLL at 960×540 and a scratch build of the host. With ray tracing and grading disabled for this marker test, the host uses `ColorFill` on backbuffer 0 immediately before `PresentEx`. Six successive frames alternate exact RGB `(224,32,64)` and `(32,224,96)`. The existing output copy, GPU fence and readback follow each Present. The two runs differ only in `d3d9.noExplicitFrontBuffer = True` for the second run. Every one of the 518,400 output pixels agreed with the recorded marker on each frame.
+
+| Input or returned sequence | 0 | 1 | 2 | 3 | 4 | 5 |
+| --- | --- | --- | --- | --- | --- | --- |
+| Submitted | Red | Green | Red | Green | Red | Green |
+| Default swap chain | Black | Red | Green | Red | Green | Red |
+| No explicit front buffer | Red | Green | Red | Green | Red | Green |
+
+The unmodified host with ray tracing enabled and the single-image configuration also put 712–793 bright pixels exclusively in the current owner mask on each of six alternating camera jumps, with zero exclusively in the prior mask. The fresh alternating default run had blank colour during those jumps, so use the earlier staged-pan default replay above for the ray-traced lag evidence. A subsequent same-sequence single-image attempt also had blank colour during its sample window. The first-use colour variability limits the ray-traced comparison. The marker result independently proves which image the copy selects. All six-frame marker runs exited normally with no owned processes left.
+
+Local evidence is in `artifacts/player-replacement/rapid-pan-kff-backbuffer-marker-{default,single-image}` (`markers.json` and job receipts) and `artifacts/player-replacement/rapid-pan-kff-backbuffer-single-image` (`alternating-pose-alignment.json`). The scratch host and replay runner are in `artifacts/alpha/candidate/backbuffer-marker` and `artifacts/alpha/candidate/run-kff-backbuffer-marker.py`. No runtime setting has been promoted to normal play.
+
+The exact ZIP passed read-only preflight for the copied game. The pending in-game check uses the standard packaged path with `--troubleshoot`. Let the enhanced Bird-of-Prey settle, sweep the camera rapidly in both directions, then hold the camera still on the wings. Record whether the gray patches appear in motion and clear when still, along with the short run report. A same-scene checkout of a session-local candidate setting can follow if needed.
