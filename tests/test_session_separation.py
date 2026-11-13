@@ -51,7 +51,7 @@ print('SHARED_CANONICAL_MODULES_PASS')
     def test_package_manifest_lists_application_modules_not_compatibility_tools(self):
         value=json.loads((ROOT/'tools/release/runtime_modules.json').read_text())
         names=set(value['files'])
-        self.assertEqual(len(names),62)
+        self.assertEqual(len(names),64)
         self.assertTrue({'src/session/coordinator.py','src/session/exit_monitor.py','src/session/reports.py'}<=names)
         for name in ('run_return_game','session_exit','run_report'):
             self.assertNotIn('tools/remix_runtime/'+name+'.py',names)

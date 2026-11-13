@@ -4,6 +4,7 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 import zipfile
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -43,6 +44,26 @@ class AlphaZipTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError,'already exists'):
                 builder.build(recipe,root,output,check_commit=False)
 
+    def test_private_checkout_is_marked_and_restore_can_share_launcher(self):
+        with tempfile.TemporaryDirectory(dir=ROOT/'artifacts/alpha') as tmp:
+            root = Path(tmp)
+            recipe = self.fixture(root)
+            recipe.pop('commit')
+            recipe['license_review'] = 'pending'
+            recipe['files'] = [item for item in recipe['files'] if item['role'] != 'restore']
+            with self.assertRaisesRegex(ValueError, 'Reviewed release'):
+                builder.build(recipe, root, root/'release.zip')
+            with self.assertRaisesRegex(ValueError, 'private-checkout'):
+                builder.build(recipe, root, root/'release.zip', private_checkout=True)
+            output = root/'candidate-private-checkout.zip'
+            builder.build(recipe, root, output, private_checkout=True)
+            with zipfile.ZipFile(output) as archive:
+                manifest = json.loads(archive.read('SFCRemix/package.json'))
+            self.assertTrue(manifest['private_checkout'])
+            self.assertIsNone(manifest['commit'])
+            self.assertEqual(manifest['license_review'], 'pending')
+            self.assertEqual(manifest['roles']['restore'], manifest['roles']['launcher'])
+
     def test_game_capture_private_settings_and_changed_inputs_rejected(self):
         with tempfile.TemporaryDirectory(dir=ROOT/'artifacts/alpha') as tmp:
             root=Path(tmp);recipe=self.fixture(root)
@@ -64,6 +85,50 @@ class AlphaZipTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError,'not included'):builder.validate_recipe(recipe,root)
             item['notice']=recipe['files'][1]['target']
             self.assertEqual(len(builder.validate_recipe(recipe,root)[0]),len(recipe['files']))
+
+    def test_partial_setup_payload_is_rejected_before_build(self):
+        with tempfile.TemporaryDirectory(dir=ROOT/'artifacts/alpha') as tmp:
+            root=Path(tmp)
+            recipe=self.fixture(root)
+            path=root/'wrapper-template.txt'
+            path.write_text('fixture')
+            recipe['files'].append(dict(source=path.name,target='runtime/graphics/dgVoodoo.conf',
+                                        sha256=builder.digest(path),role='setup_dgvoodoo',kind='project'))
+            with self.assertRaisesRegex(ValueError,'Incomplete graphics setup inputs'):
+                builder.validate_recipe(recipe,root)
+
+    def test_reshade_roles_are_distinct_and_tied_to_the_baseline(self):
+        import prepare_reshade_payloads as reshade
+
+        with tempfile.TemporaryDirectory(dir=ROOT/'artifacts/alpha') as tmp:
+            root=Path(tmp)
+            recipe=self.fixture(root)
+            full=next(item for item in recipe['files'] if item['role']==reshade.FULL_ROLE)
+            full.update(kind='vendor', target=reshade.FULL_TARGET, upstream=reshade.FULL_SOURCE, notice=reshade.NOTICE)
+            baseline=root/'standard.dll'
+            baseline.write_bytes(b'standard fixture')
+            old=builder.digest(baseline)
+            notice=root/'notice.txt'
+            notice.write_bytes(b'notice fixture')
+            recipe['files'].extend([
+                dict(kind='vendor', source=baseline.name, target=reshade.STANDARD_TARGET, role=reshade.BASELINE_ROLE,
+                     upstream=reshade.STANDARD_SOURCE, notice=reshade.NOTICE, sha256=old),
+                dict(kind='vendor', source=notice.name, target=reshade.NOTICE, upstream=reshade.NOTICE_SOURCE,
+                     notice=reshade.NOTICE, sha256=builder.digest(notice)),
+            ])
+            recipe['game_profile']={'files':{'dxgi.dll':old}}
+            with patch.multiple(reshade, OLD_SHA=old, FULL_SHA=full['sha256'], NOTICE_SHA=builder.digest(notice)):
+                output=root/'reshade-inputs.zip'
+                builder.build(recipe,root,output,check_commit=False)
+                with zipfile.ZipFile(output) as archive:
+                    manifest=json.loads(archive.read('SFCRemix/package.json'))
+                    self.assertEqual(archive.read('SFCRemix/'+manifest['roles'][reshade.BASELINE_ROLE]), baseline.read_bytes())
+                    self.assertEqual(archive.read('SFCRemix/'+manifest['roles'][reshade.FULL_ROLE]), (root/full['source']).read_bytes())
+                    self.assertEqual(archive.read('SFCRemix/'+reshade.NOTICE), notice.read_bytes())
+                    self.assertNotIn('dxgi.dll', archive.namelist())
+                recipe['game_profile']['files']['dxgi.dll']=full['sha256']
+                with self.assertRaisesRegex(ValueError,'differs from the qualified game profile'):
+                    builder.validate_recipe(recipe,root)
 
 
 if __name__=='__main__':unittest.main()

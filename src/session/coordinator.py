@@ -56,7 +56,12 @@ def game_running():
     from windows_processes import game_running as native_inventory
     return native_inventory()
 
-def critical_hashes(folder):return {n:digest(folder/n) for n in CRITICAL}
+def critical_hashes(folder):
+    hashes = {name: digest(folder/name) for name in CRITICAL if name != 'ReShade.ini'}
+    config = folder/'ReShade.ini'
+    if not CONTEXT.release or config.exists():
+        hashes[config.name] = digest(config)
+    return hashes
 def launcher_paths():
     try:
         with winreg.OpenKey(winreg.HKEY_CURRENT_USER,r'Software\VB and VBA Program Settings\SFCLauncher\Paths') as key:
@@ -242,6 +247,8 @@ class Session:
         self.metadata=dict(probe='NATIVE-COHORT-001',utc=dt.datetime.now(dt.timezone.utc).isoformat(),
             accepted_critical_before=self.original,copied_critical_before=critical_hashes(TEST),
             copied_sfc_protected_sha256=protected_ini_sha256((TEST/'sfc.ini').read_bytes()),
+            reshade_config_isolated=CONTEXT.release,
+            tester_config_owned=CONTEXT.release,
             launcher_settings_before=self.paths,source_compatibility=self.compat,
             full_support_qualification=self.q,build_hashes={p.name:digest(p) for p in build_files},
             scene='Fresh retained ships through native insertion',play_session=True,
@@ -286,7 +293,8 @@ class Session:
 
     def _install_proxy(self):
         if self.full_support:
-            shutil.copyfile(TEST / 'ReShade.ini', self.config_backup)
+            if not CONTEXT.release:
+                shutil.copyfile(TEST / 'ReShade.ini', self.config_backup)
             graphics_transaction.install_test_proxy(TEST / 'dxgi.dll', self.rollback)
 
     def _start_host(self):
@@ -528,10 +536,11 @@ class Session:
                         shutil.copyfile(TEST / 'ReShade.log', self.work / 'ReShade.full-support.log')
                     graphics_transaction.restore_test_proxy(TEST / 'dxgi.dll', self.rollback)
                     self.proxy_restored = True
-                    if digest(self.config_backup) != self.metadata['copied_critical_before']['ReShade.ini']:
-                        raise ValueError('Copied configuration rollback hash mismatch')
-                    shutil.copyfile(TEST / 'ReShade.ini', self.work / 'ReShade.after-test.ini')
-                    shutil.copyfile(self.config_backup, TEST / 'ReShade.ini')
+                    if not CONTEXT.release:
+                        if digest(self.config_backup) != self.metadata['copied_critical_before']['ReShade.ini']:
+                            raise ValueError('Copied configuration rollback hash mismatch')
+                        shutil.copyfile(TEST / 'ReShade.ini', self.work / 'ReShade.after-test.ini')
+                        shutil.copyfile(self.config_backup, TEST / 'ReShade.ini')
                 except Exception as exc:
                     self.proxy_restored = False
                     self.error = (self.error + '; ' if self.error else '') + str(exc)
@@ -568,12 +577,15 @@ class Session:
         self.after = critical_hashes(SOURCE)
         self.paths_after = launcher_paths()
         self.copy_after = critical_hashes(TEST)
-        self.original_changed = bool(changed_protected_files(self.original, self.after, (SOURCE / 'sfc.ini').read_bytes(), self.metadata['copied_sfc_protected_sha256'])) if CONTEXT.release else self.after != self.original
+        self.copy_protected_changes = changed_protected_files(self.metadata['copied_critical_before'], self.copy_after, (TEST / 'sfc.ini').read_bytes(), self.metadata['copied_sfc_protected_sha256'])
+        if CONTEXT.release:
+            self.copy_protected_changes = [name for name in self.copy_protected_changes
+                                           if name not in ('sfc.ini', 'dgVoodoo.conf')]
+        self.original_changed = bool(self.copy_protected_changes) if CONTEXT.release else self.after != self.original
         if self.original_changed or self.paths_after != self.paths:
             self.error = (self.error + '; ' if self.error else '') + 'Accepted installation or launcher settings changed'
         if self.copy_after['StarFleetOP.exe'] != CLIENT:
             self.error = (self.error + '; ' if self.error else '') + 'Copied client hash changed'
-        self.copy_protected_changes = changed_protected_files(self.metadata['copied_critical_before'], self.copy_after, (TEST / 'sfc.ini').read_bytes(), self.metadata['copied_sfc_protected_sha256'])
         if self.full_support and self.copy_protected_changes:
             self.error = (self.error + '; ' if self.error else '') + 'Copied critical baseline not fully restored'
 

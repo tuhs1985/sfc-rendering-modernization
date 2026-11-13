@@ -1,7 +1,4 @@
-"""Recognize the qualified graphics profile with only its output size varied.
-
-All other bytes remain protected. This does not edit a user's game settings.
-"""
+"""Read the SFC and dgVoodoo settings needed by the graphics integration."""
 import hashlib
 import re
 
@@ -25,15 +22,38 @@ def canonical(raw, fields):
     return b''.join(out),seen
 
 
-def signature(sfc,dg):
+def sfc_profile(raw):
     from copied_preferences import protected_ini_sha256
-    native,values=canonical(sfc,{(b'3d',b'width'):b'<width>',(b'3d',b'height'):b'<height>'})
+    native,values=canonical(raw,{(b'3d',b'width'):b'<width>',(b'3d',b'height'):b'<height>'})
     try:size=tuple(int(values[b'3d',k]) for k in (b'width',b'height'))
     except ValueError as exc:raise ValueError('Invalid native dimensions') from exc
     if size not in SIZES:raise ValueError('Unsupported SFC alpha resolution')
-    graphics,values=canonical(dg,{(b'generalext',b'desktopresolution'):b'<desktop>',(b'directx',b'resolution'):b'<output>'})
+    return protected_ini_sha256(native),size
+
+
+def wrapper_profile(raw):
+    graphics,values=canonical(raw,{(b'generalext',b'desktopresolution'):b'<desktop>',(b'directx',b'resolution'):b'<output>'})
+    return hashlib.sha256(graphics).hexdigest().upper(),values[b'generalext',b'desktopresolution'],values[b'directx',b'resolution']
+
+
+def wrapper_requirements(raw):
+    backend = (b'general', b'outputapi')
+    samples = (b'directx', b'antialiasing')
+    _, values = canonical(raw, {backend: b'', samples: b''})
+    if values[backend].lower() not in (b'd3d11_fl10_1', b'd3d11_fl11_0', b'd3d11_fl11_1'):
+        raise ValueError('OutputAPI must select hardware Direct3D 11 at feature level 10.1 or higher')
+    if values[samples].lower() != b'8x':
+        raise ValueError('DirectX Antialiasing must be 8x for native ship insertion')
+
+
+def matching_dimensions(size,desktop,output):
     w,h=size
-    if values[b'generalext',b'desktopresolution']!=f'{w}x{h}'.encode() or values[b'directx',b'resolution']!=f'h:{w}, v:{h}'.encode():
+    return desktop==f'{w}x{h}'.encode() and output==f'h:{w}, v:{h}'.encode()
+
+
+def signature(sfc,dg):
+    sfc_hash,size=sfc_profile(sfc)
+    dg_hash,desktop,output=wrapper_profile(dg)
+    if not matching_dimensions(size,desktop,output):
         raise ValueError('SFC and qualified wrapper dimensions must agree')
-    return dict(schema='sfc.alpha.graphics-dimensions.v1',sfc_sha256=protected_ini_sha256(native),
-                dg_sha256=hashlib.sha256(graphics).hexdigest().upper())
+    return dict(schema='sfc.alpha.graphics-dimensions.v1',sfc_sha256=sfc_hash,dg_sha256=dg_hash)

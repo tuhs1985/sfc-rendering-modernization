@@ -56,10 +56,182 @@ is deliberately marked not distribution-ready until the exact bundle and terms
 are reviewed. Vendor components cannot be relicensed under project MIT.
 Contributed research is not a runtime dependency and is excluded from the ZIP.
 
+## November 11 release input review
+
+The reversible-setup package passed the local private gameplay checkout. A
+separate review rehashed its 3,860 immutable files, compared all 191 Remix
+files with the official pinned x64 runtime manifest, and inspected the normal
+PE import tables of 141 binaries. The review list omits the private fixture
+marker and notice inventory from proposed public payloads. It does not include
+the enclosing game directory or any mutable package data.
+
+| Input | Verified | Remaining release check |
+| --- | --- | --- |
+| Visual C++ for Remix | Remix and OpenUSD import `msvcp140.dll`, `vcruntime140.dll`, and `vcruntime140_1.dll`. The private package had these CRT names available through this workstation, with only Python's own copies of the two vcruntime files in the package. VS 2026 x64 REDIST 14.51.36231 files are pinned and staged for placement beside the Remix DLL. The standalone GPU adapter probe passed with the augmented runtime. | Verify application-local loading and gameplay on Windows without a system VC runtime installation. The workstation result confirms compatibility with the staged layout on this PC. [Microsoft 2026 REDIST list](https://learn.microsoft.com/en-us/visualstudio/releases/2026/redistribution). |
+| Remix supplemental notices | Verified 24 texts from NVIDIA's Minecraft integration at `befcc00d16a4fc9f284cec0eceed6c639e17fa64`. Its MIT and DXVK third-party aggregate notices match the 1.6.1 archive byte-for-byte. The other 22 are mapped for review and cover OpenUSD, oneTBB, XeSS, Crashpad, NRC dependencies and other components. | Confirm version applicability against the exact pinned x64 file list and finalize separate SDK and CUDA terms in the shipped notices. [NVIDIA notice inventory](https://github.com/NVIDIAGameWorks/rtx-remix-minecraft/blob/befcc00d16a4fc9f284cec0eceed6c639e17fa64/THIRD_PARTY_NOTICES.md) · [CUDA 13.3 terms](https://docs.nvidia.com/cuda/archive/13.3.0/eula/index.html). |
+| dgVoodoo | The preserved 2.86.5 archive matches the mirror's Git blob `bfec80629136002ae88496512fad9a3cac6f5ed1`. Its original x86 DLLs match the two setup inputs. The author's current terms allow unmodified components shipped with a specific game mod. | Include attribution, the version-specific preserved archive provenance and the author's terms reference in the exact candidate. [Preserved archive](https://github.com/masterotaku/dgVoodoo-binaries/blob/main/dgVoodoo2_86_5.zip) · [Author's redistribution terms](https://www.dege.freeweb.hu/dgVoodoo2/ReadmeGeneral/#redistribution-rights). |
+
+Local evidence is in `artifacts/alpha/alpha-release-input-review.json`,
+`alpha-release-native-imports.json`, `remix-notice-review/review-inputs.json`,
+`remix-crt-recipe-inputs.json` and `remix-crt-gpu-probe.txt`. Eleven focused
+alpha Python regressions passed. The recipe review has no approved commit yet.
+The public builder requires a reviewed commit and matching built binaries.
+The reversible setup source is still uncommitted. No release ZIP, extraction
+checkout or tag was produced during this review.
+
+The supplemental notice source pins `minecraft-rtx2-a00da12a-win64-release`.
+The two byte-identical notices establish overlap with the public Remix archive.
+Check the remaining supplemental notices against the shipped 1.6.1 components
+before marking the full recipe reviewed.
+
+## Exact ZIP extraction checkout
+
+The allowlist builder produced a local `SFCRemix-v0.1.0-alpha.1-private-checkout.zip`
+under `artifacts/alpha/candidate`. It contains 3,886 manifest inputs and
+only adds the CMD launcher and the SFCRemix directory on extraction.
+The ZIP is 510,845,229 bytes. SHA-256 is
+`daf688b30f809e3721663540ad61a905dd95447699bbc8b518ec6cac3fb7a360`.
+The manifest records pending vendor review and no release commit. The
+archive is for local verification. No tag or publication was made.
+
+The candidate includes the three application-local Remix CRT DLLs, the
+two ReShade variants, reversible graphics setup, default profiles and
+vendor notices. It excludes the surrounding game, local settings, saves,
+and development captures. The local recipe and exact archive receipts
+are in `artifacts/alpha/candidate`.
+
+Extracted the exact archive into `artifacts/alpha/candidate/game`, a fresh
+copy of the validated SFC test source. Native preflight identified the
+original ReShade configuration. Installed setup used the staged probes to
+qualify the GPU and apply the profile. Native preflight passed with the
+applied profile. Restore returned the protected files byte-for-byte, and
+the last preflight again identified the original ReShade configuration.
+The source files matched their original hashes. The receipt is
+`extraction-qualification.json`.
+
+These checks used the packaged bootstrap for the setup and restore actions.
+The next check is the normal CMD launcher with its elevation path and
+enhanced gameplay in that extracted copy. Twelve focused alpha tests passed.
+Clean-machine and hybrid-GPU coverage remain open.
+
+### Extracted game asset repair
+
+The sponsor reported a launch failure, then a white/black tactical background
+and an early console exit. The retained run `20261112-042551-898187-in-game`
+stopped on `Original image missing/bound` after 30.719 seconds. The game was
+still running, so the graphics swap was deferred for recovery. No separate
+failure receipt is available for the first attempt.
+
+The local extraction checkout script treated every BMP as a screenshot.
+It omitted 4,379 original bitmaps from the copied Assets tree, including
+ship images and background resources. This happened when copying the
+tester-owned game, before extraction of the ZIP. Restored all 4,379
+files in place from the validated source and compared each SHA-256.
+Compared file presence and size across Assets, MetaAssets, and the ReShade
+shader tree. The script now filters screenshot filenames only in the root
+and checks the asset trees before exercising the launcher.
+
+Local evidence remains under `artifacts/alpha/candidate`, including
+`failed-checkout-evidence` and `asset-repair-receipt.json`.
+The archive checksum and game checkout command are unchanged.
+The next gameplay run qualifies the repaired copy.
+
+### Tester ReShade configuration
+
+The sponsor confirmed that the original private ZIP ran in another SFC
+folder and requested that their `ReShade.ini` remain theirs. New packages
+omit the setup INI template and its expected hash. Installed preflight
+accepts existing settings or a missing INI. The running session derives a
+ReShade configuration under its own data directory and redirects the
+cache, screenshot and add-on paths there. With no INI it uses ReShade
+defaults in that directory. Existing rules keep shader, texture and preset
+paths inside the game copy.
+
+New release sessions restore only the swapped DLL. Legacy setup and session
+journals retain their original restore behavior. Test coverage verifies
+customized and missing INI admission, session-only defaults, and both
+legacy and isolated interrupted recovery. All 777 Windows regressions passed.
+
+The updated private ZIP is
+`artifacts/alpha/candidate/SFCRemix-v0.1.0-alpha.1-preserve-reshade-private-checkout.zip`.
+SHA-256 is `99d89755467a968a32ae2eafd089e257e0a630299e200a10572e0f641361fdaf`.
+Applied its exact changed package files to the existing disposable checkout.
+Native preflight, GPU preparation with closed stdin, restore, and generation
+of the private session config passed. The tester INI's bytes and modification
+time matched before and after each check. Gameplay of the revised ZIP is open.
+
+### Tester-owned game and wrapper settings
+
+The launcher admits the tester's `sfc.ini` and `dgVoodoo.conf` by checking
+the graphics settings relevant to the alpha. It checks supported SFC
+dimensions and the paired wrapper dimensions. The wrapper must use hardware
+Direct3D 11 with the 8x multisample layout used by native insertion. Runtime
+still checks the actual target and matching GPU. Preference values and
+comments outside those graphics checks do not have to match the development
+profile.
+
+Setup installs only the qualified DLLs after confirmation. It runs the
+adapter probe on the tester's wrapper settings in scratch storage and
+reports a verified alternative adapter setting when the existing one
+selects a different GPU. It does not install a wrapper settings template.
+New interrupted sessions can restore the DLL even if the tester changes
+their settings after exit. Explicit recovery of old journals still follows
+the original verified backups.
+
+The revised private ZIP is
+`artifacts/alpha/candidate/SFCRemix-v0.1.0-alpha.1-preserve-settings-private-checkout.zip`.
+Its SHA-256 is `11caa47ebe82788f1ce21689649a21e295da2e52646e5ba40e0d395baf1d238a`.
+The existing checkout was updated in place. Native preflight, real GPU
+preparation, restore and temporary ReShade configuration generation passed.
+The bytes and modification timestamps of all three tester configuration
+files matched before and after. All 778 Windows regressions passed on retry
+after a transient Windows file-replacement error in the material test.
+The sponsor confirmed revised-package gameplay. Clean-machine and
+hybrid-GPU qualification remain open.
+
 Official references: [Remix release](https://github.com/NVIDIAGameWorks/rtx-remix/releases/tag/remix-1.6.1),
 [pinned ReShade license](https://github.com/crosire/reshade/blob/8cf85bd12d56697d756d4fcb45e501f5d1b540fa/LICENSE.md),
 [dgVoodoo redistribution](https://dege.freeweb.hu/dgVoodoo2/ReadmeGeneral/),
 [Microsoft redistribution guidance](https://learn.microsoft.com/en-us/cpp/windows/redistributing-visual-cpp-files).
+
+## Committed alpha tester ZIP
+
+Built `SFCRemix-v0.1.0-alpha.1.zip` from `4d41a31b97a776a7ccbe50be3d75a3d461252ce9`
+using a detached source checkout. Rebuilt the 13 native endpoints from that
+commit and archived Git's exact application source bytes. The recipe retains
+the full previously qualified x64 Remix payload. It excludes game assets,
+saved preferences, captures, developer receipts and unrelated workspace files.
+
+The notice index links the exact upstream sources and preserves their separate
+terms. The pinned [NVIDIA build list](https://github.com/NVIDIAGameWorks/dxvk-remix/blob/0a6cd5b1ee814ec390c358e0c9c32ece8895ddc0/packman-external.xml)
+confirms OpenUSD 25.11 and Sentry Native 0.15.3. oneTBB 2021.12 matches the
+included DLL's version metadata. The supplemental XeSS license text matches
+[Intel's pinned submodule notice](https://github.com/intel/xess/blob/677aeb1ebe8fe1250ab98180bcdc8e5fda4a7628/LICENSE.txt)
+after line ending normalization. The original Remix, NVIDIA SDK and Aftermath
+notices remain bundled. The index identifies the CUDA terms and preserved
+dgVoodoo archive. The Microsoft files come from the matching x64 REDIST
+directory.
+
+The archive has 3,884 manifest inputs and is 510,879,148 bytes.
+SHA-256 is `c222118593df64b11e24af79b3c805781fcfc0450aa2abb970900bc7034bbf55`.
+Local ZIP, checksum, input recipe and build logs are in
+`artifacts/alpha/candidate`. There is no tag, upload or publication.
+
+The exact ZIP was freshly extracted into the existing disposable game copy.
+Native preflight, installed GPU preparation, restore, and repeat native
+preflight passed with the game executable and graphics files unchanged.
+Windows temporarily held the empty GPU scratch directory during fixture
+cleanup. The archive was re-extracted and final native preflight passed with
+a Windows-only PATH. The prior package backup was removed after merging
+the existing mutable settings and data. The independent PC gameplay and
+restore test is pending. See `alpha-release-local-checkout.json` and
+`alpha-release-installed-final.txt`.
+
+The shipped standalone GPU transfer probe also matched all 2,073,600
+pixels at 1920×1080. The helper hit its 45-second exit deadline after
+reporting successful SDK shutdown, reproducing the prior 1080p probe's
+teardown limitation. The job left zero owned processes. This evidence
+qualifies pixel transfer and leaves live-game shutdown for the tester run.
 
 ## Exit gate
 

@@ -18,6 +18,7 @@ class PortableReShadeTests(unittest.TestCase):
             root=Path(env['RESHADE_BASE_PATH_OVERRIDE'])
             text=(root/'ReShade.ini').read_text(encoding='utf-8')
             self.assertIn(str(context.game_root/'shaders'/'**'),text)
+            self.assertIn(str(context.game_root/'preset.ini'),text)
             self.assertIn(str(root/'cache'),text)
             self.assertIn(str(root/'screenshots'),text)
             self.assertEqual(path.read_bytes(),original)
@@ -28,6 +29,14 @@ class PortableReShadeTests(unittest.TestCase):
             (context.game_root/'ReShade.ini').write_text('[GENERAL]\nPresetPath=../outside.ini\n')
             work=context.data_root/'run';work.mkdir(parents=True)
             with self.assertRaisesRegex(ValueError,'outside game copy'):prepare(context,work)
+
+    def test_missing_ini_uses_session_defaults_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            context=packaged(Path(tmp)/'Game/SFCRemix')
+            work=context.data_root/'run';work.mkdir(parents=True)
+            prepare(context,work)
+            self.assertTrue((work/'reshade/ReShade.ini').is_file())
+            self.assertFalse((context.game_root/'ReShade.ini').exists())
 
 
 if __name__=='__main__':unittest.main()

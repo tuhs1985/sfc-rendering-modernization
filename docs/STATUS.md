@@ -1,13 +1,95 @@
 ---
 title: SFC Modernization — Status Tracker
-updated: 2026-11-10
-checkpoint: Main source reorganization complete. Sponsor completed the gameplay checkout.
+updated: 2026-11-12
+checkpoint: Rapid-pan correction enabled for pinned Remix and qualified through standalone target recreation. Alpha ZIP unchanged.
 tags:
   - sfc-modernization
   - project-status
 ---
 
 # SFC Modernization — Status Tracker
+
+## November 12 — rapid camera pans
+
+The Bird-of-Prey replay showed that Remix colour could follow the previous
+camera pose while the hull mask and depth already followed the current pose.
+Frame markers verified that the post-Present copy reads the previous image with
+the default swap chain. The sponsor reproduced the patches during fast slews
+and zooms in and out on the unchanged alpha. With the session-local correction
+enabled in the development copy, the sponsor reported that it seemed to work.
+The pinned adapter now uses that setting by default. Standalone checks passed
+for the initial output, resize and device recreation. Packaged gameplay is pending.
+[Replay and evidence](runs/2026-11-12-codex-rapid-pan-colour-lag.md).
+
+## Committed alpha tester ZIP
+
+The package built from `4d41a31` passed local extraction, preflight,
+graphics setup and restoration. The existing test copy has been updated.
+Next verify gameplay and restoration on a tester's PC.
+[Build and qualification record](releases/DEPENDENCY_CLOSURE.md#committed-alpha-tester-zip).
+
+## November 11 — tester-owned SFC and dgVoodoo settings
+
+The updated private ZIP checks graphics compatibility and leaves the tester's
+settings in place. The installed GPU, preflight, and restore checks preserved
+all three config files. The sponsor confirmed revised-package gameplay.
+Clean-machine and hybrid-GPU qualification remain open.
+[Evidence](releases/DEPENDENCY_CLOSURE.md#tester-owned-game-and-wrapper-settings).
+
+## November 11 — tester ReShade preferences
+
+The sponsor confirmed the private ZIP worked in a separate SFC copy. The
+revised ZIP preserves the original ReShade INI through first-run preparation,
+session configuration generation and restoration. Gameplay of the revised
+ZIP is open.
+[Evidence](releases/DEPENDENCY_CLOSURE.md#tester-reshade-configuration).
+
+## November 11 — private ZIP extraction verified
+
+The allowlisted ZIP passed fresh extraction, first-run setup, preflight and
+restoration on this workstation. Enhanced gameplay from that ZIP is the next
+checkout. [ZIP evidence](releases/DEPENDENCY_CLOSURE.md#exact-zip-extraction-checkout).
+
+## November 11 — reversible first-run graphics setup
+
+The private package passed GPU matching, setup preview, declined and approved
+preparation, and restoration on this workstation. The sponsor confirmed the
+normal CMD launcher worked in gameplay, and preflight passed after exit.
+Rapid camera panning reproduced the earlier gray-wing issue. Ship and mask
+synchronization remains a hypothesis.
+[Verification record](runs/2026-11-11-codex-reversible-graphics-setup.md).
+
+## November 11 — setup-time GPU matching verified
+
+The pinned Remix and dgVoodoo device probes reported the same LUID using the
+existing setting. The candidate config was byte-identical to the input.
+769 regressions passed. Reversible launcher preparation and hybrid gameplay
+qualification remain open.
+[Verification record](runs/2026-11-11-codex-graphics-adapter-matching.md).
+
+## November 11 — standard ReShade x86 source verified
+
+Both official endpoints supplied the same standard 6.7.1 installer. Its
+embedded 6.7.1.2133 x86 DLL matches the pinned baseline hash. The
+[download, extraction and hash procedure](releases/GRAPHICS_BASELINE_AUDIT.md#verified-source-for-the-standard-reshade-x86-dll)
+is verified. Reversible preparation and clean-machine checkout remain open.
+
+## November 11 — portable graphics candidate
+
+Cache-only ReShade comparison preserved the generated profile and all 128
+appearance inputs. Both dgVoodoo policies matched Remix's adapter on the
+single-physical-GPU workstation. The sponsor completed the private cache-only checkout.
+Hybrid selection, standard ReShade sourcing, reversible setup and clean-machine
+qualification remain open.
+[Evidence and checkout command](runs/2026-11-11-codex-portable-graphics-profile.md).
+
+## November 11 — tester graphics preflight verified
+
+The reorganization merged as `e324e5c`. Installed `--preflight` now lists
+graphics mismatches together. 765 regressions passed, and the packaged launcher
+reported five simultaneous issues without changing any files. The qualified
+profile still passes. Portable preparation, rollback and clean-machine gameplay
+are the next gates. [Test record](runs/2026-11-11-codex-tester-graphics-preflight.md).
 
 ## November 10 — main source reorganization implemented
 

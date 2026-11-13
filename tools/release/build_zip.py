@@ -14,19 +14,22 @@ import zipfile
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/'tools/release'))
 sys.path.insert(0,str(ROOT/'tools/remix_runtime'))
-from release_manifest import SCHEMA,digest,REQUIRED_ROLES
+from release_manifest import SCHEMA,digest,REQUIRED_ROLES,SETUP_ROLES,SETUP_INPUT_ROLES
 from runtime_context import VERSION,CLIENT_SHA256,relative_name
 from package_layout import excluded
 from inventory_dependencies import production_files
+from prepare_reshade_payloads import verify_roles as verify_reshade_roles
 
 FORBIDDEN_PARTS={'.git','.codex','.codex-attachments','runs','archives','captures','saves','settings','data'}
 FORBIDDEN_SUFFIXES={'.mod','.bin','.raw32','.bmp','.dmp','.etl','.nsys-rep','.sqlite','.pdb','.obj','.lib','.exp','.log'}
 
 
-def validate_recipe(recipe,source_root):
+def validate_recipe(recipe,source_root,*,private_checkout=False):
+    review = 'pending' if private_checkout else 'complete'
     if (recipe.get('schema')!='sfc.alpha.build.v1' or recipe.get('version')!=VERSION or
-            recipe.get('license_review')!='complete' or
-            not isinstance(recipe.get('commit'),str) or len(recipe['commit'])!=40):
+            recipe.get('license_review')!=review or
+            (not private_checkout and
+             (not isinstance(recipe.get('commit'),str) or len(recipe['commit'])!=40))):
         raise ValueError('Reviewed release recipe/commit/license inventory required')
     records=recipe.get('files',[])
     if not 1<=len(records)<=20000:raise ValueError('Allowlist file count')
@@ -60,20 +63,33 @@ def validate_recipe(recipe,source_root):
             if item['role'] in roles:raise ValueError('Duplicate application role')
             roles[item['role']]=name
         items.append((item,source,name))
+    if 'launcher' in roles:
+        roles.setdefault('restore',roles['launcher'])
     if not REQUIRED_ROLES<=roles.keys():raise ValueError('Missing required application roles')
+    if SETUP_INPUT_ROLES & roles.keys():
+        if not SETUP_ROLES<=roles.keys():
+            raise ValueError('Incomplete graphics setup inputs')
+        hashes={name:item['sha256'] for item,_,name in items}
+        baseline=recipe['game_profile']['files']
+        for role,name in (('setup_ddraw','DDraw.dll'),('setup_d3dimm','D3DImm.dll')):
+            if hashes[roles[role]]!=baseline[name].lower():
+                raise ValueError('Setup ZIP input differs from the qualified profile: '+name)
     for item,_,_ in items:
         if item['kind']=='vendor' and item['notice'] not in {n for _,_,n in items}:
             raise ValueError('Vendor notice is not included in the ZIP')
+    verify_reshade_roles(items, roles, recipe['game_profile'])
     return items,roles
 
 
-def build(recipe,source_root,output,*,check_commit=True):
+def build(recipe,source_root,output,*,check_commit=True,private_checkout=False):
     source_root=Path(source_root).resolve();output=Path(output).resolve()
     if not output.is_relative_to((ROOT/'artifacts/alpha').resolve()):
         raise ValueError('Candidate output must stay under artifacts/alpha')
     if output.exists():raise ValueError('Candidate already exists; never overwrite an earlier reviewed ZIP')
-    items,roles=validate_recipe(recipe,source_root)
-    if check_commit:
+    if private_checkout and not output.name.endswith('-private-checkout.zip'):
+        raise ValueError('Unreviewed output must be named *-private-checkout.zip')
+    items,roles=validate_recipe(recipe,source_root,private_checkout=private_checkout)
+    if check_commit and not private_checkout:
         head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=source_root,text=True).strip()
         if head!=recipe['commit']:raise ValueError('Reviewed commit differs from checkout')
         # Untracked user files may coexist, but no modified tracked input is a
@@ -91,9 +107,12 @@ def build(recipe,source_root,output,*,check_commit=True):
                 if tracked.returncode or hashlib.sha256(tracked.stdout).hexdigest()!=item['sha256']:
                     raise ValueError('Project input is not the reviewed committed file: '+item['source'])
     manifest=dict(schema=SCHEMA,version=VERSION,platform='windows-x64',client_sha256=CLIENT_SHA256,
-                  commit=recipe['commit'],roles=roles,game_profile=recipe['game_profile'],remix=recipe['remix'],
+                  commit=None if private_checkout else recipe['commit'],roles=roles,
+                  game_profile=recipe['game_profile'],remix=recipe['remix'],
                   files={name:dict(bytes=source.stat().st_size,sha256=item['sha256']) for item,source,name in items},
                   provenance={name:{k:item[k] for k in ('kind','upstream','notice') if k in item} for item,_,name in items})
+    if private_checkout:
+        manifest.update(private_checkout=True, license_review='pending')
     payload=json.dumps(manifest,indent=2,sort_keys=True).encode('utf-8')
     launcher=ROOT/'src/launcher/SFCRemix-Launch.cmd'
     output.parent.mkdir(parents=True,exist_ok=True)
@@ -118,7 +137,8 @@ def build(recipe,source_root,output,*,check_commit=True):
         raise
     checksum=digest(output)
     output.with_suffix('.zip.sha256').write_text(checksum+'  '+output.name+'\n',encoding='ascii')
-    return dict(zip=str(output),bytes=output.stat().st_size,sha256=checksum,files=len(items),published=False)
+    return dict(zip=str(output),bytes=output.stat().st_size,sha256=checksum,files=len(items),
+                private_checkout=private_checkout,published=False)
 
 
 def write(archive,name,data):
@@ -132,5 +152,8 @@ if __name__=='__main__':
     parser=argparse.ArgumentParser()
     parser.add_argument('--recipe',type=Path,required=True)
     parser.add_argument('--output',type=Path,required=True)
+    parser.add_argument('--private-checkout',action='store_true',
+                        help='build a clearly marked local ZIP while review is pending')
     args=parser.parse_args()
-    print(json.dumps(build(json.loads(args.recipe.read_text()),ROOT,args.output),indent=2))
+    print(json.dumps(build(json.loads(args.recipe.read_text()),ROOT,args.output,
+                           private_checkout=args.private_checkout),indent=2))

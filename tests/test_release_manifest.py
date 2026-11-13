@@ -100,6 +100,12 @@ class ReleaseManifestTests(unittest.TestCase):
             value['game_profile']=dict(files={n:rm.digest(context.game_root/n) for n in names},
                                       sfc_protected_sha256=protected_ini_sha256(ini))
             rm.verify_game_profile(context,value)
+            (context.game_root/'ReShade.ini').write_bytes(b'[GENERAL]\nPresetPath=custom.ini\n')
+            rm.verify_game_profile(context,value)
+            (context.game_root/'ReShade.ini').unlink()
+            rm.verify_game_profile(context,value)
+            del value['game_profile']['files']['ReShade.ini']
+            rm.verify_game_profile(context,value)
             self.assertFalse(context.settings_root.exists())
             (context.game_root/'d3d9.dll').write_bytes(b'unknown')
             with self.assertRaisesRegex(ValueError,'proxy conflict'):
@@ -108,6 +114,53 @@ class ReleaseManifestTests(unittest.TestCase):
             (context.game_root/'dxgi.dll').write_bytes(b'unknown')
             with self.assertRaisesRegex(ValueError,'Unsupported graphics file'):
                 rm.verify_game_profile(context,value)
+            self.assertFalse(context.data_root.exists())
+
+    def test_preflight_reports_all_graphics_issues_without_writing(self):
+        from copied_preferences import protected_ini_sha256
+        from game_profile import signature
+
+        with tempfile.TemporaryDirectory() as tmp:
+            context, value = self.stage(tmp)
+            game = context.game_root
+            names = ('DDraw.dll', 'D3DImm.dll', 'dxgi.dll', 'dgVoodoo.conf', 'ReShade.ini')
+            for name in names:
+                (game / name).write_bytes(name.encode())
+            native = b'[3D]\r\nWidth=1280\r\nHeight=720\r\n[Network]\r\nPlayerName=test\r\n'
+            wrapper = (b'[General]\r\nOutputAPI=d3d11_fl10_1\r\n'
+                       b'[GeneralExt]\r\nDesktopResolution=1280x720\r\n'
+                       b'[DirectX]\r\nResolution=h:1280, v:720\r\nAntialiasing=8x\r\n')
+            (game / 'dgVoodoo.conf').write_bytes(wrapper)
+            (game / 'sfc.ini').write_bytes(native)
+            value['game_profile'] = dict(
+                files={name: rm.digest(game / name) for name in names},
+                sfc_protected_sha256=protected_ini_sha256(native),
+                dimension_profile=signature(native, wrapper),
+            )
+            self.assertEqual(list(rm.game_profile_issues(context, value)), [])
+            (game / 'sfc.ini').write_bytes(native + b'[Sound]\r\nVolume=20\r\n')
+            (game / 'dgVoodoo.conf').write_bytes(wrapper + b';custom comment\r\n')
+            self.assertEqual(list(rm.game_profile_issues(context, value)), [])
+            (game / 'dgVoodoo.conf').write_bytes(wrapper.replace(b'8x',b'4x'))
+            self.assertTrue(any('Antialiasing must be 8x' in issue
+                                for issue in rm.game_profile_issues(context,value)))
+            (game / 'DDraw.dll').unlink()
+            (game / 'dxgi.dll').write_bytes(b'other proxy')
+            (game / 'dgVoodoo.conf').write_bytes(wrapper.replace(b'1280x720', b'1920x1080'))
+            (game / 'sfc.ini').write_bytes(native + b';changed setting\r\n')
+            (game / 'd3d9.dll').write_bytes(b'conflicting proxy')
+            before = {path: path.read_bytes() for path in game.rglob('*') if path.is_file()}
+
+            issues = list(rm.game_profile_issues(context, value))
+            for expected in ('Missing graphics file: DDraw.dll', 'Unsupported graphics file: dxgi.dll',
+                             'resolution does not match sfc.ini (1280x720)',
+                             'Unrecognized proxy conflict: d3d9.dll'):
+                self.assertTrue(any(expected in issue for issue in issues), issues)
+            self.assertEqual(len(issues), 4)
+            with self.assertRaisesRegex(ValueError, 'Missing graphics file: DDraw.dll'):
+                rm.verify_game_profile(context, value)
+            self.assertEqual({path: path.read_bytes() for path in game.rglob('*') if path.is_file()}, before)
+            self.assertFalse(context.settings_root.exists())
             self.assertFalse(context.data_root.exists())
 
 

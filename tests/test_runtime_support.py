@@ -63,6 +63,22 @@ with tempfile.TemporaryDirectory() as temp:
   assert (game/'ReShade.ini').read_bytes()==b'settings'
   assert recovery.recover_pending(lambda:False) is None
   assert json.loads((run/'recovery.json').read_text())['game_absent_verified']
+  isolated=context.artifact('remix-runtime/runs')/'isolated-in-game';isolated.mkdir()
+  (isolated/'dxgi-original.rollback').write_bytes(b'original')
+  (isolated/'manifest.json').write_text(json.dumps({'probe':'NATIVE-COHORT-001',
+    'full_support_qualification':{'result':'RELEASE_MANIFEST_INPUTS'},
+    'copied_critical_before':{**baseline,'sfc.ini':'OLD','dgVoodoo.conf':'OLD'},
+    'reshade_config_isolated':True,'tester_config_owned':True}))
+  (game/'dxgi.dll').write_bytes(b'full')
+  (game/'ReShade.ini').write_bytes(b'tester custom settings')
+  (game/'sfc.ini').write_bytes(b'tester sfc settings')
+  (game/'dgVoodoo.conf').write_bytes(b'tester wrapper settings')
+  assert recovery.recover_pending(lambda:False)
+  assert (game/'dxgi.dll').read_bytes()==b'original'
+  assert (game/'ReShade.ini').read_bytes()==b'tester custom settings'
+  assert (game/'sfc.ini').read_bytes()==b'tester sfc settings'
+  assert (game/'dgVoodoo.conf').read_bytes()==b'tester wrapper settings'
+  assert not json.loads((isolated/'recovery.json').read_text())['config_restored']
 print('APPLICATION_RECOVERY_WITHOUT_DIAGNOSTICS_PASS')
 '''
         result=subprocess.run([sys.executable,'-I','-B','-c',code,str(ROOT)],

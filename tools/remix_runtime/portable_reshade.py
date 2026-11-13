@@ -14,7 +14,10 @@ def prepare(context,work):
     if not root.is_relative_to(context.data_root.resolve()):raise ValueError('ReShade output must stay under package data')
     profile=configparser.RawConfigParser(strict=True)
     profile.optionxform=str
-    profile.read_string((context.game_root/'ReShade.ini').read_text(encoding='utf-8-sig'))
+    try:
+        profile.read_string((context.game_root/'ReShade.ini').read_text(encoding='utf-8-sig'))
+    except FileNotFoundError:
+        pass  # ReShade can start with defaults in its private session directory.
     root.mkdir();(root/'cache').mkdir();(root/'screenshots').mkdir();(root/'addons').mkdir()
     for section in ('GENERAL','SCREENSHOT','ADDON'):
         if not profile.has_section(section):profile.add_section(section)

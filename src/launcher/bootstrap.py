@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 import sys
 import subprocess
-from contextlib import redirect_stdout,redirect_stderr
+from contextlib import nullcontext, redirect_stdout, redirect_stderr
 
 CODE = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -17,8 +17,8 @@ sys.path.insert(0,str(CODE/'src/assets'))
 sys.path.insert(0,str(CODE/'src/transport'))
 sys.path.insert(0,str(CODE/'src/rendering'))
 from runtime_context import CONTEXT
-from release_manifest import contained, verify, verify_game_profile, seed_settings
-from release_manifest import verified_role,digest
+from release_manifest import contained, game_profile_issues, verify, verify_game_profile, seed_settings
+from release_manifest import verified_role,digest,setup_enabled
 from session_recording import finish
 
 
@@ -54,33 +54,57 @@ def main():
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument('--preflight', action='store_true')
     mode.add_argument('--restore', action='store_true')
+    mode.add_argument('--prepare', action='store_true')
     mode.add_argument('--troubleshoot', action='store_true')
     args = parser.parse_args()
     if not CONTEXT.release or CONTEXT.code_root != CODE:
         raise ValueError('Use the launcher from the extracted SFCRemix package')
     manifest = verify(CONTEXT)
-    if manifest.get('fixture_only') and not args.preflight:
+    if args.preflight:
+        issues = list(game_profile_issues(CONTEXT, manifest))
+        if issues:
+            print('This game copy needs graphics setup.')
+            for issue in issues:
+                print('- ' + issue)
+            print('No game or package files were changed.', flush=True)
+            raise SystemExit(1)
+        check_native_launcher(CONTEXT, manifest)
+        print(json.dumps(dict(result='READ_ONLY_PACKAGE_PREFLIGHT_PASS', version=manifest['version'],
+                              game=str(CONTEXT.game_root), files=len(manifest['files']))))
+        return
+    if manifest.get('fixture_only'):
         raise ValueError('This private preflight fixture cannot launch SFC or restore a real installation')
+    setup = None
+    if setup_enabled(manifest):
+        import graphics_setup as setup
+    if args.prepare and not setup:
+        raise ValueError('This package does not include first-run graphics setup.')
+    with setup.launch_lock(CONTEXT) if setup else nullcontext():
+        launch(args, manifest, setup)
+
+
+def launch(args, manifest, setup):
     from windows_processes import game_running
-    if not args.preflight and game_running():
+    if game_running():
         raise ValueError('Exit SFC normally before starting or restoring this copy')
     from session_recovery import recover_pending
     if args.restore:
         recovered = recover_pending(game_running)
-        verify_game_profile(CONTEXT, manifest)
+        prepared = setup.restore(CONTEXT, game_running) if setup else False
+        if not prepared:
+            verify_game_profile(CONTEXT, manifest)
         finish(CONTEXT,game_running)
-        print('Graphics restored.' if recovered else 'No interrupted graphics transaction to restore.')
+        print('Graphics restored.' if recovered or prepared else 'No graphics transaction to restore.')
         return
-    if not args.preflight:
-        recovered = recover_pending(game_running)
-        if recovered:
-            print('Previous session restored.')
-        finish(CONTEXT,game_running)
+    recovered = recover_pending(game_running)
+    if recovered:
+        print('Previous session restored.')
+    finish(CONTEXT,game_running)
+    if setup:
+        setup.prepare_graphics(CONTEXT, manifest, game_running)
     verify_game_profile(CONTEXT, manifest)
     check_native_launcher(CONTEXT,manifest)
-    if args.preflight:
-        print(json.dumps(dict(result='READ_ONLY_PACKAGE_PREFLIGHT_PASS', version=manifest['version'],
-                              game=str(CONTEXT.game_root), files=len(manifest['files']))))
+    if args.prepare:
         return
     prepare(CONTEXT, manifest)
     os.environ['SFC_RELEASE_RECORDING']='minimal' if args.troubleshoot else 'off'
