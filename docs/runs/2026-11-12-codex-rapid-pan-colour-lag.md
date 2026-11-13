@@ -48,4 +48,18 @@ Local evidence is in `artifacts/player-replacement/rapid-pan-kff-backbuffer-mark
 
 The exact ZIP passed read-only preflight for the copied game. The sponsor ran the unchanged package with `--troubleshoot` and reported that the gray patches appeared on fast slews and pans in and out. Whether they cleared immediately when the camera stopped was unreported. The local short report `20261113-033810-850240-in-game.json` recorded `PLAY_SESSION_FINISHED_NORMAL_EXIT`, tactical exit, proxy restoration, and no recorded error. The report has no frame pixels or pose history, so it cannot associate the visible artifact with a specific returned frame.
 
-Next compare the same maneuver with the explicit front buffer disabled only in the copied game's Remix host session. Check both camera rotation and changes in distance, and confirm stable insertion, depth and ordinary cleanup before considering a default change.
+## Session-local gameplay comparison
+
+The development checkout `20261113-041421-283776-in-game` used `-RapidPanCheckout -BreakModels` with the same pinned RTX Remix runtime. The development launcher enabled `d3d9.noExplicitFrontBuffer = True` in the generated host configuration. The runtime log confirmed it was loaded at startup. The sponsor reported that the checkout seemed to work after the requested rapid maneuvers.
+
+The 1080p run published 3,024 scene frames and dropped 35 before delivery, with zero invalid packets. The native gate counted 3,024 requests, one miss, one stale event and zero invalid events. Both ships were replaced, with 3,662 matching insertion and suppression receipts across the two owners. No owner-level unavailability was recorded. The host exited zero with no owned processes left. Normal game exit reclaimed the hook, the proxy was restored and the original critical files and launcher settings were unchanged.
+
+This supports fixing the gray-wing issue at the Remix adapter's output source. The lightweight run retained counters and the sponsor's observation. It did not record pixel comparisons or comparable before/after frame-time distributions, and it did not exercise damage draws or weapon lights.
+
+## Merge qualification
+
+The pinned Remix 1.6.1 backend writes the correction to its generated child configuration for normal play. The temporary developer switch was removed. The SFC graphics configuration and other renderer paths are unaffected by the setting.
+
+- The six-frame full-surface marker fixture with the corrected configuration returned six exact matches. This includes the first standalone output and frame 3, the first output after an actual D3D9 `ResetEx`. The fixture uses marker colour without ray tracing and has no game-side insertion.
+- The normal-config standalone insertion fixture `20261113-042820-602518-return-fixture` loaded the setting and completed 600 frames with 1,715 draws and zero state errors. It began at 1366×768, resized to 1024×768 and recreated the device, reaching output generation 3 with retained assets. Both sampled colour/depth/native-text checks passed with zero pixel mismatches. The processes exited cleanly. Those samples establish insertion across the transitions. They do not identify every ray-traced pixel on the first tactical frame.
+- The previous alpha ZIP remains the tester artifact. A packaged gameplay smoke test on the new default remains before replacing it.

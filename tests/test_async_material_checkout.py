@@ -126,6 +126,8 @@ class AsyncMaterialTests(unittest.TestCase):
         text,report=configure_child(backend,child)
         self.assertIn('asyncAssetLoading = True',text);self.assertEqual(child['DXVK_ASYNC_ASSET_LOADING'],'1')
         self.assertIn('enableReplacementAssets = True',text)
+        self.assertIn('d3d9.noExplicitFrontBuffer = True',text.splitlines())
+        self.assertIs(report['explicit_front_buffer'], False)
         self.assertEqual(child['SFC_D3D9_RENDER_PREWARM'],'triangle')
         self.assertEqual(child['SFC_D3D9_STARTUP_PROFILE'],'1')
         self.assertTrue(report['initial_material_priming'])

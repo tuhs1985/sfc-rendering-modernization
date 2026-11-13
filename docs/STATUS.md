@@ -1,7 +1,7 @@
 ---
 title: SFC Modernization — Status Tracker
 updated: 2026-11-12
-checkpoint: Gray patches reproduced in gameplay. Next compare the single-image setting in the copied game.
+checkpoint: Rapid-pan correction enabled for pinned Remix and qualified through standalone target recreation. Alpha ZIP unchanged.
 tags:
   - sfc-modernization
   - project-status
@@ -15,8 +15,10 @@ The Bird-of-Prey replay showed that Remix colour could follow the previous
 camera pose while the hull mask and depth already followed the current pose.
 Frame markers verified that the post-Present copy reads the previous image with
 the default swap chain. The sponsor reproduced the patches during fast slews
-and zooms in and out on the unchanged alpha. Next compare with the single-image
-setting in the copied game.
+and zooms in and out on the unchanged alpha. With the session-local correction
+enabled in the development copy, the sponsor reported that it seemed to work.
+The pinned adapter now uses that setting by default. Standalone checks passed
+for the initial output, resize and device recreation. Packaged gameplay is pending.
 [Replay and evidence](runs/2026-11-12-codex-rapid-pan-colour-lag.md).
 
 ## Committed alpha tester ZIP

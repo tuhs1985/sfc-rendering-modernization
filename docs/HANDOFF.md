@@ -13,9 +13,19 @@ markers verified that `FINAL_COLOR` reads the previous image after the default
 swap-chain rotation. Removing the explicit front image in a standalone test
 returned every current marker. The sponsor reproduced the gray patches in the
 copied alpha installation during fast slews and zooms in and out. The short
-report confirms normal tactical exit and proxy restoration. Next qualify the
-single-image setting in a session-local gameplay comparison.
+report confirms normal tactical exit and proxy restoration. In the subsequent
+1080p development checkout, Remix loaded the session-local override and the
+sponsor reported that it seemed to work. Both owners received replacement with
+3,662 matching insertions and suppressions and one recorded gate miss. The
+pinned Remix adapter now enables the correction by default. The standalone
+600-frame test passed through resize and device recreation, and a separate
+marker test verified the first copy and the first copy after `ResetEx`.
 [Replay and evidence](runs/2026-11-12-codex-rapid-pan-colour-lag.md).
+
+The pre-merge [frame provenance audit](runs/2026-11-12-codex-frame-provenance-audit.md)
+found the same post-Present assumption in diagnostic paths. It found no second
+instance in the active frame handoff. A fresh packaged gameplay smoke test
+remains before replacing the current alpha ZIP.
 
 ## Current checkpoint — committed alpha tester ZIP
 
