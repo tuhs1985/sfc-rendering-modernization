@@ -44,4 +44,8 @@ The unmodified host with ray tracing enabled and the single-image configuration 
 
 Local evidence is in `artifacts/player-replacement/rapid-pan-kff-backbuffer-marker-{default,single-image}` (`markers.json` and job receipts) and `artifacts/player-replacement/rapid-pan-kff-backbuffer-single-image` (`alternating-pose-alignment.json`). The scratch host and replay runner are in `artifacts/alpha/candidate/backbuffer-marker` and `artifacts/alpha/candidate/run-kff-backbuffer-marker.py`. No runtime setting has been promoted to normal play.
 
-The exact ZIP passed read-only preflight for the copied game. The pending in-game check uses the standard packaged path with `--troubleshoot`. Let the enhanced Bird-of-Prey settle, sweep the camera rapidly in both directions, then hold the camera still on the wings. Record whether the gray patches appear in motion and clear when still, along with the short run report. A same-scene checkout of a session-local candidate setting can follow if needed.
+## Gameplay baseline confirmed
+
+The exact ZIP passed read-only preflight for the copied game. The sponsor ran the unchanged package with `--troubleshoot` and reported that the gray patches appeared on fast slews and pans in and out. Whether they cleared immediately when the camera stopped was unreported. The local short report `20261113-033810-850240-in-game.json` recorded `PLAY_SESSION_FINISHED_NORMAL_EXIT`, tactical exit, proxy restoration, and no recorded error. The report has no frame pixels or pose history, so it cannot associate the visible artifact with a specific returned frame.
+
+Next compare the same maneuver with the explicit front buffer disabled only in the copied game's Remix host session. Check both camera rotation and changes in distance, and confirm stable insertion, depth and ordinary cleanup before considering a default change.

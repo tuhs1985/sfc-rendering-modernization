@@ -11,8 +11,10 @@ Remix colour relative to current hull depth and owner coverage. The mismatch is
 already present in the host outputs before SFC insertion. Six full-frame colour
 markers verified that `FINAL_COLOR` reads the previous image after the default
 swap-chain rotation. Removing the explicit front image in a standalone test
-returned every current marker. The exact in-game gray patch remains to be
-rechecked using the preflighted copied alpha installation.
+returned every current marker. The sponsor reproduced the gray patches in the
+copied alpha installation during fast slews and zooms in and out. The short
+report confirms normal tactical exit and proxy restoration. Next qualify the
+single-image setting in a session-local gameplay comparison.
 [Replay and evidence](runs/2026-11-12-codex-rapid-pan-colour-lag.md).
 
 ## Current checkpoint — committed alpha tester ZIP
