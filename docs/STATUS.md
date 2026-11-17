@@ -1,13 +1,20 @@
 ---
 title: SFC Modernization — Status Tracker
-updated: 2026-11-12
-checkpoint: Rapid-pan correction enabled for pinned Remix and qualified through standalone target recreation. Alpha ZIP unchanged.
+updated: 2026-11-16
+checkpoint: Four-stage startup status accepted as the new private alpha baseline.
 tags:
   - sfc-modernization
   - project-status
 ---
 
 # SFC Modernization — Status Tracker
+
+## November 16 — packaged startup status
+
+The sponsor confirmed that the centered four-stage startup status worked and
+accepted the tested ZIP as the new private alpha baseline. The standalone
+window tests and extracted-package preflight passed.
+[Package checksum and checkout record](runs/2026-11-16-codex-alpha-startup-indicator.md).
 
 ## November 12 — rapid camera pans
 
