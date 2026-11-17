@@ -107,12 +107,9 @@ Offset and late-composition launchers remain diagnostics. In native replacement,
 ### Where to inspect this pipeline
 
 For developer reuse, start with the
-[current interface and exposure guide](docs/reconnaissance/2026-11-03-renderer-interface-exposure-audit.md).
-It maps captured assets/state, D3D9 submission, light/material side channels and
-native output integration to their source files. Geometry, owner tracking and
-camera work are reusable; enhanced materials/lights and output still have
-Remix/Windows-specific adapters. This is published experimental source, not a
-stable drop-in renderer SDK. The native replacement baseline carries reversible
+[renderer interface control document](docs/D3D9_INTERFACE_CONTROL.md). It identifies
+the upstream scene input, ordinary D3D9 submission, separate light and material
+inputs, and the GPU return and insertion contracts. The native replacement baseline carries reversible
 per-owner damage state through the live scene interface and submits cached
 original-image decals. The standard damage path is visually confirmed in tested
 skirmishes. See the [live damage results and limits](docs/runs/2026-11-04-codex-damage-live-confirmation.md).

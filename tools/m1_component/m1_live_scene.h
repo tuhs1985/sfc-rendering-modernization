@@ -10,6 +10,9 @@
 #include "../scene_bridge/break_pose.h"
 #include "../scene_bridge/break_registry.h"
 #include "../scene_bridge/break_metadata.h"
+#ifdef SFC_EFFECT_JOIN_PRODUCER
+#include "../effect_probe/retained_frame_join.h"
+#endif
 #ifdef SFC_NATIVE_LIGHT_DISCOVERY
 #include "native_light_observer.h"
 #include "m1_light_transport.h"
@@ -64,6 +67,10 @@ struct LiveScene {
     multi_scene::Source cohort;
     DWORD persistentFrame=0,persistentPublications=0,persistentFailures=0;
     DWORD persistentFrames=0;LONGLONG persistentTicks=0,persistentMaxTicks=0;
+#ifdef SFC_EFFECT_JOIN_PRODUCER
+    uint64_t effectJoinSceneStart=0;
+    DWORD effectJoinSceneFrame=0,effectJoinThread=0,effectJoinManager=0;
+#endif
 #ifdef SFC_NATIVE_LIGHT_DISCOVERY
     sfc_native_lights::Observer lights;
     sfc_light_transport::Raw* sharedLights=nullptr;
@@ -288,7 +295,25 @@ struct LiveScene {
         }
         appendBreakRows(camera,frame,elapsed,read,anchor,anchorPrepared);
         if(cohort.store){const bool ready=cohort.publish(static_cast<uint64_t>(InterlockedCompareExchange64(&directSource.store->header.selected,0,0)));
-            if(ready&&anchorPrepared)directSource.commit(anchor);}
+            if(ready&&anchorPrepared){
+                const bool committed=directSource.commit(anchor);
+#ifdef SFC_EFFECT_JOIN_PRODUCER
+                if(committed&&frame==effectJoinSceneFrame&&manager==effectJoinManager&&
+                   GetCurrentThreadId()==effectJoinThread){
+                    LARGE_INTEGER now{};
+                    if(QueryPerformanceCounter(&now)){
+                        effect_probe::FrameStamp stamp{};
+                        memcpy(stamp.session,cohort.store->header.session,sizeof(stamp.session));
+                        stamp.pid=GetCurrentProcessId();stamp.thread=effectJoinThread;stamp.manager=manager;stamp.frame=frame;
+                        stamp.sequence=cohort.pending.sequence;stamp.checksum=cohort.pending.checksum;
+                        stamp.scene_start=effectJoinSceneStart;stamp.observed=now.QuadPart;
+                        effect_probe::publish_stamp(*reinterpret_cast<effect_probe::StampSlot*>(view+effect_probe::StampOffset),stamp);
+                    }
+                }
+#else
+                (void)committed;
+#endif
+            }}
         LARGE_INTEGER finished{};QueryPerformanceCounter(&finished);const auto ticks=finished.QuadPart-started.QuadPart;
         ++persistentFrames;persistentTicks+=ticks;if(ticks>persistentMaxTicks)persistentMaxTicks=ticks;
     }
@@ -326,6 +351,15 @@ struct LiveScene {
             }
         };
         do{
+#ifdef SFC_EFFECT_JOIN_PRODUCER
+            if(b.directSource.store&&!InterlockedCompareExchange64(&b.directSource.store->header.selected,0,0)){
+                for(DWORD slot=0;slot<kSceneAssets;++slot){
+                    auto* d=reinterpret_cast<DWORD*>(b.view+256+slot*64);
+                    const auto ack=static_cast<DWORD>(InterlockedCompareExchange(reinterpret_cast<LONG*>(d+1),0,0));
+                    if(effect_probe::select_acknowledged_anchor(b.directSource.store->header,generations[slot],ack,d[4],d[5]))break;
+                }
+            }
+#endif
             drainLifecycle();
 #ifdef SFC_NATIVE_LIGHT_DISCOVERY
             if(lightRequested){

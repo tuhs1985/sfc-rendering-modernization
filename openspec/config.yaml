@@ -3,6 +3,8 @@ schema: spec-driven
 context: |
   This is the existing SFC: Orion Pirates rendering-modernization project.
   Follow AGENTS.md and the latest authoritative checkpoint in docs/HANDOFF.md.
+  Apply the planning, debugging and review rules in AGENTS.md during normal-mode work.
+  Record durable implementation plans in the applicable OpenSpec change.
   The capability requirements in docs/requirements/ govern overall scope and milestones.
   OpenSpec organizes behavior contracts and changes; run records remain evidence,
   the handoff holds the implementation checkpoint, and Obsidian holds human-facing context.

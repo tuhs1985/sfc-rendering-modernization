@@ -241,3 +241,20 @@ ZIP from a reviewed commit. Record size/checksums and clean-directory/second-mac
 results. Sponsor approval is required before tagging or publishing the prerelease.
 The private checkout contains proprietary game files outside the package and must
 never be distributed as a whole directory or used as the public ZIP input root.
+## Merged alpha tester candidate
+
+The local `v0.1.0-alpha.1` candidate was built from `e450c30` with 13 freshly
+compiled native binaries and 3,884 manifest entries. The archive passed the
+allowlist and exact-file checks, then passed preflight, graphics setup,
+restoration, and another preflight after extraction into the existing test copy.
+The sponsor reported that the normal-launch gameplay smoke test looked good.
+Post-run preflight passed, no owned renderer processes or pending recovery
+remained, and no frame trace was kept under the default recording policy.
+
+- Candidate `artifacts/alpha/candidate/merged-e450c30/SFCRemix-v0.1.0-alpha.1.zip`, 510,879,266 bytes.
+- SHA-256 `b6de54b43a9c6870fbb1f5849b25c5951a8e749d8d7d2f567623bbc92493a77d`.
+- Local receipts `build.json` and `local-checkout.json` beside the ZIP.
+- The November 15 storage cleanup removed the superseded ZIPs, including the package from `4d41a31`. The merged candidate and its receipts remain available.
+
+This is the candidate for selected private testing. GitHub publication and
+external tester feedback are pending.

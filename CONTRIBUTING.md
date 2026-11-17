@@ -11,7 +11,8 @@ integration with a working private alpha, not a clean-sheet engine project.
 2. Check `git status --short`, the current branch and its base. Preserve unrelated
    local work. A folder name such as `tools/` does not make its contents disposable.
 3. Choose one scoped change. [OpenSpec](docs/OPENSPEC.md) records its purpose,
-   approach and tasks; existing user authorization governs what may proceed.
+   approach and tasks. Use the [planning, debugging and review rules](AGENTS.md#planning-debugging-and-review)
+   to scale the workflow to the change. Existing user authorization governs what may proceed.
 4. Implement and verify the affected boundary. Preserve compatibility and user
    settings, and record what the checks actually establish.
 5. Update the current checkpoint and links. Stage, commit, push, integrate or
@@ -74,6 +75,7 @@ git diff --cached
 | What behavior is accepted, or proposed to change? | OpenSpec specifications and individual changes; an unfinished proposal is not implemented behavior |
 | What standing rules apply to contributors/agents? | [AGENTS.md](AGENTS.md) |
 | Where does the code live now? | [Repository map](docs/REPOSITORY_MAP.md); manifests/build inputs determine actual dependencies |
+| Where does a renderer connect? | [Renderer interface control document](docs/D3D9_INTERFACE_CONTROL.md) and its linked wire contracts |
 | What will move later, and under what checks? | [Migration roadmap](docs/REPOSITORY_MIGRATION.md); separate changes authorize each move |
 | What is the latest implementation checkpoint? | The top current section of [HANDOFF](docs/HANDOFF.md); older checkpoints are historical |
 | What is open, parked or recently completed? | [STATUS](docs/STATUS.md), linking to evidence rather than duplicating it |

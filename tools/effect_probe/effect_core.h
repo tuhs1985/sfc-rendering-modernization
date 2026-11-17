@@ -3,7 +3,7 @@
 #include <cstdint>
 namespace effect_probe {
 constexpr unsigned Owners=4096,Nesting=8;
-enum Kind:uint32_t {Born=64,Retired,Enter,Leave,Selected,Finalized,Polygon,Resource,Name,Fault,Overflow,Stopped,Statistics};
+enum Kind:uint32_t {Born=64,Retired,Enter,Leave,Selected,Finalized,Polygon,Resource,Name,Fault,Overflow,Stopped,Statistics,QuadCorner,QuadResult,BatchSpan,BatchVertex,BatchIndices,BatchFlush,BatchState,BatchPresent};
 struct Identity {uint32_t pointer=0,epoch=0;bool alive=false,late=false;};
 struct Registry {
  std::array<Identity,Owners> slots{};uint32_t serial=0;

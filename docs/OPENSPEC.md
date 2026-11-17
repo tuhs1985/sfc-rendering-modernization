@@ -34,6 +34,8 @@ $openspec-propose "Describe the change"
 ```
 
 Proposal and exploration workflows do planning; implementation uses apply-change.
+For multi-step work in normal mode, use the [planning, debugging and review rules](../AGENTS.md#planning-debugging-and-review).
+Keep the implementation plan with its OpenSpec change.
 Existing user instructions and authorization retain precedence. We do not add a
 new approval gate for routine work merely because the framework is installed.
 The optional verify workflow is not installed by the core profile; our existing

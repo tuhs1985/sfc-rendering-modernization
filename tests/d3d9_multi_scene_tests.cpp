@@ -3,9 +3,12 @@
 #include "../tools/d3d9_proof/multi_scene_wire.h"
 #include "../tools/d3d9_proof/input_admission.h"
 #include "../tools/d3d9_proof/run_lifetime.h"
+#include "../src/transport/transient_draw.h"
+#include "../tools/effect_probe/retained_frame_join.h"
+#include <fstream>
 #include <memory>
 #include <iostream>
-int main(){
+int main(int argc,char** argv){
  unsigned checks=0;auto test=[&](bool okay){++checks;if(!okay){std::cerr<<"Multi-scene FAIL "<<checks<<'\n';ExitProcess(1);}};
  // Fake elapsed time, not sleeps: exercise the production loop/window policy
  // past 6,000 attempts even when every attempted output is omitted.
@@ -50,11 +53,74 @@ int main(){
  test(!multi_scene::initial_resolved(*store,uint64_t(1)<<63));
  store->assets[0].ack=store->assets[1].ack=0;
  multi_scene::Source source;source.store=store.get();source.begin();
- live_owner::Row a{};a[1]=7;a[2]=10;a[4]=a[48]=1;a[5]=70;a[6]=71;a[7]=1;a[89]=100;a[94]=3;
+ live_owner::Row a{};a[1]=7;a[2]=10;a[4]=a[48]=1;a[5]=70;a[6]=71;a[7]=1;a[47]=19;a[89]=100;a[94]=3;
  auto b=a;b[1]=8;b[5]=80;b[6]=81;b[7]=2;b[94]=0;
  source.offer(a);source.offer(b);source.publish(live_owner::selection(7,1));
  auto frame=std::make_unique<multi_scene::Frame>();
  test(multi_scene::read(*store,10,3,*frame));test(frame->count==2&&h.published==1);
+ {
+  effect_probe::FrameStamp publication{{1,2,3,4},h.pid,19,200,10,3,frame->checksum,90,101};
+  auto flush=publication;flush.observed=104;
+  auto present=flush;present.observed=110;
+  auto scratch=std::make_unique<multi_scene::Frame>();
+  auto join=[&](bool succeeded=true){
+   return effect_probe::verify_retained_frame(*store,publication,flush,present,succeeded,*scratch);
+  };
+  test(join());
+  test(!join(false));
+  ++flush.frame;test(!join());--flush.frame;
+  ++present.manager;test(!join());--present.manager;
+  ++present.scene_start;test(!join());--present.scene_start;
+  ++present.thread;test(!join());--present.thread;
+  ++present.session[0];test(!join());--present.session[0];
+  ++flush.sequence;test(!join());--flush.sequence;
+  present.observed=103;test(!join());present.observed=110;
+  publication.checksum^=1;flush.checksum=present.checksum=publication.checksum;
+  test(!join());publication.checksum=flush.checksum=present.checksum=frame->checksum;
+  publication.thread=flush.thread=present.thread=20;
+  test(!join());publication.thread=flush.thread=present.thread=19;
+  auto& frameSlot=store->frames[10%multi_scene::Frames];
+  ++frameSlot.guard;test(!join());++frameSlot.guard;
+  test(join());
+ }
+ if(argc==2){
+  transient_draw::Packet captured{},received{};
+  std::ifstream fixture(argv[1],std::ios::binary);
+  test(bool(fixture.read(reinterpret_cast<char*>(&captured),sizeof(captured)))&&fixture.peek()==EOF);
+  // Bind to this synthetic frame for the transport test. Captured Present and
+  // flush ordinals remain evidence from the original game session.
+  memcpy(captured.session,session,sizeof(session));captured.source_frame=frame->frame;
+  captured.source_sequence=frame->sequence;captured.frame_checksum=frame->checksum;
+  captured.checksum=transient_draw::checksum(captured);
+  transient_draw::Slot inbox{};
+  const auto take=[&](){return transient_draw::read(inbox,session,frame->frame,frame->sequence,frame->checksum,received);};
+  test(!take());
+  test(transient_draw::publish(inbox,captured)&&take());
+  test(memcmp(&captured,&received,sizeof(captured))==0);
+  test(received.vertex_count==4&&received.index_count==6&&received.present_ordinal==2416);
+  test(!transient_draw::read(inbox,session,frame->frame+1,frame->sequence,frame->checksum,received));
+  test(!transient_draw::read(inbox,session,frame->frame,frame->sequence+1,frame->checksum,received));
+  test(!transient_draw::read(inbox,session,frame->frame,frame->sequence,frame->checksum^1,received));
+  const DWORD other_session[]{4,3,2,1};
+  test(!transient_draw::read(inbox,other_session,frame->frame,frame->sequence,frame->checksum,received));
+  inbox.state=transient_draw::Slot::Writing;test(!take());
+  inbox.state=transient_draw::Slot::Reading;test(!transient_draw::publish(inbox,captured));
+  inbox.state=transient_draw::Slot::Ready;
+  auto incomplete=captured;incomplete.indices[0]=215;incomplete.checksum=transient_draw::checksum(incomplete);
+  test(!transient_draw::publish(inbox,incomplete)&&take());
+  auto newerStore=std::make_unique<multi_scene::Store>();
+  multi_scene::Source newerSource;newerSource.store=newerStore.get();
+  auto later=a;++later[2];++later[94];newerSource.begin();newerSource.offer(later);
+  test(newerSource.publish(live_owner::selection(7,1)));
+  auto laterFrame=std::make_unique<multi_scene::Frame>();
+  test(multi_scene::read(*newerStore,later[2],later[94],*laterFrame));
+  auto newer=captured;newer.source_frame=laterFrame->frame;newer.source_sequence=laterFrame->sequence;
+  newer.frame_checksum=laterFrame->checksum;newer.checksum=transient_draw::checksum(newer);
+  test(transient_draw::publish(inbox,newer)&&!take());
+  test(transient_draw::read(inbox,session,newer.source_frame,newer.source_sequence,newer.frame_checksum,received));
+  inbox.packet.checksum^=1;
+  test(!transient_draw::read(inbox,session,newer.source_frame,newer.source_sequence,newer.frame_checksum,received));
+ }
  auto check=*frame;check.rows[1][8]++;test(!multi_scene::valid(check));check.checksum=multi_scene::checksum(check);test(multi_scene::valid(check));
  check.rows[1][1]=7;check.checksum=multi_scene::checksum(check);test(!multi_scene::valid(check)); // duplicate owner
  check=*frame;check.rows[1][49]++;check.checksum=multi_scene::checksum(check);test(!multi_scene::valid(check)); // different camera

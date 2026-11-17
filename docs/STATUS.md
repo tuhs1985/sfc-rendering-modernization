@@ -1,13 +1,145 @@
 ---
 title: SFC Modernization — Status Tracker
-updated: 2026-11-12
-checkpoint: Rapid-pan correction enabled for pinned Remix and qualified through standalone target recreation. Alpha ZIP unchanged.
+updated: 2026-11-15
+checkpoint: SFC-07 ordered standalone readback passed. Live target association remains open.
 tags:
   - sfc-modernization
   - project-status
 ---
 
 # SFC Modernization — Status Tracker
+
+## November 15 — SFC-07 ordered standalone readback passed
+
+The pinned wrapper fixture recovered correct before/after pixels with ordered
+copies and a D3D11 completion query. Exact live ownership between the native
+draw surface and its D3D11 texture is still unqualified.
+[Run record](runs/2026-11-13-codex-sfc07-scene-consumer.md#completion-aware-readback-and-remaining-target-join).
+
+## November 15 — SFC-07 standalone drone replay passed
+
+The medium and fast captures passed the D3D9 fixture's sampling, placement,
+additive blend and depth controls. A matched native pixel sample remains open.
+[Run record](runs/2026-11-13-codex-sfc07-scene-consumer.md#standalone-d3d9-drone-replay).
+
+## November 15 — SFC-07 live drone capture passed
+
+One live main quad matched the named texture binding, native indexed draw,
+effective state and exact retained frame. Clean teardown passed. Native
+atlas orientation and pixel replay remain open.
+[Run record](runs/2026-11-13-codex-sfc07-scene-consumer.md#final-live-drone-checkout).
+
+## November 15 — SFC-07 final resource drain passed offline
+
+The diagnostic worker finishes resolving accepted resource names before
+closing. The report independently verifies the retained-frame receipt.
+Offline regression, injected fixtures and copied-game preflight passed.
+One live `-Join` capture remains to verify all draw fields together.
+[Run record](runs/2026-11-13-codex-sfc07-scene-consumer.md#final-resource-drain-qualified-offline).
+
+## November 15 — SFC-07 live drone frame verified
+
+The combined copied-game run paired the drone batch and successful Present
+with the exact retained frame. Both components shut down cleanly. The run
+lacks a resolved texture filename. Next check the diagnostic worker's final
+resource drain offline.
+[Run record](runs/2026-11-13-codex-sfc07-scene-consumer.md#live-join-checkout--frame-verified-texture-name-missing).
+
+## November 15 — SFC-07 producer-only checkout
+
+The copied game published valid retained frames 19 and 139, then exited
+normally with controlled producer unload and unchanged protected files.
+The next checkout uses the revised combined observer.
+[Run record](runs/2026-11-13-codex-sfc07-scene-consumer.md#producer-only-checkout).
+
+## November 15 — SFC-07 first live join failure
+
+The join runner failed before arming could produce a drone sample. The
+diagnostic producer now selects the anchor through the existing asset
+acknowledgement. The sponsor's hard freeze remains unattributed.
+[Run record](runs/2026-11-13-codex-sfc07-scene-consumer.md#first-live-join-failure).
+
+## November 14 — SFC-07 same-run join launcher
+
+The injected shared-mapping fixture and copied-game preflight passed. The
+`-Join` checkout needs one live drone sample to verify exact retained-frame
+matching and shutdown. [Run record](runs/2026-11-13-codex-sfc07-scene-consumer.md#same-run-join-checkout).
+
+## November 14 — SFC-07 retained-frame join verifier
+
+The verifier passed with the real retained-frame reader in both native
+builds. Remaining work is one shared diagnostic capture path and one
+copied-game proof. [Run record](runs/2026-11-13-codex-sfc07-scene-consumer.md#retained-frame-join-verifier).
+
+## November 14 — SFC-07 live native scene marker
+
+The copied-game trace joined one main drone quad to native scene 2269 and
+successful engine Present 2270. Zero records dropped, both observers
+shut down cleanly, and protected files and settings matched. The live
+retained-frame key remains open.
+[Run record](runs/2026-11-13-codex-sfc07-scene-consumer.md#live-scene-marker-checkout).
+
+## November 14 — SFC-07 native scene marker
+
+The batch observer records the native scene ordinal alongside the drone
+flush and engine Present. Synthetic qualification and copied-game preflight
+passed. The live retained-frame key remains a separate open association.
+[Run record](runs/2026-11-13-codex-sfc07-scene-consumer.md#native-scene-boundary).
+
+## November 14 — SFC-07 retained-frame interface check
+
+The x86 and x64 fixtures read the captured drone draw alongside a synthetic
+retained frame using the existing D3D9 frame reader. Wrong-session, stale
+and incomplete observations were rejected. Live publication and pixel
+replay remain follow-ups.
+[Run record](runs/2026-11-13-codex-sfc07-scene-consumer.md#retained-frame-interface-check).
+
+## November 14 — SFC-07 offline drone reader
+
+The reader recovered the captured main drone quad, its verified texture
+binding, native state and presentation order without a graphics device.
+Native atlas orientation and pixel comparison remain open.
+[Run record](runs/2026-11-13-codex-sfc07-scene-consumer.md#offline-native-draw-reader).
+
+## November 14 — SFC-07 live drone batch
+
+One main drone quad reached an indexed batch with four vertices and six
+indices. The native texture binding matched `fx0.bmp`. Additive blending
+and depth testing were enabled, with depth writes off. The observer stopped
+after the match and shut down cleanly. [Run record](runs/2026-11-13-codex-sfc07-scene-consumer.md#live-batch-retry).
+
+## November 14 — SFC-07 drone draw-path trace
+
+The saved UVs distinguish five main quads from eleven trail quads. Static
+verification places them on a shared indexed batch path after clipping.
+The next capture needs the selected quad's exact batch span and effective
+draw state. [Run record](runs/2026-11-13-codex-sfc07-scene-consumer.md#november-14-downstream-trace).
+
+## November 14 — SFC-07 drone follow-up
+
+The drone run retained 16 complete preclip `fx0.bmp` quads across three
+owner epochs. The game exited with code 0. The observer did not finalize the
+file, so this is partial evidence. Effective draw-state and frame matching
+remain open. [Run record](runs/2026-11-13-codex-sfc07-scene-consumer.md#november-14-drone-rerun).
+
+## November 14 — SFC-07 copied-game quad observation
+
+The 90-second run exited normally with no drops. The selected drone draw
+scope was absent, so exact quad and effective draw-state matching remain open.
+[Run record](runs/2026-11-13-codex-sfc07-scene-consumer.md#november-14-follow-up--copied-game-checkout).
+
+## November 13 — SFC-07 independent scene reader
+
+The reader verified the Bird-of-Prey and four F-CA fragments without a renderer.
+The bounded quad sampler passed its synthetic fixture and read-only preflight.
+Live quad evidence and effective draw-state matching remain pending.
+[Run record](runs/2026-11-13-codex-sfc07-scene-consumer.md).
+
+## November 12 — merged alpha tester candidate
+
+The updated ZIP from `e450c30` passed local package checks and the sponsor's
+normal-launch gameplay smoke test. The prior ZIP remains available for rollback.
+[Package and checksum](releases/DEPENDENCY_CLOSURE.md#merged-alpha-tester-candidate).
 
 ## November 12 — rapid camera pans
 
@@ -732,6 +864,7 @@ Updated through **Run233,October31,2026**. Repository handoff and run records co
 **PARKED / LATE ALPHA FOLLOW-UP — no investigation or fix authorized now.**
 
 - Sponsor observation: fighters are often displayed as1,2,3or4 models. The engine's mechanism is unknown; do not assume these are separate simulation owners, repeated draws or a combined mesh.
+- November 14 sponsor observation in both SFC-07 runs: the same fighter model appeared several times, and the visible copy count decreased as the fighters took damage. When SFC-22 reopens, compare model submissions, transforms and owner identities before and after a damage step. [Run record](runs/2026-11-13-codex-sfc07-scene-consumer.md#november-14-drone-rerun).
 - Do not infer fighter gameplay counts from visible model counts alone. This observation does not establish that the current replacement path handles every display arrangement correctly.
 - **Reopen:** only after most of the alpha-release work is complete. **Next action then:** correlate one fighter entity with its model submissions and transforms to explain the1–4-model presentation,then determine whether interface support needs extending. No priority change to current fleet testing or alpha requirements.
 

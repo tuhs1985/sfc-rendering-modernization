@@ -1,5 +1,21 @@
 # SFC rendering families — evidence map
 
+**SFC-07 update, November 14:** The independent reader verified the original
+ship and four break-piece assets. The copied-game follow-up retained source
+UVs for five main drone quads and eleven segmented trail quads bound to
+`fx0.bmp`. The pinned client clips and queues these polygons for shared
+indexed drawing. The November 15 live checkout matched one main quad to its
+indexed batch, named texture binding, effective state and exact retained
+frame. Native atlas orientation and effect replay remain pending.
+[Live verification](../runs/2026-11-13-codex-sfc07-scene-consumer.md#final-live-drone-checkout).
+
+**Skybox model lead:** The sponsor identifies `assets/models/space/space##.mod`
+as the skybox background. The early-model probe independently recorded
+successful loads of `space00.mod`, `space22.mod`, and `space29.mod`. The draw
+origin, camera coupling, depth/order and relationship to the separate
+`skybgnds/%d.bmp` references remain to be verified.
+[Early-model loader evidence](evidence/20261025-early-model-timing-result.json).
+
 **Research supplement, November 7:** [nxreliant's weapon/light contribution](nxreliant-weapon-light-research.md)
 adds entity light/source-identity and core-versus-particle colour leads, with
 explicit external-build limits. This does not extend observed family coverage

@@ -1,9 +1,14 @@
 #pragma once
 #include <string>
+#include <fstream>
+#include <filesystem>
+#include <memory>
+#include <memory>
 #include "effect_native.h"
 #include "../remix_runtime/return_wire.h"
 namespace effect_probe {
 constexpr Word Magic=0x45524631,Hard=16*1024*1024,Capacity=8192;
+enum class HookPhase : LONG { Passive=1, Attaching, Attached, Detaching, Detached, Failed };
 struct Record {uint64_t sequence,qpc;Word kind,thread;uint64_t object,manager,args[11];};
 struct Header {
  Word magic,version,recordBytes,headerBytes;volatile LONG status,error,reason,warning,attempts,dropped,written,queued;
@@ -19,18 +24,41 @@ class Runtime {
 public:
  return_path::State* control=nullptr;Header* header=nullptr;std::wstring path;
  bool hooked=false;Targets original{};
+ bool retain_join(){
+  auto& store=*reinterpret_cast<multi_scene::Store*>(joinView+multi_scene::Offset);
+  auto frame=std::make_unique<multi_scene::Frame>();
+  if(!verify_retained_frame(store,joinPublished,joinFlushed,joinPresented,true,*frame))return false;
+  const auto folder=std::filesystem::path(path).parent_path();
+  std::ofstream raw(folder/"retained-frame.bin",std::ios::binary);
+  raw.write(reinterpret_cast<const char*>(frame.get()),sizeof(*frame));raw.close();
+  if(!raw)return false;
+  std::ofstream receipt(folder/"retained-frame.json");
+  receipt<<"{\"session_words\":["<<joinPublished.session[0]<<','<<joinPublished.session[1]<<','
+     <<joinPublished.session[2]<<','<<joinPublished.session[3]<<"],\"pid\":"<<joinPublished.pid
+     <<",\"thread\":"<<joinPublished.thread<<",\"manager\":"<<joinPublished.manager
+     <<",\"frame\":"<<joinPublished.frame<<",\"sequence\":"<<joinPublished.sequence
+     <<",\"checksum\":"<<joinPublished.checksum<<",\"scene_start_qpc\":"<<joinPublished.scene_start
+     <<",\"published_qpc\":"<<joinPublished.observed<<",\"flushed_qpc\":"<<joinFlushed.observed
+     <<",\"presented_qpc\":"<<joinPresented.observed<<"}\n";
+  receipt.close();return bool(receipt);
+ }
  bool prepare(return_path::State* state,const wchar_t* output){
   if(!state||!return_path::valid(*state)||!output||wcslen(output)>=1024)return false;
   control=state;header=reinterpret_cast<Header*>(reinterpret_cast<BYTE*>(state)+256);path=output;
+  armedFlag=&state->armed;
   ZeroMemory(header,sizeof(Header));header->magic=Magic;header->version=1;header->recordBytes=header->headerBytes=128;
   header->pid=GetCurrentProcessId();header->frequency=state->qpcFrequency;header->startQpc=return_path::now();
   header->hardBytes=Hard;header->warningBytes=Hard/2;header->durationMs=90000;header->status=1;
+  set_hook_phase(HookPhase::Passive);
   ring=static_cast<Record*>(VirtualAlloc(nullptr,Capacity*sizeof(Record),MEM_COMMIT|MEM_RESERVE,PAGE_READWRITE));
   return ring!=nullptr;
  }
- void emit(Kind kind,Word object,Word manager,const std::array<uint64_t,11>& args){
+ void set_hook_phase(HookPhase phase){
+  InterlockedExchange(reinterpret_cast<volatile LONG*>(&header->reserved[0]),static_cast<LONG>(phase));
+ }
+ void emit(Kind kind,Word object,Word manager,const std::array<uint64_t,11>& args,bool workerRecord=false){
   if(!accepting)return;
-  if(kind!=Born&&kind!=Retired&&kind!=Stopped&&kind!=Statistics&&!return_path::read(control->armed))return;
+  if(!workerRecord&&kind!=Born&&kind!=Retired&&kind!=Stopped&&kind!=Statistics&&!return_path::read(control->armed))return;
   InterlockedIncrement(&header->attempts);
   if(!TryAcquireSRWLockExclusive(&guard)){InterlockedIncrement(&header->dropped);return;}
   const auto n=head.load(std::memory_order_relaxed);
@@ -47,43 +75,62 @@ public:
   if(word(registryAddress)!=reg||word(reg)!=0x00795C54||word(reg+12+(id-1)*20)!=obj||word(static_cast<Word>(r.manager)+0x3F60+(id-1)*4)!=entry||word(entry+4)!=surface)valid=false;
   std::array<char,256> again{};if(!valid||!read(obj+8,again.data(),length+1)||again!=name)valid=false;
   // Exact current snapshot/recheck, not proof of unobserved allocation epochs.
-  if(!valid){emit(Fault,static_cast<Word>(r.object),static_cast<Word>(r.manager),{r.sequence,id,1});return;}
-  if(word(registryAddress)!=reg||word(reg+12+(id-1)*20)!=obj||word(static_cast<Word>(r.manager)+0x3F60+(id-1)*4)!=entry||word(entry+4)!=surface){emit(Fault,static_cast<Word>(r.object),static_cast<Word>(r.manager),{r.sequence,id,1});return;}
+  if(!valid){emit(Fault,static_cast<Word>(r.object),static_cast<Word>(r.manager),{r.sequence,id,1},true);return;}
+  if(word(registryAddress)!=reg||word(reg+12+(id-1)*20)!=obj||word(static_cast<Word>(r.manager)+0x3F60+(id-1)*4)!=entry||word(entry+4)!=surface){emit(Fault,static_cast<Word>(r.object),static_cast<Word>(r.manager),{r.sequence,id,1},true);return;}
   const std::array<Word,6> key{static_cast<Word>(r.manager),reg,obj,entry,surface,hash};if(resolved[id-1]==key&&resolvedNames[id-1]==name)return;resolved[id-1]=key;resolvedNames[id-1]=name;
-  for(unsigned chunk=0;chunk<4;++chunk){std::array<uint64_t,11> args{r.sequence,id,chunk};std::memcpy(args.data()+3,name.data()+64*chunk,64);emit(Name,static_cast<Word>(r.object),static_cast<Word>(r.manager),args);}
+  for(unsigned chunk=0;chunk<4;++chunk){std::array<uint64_t,11> args{r.sequence,id,chunk};std::memcpy(args.data()+3,name.data()+64*chunk,64);emit(Name,static_cast<Word>(r.object),static_cast<Word>(r.manager),args,true);}
  }
  LONG stop(){
-  observing=false;LONG error=hooked?transaction(false):NO_ERROR;
+  observing=false;
+  set_hook_phase(HookPhase::Detaching);
+  LONG error=hooked?transaction(false):NO_ERROR;
   if(!error)hooked=false;
   const auto until=GetTickCount64()+2000;while(active.load()&&GetTickCount64()<until)Sleep(1);
   if(active.load()&&!error)error=WAIT_TIMEOUT;
   emit(Stopped,0,0,{static_cast<Word>(error),active.load()});
   emit(Statistics,0,0,{faults.load(),busy.load(),unscoped.load(),registry.serial,identityUncertain.load()});
+  set_hook_phase(error?HookPhase::Failed:HookPhase::Detached);
   if(error){header->error=static_cast<LONG>(error);return_path::write(control->error,120);}
   return error;
  }
- DWORD work(Targets targets,bool install=true){
+ DWORD work(Targets targets,bool install=true,bool deferHooks=false){
   auto file=CreateFileW(path.c_str(),GENERIC_WRITE,FILE_SHARE_READ,nullptr,CREATE_NEW,FILE_ATTRIBUTE_NORMAL,nullptr);
   if(file==INVALID_HANDLE_VALUE){header->error=1;header->status=4;return_path::write(control->error,121);return 1;}
   DWORD bytes=0;uint64_t size=128;bool ok=WriteFile(file,header,128,&bytes,nullptr)&&bytes==128;
   native=original=targets;accepting=true;
-  LONG error=ok&&install?transaction(true):ok?NO_ERROR:ERROR_WRITE_FAULT;
-  hooked=install&&!error;observing=!error;header->error=error;header->status=error?4:2;
+  if(ok&&install&&!deferHooks)set_hook_phase(HookPhase::Attaching);
+  LONG error=ok&&install&&!deferHooks?transaction(true):ok?NO_ERROR:ERROR_WRITE_FAULT;
+  hooked=install&&!deferHooks&&!error;observing=!deferHooks&&!error;header->error=error;header->status=error?4:2;
+  if(hooked)set_hook_phase(HookPhase::Attached);
   if(error){return_path::write(control->error,122);accepting=false;}
   else return_path::write(control->ready,1);
   bool stopping=error!=0;
   while(ok){
    const auto now=return_path::now();if(!header->gateQpc&&return_path::read(control->armed))header->gateQpc=now;
-   if(return_path::read(control->stop))header->reason=3;
+   if(return_path::read(control->stop)||batchFinished.load())header->reason=3;
+   if(joinReady.exchange(false,std::memory_order_acquire)){
+    try {if(!retain_join())header->reason=6;}
+    catch(...){header->reason=6;}
+   }
    if(header->gateQpc&&now-header->gateQpc>=header->frequency*header->durationMs/1000)header->reason=1;
    if(now-header->startQpc>285*header->frequency)header->reason=6;
-   if((header->reason||!ok)&&!stopping){stopping=true;stop();accepting=false;}
+   // The runner arms this only after the startup gate restores its hook bytes
+   // and unloads. Batch mode shares a native address with its restore check.
+    if(deferHooks&&!header->reason&&header->gateQpc){
+    deferHooks=false;set_hook_phase(HookPhase::Attaching);
+    error=install?transaction(true):NO_ERROR;
+    hooked=install&&!error;observing=!error;
+    if(error){set_hook_phase(HookPhase::Failed);header->error=error;header->reason=6;return_path::write(control->error,122);}
+    else {set_hook_phase(HookPhase::Attached);return_path::write(control->ready,2);}
+   }
+   // Detach before final drain, but let the worker finish accepted resource records.
+   if(header->reason&&!stopping){stopping=true;if(stop())accepting=false;}
    auto n=tail.load(std::memory_order_relaxed);const auto end=head.load(std::memory_order_acquire);
    unsigned batch=0;
    while(n!=end&&batch++<256){
     const auto r=ring[n%Capacity];
     if(!bounds(size,128)){header->reason=2;InterlockedIncrement(&header->dropped);}
-    else{ok=WriteFile(file,&r,128,&bytes,nullptr)&&bytes==128;if(!ok)break;size+=128;++header->written;if(!stopping&&r.kind==Resource)resolve(r);}
+    else{ok=WriteFile(file,&r,128,&bytes,nullptr)&&bytes==128;if(!ok)break;size+=128;++header->written;if(accepting&&r.kind==Resource)resolve(r);}
     ++n;
    }
    tail.store(n,std::memory_order_release);header->queued=static_cast<LONG>(head.load()-n);header->fileBytes=size;
@@ -91,7 +138,8 @@ public:
    if(stopping&&n==head.load())break;
    if(!ok){header->error=ERROR_WRITE_FAULT;break;}Sleep(2);
   }
-  if(!stopping){stop();accepting=false;}
+  if(!stopping)stop();
+  accepting=false;
   return_path::write(control->ready,0);header->endQpc=return_path::now();header->status=header->error?4:3;
   LARGE_INTEGER zero{};ok=SetFilePointerEx(file,zero,nullptr,FILE_BEGIN)&&WriteFile(file,header,128,&bytes,nullptr)&&bytes==128&&ok;
   FlushFileBuffers(file);CloseHandle(file);

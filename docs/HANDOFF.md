@@ -4,6 +4,115 @@ Sponsor-facing current work and parked items: [status tracker](STATUS.md).
 Diagnostic tools, triggers, limits and known pitfalls: [diagnostic reference](DIAGNOSTICS.md).
 The tracker is a sponsor-facing summary; the newest authoritative checkpoint below controls technical work.
 
+## Current checkpoint — November 13 rendering interface expansion
+
+Branch `codex/expand-rendering-interface` starts from merged alpha `e450c30`.
+The [renderer interface control document](D3D9_INTERFACE_CONTROL.md) is the
+contributor entry point for upstream scene input, D3D9 and native GPU return.
+The [change design](../openspec/changes/expand-rendering-interface/design.md)
+maps current exposure and remaining gaps for Remix and a future UE5 consumer.
+The renderer-independent reader passed on the Bird-of-Prey and four F-CA
+fragments. Run169 lacks the corner payload and downstream draw-state join.
+The bounded quad observer passed its standalone fixture. The second copied-game
+run, confirmed by the sponsor to contain drones, retained 16 complete preclip
+`fx0.bmp` quad samples across three `tFx_Drone` owner epochs. The game exited
+with code 0 and protected files matched. The observer did not finalize its
+trace, so loss and observer teardown remain unverified. Use the preserved
+samples as the source reference. Five match the main quad and eleven match
+the segmented trail strip. The pinned path clips them and writes to a shared
+batch. Next qualify the index span for one main quad through actual indexed
+drawing, including effective state and source-frame order. The default-off
+`-Batch` observer is ready for one copied-game run. Its injected fixture
+joined the span across a preceding flush and checked hook restoration.
+Launch with the `-Batch` command in the linked run record, fire drones and
+exit normally after the two beeps. The observer stops after a matched native
+presentation attempt or the standard capture deadline.
+The first two batch runs hit a startup-hook conflict at `0x006AB410`.
+The batch observer now attaches only after the tactical gate restores its
+bytes and unloads. The live retry verified that order and captured one main
+drone quad with its exact native indexed batch and successful engine Present
+attempt. The observer stopped after the match, 40.39 seconds after arming.
+The offline reader verified all four vertices, six indices, native state
+and the exact in-run texture binding. The x86/x64 interface fixture paired
+the saved draw with a synthetic retained frame read through the same
+`multi_scene::read` used by the D3D9 adapter. The opt-in companion has no
+live producer or adapter wiring. Native atlas orientation and pixel replay
+are deferred. The diagnostic observer now stamps a native scene ordinal at
+the M1 scene-begin boundary and requires that same scene at flush and Present.
+The retained-frame source publishes earlier, at the first qualified wrapper.
+The copied-game run verified scene 2269 at both flush and Present 2270,
+with zero drops and clean teardown. The same-run retained-frame join
+verifier passed x86/x64 fixture checks. The first live `-Join` checkout
+failed before capture and the sponsor reported a hard freeze. The launcher
+called a missing 64-bit atomic export during anchor selection. The revised
+diagnostic producer selects the anchor after a validated asset
+acknowledgement. The observer stays passive until the first retained frame
+is readable. The producer-only copied-game check passed, with verified
+frames 19 and 139 and controlled teardown. The original freeze remains
+unattributed. The revised combined `-Join` run verified the exact live
+retained frame and both shutdowns. Its selected draw has a surface identity
+but no filename record, so complete same-run draw qualification remains open.
+The worker now resolves accepted resource records during its final drain,
+and the runner verifies retained-frame receipts independently of resource
+completeness. The final copied-game `-Join` checkout captured one complete
+main drone draw bound to `assets/textures/fx0.bmp` on retained frame 800,
+sequence 789. The offline reader verified the payload and encoded it for
+an independent consumer. Both diagnostic components shut down cleanly.
+No repeat of the draw metadata capture is needed. The offline candidates use
+the captured vertices and the two vertical atlas orientations. They differ
+strongly in color. A sponsor-reported medium-speed run selected a different
+atlas row. `1−V` selects blue for medium and purple for the earlier fast run;
+raw V selects silhouettes and orange. The standalone D3D9 fixture now
+verifies these two quads against the CPU sampling reference and checks
+screen footprint, additive blending and depth behavior. Next qualify a
+matched native draw pixel sample. The standalone wrapper fixture verified
+ordered before/after copies and completion-aware D3D11 staging on its known
+8×MSAA texture. The live path still needs an exact association between the
+selected DirectDraw target and its D3D11 texture/subresource. The wrapper can
+defer the draw and change the bound RTV, so qualify that association before
+wiring a one-shot copied-game capture. Remix is an optional standalone pipeline
+validation consumer when it answers a remaining interface question. Live
+Remix effect integration is deferred.
+[Native pixel route checkout](runs/2026-11-13-codex-sfc07-scene-consumer.md#completion-aware-readback-and-remaining-target-join).
+[Standalone replay](runs/2026-11-13-codex-sfc07-scene-consumer.md#standalone-d3d9-drone-replay).
+[Atlas candidates](runs/2026-11-13-codex-sfc07-scene-consumer.md#offline-atlas-orientation-candidates).
+[Final live checkout](runs/2026-11-13-codex-sfc07-scene-consumer.md#final-live-drone-checkout).
+[Combined checkout](runs/2026-11-13-codex-sfc07-scene-consumer.md#live-join-checkout--frame-verified-texture-name-missing).
+[Producer-only evidence](runs/2026-11-13-codex-sfc07-scene-consumer.md#producer-only-checkout).
+[Verification and limitations](runs/2026-11-13-codex-sfc07-scene-consumer.md).
+Skybox follow-up is parked under SFC-07. Earlier loader evidence records
+`space00.mod`, `space22.mod`, and `space29.mod`. When background work begins,
+trace the selected `space##.mod` through its draw and texture bindings.
+External feedback on the current tester ZIP remains pending.
+
+### November 15 storage cleanup
+
+Removed 14.10 GB of logical file content across the project and two sibling
+folders. This included 107 obsolete ZIPs, historical generated texture copies,
+the old `SFC-Alpha-Checkout`, the redundant portability fixture game tree and
+the independent `SFC-Modernize-Publish` clone. The clone was clean and its
+only branch tip is in current history. The full per-path ledger and verified
+copies of saves, settings and other unique files are under
+`artifacts/workspace-cleanup-20261115/`. The current merged tester ZIP,
+packaged game checkout, active `SFC-Remix-Return-Test` development copy and
+offline recovery backups were retained.
+
+The launcher evidence counter fell from 19.61 GB to 15.82 GB against the
+20 GB limit. The full artifact tree measured 26.43 GB, including the packaged
+game, release ZIP, dependencies and other files outside that counter. The
+SFC-07 read-only preflight and installed alpha preflight passed. No game or
+renderer was started during cleanup.
+
+## Current checkpoint — merged alpha ZIP passed local gameplay
+
+PR #2 merged at `e450c30`. The updated `v0.1.0-alpha.1` ZIP from that revision
+passed extraction, installed preflight, graphics setup and restoration in the
+existing test copy. The sponsor reported that the normal-launch gameplay smoke
+test looked good. Post-run preflight passed, no owned renderer processes or
+pending run recovery remained, and the normal no-recording mode retained no
+frame trace. Use this ZIP for selected private testers. The November 15
+cleanup removed the superseded packages. [Package and checksum](releases/DEPENDENCY_CLOSURE.md#merged-alpha-tester-candidate).
+
 ## Current checkpoint — November 12 rapid camera pans
 
 The standalone Bird-of-Prey replay reproduced a one-frame spatial lag in returned
@@ -24,8 +133,7 @@ marker test verified the first copy and the first copy after `ResetEx`.
 
 The pre-merge [frame provenance audit](runs/2026-11-12-codex-frame-provenance-audit.md)
 found the same post-Present assumption in diagnostic paths. It found no second
-instance in the active frame handoff. A fresh packaged gameplay smoke test
-remains before replacing the current alpha ZIP.
+instance in the active frame handoff. The merged ZIP checkout is recorded above.
 
 ## Current checkpoint — committed alpha tester ZIP
 

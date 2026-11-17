@@ -1267,6 +1267,14 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
         event.origin = 0x0069E300;
         if (g_gate) {
             DWORD frame = static_cast<DWORD>(InterlockedIncrement(&g_frame));
+#ifdef SFC_EFFECT_JOIN_PRODUCER
+            LARGE_INTEGER sceneStart{};
+            QueryPerformanceCounter(&sceneStart);
+            g_live_scene.effectJoinSceneStart=sceneStart.QuadPart;
+            g_live_scene.effectJoinSceneFrame=frame;
+            g_live_scene.effectJoinThread=thread_id;
+            g_live_scene.effectJoinManager=event.ecx;
+#endif
             if(g_native_gate){native_gate::begin(*g_native_gate,frame,thread_id);g_native_decided=false;g_native_inserted=false;g_native_blocked=false;if(g_native_cohort_mode)for(auto& d:g_native_owners)d={};}
             if(g_insertion_probe&&g_live_scene.directSource.store)native_insertion::begin(*g_insertion_probe,frame,
                 static_cast<uint64_t>(InterlockedCompareExchange64(&g_live_scene.directSource.store->header.selected,0,0)));
@@ -1309,7 +1317,9 @@ extern "C" void __cdecl RecordHook(DWORD kind, const DWORD* saved) {
                 });
             }
             append_event_locked(event);
+#ifndef SFC_EFFECT_JOIN_PRODUCER
             if (frame >= g_config.max_frames) signal_saturation();
+#endif
         }
     } else if (kind == kShip) {
         event.origin = 0x004162B9;
