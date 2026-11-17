@@ -62,7 +62,7 @@ class GraphicsSetupTests(unittest.TestCase):
         self.assertEqual(self.ini.read_bytes(), b'player settings')
         self.assertEqual(self.wrapper.read_bytes(), b'[General]\nAdapters=1\n;tester option\n')
 
-    def test_gpu_mismatch_suggests_setting_without_replacing_wrapper(self):
+    def test_first_run_prepares_required_settings_and_gpu_without_editing_original(self):
         files = {}
         hashes = {}
         for name, role in setup.TARGETS.items():
@@ -70,14 +70,32 @@ class GraphicsSetupTests(unittest.TestCase):
             path.write_bytes(role.encode('ascii'))
             files[role] = path
             hashes[name] = sha256(path.read_bytes()).hexdigest()
-        before = self.wrapper.read_bytes()
-        with patch.object(setup, 'game_profile_issues', return_value=[]), \
+        before = b'[General]\r\nOutputAPI=bestavailable\r\n[DirectX]\r\nAntialiasing=appdriven\r\nFiltering=16x\r\n'
+        self.wrapper.write_bytes(before)
+        self.ini.write_bytes(b'[3D]\r\nWidth=1280\r\nHeight=720\r\n')
+        from game_profile import wrapper_requirements, wrapper_profile
+        from setup_adapter import current_setting, wrapper_config
+
+        def probe(_context, _manifest, wrapper, preferred):
+            self.assertEqual(preferred, 'all')
+            wrapper_requirements(wrapper)
+            self.assertEqual(wrapper_profile(wrapper)[1:], (b'1280x720', b'h:1280, v:720'))
+            return wrapper_config(wrapper, '2'), '0:12'
+
+        with patch.object(setup, 'game_profile_issues', return_value=['dgVoodoo.conf: profile needs setup']), \
              patch.object(setup, 'verified_role', side_effect=lambda _ctx, _manifest, role: files[role]), \
-             patch.object(setup, 'choose', return_value=(before.replace(b'Adapters=1', b'Adapters=2'), '0:12')), \
-             self.assertRaisesRegex(ValueError, 'Adapters=2'):
-            self.real_candidates(self.context, {'game_profile': {'files': hashes}})
+             patch.object(setup, 'choose', side_effect=probe):
+            sources, luid = self.real_candidates(self.context, {'game_profile': {'files': hashes}})
+        self.assertEqual(luid, '0:12')
+        self.assertEqual(current_setting(sources['dgVoodoo.conf']), '2')
+        self.assertIn(b'Filtering=16x\r\n', sources['dgVoodoo.conf'])
         self.assertEqual(self.wrapper.read_bytes(), before)
         self.assertFalse(setup.setup_root(self.context).exists())
+        self.sources.update(sources)
+        self.prepare()
+        self.assertEqual(self.wrapper.read_bytes(), sources['dgVoodoo.conf'])
+        self.assertTrue(setup.restore(self.context, self.game_running))
+        self.assertEqual(self.wrapper.read_bytes(), before)
 
     def test_interrupted_apply_is_recovered(self):
         actual = setup.replace_file

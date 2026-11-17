@@ -4,6 +4,29 @@ Sponsor-facing current work and parked items: [status tracker](STATUS.md).
 Diagnostic tools, triggers, limits and known pitfalls: [diagnostic reference](DIAGNOSTICS.md).
 The tracker is a sponsor-facing summary; the newest authoritative checkpoint below controls technical work.
 
+## Current checkpoint — November 16 tester graphics setup correction
+
+A tester's dgVoodoo configuration was rejected before setup could prepare it.
+The corrected package prepares the required settings from the game copy's SFC
+resolution, validates the GPU and backs up the original config before applying
+the change. Packaged first-run setup, repeat setup, read-only preflight, and
+byte-for-byte restoration passed from a mismatched 1280×720 fixture using the
+real GPU probes. The corrected private ZIP is in `artifacts/alpha`; its receipt
+and the rollback package are retained there. Tester gameplay on the corrected
+build is pending. [Setup record](releases/DEPENDENCY_CLOSURE.md#tester-owned-game-and-wrapper-settings).
+
+The tester's RTX 3090 Ti had NVIDIA driver 610.88, below the pinned Remix
+1.6.1 minimum of 616.92. The reported error was at Remix initialization. This
+is a deployment constraint and a reason to evaluate a second renderer through
+SFC-07. No renderer or package change was made for that assessment.
+[Driver floor and UE5 proof scope](releases/DEPENDENCY_CLOSURE.md#remix-driver-floor-and-renderer-portability).
+
+The November 17 local cleanup verified PR #3 on `origin/master` at `5c7df8f`
+and retired the already-integrated `codex/tester-graphics-setup` branch at
+`f71647b`. The PR #3 worktree was retained for this later graphics setup fix and
+local evidence. The original recovery branch and configured publication branch
+remain local. [Post-merge procedure](../CONTRIBUTING.md#post-merge-local-cleanup).
+
 ## Current checkpoint — November 16 alpha startup indicator
 
 The sponsor confirmed the four-stage loading indicator worked in the packaged

@@ -100,6 +100,8 @@ def main():
             print('This game copy needs graphics setup.')
             for issue in issues:
                 print('- ' + issue)
+            if setup_enabled(manifest):
+                print('Start SFCRemix-Launch.cmd to apply supported graphics changes with a backup.')
             print('No game or package files were changed.', flush=True)
             raise SystemExit(1)
         check_native_launcher(CONTEXT, manifest)

@@ -8,6 +8,7 @@ import re
 
 from release_manifest import contained, digest, game_profile_issues, verified_role, verify_game_profile
 from setup_adapter import choose, current_setting
+from game_profile import prepare_wrapper, sfc_profile
 
 TARGETS = {'DDraw.dll': 'setup_ddraw', 'D3DImm.dll': 'setup_d3dimm',
            'dxgi.dll': 'reshade_baseline_proxy'}
@@ -113,7 +114,7 @@ def restore(context, game_running):
 def candidates(context, manifest):
     profile = manifest['game_profile']
     for issue in game_profile_issues(context, manifest):
-        if issue.startswith(('Unrecognized proxy conflict:', 'sfc.ini:', 'dgVoodoo.conf:')):
+        if issue.startswith(('Unrecognized proxy conflict:', 'sfc.ini:')):
             raise ValueError(issue)
     result = {}
     for name, role in TARGETS.items():
@@ -125,22 +126,29 @@ def candidates(context, manifest):
             raise ValueError('Packaged graphics input differs from the qualified profile: ' + name)
         result[name] = raw
     wrapper_path = contained(context.game_root, 'dgVoodoo.conf')
-    with wrapper_path.open('rb') as stream:
-        wrapper = stream.read(1024*1024+1)
+    original = b''
+    if wrapper_path.exists():
+        with wrapper_path.open('rb') as stream:
+            original = stream.read(1024*1024+1)
+    with contained(context.game_root, 'sfc.ini').open('rb') as stream:
+        _, size = sfc_profile(stream.read(1024*1024+1))
+    wrapper = prepare_wrapper(original, size)
     preferred = current_setting(wrapper)
     verified, luid = choose(context, manifest, wrapper, preferred)
-    matching = current_setting(verified)
-    if matching != preferred:
-        raise ValueError(f'dgVoodoo.conf selects a different GPU from Remix. In this game copy, '
-                         f'set [General] Adapters={matching} to use the verified match.')
+    result['dgVoodoo.conf'] = verified
     return result, luid
 
 
 def prepare_graphics(context, manifest, game_running, confirm=input):
     root = setup_root(context)
     if contained(root, 'complete').is_file() and contained(root, 'journal.json').is_file():
-        verify_game_profile(context, manifest)
-        return
+        try:
+            verify_game_profile(context, manifest)
+        except ValueError as exc:
+            if not str(exc).startswith('dgVoodoo.conf:'):
+                raise
+        else:
+            return
     if game_running():
         raise ValueError('Close SFC before preparing graphics files.')
     if restore(context, game_running):
@@ -157,6 +165,9 @@ def prepare_graphics(context, manifest, game_running, confirm=input):
         print(context.game_root)
         for name, (before, _) in entries.items():
             print(f'- {"Replace" if before else "Add"} {name}')
+        if 'dgVoodoo.conf' in entries:
+            print('dgVoodoo will use SFC\'s resolution, 8x antialiasing and the verified graphics adapter.')
+            print('Run SFCRemix-Launch.cmd --restore to recover your original graphics files.')
         if confirm('Type Y to continue: ').strip().casefold() != 'y':
             raise ValueError('Graphics setup cancelled. Game files were kept.')
     if game_running():

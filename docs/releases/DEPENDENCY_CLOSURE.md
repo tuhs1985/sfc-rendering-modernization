@@ -162,6 +162,53 @@ time matched before and after each check. Gameplay of the revised ZIP is open.
 
 ### Tester-owned game and wrapper settings
 
+**November 16 first-run correction.** The earlier setup below rejected a
+tester whose dgVoodoo antialiasing and resolution values differed. The
+updated launcher derives the insertion profile from the game copy's existing
+supported SFC resolution. It checks the matching GPU before asking for consent
+to install the required wrapper settings. The original `dgVoodoo.conf` is
+backed up. `SFCRemix-Launch.cmd --restore` restores it byte-for-byte or removes
+the generated config if none existed. `sfc.ini`, `ReShade.ini`, and unrelated
+wrapper settings retain their existing values. The compositor still checks the
+actual Direct3D 11 target and matching GPU at runtime.
+
+The extracted checkout with application-driven AA and unforced resolution
+passed preparation using the packaged GPU probes at 1280×720. Read-only
+preflight confirmed the prepared profile. Repeat preparation skipped the
+prompt, and restore returned the original config and protected files
+byte-for-byte. The corrected ZIP SHA-256 is
+`b1c992f442cf2ba178029b8e3444e2da93a0123daa4532bcc2d8eecbd61725c1`.
+The tester's gameplay checkout is still pending.
+
+### Remix driver floor and renderer portability
+
+The alpha pins RTX Remix 1.6.1. NVIDIA lists Windows driver 616.92 as its
+minimum. A tester on an RTX 3090 Ti with driver 610.88 was below that floor
+and saw the generic Remix GPU initialization error. The exact probe error
+was discarded and gameplay on a supported driver is pending. The 1.5.2
+runtime is a possible separately qualified fallback. The alpha does not
+ship that runtime or a matching host.
+[NVIDIA 1.6.1 release notes](https://docs.omniverse.nvidia.com/kit/docs/rtx_remix/1.6.1-0/docs/changelog/remix-releasenotes.html).
+
+This increases the priority of proving a second renderer against the SFC-07
+scene interface. Start with one captured ship, its source textures and the
+captured camera in a packaged UE5 consumer. Measure startup and frame timing
+before attempting synchronized colour and depth return to SFC. Epic documents
+DX12 hardware ray tracing across multiple GPU vendors. The actual UE5 build
+and graphics settings still need qualification on each target driver and GPU.
+[Epic UE5 rendering requirements](https://dev.epicgames.com/documentation/en-us/unreal-engine/hardware-and-software-specifications-for-unreal-engine).
+
+The sponsor parked the UE5 proof and asked to revisit whether a future backend
+can remove dgVoodoo. Trace the current wrapper's roles in legacy graphics
+translation and the native colour/depth insertion path before choosing an
+alternative. Reopen when an independent SFC-07 consumer can replay the ship
+and camera. Qualify how the game menu, tactical HUD and effects continue to
+render before removing the wrapper from a gameplay build.
+
+### Earlier tester configuration behavior
+
+Historical behavior before that correction follows.
+
 The launcher admits the tester's `sfc.ini` and `dgVoodoo.conf` by checking
 the graphics settings relevant to the alpha. It checks supported SFC
 dimensions and the paired wrapper dimensions. The wrapper must use hardware
