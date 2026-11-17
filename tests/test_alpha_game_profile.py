@@ -2,11 +2,24 @@ import sys
 from pathlib import Path
 import unittest
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools/remix_runtime'))
-from game_profile import signature,SIZES
+from game_profile import SIZES, prepare_wrapper, signature, wrapper_profile, wrapper_requirements
 from tools.release.qualify_graphics_adapter import matching_setting, wrapper_config
 
 
 class AlphaGraphicsProfileTests(unittest.TestCase):
+    def test_missing_wrapper_config_uses_supported_defaults_at_game_resolution(self):
+        for size in SIZES:
+            with self.subTest(size=size):
+                prepared = prepare_wrapper(b'', size)
+                wrapper_requirements(prepared)
+                self.assertEqual(signature(self.inputs(*size)[0], prepared)['schema'],
+                                 'sfc.alpha.graphics-dimensions.v1')
+                self.assertEqual(prepare_wrapper(prepared, size), prepared)
+
+    def test_preparation_rejects_duplicate_managed_settings(self):
+        with self.assertRaisesRegex(ValueError, 'Ambiguous'):
+            prepare_wrapper(b'[DirectX]\nAntialiasing=2x\nAntialiasing=4x\n', (1280, 720))
+
     def inputs(self,w=1920,h=1080):
         return (f'[3D]\r\nWidth={w}\r\nHeight={h}\r\nzbuffer=1\r\n[Network]\r\nPlayerName=test\r\n'.encode(),
                 f'[GeneralExt]\r\nDesktopResolution={w}x{h}\r\n[DirectX]\r\nResolution=h:{w}, v:{h}\r\nAntialiasing=8x\r\n'.encode())
