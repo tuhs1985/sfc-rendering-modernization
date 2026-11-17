@@ -4,6 +4,15 @@ Sponsor-facing current work and parked items: [status tracker](STATUS.md).
 Diagnostic tools, triggers, limits and known pitfalls: [diagnostic reference](DIAGNOSTICS.md).
 The tracker is a sponsor-facing summary; the newest authoritative checkpoint below controls technical work.
 
+## Current checkpoint — November 16 alpha startup indicator
+
+The sponsor confirmed the four-stage loading indicator worked in the packaged
+game and accepted that ZIP as the new private alpha baseline. The centered
+window reports the current startup stage and elapsed seconds. Standalone
+readiness, delay, failure and quiet-command checks passed, along with packaged
+read-only preflight. The SFC-07 checkpoint is `e07a025` on its separate branch.
+[Run record](runs/2026-11-16-codex-alpha-startup-indicator.md).
+
 ## Current checkpoint — November 12 rapid camera pans
 
 The standalone Bird-of-Prey replay reproduced a one-frame spatial lag in returned

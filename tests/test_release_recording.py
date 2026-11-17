@@ -4,7 +4,7 @@ from pathlib import Path
 import subprocess
 import sys
 import tempfile
-from unittest.mock import patch
+from unittest.mock import Mock, call, patch
 import io
 import unittest
 
@@ -75,6 +75,44 @@ class RecordingTests(unittest.TestCase):
             self.assertIsNone(resources.policy()['aggregate_cap_bytes'])
             with self.assertRaisesRegex(ValueError,'disk space'):
                 resources.require_capacity(100,inventory=0,free=1)
+
+    def test_startup_indicator_signals_only_after_graphics_ready(self):
+        from coordinator import Session
+
+        with tempfile.TemporaryDirectory() as folder:
+            ready = Mock()
+            session = Session(startup_ready=ready)
+            session.channel, session.launcher, session.enforce = Mock(), Mock(), Mock()
+            session.pid, session.metadata, session.work = 123, {}, Path(folder)
+            with patch('coordinator.wait_component_ready', side_effect=RuntimeError('startup timed out')):
+                with self.assertRaisesRegex(RuntimeError, 'startup timed out'):
+                    session._await_device()
+            ready.assert_not_called()
+            with patch('coordinator.wait_component_ready'), patch('coordinator.digest', return_value='fixture'):
+                session._await_device()
+            ready.assert_called_once_with()
+            self.assertEqual(session.session_stage, 'mission_selection')
+
+    def test_startup_steps_follow_work_boundaries(self):
+        from coordinator import Session
+        trace = Mock()
+        session = Session(startup_stage=trace.stage)
+        for name in ('_prepare', '_initialize', '_install_proxy', '_start_host', '_wait_host',
+                     '_prepare_game', '_launch_game', '_after_launch', '_await_device',
+                     '_instructions', '_configure_controller', '_start_controller', '_check_observers',
+                     '_arm', '_begin_observation', '_observe', '_end_observation', '_stop_workers',
+                     '_restore_graphics', '_snapshot', '_collect', '_close_mappings', '_verify_files',
+                     '_base_result', '_report'):
+            setattr(session, name, getattr(trace, name))
+        session.work = 'fixture'
+        session.error = None
+        with patch('builtins.print'):
+            session.run()
+        self.assertEqual(trace.mock_calls[:10], [
+            call._prepare(), call._initialize(), call._install_proxy(), call.stage(3),
+            call._start_host(), call._wait_host(), call.stage(4), call._prepare_game(),
+            call._launch_game(), call._after_launch(),
+        ])
 
     def test_bootstrap_default_and_opt_in_hide_developer_output_and_finalize(self):
         for mode in ('off','minimal'):

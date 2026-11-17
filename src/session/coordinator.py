@@ -147,7 +147,9 @@ def play_options(argv=None):
 
 class Session:
     """Shared process, graphics and resource lifetime; mode-specific phases are explicit."""
-    def __init__(self,argv=None):
+    def __init__(self,argv=None,*,startup_ready=None,startup_stage=None):
+        self.startup_ready = startup_ready
+        self.startup_stage = startup_stage
         self.argv=argv
         self.full_support=True
         self.semantic_enabled=True
@@ -164,8 +166,12 @@ class Session:
         self._initialize()
         try:
             self._install_proxy()
+            if self.startup_stage is not None:
+                self.startup_stage(3)
             self._start_host()
             self._wait_host()
+            if self.startup_stage is not None:
+                self.startup_stage(4)
             self._prepare_game()
             self._launch_game()
             self._after_launch()
@@ -433,6 +439,8 @@ class Session:
         wait_component_ready(self.channel.snapshot, self.pid, self.launcher.poll, self.enforce)
         self.metadata['graphics_ready_wait_seconds'] = time.monotonic() - self.ready_at
         self.session_stage = 'mission_selection'
+        if self.startup_ready is not None:
+            self.startup_ready()
         self.metadata['gate_build_hashes'] = {p.name: digest(p) for p in (CONTEXT.artifact('m1/bin/m1_controller.exe'), CONTEXT.artifact('m1/bin/m1_gate.dll'))}
         (self.work / 'manifest.json').write_text(json.dumps(self.metadata, indent=2))
 
@@ -628,8 +636,8 @@ class Session:
             cleanup_mode='controlled live unload' if self.gate_clean else 'process-exit reclamation')
         run_report.save(self.work,self.result)
 
-def main(argv=None):
-    Session(argv).run()
+def main(argv=None, *, startup_ready=None, startup_stage=None):
+    Session(argv, startup_ready=startup_ready, startup_stage=startup_stage).run()
 
 def cli():
     try:main()

@@ -49,7 +49,41 @@ def prepare(context, manifest):
     os.environ.update(context.child_environment())
 
 
+def startup_signal(variable):
+    """Take a private inherited event out of the environment before child launches."""
+    value = os.environ.pop(variable, '')
+    if not value:
+        return None
+    import ctypes
+    try:
+        handle = int(value)
+    except ValueError:
+        return None
+    if not 0 < handle <= ctypes.c_size_t(-1).value:
+        return None
+    kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+    kernel.SetHandleInformation.argtypes = [ctypes.c_void_p, ctypes.c_uint32, ctypes.c_uint32]
+    kernel.SetEvent.argtypes = [ctypes.c_void_p]
+    kernel.CloseHandle.argtypes = [ctypes.c_void_p]
+    if not kernel.SetHandleInformation(handle, 1, 0):  # HANDLE_FLAG_INHERIT
+        return None
+
+    def signal():
+        kernel.SetEvent(handle)
+        kernel.CloseHandle(handle)
+
+    return signal
+
+
 def main():
+    startup_ready = startup_signal('SFC_RELEASE_STARTUP_EVENT')
+    stage_signals = {step: startup_signal(f'SFC_RELEASE_STARTUP_STAGE_{step}') for step in (2, 3, 4)}
+
+    def startup_stage(step):
+        signal = stage_signals.pop(step, None)
+        if signal is not None:
+            signal()
+
     parser = argparse.ArgumentParser()
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument('--preflight', action='store_true')
@@ -74,16 +108,17 @@ def main():
         return
     if manifest.get('fixture_only'):
         raise ValueError('This private preflight fixture cannot launch SFC or restore a real installation')
+    startup_stage(2)
     setup = None
     if setup_enabled(manifest):
         import graphics_setup as setup
     if args.prepare and not setup:
         raise ValueError('This package does not include first-run graphics setup.')
     with setup.launch_lock(CONTEXT) if setup else nullcontext():
-        launch(args, manifest, setup)
+        launch(args, manifest, setup, startup_ready, startup_stage if any(stage_signals.values()) else None)
 
 
-def launch(args, manifest, setup):
+def launch(args, manifest, setup, startup_ready=None, startup_stage=None):
     from windows_processes import game_running
     if game_running():
         raise ValueError('Exit SFC normally before starting or restoring this copy')
@@ -121,7 +156,12 @@ def launch(args, manifest, setup):
     failed=None
     try:
         with open(os.devnull,'w') as sink,redirect_stdout(sink),redirect_stderr(sink):
-            play()
+            callbacks = {}
+            if startup_ready is not None:
+                callbacks['startup_ready'] = startup_ready
+            if startup_stage is not None:
+                callbacks['startup_stage'] = startup_stage
+            play(**callbacks)
     except Exception as exc:
         failed=exc
     finally:
