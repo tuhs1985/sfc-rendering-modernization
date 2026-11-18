@@ -1,7 +1,9 @@
 # Portable alpha implementation — v0.1.0-alpha.1
 
-Approved November 8, 2026. **Implementation in progress; no releasable ZIP,
-tag or GitHub prerelease exists.** The current development baseline is still
+Approved November 8, 2026. **Public prerelease preparation authorized November
+18.** The [release notes](v0.1.0-alpha.1.md) identify requirements and single-PC
+qualification. The remaining text records the earlier implementation history.
+The current development baseline is still
 1920×1080. Native-size allocation and generation retirement are now connected in
 the alpha path; six-size standalone qualification passes. Packaged gameplay has
 not been qualified.

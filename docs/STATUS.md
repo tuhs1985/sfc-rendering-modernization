@@ -1,13 +1,23 @@
 ---
 title: SFC Modernization — Status Tracker
-updated: 2026-11-16
-checkpoint: Four-stage startup status accepted as the new private alpha baseline.
+updated: 2026-11-18
+checkpoint: Public Remix alpha preparation authorized. UE work separately committed at 43df260.
 tags:
   - sfc-modernization
   - project-status
 ---
 
 # SFC Modernization — Status Tracker
+
+## November 18 — public alpha preparation
+
+The sponsor authorized publication of the existing Remix alpha as a GitHub
+prerelease. Its public notes list the pinned client, NVIDIA driver 616.92+
+and successful testing on the author's PC only. Release promotion preserves
+all tested runtime bytes, changing README and manifest metadata only, with
+source/vendor/native provenance checks. Upload and final publication follow
+the release preparation commit. UE work is separately saved at `43df260`.
+[Release notes](releases/v0.1.0-alpha.1.md).
 
 ## November 16 — packaged startup status
 

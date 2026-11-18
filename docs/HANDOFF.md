@@ -4,7 +4,24 @@ Sponsor-facing current work and parked items: [status tracker](STATUS.md).
 Diagnostic tools, triggers, limits and known pitfalls: [diagnostic reference](DIAGNOSTICS.md).
 The tracker is a sponsor-facing summary; the newest authoritative checkpoint below controls technical work.
 
-## Current checkpoint — November 16 tester graphics setup correction
+## Current checkpoint — November 18 public alpha preparation
+
+The sponsor requested a commit of the UE work and publication of the existing
+Remix alpha. UE source/review/plan are checkpointed locally at `43df260` on
+`codex/expand-rendering-interface`. Release preparation is isolated on
+`codex/publish-alpha-1` from merged alpha `370accf`, with no UE code in the ZIP.
+The public notes explicitly require NVIDIA driver 616.92 or later and state
+successful gameplay testing only on the author's Windows 11/4070 Ti machine.
+
+`tools/release/promote_alpha.py` promotes the qualified candidate's exact
+runtime bytes, verifying source text against the release commit and inheriting
+the unchanged vendor/native inventory from the reviewed merged candidate.
+Only README and package metadata change. Preserve original native build
+lineage rather than claiming fresh compilation. Promotion, exact archive
+preflight and GitHub upload/publication still follow this preparation commit.
+[Release notes](releases/v0.1.0-alpha.1.md).
+
+## November 16 tester graphics setup correction
 
 A tester's dgVoodoo configuration was rejected before setup could prepare it.
 The corrected package prepares the required settings from the game copy's SFC

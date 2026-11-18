@@ -72,3 +72,15 @@ whose vendor review is still pending. The resulting filename must end in
 `-private-checkout.zip` and its manifest records the pending review. Use
 this ZIP for local extraction and gameplay checks. The release build still
 requires a reviewed commit and complete vendor review.
+
+## Promoting the qualified alpha
+
+`promote_alpha.py` is the explicit v0.1.0-alpha.1 promotion path. It pins the
+qualified candidate ZIP, verifies every immutable input, inherits the unchanged
+vendor inventory from the reviewed merged candidate/recipe, checks packaged
+application text against a named Git commit, and verifies native-source lineage.
+It records inherited binary origins rather than claiming a new compilation.
+Only the public README and package metadata change. All runtime bytes must stay
+identical to the tested candidate, with a fresh checksum and promotion receipt.
+It neither publishes nor changes any game installation. Use the normal builder
+for new runtime payloads rather than weakening promotion checks.

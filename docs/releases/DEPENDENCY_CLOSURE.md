@@ -1,7 +1,11 @@
 # Alpha dependency and redistribution review
 
 November8,2026. This records implementation evidence and remaining release
-review. **No public ZIP is approved or published.**
+review. Publication was authorized November 18 for the qualified alpha.
+The public promotion verifies that its vendor payload is byte-identical to
+the reviewed merged candidate and retains all vendor notices. See
+[release notes](v0.1.0-alpha.1.md) and the publication run record for actual
+release state. Earlier pending statements below are historical checkpoints.
 
 ## Functional closure
 
