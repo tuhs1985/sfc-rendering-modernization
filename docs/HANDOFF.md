@@ -4,7 +4,22 @@ Sponsor-facing current work and parked items: [status tracker](STATUS.md).
 Diagnostic tools, triggers, limits and known pitfalls: [diagnostic reference](DIAGNOSTICS.md).
 The tracker is a sponsor-facing summary; the newest authoritative checkpoint below controls technical work.
 
-## Current checkpoint — November 18 public alpha preparation
+## Current checkpoint — November 18 public alpha published
+
+Published [v0.1.0-alpha.1](https://github.com/tuhs1985/sfc-rendering-modernization/releases/tag/v0.1.0-alpha.1)
+as a GitHub prerelease from `e747bd3`. The ZIP is 510,884,422 bytes, SHA-256
+`e93e7d55e75e174cfa75f6ba648c32b7495d36fe4b39e519af4e4d3a38009d52`.
+All three remote asset digests matched local files. Exact packaged preflight
+passed and protected game/profile files were unchanged. Public notes list
+driver 616.92+ and successful testing only on the author's machine.
+[Publication record](runs/2026-11-18-codex-public-alpha-release.md).
+
+The UE checkpoint remains separately committed at `43df260`. Return to
+`codex/expand-rendering-interface` after publication documentation is saved.
+Its first implementation stage remains pending. Do not move the release tag
+to a later documentation commit or mix UE binaries into this alpha.
+
+## November 18 public alpha preparation
 
 The sponsor requested a commit of the UE work and publication of the existing
 Remix alpha. UE source/review/plan are checkpointed locally at `43df260` on
