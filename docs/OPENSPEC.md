@@ -36,6 +36,10 @@ $openspec-propose "Describe the change"
 Proposal and exploration workflows do planning; implementation uses apply-change.
 For multi-step work in normal mode, use the [planning, debugging and review rules](../AGENTS.md#planning-debugging-and-review).
 Keep the implementation plan with its OpenSpec change.
+Every new task list includes a final documentation and continuity task.
+Apply the [documentation completion checks](../AGENTS.md#documentation-completion-checks)
+before reporting each meaningful increment complete. Task and checkpoint
+updates must reflect verified work and retain unresolved checks.
 Existing user instructions and authorization retain precedence. We do not add a
 new approval gate for routine work merely because the framework is installed.
 The optional verify workflow is not installed by the core profile; our existing

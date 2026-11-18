@@ -1,0 +1,7 @@
+{
+  "FileVersion": 3,
+  "EngineAssociation": "5.8",
+  "Description": "Offline captured SFC scene consumer",
+  "Modules": [{"Name": "SFCSceneProof", "Type": "Runtime", "LoadingPhase": "Default"}],
+  "Plugins": [{"Name": "ProceduralMeshComponent", "Enabled": true}]
+}

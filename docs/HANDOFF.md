@@ -4,7 +4,102 @@ Sponsor-facing current work and parked items: [status tracker](STATUS.md).
 Diagnostic tools, triggers, limits and known pitfalls: [diagnostic reference](DIAGNOSTICS.md).
 The tracker is a sponsor-facing summary; the newest authoritative checkpoint below controls technical work.
 
-## Current checkpoint — November 13 rendering interface expansion
+## Current checkpoint — November 18 UE-to-SFC insertion plan
+
+The sponsor requested a plan from the UE proof to in-game insertion. The
+new [ue-native-insertion change](../openspec/changes/ue-native-insertion/proposal.md)
+contains the [design and six gates](../openspec/changes/ue-native-insertion/design.md),
+two capability specs and pending implementation tasks. Planning validation
+passed. No implementation was performed and no task is marked implemented.
+
+Order: packaged world-space foundation, standalone UE GPU-to-D3D11 return,
+live read-only source receipt, additive native insertion, one-player
+zero-offset replacement, integrated qualification. Epic Texture Share is the
+first GPU-sharing candidate to qualify, not a proven transfer path. Its plugin
+is installed but Beta; documented sample projects are not present locally.
+Existing x86/native output roles and handle-width restrictions require an
+explicit UE receiver adapter. Keep native ExtraFrame timing, output ownership,
+capture-first suppression and ReShade/dgVoodoo integration. Do not redo the
+Strict/ExtraFrame comparison or use CPU image transfer.
+
+Next execute stage 1 only when implementation is requested. Preserve all
+uncommitted work, the existing UE comparator and accepted alpha. GPU transfer
+is deliberately qualified before wiring live source state, so its feasibility
+is established without another game discovery run. Update each stage's actual
+interface/evidence before claiming native insertion or replacement.
+
+## November 18 UE integration review
+
+The sponsor requested a documented UE review before live updates. The
+[review](reconnaissance/2026-11-18-ue-integration-review.md) is complete against
+the actual proof, existing interface and pinned UE 5.8.4 source, with official
+Epic references. No runtime/source configuration or package was changed.
+The proof has a Shipping hazard from required texture I/O inside `check`,
+bakes model/camera transforms into vertices, and duplicates complete vertex
+arrays per material section. These are prototype findings, not failures of
+the successful Development checks.
+
+Next scope a packaged world-space replay foundation before live transport.
+Separate session/world ownership, immutable assets and owner/camera transforms,
+keep diagnostics optional, and qualify the shared runtime StaticMesh candidate
+against the procedural baseline. Do not assume all mesh paths provide Lumen,
+Nanite or equivalent sharing. GPU return remains a separate gate. The sponsor
+launched the proof and found the close action undiscoverable. Add visible Exit
+and Escape support in the next implementation. Changes remain uncommitted on
+`codex/expand-rendering-interface` at `e07a025`, preserving prior work.
+
+## November 18 packaged UE captured-scene proof
+
+The first Win64 UE 5.8.4 package has built and rendered the checked SFC ship,
+original primary textures and SFC camera, independently of D3D9 and Remix.
+Four final packaged runs exited normally: K-FF, F-FF and two captured F-CA
+fragment poses. Constructed mesh arrays and source identities passed. F-FF
+matched 98.33% of 8,762 sampled interior pixels within three colour levels
+against an independent source-space rasterizer. The fragment poses produced
+different verified pixels. This is an offline unlit proof, with live UE input
+and GPU return still separate work. Sponsor visual checkout is ready.
+
+Working source remains uncommitted on `codex/expand-rendering-interface` at
+`e07a025`. Do not lose the preceding SFC-07 and documentation edits or unrelated
+untracked files. No commits or changes to the accepted alpha were made. The
+local package, launcher, evidence, build recipe and exact next steps are in
+the [UE proof run record](runs/2026-11-18-codex-ue5-packaged-proof.md).
+
+## November 17 SFC-07 interface verification
+
+The sponsor confirmed the two project deliverables as the reusable DLL
+interface with its necessary supporting components for other developers,
+and the UE5 wrapper that consumes it. Record independent acceptance and
+packaging for each. [Delivery direction](decisions/2026-11-17-project-deliverables.md).
+
+Working on the existing SFC-07 branch at `e07a025`. The independent consumer
+rechecked five assets and 26 pose samples. The later live drone sample passed
+both architectures of the optional-companion fixture with its own Present
+ordinal. The focused Python suite passed 58 checks. The corrected private
+alpha ZIP was reverified. The November 17 standalone D3D9 replay could not
+create its device, so retain the prior successful isolated replay as GPU
+evidence. Live transient delivery to a renderer and native pixel matching
+remain open. The latter needs an exact association between the DirectDraw
+target and its D3D11 texture/subresource. No new game run is prepared.
+[Run record](runs/2026-11-13-codex-sfc07-scene-consumer.md#november-17-interface-verification-and-ue5-reference).
+
+UE5 investigation began with a CPU projection reference from the real
+Bird-of-Prey and a topology audit on four break fragments. UE 5.8.4 is installed
+at `C:\Project\Dependencies\UE_5.8`, changelist 58902052. The editor and build
+tools are present. Build-tool startup passed using bundled .NET 10. Project
+compilation remains unverified. Next write the scoped implementation plan for
+the packaged ship-and-camera consumer using the verified scene view. Prove
+native GPU return separately.
+[UE5 investigation](reconnaissance/2026-11-17-ue5-consumer-investigation.md).
+
+Documentation completion checks now live in AGENTS.md and OpenSpec task rules.
+The existing SFC-07 task list retains its two implementation gaps and adds
+final documentation reconciliation. The alpha fixes are merged on GitHub
+`master` at `370accf`; the current SFC-07 checkout remains based on `e450c30`
+with checkpoint `e07a025` and later uncommitted changes. The alpha worktree
+cleanup remains parked because Codex treats it as this chat's primary checkout.
+
+## November 13 rendering interface expansion
 
 Branch `codex/expand-rendering-interface` starts from merged alpha `e450c30`.
 The [renderer interface control document](D3D9_INTERFACE_CONTROL.md) is the

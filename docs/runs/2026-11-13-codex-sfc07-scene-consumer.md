@@ -195,3 +195,37 @@ The x86 ReShade observer recorded D3D11 device and command-list initialization, 
 Bracketing the Device3 draw with private DirectDraw blits before staging the original, explicitly retained D3D11 texture yielded correct clear and drawn pixels. Across three repeated passes, the blits took 0.04–0.14 ms and each map after the GPU query took less than 0.004 ms. The isolated texture was RGBA8 with 8×MSAA. The blits changed the bound RTV, so the most recently bound view cannot identify the game draw's target. The tagged private scratch-surface test also yielded no matching ReShade creation event. Fixture sources and receipts are under `artifacts/effect-probe/native-pixel-20261115/`, especially `status-probe.txt`, `translated-pixels.txt`, `translated-endscene.txt` and `ordered-repeat.txt`.
 
 The missing live link is the exact D3D11 texture and subresource corresponding to the `IDirectDrawSurface4` used by the selected native batch. Qualify the association across target switches and reject ambiguity before connecting this method to the copied game. The controlled fixture knows its source. A matching size, format or current RTV alone is insufficient in a live scene. No gameplay runner, Remix integration or shipped component was changed.
+
+### November 17 interface verification and UE5 reference
+
+Reran the independent reader for one Bird-of-Prey and four F-CA fragment
+fixtures. It verified 20,466 corners and 26 pose samples across two separate
+capture sessions. The same intact fixture rejected a substituted capture
+session and a missing replay texture. Tests exercised frame matching,
+geometry sharing, offscreen break pose updates, retirement, damage and light
+transport. All 58 focused Python checks passed with the Windows shared-memory
+access and application module paths required by the fixtures.
+
+The native retained-frame test accepted an archived Present ordinal as its
+only supported input. It now accepts an explicit expected ordinal for each
+additional fixture. x86 and x64 builds passed both the original sample
+(134 checks each) and the complete live frame 800 capture at Present 782
+(135 checks each), rejecting ordinal 783 on both architectures. These tests
+exercise the optional single-slot draw companion against the retained-frame
+reader. The live draw and retained receipt still come from the original game
+capture. Production publication, suppression and fallback retain their
+existing behavior.
+
+The fresh D3D9 replay attempt returned 0x8876086A at device creation. The
+previous standalone results remain the last GPU playback evidence. No game
+ran in this increment. Native pixel parity still needs the exact live
+DirectDraw-to-D3D11 target/subresource association, followed by one matched
+before/after sample. This gap applies to native effect parity. It does not
+block a standalone UE5 ship consumer. The corrected alpha ZIP remains
+available and matches SHA-256
+`b1c992f442cf2ba178029b8e3444e2da93a0123daa4532bcc2d8eecbd61725c1`.
+
+The independent CPU study found 0.000026 pixel maximum XY projection error
+against the checked native matrix and identified a topology constraint in
+three F-CA fragments. See the
+[UE5 consumer investigation](../reconnaissance/2026-11-17-ue5-consumer-investigation.md).

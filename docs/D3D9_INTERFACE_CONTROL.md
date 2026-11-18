@@ -4,6 +4,12 @@
 
 ## Connection points
 
+The project will deliver this interface as a reusable DLL and its necessary
+supporting components, with documentation and a consumer example. The second
+deliverable is a UE5 wrapper built on that interface. The current experimental
+contracts and existing source-level adapters are the implementation baseline.
+[Sponsor-confirmed deliverables](decisions/2026-11-17-project-deliverables.md).
+
 ```text
 SFC 2.5.6.4 (x86)
   semantic capture → session IPC → scene receipt and asset preparation
@@ -47,6 +53,55 @@ The opt-in `-Join` launcher connects the diagnostic producer and observer in one
 `-JoinProducerOnly` isolates the retained-frame publication and shutdown path for diagnosis. The copied-game check passed with the transient observer passive. The revised combined `-Join` run then verified one exact retained-frame association and clean teardown. The captured surface lacks a verified same-run filename. [Combined checkout](runs/2026-11-13-codex-sfc07-scene-consumer.md#live-join-checkout--frame-verified-texture-name-missing)
 
 The diagnostic worker resolves queued resource snapshots after detachment and before trace closure. The frame receipt is checked independently of texture completeness. A missing or ambiguous texture binding still leaves the full draw partial. The final copied-game run verified the named binding, indexed draw and exact retained frame together. [Live checkout](runs/2026-11-13-codex-sfc07-scene-consumer.md#final-live-drone-checkout)
+
+November 17 x86 and x64 fixtures verified the optional companion with a saved
+live draw carrying Present ordinal 782. The diagnostic test accepts the
+expected ordinal as an argument and rejected the wrong one. The fixture
+still attaches the saved draw to a synthetic frame to exercise the same
+retained reader. The live join has its separate retained frame receipt.
+Verified offline payload and live producer evidence are available. Live
+transient publication to a renderer and matched native pixels remain open.
+[Verification](runs/2026-11-13-codex-sfc07-scene-consumer.md#november-17-interface-verification-and-ue5-reference).
+
+The [UE5 consumer investigation](reconnaissance/2026-11-17-ue5-consumer-investigation.md)
+uses the renderer-independent geometry and camera inputs. It records screen
+landmarks and a topology constraint for captured break models. It adds no
+wire format or renderer connection.
+
+### Packaged offline UE consumer — verified November 18
+
+`src/ue5_proof` consumes a checked local scene view produced by
+`tools/ue5_proof/prepare.py` from the independent reader. This adds no live wire
+format or DLL export. The view carries original source positions, per-corner
+normals/UVs, triangle groups, image identities, instance/session and captured
+model/view/projection/viewport. Prepared BGRA files retain original top-row
+orientation and hashes. The UE adapter applies its own camera-space axis and
+reversed-depth conversion. It never imports Remix's texture correction.
+
+The Win64 package builds procedural mesh sections and original-colour unlit
+materials. `-SFCScene`, `-SFCOutput` and optional `-SFCFrame` explicitly select
+checked input, bounded output and captured sample. It does not accept live
+updates, join sessions or return shared GPU surfaces. Inputs must be prepared
+by the checked development reader; this proof is not an untrusted public
+scene-file parser or stable SDK. Source arrays, texture sampling and camera
+projection were checked through the actual packaged renderer.
+[Contract, evidence and limitations](runs/2026-11-18-codex-ue5-packaged-proof.md).
+
+The subsequent [UE integration review](reconnaissance/2026-11-18-ue-integration-review.md)
+defines recommended pre-live qualification. It proposes a UE-owned runtime
+adapter with session/world lifetimes and local-space asset reuse. No new live
+connection, wire layout or exported ABI is implemented by that review. The
+current proof's camera-baked mesh must not become the live transform path.
+Separately, Remix-prepared images must not replace original image semantics
+in the neutral live interface.
+
+The proposed [UE insertion plan](../openspec/changes/ue-native-insertion/design.md)
+adds a separately qualified UE GPU producer/import front end while retaining
+the current native game-pool, leases and insertion gate. Original scene input
+stays upstream of D3D9. The plan evaluates Epic Texture Share before new
+transfer code and explicitly checks cross-API/bitness/handle compatibility.
+These are proposed connection points only. No UE live input or GPU-return ABI
+is implemented or qualified yet.
 
 ## D3D9 submission
 

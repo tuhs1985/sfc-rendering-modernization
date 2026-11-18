@@ -8,8 +8,8 @@
 ## 2. Prove independent consumption
 
 - [x] Reuse the current decoder and scene representation to expose an offline consumer view. Preserve original geometry, corner data, resource bindings, damage state and camera/instance identity.
-- [ ] Demonstrate the view with a consumer that uses neither Remix nor D3D9. Check frame pairing, shared assets, offscreen transforms, retirement, missing capability and incomplete inputs.
-- [ ] Verify that the existing D3D9/Remix path still consumes the same source state and that the tested alpha remains available for external testing.
+- [x] Demonstrate the view with a consumer that uses neither Remix nor D3D9. Check frame pairing, shared assets, offscreen transforms, retirement, missing capability and incomplete inputs.
+- [x] Verify that the existing D3D9/Remix path still consumes the same source state and that the tested alpha remains available for external testing.
 
 ## 3. Expand one observed rendering family
 
@@ -21,6 +21,11 @@
   - The isolated producer and `-Join` launcher now pass the injected shared-mapping fixture and copied-game preflight. One copied-game drone capture is pending.
   - The combined live run verified the retained-frame receipt and clean teardown. The missing texture filename reproduced in a forced-stop fixture. The final resource drain and independent receipt checks passed offline. One focused live capture needs both parts together.
   - The final copied-game checkout verified the exact retained frame, named texture binding and indexed draw together. Production transient publication and backend replay remain open.
-  - Standalone D3D9 replay passed both captured main-quad samples with an independent sampling check, blend and depth controls. Native pixel parity and Remix submission remain open.
+  - Standalone D3D9 replay passed both captured main-quad samples with an independent sampling check, blend and depth controls.
+  - November 17 x86/x64 tests verified the later saved draw at Present ordinal 782 and rejected a different ordinal. Live publication to a renderer remains open. Pixel parity still needs a match from the live DirectDraw target to its D3D11 texture/subresource.
 - [ ] Document what an independent consumer receives and verify the remaining pixel and ordering questions. Use a standalone Remix submission only if needed to validate the pipeline. Live Remix effect integration is deferred.
-- [ ] Record remaining family coverage and the smallest next increment. Keep UE5 render/output qualification separate.
+- [x] Record remaining family coverage and the smallest next increment. Keep UE5 render/output qualification separate.
+
+## 4. Complete documentation and continuity
+
+- [ ] At change completion, reconcile the interface control document, coverage map and evidence with the implemented behavior, update the handoff and repository status, write and read back a dated Obsidian entry, and refresh the restart brief with remaining limitations and the exact next action. Apply AGENTS.md documentation completion checks to intermediate increments as well.

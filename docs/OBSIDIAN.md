@@ -27,10 +27,14 @@ Read the current Status Tracker and the Project Parking Note if it exists. Consu
 
 ## Record progress or defer an idea
 
-- **Status Tracker** — Append a dated entry when a milestone, technical finding or implementation status materially changes. Include evidence, validation and the next action. Keep prior entries and internal links. Refresh the existing `updated` and `checkpoint` properties when the current checkpoint changes.
+- **Status Tracker** — Insert a dated entry at the top of `Recent updates` when a milestone, technical finding or implementation status materially changes. Include evidence, validation and the next action. Keep prior entries and internal links. Refresh the existing `updated` and `checkpoint` properties when the current checkpoint changes.
 - **Parking Lot** — Append or update a single entry when the user defers an idea. Capture the reason, what should reopen it and the first practical step. Update `updated` on substantive changes. Parking an idea records intent for later review.
 
-Use CLI `append` for new entries and `property:set` for properties. Pass Markdown text as one `content=` argument with `\n` for newlines. Read back each write and check the new entry and properties. Use wikilinks for vault notes and repository paths or links for engineering evidence.
+Use CLI `prepend` with `heading=Recent updates` for tracker entries, `append`
+for new parking entries, and `property:set` for properties. Pass Markdown text
+as one `content=` argument with `\n` for newlines. Read back each write and
+check the entry and properties. Use wikilinks for vault notes and repository
+paths or links for engineering evidence.
 
 ## Park a session
 

@@ -5,7 +5,9 @@
 #include "../tools/d3d9_proof/run_lifetime.h"
 #include "../src/transport/transient_draw.h"
 #include "../tools/effect_probe/retained_frame_join.h"
+#include <charconv>
 #include <fstream>
+#include <string_view>
 #include <memory>
 #include <iostream>
 int main(int argc,char** argv){
@@ -83,7 +85,15 @@ int main(int argc,char** argv){
   ++frameSlot.guard;test(!join());++frameSlot.guard;
   test(join());
  }
- if(argc==2){
+ test(argc<=3);
+ if(argc>=2){
+  uint64_t expectedPresent=2416; // Original archived fixture for existing callers.
+  if(argc==3){
+   const std::string_view value=argv[2];
+   const auto end=value.data()+value.size();
+   const auto parsed=std::from_chars(value.data(),end,expectedPresent);
+   test(parsed.ec==std::errc{}&&parsed.ptr==end&&expectedPresent!=0);
+  }
   transient_draw::Packet captured{},received{};
   std::ifstream fixture(argv[1],std::ios::binary);
   test(bool(fixture.read(reinterpret_cast<char*>(&captured),sizeof(captured)))&&fixture.peek()==EOF);
@@ -97,7 +107,7 @@ int main(int argc,char** argv){
   test(!take());
   test(transient_draw::publish(inbox,captured)&&take());
   test(memcmp(&captured,&received,sizeof(captured))==0);
-  test(received.vertex_count==4&&received.index_count==6&&received.present_ordinal==2416);
+  test(received.vertex_count==4&&received.index_count==6&&received.present_ordinal==expectedPresent);
   test(!transient_draw::read(inbox,session,frame->frame+1,frame->sequence,frame->checksum,received));
   test(!transient_draw::read(inbox,session,frame->frame,frame->sequence+1,frame->checksum,received));
   test(!transient_draw::read(inbox,session,frame->frame,frame->sequence,frame->checksum^1,received));

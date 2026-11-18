@@ -23,6 +23,19 @@ These instructions apply to the entire repository.
 - Update the existing Status Tracker after meaningful verified changes. Record user-deferred ideas in the existing Parking Lot. When the user parks or ends a session, write the Project Parking Note with exactly two substantive Restart Brief paragraphs followed by a compact Session Summary.
 - Use the installed Obsidian CLI and Markdown skills and the exact vault and note paths in [the Obsidian workflow](docs/OBSIDIAN.md). Limit writes to the existing SFC project folder. Git and the repository handoff govern implementation and evidence. Obsidian holds project context and restart information.
 
+## Documentation completion checks
+
+Complete these checks before reporting a meaningful implementation increment,
+investigation, dependency qualification, or requested commit/merge as finished.
+For a small edit, update only the records affected by that edit.
+
+- Reconcile the actual checkout, branch, local edits and verification results with the current plan. Mark only verified tasks complete and keep human checkout and unresolved failures explicit.
+- Update the owning interface or procedure when its behavior changes. Record evidence, limitations and the next executable action in the handoff or a linked run record. Keep each record's responsibility as assigned in CONTRIBUTING.md.
+- Update the repository status and add a dated entry at the top of Obsidian's Recent updates after meaningful verified progress. Refresh the checkpoint properties as well. Read the updated entry back through the CLI.
+- Refresh an existing restart brief whenever its next action becomes stale. When parking or ending a session, verify exactly two substantive Restart Brief paragraphs and a compact Session Summary. Preserve user annotations and earlier status history.
+- Check documentation links, Git diff and applicable OpenSpec validation. Read the changed checkpoint and task entries back, ensuring they describe the actual working tree and distinguish local, committed and merged work.
+- If a documentation destination is unavailable, record the pending update in the repository handoff and disclose it in the final response. Complete other authorized work while that destination is unavailable.
+
 ## Game installations and runtime
 
 - Treat the accepted SFC installation and original game assets as read-only. Use the verified test copy and the repository launchers for live integration work. Consult the [README](README.md) for setup and launch commands.

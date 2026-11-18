@@ -28,12 +28,15 @@ rules:
     - Use focused checks appropriate to the change, exercising actual process or file boundaries when relevant.
     - Distinguish offline, standalone GPU, packaged execution, and sponsor gameplay verification.
     - Keep pending human verification explicit; a checked task is not proof of universal compatibility.
+    - Include a final documentation task covering the owning contracts, evidence/run record, handoff, repository status, and dated Obsidian entry, with read-back verification.
+    - Apply AGENTS.md documentation completion checks to each meaningful increment; refresh stale restart instructions as work advances.
 
 operations:
   apply:
     guidance:
       - Preserve uncommitted work and existing user authorization; do not stage, commit, or push unless requested.
       - Keep changes focused and report results in plain language with material limitations.
+      - Before reporting an increment complete, perform AGENTS.md documentation completion checks and keep unresolved implementation and verification tasks open.
   archive:
     guidance:
       - Link supporting evidence and retain unresolved limitations and next actions.

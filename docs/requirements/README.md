@@ -1,5 +1,10 @@
 # Governing capability requirements
 
+The sponsor confirmed two project deliverables on November 17, 2026.
+Deliver the reusable DLL interface with its necessary supporting components
+for other developers, and deliver the UE5 wrapper that consumes it.
+[Delivery direction and relationship to the baseline](../decisions/2026-11-17-project-deliverables.md).
+
 [Starfleet Command Rendering Modernization Capability Requirements v1.0](Starfleet%20Command%20Rendering%20Modernization%20Capability%20Requirements.md)
 is a byte-for-byte copy of the sponsor's approved baseline, imported 2026-10-18.
 Its approval date is 2026-09-03. No requirements, IDs, thresholds, objectives,

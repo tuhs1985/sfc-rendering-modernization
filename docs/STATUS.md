@@ -1,13 +1,67 @@
 ---
 title: SFC Modernization — Status Tracker
-updated: 2026-11-15
-checkpoint: SFC-07 ordered standalone readback passed. Live target association remains open.
+updated: 2026-11-18
+checkpoint: UE-to-SFC insertion plan prepared. Six gated stages; implementation has not started.
 tags:
   - sfc-modernization
   - project-status
 ---
 
 # SFC Modernization — Status Tracker
+
+## November 18 — UE insertion plan prepared
+
+The [UE-to-SFC plan](../openspec/changes/ue-native-insertion/design.md) defines
+six gates: packaged foundation, standalone GPU return, live source input,
+additive in-game insertion, one-player replacement and integrated qualification.
+It reuses the current native insertion point and standard ExtraFrame policy.
+Epic Texture Share is a candidate to qualify before custom GPU-transfer work.
+No renderer, game configuration or package changed. All implementation tasks
+remain pending. First execution step is the packaged world-space foundation.
+
+## November 18 — UE integration review complete
+
+The sponsor launched the offline UE proof. The subsequent read-only review
+identified camera-baked vertices, full-array duplication per material group,
+and required texture loading inside an assertion as issues to address before
+the live wrapper. Recommendations use Epic's subsystem/module and resource
+ownership facilities. A shared runtime StaticMesh is the preferred rigid-mesh
+candidate to qualify, not an already selected or verified renderer path.
+[Documented review and gates](reconnaissance/2026-11-18-ue-integration-review.md).
+Next scope a packaged world-space replay foundation, including normal Exit
+controls, before attaching live input. Runtime and accepted alpha unchanged.
+
+## November 18 — packaged UE proof ready
+
+The Win64 UE 5.8.4 executable rendered captured ships, original primary images
+and the recorded SFC camera. Four final packaged checks passed, including two
+distinct fragment poses. Source identity and constructed arrays matched, and
+the larger intact ship's interior pixel comparison passed at 98.33% within
+three colour levels. The command-line build recipe passed end to end.
+[Run record and sponsor launcher](runs/2026-11-18-codex-ue5-packaged-proof.md).
+This is local uncommitted work. Sponsor visual checkout, live UE input, GPU
+return and the remaining SFC-07 transient gaps are open. The Remix alpha stays
+unchanged.
+
+## November 17 — current deliverables and continuity
+
+The project delivers a reusable DLL interface and necessary supporting
+components, plus a UE5 wrapper consuming it.
+[Sponsor decision](decisions/2026-11-17-project-deliverables.md).
+UE 5.8.4 is installed at changelist 58902052 and build-tool startup passed.
+The first packaged ship-and-camera consumer still needs an implementation
+plan and project compilation.
+[Dependency and consumer investigation](reconnaissance/2026-11-17-ue5-consumer-investigation.md).
+
+The independent reader and x86/x64 frame fixtures were revalidated.
+Native effect pixel matching and production transient publication remain
+open. The alpha setup fixes are merged on GitHub at `370accf`; the SFC-07
+branch is at `e07a025` with subsequent local changes.
+[Run evidence](runs/2026-11-13-codex-sfc07-scene-consumer.md#november-17-interface-verification-and-ue5-reference).
+
+The [documentation completion checks](../AGENTS.md#documentation-completion-checks)
+now require current checkpoints, dated Obsidian entries, restart instructions
+and read-back verification before reporting meaningful increments complete.
 
 ## November 15 — SFC-07 ordered standalone readback passed
 
