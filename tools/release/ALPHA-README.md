@@ -1,8 +1,8 @@
 # SFC Rendering Modernization — v0.1.0-alpha.1
 
 Experimental RTX Remix ship replacement for the supported Starfleet Command:
-Orion Pirates client. This guide describes the intended release package; a
-private checkout is not an approved public release.
+Orion Pirates client. This is the first public experimental prerelease.
+Successful gameplay testing has only been completed on the author's own computer.
 
 ## Start
 
@@ -23,6 +23,30 @@ ExtraFrame timing is the standard. Normal play has no match or session timer.
 Native drawing remains available while a matching replacement is being prepared.
 The Toolkit, Python installation, PowerShell and developer tools are not needed.
 
+## Requirements and testing status
+
+- A separate copy of the supported SFC: Orion Pirates Community Edition client
+  (2.5.6.4), with the executable hash listed below. The game is not included.
+- 64-bit Windows. Successful testing has only been performed on Windows 11.
+- An NVIDIA RTX GPU compatible with the bundled RTX Remix 1.6.1 runtime.
+- NVIDIA graphics driver **616.92 or newer**. The tested driver is **621.01**.
+  Older drivers such as 610.88 are below the bundled runtime's requirement.
+  See [NVIDIA's release notes](https://docs.omniverse.nvidia.com/kit/docs/rtx_remix/1.6.1-0/docs/changelog/remix-releasenotes.html).
+- Hardware Direct3D 11 with the required 8x multisampling profile, and the game
+  and Remix using the same GPU. First-run setup checks/prepares the game-copy
+  graphics profile with your approval. Keep a backup of your normal game.
+- Permission to approve the launcher's Windows elevation prompt when requested.
+  Allow several gigabytes for the extracted runtime, caches and working files,
+  in addition to your separate game copy.
+
+**Tested on one computer only:** Windows 11, Core i7-13700KF, 32 GB RAM,
+GeForce RTX 4070 Ti (12 GB), NVIDIA driver 621.01. This is the tested setup,
+not a claim that this exact CPU/GPU/RAM is required. Successful play on other
+machines has not yet been qualified. No Toolkit, Unreal Engine, Python,
+PowerShell or build-tool installation is required by the packaged entry point.
+The package does not install a graphics driver or change system-wide graphics
+settings. Dependencies retain their own terms in the bundled notices.
+
 ## Supported setup
 
 The initial alpha supports the pinned Community Edition executable, SHA256
@@ -40,8 +64,8 @@ The launcher uses your ReShade settings to create a session configuration under
 `SFCRemix/data`. Keep your shaders, textures and presets inside the game copy.
 ReShade's session cache and screenshot outputs use the package data directory.
 
-Known stable native sizes are1024×768,1280×720,1366×768,1440×900,1600×900 and
-1920×1080. The game and its wrapper must use matching supported dimensions.
+Known stable native sizes are 1024x768, 1280x720, 1366x768, 1440x900,
+1600x900 and 1920x1080. The game and its wrapper must use matching supported dimensions.
 Native1440p/4K and supersampling are not part of this alpha qualification.
 An RTX-capable GPU and a driver supported by the pinned Remix1.6.1 runtime are
 required. The package does not install or change your graphics driver.

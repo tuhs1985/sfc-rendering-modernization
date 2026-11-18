@@ -4,7 +4,39 @@ Sponsor-facing current work and parked items: [status tracker](STATUS.md).
 Diagnostic tools, triggers, limits and known pitfalls: [diagnostic reference](DIAGNOSTICS.md).
 The tracker is a sponsor-facing summary; the newest authoritative checkpoint below controls technical work.
 
-## Current checkpoint — November 16 tester graphics setup correction
+## Current checkpoint — November 18 public alpha published
+
+Published [v0.1.0-alpha.1](https://github.com/tuhs1985/sfc-rendering-modernization/releases/tag/v0.1.0-alpha.1)
+as a GitHub prerelease from `e747bd3`. The ZIP is 510,884,422 bytes, SHA-256
+`e93e7d55e75e174cfa75f6ba648c32b7495d36fe4b39e519af4e4d3a38009d52`.
+All three remote asset digests matched local files. Exact packaged preflight
+passed and protected game/profile files were unchanged. Public notes list
+driver 616.92+ and successful testing only on the author's machine.
+[Publication record](runs/2026-11-18-codex-public-alpha-release.md).
+
+The UE checkpoint remains separately committed at `43df260`. Return to
+`codex/expand-rendering-interface` after publication documentation is saved.
+Its first implementation stage remains pending. Do not move the release tag
+to a later documentation commit or mix UE binaries into this alpha.
+
+## November 18 public alpha preparation
+
+The sponsor requested a commit of the UE work and publication of the existing
+Remix alpha. UE source/review/plan are checkpointed locally at `43df260` on
+`codex/expand-rendering-interface`. Release preparation is isolated on
+`codex/publish-alpha-1` from merged alpha `370accf`, with no UE code in the ZIP.
+The public notes explicitly require NVIDIA driver 616.92 or later and state
+successful gameplay testing only on the author's Windows 11/4070 Ti machine.
+
+`tools/release/promote_alpha.py` promotes the qualified candidate's exact
+runtime bytes, verifying source text against the release commit and inheriting
+the unchanged vendor/native inventory from the reviewed merged candidate.
+Only README and package metadata change. Preserve original native build
+lineage rather than claiming fresh compilation. Promotion, exact archive
+preflight and GitHub upload/publication still follow this preparation commit.
+[Release notes](releases/v0.1.0-alpha.1.md).
+
+## November 16 tester graphics setup correction
 
 A tester's dgVoodoo configuration was rejected before setup could prepare it.
 The corrected package prepares the required settings from the game copy's SFC

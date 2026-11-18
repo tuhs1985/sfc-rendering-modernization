@@ -1,13 +1,33 @@
 ---
 title: SFC Modernization — Status Tracker
-updated: 2026-11-16
-checkpoint: Four-stage startup status accepted as the new private alpha baseline.
+updated: 2026-11-18
+checkpoint: v0.1.0-alpha.1 published as a GitHub prerelease. UE work separately committed at 43df260.
 tags:
   - sfc-modernization
   - project-status
 ---
 
 # SFC Modernization — Status Tracker
+
+## November 18 — public alpha published
+
+[Download v0.1.0-alpha.1](https://github.com/tuhs1985/sfc-rendering-modernization/releases/tag/v0.1.0-alpha.1).
+The 510,884,422-byte ZIP, checksum and promotion receipt are public. Remote
+digests and source tag were verified. The exact ZIP passed native launcher
+preflight; runtime bytes are unchanged from the tested candidate. Requirements
+include NVIDIA driver 616.92+ and explicitly successful testing on the author's
+PC only. [Publication evidence](runs/2026-11-18-codex-public-alpha-release.md).
+UE work is separately committed at `43df260`; live insertion is not implemented.
+
+## November 18 — public alpha preparation
+
+The sponsor authorized publication of the existing Remix alpha as a GitHub
+prerelease. Its public notes list the pinned client, NVIDIA driver 616.92+
+and successful testing on the author's PC only. Release promotion preserves
+all tested runtime bytes, changing README and manifest metadata only, with
+source/vendor/native provenance checks. Upload and final publication follow
+the release preparation commit. UE work is separately saved at `43df260`.
+[Release notes](releases/v0.1.0-alpha.1.md).
 
 ## November 16 — packaged startup status
 
