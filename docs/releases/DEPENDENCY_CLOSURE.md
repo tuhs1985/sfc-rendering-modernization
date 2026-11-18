@@ -1,7 +1,10 @@
 # Alpha dependency and redistribution review
 
 November8,2026. This records implementation evidence and remaining release
-review. **No public ZIP is approved or published.**
+review. The unchanged vendor inventory was reverified and the first alpha was
+authorized and published November 18. See the
+[publication record](../runs/2026-11-18-codex-public-alpha-release.md).
+Earlier pending statements below are historical checkpoints.
 
 ## Functional closure
 

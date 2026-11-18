@@ -1,7 +1,9 @@
 # Portable alpha implementation — v0.1.0-alpha.1
 
-Approved November 8, 2026. **Implementation in progress; no releasable ZIP,
-tag or GitHub prerelease exists.** The current development baseline is still
+Approved November 8, 2026. **v0.1.0-alpha.1 was published November 18** from the
+separate reviewed alpha source. See the [publication record](../runs/2026-11-18-codex-public-alpha-release.md)
+and [GitHub prerelease](https://github.com/tuhs1985/sfc-rendering-modernization/releases/tag/v0.1.0-alpha.1).
+The remaining text records earlier implementation history. The development baseline is still
 1920×1080. Native-size allocation and generation retirement are now connected in
 the alpha path; six-size standalone qualification passes. Packaged gameplay has
 not been qualified.

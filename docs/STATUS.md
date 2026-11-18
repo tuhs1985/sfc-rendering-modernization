@@ -1,13 +1,23 @@
 ---
 title: SFC Modernization — Status Tracker
 updated: 2026-11-18
-checkpoint: UE-to-SFC insertion plan prepared. Six gated stages; implementation has not started.
+checkpoint: Remix alpha v0.1.0-alpha.1 is public. UE proof/review/plan committed at 43df260; implementation stage 1 pending.
 tags:
   - sfc-modernization
   - project-status
 ---
 
 # SFC Modernization — Status Tracker
+
+## November 18 — alpha published and UE checkpoint committed
+
+[v0.1.0-alpha.1 is public](https://github.com/tuhs1985/sfc-rendering-modernization/releases/tag/v0.1.0-alpha.1)
+as a GitHub prerelease, with ZIP/checksum/provenance assets verified. Notes
+require NVIDIA driver 616.92+ and state successful testing on the author's
+PC only. The exact public ZIP passed packaged preflight; runtime bytes remain
+identical to the qualified candidate. [Publication record](runs/2026-11-18-codex-public-alpha-release.md).
+UE work is committed locally at `43df260` and the checkout is back on its
+development branch. First UE implementation stage remains pending.
 
 ## November 18 — UE insertion plan prepared
 

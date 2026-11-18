@@ -4,7 +4,28 @@ Sponsor-facing current work and parked items: [status tracker](STATUS.md).
 Diagnostic tools, triggers, limits and known pitfalls: [diagnostic reference](DIAGNOSTICS.md).
 The tracker is a sponsor-facing summary; the newest authoritative checkpoint below controls technical work.
 
-## Current checkpoint — November 18 UE-to-SFC insertion plan
+## Current checkpoint — November 18 commits and public alpha
+
+UE proof/review/insertion planning is committed locally at `43df260` on
+`codex/expand-rendering-interface`. The working checkout has returned to this
+branch. First UE implementation stage remains pending.
+
+Published [v0.1.0-alpha.1](https://github.com/tuhs1985/sfc-rendering-modernization/releases/tag/v0.1.0-alpha.1)
+as a GitHub prerelease from the separate release source `e747bd3`, based on
+merged `370accf`. Release preparation/publication records are pushed on
+`codex/publish-alpha-1`, with evidence commit `948ba8a`. The release tag stays
+at its package-source commit. It does not include experimental UE binaries.
+The ZIP is 510,884,422 bytes and its GitHub SHA-256 matches
+`e93e7d55e75e174cfa75f6ba648c32b7495d36fe4b39e519af4e4d3a38009d52`.
+All runtime bytes are preserved from the qualified candidate; only README and
+manifest metadata changed. Exact packaged preflight passed without modifying
+protected game files. Public notes explicitly list driver 616.92+ and successful
+testing on the author's machine only. [Publication record](runs/2026-11-18-codex-public-alpha-release.md).
+
+No merge into master or alpha renderer change was performed. Preserve the
+unrelated attachments and memory note. Resume UE stage 1 only on request.
+
+## November 18 UE-to-SFC insertion plan
 
 The sponsor requested a plan from the UE proof to in-game insertion. The
 new [ue-native-insertion change](../openspec/changes/ue-native-insertion/proposal.md)
