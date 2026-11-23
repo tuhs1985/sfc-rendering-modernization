@@ -5,17 +5,18 @@ from live_scene import SceneChannel, decode_mesh, ASSETS
 
 
 class Receiver:
-    def __init__(self,*,break_models=False):
+    def __init__(self,*,break_models=False,retain_assets=True):
         self.channel=SceneChannel(create=True)
         self.break_models=break_models
         self.revisions={}
         self.assets={}
-        self.retain_assets=True # Legacy single-owner recovery consumes decoded packets.
+        self.retain_assets=retain_assets # Legacy single-owner recovery consumes decoded packets.
 
     @property
     def name(self):return self.channel.name
 
-    def drain(self):
+    def drain(self,*,collect=False):
+        admitted=[] if collect else None
         for slot in range(4):
             transfer=self.channel.asset_transfer(slot)
             if transfer is None:continue
@@ -30,6 +31,8 @@ class Receiver:
             if revision in self.revisions and self.revisions[revision]!=identity:raise ValueError('Reused asset revision')
             self.revisions[revision]=identity
             if self.retain_assets:self.assets[revision]=data
+            if collect:admitted.append((revision,data))
             self.channel.acknowledge(slot,generation)
+        return admitted
 
     def close(self):self.channel.close()

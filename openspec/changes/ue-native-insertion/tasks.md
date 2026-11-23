@@ -30,7 +30,7 @@ DX12 UE rendering and the established D3D11/native insertion consumer.
 - Keep detailed logs within 32 MiB, warn at 16 MiB, active evidence within
   20 GB, and output resources within 128 MiB with the existing two-slot pool.
   Diagnostic limits stop recording, not untimed normal play.
-- All tasks below are pending. Update owning contracts and handoff after each
+- Task checkboxes below track verified progress. Update owning contracts and handoff after each
   verified stage. A failed essential gate reports the exact blocker.
 
 ## Review focus
@@ -56,12 +56,12 @@ Do not move the working proof or neutral interface into the plugin.
 enter the adapter. Separate retained asset handles, owner instances and one
 source camera leave it. Runtime code has no dependency on `UnrealEd`.
 
-- [ ] 1.1 Add failing replay checks for independent model/camera translation and rotation, shared owners, viewport mapping and constant local geometry; verify they expose the proof's camera-baking/duplication behavior.
-- [ ] 1.2 Implement the session/world lifetime split and separate local-space asset, owner and camera state; verify exact projection against the retained source-space reference and unchanged UV/group data.
-- [ ] 1.3 Qualify runtime StaticMesh fast building against the compact procedural baseline, using the intact ships and recorded fragment topology; verify packaged source pixels/attributes, geometry sharing and required shadow/ray-tracing capability before selecting a path.
-- [ ] 1.4 Make required I/O and structural admission independent of assertions, with recoverable missing/bad input; verify intended Development and Shipping packages and truthful diagnostic receipt flags.
-- [ ] 1.5 Separate editor generation, pin full engine/build dependencies, allowlist plugins/config and add Exit/Escape/cleanup; verify relocation, early exit, immediate relaunch and no injected private generated configuration in the candidate package.
-- [ ] 1.6 Publish the foundation qualification record, measured asset/transform costs and selected mesh rationale; update the interface/handoff/Obsidian and read them back before proceeding.
+- [x] 1.1 Add failing replay checks for independent model/camera translation and rotation, shared owners, viewport mapping and constant local geometry; verify they expose the proof's camera-baking/duplication behavior.
+- [x] 1.2 Implement the session/world lifetime split and separate local-space asset, owner and camera state; verify exact projection against the retained source-space reference and unchanged UV/group data.
+- [x] 1.3 Qualify runtime StaticMesh fast building against the compact procedural baseline, using the intact ships and recorded fragment topology; verify packaged source pixels/attributes, geometry sharing and required shadow/ray-tracing capability before selecting a path.
+- [x] 1.4 Make required I/O and structural admission independent of assertions, with recoverable missing/bad input; verify intended Development and Shipping packages and truthful diagnostic receipt flags.
+- [x] 1.5 Separate editor generation, pin full engine/build dependencies, allowlist plugins/config and add Exit/Escape/cleanup; verify relocation, early exit, immediate relaunch and no injected private generated configuration in the candidate package.
+- [x] 1.6 Publish the foundation qualification record, measured asset/transform costs and selected mesh rationale; update the interface/handoff/Obsidian and read them back before proceeding.
 
 ## 2. Standalone GPU output feasibility and contract
 
@@ -77,7 +77,7 @@ resources and owns their lease until completion. No SFC process is intercepted.
 
 - [ ] 2.1 Evaluate the installed Texture Share public plugin/SDK route with changing colour/depth/owner fixtures; verify actual UE DX12-to-D3D11 exchange, CPU-copy absence, same-LUID selection, stop/disconnect and bounded/non-stacked synchronization.
 - [ ] 2.2 If that route fails, record its exact unsupported capability and qualify the smallest public-RHI/Windows shared-resource/fence alternative; verify without engine patches or silently switching rendering APIs, otherwise stop at the foundation checkpoint.
-- [ ] 2.3 Define the backend output/import contract from the successful experiment, including session/frame/camera/asset identity, handle kind/ownership and completion; verify stale/wrong tickets and 64-bit versus existing 32-bit handle restrictions with process-boundary tests.
+- [x] 2.3 Define the backend output/import contract from the successful experiment, including session/frame/camera/asset identity, handle kind/ownership and completion; verify stale/wrong tickets and 64-bit versus existing 32-bit handle restrictions with process-boundary tests.
 - [ ] 2.4 Produce native-compatible colour, physical depth and packed owner coverage from the same snapshot; verify near/far ordering, opaque black markings, exact owner bits, viewport offset and visibly different consecutive poses/markers.
 - [ ] 2.5 Exercise target resize/device generation, occupied pool, slow/crashed consumer, failed allocation and stop during GPU use; verify leases drain before reuse and old pixels cannot reappear under new metadata.
 - [ ] 2.6 Record the GPU mechanism, limits, timing, descriptor/ownership contract and failures; update the interface/handoff/Obsidian and read back the demonstrated standalone gate.
@@ -93,7 +93,7 @@ point. Keep the existing Remix selector/default behavior intact.
 neutral reader facade. Original CPU geometry/images plus coherent source
 frames enter UE. No UObject is accessed by source receipt workers.
 
-- [ ] 3.1 Qualify the exact reader boundary for original source geometry/images and live frame identities, using actual existing transfers; verify no Remix UV/material processing or saved-template requirement leaks into UE.
+- [x] 3.1 Qualify the exact reader boundary for original source geometry/images and live frame identities, using actual existing transfers; verify no Remix UV/material processing or saved-template requirement leaks into UE.
 - [ ] 3.2 Implement passive startup/late activation and base-model admission as assets arrive; verify renderer startup does not wait for all ships/enhancements and original image identity is retained without expensive repeated comparisons.
 - [ ] 3.3 Replay multiple/shared owners, offscreen motion, revision changes, delayed material arrival, retirement, pointer reuse and new sessions through the real reader; verify zero geometry rebuilds for transform-only updates and no cross-associated ship.
 - [ ] 3.4 Measure 1/6/100+ representative-owner replay within declared budgets, including GPU/CPU timing and resource growth; verify diagnostics-off operation creates no image/trace recordings and introduces no new count/rate cap.

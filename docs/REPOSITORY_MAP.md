@@ -247,3 +247,13 @@ presence does not authorize adding them, deleting them or silently changing
 ignore rules. Classification of every inactive method/shared native include,
 full clean-machine vendor closure and each future destination directory remains
 open. They are follow-up work, not claims made by this map.
+
+## UE adapter addition — November 18
+
+`src/ue_wrapper` owns the experimental UE application and its SFCBridge
+runtime/editor modules. `src/ue5_proof` stays as the earlier comparator.
+`tools/ue_wrapper` owns development-only preparation, builds and qualification;
+none of it enters the Remix alpha. Generated content, build caches, source
+images and packages remain ignored local files. See the
+[foundation qualification](runs/2026-11-18-codex-ue-worldspace-foundation.md)
+and [renderer interface control document](D3D9_INTERFACE_CONTROL.md).

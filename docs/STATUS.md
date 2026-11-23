@@ -1,13 +1,75 @@
 ---
 title: SFC Modernization — Status Tracker
-updated: 2026-11-18
-checkpoint: Remix alpha v0.1.0-alpha.1 is public. UE proof/review/plan committed at 43df260; implementation stage 1 pending.
+updated: 2026-11-22
+checkpoint: Actual UE GPU output and neutral source receipt verified. Persistent publication and live wiring remain open. Insertion plan 8/30.
 tags:
   - sfc-modernization
   - project-status
 ---
 
 # SFC Modernization — Status Tracker
+
+## November 22 — UE output and source-reader boundary verified
+
+Development and Shipping export actual F-CA colour/depth through shared GPU
+resources and ready/acknowledgement fences. Colour matches exactly; physical
+depth and single-owner coverage pass source comparisons. The independent reader
+receives four original assets and 91 retained frames through existing Windows
+IPC, preserving UVs/images and reusing geometry. Its generated scene passes UE
+without a saved template. Candidate output/lease checks pass x86/x64; the real
+Windows two-slot fixture passes delayed-consumer reuse. Native-format GPU
+normalization also passes, including viewport margins and black coverage.
+
+The insertion plan is 8/30. Persistent UE publication, live world updates and
+native insertion remain open. No alpha, game or appearance change. Next connect
+the verified boundaries with qualified GPU lifetimes, not another discovery run.
+[Evidence and limits](runs/2026-11-22-codex-ue-actual-gpu-output.md).
+
+## November 22 — Standalone Windows GPU exchange
+
+Five same-adapter DX12-to-D3D11 runs and an early-disconnect fixture passed.
+The next check is to export a real UE scene-capture target with explicit GPU
+completion. The insertion plan remains at 6/30. See the
+[probe and its limits](runs/2026-11-22-codex-ue-gpu-exchange-probe.md).
+
+## November 20 — OpenSpec and Superpowers workflow clarified
+
+[The development workflow](OPENSPEC.md#using-it) assigns scoped plans and task
+status to OpenSpec, and implementation and verification practices to Superpowers.
+Nine completed changes were archived. The packaged offline UE proof contributed
+two accepted requirements to the [standing spec](../openspec/specs/ue5-offline-consumer/spec.md).
+Three unfinished changes remain active. The UE checkpoint below still governs
+the next engineering step.
+
+## November 18 — UE foundation qualified; wrapped for credits
+
+Executing the existing native-insertion plan on the UE branch, without changing
+the public alpha. The new project/plugin retains local geometry and shares a
+runtime mesh while moving actors and the camera separately. Development checks
+pass source pixel/attribute comparisons, two shared owners, four break pieces,
+safe malformed-input rejection and diagnostics-off close/relaunch. Persistent
+capture view state enabled real ray-traced shadows in the qualification fixture.
+Shipping, relocation, Escape/normal close and relaunch pass. World recreation
+retains one asset build across two worlds. An earlier shared-run timeout remains
+documented; five later serial repeats passed. Source snapshots match between
+configurations. Live input and GPU exchange are not wired. The sponsor requested
+wrap-up for credits; next is standalone Texture Share evaluation, without a new
+game discovery run. [Evidence and next gate](runs/2026-11-18-codex-ue-worldspace-foundation.md).
+
+## November 18 — parked external decompilation reference
+
+Track [marinohardin/SFC2-decomp](https://github.com/marinohardin/SFC2-decomp)
+for future rendering-interface and engine research. Its README describes a
+partial matching Orion Pirates **2.5.5.2** decompilation, function/symbol maps,
+verification tooling and a consumer interface document. Empires at War is
+listed as not started. These are upstream claims, not locally verified results.
+Potential use: clarify model/resource ownership, effects, lifecycle and earlier
+asset discovery. Our supported client is **2.5.6.4**; do not transplant addresses
+or layouts without checking our executable. The README says licensing is not
+yet decided; tracking the reference does not import or redistribute its code.
+Reopen when a specific SFC-07 or UE-wrapper relationship needs clarification:
+pin an upstream revision, read `docs/INTERFACE.md`, then compare one relevant
+function against our existing evidence. No clone, dependency or runtime change.
 
 ## November 18 — alpha published and UE checkpoint committed
 
@@ -450,7 +512,7 @@ The sponsor's parent-folder clarification is accounted for in the
 [external workspace inventory](REPOSITORY_MAP.md#project-workspace-outside-this-repository):
 test copies, old publishing clone, backups, RemixJobs and Toolkit archives are
 classified separately from Git branches. No external folders were moved/deleted.
-The [task list](../openspec/changes/organize-repository-foundation/tasks.md) records
+The [task list](../openspec/changes/archive/2026-11-20-organize-repository-foundation/tasks.md) records
 completion and verification. The sponsor reviewed the foundation and requested
 a local commit on `codex/organize-repository-foundation`; no merge, push or release.
 
@@ -479,7 +541,7 @@ project health/templates/update dry-run verified. The repository-foundation
 proposal/design/task list passes strict validation;14implementation tasks remain.
 No game-behavior specs or historical migration. Development-only; alpha package
 unchanged. [OpenSpec guide](OPENSPEC.md) and
-[foundation proposal](../openspec/changes/organize-repository-foundation/proposal.md).
+[foundation proposal](../openspec/changes/archive/2026-11-20-organize-repository-foundation/proposal.md).
 No foundation implementation or push.
 
 **November9 — Cleanup startup regression fixed:** the profiling-off change hit

@@ -26,6 +26,46 @@ SFC 2.5.6.4 (x86)
 
 ## Scene input upstream of D3D9
 
+### UE output adapter — standalone qualification, November 22
+
+The packaged Development/Shipping checks transferred actual UE colour and
+linear depth into a D3D11 consumer. Explicit Windows shared resources wrapped
+through public RHI passed. Development and Shipping checks use shared producer
+and consumer GPU fences. Native-depth conversion and exact single-owner bits
+passed source-geometry comparisons, including opaque black markings.
+See the [experiment and limits](runs/2026-11-22-codex-ue-actual-gpu-output.md).
+
+The [candidate output contract](contracts/UE_OUTPUT.md) defines full source
+identity, 64-bit NT handle ownership, peer/LUID identity and a two-slot lease.
+Its 280-byte descriptor, explicit target/viewport and state-machine tests pass
+x86/x64. A Windows two-slot GPU test passes repeated reuse; persistent UE
+publication remains pending. The native-format normalizer writes directly into
+caller-owned targets, with separate GPU qualification. The UE source reader consumes the existing source
+channel upstream of D3D9 with original geometry, UVs and image bytes.
+The reader's decoded-buffer ownership is explicit. Normal existing receiver
+callers retain their previous default ownership.
+Ninety-one retained frames and four original assets pass actual source IPC;
+its generated F-CA input also passes packaged UE/GPU export. This is replay
+through the current transport, not a new live SFC checkout.
+
+### UE adapter foundation — offline qualification only
+
+`src/ue_wrapper/Plugins/SFCBridge` is an independent consumer of the existing
+checked offline source scene facade. It preserves original local positions,
+corner normals/UVs, group/image associations, content/revision and available
+fragment relationships. Session-owned assets are separate from world-owned
+instances and camera state. UE basis/row-matrix conversion belongs in this
+adapter; neither neutral packets nor Remix's UV/material rules are changed.
+
+This is not a new live ABI, trusted submission ticket or native suppression
+authorization. The upstream inspector establishes packet/image provenance;
+the offline loader checks structural admission and frame owner/revision.
+No UE GPU resource or type enters the source DLL wire. GPU sharing and live
+receipt remain separately gated. Normal mode omits readback/array comparisons;
+the `SFCDiagnostics` fixture explicitly enables them. See the
+[foundation implementation record](runs/2026-11-18-codex-ue-worldspace-foundation.md)
+for demonstrated capabilities and pending qualifications.
+
 The x86 component captures the supported mesh and game state. Workers receive and acknowledge asset transfers, prepare resources and maintain the catalog. The x64 host consumes one frame snapshot for a set of retained owners. Each owner has its own pose and lifetime even when several owners share geometry. Asset readiness can change independently of frame availability.
 
 | Input | What the consumer receives | Control reference |

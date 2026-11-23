@@ -4,7 +4,120 @@ Sponsor-facing current work and parked items: [status tracker](STATUS.md).
 Diagnostic tools, triggers, limits and known pitfalls: [diagnostic reference](DIAGNOSTICS.md).
 The tracker is a sponsor-facing summary; the newest authoritative checkpoint below controls technical work.
 
-## Current checkpoint — November 18 commits and public alpha
+## Current checkpoint — November 22 actual UE GPU output and neutral receipt
+
+Continue in the primary checkout, `C:/Project/SFC-Modernize Engine`, branch
+`codex/expand-rendering-interface`, implementation parent `27f4638`. The sponsor
+requested this checkpoint committed and pushed on the branch, without merging.
+Use the branch log for the exact saved commits; the alpha remains unchanged.
+The sponsor requested a pause after the five-hour work window. The final prepared
+GPU fixture passed; no owned UE/GPU helpers remain. Resume from the next step below.
+The approved insertion plan is 8/30: foundation, output contract and neutral
+reader boundary are verified. Do not equate this with live UE insertion.
+
+[Actual UE output evidence](runs/2026-11-22-codex-ue-actual-gpu-output.md) now
+covers real scene-capture colour/depth exported through public DX12 RHI into an
+independent D3D11 child. Shared GPU fences govern readiness and acknowledgement.
+Current Development and Shipping packages pass the source reader's F-CA input,
+exact received colour, physical depth and single-owner coverage. Exit-before-import,
+wrong acknowledgement and a stalled diagnostic child reject within explicit bounds.
+
+The neutral reader receives original packets over existing Windows IPC. Ninety-one
+historical frames, four assets, shared geometry/image reuse, retirement and
+cross-session rejection pass. It emits its own fresh F-CA scene from that data,
+which passes both packaged configurations. The historical layout adaptation is
+explicit; this is not new live SFC evidence. Source arrays and original image
+identities are preserved, with no Remix conversion or saved scene template.
+
+The [candidate output contract](contracts/UE_OUTPUT.md) is now 280 bytes and
+distinguishes tactical export extent/offset from the full native target.
+Twenty-seven child-process descriptor cases pass under x86 and x64; lease
+tests reject stale identity and unsafe reuse. A real Windows two-slot fixture
+passes twelve changing frames with a delayed receiver. The native-format GPU
+normalizer writes all three outputs into caller-owned targets; its odd-extent,
+historical 1280×360, full-1080p viewport placement, margin, black coverage and exact
+owner-bit checks pass (17,974,164 pixel values). None of these helpers
+authorizes native suppression yet.
+
+Next integrate persistent, coherent colour/depth publication from UE with the
+normalizer and existing game pool. Keep GPU input leases until completed reads;
+qualify actual resize/device generations, cancellation and bounded failure before
+live wiring. The UE diagnostic still starts one child per texture and blocks.
+The neutral reader is not yet bound continuously to UE. Tasks 2.1/2.2 remain
+open: Texture Share was reviewed, not executed; its public GPU lease guarantee
+was not established. The alternative public-RHI experiment passes but its
+production lifetime integration remains open. No sponsor run is needed yet.
+
+Do not repeat discovery traces or change alpha settings. Current exact inputs,
+receipts and repeatable tools are recorded in the linked run record and local
+`artifacts/ue-foundation/progress.md`.
+
+## Prior checkpoint — November 22 Windows GPU exchange proven in isolation
+
+The [standalone probe](runs/2026-11-22-codex-ue-gpu-exchange-probe.md) moved
+five sets of four changing colour/depth/owner frames through same-GPU
+DX12-to-D3D11 shared textures between two Windows processes. Shared fences
+govern producer readiness and consumer acknowledgement. Early receiver exit
+left the slot unacknowledged. This is the Windows fallback experiment.
+The reviewed Epic public interface provides frame barriers and resource
+exchange, with no explicit GPU-completion or consumer-read fence contract
+established in the review. No Epic exchange was executed.
+
+OpenSpec remains 6/30. Next, use the pinned engine's public
+ID3D12DynamicRHI resource wrapping and RHI queue APIs to export an actual UE
+scene-capture target. Establish the RHI copy/transition and GPU signal order
+before a standalone D3D11 consumer can accept it. Keep the existing Windows
+probe as the independent comparison. No live source or game insertion is wired.
+
+## November 20 — Development workflow update
+
+Apply the [OpenSpec and Superpowers workflow](OPENSPEC.md#using-it) to the next
+UE task. OpenSpec owns scope and task status. Use Superpowers for implementation
+and verification, then link results before checking off tasks. Nine changes
+were archived and the offline UE consumer spec was promoted. Strict validation
+passed for the three remaining changes and the standing spec.
+
+Use C:/Project/SFC-Modernize Engine for this work. GitHub PR #4 is merged and its
+local tip is contained in origin/master. The old chat worktree still holds local
+attachments and ignored alpha artifacts. The app rejected attaching the primary
+checkout as a linked worktree. Retain the old worktree until the chat context can
+be moved and its needed files preserved.
+
+## Current checkpoint — November 18 UE foundation qualified; wrapped for credits
+
+The sponsor authorized execution of `ue-native-insertion`. Work is in place on
+`codex/expand-rendering-interface`, parent `27f4638`, with implementation left
+unstaged/uncommitted. Preserve the preceding parked SFC2-decomp status entry,
+attachments and unrelated memory note. Release PR #5 is verified merged on
+remote master at `e01cd90`; its obsolete local release branch was removed.
+The public alpha ZIP/tag and prior `src/ue5_proof` are unchanged.
+
+New `src/ue_wrapper` separates runtime/editor modules, session-owned retained
+assets, world-owned actors and the independent source camera. Source arrays,
+UVs and image identities remain original; adapter math applies only UE basis
+and row-matrix conventions. Native x86/x64 conversion fixtures pass 1,016 checks
+each. Development package geometry, pixels, shared owners, all four break
+pieces, malformed inputs and normal close/relaunch pass. Real ray-traced shadow
+qualification required persistent capture view state and then measured 5,797
+shadow pixels. Forty-two focused existing Python regressions pass in the
+desktop environment. Shipping and Development source manifests match. Shipping
+also passed relocation, missing input, normal close/Escape and relaunch. Both
+configurations recreated their world while retaining one asset build and correct
+pixels. Five repeated shared-owner runs passed after capture was kept progressing
+through readiness. One earlier shared-run timeout remains recorded without an
+established engine-side cause. The sponsor requested wrap-up for credits.
+[Implementation and evidence](runs/2026-11-18-codex-ue-worldspace-foundation.md).
+
+Next execute task 2.1: qualify standalone GPU sharing before live source updates or SFC
+insertion. The installed Texture Share SDK and D3D11/D3D12 samples are at
+`Engine/Extras/VirtualProduction/TextureShare`; use these and the public Blueprint
+container APIs before custom sharing code. Verify actual GPU completion rather
+than assuming its frame synchronization is a fence. Live reader, GPU exchange,
+native insertion and suppression are not wired. No sponsor game run is needed yet.
+Resume using the ledger `artifacts/ue-foundation/progress.md`, current build
+logs/receipts and the OpenSpec task checkboxes rather than repeating old work.
+
+## November 18 commits and public alpha
 
 UE proof/review/insertion planning is committed locally at `43df260` on
 `codex/expand-rendering-interface`. The working checkout has returned to this
@@ -618,7 +731,7 @@ function/class ASTs and fresh installed preflight (original/moved Unicode path
 plus coordinator) pass. No SFC/GPU launch or gameplay validation. Current private
 alpha, settings, native binaries and external folders untouched. See the
 [run record](runs/2026-11-09-codex-session-coordinator-separation.md) and
-[task list](../openspec/changes/separate-session-coordinator/tasks.md).
+[task list](../openspec/changes/archive/2026-11-20-separate-session-coordinator/tasks.md).
 
 Important existing limitation: before this move the developer normal preflight
 already rejected `live_light_binding.py` against an old native-cohort source
@@ -642,7 +755,7 @@ build/packaging/qualification inputs. New installed layout is
 `code/src/launcher`, paired with the rebuilt native launcher. Build, bootstrap
 imports, production inventory, manifest role, staging and ZIP consumers agree.
 See the [run record](runs/2026-11-09-codex-release-tooling-separation.md) and
-[tracked change](../openspec/changes/separate-release-tooling/tasks.md).
+[tracked change](../openspec/changes/archive/2026-11-20-separate-release-tooling/tasks.md).
 
 Strict launcher build, all 749 regressions and actual installed preflight pass.
 The fresh reduced package passes at a space/Unicode path, after moving, and
@@ -681,7 +794,7 @@ game files and settings are unchanged. No commits, pushes, merges or
 release actions were part of implementation. The sponsor subsequently reviewed
 the foundation and requested a local checkpoint only; no merge or push.
 Verification/completion is
-tracked in the [change tasks](../openspec/changes/organize-repository-foundation/tasks.md).
+tracked in the [change tasks](../openspec/changes/archive/2026-11-20-organize-repository-foundation/tasks.md).
 
 Focused verification passes: 76 new/document-entry Markdown links, all 12 tracked
 root classifications, 784 source/build/test inputs unchanged, and 10 checked private
@@ -760,7 +873,7 @@ core Codex profile with six repository-local skills under `.agents/skills/`.
 `openspec/config.yaml` carries concise SFC context/rules; AGENTS.md unchanged.
 Anonymous telemetry disabled. Doctor reports a healthy project root; templates
 resolve and update dry-run is empty. The scoped
-[repository-foundation proposal](../openspec/changes/organize-repository-foundation/proposal.md)
+[repository-foundation proposal](../openspec/changes/archive/2026-11-20-organize-repository-foundation/proposal.md)
 has a design and14pending implementation tasks; strict change validation passes.
 Behavior specs are explicitly skipped for this documentation/process-only change.
 No foundation implementation, historical migration or production payload change.

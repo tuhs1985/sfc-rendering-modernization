@@ -1,0 +1,9 @@
+{
+  "FileVersion":3,"Version":1,"VersionName":"0.1","FriendlyName":"SFC Bridge",
+  "CanContainContent":false,
+  "Modules":[
+    {"Name":"SFCBridgeRuntime","Type":"Runtime","LoadingPhase":"Default"},
+    {"Name":"SFCBridgeEditor","Type":"Editor","LoadingPhase":"Default"}
+  ],
+  "Plugins":[{"Name":"ProceduralMeshComponent","Enabled":true}]
+}

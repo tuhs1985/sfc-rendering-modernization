@@ -1,0 +1,8 @@
+/Binaries/
+/Intermediate/
+/Saved/
+/Content/
+/DerivedDataCache/
+/Plugins/*/Binaries/
+/Plugins/*/Intermediate/
+*.sln

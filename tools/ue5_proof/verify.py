@@ -7,7 +7,7 @@ import numpy as np
 from PIL import Image
 
 
-def reference(scene, folder, frame_index=0):
+def reference(scene, folder, frame_index=0, *, include_depth=False):
     frame = scene['frames'][frame_index]
     width, height = map(int, frame['viewport'][2:])
     positions = np.array(scene['positions'])
@@ -53,6 +53,8 @@ def reference(scene, folder, frame_index=0):
             result[area][selected] = colour[selected]
             depth[area][selected] = z[selected]
             interior[area][selected] = weights.min(-1)[selected] > .05
+    if include_depth:
+        return result, np.isfinite(depth), interior, depth
     return result, np.isfinite(depth), interior
 
 
