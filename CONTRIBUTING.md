@@ -10,9 +10,8 @@ integration with a working private alpha, not a clean-sheet engine project.
    interface contract. Separate current guidance from dated experiments.
 2. Check `git status --short`, the current branch and its base. Preserve unrelated
    local work. A folder name such as `tools/` does not make its contents disposable.
-3. Choose one scoped change. [OpenSpec](docs/OPENSPEC.md) records its purpose,
-   approach and tasks. Use the [planning, debugging and review rules](AGENTS.md#planning-debugging-and-review)
-   to scale the workflow to the change. Existing user authorization governs what may proceed.
+3. Choose one scoped change. Follow the [OpenSpec and Superpowers workflow](docs/OPENSPEC.md#using-it)
+   for planning, implementation and verification. Existing user authorization governs what may proceed.
 4. Implement and verify the affected boundary. Preserve compatibility and user
    settings, and record what the checks actually establish.
 5. Update the current checkpoint and links. Stage, commit, push, integrate or
@@ -66,6 +65,27 @@ git diff --check
 git diff --cached --name-only
 git diff --cached
 ```
+
+### Post-merge local cleanup
+
+1. Confirm the PR is merged on GitHub. Fetch the destination branch and verify
+   that it contains the merge and all work on the exact local branch tip. For a
+   squash or rebase merge, compare the local changes with the merged PR and
+   account for any commits added afterward. Preserve the branch if integration
+   cannot be verified.
+2. Run `git worktree list --porcelain` and check the associated worktree for
+   tracked changes, untracked files and ignored artifacts. Keep worktrees with
+   follow-up edits or needed local files. Move any deliverables and evidence
+   needed after cleanup to their normal project location and verify them there.
+3. From a surviving checkout, remove the verified clean linked worktree with
+   `git worktree remove <path>`. Check that the resolved path matches the exact
+   Git-registered worktree. For an app-managed worktree, first release it from
+   the active session using the app's worktree controls. Preserve the primary
+   checkout and any linked worktree still in use.
+4. Delete the obsolete local branch with `git branch -d <branch>`. A refused
+   deletion leaves the branch in place for review. Retain historical recovery
+   refs and branches still named by repository configuration. Verify the final
+   worktree and branch lists. This procedure acts on local worktrees and refs.
 
 ## Documentation responsibilities
 

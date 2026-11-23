@@ -2,7 +2,7 @@
 
 Initialized November 9, 2026 with the official standalone Windows CLI **1.16.1**
 and its core Codex profile. This is development tooling, not an alpha dependency.
-Anonymous CLI telemetry is disabled in the local OpenSpec configuration.
+Set `OPENSPEC_TELEMETRY=0` for repository commands in environments that do not inherit the local telemetry preference.
 
 ## Installed locations
 
@@ -13,12 +13,11 @@ Anonymous CLI telemetry is disabled in the local OpenSpec configuration.
 - Proposed changes and completed-change history: `openspec/changes/`.
 - Six generated Codex workflows: `.agents/skills/openspec-*/SKILL.md`.
 
-The first change, [organize-repository-foundation](../openspec/changes/organize-repository-foundation/proposal.md),
-has a proposal, design and 14 tracked implementation tasks; see its task list for
-current completion. It deliberately skips
-behavior specs because its scope is documentation/process only. No standing
-specifications have been generated. Existing research, requirements, plans and
-evidence have not been migrated or rewritten.
+The first change, [organize-repository-foundation](../openspec/changes/archive/2026-11-20-organize-repository-foundation/proposal.md),
+tracked 14 documentation and process tasks. Completed changes live in
+`openspec/changes/archive/`. The [UE5 offline consumer spec](../openspec/specs/ue5-offline-consumer/spec.md)
+covers the packaged captured-scene proof.
+
 The installation preserved AGENTS.md. Generated workflows should be refreshed
 through OpenSpec rather than manually customized; project rules belong in config.
 
@@ -33,17 +32,29 @@ Use the skills picker; the proposal skill can also be invoked by name:
 $openspec-propose "Describe the change"
 ```
 
-Proposal and exploration workflows do planning; implementation uses apply-change.
-For multi-step work in normal mode, use the [planning, debugging and review rules](../AGENTS.md#planning-debugging-and-review).
-Keep the implementation plan with its OpenSpec change.
-Every new task list includes a final documentation and continuity task.
-Apply the [documentation completion checks](../AGENTS.md#documentation-completion-checks)
-before reporting each meaningful increment complete. Task and checkpoint
-updates must reflect verified work and retain unresolved checks.
-Existing user instructions and authorization retain precedence. We do not add a
-new approval gate for routine work merely because the framework is installed.
-The optional verify workflow is not installed by the core profile; our existing
-tests and evidence requirements continue to apply regardless.
+1. **Plan in OpenSpec.** Start with the capability requirements and the applicable
+   change. Keep the approved scope, behavior, design and task list there.
+   Brainstorming and plan-writing techniques can refine those artifacts. Use the
+   existing OpenSpec files as their destination instead of creating separate
+   specs or plans under `docs/superpowers/`. Existing approval covers the same scope.
+2. **Implement and verify with Superpowers.** For an OpenSpec change, use
+   apply-change to resolve the change, read the controlling artifacts and identify
+   pending tasks. Use the applicable Superpowers implementation, debugging, review
+   and verification practices to execute that task list. Follow SFC's focused
+   verification rules. Use engineering judgment for choices within approved scope.
+   If a decision changes approved behavior or acceptance criteria, surface it and
+   update the OpenSpec artifacts after approval. Investigate routine failures
+   within scope and keep blocked or unverified tasks open. Stage, commit and push
+   only when requested.
+3. **Record evidence and close in OpenSpec.** Link the actual checks and results
+   in a run record or handoff before checking off the corresponding task. A local
+   execution ledger may track working details. OpenSpec owns durable task status.
+   Include the final documentation and continuity task and apply the
+   [documentation completion checks](../AGENTS.md#documentation-completion-checks).
+   Review completed behavior deltas against the evidence, sync accepted
+   requirements into standing specs, then archive the completed change.
+   Archive verified process-only changes without creating behavior requirements.
+   Keep links to moved artifacts current. Leave unfinished changes active.
 
 Useful terminal commands, from the repository root:
 

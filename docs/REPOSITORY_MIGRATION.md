@@ -37,7 +37,7 @@ ZIP. A documentation branch does not upgrade its release-readiness status.
 
 **First concrete separation:** `separate-release-tooling` now moves the five
 launcher inputs to `src/launcher`, leaving release/build tools behind. See its
-[design](../openspec/changes/separate-release-tooling/design.md) and
+[design](../openspec/changes/archive/2026-11-20-separate-release-tooling/design.md) and
 [verification record](runs/2026-11-09-codex-release-tooling-separation.md).
 The next scoped change, `separate-session-coordinator`, relocates the coordinator
 and its exit/report helpers to `src/session`, with development-only compatibility
