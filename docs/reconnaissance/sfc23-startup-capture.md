@@ -50,3 +50,12 @@ The affected script uses WOF compression in the accepted install. The verified t
 The sponsor added a Defender folder exclusion for `C:\Project\SFC-Remix-Return-Test\Assets\scripts` and reported no 20-second pause on the first launch after a fresh restart. The sponsor considers the recurring slowdown resolved on this setup. The trace identifies Defender scanning as the cause of the stall. Why that scan took so long remains unknown. Parked with no further capture planned.
 
 For a lightweight warm timing sample, add `-TimingOnly` to `-Pass Repeat -Launch`. This records launch, process and menu markers in `timeline.json` without a kernel trace. Use the same launch path and record when the repeat was run. The prior warm capture used the same game executable via SFCLauncher, so it is a separate launch-path comparison. Both new entry points passed `-CheckOnly`. Local analysis is alongside the post-reboot ETL in `main-waits.txt`, `longest-wait-start.txt`, and `ReShade.log`.
+
+
+## November 23 evidence retirement
+
+After the sponsor declared SFC-23 resolved and authorized retirement of resolved
+diagnostic data, the three large raw startup ETLs and the full-system precise
+CPU CSV were removed. Focused extracted analysis, timelines, logs and these
+findings remain. The old raw paths are intentionally unavailable; this is not
+a new capture failure. [Maintenance record](../runs/2026-11-23-codex-evidence-compaction.md).
