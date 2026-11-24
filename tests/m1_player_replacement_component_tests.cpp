@@ -87,6 +87,16 @@ int main(){
  second.live=true;start(104);state->owner_id=firstOwner+1;state->ship=reinterpret_cast<DWORD>(otherShip.data());state->visual=reinterpret_cast<DWORD>(otherVisual.data());
  stack[0]=0x0042e55d;stack[1]=1;CoordinateAfterCapture(kWrapper,saved.data());test(stack[1]==0&&gateCommits==before+3&&!gate->header.stop);
  state->owner_id=firstOwner;state->ship=reinterpret_cast<DWORD>(ship.data());state->visual=reinterpret_cast<DWORD>(visual.data());g_native_cohort_mode=false;g_native_cohort=nullptr;
+ // Additive gate commits the same image without zeroing either original list.
+ const LONG previousSuppressed=ledger->suppressed;const auto previousAcquires=gateAcquires,previousCommits=gateCommits;
+ g_native_additive=true;start(105);stack[0]=0x0042e55d;stack[1]=1;invokeRecorder(saved.data());CoordinateAfterCapture(kWrapper,saved.data());
+ test(stack[1]==1&&g_native_inserted&&g_native_committed==105&&gateAcquires==previousAcquires+1&&gateCommits==previousCommits+1);
+ stack[0]=0x0042e626;stack[1]=1;invokeRecorder(saved.data());CoordinateAfterCapture(kWrapper,saved.data());
+ test(stack[1]==1&&gateAcquires==previousAcquires+1&&gateCommits==previousCommits+1&&ledger->suppressed==previousSuppressed);
+ test(!gate->current.primary&&!gate->current.secondary&&memcmp(mesh.data(),&g_mesh_packet,mesh.size())==0);
+ start(106);gateTimeout=true;stack[0]=0x0042e55d;stack[1]=1;CoordinateAfterCapture(kWrapper,saved.data());test(stack[1]==1&&!g_native_inserted);
+ stack[0]=0x0042e626;CoordinateAfterCapture(kWrapper,saved.data());test(stack[1]==1&&ledger->suppressed==previousSuppressed);
+ g_native_additive=false;gateTimeout=false;
  // Unload's conservative PC exclusion covers each complete naked hook stub.
  for(const auto& hook:g_hooks){const auto* bytes=reinterpret_cast<const BYTE*>(hook.destination);bool end=false;
   if(!strncmp(hook.name,"break_",6)){

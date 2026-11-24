@@ -252,8 +252,43 @@ open. They are follow-up work, not claims made by this map.
 
 `src/ue_wrapper` owns the experimental UE application and its SFCBridge
 runtime/editor modules. `src/ue5_proof` stays as the earlier comparator.
-`tools/ue_wrapper` owns development-only preparation, builds and qualification;
+`src/rendering/ue` owns the neutral-reader facade, one-time UE definition
+publisher, explicit read-only source service and backend-specific GPU
+export/normalization. The read-only native
+scene view/channel live in `src/transport` and reuse the existing writer's
+canonical capacity header; they are not a standalone stable SDK.
+`tools/ue_wrapper` owns development-only preparation, builds, qualification and
+the read-only copied-game observation entry point;
 none of it enters the Remix alpha. Generated content, build caches, source
 images and packages remain ignored local files. See the
 [foundation qualification](runs/2026-11-18-codex-ue-worldspace-foundation.md)
 and [renderer interface control document](D3D9_INTERFACE_CONTROL.md).
+
+### UE native return increment — November 23
+
+Read-only native target receipt belongs to src/transport/source_target_view.h.
+UE source identity and native-pool admission/writer belong to src/rendering/ue.
+The private SFCGameOutput component and owner capture helper belong to the UE
+runtime plugin. They are compiled but not yet connected to live inspection.
+Standalone game-pool, native consumer and additive recorder fixtures remain in
+tests and tools/ue_wrapper; their readback, completion-event pacing and synthetic
+source fields are diagnostic only. See the current handoff for qualification.
+
+
+### Frozen evidence maintenance
+
+tools/asset_diagnostics/share_evidence.py owns explicit offline inventory and
+sharing of immutable completed-test images. Its reviewed manifests and ledgers
+stay in ignored artifacts. tests/test_share_evidence.py exercises actual file
+boundaries. Neither tool nor test belongs to the alpha runtime or normal session
+imports. Maintenance planning is separate from the UE insertion change.
+
+## UE additive preparation — November 23
+
+The opt-in retained-scene/output service belongs to src/rendering/ue and the
+runtime plugin. Source/target wire readers remain in src/transport. Existing
+native insertion/compositor components keep their current ownership; the new
+native pixel-layout version is described in docs/contracts/UE_OUTPUT.md.
+Development launch/orchestration, qualification hashes and GPU fixtures remain
+in tools/ue_wrapper and tests. None is added to the public Remix alpha package.
+See docs/runs/2026-11-23-codex-ue-additive-insertion.md for the verified boundary.

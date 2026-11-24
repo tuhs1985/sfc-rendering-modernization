@@ -7,7 +7,8 @@ import numpy as np
 from PIL import Image
 
 
-def reference(scene, folder, frame_index=0, *, include_depth=False):
+def reference(scene, folder, frame_index=0, *, include_depth=False, image_origin='top'):
+    if image_origin not in ('top','bottom'):raise ValueError('Unknown image origin')
     frame = scene['frames'][frame_index]
     width, height = map(int, frame['viewport'][2:])
     positions = np.array(scene['positions'])
@@ -23,6 +24,7 @@ def reference(scene, folder, frame_index=0, *, include_depth=False):
         image = scene['images'][group['primary']['filename']]
         texture = np.frombuffer((folder / image['file']).read_bytes(), dtype=np.uint8)
         texture = texture.reshape(image['height'], image['width'], 4)[:, :, [2, 1, 0]]
+        if image_origin=='bottom':texture=texture[::-1]
         start, count = group['first_index'], group['index_count']
         for offset in range(start, start + count, 3):
             triangle = [corners[i] for i in scene['indices'][offset:offset + 3]]
@@ -58,9 +60,9 @@ def reference(scene, folder, frame_index=0, *, include_depth=False):
     return result, np.isfinite(depth), interior
 
 
-def verify(scene_file, rendered, output, frame_index=0):
+def verify(scene_file, rendered, output, frame_index=0, *, image_origin='top'):
     scene = json.loads(scene_file.read_text(encoding='utf-8'))
-    expected, coverage, interior = reference(scene, scene_file.parent, frame_index)
+    expected, coverage, interior = reference(scene, scene_file.parent, frame_index,image_origin=image_origin)
     actual = np.array(Image.open(rendered).convert('RGB'))
     if actual.shape != expected.shape:
         raise ValueError('Rendered dimensions differ from captured viewport')

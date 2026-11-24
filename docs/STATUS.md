@@ -1,13 +1,156 @@
 ---
 title: SFC Modernization — Status Tracker
-updated: 2026-11-22
-checkpoint: Actual UE GPU output and neutral source receipt verified. Persistent publication and live wiring remain open. Insertion plan 8/30.
+updated: 2026-11-23
+checkpoint: UE insertion 21/30; live additive checkout passed with correct depth; branch backup authorized, no merge.
 tags:
   - sfc-modernization
   - project-status
 ---
 
 # SFC Modernization — Status Tracker
+
+## November 23 — Live UE additive insertion confirmed
+
+Sponsor confirms correct native depth. Latest run has 2,270 successful native
+commits, zero requested synchronization timeouts/invalid/partial results and
+verified normal exit/restoration. Record 433 no-request frames separately; they
+remain relevant to future seamless replacement. OpenSpec is 21/30. Sponsor
+requested commit/push for backup, explicitly no merge. Next is classification
+of those eligibility intervals before player suppression.
+[Successful checkout](runs/2026-11-23-codex-ue-additive-insertion.md#successful-sponsor-checkout--november-23).
+
+## November 23 — First additive launch failures corrected
+
+Both sponsor attempts stopped before capture because the diagnostic checkout
+passed untimed arguments to the controller. The bounded duration is now explicit
+in its arguments/INI; a real-controller process test passes. Pre-attachment UE
+cancellation also exits normally after a focused reader fix. Both packages rebuilt;
+Shipping again passes 60 native commits with zero post-start misses. Both failed
+runs restored files/settings. Retry the same launcher; gameplay remains pending,
+OpenSpec 19/30. [Follow-up](runs/2026-11-23-codex-ue-additive-insertion.md#follow-up--both-first-gameplay-attempts-stopped-before-capture).
+
+## November 23 — UE additive checkout prepared
+
+Both packaged UE builds pass 60 consecutive actual native coordinator insertions,
+zero misses after startup and no original suppression. Native effects/text depth,
+opaque black, state restoration, exact source identity and GPU lease checks pass.
+UE native-pixel layout is explicitly versioned; legacy Remix remains unchanged.
+The player-only offset launcher passes read-only preflight. OpenSpec is 19/30;
+next is sponsor gameplay, then evidence/cleanup review before any replacement.
+[Record and command](runs/2026-11-23-codex-ue-additive-insertion.md).
+
+## November 23 — Further evidence compaction complete
+
+Another 4.59 GB of disk space reclaimed. Identical images/readbacks preserve all
+paths/bytes through read-only sharing; resolved SFC-23 raw traces and old proof
+build binaries were retired, retaining findings and the packaged proof.
+Counted evidence is 14.77 GB, leaving 4.66 GB after reservation. Packages/final
+inputs are intact and preflight passes. Explicit offline maintenance tooling has
+six passing file-boundary tests; nothing runs automatically during gameplay.
+UE work remains 17/30. [Record](runs/2026-11-23-codex-evidence-compaction.md).
+
+## November 23 — Storage blocker cleared
+
+Sponsor-authorized cleanup reclaimed 7.78 GB of disk space. Obsolete first-proof
+build/cook caches and unpinned generated copies from older completed runs were
+removed; raw evidence, current inputs/packages, rollback and alpha remain.
+A further 83 Remix data ZIPs (646 MB), not accessed for two weeks, were removed
+with sponsor approval; recently accessed ZIPs remain. Counted evidence is now
+17.40 GB, leaving 2.03 GB after the next-run reservation.
+Read-only UE preflight PASSes; package hashes are unchanged. Plan remains 17/30;
+task 4.2 is next. [Cleanup record](runs/2026-11-23-codex-artifact-cleanup.md).
+
+## November 23 — Additive insertion started; 5% checkpoint
+
+Plan remains 17/30. Additive hook policy passes 111 native recorder checks;
+world-space offset math passes 2,820 checks. The live output component and early
+target receipt compile in both packages but are not connected to a launcher.
+Unique player selection and native composition qualification are next.
+Read-only preflight currently stops at the 20 GB evidence reservation; removing
+124 MB of verified duplicate intermediates was insufficient. No live run or
+suppression was enabled. [Checkpoint](runs/2026-11-23-codex-ue-native-game-pool.md#final-source-and-next-checkpoint-at-5-allowance).
+
+## November 23 — UE native game-pool boundary passed
+
+Task 4.1 closes; plan 17/30. Packaged Development/Shipping output reaches the
+existing native pool and a separate x86 GPU consumer with current colour/depth/
+owner identity. Native resize, held-slot and actual fence checks pass. Original
+SFC drawing remains enabled. Next is additive native insertion before later
+effects/text with a world-space player offset. No gameplay checkout yet.
+[Evidence](runs/2026-11-23-codex-ue-native-game-pool.md).
+
+## November 23 — Read-only UE checkout passed
+
+Sponsor confirms aligned textures and centered ships. Latest run records 3042
+source snapshots, two assets, no error, normal exit and verified restoration.
+Task 3.5 closes; plan 16/30. Next is completed UE output into the existing native
+game pool, followed by additive insertion with original SFC drawing preserved.
+[Evidence](runs/2026-11-23-codex-ue-texture-origin.md#sponsor-checkout-passed--november-23).
+
+## November 23 — Retained UE scene verified; live checkout next
+
+The known vertical conversion is now applied once in UE's upload buffer, with
+source UVs/images preserved. Development/Shipping pixel comparison is 99.71%;
+x86/x64 asymmetric upload and actual-window checks pass. Same command is ready
+for appearance confirmation. [Evidence](runs/2026-11-23-codex-ue-texture-origin.md).
+
+Latest sponsor run shows both ships after roughly 3–4 seconds; opacity/placement
+are corrected, but texture orientation is flipped. Log confirms 3077 source
+snapshots, two assets, normal exits and restored graphics. UE-specific image/UV
+origin qualification is next; keep original source data unchanged. First-visible
+timing is sponsor-observed, not measured by the current minimal recording.
+
+Live source receipt succeeds (3275 snapshots/two assets). The inspection window's
+black outlines and clipping are now reproduced/fixed at the actual Slate pixel
+boundary: opaque aspect-fit presentation passes Development/Shipping checks,
+with source RGB unchanged. Same command is ready for visual confirmation.
+[Evidence](runs/2026-11-23-codex-ue-inspection-display.md).
+
+The first two live checkouts failed before source admission. Our reader and
+fixtures incorrectly treated the common worker status as a PID. The
+[correction](runs/2026-11-23-codex-ue-worker-status.md) preserves real scene PID
+validation and now passes native and packaged source/lifetime checks. Retry is
+pending; task 3.5 remains open.
+
+Development and Shipping pass 14 actual-IPC/pixel stages for shared resources,
+late material/geometry revisions, offscreen motion, retirement, recycled epochs
+and world recreation. 128 Shipping instances retain one mesh; median CPU scene
+updates are 0.334 ms and observed GPU completion 4.324 ms, excluding native return.
+Startup tails remain recorded. Diagnostics-off creates no recordings. Plan 15/30.
+
+The explicit read-only parent passes preflight, actual transfer-to-UE consumption,
+passive stop, supervisor death and relaunch. Sponsor checkout is next (3.5):
+the command is in [handoff](HANDOFF.md). SFC keeps native drawing; UE displays in
+a separate inspection window. No live UE insertion or suppression claimed.
+[Evidence and limits](runs/2026-11-23-codex-ue-retained-scene.md).
+
+## November 22 — Persistent generations and direct source replay
+
+Shipping passes 600 GPU outputs and exact beginning/end pixels. No-readback
+capture-to-normalized completion measures 4.594 ms median, 6.305 ms p99 and
+15.547 ms maximum, excluding SFC and final insertion. Forty-nine target changes
+pass with explicit import/export retirement. Device failure is injected, not an
+actual driver-reset claim. Plan 13/30; Texture Share execution remains open.
+
+The packaged source reader reads the existing native scene mapping with
+read-only access and waits for a late asset. A reusable publisher creates a
+fresh base definition from admitted neutral arrays/images, without a template or
+repeat asset preparation. Twelve independently changing camera/pose updates
+reuse one mesh and match independent source pixels. Wrong late identity and
+source stop before assets are checked. This is recorded-data replay; normal
+live parent selection, multi-owner lifetime and game return remain open.
+[Evidence and limits](runs/2026-11-22-codex-ue-persistent-output.md).
+
+## November 22 — Persistent UE output, timing and failure boundaries
+
+One persistent receiver and two output slots now transfer changing real UE
+images correctly. Six hundred outputs without image readback measure 6.278 ms
+median, 8.577 ms p99 and 17.226 ms maximum to normalized GPU completion.
+This is standalone timing, excluding SFC and final insertion. Slow consumption,
+crashed receivers, invalid acknowledgements, partial allocation failure and
+early/read-in-flight cancellation are checked. The plan is 9/30. Next qualify
+target-generation retirement and Shipping; live source/game return remains open.
+[Evidence and limitations](runs/2026-11-22-codex-ue-persistent-output.md).
 
 ## November 22 — UE output and source-reader boundary verified
 

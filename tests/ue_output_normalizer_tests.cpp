@@ -22,7 +22,7 @@ unsigned check_extent(Normalizer& normalizer,ID3D11Device* device,ID3D11DeviceCo
     auto output=normalizer.bind_targets(destinations);
     unsigned checked=0;
     for(UINT frame=1;frame<=frames;++frame){
-        const UINT owner=frame==frames?0xffffffffu:0x12345670u+frame;
+        const UINT owner=frame==1?3u:frame==frames?0xffffffffu:frame==2?7u:0x12345670u+frame;
         std::vector<uint32_t> colours(Width*Height);std::vector<float> depths(Width*Height);
         for(UINT i=0;i<Width*Height;++i){
             colours[i]=i==0?0xff000000u:(0xff000000u|(frame*31u<<16)|(i*3u));

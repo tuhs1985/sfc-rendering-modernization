@@ -24,7 +24,7 @@ bool Integer(const TSharedPtr<FJsonObject>& O,const TCHAR* Key,int64& N) {
 }
 bool Index(double N,int32 Limit) { return N>=0&&N<Limit&&N==FMath::FloorToDouble(N); }
 }
-bool LoadSFCScene(const FString& Filename,FSFCSceneData& Out,FString& Error) {
+bool LoadSFCScene(const FString& Filename,FSFCSceneData& Out,FString& Error,bool MetadataOnly) {
     // Fresh temporary means a failed admission never mutates a retained asset.
     FSFCSceneData S;
     auto Fail=[&](const TCHAR* Why) { Error=Why; return false; };
@@ -32,6 +32,24 @@ bool LoadSFCScene(const FString& Filename,FSFCSceneData& Out,FString& Error) {
     if(Size<=0||Size>16*1024*1024) return Fail(TEXT("Missing or oversized source scene"));
     FString Text; TSharedPtr<FJsonObject> O;
     if(!FFileHelper::LoadFileToString(Text,*Filename)||!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text),O)||!O.IsValid()) return Fail(TEXT("Invalid source JSON"));
+    if(O->HasField(TEXT("asset_reference"))){
+        FString Reference;
+        if(!O->TryGetStringField(TEXT("asset_reference"),Reference)||Reference.IsEmpty()||Reference!=FPaths::GetCleanFilename(Reference)||
+           Reference.Contains(TEXT(":"))||Reference==TEXT("..")||Reference==TEXT("."))return Fail(TEXT("Invalid local asset reference"));
+        if(!MetadataOnly){
+            const FString Path=FPaths::GetPath(Filename)/Reference;TSharedPtr<FJsonObject> Base;
+            const int64 BaseSize=IFileManager::Get().FileSize(*Path);
+            if(BaseSize<=0||BaseSize>16*1024*1024||!FFileHelper::LoadFileToString(Text,*Path)||
+               !FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text),Base)||!Base.IsValid()||Base->HasField(TEXT("asset_reference")))return Fail(TEXT("Missing or nested local asset definition"));
+            const TSharedPtr<FJsonObject> *BaseAsset=nullptr,*CurrentAsset=nullptr;FString BaseSession,CurrentSession,BaseContent,CurrentContent;
+            if(!Base->TryGetObjectField(TEXT("asset"),BaseAsset)||!O->TryGetObjectField(TEXT("asset"),CurrentAsset)||
+               !(*BaseAsset)->TryGetStringField(TEXT("content"),BaseContent)||!(*CurrentAsset)->TryGetStringField(TEXT("content"),CurrentContent)||BaseContent!=CurrentContent||
+               !Base->TryGetStringField(TEXT("session"),BaseSession)||!O->TryGetStringField(TEXT("session"),CurrentSession)||BaseSession!=CurrentSession)return Fail(TEXT("Cross-associated local asset reference"));
+            for(const TCHAR* Field:{TEXT("positions"),TEXT("corners"),TEXT("indices"),TEXT("groups"),TEXT("images")}){
+                const auto Value=Base->TryGetField(Field);if(!Value.IsValid())return Fail(TEXT("Incomplete referenced geometry"));O->SetField(Field,Value);
+            }
+        }
+    }
     FString Schema; const TSharedPtr<FJsonObject>* Asset=nullptr;
     if(!O->TryGetStringField(TEXT("proof_schema"),Schema)||Schema!=TEXT("sfc.ue5.offline-proof.v1")||
        !O->TryGetStringField(TEXT("session"),S.Session)||S.Session.IsEmpty()||
@@ -39,14 +57,24 @@ bool LoadSFCScene(const FString& Filename,FSFCSceneData& Out,FString& Error) {
        !Integer(O,TEXT("owner_epoch"),S.OwnerEpoch)||!S.OwnerEpoch||!O->TryGetObjectField(TEXT("asset"),Asset)||
        !(*Asset)->TryGetStringField(TEXT("content"),S.Content)||S.Content.Len()!=64||
        !(*Asset)->TryGetStringField(TEXT("model"),S.ModelName)||!Integer(*Asset,TEXT("revision"),S.Revision)||!S.Revision) return Fail(TEXT("Incomplete source identity"));
-    const Values *Points=nullptr,*Corners=nullptr,*Indices=nullptr,*Groups=nullptr,*Frames=nullptr;
+    S.GeometryContent=S.Content;
+    if((*Asset)->HasField(TEXT("geometry_content"))&&(!(*Asset)->TryGetStringField(TEXT("geometry_content"),S.GeometryContent)||S.GeometryContent.Len()!=64))return Fail(TEXT("Invalid geometry content identity"));
+    const TSharedPtr<FJsonObject>* Binding=nullptr;
+    if(O->TryGetObjectField(TEXT("source_binding"),Binding)){
+        if(!Integer(*Binding,TEXT("pid"),S.SourcePid)||!Integer(*Binding,TEXT("model"),S.ModelIdentity)||
+           !Integer(*Binding,TEXT("source"),S.SourceIdentity)||!S.SourcePid||S.SourcePid>UINT32_MAX||
+           !S.ModelIdentity||S.ModelIdentity>UINT32_MAX||!S.SourceIdentity||S.SourceIdentity>UINT32_MAX)return Fail(TEXT("Invalid source definition binding"));
+    }
+    const Values* Frames=nullptr;
+    if(!O->TryGetArrayField(TEXT("frames"),Frames)||Frames->IsEmpty())return Fail(TEXT("Missing source frame"));
+    const TSharedPtr<FJsonObject>* Fragment=nullptr;
+    if(O->TryGetObjectField(TEXT("fragment"),Fragment)) S.FragmentRelationship=*Fragment;
+    if(!MetadataOnly){
+    const Values *Points=nullptr,*Corners=nullptr,*Indices=nullptr,*Groups=nullptr;
     if(!O->TryGetArrayField(TEXT("positions"),Points)||Points->IsEmpty()||Points->Num()>65536||
        !O->TryGetArrayField(TEXT("corners"),Corners)||Corners->IsEmpty()||Corners->Num()>32768||
        !O->TryGetArrayField(TEXT("indices"),Indices)||Indices->IsEmpty()||Indices->Num()>8192*3||Indices->Num()%3||
-       !O->TryGetArrayField(TEXT("groups"),Groups)||Groups->IsEmpty()||Groups->Num()>256||
-       !O->TryGetArrayField(TEXT("frames"),Frames)||Frames->IsEmpty()) return Fail(TEXT("Unsupported source counts"));
-    const TSharedPtr<FJsonObject>* Fragment=nullptr;
-    if(O->TryGetObjectField(TEXT("fragment"),Fragment)) S.FragmentRelationship=*Fragment;
+       !O->TryGetArrayField(TEXT("groups"),Groups)||Groups->IsEmpty()||Groups->Num()>256) return Fail(TEXT("Unsupported source counts"));
     for(const auto& P:*Points) {
         TArray<double> V; if(!Numbers(P,3,V)) return Fail(TEXT("Invalid position"));
         const FVector3f Position(V[0],V[1],V[2]);
@@ -67,6 +95,7 @@ bool LoadSFCScene(const FString& Filename,FSFCSceneData& Out,FString& Error) {
         S.Groups.Add({static_cast<int32>(First),static_cast<int32>(Count),Name,P}); Next+=Count;
     }
     if(Next!=S.Indices.Num()) return Fail(TEXT("Incomplete group coverage"));
+    }
     for(const auto& F:*Frames) {
         FSFCFrame Frame; Frame.Original=F->AsObject(); const Values* V=nullptr;
         int64 Owner,Revision;
@@ -78,6 +107,7 @@ bool LoadSFCScene(const FString& Filename,FSFCSceneData& Out,FString& Error) {
         if(Frame.Viewport[0]<0||Frame.Viewport[1]<0||Frame.Viewport[2]<=0||Frame.Viewport[3]<=0||Frame.Viewport[0]+Frame.Viewport[2]>4096||Frame.Viewport[1]+Frame.Viewport[3]>4096) return Fail(TEXT("Unsupported viewport"));
         S.Frames.Add(MoveTemp(Frame));
     }
+    if(!MetadataOnly){
     const TSharedPtr<FJsonObject>* Images=nullptr; int64 Bytes=0;
     if(!O->TryGetObjectField(TEXT("images"),Images)) return Fail(TEXT("Missing images"));
     for(const auto& G:S.Groups) {
@@ -91,6 +121,7 @@ bool LoadSFCScene(const FString& Filename,FSFCSceneData& Out,FString& Error) {
         const FString ImagePath=FPaths::GetPath(Filename)/File;
         if(IFileManager::Get().FileSize(*ImagePath)!=W*H*4||!FFileHelper::LoadFileToArray(Image.Pixels,*ImagePath)||Image.Pixels.Num()!=W*H*4) return Fail(TEXT("Missing or invalid original image"));
         S.Images.Add(G.Image,MoveTemp(Image));
+    }
     }
     Out=MoveTemp(S); return true;
 }

@@ -213,7 +213,7 @@ class Receiver {
      }
      if(InterlockedCompareExchange(&wire.state,output_wire::acquired,output_wire::ready)!=output_wire::ready)continue;
      try{const auto p=wire.packet;
-      if(!output_wire::valid(p,p.session,pool->header.receiver_pid)||p.width!=targetWidth||p.height!=targetHeight||p.resource_epoch!=game_output::slot_epoch(targetGeneration,slot))throw std::runtime_error("D3D9 imported descriptor/generation");
+      if(!game_output::valid_layout(*pool)||!output_wire::valid(p,p.session,pool->header.receiver_pid)||p.width!=targetWidth||p.height!=targetHeight||p.resource_epoch!=game_output::slot_epoch(targetGeneration,slot))throw std::runtime_error("D3D9 imported descriptor/generation");
       Microsoft::WRL::ComPtr<IDXGIDevice> dx;Microsoft::WRL::ComPtr<IDXGIAdapter> adapter;DXGI_ADAPTER_DESC desc{};
       ship_triplet::checked(device.As(&dx),"game GPU interface");ship_triplet::checked(dx->GetAdapter(&adapter),"game GPU");ship_triplet::checked(adapter->GetDesc(&desc),"game GPU identity");
       if(desc.AdapterLuid.LowPart!=p.luid_low||desc.AdapterLuid.HighPart!=p.luid_high)throw std::runtime_error("D3D9/game GPU mismatch");
@@ -367,7 +367,7 @@ public:
   float viewport[4]{};memcpy(viewport,gateRow.data()+83,16);bool good=true;
   for(unsigned i=0;i<4;++i){good&=std::isfinite(viewport[i])&&viewport[i]>=0&&viewport[i]<=(i%2?key.height:key.width)&&fabs(viewport[i]-round(viewport[i]))<.001f;if(good)key.viewport[i]=DWORD(viewport[i]);}
   ID3D11ShaderResourceView* views[]{item.views[0].Get(),item.views[1].Get(),item.views[2].Get()};
-  if(!good||!nativeCompositor->draw(target.Get(),z.Get(),views,key)){if(!cohortGate)gateCancel();gateStore->current.outcome=DWORD(Result::Original);gateStore->current.ended=now();reply->result=Result::Original;return DWORD(reply->result);}
+  if(!good||!nativeCompositor->draw(target.Get(),z.Get(),views,key,game_output::native_pixels(*pool)?ship_replacement::ImageLayout::NativeTarget:ship_replacement::ImageLayout::CameraSurface)){if(!cohortGate)gateCancel();gateStore->current.outcome=DWORD(Result::Original);gateStore->current.ended=now();reply->result=Result::Original;return DWORD(reply->result);}
   // From this point submission is committed:retain ownership through GPU use.
   item.lease.signal(fencedContext.Get(),cohortGate);if(cohortGate){cohortWrites=true;native_cohort::count(*cohortProof,*ticket,true,false);}gateStore->current.inserted=now();gateStore->current.ended=now();
   gateStore->current.outcome=DWORD(Result::Inserted);InterlockedIncrement(&gateStore->header.commits);

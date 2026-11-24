@@ -24,6 +24,16 @@ inline bool ValidAffine(const Matrix& a) {
     for(const auto& row:a) for(double n:row) if(!std::isfinite(n)) return false;
     return a[3]==Point{0,0,0,1} && std::abs(Determinant(a))>1e-12;
 }
+// Diagnostic adapter transform only: native-unit world axes, independent of
+// camera and model rotation. Original geometry, UVs and captured pose stay intact.
+inline bool DiagnosticWorldOffset(const Matrix& source,const Point& delta,Matrix& output) {
+    if(!ValidAffine(source)||delta[3]!=0)return false;
+    for(double value:delta)if(!std::isfinite(value))return false;
+    Matrix shifted=source;
+    for(int axis=0;axis<3;++axis)shifted[axis][3]+=delta[axis];
+    if(!ValidAffine(shifted))return false;
+    output=shifted;return true;
+}
 // Call only after ValidAffine at the input boundary.
 inline Matrix InverseAffine(const Matrix& a) {
     Matrix b=Identity(); const double d=Determinant(a);

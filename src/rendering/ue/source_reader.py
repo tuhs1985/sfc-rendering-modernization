@@ -39,6 +39,7 @@ class Asset:
     corners: tuple
     polygons: tuple
     groups: tuple
+    geometry_content: str = ''
 
 
 class SourceReader:
@@ -55,6 +56,7 @@ class SourceReader:
         self.images = {}
         self.assets = {}
         self.revisions = {}
+        self.origins = {}
         self.image_bytes = 0
         self.asset_bytes = 0
         self.last_sequence = 0
@@ -104,10 +106,11 @@ class SourceReader:
                     raise ValueError('Retained source asset budget')
                 self.assets[identity] = Asset(identity, mesh['refs']['model_filename'],
                     tuple(mesh['points']), tuple(mesh['corners']),
-                    tuple(mesh['polygons']), tuple(groups))
+                    tuple(mesh['polygons']), tuple(groups), mesh['geometry_sha256'])
                 self.asset_bytes += mesh['memory_bytes']
             self.revisions[revision] = (identity, mesh['header'][4],
                                         mesh['header'][10], mesh['header'][12])
+            self.origins[revision] = dict(packet_sha256=mesh['packet_sha256'],packet_bytes=mesh['header'][2],fragment=None)
 
     def snapshot(self):
         if self.receiver.name != self.session:
@@ -117,7 +120,10 @@ class SourceReader:
             return None
         if header[:3] != (MAGIC,3,STORE_BYTES):
             raise ValueError('Source layout changed')
-        if header[3] != self.source_pid or header[8] or header[4:8] != self.session_words:
+        if header[4:8] != self.session_words:
+            raise ValueError('Source process stopped or changed')
+        if not header[3]:return None # Parent may start UE before the native source attaches.
+        if header[3] != self.source_pid or header[8]:
             raise ValueError('Source process stopped or changed')
         # The existing transport validates the sealed frame and checksum.
         snapshot = frame_snapshot(self.receiver.channel)
@@ -153,11 +159,6 @@ class SourceReader:
                 if row[2] <= self.retired_epochs[row[1]]:
                     continue
                 raise ValueError('Retired owner epoch reappeared')
-            if row[7] not in self.revisions:
-                continue
-            content, owner, model, source = self.revisions[row[7]]
-            if (row[1], row[5], row[6]) != (owner, model, source):
-                raise ValueError('Cross-associated source asset')
             if any(row[42:45]):
                 continue
             current_camera = (native_matrix(row[49:66]), native_matrix(row[66:83]),
@@ -170,6 +171,11 @@ class SourceReader:
             if camera is not None and current_camera != camera:
                 raise ValueError('Source cohort camera changed within frame')
             camera = current_camera
+            if row[7] not in self.revisions:
+                continue
+            content, owner, model, source = self.revisions[row[7]]
+            if (row[1], row[5], row[6]) != (owner, model, source):
+                raise ValueError('Cross-associated source asset')
             instances.append(dict(session=self.session, owner_epoch=owner, revision=row[7],
                                   asset=content, model=native_matrix(row[8:25]),
                                   owner_sequence=row[94] | (row[95] << 32)))

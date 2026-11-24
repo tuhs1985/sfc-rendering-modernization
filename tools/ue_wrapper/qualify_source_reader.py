@@ -11,6 +11,7 @@ for part in ('src/rendering/ue','src/transport','src/assets','src/runtime'):
     sys.path.insert(0,str(ROOT/part))
 from scene_receiver import Receiver
 from source_reader import SourceReader
+from scene_definition import DefinitionPublisher
 import multi_scene as wire
 from owner_rebind import fnv
 from runtime_context import CONTEXT
@@ -64,6 +65,11 @@ def export_fca(reader,snapshots,run,output):
         source_packet_sha256=hashlib.sha256(packet.read_bytes()).hexdigest(),
         source_scope='Retained native data replayed through current Windows IPC; no live SFC run')
     (output/'scene.json').write_text(json.dumps(scene))
+    fresh=DefinitionPublisher(output.parent/'definitions'/reader.session[-32:]).publish(reader,snapshot,instance)
+    actual=json.loads(fresh.read_text())
+    for key in ('positions','corners','indices','images','frames'):
+        if json.loads(json.dumps(scene[key]))!=actual[key]:raise ValueError(f'Fresh base definition changed source {key}')
+    (output.parent/'fresh-definition.json').write_text(json.dumps(dict(path=str(fresh))))
     return str(output/'scene.json')
 
 def run():
@@ -75,7 +81,7 @@ def run():
     receiver=Receiver(retain_assets=False)
     try:
         channel=receiver.channel
-        channel.write(12,struct.pack('<I',os.getpid()))
+        channel.write(12,struct.pack('<I',1))
         wire.initialize(channel)
         channel.write(wire.OFFSET+12,struct.pack('<I',os.getpid()))
         reader=SourceReader(receiver,CONTEXT.game_root,os.getpid())
@@ -123,6 +129,15 @@ def run():
         owners={item['owner_epoch'] for frame in snapshots for item in frame['instances']}
         if len(owners)<2:
             raise ValueError('Missing independently qualified owners')
+        # Camera/target preparation must not wait for geometry or image work.
+        revisions,sequence_seen=reader.revisions,reader.last_sequence
+        reader.revisions={};reader.last_sequence=0
+        try:
+            early=reader.snapshot()
+            if not early or early['camera']!=snapshots[-1]['camera'] or early['instances']:
+                raise ValueError('Camera readiness is incorrectly coupled to asset admission')
+        finally:
+            reader.revisions=revisions;reader.last_sequence=sequence_seen
         # A second owner receives identical captured geometry, with an explicit
         # synthetic epoch. This must share the retained asset and images.
         duplicate=bytearray((run/'gate/LIVE-SCENE-001-asset-4.bin').read_bytes())
@@ -178,6 +193,7 @@ def run():
                     shared_asset_reused=True,retirement_propagated=True,cross_session_rejected=True,
                     first_sequence=snapshots[0]['sequence'],last_sequence=snapshots[-1]['sequence'],
                     original_uvs=True,remix_submission=False)
+        result['camera_before_assets']=True
         output=ROOT/'artifacts/ue-foundation/source-reader'
         output.mkdir(exist_ok=True)
         result['fca_input']=export_fca(reader,snapshots,run,output/'fca-input')

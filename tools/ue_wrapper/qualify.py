@@ -71,7 +71,7 @@ def run(exe, scene, output, *, frame=0, procedural=False, shared=False, expect_r
     source = json.loads(scene.read_text(encoding='utf-8'))
     if gpu_depth:
         import numpy as np
-        _, coverage, interior, ndc = pixels.reference(source, scene.parent, frame, include_depth=True)
+        _, coverage, interior, ndc = pixels.reference(source, scene.parent, frame, include_depth=True,image_origin='bottom')
         actual = np.fromfile(output / 'depth.raw', dtype='<f4').reshape(ndc.shape)
         projection = np.asarray(source['frames'][frame]['projection'])
         selected = coverage & interior
@@ -126,7 +126,7 @@ def run(exe, scene, output, *, frame=0, procedural=False, shared=False, expect_r
     if world_restart and (report.get('world_activations') != 2 or report.get('asset_builds') != 1):
         raise ValueError('World recreation did not reuse its session asset')
     if not shared:
-        report['pixels'] = pixels.verify(scene, output / 'ship.bmp', output, frame)
+        report['pixels'] = pixels.verify(scene, output / 'ship.bmp', output, frame,image_origin='bottom')
         if report['pixels']['within_three_levels'] < .97:
             raise ValueError(f'Source pixel comparison failed: {output}')
     report['process_seconds'] = elapsed

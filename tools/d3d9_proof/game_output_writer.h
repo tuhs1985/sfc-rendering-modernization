@@ -13,7 +13,7 @@ struct GameOutputWriter {
  native_cohort::Store* cohortStore=nullptr;native_cohort::Manifest members{};
  sfc_calibration::Reader source;game_output::Pool* pool=nullptr;
  Microsoft::WRL::ComPtr<ID3D11Texture2D> textures[2][3];uint64_t handles[2][3]{};
- bool enabled=false,retainReady=false,replacementMode=false,prepared=false;uint64_t session=0;
+ bool nativePixels=false,enabled=false,retainReady=false,replacementMode=false,prepared=false;uint64_t session=0;
  BYTE activatedAsset[32]{};float activatedOffset=0;bool identityBound=false;
  void bind(const BYTE (&asset)[32],float offset){check(!identityBound&&std::isfinite(offset),"one late output identity");memcpy(activatedAsset,asset,32);activatedOffset=offset;identityBound=true;}
  ~GameOutputWriter(){if(pool){InterlockedExchange(&pool->header.stopped,1);InterlockedExchange(&pool->header.ready,0);}source.close();}
@@ -39,7 +39,7 @@ struct GameOutputWriter {
    hr(device->CreateTexture2D(&d,nullptr,&textures[slot][i]),"game pool GPU texture");
    Microsoft::WRL::ComPtr<IDXGIResource> r;hr(textures[slot][i].As(&r),"game pool shared interface");HANDLE handle=nullptr;hr(r->GetSharedHandle(&handle),"game pool handle");handles[slot][i]=reinterpret_cast<uintptr_t>(handle);
   }
-  memset(pool,0,sizeof(*pool));auto& h=pool->header;h.magic=game_output::Magic;h.version=game_output::Version;h.bytes=sizeof(*pool);h.game_pid=game;
+  memset(pool,0,sizeof(*pool));auto& h=pool->header;h.magic=game_output::Magic;h.version=nativePixels?game_output::NativeTargetVersion:game_output::Version;h.bytes=sizeof(*pool);h.game_pid=game;
   if(identityBound)memcpy(pool->asset,activatedAsset,32);
   else {wchar_t asset[66]{};check(GetEnvironmentVariableW(L"SFC_D3D9_ASSET_SHA256",asset,66)==64,"game pool content identity required");
   for(unsigned i=0;i<32;++i){unsigned byte=0;for(unsigned j=0;j<2;++j){const auto c=asset[2*i+j];check((c>=L'0'&&c<=L'9')||(c>=L'a'&&c<=L'f'),"game pool asset hex");byte=byte*16+unsigned(c<=L'9'?c-L'0':c-L'a'+10);}pool->asset[i]=static_cast<BYTE>(byte);}}
@@ -47,7 +47,7 @@ struct GameOutputWriter {
   wchar_t multi[2]{};const bool cohort=GetEnvironmentVariableW(L"SFC_D3D9_MULTISCENE",multi,2)==1&&multi[0]==L'1';
   pool->camera_offset[0]=identityBound?activatedOffset:static_cast<float>(_wtof(offset));
   check(std::isfinite(pool->camera_offset[0])&&(cohort?(pool->camera_offset[0]<=0&&pool->camera_offset[0]>=-1e6f):(pool->camera_offset[0]<-1e-5f&&pool->camera_offset[0]>=-1e6f)),"explicit aligned-cohort or camera-left diagnostic offset");
-  pool->diagnostic_mode=pool->camera_offset[0]==0?0u:1u;pool->reserved[2]=cohort?1u:0u; // Union coverage,not a native per-owner picking map.
+  pool->diagnostic_mode=pool->camera_offset[0]==0?0u:1u;pool->reserved[2]=(cohort?game_output::CohortFlag:0u)|(nativePixels?game_output::NativePixelsFlag:0u); // Union coverage,not a native per-owner picking map.
   pool->reserved[3]=retainReady?1u:0u;
   pool->reserved[1]=output_target::requested()?static_cast<DWORD>(input.resource_epoch):0;
   memcpy(h.session,source.session,16);h.receiver_pid=GetCurrentProcessId();h.host_pid=input.producer_pid;session=input.session;
@@ -66,8 +66,8 @@ struct GameOutputWriter {
   for(auto& slot:textures)for(auto& image:slot)image.Reset();
   memset(handles,0,sizeof(handles));pool=nullptr;prepared=false;return true;
  }
- int copy(ID3D11Device* device,ID3D11DeviceContext* context,const output_wire::Packet& input,const game_output::Metadata& metadata,ID3D11Texture2D* const (&images)[3]){
-  prepare(device,input);
+ int reserve(const output_wire::Packet& input,const game_output::Metadata& metadata){
+  check(prepared&&pool,"game pool must be prepared before reserving");
   if(cohortStore){auto* base=reinterpret_cast<BYTE*>(source.mailbox)-sfc_calibration::Offset;auto* catalog=reinterpret_cast<multi_scene::Store*>(base+multi_scene::Offset);multi_scene::Frame snapshot{};
    if(!native_cohort::read(cohortStore->upstream,members)||members.output!=input.sequence||members.frame!=input.source_frame||members.anchor!=input.owner||members.revision!=input.revision||members.sequence!=metadata.source_sequence||members.hash!=input.source_state_hash||
       !multi_scene::read(*catalog,members.frame,members.sequence,snapshot)||!native_cohort::qualifies(members,*catalog,snapshot))return -1;
@@ -77,6 +77,10 @@ struct GameOutputWriter {
   // Buffered presentation still needs READY images;never replace one before
   // the game acquires it. Busy skips this publication,never waits on SFC.
   int slot=game_output::reserve(*pool,retainReady);if(slot<0)return -1;
+  return slot;
+ }
+ int copy(ID3D11Device* device,ID3D11DeviceContext* context,const output_wire::Packet& input,const game_output::Metadata& metadata,ID3D11Texture2D* const (&images)[3]){
+  prepare(device,input);const int slot=reserve(input,metadata);if(slot<0)return -1;
   for(unsigned i=0;i<3;++i)context->CopyResource(textures[slot][i].Get(),images[i]);
   return slot;
  }

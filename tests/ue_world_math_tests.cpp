@@ -52,5 +52,22 @@ int main() {
         for(int i=0;i<4;++i) expect(std::abs(actual[i]-source[i])<1e-8);
         expect(local==original);
     }
+    const Point delta{-25,0,8,0};Matrix diagnostic{};
+    expect(DiagnosticWorldOffset(model,delta,diagnostic));
+    const auto fixedWorld=ToUERow(diagnostic);
+    for(int step=0;step<200;++step){
+        const double a=step*.031;Matrix cameraView=Identity();
+        cameraView[0][0]=cameraView[2][2]=std::cos(a);cameraView[0][2]=-std::sin(a);cameraView[2][0]=std::sin(a);
+        const auto nativeOriginal=Apply(model,local),nativeShifted=Apply(diagnostic,local);
+        for(int axis=0;axis<4;++axis)expect(std::abs(nativeShifted[axis]-nativeOriginal[axis]-delta[axis])<1e-9);
+        const auto displayed=RowApply(InverseRow(ToUERow(InverseAffine(cameraView))),RowApply(ToUERow(diagnostic),Basis(local)));
+        const auto correct=Basis(Apply(cameraView,nativeShifted));
+        for(int axis=0;axis<4;++axis)expect(std::abs(displayed[axis]-correct[axis])<1e-9);
+        expect(ToUERow(diagnostic)==fixedWorld); // Camera cannot mutate the fixed world placement.
+    }
+    const auto preserved=diagnostic;
+    expect(!DiagnosticWorldOffset(model,{1,0,0,1},diagnostic)&&diagnostic==preserved);
+    expect(!DiagnosticWorldOffset(model,{std::numeric_limits<double>::infinity(),0,0,0},diagnostic)&&diagnostic==preserved);
+    expect(!DiagnosticWorldOffset(Matrix{},delta,diagnostic)&&diagnostic==preserved);
     std::cout << "UE world math PASS " << checks << " checks\n";
 }

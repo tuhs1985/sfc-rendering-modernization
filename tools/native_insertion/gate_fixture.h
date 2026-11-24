@@ -24,9 +24,9 @@ struct Fixture {
  float mappedViewport[4]{0,0,1920,1080};
  std::array<DWORD,32> frameOwners{},seenOwners{};unsigned frameOwnerCount=0,seenOwnerCount=0;
  void check(bool b,const char* why){++checks;if(!b)throw std::runtime_error(why);}
- void init(ID3D11Device* device,ID3D11DeviceContext* context,BYTE* base,DWORD* s,HMODULE addon){
+ void init(ID3D11Device* device,ID3D11DeviceContext* context,BYTE* base,DWORD* s,HMODULE addon,Dispatch provided=nullptr){
   d=device;c=context;session=s;store=reinterpret_cast<Store*>(base+Offset);pool=reinterpret_cast<game_output::Pool*>(base+game_output::Offset);ledger=reinterpret_cast<replacement::Store*>(base+replacement::Offset);
-  wchar_t baselineValue[4]{};GetEnvironmentVariableW(L"SFC_NATIVE_GATE_BASELINE",baselineValue,4);baseline=baselineValue[0]==L'1';dispatch=reinterpret_cast<Dispatch>(GetProcAddress(addon,"SFCNativeInsertionV1"));check(dispatch!=nullptr,"Native gate fixture export");
+  wchar_t baselineValue[4]{};GetEnvironmentVariableW(L"SFC_NATIVE_GATE_BASELINE",baselineValue,4);baseline=baselineValue[0]==L'1';dispatch=provided?provided:reinterpret_cast<Dispatch>(GetProcAddress(addon,"SFCNativeInsertionV1"));check(dispatch!=nullptr,"Native gate fixture export");
   D3D11_TEXTURE2D_DESC t{};t.Width=w;t.Height=h;t.MipLevels=t.ArraySize=1;t.SampleDesc.Count=8;t.Format=DXGI_FORMAT_R8G8B8A8_TYPELESS;t.BindFlags=D3D11_BIND_RENDER_TARGET;
   check(SUCCEEDED(d->CreateTexture2D(&t,nullptr,&colour)),"Native gate fixture colour");
   D3D11_RENDER_TARGET_VIEW_DESC rv{};rv.Format=DXGI_FORMAT_R8G8B8A8_UNORM;rv.ViewDimension=D3D11_RTV_DIMENSION_TEXTURE2DMS;
@@ -98,7 +98,7 @@ Texture2D<float4> image:register(t0);float4 copy(float4 p:SV_Position):SV_Target
     if(insertedNow){++draws;store->current.primary=store->current.secondary=1;check(frameOwnerCount<32,"Fixture owner bound");frameOwners[frameOwnerCount++]=t.owner;
      bool known=false;for(unsigned k=0;k<seenOwnerCount;++k)known|=seenOwners[k]==t.owner;if(!known){check(seenOwnerCount<32,"Fixture seen owner bound");seenOwners[seenOwnerCount++]=t.owner;}
      if(native_cohort::requested())native_cohort::count(*reinterpret_cast<native_cohort::Store*>(reinterpret_cast<BYTE*>(store)-Offset+native_cohort::Offset),t,false,true);
-     replacement::Receipt r{};if(replacement::sample(*ledger,t.frame,r)){r.owner=t.owner;r.revision=t.revision;r.flags|=replacement::Seen|replacement::Suppressed;replacement::write(ledger->receipt[t.frame%replacement::Frames],r);InterlockedIncrement(&ledger->suppressed);}}
+     replacement::Receipt r{};if(!native_gate::additive()&&replacement::sample(*ledger,t.frame,r)){r.owner=t.owner;r.revision=t.revision;r.flags|=replacement::Seen|replacement::Suppressed;replacement::write(ledger->receipt[t.frame%replacement::Frames],r);InterlockedIncrement(&ledger->suppressed);}}
    }
    }
   }
@@ -121,7 +121,8 @@ Texture2D<float4> image:register(t0);float4 copy(float4 p:SV_Position):SV_Target
   for(unsigned i=0;i<3;++i)check(SUCCEEDED(c->Map(expected[i].Get(),0,D3D11_MAP_READ,0,&ref[i])),"Reference fixture readback");
   unsigned mismatches=0,covered=0,textCovered=0;std::array<unsigned,32> ownerPixels{};
   for(unsigned y=0;y<h;++y)for(unsigned x=0;x<w;++x){DWORD id{};float z=1;
-   const auto qx=static_cast<int>(floor((float(x)+.5f-mappedViewport[0])*w/mappedViewport[2])),qy=static_cast<int>(floor((float(y)+.5f-mappedViewport[1])*h/mappedViewport[3]));
+   const auto qx=game_output::native_pixels(*pool)?int(x):static_cast<int>(floor((float(x)+.5f-mappedViewport[0])*w/mappedViewport[2]));
+   const auto qy=game_output::native_pixels(*pool)?int(y):static_cast<int>(floor((float(y)+.5f-mappedViewport[1])*h/mappedViewport[3]));
    if(qx>=0&&qy>=0&&qx<int(w)&&qy<int(h)){memcpy(&id,static_cast<BYTE*>(ref[2].pData)+qy*ref[2].RowPitch+qx*4,4);memcpy(&z,static_cast<BYTE*>(ref[1].pData)+qy*ref[1].RowPitch+qx*4,4);}
    DWORD expectedColour=0xff00ff00; // native green background/effect
    bool accepted=id==owner;if(native_cohort::requested()){accepted=false;for(unsigned k=0;k<frameOwnerCount;++k)if(id==frameOwners[k]){accepted=true;++ownerPixels[k];break;}}

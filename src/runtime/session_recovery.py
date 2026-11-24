@@ -13,7 +13,7 @@ from copied_preferences import prepared_ini_signature,changed_protected_files
 
 def supported_transaction(manifest):
     return (any(manifest.get(n,{}).get('enabled') is True for n in ('broad_capture','depth_snapshots'))
-            or (manifest.get('probe') in ('D3D9-ADDITIVE-001','D3D9-MULTISHIP-001','PLAYER-REPLACEMENT-001','NATIVE-INSERTION-001','NATIVE-GATE-001','NATIVE-COHORT-001')
+            or (manifest.get('probe') in ('D3D9-ADDITIVE-001','D3D9-MULTISHIP-001','PLAYER-REPLACEMENT-001','NATIVE-INSERTION-001','NATIVE-GATE-001','NATIVE-COHORT-001','UE-SOURCE-001','UE-ADDITIVE-001')
                 and isinstance(manifest.get('full_support_qualification'),dict)
                 and bool(manifest['full_support_qualification'])))
 

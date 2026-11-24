@@ -4,7 +4,167 @@ Sponsor-facing current work and parked items: [status tracker](STATUS.md).
 Diagnostic tools, triggers, limits and known pitfalls: [diagnostic reference](DIAGNOSTICS.md).
 The tracker is a sponsor-facing summary; the newest authoritative checkpoint below controls technical work.
 
-## Current checkpoint — November 22 actual UE GPU output and neutral receipt
+## Current checkpoint — November 23 live UE additive insertion passed; branch backup
+
+Primary checkout C:/Project/SFC-Modernize Engine, codex/ue-native-insertion.
+Sponsor authorizes commit/push as backup, explicitly no merge. OpenSpec
+ue-native-insertion is 21/30: additive checkout/evidence 4.4/4.5 complete.
+The public Remix alpha, original assets and appearance remain unchanged.
+
+Run 20261124-043925-000700-in-game ended error=null; sponsor reports success
+and confirms correct native depth. Actual native gate: 2,270 commits from 2,270
+requested transactions, zero timeouts/invalid/partial results, one pending gate
+request maximum, two output slots, zero diagnostic-ring loss. Source service:
+2,510 snapshots, two assets and 94 original images. Native source-to-Present
+median 15.392ms/p99 16.970ms; these are not scanout/input-latency measurements.
+There are 433 no-request frames (entered=sequence=0), 221 stale output discards
+and a roughly ten-second terminal present interval. First commit starts 3.569s
+after the first native record. Do not hide these behind the zero-timeout count.
+
+SFC/UE exit normally, controller exit 8 means its target exited first, no helper
+is left running. Proxy restoration, original critical files and launcher settings
+pass. Original meshes stay enabled. See the [run record](runs/2026-11-23-codex-ue-additive-insertion.md)
+for exact evidence, prior startup failures/fixes, tests and known scope.
+
+The opt-in registry/output component uses the unique configured F-CA and fixed
+native-world offset (-15.897722721099854,0,0). UE pool v4 means full native-target
+pixels; legacy v3/Remix keeps its mapping. Original arrays/UVs/images and source
+identity are untouched. Both packages and native endpoints are rebuilt. Previous
+DLLs remain under ue-foundation/native-insertion/pre-native-layout. Startup
+controller arguments and pre-attachment cancellation are fixed and qualified.
+
+Next: before task 5 zero-offset player suppression, classify the no-request
+camera/startup intervals and preserve capture-first native matching. Additive
+success is not seamless-replacement acceptance or UE lighting/material/damage/
+destruction parity. No new live run is required merely to back up this checkpoint.
+Keep local attachments and unrelated memory notes out of commits; retain generated
+packages/captures locally. Do not merge this branch until sponsor authorizes it.
+
+## Earlier checkpoint — November 23 read-only UE live checkout passed
+
+Primary checkout `C:/Project/SFC-Modernize Engine`, branch
+`codex/ue-native-insertion`, pushed tip `1834379`. Work remains unstaged and
+uncommitted. OpenSpec `ue-native-insertion` is **16/30**; task 3.5 is complete.
+No commit, push or merge is authorized by the checkout.
+
+Sponsor confirms aligned textures and centered ships in UTC-named run
+`20261124-011346-171859-in-game` (November 23 local). Result: error=null,
+3042 source snapshots, two assets/94 images, normal game/UE exits, restored
+proxy, protected client/launcher settings unchanged and no remaining controller.
+Hook cleanup is process-exit reclamation, not controlled live unload.
+No native mesh is suppressed and no UE image is inserted into SFC yet.
+
+The [retained-source contract](contracts/UE_SOURCE.md) and
+[scene record](runs/2026-11-23-codex-ue-retained-scene.md) cover sharing,
+independent transforms, revisions, retirement and world recreation. Fourteen
+pixel-backed stages and representative counts through 128 shared instances pass.
+Shipping/128 median CPU scene updates are 0.334 ms and observed GPU completion
+median/p99/max is 4.324/6.895/44.479 ms, excluding SFC/native return/presentation.
+Startup tails and sponsor-observed 3–4 second appearance delay remain separate.
+
+Live corrections are recorded for [worker status](runs/2026-11-23-codex-ue-worker-status.md),
+[opaque aspect-fit inspection](runs/2026-11-23-codex-ue-inspection-display.md)
+and [once-only texture origin plus final checkout](runs/2026-11-23-codex-ue-texture-origin.md).
+The common status word is not PID; actual scene PID/session checks remain strict.
+Slate presentation leaves export semantics unchanged. UE reverses upload rows
+once, preserving source UVs/images; x86/x64 tests and both package pixel checks
+pass at 99.71%. No conversion rediscovery or second flip is needed.
+
+**Next: task 4.1**, completed UE colour/depth/owner output through the existing
+x64 receiver into the native D3D11 game pool/readiness path. Reuse identities,
+GPU completion, leases and standard deadlines. Suppression remains disabled for
+the additive proof. Qualify that boundary before requesting another gameplay
+run. Source-viewer acceptance does not establish native insertion or UE feature
+parity. The existing read-only launcher remains available for troubleshooting.
+
+Both packages are current. Original game assets, public Remix alpha and current
+appearance are unchanged. Verified duplicate intermediate images were pruned
+with hashes/retained aliases in local `evidence-deduplication.json` and
+`inspection-evidence-aliases.json`; current inputs and final evidence remain.
+Some copies were hardlinks: logical reduction is not equal physical savings.
+Preserve unrelated attachments and `windows-memory-audit.md`.
+
+## Current checkpoint — November 22 persistent UE output and direct source input
+
+Work resumed on `codex/ue-native-insertion` in the primary checkout from pushed
+`1834379`. New work is unstaged/uncommitted. Fuel Guard reports a refreshed
+five-hour allowance; sponsor requested stopping at 5%. Do not commit or merge
+without a new request. Public alpha and normal Remix behavior remain unchanged.
+
+The [persistent-output record](runs/2026-11-22-codex-ue-persistent-output.md)
+and [raw export contract](contracts/UE_EXPORT.md) cover one persistent x64
+receiver, two paired shared DX12 exports, public RHI copy/signal ordering and
+native normalization into caller-owned targets. Twelve alternating real UE
+poses pass independent pixel/depth/owner checks and exact packet provenance.
+Development and Shipping pass 600-output reuse, including exact first/last pixel
+checks. Shipping no-readback capture-to-normalized output measures 4.594 ms
+median, 6.305 ms p99 and 15.547 ms maximum, with no sample over 33.333 ms.
+This excludes SFC contention, source receipt, game-pool copy and presentation.
+
+Slow consumption preserves exact pixels and bounded two-slot occupancy. Passive
+exit, crash-after-acquire, wrong acknowledgement, wrong receipt and partial
+allocation failure reject. Cancellation before first output and during a held
+read drain both slots; no owned UE/receiver processes remain. Failed reads retire
+the UE process; in-process recovery after a lost acknowledgement is unqualified.
+
+Target retirement is qualified: 100 outputs/49 changes, exact resized pixels,
+old-generation rejection and release-before-recreation. Injected device loss,
+stale device and second-generation allocation failures reject; actual driver
+reset is unqualified. Tasks 2.2/2.5/2.6 are complete, with the public-RHI alternative
+qualified rather than pretending the reviewed Texture Share route was executed.
+The latter's public external GPU read-lease guarantee remains unestablished.
+
+`source_scene_view.h` and `source_scene_channel.h` read the unchanged native scene
+mapping without write access. Native tests check the original writer's exact ABI,
+read-only process attachment, passive lifetime, duplicate reads, producer death
+and header/slot publication ordering. `SFCLiveSource` applies source matrices to
+the retained world without rebuilding geometry. A Development package admits a
+late original-image definition, then renders twelve changing IPC poses with one
+asset build; independent pixels match 99.73% within three levels. This remains an
+explicit recorded-data replay, not a live SFC checkout. The first source adapter
+currently accepts one parent-selected owner/revision/model/source; multi-owner
+admission and the normal parent/backend selector remain open. No guessed player.
+
+`scene_definition.py` now publishes the existing local UE input schema directly
+from neutral admitted assets, original image IDs and one coherent frame. It
+writes base images once and atomically publishes one immutable definition; no
+saved template or per-frame asset comparison. Source bindings include actual
+PID and opaque model/source labels. Wrong session/owner/revision/binding and
+source stop before first asset reject/close in Shipping. A fresh definition
+passes Shipping changing-camera/model pixels at 99.69% within three levels,
+with one mesh build; source preparation is 0.163 seconds in that replay.
+Task 3.2 is verified, plan 13/30. Normal parent/backend selection is task 3.5;
+current command arguments are internal development APIs, not a sponsor launcher.
+
+Next implement task 3.3's UE retained multi-owner/revision/retirement behavior,
+using the existing four-asset reader and source/world lifetimes; then measure
+representative owner counts and connect the existing parent for read-only gameplay. No native
+suppression or gameplay checkout is authorized by these standalone results.
+Current Development package is built; receiver source/build is separate at
+`src/rendering/ue/ue_output_receiver.cpp`. It is exercised by
+`tools/ue_wrapper/qualify_stream.py`. Explicit replay/fault/readback modes stay
+development-only. Source geometry, image identities and the old comparator stay
+unchanged. Check the local ledger before repeating completed experiments.
+
+Final checks: both packaged configurations are current; four publisher tests,
+seven desktop break-transport tests, three UE-proof tests, x86/x64 native scene
+view/channel fixtures, strict OpenSpec and Git whitespace pass. The optional
+receipt benchmark measures roughly 0.079–0.092 ms median at 1/6/100/256 rows;
+that is not UE rendering or a completed task 3.4. No owned UE/receiver helpers
+remain. The publisher's last change rejects reuse across sessions without
+rewriting immutable definitions. Its valid-session path is unchanged.
+
+Resume in `C:/Project/SFC-Modernize Engine`, not the chat's old worktree.
+Start with task 3.3: a failing packaged fixture with two independent owners
+sharing one asset, then retained revision/retirement/session cases. Current
+`USFCSessionSubsystem` retains one mesh and the world supports only the explicit
+two-owner diagnostic; extend their real caches instead of synthesizing another
+capture or template. Do not request gameplay until task 3.5's read-only parent
+entry point is ready. Newly added source files change development inventory
+fingerprints; rebuild the relevant development qualification before claiming its
+normal Remix preflight passes. The published alpha ZIP is untouched.
+
+## Prior checkpoint — November 22 actual UE GPU output and neutral receipt
 
 Continue in the primary checkout, `C:/Project/SFC-Modernize Engine`, branch
 `codex/expand-rendering-interface`, implementation parent `27f4638`. The sponsor

@@ -1,5 +1,55 @@
 # Diagnostic tools reference
 
+## UE additive native checkout — November 23
+
+Development only, default off. The existing copied game, verified graphics
+transaction and unique configured F-CA are required. Read-only preflight:
+python tools/ue_wrapper/run_additive_session.py. The prepared gameplay command
+is tools/ue_wrapper/start_additive_session.cmd from Administrator CMD.
+Original meshes stay on. Ninety-second source-activity cue, 285-second prepared
+ceiling, 8MiB detailed gate records within the 32MiB logs bound and no continuous
+images. Source assets/definitions are required working files. Unknown or
+unqualified interrupted transactions remain refused by normal recovery.
+
+qualify_live_output.py exercises fresh transfers/UE registry/GPU pool and
+independent source pixels; optional --native-insertion adds actual native
+compositor/effects/state checks. qualify_native_gate.py drives the real native
+Receiver Acquire/Commit from tests/ue_native_gate_fixture.cpp, without SFC.
+Its generated hash receipt pins the prepared development checkout. Fixture
+cadence/readbacks never enter normal gameplay. Correctness readbacks are slow
+and must be excluded from timing conclusions. [Evidence and command](runs/2026-11-23-codex-ue-additive-insertion.md).
+
+## UE standalone source and GPU qualification — November 22
+
+These are development tools, not Remix alpha launchers. They do not launch or
+modify SFC. Use the documented Windows Python and the current Development or
+Shipping package under `artifacts/ue-foundation`; run GPU checks serially in the
+desktop session. Choose a fresh output directory per invocation.
+
+| Tool | Question and output |
+| --- | --- |
+| `tests/ue_texture_origin_tests.cpp` | UE-only vertical upload convention with asymmetric cells, preserved source/U/channels, padded rows and byte bounds. Compile/run x86 and x64. Current UE pixel qualification selects bottom-origin sampling; the old proof keeps its historical default. |
+| `tools/ue_wrapper/qualify_inspection.py EXE SCENE OUTPUT` | Explicit actual-Slate-widget pixels versus centered aspect-fit source coverage. Default 1280×800; `--width 960 --height 960` checks square letterboxing. Bounded window/target BMPs, no SFC. This catches inverse-opacity misuse that source RGB-only comparisons miss. |
+| `tools/ue_wrapper/qualify_source_reader.py` | Replays retained packets through real source IPC, verifies original arrays/images, camera-before-assets, shared assets and retirement, then publishes a fresh original-image definition. Local paths appear in `source-reader/result.json` and `fresh-definition.json`. |
+| `tools/ue_wrapper/qualify_live_reader.py EXE SCENE OUTPUT` | Packaged read-only source replay with late base admission and independently changing model/camera. `--delay 0` tests immediate admission; default 1.5 seconds tests passive lifetime. One final diagnostic image is compared independently. `--fault` selects wrong identity or stop before first asset. This is explicit replay, not live gameplay. |
+| `tools/ue_wrapper/qualify_registry.py EXE SCENE OUTPUT` | Fourteen source-IPC stages: retained shared owners, revisions, retirement, reused pointers/slots, world recreation, material-slot/texture-extent identity, unqualified pose and captured fragment revision. One bounded image per stage is compared against independent source pixels. |
+| `tools/ue_wrapper/qualify_registry_timing.py EXE SCENE OUTPUT --owners 128 --frames 600` | Standalone source/scene CPU costs, nonblocking GPU-fence completion and resource totals; bounded numeric samples, no image readback. `--normal` removes all UE diagnostics and checks source-stop cleanup/no recordings. Completion includes polling and queue latency, not pure GPU execution time. |
+| `tools/ue_wrapper/qualify_source_service.py EXE SCENE OUTPUT` | Actual asset transfer/ACK through original image preparation, one-time definitions and UE catalogue consumption; 20 bounded timing samples, no SFC. |
+| `tools/ue_wrapper/qualify_source_lifetime.py EXE OUTPUT` | Passive cancellation, independent supervisor death and immediate fresh-session relaunch against the packaged consumer; no SFC or images. |
+| `tools/ue_wrapper/run_source_session.py` | Read-only build/component/client/storage preflight. `--execute` is explicit copied-game observation through the established parent/recovery; no native output or suppression. Administrator CMD entry: `tools/ue_wrapper/start_source_session.cmd`. Five-minute prepared workflow; exit SFC normally. |
+| `tools/ue_wrapper/qualify_stream.py EXE SCENE RECEIVER OUTPUT` | Persistent two-slot GPU export/normalization. `--frames 600 --no-readback` records bounded timing only; omit `--no-readback` to compare at most four triplets (first two and last two). `--resize`, `--fault`, cancellation and injected device/allocation failures are opt-in. |
+| `tests/source_scene_view_tests.cpp`, `source_scene_channel_tests.cpp` | Exact existing native ABI, read-only Windows views, source PID/session, slot/header publication ordering, separate consumer and actual producer exit. Qualify x86 and x64. |
+| `tests/ue_export_channel_tests.cpp`, `ue_output_normalizer_tests.cpp` | Process-boundary lease identity and actual GPU colour/depth/owner values, including low owner IDs and historical odd-width layouts. |
+
+No-readback stream timings exclude SFC contention, final game-pool copying and
+native presentation. Diagnostic readback/file-writing runs are pixel evidence,
+not production performance measurements. Graceful UE rejection can return zero;
+require explicit failure/success receipts, never exit status alone. Detailed
+records and exact limitations: [persistent output/source record](runs/2026-11-22-codex-ue-persistent-output.md).
+The scene-view native test's `--benchmark` option measures snapshot
+copy/checksum/identity costs at 1/6/100/256 rows; it does not measure UE rendering
+or introduce a runtime owner limit.
+
 ## Asset preparation and review
 
 Normal geometry/image/material preparation and working caches live in
@@ -309,3 +359,36 @@ Other workflows and standalone fixtures retain their separate explicit behavior.
 This does NOT enable pixel readbacks,completion/light diagnostics or synthetic
 stage injection in SFC. Normal snapshot environment remains0. Individual damage
 counter switches are still not implemented;the register above identifies them.
+
+### UE native game-pool qualification (development only)
+
+The qualify_game_pool command runs an actual packaged UE producer, explicit
+--game-pool receiver and x86 ue_game_pool_consumer against a private source
+mapping. It paces six synthetic native-frame submissions with a precreated
+read-completion event and writes at most four diagnostic triplets. Original
+captured arrays/images remain unchanged; target dimensions/poses are explicit
+fixtures. SFCGamePoolFixture, synthetic state-hash field/event, readback and
+pacing never enter normal inspection/gameplay. The native game-output GPU test
+separately covers busy slots and size-generation retirement with actual
+cross-process GPU reads. See [record](runs/2026-11-23-codex-ue-native-game-pool.md).
+
+
+### Share frozen development evidence
+
+Use tools/asset_diagnostics/share_evidence.py only on immutable, completed test
+images. It is not a runtime tool. Run it with the documented Windows Python:
+
+    python tools/asset_diagnostics/share_evidence.py --scan-before 2026-11-12 --write-manifest artifacts/evidence-review/manifest.json
+    python tools/asset_diagnostics/share_evidence.py artifacts/evidence-review/manifest.json
+    python tools/asset_diagnostics/share_evidence.py artifacts/evidence-review/manifest.json --apply --ledger artifacts/evidence-review/shared.jsonl
+
+Choose a fresh manifest/ledger path for each review. Inventory does not mutate
+payloads; apply revalidates SHA-256 and atomically shares identical bytes through
+read-only NTFS hard links. Keep the ledger. Use the desktop execution path if
+the app's restricted process denies hard-link creation. Do not use it on live
+working sets; in-place writes affect all aliases. Successful older runs are
+selected separately from failed/current evidence. This does not change the
+conservative evidence budget or add work to normal play.
+
+Focused checks: tests/test_share_evidence.py (six actual-file tests).
+[Current evidence and retired trace paths](runs/2026-11-23-codex-evidence-compaction.md).

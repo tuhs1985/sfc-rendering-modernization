@@ -5,6 +5,7 @@
 #include "device_identity.h"
 namespace ship_replacement {
 using Microsoft::WRL::ComPtr;
+enum class ImageLayout {CameraSurface,NativeTarget};
 class DepthCompositor {
  GraphicsDeviceIdentity identity;
  ComPtr<ID3D11Device> ownerDevice;
@@ -88,17 +89,21 @@ Output main(float4 p:SV_Position){
   checked(device->CreateBuffer(&cb,nullptr,&parameters),"replacement parameters");
  }
  bool draw(ID3D11RenderTargetView* target,ID3D11DepthStencilView* nativeDepth,
-           ID3D11ShaderResourceView* const (&views)[3],const ship_triplet::Key& key){
+           ID3D11ShaderResourceView* const (&views)[3],const ship_triplet::Key& key,ImageLayout layout=ImageLayout::CameraSurface){
   // Full-resolution 1:1 inputs only. No nearest-rescale/misregistered depth.
-  if(!target||!nativeDepth||!views[0]||!views[1]||!views[2]||!ship_triplet::validKey(key)||key.diagnosticMode)return false;
+  if((layout!=ImageLayout::CameraSurface&&layout!=ImageLayout::NativeTarget)||!target||!nativeDepth||!views[0]||!views[1]||!views[2]||!ship_triplet::validKey(key)||key.diagnosticMode)return false;
   if(!qualifyTarget(target,nativeDepth))return false;
   if(targetCache.width!=key.width||targetCache.height!=key.height||
      uint64_t(key.viewport[0])+key.viewport[2]>targetCache.width||uint64_t(key.viewport[1])+key.viewport[3]>targetCache.height)return false;
   const auto* inputs=qualifyInputs(views,key);if(!inputs)return false;
   // Aliasing depends on the active targets,not just the immutable input views.
   for(const auto& r:inputs->resources)if(r.Get()==targetCache.colorResource.Get()||r.Get()==targetCache.depthResource.Get())return false;
-  Parameters p{key.objectId,key.width,key.height,0,{static_cast<float>(key.viewport[0]),static_cast<float>(key.viewport[1]),
-      static_cast<float>(key.width)/key.viewport[2],static_cast<float>(key.height)/key.viewport[3]}};deferred->ClearState();
+  Parameters p{key.objectId,key.width,key.height,0,{0,0,1,1}};
+  if(layout==ImageLayout::CameraSurface){
+   p.viewportMap[0]=static_cast<float>(key.viewport[0]);p.viewportMap[1]=static_cast<float>(key.viewport[1]);
+   p.viewportMap[2]=static_cast<float>(key.width)/key.viewport[2];p.viewportMap[3]=static_cast<float>(key.height)/key.viewport[3];
+  }
+  deferred->ClearState();
   deferred->UpdateSubresource(parameters.Get(),0,nullptr,&p,0,0);auto* cb=parameters.Get();deferred->PSSetConstantBuffers(0,1,&cb);
   deferred->VSSetShader(vertex.Get(),nullptr,0);deferred->PSSetShader(pixel.Get(),nullptr,0);deferred->PSSetShaderResources(0,3,views);
   deferred->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);deferred->RSSetState(raster.Get());

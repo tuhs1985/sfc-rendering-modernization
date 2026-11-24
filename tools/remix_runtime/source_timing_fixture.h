@@ -27,7 +27,7 @@ struct SourceTimingFixture {
    std::ifstream f(path,std::ios::binary|std::ios::ate);const auto bytes=f.tellg();if(bytes<=0||bytes>384*16||bytes%384)throw std::runtime_error("live fixture row bound");
    rows.resize(static_cast<size_t>(bytes)/384);f.seekg(0);f.read(reinterpret_cast<char*>(rows.data()),static_cast<std::streamsize>(bytes));if(!f)throw std::runtime_error("live fixture rows");
    wchar_t multi[2]{};if(GetEnvironmentVariableW(L"SFC_D3D9_MULTISCENE",multi,2)==1&&multi[0]==L'1'){
-    if(rows.size()<2||rows.size()>16||!cohort.attach(reinterpret_cast<BYTE*>(source.mailbox)-sfc_calibration::Offset,source.session))throw std::runtime_error("multi-scene fixture input");
+    if(rows.empty()||rows.size()>16||!cohort.attach(reinterpret_cast<BYTE*>(source.mailbox)-sfc_calibration::Offset,source.session))throw std::runtime_error("multi-scene fixture input");
     wchar_t late[2]{};lateAssetFixture=GetEnvironmentVariableW(L"SFC_MULTISCENE_LATE_ASSET",late,2)==1&&late[0]==L'1';}
   }
   // Standalone startup experiment only: publish the verified PID, but no

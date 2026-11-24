@@ -38,6 +38,7 @@ struct Store {Header header{};Record current{};Record records[Capacity]{};};
 static_assert(sizeof(Header)==256&&sizeof(Record)==128&&sizeof(Store)==8576);
 static_assert(Offset>=native_insertion::Offset+sizeof(native_insertion::Store)&&Offset+sizeof(Store)<=replacement::Offset+replacement::Bytes);
 inline bool requested(){wchar_t f[2]{};return GetEnvironmentVariableW(L"SFC_NATIVE_INSERTION_GATE",f,2)==1&&f[0]==L'1';}
+inline bool additive(){wchar_t f[2]{};return GetEnvironmentVariableW(L"SFC_NATIVE_INSERTION_ADDITIVE",f,2)==1&&f[0]==L'1';}
 inline uint64_t now(){LARGE_INTEGER q{};QueryPerformanceCounter(&q);return q.QuadPart;}
 inline bool valid(const Header& h,const DWORD* s,DWORD pid){return h.magic==Magic&&h.version==Version&&h.bytes==sizeof(Store)&&h.pid==pid&&
  !memcmp(h.session,s,16)&&h.frequency&&(h.policy==1||h.policy==2)&&h.generation;}

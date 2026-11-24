@@ -51,7 +51,7 @@ constexpr std::size_t kThreadCapacity = 8;
 replacement::Store* g_replacement=nullptr;
 native_foreground::source_notice::Store* g_foreground_notice=nullptr;
 native_insertion::Store* g_insertion_probe=nullptr;
-bool g_native_gate_requested=false;
+bool g_native_gate_requested=false,g_native_additive=false;
 native_gate::Store* g_native_gate=nullptr;native_gate::Dispatch g_native_dispatch=nullptr;
 HMODULE g_native_adapter=nullptr;HANDLE g_native_stop_event=nullptr;volatile LONG g_in_native_gate=0,g_native_committed=0;
 volatile LONG g_in_hook_spans=0;
@@ -1628,6 +1628,9 @@ extern "C" void __cdecl CoordinateAfterCapture(DWORD kind,const DWORD* saved){
   }
   committedTicket=ticket;inserted=true;InterlockedExchange(&g_native_committed,static_cast<LONG>(frame));
  }
+ // Additive proof uses the same capture/acquire/commit boundary but never
+ // changes original submission arguments or creates suppression receipts.
+ if(g_native_additive)return;
  if(!safe_write32(snapshot_entry_esp(saved)+4,0)){
   native_gate::terminal(*g_native_gate,native_gate::TerminalReason::SuppressionWrite,observedOwner);
   if(g_native_stop_event)SetEvent(g_native_stop_event);return;
@@ -2239,7 +2242,8 @@ extern "C" DWORD WINAPI M1StartW(void* parameter) {
     g_native_gate=nullptr;g_native_dispatch=nullptr;g_native_decided=false;g_native_inserted=false;g_native_blocked=false;g_native_committed=0;
     g_native_cohort=nullptr;g_native_cohort_mode=native_cohort::requested();for(auto& d:g_native_owners)d={};
 #ifndef M1_GATE_ONLY
-    g_native_gate_requested=native_gate::requested();
+    g_native_gate_requested=native_gate::requested();g_native_additive=native_gate::additive();
+    if(g_native_additive&&(!g_native_gate_requested||replacement::requested()||g_native_cohort_mode))return 3;
 #endif
     if (!load_config(static_cast<const wchar_t*>(parameter))) return 1;
     if(g_persistent_requested&&g_config.live_channel.empty())return 1;
@@ -2295,7 +2299,7 @@ extern "C" DWORD WINAPI M1StartW(void* parameter) {
         g_insertion_probe=reinterpret_cast<native_insertion::Store*>(g_live_scene.view+native_insertion::Offset);
         native_insertion::initialize(*g_insertion_probe,reinterpret_cast<DWORD*>(g_live_scene.view)+4,GetCurrentProcessId());
     }
-    if(replacement::requested()){
+    if(replacement::requested()||g_native_additive){
         if(!g_live_scene_mode||!g_live_scene.persistent||!g_config.enable_wrapper_observation)return 3;
         auto* candidate=reinterpret_cast<replacement::Store*>(g_live_scene.view+replacement::Offset);
         if(!replacement::valid(candidate,reinterpret_cast<DWORD*>(g_live_scene.view)+4,GetCurrentProcessId()))return 3;

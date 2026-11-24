@@ -76,11 +76,11 @@ enters the export adapter. A D3D11 consumer receives immutable, same-identity
 resources and owns their lease until completion. No SFC process is intercepted.
 
 - [ ] 2.1 Evaluate the installed Texture Share public plugin/SDK route with changing colour/depth/owner fixtures; verify actual UE DX12-to-D3D11 exchange, CPU-copy absence, same-LUID selection, stop/disconnect and bounded/non-stacked synchronization.
-- [ ] 2.2 If that route fails, record its exact unsupported capability and qualify the smallest public-RHI/Windows shared-resource/fence alternative; verify without engine patches or silently switching rendering APIs, otherwise stop at the foundation checkpoint.
+- [x] 2.2 If that route fails, record its exact unsupported capability and qualify the smallest public-RHI/Windows shared-resource/fence alternative; verify without engine patches or silently switching rendering APIs, otherwise stop at the foundation checkpoint.
 - [x] 2.3 Define the backend output/import contract from the successful experiment, including session/frame/camera/asset identity, handle kind/ownership and completion; verify stale/wrong tickets and 64-bit versus existing 32-bit handle restrictions with process-boundary tests.
-- [ ] 2.4 Produce native-compatible colour, physical depth and packed owner coverage from the same snapshot; verify near/far ordering, opaque black markings, exact owner bits, viewport offset and visibly different consecutive poses/markers.
-- [ ] 2.5 Exercise target resize/device generation, occupied pool, slow/crashed consumer, failed allocation and stop during GPU use; verify leases drain before reuse and old pixels cannot reappear under new metadata.
-- [ ] 2.6 Record the GPU mechanism, limits, timing, descriptor/ownership contract and failures; update the interface/handoff/Obsidian and read back the demonstrated standalone gate.
+- [x] 2.4 Produce native-compatible colour, physical depth and packed owner coverage from the same snapshot; verify near/far ordering, opaque black markings, exact owner bits, viewport offset and visibly different consecutive poses/markers.
+- [x] 2.5 Exercise target resize/device generation, occupied pool, slow/crashed consumer, failed allocation and stop during GPU use; verify leases drain before reuse and old pixels cannot reappear under new metadata.
+- [x] 2.6 Record the GPU mechanism, limits, timing, descriptor/ownership contract and failures; update the interface/handoff/Obsidian and read back the demonstrated standalone gate.
 
 ## 3. Retained live scene input
 
@@ -94,10 +94,10 @@ neutral reader facade. Original CPU geometry/images plus coherent source
 frames enter UE. No UObject is accessed by source receipt workers.
 
 - [x] 3.1 Qualify the exact reader boundary for original source geometry/images and live frame identities, using actual existing transfers; verify no Remix UV/material processing or saved-template requirement leaks into UE.
-- [ ] 3.2 Implement passive startup/late activation and base-model admission as assets arrive; verify renderer startup does not wait for all ships/enhancements and original image identity is retained without expensive repeated comparisons.
-- [ ] 3.3 Replay multiple/shared owners, offscreen motion, revision changes, delayed material arrival, retirement, pointer reuse and new sessions through the real reader; verify zero geometry rebuilds for transform-only updates and no cross-associated ship.
-- [ ] 3.4 Measure 1/6/100+ representative-owner replay within declared budgets, including GPU/CPU timing and resource growth; verify diagnostics-off operation creates no image/trace recordings and introduces no new count/rate cap.
-- [ ] 3.5 Prepare an explicit UE read-only launcher from the existing parent/recovery workflow; verify preflight, cancellation, parent death and relaunch, then record source/camera continuity and any remaining live-only question before additive checkout.
+- [x] 3.2 Implement passive startup/late activation and base-model admission as assets arrive; verify renderer startup does not wait for all ships/enhancements and original image identity is retained without expensive repeated comparisons.
+- [x] 3.3 Replay multiple/shared owners, offscreen motion, revision changes, delayed material arrival, retirement, pointer reuse and new sessions through the real reader; verify zero geometry rebuilds for transform-only updates and no cross-associated ship.
+- [x] 3.4 Measure 1/6/100+ representative-owner replay within declared budgets, including GPU/CPU timing and resource growth; verify diagnostics-off operation creates no image/trace recordings and introduces no new count/rate cap.
+- [x] 3.5 Prepare an explicit UE read-only launcher from the existing parent/recovery workflow; verify preflight, cancellation, parent death and relaunch, then record source/camera continuity and any remaining live-only question before additive checkout.
 
 ## 4. Additive in-game insertion
 
@@ -110,11 +110,11 @@ existing game-pool interface is insufficient. Keep game-side code x86.
 D3D11 game pool. The existing x86 return adapter consumes the completed pool
 through native target/lease rules. Original SFC drawing remains enabled.
 
-- [ ] 4.1 Wire the successful GPU return mechanism into the existing pool and readiness path; verify readiness follows actual game-side GPU copy completion, target generation and coherent output identity, with no new deadline.
-- [ ] 4.2 Reuse the native insertion point before later effects/text with suppression disabled and a documented world-space diagnostic offset on the identified player; verify the offset, scene/depth mapping and all graphics-state restoration in the standalone native fixture.
-- [ ] 4.3 Run relevant scene, transport, native-insertion and cleanup regressions plus read-only launcher preflight; prepare one copy-paste CMD command only when lower-level gates pass.
-- [ ] 4.4 Sponsor checkout: textured offset player, camera turns/zooms, motion, shield exposure, pause text and normal exit; record real insertion provenance and sponsor gameplay observations, then confirm restoration/unchanged protected client files.
-- [ ] 4.5 Record additive insertion as its own result, including timing tails and any repeated camera misses; update contracts, run record, status, Obsidian and restart instructions before enabling suppression.
+- [x] 4.1 Wire the successful GPU return mechanism into the existing pool and readiness path; verify readiness follows actual game-side GPU copy completion, target generation and coherent output identity, with no new deadline.
+- [x] 4.2 Reuse the native insertion point before later effects/text with suppression disabled and a documented world-space diagnostic offset on the identified player; verify the offset, scene/depth mapping and all graphics-state restoration in the standalone native fixture.
+- [x] 4.3 Run relevant scene, transport, native-insertion and cleanup regressions plus read-only launcher preflight; prepare one copy-paste CMD command only when lower-level gates pass.
+- [x] 4.4 Sponsor checkout: textured offset player, camera turns/zooms, motion, shield exposure, pause text and normal exit; record real insertion provenance and sponsor gameplay observations, then confirm restoration/unchanged protected client files.
+- [x] 4.5 Record additive insertion as its own result, including timing tails and any repeated camera misses; update contracts, run record, status, Obsidian and restart instructions before enabling suppression.
 
 ## 5. One-player native replacement
 

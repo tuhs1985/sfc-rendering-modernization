@@ -4,7 +4,10 @@
 #include "output_channel.h"
 #include <cstring>
 namespace game_output {
-constexpr uint32_t Magic=0x314f4753,Version=3,Offset=11*1024*1024+128*1024;
+constexpr uint32_t Magic=0x314f4753,Version=3,NativeTargetVersion=4,Offset=11*1024*1024+128*1024;
+constexpr uint32_t CohortFlag=1,NativePixelsFlag=2;
+// Version4 marks pixels already placed in the native target. Legacy receivers
+// reject this version instead of applying their camera-surface mapping twice.
 // Positive native generations distinguish reused slot indices after resize.
 inline uint64_t slot_epoch(uint32_t generation,unsigned slot){return uint64_t(generation)*2+slot+1;}
 constexpr LONG Writing=6;
@@ -21,7 +24,12 @@ struct alignas(64) Header {
 struct alignas(64) Stats {volatile LONG drawn,stale,invalid,not_ready,retired,gpu_busy,resource_failed,depth_missing;DWORD frame;uint32_t reserved[7];};
 struct alignas(64) Pool {Header header;BYTE asset[32];float camera_offset[3];uint32_t diagnostic_mode,reserved[4];output_wire::Channel slots[2];Stats stats;};
 static_assert(sizeof(Header)==64&&sizeof(Stats)==64&&sizeof(Pool)==576&&Offset+sizeof(Pool)<12*1024*1024);
-inline bool valid(const Header& h,const DWORD* session,uint32_t game){return h.magic==Magic&&h.version==Version&&h.bytes==sizeof(Pool)&&h.game_pid==game&&game&&h.receiver_pid&&h.host_pid&&memcmp(h.session,session,16)==0;}
+inline bool valid(const Header& h,const DWORD* session,uint32_t game){return h.magic==Magic&&(h.version==Version||h.version==NativeTargetVersion)&&h.bytes==sizeof(Pool)&&h.game_pid==game&&game&&h.receiver_pid&&h.host_pid&&memcmp(h.session,session,16)==0;}
+inline bool valid_layout(const Pool& p){
+ const auto flags=p.reserved[2];if(flags&~(CohortFlag|NativePixelsFlag))return false;
+ return p.header.version==Version?!(flags&NativePixelsFlag):p.header.version==NativeTargetVersion&&(flags&NativePixelsFlag);
+}
+inline bool native_pixels(const Pool& p){return p.header.version==NativeTargetVersion&&(p.reserved[2]&NativePixelsFlag);}
 inline int reserve(Pool& pool,bool retainReady=false){
  if(InterlockedCompareExchange(&pool.header.stopped,0,0))return -1;
  for(unsigned pass=0;pass<(retainReady?1u:2u);++pass)for(unsigned i=0;i<2;++i){const LONG prior=pass?output_wire::ready:output_wire::idle;

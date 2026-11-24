@@ -19,6 +19,10 @@ int main(){
  auto bad=t;++bad.revision;bad.hash=0;test(acquire(bad,*s,e,process,[]{return true;})==Result::Invalid);
  t=ticket(*s,2);t.frameStart-=s->header.frequency;t.deadline=deadline(s->header,t.frameStart);t.offered=t.frameStart;
  test(acquire(t,*s,e,process,[]{return true;})==Result::Timeout);
+ // Exercise event/stop/recycle behavior with the supported ExtraFrame policy.
+ // Windows Sleep/thread startup can consume a 16.667ms Strict window even
+ // when asked for 2-3ms; Strict deadline arithmetic/expiry remain tested above.
+ s->header.policy=DWORD(Policy::ExtraFrame);
  t=ticket(*s,3);std::atomic<bool> available{false};
  std::thread producer([&]{Sleep(3);available.store(true,std::memory_order_release);SetEvent(e.ready);});
  result=acquire(t,*s,e,process,[&]{return available.load(std::memory_order_acquire);});producer.join();test(result==Result::Acquired);

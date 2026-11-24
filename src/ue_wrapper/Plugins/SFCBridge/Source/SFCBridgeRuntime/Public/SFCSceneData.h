@@ -24,9 +24,10 @@ struct FSFCFrame {
     TSharedPtr<class FJsonObject> Original;
 };
 struct FSFCSceneData {
-    FString Session, Content, PacketHash, ModelName;
+    FString Session, Content, GeometryContent, PacketHash, ModelName;
     TSharedPtr<class FJsonObject> FragmentRelationship;
     int64 OwnerEpoch=0, Revision=0;
+    int64 SourcePid=0,ModelIdentity=0,SourceIdentity=0; // Optional local-definition binding; opaque, never dereferenced.
     TArray<FVector3f> Positions;
     TArray<FSFCCorner> Corners;
     TArray<int32> Indices;
@@ -40,4 +41,4 @@ struct FSFCSceneData {
     TMap<FString,FImage> Images;
 };
 // Offline proof input facade, not a new source wire. No UObject work here.
-bool LoadSFCScene(const FString& Filename, FSFCSceneData& Out, FString& Error);
+bool LoadSFCScene(const FString& Filename, FSFCSceneData& Out, FString& Error,bool MetadataOnly=false);

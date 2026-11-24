@@ -25,6 +25,12 @@ function Source-Hashes {
     foreach($file in ($files | Sort-Object FullName)) {
         $result[$file.FullName.Substring($projectRoot.Length+1).Replace('\','/')]=(Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
     }
+    foreach($file in (Get-ChildItem (Join-Path $root 'src/rendering/ue') -Filter '*.h' -File | Sort-Object Name)) {
+        $result["external/rendering/ue/$($file.Name)"]=(Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+    }
+    foreach($name in @('src/transport/source_scene_view.h','src/transport/source_scene_channel.h','src/transport/source_target_view.h','tools/scene_bridge/scene_capacity.h')) {
+        $result["external/$name"]=(Get-FileHash -LiteralPath (Join-Path $root $name) -Algorithm SHA256).Hash.ToLowerInvariant()
+    }
     return $result
 }
 $sourceHashes=Source-Hashes

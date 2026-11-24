@@ -26,7 +26,72 @@ SFC 2.5.6.4 (x86)
 
 ## Scene input upstream of D3D9
 
+### UE retained consumer — November 23
+
+The [source contract](contracts/UE_SOURCE.md) now defines read-only native frame,
+catalogue and lifetime receipt; one-time original-asset preparation; shared UE
+resources; and explicit read-only parent selection. Development/Shipping pass
+14 pixel-backed lifecycle stages. A 128-owner Shipping replay retains one mesh
+and measures 0.334 ms median CPU scene updates and 4.324 ms median observed GPU
+completion, excluding game return. See the [timing limits](runs/2026-11-23-codex-ue-retained-scene.md).
+The default-off observation launcher preserves SFC drawing. It is not an
+insertion path or a claim of UE lighting/effect parity.
+
+### UE additive native return — November 23
+
+The read-only native scene reader now honours the session owner's existing stop
+flag before the producer attaches, with valid session/header and unclaimed-or-
+matching PID required. Running wrong-PID input still rejects. This is a lifecycle
+qualification, not a new source wire. Actual packaged cancellation tests pass.
+
+
+The [output contract](contracts/UE_OUTPUT.md#native-target-pixel-layout-and-additive-gate--november-23)
+now connects the opt-in retained UE component through the existing GPU pool and
+native Acquire/Commit boundary. It uses unique configured-player selection,
+original source/frame/pose identity, early target receipt and a fixed diagnostic
+world offset. Original mesh drawing remains enabled. No neutral source geometry,
+UVs or images are changed.
+
+Native pool version 3 retains legacy Remix camera-surface mapping. Version 4
+requires NativePixelsFlag for already-positioned full native-target images;
+unknown/mismarked layouts reject. Pool size/slots/metadata remain unchanged.
+UE normalization, output-copy completion and native GPU read completion retain
+separate ownership. Older receivers reject version 4. Both endpoints must be
+rebuilt together; this remains an experimental source-level interface.
+
+Standalone Shipping/Development each pass 60 actual native coordinator commits,
+zero post-start misses, changing-image pixel/depth checks and later native
+effects/text. The default-off additive launcher passes read-only preflight.
+The subsequent sponsor checkout confirms live additive insertion and correct
+native depth: 2,270 commits with zero requested timeouts. No-request intervals
+remain documented; seamless suppression and UE feature parity are unqualified.
+[Evidence and checkout](runs/2026-11-23-codex-ue-additive-insertion.md).
+
 ### UE output adapter — standalone qualification, November 22
+
+The [persistent raw-pair adapter](contracts/UE_EXPORT.md) now transfers actual
+UE colour/depth through one receiver and two reused slots, then normalizes to
+the native triplet. Changing-pose pixels, slow/crashed receivers and bounded
+cancellation pass standalone checks. A 600-frame no-readback test measures
+6.278 ms median and 8.577 ms p99 from capture submission to normalized output;
+these exclude game-pool copy, SFC contention and native presentation.
+Target retirement/recreation and injected device failure are qualified in the
+persistent adapter. Shipping no-readback timing is 4.594 ms median, 6.305 ms p99,
+15.547 ms maximum across 600 outputs. This excludes final game-pool insertion.
+An actual driver reset and live publication remain open.
+
+The [retained UE source contract](contracts/UE_SOURCE.md) documents session/world
+ownership, one-time asset/binding admission and the existing catalog/retirement
+relationships. This backend remains under standalone qualification.
+
+The [read-only native scene view](../src/transport/source_scene_view.h) and
+[Windows reader](../src/transport/source_scene_channel.h) consume the unchanged
+protocol4 mapping/version3 frame store. They preserve native units, source
+matrices, viewport and opaque owner/model/source labels; only the UE world
+adapter changes basis. Passive source startup does not require assets. A
+packaged one-owner replay admits one late original-image definition and updates
+its retained mesh from IPC without rebuilding geometry. It is not yet normal
+parent admission or live UE insertion. The source DLL and D3D9 adapter are unchanged.
 
 The packaged Development/Shipping checks transferred actual UE colour and
 linear depth into a D3D11 consumer. Explicit Windows shared resources wrapped
@@ -140,8 +205,9 @@ adds a separately qualified UE GPU producer/import front end while retaining
 the current native game-pool, leases and insertion gate. Original scene input
 stays upstream of D3D9. The plan evaluates Epic Texture Share before new
 transfer code and explicitly checks cross-API/bitness/handle compatibility.
-These are proposed connection points only. No UE live input or GPU-return ABI
-is implemented or qualified yet.
+These connection points were proposed at that checkpoint. The later retained
+input and standalone native-return qualifications are recorded above; live
+additive gameplay and a stable public GPU-return ABI remain unqualified.
 
 ## D3D9 submission
 
